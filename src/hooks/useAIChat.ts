@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useAIConfig } from '@/store/AIConfigContext';
+import { useAIConfig } from '@/features/ai-chat/hooks/useAIConfig';
 import type { ChatMessage } from '@/types';
 
 interface UseAIChatReturn {
@@ -72,7 +72,7 @@ export function useAIChat(): UseAIChatReturn {
       }
 
       const data = await response.json();
-      
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -83,7 +83,7 @@ export function useAIChat(): UseAIChatReturn {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
-      
+
       // Fallback: Simulate AI response for demo
       setTimeout(() => {
         const fallbackMessage: ChatMessage = {
@@ -124,22 +124,22 @@ export function useAIChat(): UseAIChatReturn {
 // Fallback response generator for demo
 function generateFallbackResponse(userMessage: string): string {
   const lowerMsg = userMessage.toLowerCase();
-  
+
   if (lowerMsg.includes('cv') || lowerMsg.includes('resume')) {
     return 'Untuk membuat CV yang menarik, pastikan:\n\n1. **Gunakan format yang rapi** - ATS-friendly\n2. **Highlight pencapaian** - Gunakan angka/statistik\n3. **Sesuaikan dengan job desc** - Keyword matching\n4. **Tambahkan portfolio** - Jika relevan\n5. **Proofread** - Cek typo dan grammar\n\nAnda bisa menggunakan fitur CV Generator kami untuk membuat CV profesional!';
   }
-  
+
   if (lowerMsg.includes('wawancara') || lowerMsg.includes('interview')) {
     return 'Tips sukses wawancara kerja:\n\n1. **Riset perusahaan** - Visi, misi, produk\n2. **Latihan STAR method** - Situation, Task, Action, Result\n3. **Siapkan pertanyaan** - Tunjukkan antusiasme\n4. **Dress appropriately** - Sesuaikan kultur perusahaan\n5. **Datang 15 menit lebih awal**\n\nCoba fitur Mock Interview kami untuk latihan!';
   }
-  
+
   if (lowerMsg.includes('skill') || lowerMsg.includes('belajar')) {
     return 'Untuk mengembangkan skill, saya sarankan:\n\n1. **Identifikasi skill gap** - Bandingkan dengan job requirements\n2. **Buat learning plan** - Gunakan Skill Roadmap kami\n3. **Praktik secara konsisten** - 1 jam per hari\n4. **Build portfolio projects** - Tunjukkan hasil kerja\n5. **Join komunitas** - Networking dan belajar bersama\n\nLihat Skill Roadmap kami untuk berbagai bidang karir!';
   }
-  
+
   if (lowerMsg.includes('gaji') || lowerMsg.includes('salary')) {
     return 'Tips negosiasi gaji:\n\n1. **Riset market rate** - Gunakan Financial Calculator\n2. **Know your worth** - Skill dan pengalaman\n3. **Tunggu tawaran pertama** - Tapi siapkan range\n4. **Pertimbangkan total compensation** - Benefit, bonus, dll\n5. **Negosiasi dengan data** - Jangan malu-malu\n\nCek Salary Insights di Financial Calculator kami!';
   }
-  
+
   return 'Terima kasih atas pertanyaannya! Saya dapat membantu Anda dengan:\n\n• Penyusunan CV dan portfolio\n• Persiapan wawancara kerja\n• Rekomendasi pengembangan skill\n• Informasi gaji dan benefit\n• Tips karir lainnya\n\nSilakan tanyakan lebih spesifik agar saya bisa membantu lebih baik. 😊';
 }

@@ -1,27 +1,29 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from '@/store/AuthContext';
-import { AIConfigProvider } from '@/store/AIConfigContext';
-import { LoginPage } from '@/sections/LoginPage';
-import { AdminDashboard } from '@/sections/AdminDashboard';
-import { Navigation } from '@/components/Navigation';
-import { HeroSection } from '@/sections/HeroSection';
-import { CVGenerator } from '@/sections/CVGenerator';
-import { SkillRoadmap } from '@/sections/SkillRoadmap';
-import { DocumentChecklist } from '@/sections/DocumentChecklist';
-import { CareerDashboard } from '@/sections/CareerDashboard';
-import { MockInterview } from '@/sections/MockInterview';
-import { FinancialCalculator } from '@/sections/FinancialCalculator';
-import { AIChat } from '@/sections/AIChat';
-import { Button } from '@/components/ui/button';
+// Auth from features
+import { AuthProvider, useAuth, LoginPage } from '@/features/auth';
+// AI Config from features
+import { AIConfigProvider, AIChat } from '@/features/ai-chat';
+// Feature components
+import { AdminDashboard } from '@/features/admin';
+import { HeroSection } from '@/features/hero';
+import { CVGenerator } from '@/features/cv-generator';
+import { SkillRoadmap } from '@/features/skill-roadmap';
+import { DocumentChecklist } from '@/features/document-checklist';
+import { CareerDashboard } from '@/features/career-dashboard';
+import { MockInterview } from '@/features/mock-interview';
+import { FinancialCalculator } from '@/features/financial-calculator';
+// Shared components
+import { Navigation } from '@/shared/components/Navigation';
+import { Button } from '@/shared/components/ui/button';
+import { Toaster } from '@/shared/components/ui/sonner';
 import { Bot } from 'lucide-react';
-import { Toaster } from '@/components/ui/sonner';
 import './App.css';
 
 // Protected Route Component
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { state } = useAuth();
-  
+
   if (state.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -29,15 +31,15 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
       </div>
     );
   }
-  
+
   if (!state.isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   if (requireAdmin && state.user?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
-  
+
   return <>{children}</>;
 }
 
@@ -75,13 +77,13 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navigation 
-        currentView={currentView} 
+      <Navigation
+        currentView={currentView}
         onViewChange={setCurrentView}
         user={state.user}
         onLogout={logout}
       />
-      
+
       <main>
         {renderView()}
       </main>
@@ -117,7 +119,7 @@ function AppContent() {
                 Starter pack lengkap untuk kesuksesan karir Anda. Dari pembuatan CV hingga mendapatkan pekerjaan impian.
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-slate-900 mb-4">Fitur</h4>
               <ul className="space-y-2 text-sm text-slate-600">
@@ -127,7 +129,7 @@ function AppContent() {
                 <li><button onClick={() => setCurrentView('interview')} className="hover:text-career-600">Simulasi Wawancara</button></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-slate-900 mb-4">Resources</h4>
               <ul className="space-y-2 text-sm text-slate-600">
@@ -136,7 +138,7 @@ function AppContent() {
                 <li><button onClick={() => setIsChatOpen(true)} className="hover:text-career-600">AI Assistant</button></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold text-slate-900 mb-4">Admin</h4>
               <ul className="space-y-2 text-sm text-slate-600">
@@ -148,7 +150,7 @@ function AppContent() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-slate-200 mt-8 pt-8 text-center">
             <p className="text-sm text-slate-500">
               © 2024 CareerPack. Dibuat dengan ❤️ untuk pencari kerja Indonesia.
@@ -168,21 +170,21 @@ function App() {
         <AIConfigProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route 
-              path="/admin" 
+            <Route
+              path="/admin"
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/*" 
+            <Route
+              path="/*"
               element={
                 <ProtectedRoute>
                   <AppContent />
                 </ProtectedRoute>
-              } 
+              }
             />
           </Routes>
           <Toaster />
