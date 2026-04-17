@@ -1,6 +1,8 @@
+"use client";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
-import type { ReactNode } from "react";
+import { ConvexHttpClient } from "convex/browser";
+import { useState, type ReactNode } from "react";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -8,8 +10,22 @@ if (!convexUrl) {
     throw new Error("NEXT_PUBLIC_CONVEX_URL is required");
 }
 
-const convex = new ConvexReactClient(convexUrl);
-
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
+    const [convex] = useState(() => {
+        const client = new ConvexReactClient(convexUrl!);
+        const http = new ConvexHttpClient(convexUrl!);
+        const origAction = client.action.bind(client);
+        // Route auth:* actions via HTTP to avoid "Connection lost while action was in flight"
+        // when Dokploy proxy closes idle WebSocket connections mid-flight.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (client as any).action = (ref: any, args?: any) => {
+            const name = (ref as any)?._name ?? String(ref);
+            if (typeof name === "string" && name.startsWith("auth:")) {
+                return http.action(ref, args);
+            }
+            return origAction(ref, args);
+        };
+        return client;
+    });
     return <ConvexAuthProvider client={convex}>{children}</ConvexAuthProvider>;
 }
