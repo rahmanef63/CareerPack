@@ -17,13 +17,14 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
         const origAction = client.action.bind(client);
         // Route auth:* actions via HTTP to avoid "Connection lost while action was in flight"
         // when Dokploy proxy closes idle WebSocket connections mid-flight.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (client as any).action = (ref: any, args?: any) => {
-            const name = (ref as any)?._name ?? String(ref);
+        type ActionFn = (ref: unknown, args?: unknown) => unknown;
+        const patched = client as unknown as { action: ActionFn };
+        patched.action = (ref, args) => {
+            const name = (ref as { _name?: string } | null)?._name ?? String(ref);
             if (typeof name === "string" && name.startsWith("auth:")) {
-                return http.action(ref, args);
+                return (http.action as ActionFn)(ref, args);
             }
-            return origAction(ref, args);
+            return (origAction as ActionFn)(ref, args);
         };
         return client;
     });
