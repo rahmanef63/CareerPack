@@ -20,7 +20,7 @@ FROM node:${NODE_VERSION} AS builder
 RUN corepack enable && corepack prepare pnpm@10.24.0 --activate
 WORKDIR /app
 
-ARG NEXT_PUBLIC_CONVEX_URL=https://api-careerpack.org
+ARG NEXT_PUBLIC_CONVEX_URL=https://api.careerpack.org
 ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
