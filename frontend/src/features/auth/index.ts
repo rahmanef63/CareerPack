@@ -11,8 +11,4 @@ export { AuthProvider, useAuth } from './hooks/useAuth';
 // Types
 export type { AuthUser, AuthState, LoginCredentials, AuthContextValue } from './types';
 
-// API
-export { authenticateUser, loginAsDemo, logoutUser } from './api/auth.api';
-
 export * from './config';
-export * from './manifest';

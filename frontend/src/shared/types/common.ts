@@ -40,6 +40,16 @@ export type DemandTrend = 'increasing' | 'stable' | 'decreasing';
 // AI providers
 export type AIProvider = 'zai' | 'openai' | 'custom';
 
+export interface AIConfig {
+    provider: AIProvider;
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    isEnabled: boolean;
+}
+
 /**
  * Common value objects
  */

@@ -56,27 +56,28 @@ export function generateMockUsers(count: number): User[] {
   return Array.from({ length: count }, (_, i) => {
     const firstName = randomItem(firstNames);
     const lastName = randomItem(lastNames);
+    const created = randomDate(new Date(2023, 0, 1), new Date());
     return {
       id: generateId(),
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@email.com`,
       name: `${firstName} ${lastName}`,
       role: Math.random() > 0.9 ? 'admin' : 'user',
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName}${lastName}${i}`,
-      createdAt: randomDate(new Date(2023, 0, 1), new Date()),
+      createdAt: created,
+      updatedAt: created,
       lastLogin: randomDate(new Date(2024, 0, 1), new Date()),
       isActive: Math.random() > 0.1,
     };
   });
 }
 
-export function generateMockCV(userId: string): CVData {
+export function generateMockCV(_userId: string): CVData {
   const firstName = randomItem(firstNames);
   const lastName = randomItem(lastNames);
   const hasExperience = Math.random() > 0.3;
   
   return {
     profile: {
-      id: userId,
       name: `${firstName} ${lastName}`,
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
       phone: `+62 8${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`,

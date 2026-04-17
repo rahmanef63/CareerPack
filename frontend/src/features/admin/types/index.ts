@@ -2,6 +2,8 @@
  * Admin feature types.
  */
 
+export type { AIConfig } from '@/shared/types';
+
 export interface AdminStats {
     totalUsers: number;
     activeUsers: number;
@@ -12,14 +14,4 @@ export interface AdminStats {
         totalTokens: number;
         lastMonth: number;
     };
-}
-
-export interface AIConfig {
-    provider: 'zai' | 'openai' | 'custom';
-    apiKey: string;
-    baseUrl: string;
-    model: string;
-    temperature: number;
-    maxTokens: number;
-    isEnabled: boolean;
 }
