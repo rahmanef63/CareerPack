@@ -1,11 +1,14 @@
 # Dependencies
 node_modules
+frontend/node_modules
 .pnp
 .pnp.js
 
 # Build outputs
 dist
 dist-ssr
+frontend/.next
+frontend/out
 *.local
 
 # Environment files

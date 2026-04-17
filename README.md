@@ -1,73 +1,79 @@
-# React + TypeScript + Vite
+# CareerPack Monorepo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend memakai Next.js (`frontend/`), backend memakai Convex (`convex/`).
+Default development mode: Convex cloud dev (bukan self-hosted).
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install dependencies workspace:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Siapkan env Convex cloud di root `.env.local`:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# PowerShell
+Copy-Item .env.example .env.local
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Bash
+cp .env.example .env.local
 ```
+
+3. Set env frontend di `frontend/.env.local`:
+
+```bash
+NEXT_PUBLIC_CONVEX_URL=<your convex cloud url>
+```
+
+4. Jalankan app (otomatis push Convex sekali lalu start Next.js):
+
+```bash
+pnpm run dev
+```
+
+5. Opsional, jika ingin Convex watch mode (sinkron setiap file change), jalankan di terminal lain:
+
+```bash
+pnpm run backend:dev
+```
+
+## Repository Structure
+
+- `frontend/` Next.js app (App Router)
+- `convex/` Convex functions/schema/auth
+- `backend/convex-self-hosted/` optional self-hosted setup
+
+## Frontend Feature Contract
+
+Setiap feature di `frontend/src/features/*` memiliki:
+
+- `components/`
+- `lib/`
+- `hooks/`
+- `constants/`
+- `types/`
+- `config.ts`
+- `manifest.ts`
+- `index.ts`
+
+Jika feature punya sub-feature, gunakan `shared/` di dalam feature.
+
+## Root Scripts
+
+- `pnpm run dev` push Convex (`--once`) lalu start frontend
+- `pnpm run build` build frontend
+- `pnpm run start` run frontend production
+- `pnpm run lint` lint frontend (ESLint CLI)
+- `pnpm run backend:dev` jalankan Convex cloud dev
+- `pnpm run backend:push` push Convex sekali tanpa watch
+
+## Optional Self-Hosted
+
+Gunakan hanya jika perlu local backend containerized.
+Panduan: `backend/convex-self-hosted/README.md`
+
+## Production Deployment
+
+Panduan lengkap: `DEPLOYMENT.md`

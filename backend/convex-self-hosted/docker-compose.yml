@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: ${CONVEX_SELF_HOSTED_IMAGE:-ghcr.io/get-convex/convex-backend:latest}
+    container_name: careerpack-convex-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3210:3210"
+    volumes:
+      - convex_data:/convex/data
+
+volumes:
+  convex_data:
