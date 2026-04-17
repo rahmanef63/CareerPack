@@ -1,0 +1,10 @@
+# Marker file for si-coder deploy.js
+# Triggers Dokploy to provision the official Convex self-hosted backend
+# (api / dash / site subdomains) as a separate Compose service "<app>-db".
+# The Next.js frontend is deployed from the root Dockerfile as a Dokploy Application.
+#
+# For local development of the self-hosted backend, see backend/convex-self-hosted/.
+services:
+  marker:
+    image: tianon/true
+    restart: "no"
