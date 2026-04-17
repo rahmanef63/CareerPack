@@ -167,11 +167,9 @@ const applicationTables = {
       housing: v.number(),
       food: v.number(),
       transportation: v.number(),
-      healthcare: v.number(),
-      education: v.number(),
+      utilities: v.number(),
       entertainment: v.number(),
-      savings: v.number(),
-      other: v.number(),
+      others: v.number(),
     }),
     relocationCosts: v.optional(v.object({
       visa: v.number(),

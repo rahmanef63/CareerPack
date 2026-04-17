@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import type { User } from '@/shared/mock-db';
+import type { AuthUser as User } from '@/features/auth';
 
 interface NavigationProps {
   currentView: string;
