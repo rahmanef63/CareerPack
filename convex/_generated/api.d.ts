@@ -21,6 +21,7 @@ import type * as interviews from "../interviews.js";
 import type * as notifications from "../notifications.js";
 import type * as roadmaps from "../roadmaps.js";
 import type * as router from "../router.js";
+import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
 import type {
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   roadmaps: typeof roadmaps;
   router: typeof router;
+  seed: typeof seed;
   users: typeof users;
 }>;
 
