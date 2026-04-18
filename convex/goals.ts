@@ -1,13 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser, requireOwnedDoc } from "./_lib/auth";
 
 export const getUserGoals = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return [];
-
     return await ctx.db
       .query("careerGoals")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -28,9 +27,7 @@ export const createGoal = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
+    const userId = await requireUser(ctx);
     return await ctx.db.insert("careerGoals", {
       userId,
       title: args.title,
@@ -51,15 +48,9 @@ export const updateGoalProgress = mutation({
     completed: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const goal = await requireOwnedDoc(ctx, args.goalId, "Goal");
 
-    const goal = await ctx.db.get(args.goalId);
-    if (!goal || goal.userId !== userId) {
-      throw new Error("Goal not found or access denied");
-    }
-
-    const updatedMilestones = goal.milestones.map(milestone => {
+    const updatedMilestones = goal.milestones.map((milestone) => {
       if (milestone.id === args.milestoneId) {
         return {
           ...milestone,
@@ -70,7 +61,7 @@ export const updateGoalProgress = mutation({
       return milestone;
     });
 
-    const completedCount = updatedMilestones.filter(m => m.completed).length;
+    const completedCount = updatedMilestones.filter((m) => m.completed).length;
     const progress = Math.round((completedCount / updatedMilestones.length) * 100);
     const status = progress === 100 ? "completed" : "active";
 
@@ -85,14 +76,7 @@ export const updateGoalProgress = mutation({
 export const deleteGoal = mutation({
   args: { goalId: v.id("careerGoals") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const goal = await ctx.db.get(args.goalId);
-    if (!goal || goal.userId !== userId) {
-      throw new Error("Goal not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.goalId, "Goal");
     await ctx.db.delete(args.goalId);
   },
 });

@@ -8,6 +8,10 @@
  * @module
  */
 
+import type * as _lib_auth from "../_lib/auth.js";
+import type * as _lib_env from "../_lib/env.js";
+import type * as _lib_rateLimit from "../_lib/rateLimit.js";
+import type * as _lib_sanitize from "../_lib/sanitize.js";
 import type * as ai from "../ai.js";
 import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
@@ -32,6 +36,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "_lib/auth": typeof _lib_auth;
+  "_lib/env": typeof _lib_env;
+  "_lib/rateLimit": typeof _lib_rateLimit;
+  "_lib/sanitize": typeof _lib_sanitize;
   ai: typeof ai;
   applications: typeof applications;
   auth: typeof auth;

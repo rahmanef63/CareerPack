@@ -2,21 +2,9 @@
  * Career Dashboard feature types.
  */
 
-import type { ApplicationStatus } from '@/shared/types';
+import type { ApplicationStatus, Application } from '@/shared/types';
 
-export type { ApplicationStatus };
-
-export interface Application {
-    id: string;
-    company: string;
-    position: string;
-    status: ApplicationStatus;
-    appliedDate: string;
-    lastUpdate: string;
-    notes?: string;
-    link?: string;
-    salary?: string;
-}
+export type { ApplicationStatus, Application };
 
 export interface DashboardStats {
     totalApplications: number;

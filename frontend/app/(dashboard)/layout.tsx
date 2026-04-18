@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { ResponsiveContainer } from "@/shared/containers/ResponsiveContainer";
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -27,5 +28,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  return <ResponsiveContainer>{children}</ResponsiveContainer>;
+  return (
+    <ErrorBoundary title="Dashboard bermasalah">
+      <ResponsiveContainer>{children}</ResponsiveContainer>
+    </ErrorBoundary>
+  );
 }

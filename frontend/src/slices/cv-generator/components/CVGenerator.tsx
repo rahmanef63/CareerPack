@@ -15,34 +15,14 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import type { CVData, Education, Experience, Skill, Certification, Project } from '../types';
 import { useCV } from '../hooks/useCV';
+import { useCVAIActions } from '../hooks/useCVAIActions';
+import { initialCVData, type CVFormat } from '../constants';
 import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/shared/components/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
 import { CVScoreBadge, computeScore } from './CVScoreBadge';
 import { AnimatedProgress } from '@/shared/components/MicroInteractions';
 import { InlineAISuggestChip } from './InlineAISuggestChip';
-import { subscribe } from '@/shared/lib/aiActionBus';
 import { toast } from 'sonner';
-
-const initialCVData: CVData = {
-  profile: {
-    name: '',
-    email: '',
-    phone: '',
-    location: '',
-    linkedin: '',
-    portfolio: '',
-    summary: '',
-    targetIndustry: '',
-    experienceLevel: 'fresh-graduate',
-  },
-  education: [],
-  experience: [],
-  skills: [],
-  certifications: [],
-  projects: [],
-};
-
-type CVFormat = 'national' | 'international';
 
 export function CVGenerator() {
   const { cvData: remoteCVData, saveCV, isLoading: isCVLoading } = useCV();
@@ -73,50 +53,12 @@ export function CVGenerator() {
     }
   }, [remoteCVData, isDataLoaded]);
 
-  // Subscribe to AI agent actions
-  useEffect(() => {
-    const unsubFill = subscribe('cv.fillExperience', (action) => {
-      if (action.type !== 'cv.fillExperience') return;
-      const newExp: Experience = {
-        id: Date.now().toString(),
-        company: action.payload.company,
-        position: action.payload.position,
-        startDate: action.payload.startDate ?? '',
-        endDate: action.payload.endDate ?? '',
-        description: action.payload.description,
-        achievements: [],
-      };
-      setCvData(prev => ({ ...prev, experience: [newExp, ...prev.experience] }));
-      setActiveSection('experience');
-    });
-    const unsubSummary = subscribe('cv.improveSummary', (action) => {
-      if (action.type !== 'cv.improveSummary') return;
-      setCvData(prev => ({
-        ...prev,
-        profile: { ...prev.profile, summary: action.payload.summary },
-      }));
-    });
-    const unsubSkills = subscribe('cv.addSkills', (action) => {
-      if (action.type !== 'cv.addSkills') return;
-      const additions: Skill[] = action.payload.skills.map((s, i) => ({
-        id: `${Date.now()}-${i}`,
-        name: s.name,
-        category: s.category,
-        proficiency: 3,
-      }));
-      setCvData(prev => ({ ...prev, skills: [...prev.skills, ...additions] }));
-    });
-    const unsubFormat = subscribe('cv.setFormat', (action) => {
-      if (action.type !== 'cv.setFormat') return;
-      setFormat(action.payload.format);
-    });
-    return () => {
-      unsubFill();
-      unsubSummary();
-      unsubSkills();
-      unsubFormat();
-    };
-  }, []);
+  // AI agent bus subscriptions — wire di hook terpisah (lihat useCVAIActions)
+  useCVAIActions({
+    setCVData: setCvData,
+    setActiveSection,
+    setFormat,
+  });
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

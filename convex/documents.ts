@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser } from "./_lib/auth";
 
 const defaultDocuments = {
   local: [
@@ -21,15 +21,14 @@ const defaultDocuments = {
     { id: "bank-statements", name: "Bank Statements", category: "Financial", required: true },
     { id: "employment-letter", name: "Job Offer Letter", category: "Employment", required: false },
     { id: "insurance", name: "Health Insurance", category: "Health", required: false },
-  ]
+  ],
 };
 
 export const getUserDocumentChecklist = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
-
     return await ctx.db
       .query("documentChecklists")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -43,20 +42,17 @@ export const createDocumentChecklist = mutation({
     country: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
-    const existingChecklist = await ctx.db
+    const existing = await ctx.db
       .query("documentChecklists")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    if (existingChecklist) {
-      await ctx.db.delete(existingChecklist._id);
-    }
+    if (existing) await ctx.db.delete(existing._id);
 
     const documents = defaultDocuments[args.type as keyof typeof defaultDocuments] || [];
-    const documentsWithStatus = documents.map(doc => ({
+    const documentsWithStatus = documents.map((doc) => ({
       ...doc,
       completed: false,
       notes: "",
@@ -80,17 +76,16 @@ export const updateDocumentStatus = mutation({
     expiryDate: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
     const checklist = await ctx.db
       .query("documentChecklists")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    if (!checklist) throw new Error("Checklist not found");
+    if (!checklist) throw new Error("Checklist tidak ditemukan");
 
-    const updatedDocuments = checklist.documents.map(doc => {
+    const updatedDocuments = checklist.documents.map((doc) => {
       if (doc.id === args.documentId) {
         return {
           ...doc,
@@ -102,7 +97,7 @@ export const updateDocumentStatus = mutation({
       return doc;
     });
 
-    const completedCount = updatedDocuments.filter(doc => doc.completed).length;
+    const completedCount = updatedDocuments.filter((doc) => doc.completed).length;
     const progress = Math.round((completedCount / updatedDocuments.length) * 100);
 
     await ctx.db.patch(checklist._id, {

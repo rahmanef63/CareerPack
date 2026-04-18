@@ -1,11 +1,11 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser, requireOwnedDoc } from "./_lib/auth";
 
 export const listEvents = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return [];
     return await ctx.db
       .query("calendarEvents")
@@ -26,9 +26,10 @@ export const createEvent = mutation({
     applicationId: v.optional(v.id("jobApplications")),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
-
+    const userId = await requireUser(ctx);
+    if (args.applicationId) {
+      await requireOwnedDoc(ctx, args.applicationId, "Lamaran");
+    }
     return await ctx.db.insert("calendarEvents", {
       userId,
       title: args.title,
@@ -53,13 +54,7 @@ export const updateEvent = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
-
-    const existing = await ctx.db.get(args.eventId);
-    if (!existing || existing.userId !== userId) {
-      throw new Error("Agenda tidak ditemukan atau bukan milik Anda");
-    }
+    await requireOwnedDoc(ctx, args.eventId, "Agenda");
 
     const patch: Record<string, unknown> = {};
     if (args.title !== undefined) patch.title = args.title;
@@ -76,13 +71,7 @@ export const updateEvent = mutation({
 export const deleteEvent = mutation({
   args: { eventId: v.id("calendarEvents") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
-
-    const existing = await ctx.db.get(args.eventId);
-    if (!existing || existing.userId !== userId) {
-      throw new Error("Agenda tidak ditemukan atau bukan milik Anda");
-    }
+    await requireOwnedDoc(ctx, args.eventId, "Agenda");
     await ctx.db.delete(args.eventId);
   },
 });

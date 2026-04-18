@@ -8,6 +8,9 @@
     "build": "pnpm --filter careerpack-frontend build",
     "start": "pnpm --filter careerpack-frontend start",
     "lint": "pnpm --filter careerpack-frontend lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "cd frontend && pnpm exec tsc --noEmit && pnpm exec tsc --noEmit -p ../convex/tsconfig.json",
     "frontend:dev": "pnpm --filter careerpack-frontend dev",
     "frontend:build": "pnpm --filter careerpack-frontend build",
     "frontend:start": "pnpm --filter careerpack-frontend start",
@@ -20,11 +23,27 @@
     "backend:selfhosted:logs": "docker compose -f backend/convex-self-hosted/docker-compose.yml logs -f",
     "backend:selfhosted:admin-key": "docker compose -f backend/convex-self-hosted/docker-compose.yml exec -T backend ./generate_admin_key.sh",
     "backend:selfhosted:push": "pnpm exec convex dev --once --typecheck disable --env-file backend/convex-self-hosted/convex.env",
-    "backend:selfhosted:seed": "pnpm exec convex dev --once --typecheck disable --run seed:seedForCurrentUser --env-file backend/convex-self-hosted/convex.env"
+    "backend:selfhosted:seed": "pnpm exec convex dev --once --typecheck disable --run seed:seedForCurrentUser --env-file backend/convex-self-hosted/convex.env",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx}": [
+      "bash -c 'cd frontend && pnpm exec eslint --max-warnings=0 --fix'"
+    ],
+    "convex/**/*.ts": [
+      "bash -c 'cd frontend && pnpm exec tsc --noEmit -p ../convex/tsconfig.json'"
+    ]
   },
   "devDependencies": {
     "@convex-dev/auth": "^0.0.90",
     "@types/node": "^24.10.13",
-    "convex": "^1.31.7"
+    "@vitest/coverage-v8": "^4.1.4",
+    "convex": "^1.31.7",
+    "lint-staged": "^16.4.0",
+    "simple-git-hooks": "^2.13.1",
+    "vitest": "^4.1.4"
   }
 }

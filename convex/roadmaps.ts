@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser } from "./_lib/auth";
 
 const defaultRoadmaps = {
   "frontend-developer": [
@@ -15,7 +15,7 @@ const defaultRoadmaps = {
       resources: [
         { type: "course", title: "HTML & CSS Crash Course", url: "#", completed: false },
         { type: "practice", title: "Build 5 Landing Pages", url: "#", completed: false },
-      ]
+      ],
     },
     {
       id: "javascript",
@@ -28,7 +28,7 @@ const defaultRoadmaps = {
       resources: [
         { type: "course", title: "Modern JavaScript Course", url: "#", completed: false },
         { type: "book", title: "You Don't Know JS", url: "#", completed: false },
-      ]
+      ],
     },
     {
       id: "react",
@@ -41,8 +41,8 @@ const defaultRoadmaps = {
       resources: [
         { type: "course", title: "React Complete Guide", url: "#", completed: false },
         { type: "practice", title: "Build React Projects", url: "#", completed: false },
-      ]
-    }
+      ],
+    },
   ],
   "backend-developer": [
     {
@@ -55,7 +55,7 @@ const defaultRoadmaps = {
       prerequisites: [],
       resources: [
         { type: "course", title: "Programming Logic", url: "#", completed: false },
-      ]
+      ],
     },
     {
       id: "nodejs",
@@ -67,17 +67,16 @@ const defaultRoadmaps = {
       prerequisites: ["programming-basics"],
       resources: [
         { type: "course", title: "Node.js Complete Course", url: "#", completed: false },
-      ]
-    }
-  ]
+      ],
+    },
+  ],
 };
 
 export const getUserRoadmap = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
-
     return await ctx.db
       .query("skillRoadmaps")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -88,20 +87,17 @@ export const getUserRoadmap = query({
 export const createRoadmap = mutation({
   args: { careerPath: v.string() },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
-    const existingRoadmap = await ctx.db
+    const existing = await ctx.db
       .query("skillRoadmaps")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    if (existingRoadmap) {
-      throw new Error("Roadmap already exists");
-    }
+    if (existing) throw new Error("Roadmap sudah ada");
 
     const skills = defaultRoadmaps[args.careerPath as keyof typeof defaultRoadmaps] || [];
-    const skillsWithStatus = skills.map(skill => ({
+    const skillsWithStatus = skills.map((skill) => ({
       ...skill,
       status: "not-started" as const,
     }));
@@ -122,21 +118,21 @@ export const updateSkillProgress = mutation({
     completedResources: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
     const roadmap = await ctx.db
       .query("skillRoadmaps")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    if (!roadmap) throw new Error("Roadmap not found");
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
 
-    const updatedSkills = roadmap.skills.map(skill => {
+    const updatedSkills = roadmap.skills.map((skill) => {
       if (skill.id === args.skillId) {
-        const updatedResources = skill.resources.map(resource => ({
+        const updatedResources = skill.resources.map((resource) => ({
           ...resource,
-          completed: args.completedResources?.includes(resource.title) || resource.completed
+          completed:
+            args.completedResources?.includes(resource.title) || resource.completed,
         }));
 
         return {
@@ -149,7 +145,7 @@ export const updateSkillProgress = mutation({
       return skill;
     });
 
-    const completedSkills = updatedSkills.filter(s => s.status === "completed").length;
+    const completedSkills = updatedSkills.filter((s) => s.status === "completed").length;
     const progress = Math.round((completedSkills / updatedSkills.length) * 100);
 
     await ctx.db.patch(roadmap._id, {

@@ -31,8 +31,8 @@ import {
   type ChartConfig,
 } from "@/shared/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { useApplications } from "@/slices/career-dashboard/hooks/useApplications";
-import { useAgenda } from "@/slices/calendar/hooks/useAgenda";
+import { useApplications } from "@/shared/hooks/useApplications";
+import { useAgenda } from "@/shared/hooks/useAgenda";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 

@@ -14,12 +14,21 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         };
       },
       validatePasswordRequirements: (password: string) => {
-        if (password.length < 4) {
-          throw new Error("Password must be at least 4 characters");
+        if (password.length < 8) {
+          throw new Error("Kata sandi minimal 8 karakter");
+        }
+        if (password.length > 128) {
+          throw new Error("Kata sandi terlalu panjang (maks 128)");
+        }
+        const hasLetter = /[A-Za-z]/.test(password);
+        const hasDigit = /\d/.test(password);
+        if (!hasLetter || !hasDigit) {
+          throw new Error("Kata sandi harus mengandung huruf dan angka");
         }
       },
       // Use PBKDF2 (WebCrypto) instead of default Scrypt — Scrypt times out
       // behind Dokploy's reverse proxy (>60s) causing dropped WebSocket actions.
+      // Iterations = 100k: OWASP 2023 minimum untuk PBKDF2-SHA256.
       crypto: {
         async hashSecret(password: string) {
           const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -32,17 +41,19 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
             ["deriveBits"],
           );
           const buf = await crypto.subtle.deriveBits(
-            { name: "PBKDF2", salt, iterations: 10000, hash: "SHA-256" },
+            { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
             km,
             256,
           );
           const hex = (a: Uint8Array) =>
             Array.from(a).map((b) => b.toString(16).padStart(2, "0")).join("");
-          return `pbkdf2_${hex(salt)}_${hex(new Uint8Array(buf))}`;
+          return `pbkdf2v2_${hex(salt)}_${hex(new Uint8Array(buf))}`;
         },
         async verifySecret(password: string, hash: string) {
           const parts = hash.split("_");
-          if (parts[0] !== "pbkdf2" || parts.length !== 3) return false;
+          // Support both v1 (10k iter, legacy) and v2 (100k iter)
+          if ((parts[0] !== "pbkdf2" && parts[0] !== "pbkdf2v2") || parts.length !== 3) return false;
+          const iterations = parts[0] === "pbkdf2v2" ? 100000 : 10000;
           const salt = new Uint8Array(
             parts[1].match(/.{2}/g)!.map((b) => parseInt(b, 16)),
           );
@@ -55,14 +66,18 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
             ["deriveBits"],
           );
           const buf = await crypto.subtle.deriveBits(
-            { name: "PBKDF2", salt, iterations: 10000, hash: "SHA-256" },
+            { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
             km,
             256,
           );
           const hex = Array.from(new Uint8Array(buf))
             .map((b) => b.toString(16).padStart(2, "0"))
             .join("");
-          return hex === parts[2];
+          // Constant-time compare
+          if (hex.length !== parts[2].length) return false;
+          let diff = 0;
+          for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ parts[2].charCodeAt(i);
+          return diff === 0;
         },
       },
     }),

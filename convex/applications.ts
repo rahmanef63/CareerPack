@@ -1,13 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser, requireOwnedDoc } from "./_lib/auth";
 
 export const getUserApplications = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return [];
-
     return await ctx.db
       .query("jobApplications")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -26,9 +25,7 @@ export const createApplication = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
+    const userId = await requireUser(ctx);
     return await ctx.db.insert("jobApplications", {
       userId,
       company: args.company,
@@ -52,14 +49,7 @@ export const updateApplicationStatus = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const application = await ctx.db.get(args.applicationId);
-    if (!application || application.userId !== userId) {
-      throw new Error("Application not found or access denied");
-    }
-
+    const application = await requireOwnedDoc(ctx, args.applicationId, "Lamaran");
     await ctx.db.patch(args.applicationId, {
       status: args.status,
       notes: args.notes || application.notes,
@@ -75,22 +65,12 @@ export const addInterviewDate = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const application = await ctx.db.get(args.applicationId);
-    if (!application || application.userId !== userId) {
-      throw new Error("Application not found or access denied");
-    }
-
-    const newInterview = {
-      type: args.type,
-      date: args.date,
-      notes: args.notes,
-    };
-
+    const application = await requireOwnedDoc(ctx, args.applicationId, "Lamaran");
     await ctx.db.patch(args.applicationId, {
-      interviewDates: [...application.interviewDates, newInterview],
+      interviewDates: [
+        ...application.interviewDates,
+        { type: args.type, date: args.date, notes: args.notes },
+      ],
     });
   },
 });
@@ -98,14 +78,7 @@ export const addInterviewDate = mutation({
 export const deleteApplication = mutation({
   args: { applicationId: v.id("jobApplications") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const application = await ctx.db.get(args.applicationId);
-    if (!application || application.userId !== userId) {
-      throw new Error("Application not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.applicationId, "Lamaran");
     await ctx.db.delete(args.applicationId);
   },
 });

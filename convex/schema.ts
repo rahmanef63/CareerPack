@@ -36,7 +36,10 @@ const applicationTables = {
       notes: v.optional(v.string()),
     })),
     documents: v.array(v.string()),
-  }).index("by_user", ["userId"]),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"])
+    .index("by_user_applied", ["userId", "appliedDate"]),
 
   cvs: defineTable({
     userId: v.id("users"),
@@ -155,7 +158,9 @@ const applicationTables = {
     completedAt: v.optional(v.number()),
     duration: v.optional(v.number()),
     startedAt: v.number(),
-  }).index("by_user", ["userId"]),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_started", ["userId", "startedAt"]),
 
   financialPlans: defineTable({
     userId: v.id("users"),
@@ -196,7 +201,10 @@ const applicationTables = {
       completed: v.boolean(),
       completedAt: v.optional(v.number()),
     })),
-  }).index("by_user", ["userId"]),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_status", ["userId", "status"])
+    .index("by_user_target", ["userId", "targetDate"]),
 
   notifications: defineTable({
     userId: v.id("users"),
@@ -206,7 +214,9 @@ const applicationTables = {
     read: v.boolean(),
     actionUrl: v.optional(v.string()),
     scheduledFor: v.optional(v.number()),
-  }).index("by_user", ["userId"]),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_read", ["userId", "read"]),
 
   chatConversations: defineTable({
     userId: v.id("users"),
@@ -234,6 +244,22 @@ const applicationTables = {
   })
     .index("by_user", ["userId"])
     .index("by_user_date", ["userId", "date"]),
+
+  rateLimitEvents: defineTable({
+    userId: v.id("users"),
+    // e.g. "ai:minute", "ai:day"
+    key: v.string(),
+    timestamp: v.number(),
+  }).index("by_user_key_time", ["userId", "key", "timestamp"]),
+
+  errorLogs: defineTable({
+    userId: v.optional(v.id("users")),
+    source: v.string(),
+    message: v.string(),
+    stack: v.optional(v.string()),
+    route: v.optional(v.string()),
+    timestamp: v.number(),
+  }).index("by_time", ["timestamp"]),
 };
 
 export default defineSchema({

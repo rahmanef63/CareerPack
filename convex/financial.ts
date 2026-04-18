@@ -1,13 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser } from "./_lib/auth";
 
 export const getUserFinancialPlan = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
-
     return await ctx.db
       .query("financialPlans")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -39,18 +38,16 @@ export const createOrUpdateFinancialPlan = mutation({
     timeline: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
-    // Calculate readiness score
     const totalExpenses = Object.values(args.expenses).reduce((sum, exp) => sum + exp, 0);
     const monthlyNet = args.targetSalary / 12 - totalExpenses;
-    const relocationCosts = args.relocationCosts 
+    const relocationCosts = args.relocationCosts
       ? Object.values(args.relocationCosts).reduce((sum, cost) => sum + cost, 0)
       : 0;
     const emergencyFund = totalExpenses * 6;
     const totalNeeded = relocationCosts + emergencyFund;
-    
+
     let readinessScore = 0;
     if (monthlyNet > 0) {
       const monthsToSave = totalNeeded / monthlyNet;
@@ -60,7 +57,7 @@ export const createOrUpdateFinancialPlan = mutation({
       else readinessScore = 25;
     }
 
-    const existingPlan = await ctx.db
+    const existing = await ctx.db
       .query("financialPlans")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
@@ -77,11 +74,10 @@ export const createOrUpdateFinancialPlan = mutation({
       readinessScore,
     };
 
-    if (existingPlan) {
-      await ctx.db.patch(existingPlan._id, planData);
-      return existingPlan._id;
-    } else {
-      return await ctx.db.insert("financialPlans", planData);
+    if (existing) {
+      await ctx.db.patch(existing._id, planData);
+      return existing._id;
     }
+    return await ctx.db.insert("financialPlans", planData);
   },
 });

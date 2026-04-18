@@ -1,13 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser, requireOwnedDoc } from "./_lib/auth";
 
 export const getUserCVs = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return [];
-
     return await ctx.db
       .query("cvs")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -21,8 +20,7 @@ export const createCV = mutation({
     template: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
     const user = await ctx.db.get(userId);
     const profile = await ctx.db
@@ -30,7 +28,7 @@ export const createCV = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    const cvData = {
+    return await ctx.db.insert("cvs", {
       userId,
       title: args.title,
       template: args.template,
@@ -48,9 +46,7 @@ export const createCV = mutation({
       languages: [],
       projects: [],
       isDefault: false,
-    };
-
-    return await ctx.db.insert("cvs", cvData);
+    });
   },
 });
 
@@ -114,14 +110,7 @@ export const updateCV = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const cv = await ctx.db.get(args.cvId);
-    if (!cv || cv.userId !== userId) {
-      throw new Error("CV not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.cvId, "CV");
     await ctx.db.patch(args.cvId, args.updates);
     return args.cvId;
   },
@@ -130,14 +119,7 @@ export const updateCV = mutation({
 export const deleteCV = mutation({
   args: { cvId: v.id("cvs") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const cv = await ctx.db.get(args.cvId);
-    if (!cv || cv.userId !== userId) {
-      throw new Error("CV not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.cvId, "CV");
     await ctx.db.delete(args.cvId);
   },
 });

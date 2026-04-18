@@ -1,13 +1,13 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser } from "./_lib/auth";
 
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
-    
+
     const user = await ctx.db.get(userId);
     if (!user) return null;
 
@@ -43,35 +43,27 @@ export const createOrUpdateProfile = mutation({
     bio: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
+    const userId = await requireUser(ctx);
 
     const existingProfile = await ctx.db
       .query("userProfiles")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    const profileData = {
-      userId,
-      ...args,
-    };
+    const profileData = { userId, ...args };
 
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, profileData);
       return existingProfile._id;
-    } else {
-      return await ctx.db.insert("userProfiles", profileData);
     }
+    return await ctx.db.insert("userProfiles", profileData);
   },
 });
 
 export const getUserStats = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
 
     const [applications, goals, roadmaps, interviews] = await Promise.all([
@@ -81,13 +73,13 @@ export const getUserStats = query({
       ctx.db.query("mockInterviews").withIndex("by_user", (q) => q.eq("userId", userId)).collect(),
     ]);
 
-    const activeGoals = goals.filter(g => g.status === "active").length;
-    const completedGoals = goals.filter(g => g.status === "completed").length;
-    const avgSkillProgress = roadmaps.length > 0 
-      ? roadmaps.reduce((sum, r) => sum + r.progress, 0) / roadmaps.length 
+    const activeGoals = goals.filter((g) => g.status === "active").length;
+    const completedGoals = goals.filter((g) => g.status === "completed").length;
+    const avgSkillProgress = roadmaps.length > 0
+      ? roadmaps.reduce((sum, r) => sum + r.progress, 0) / roadmaps.length
       : 0;
-    const recentInterviews = interviews.filter(i => 
-      i.completedAt && i.completedAt > Date.now() - 30 * 24 * 60 * 60 * 1000
+    const recentInterviews = interviews.filter(
+      (i) => i.completedAt && i.completedAt > Date.now() - 30 * 24 * 60 * 60 * 1000,
     ).length;
 
     return {
@@ -97,12 +89,12 @@ export const getUserStats = query({
       avgSkillProgress: Math.round(avgSkillProgress),
       recentInterviews,
       applicationsByStatus: {
-        applied: applications.filter(a => a.status === "applied").length,
-        screening: applications.filter(a => a.status === "screening").length,
-        interview: applications.filter(a => a.status === "interview").length,
-        offer: applications.filter(a => a.status === "offer").length,
-        rejected: applications.filter(a => a.status === "rejected").length,
-      }
+        applied: applications.filter((a) => a.status === "applied").length,
+        screening: applications.filter((a) => a.status === "screening").length,
+        interview: applications.filter((a) => a.status === "interview").length,
+        offer: applications.filter((a) => a.status === "offer").length,
+        rejected: applications.filter((a) => a.status === "rejected").length,
+      },
     };
   },
 });

@@ -63,3 +63,15 @@ export interface DateRange {
     startDate: string;
     endDate?: string;
 }
+
+export interface Application {
+    id: string;
+    company: string;
+    position: string;
+    status: ApplicationStatus;
+    appliedDate: string;
+    lastUpdate: string;
+    notes?: string;
+    link?: string;
+    salary?: string;
+}

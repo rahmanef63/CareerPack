@@ -1,13 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser, requireOwnedDoc } from "./_lib/auth";
 
 export const getUserInterviews = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return [];
-
     return await ctx.db
       .query("mockInterviews")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -28,10 +27,9 @@ export const createMockInterview = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = await requireUser(ctx);
 
-    const questionsWithAnswers = args.questions.map(q => ({
+    const questionsWithAnswers = args.questions.map((q) => ({
       ...q,
       userAnswer: undefined,
       feedback: undefined,
@@ -62,15 +60,9 @@ export const updateInterviewAnswer = mutation({
     score: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const interview = await requireOwnedDoc(ctx, args.interviewId, "Interview");
 
-    const interview = await ctx.db.get(args.interviewId);
-    if (!interview || interview.userId !== userId) {
-      throw new Error("Interview not found or access denied");
-    }
-
-    const updatedQuestions = interview.questions.map(q => {
+    const updatedQuestions = interview.questions.map((q) => {
       if (q.id === args.questionId) {
         return {
           ...q,
@@ -83,9 +75,7 @@ export const updateInterviewAnswer = mutation({
       return q;
     });
 
-    await ctx.db.patch(args.interviewId, {
-      questions: updatedQuestions,
-    });
+    await ctx.db.patch(args.interviewId, { questions: updatedQuestions });
   },
 });
 
@@ -97,14 +87,7 @@ export const completeInterview = mutation({
     duration: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const interview = await ctx.db.get(args.interviewId);
-    if (!interview || interview.userId !== userId) {
-      throw new Error("Interview not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.interviewId, "Interview");
     await ctx.db.patch(args.interviewId, {
       overallScore: args.overallScore,
       feedback: args.feedback,
@@ -117,7 +100,7 @@ export const completeInterview = mutation({
 export const getInterviewAnalytics = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
 
     const interviews = await ctx.db
@@ -125,17 +108,15 @@ export const getInterviewAnalytics = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
-    const completedInterviews = interviews.filter(i => i.completedAt);
+    const completedInterviews = interviews.filter((i) => i.completedAt);
     const totalSessions = interviews.length;
-    const avgScore = completedInterviews.length > 0 
+    const avgScore = completedInterviews.length > 0
       ? Math.round(completedInterviews.reduce((acc, i) => acc + (i.overallScore || 0), 0) / completedInterviews.length)
       : 0;
     const totalPracticeTime = Math.round(completedInterviews.reduce((acc, i) => acc + (i.duration || 0), 0) / 3600);
 
     const scoresByType = completedInterviews.reduce((acc, interview) => {
-      if (!acc[interview.type]) {
-        acc[interview.type] = [];
-      }
+      if (!acc[interview.type]) acc[interview.type] = [];
       acc[interview.type].push(interview.overallScore || 0);
       return acc;
     }, {} as Record<string, number[]>);
@@ -143,7 +124,7 @@ export const getInterviewAnalytics = query({
     const improvementTrend = completedInterviews
       .sort((a, b) => (a.completedAt || 0) - (b.completedAt || 0))
       .slice(-10)
-      .map(i => i.overallScore || 0);
+      .map((i) => i.overallScore || 0);
 
     return {
       totalSessions,
@@ -160,14 +141,7 @@ export const getInterviewAnalytics = query({
 export const deleteInterview = mutation({
   args: { interviewId: v.id("mockInterviews") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const interview = await ctx.db.get(args.interviewId);
-    if (!interview || interview.userId !== userId) {
-      throw new Error("Interview not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.interviewId, "Interview");
     await ctx.db.delete(args.interviewId);
   },
 });

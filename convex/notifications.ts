@@ -1,13 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { optionalUser, requireUser, requireOwnedDoc } from "./_lib/auth";
 
 export const getUserNotifications = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return [];
-
     return await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -25,9 +24,7 @@ export const createNotification = mutation({
     scheduledFor: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
+    const userId = await requireUser(ctx);
     return await ctx.db.insert("notifications", {
       userId,
       type: args.type,
@@ -43,14 +40,7 @@ export const createNotification = mutation({
 export const markNotificationAsRead = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const notification = await ctx.db.get(args.notificationId);
-    if (!notification || notification.userId !== userId) {
-      throw new Error("Notification not found or access denied");
-    }
-
+    await requireOwnedDoc(ctx, args.notificationId, "Notifikasi");
     await ctx.db.patch(args.notificationId, { read: true });
   },
 });
@@ -58,9 +48,7 @@ export const markNotificationAsRead = mutation({
 export const markAllNotificationsAsRead = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
+    const userId = await requireUser(ctx);
     const notifications = await ctx.db
       .query("notifications")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -68,9 +56,7 @@ export const markAllNotificationsAsRead = mutation({
       .collect();
 
     await Promise.all(
-      notifications.map(notification =>
-        ctx.db.patch(notification._id, { read: true })
-      )
+      notifications.map((n) => ctx.db.patch(n._id, { read: true })),
     );
   },
 });
