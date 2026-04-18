@@ -10,7 +10,7 @@ export { AIConfigProvider, useAIConfig } from "./hooks/useAIConfig";
 export { UIPrefsProvider, useUIPrefs } from "./hooks/useUIPrefs";
 
 // Shell / container components
-export { DesktopSidebar } from "./components/DesktopSidebar";
+export { AppSidebar } from "./components/app-sidebar";
 export { BottomNav } from "./components/BottomNav";
 export { AIFab } from "./components/AIFab";
 export { MoreDrawer } from "./components/MoreDrawer";
