@@ -73,3 +73,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --font-scale: 1;
+  --nav-height: 4.5rem;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  font-size: calc(16px * var(--font-scale));
+}
