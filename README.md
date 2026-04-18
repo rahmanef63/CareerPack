@@ -1,79 +1,51 @@
-# CareerPack Monorepo
+# CareerPack
 
-Frontend memakai Next.js (`frontend/`), backend memakai Convex (`convex/`).
-Default development mode: Convex cloud dev (bukan self-hosted).
+Next.js 15 App Router + Convex. Frontend slice-based di `frontend/`, backend functions di `convex/`.
+
+## Dokumentasi Lengkap
+
+Masuk ke **[docs/](./docs/README.md)** — index semua konteks:
+
+- [docs/architecture.md](./docs/architecture.md) — layout repo, routing, pola slice, providers tree
+- [docs/backend.md](./docs/backend.md) — schema Convex + semua query/mutation/action
+- [docs/auth.md](./docs/auth.md) — flow login + guard
+- [docs/development.md](./docs/development.md) — setup, env, scripts, konvensi, testing
+- [docs/deployment.md](./docs/deployment.md) — deploy Convex + frontend
+- [docs/features/](./docs/features/README.md) — dokumen per-fitur (13 slice)
 
 ## Quick Start
 
-1. Install dependencies workspace:
-
 ```bash
 pnpm install
+cp .env.example .env.local                   # root — Convex CLI
+cp frontend/.env.example frontend/.env.local # frontend — NEXT_PUBLIC_CONVEX_URL
+pnpm dev                                     # push Convex sekali + `next dev`
 ```
 
-2. Siapkan env Convex cloud di root `.env.local`:
+Detail setup dev + env matrix: [docs/development.md](./docs/development.md).
 
-```bash
-# PowerShell
-Copy-Item .env.example .env.local
+## Repo Structure
 
-# Bash
-cp .env.example .env.local
 ```
-
-3. Set env frontend di `frontend/.env.local`:
-
-```bash
-NEXT_PUBLIC_CONVEX_URL=<your convex cloud url>
+frontend/       Next.js 15 App Router, src/slices/<feature>, src/shared/*
+convex/         Schema + functions (auth, cv, applications, roadmaps, …)
+backend/        Docker stack Convex self-hosted (opsional)
+docs/           Dokumentasi komplit (architecture, backend, per-feature)
+.github/        CI (typecheck/lint/test/build) + auto-deploy Convex
 ```
-
-4. Jalankan app (otomatis push Convex sekali lalu start Next.js):
-
-```bash
-pnpm run dev
-```
-
-5. Opsional, jika ingin Convex watch mode (sinkron setiap file change), jalankan di terminal lain:
-
-```bash
-pnpm run backend:dev
-```
-
-## Repository Structure
-
-- `frontend/` Next.js app (App Router)
-- `convex/` Convex functions/schema/auth
-- `backend/convex-self-hosted/` optional self-hosted setup
-
-## Frontend Feature Contract
-
-Setiap feature di `frontend/src/features/*` memiliki:
-
-- `components/`
-- `lib/`
-- `hooks/`
-- `constants/`
-- `types/`
-- `config.ts`
-- `manifest.ts`
-- `index.ts`
-
-Jika feature punya sub-feature, gunakan `shared/` di dalam feature.
 
 ## Root Scripts
 
-- `pnpm run dev` push Convex (`--once`) lalu start frontend
-- `pnpm run build` build frontend
-- `pnpm run start` run frontend production
-- `pnpm run lint` lint frontend (ESLint CLI)
-- `pnpm run backend:dev` jalankan Convex cloud dev
-- `pnpm run backend:push` push Convex sekali tanpa watch
+Paling sering dipakai:
 
-## Optional Self-Hosted
+- `pnpm dev` — sync Convex + start frontend
+- `pnpm typecheck` — frontend + convex
+- `pnpm lint` — ESLint `--max-warnings=0`
+- `pnpm test` — Vitest
+- `pnpm backend:deploy` — push Convex ke self-hosted prod
 
-Gunakan hanya jika perlu local backend containerized.
-Panduan: `backend/convex-self-hosted/README.md`
+Full list: [docs/development.md §3](./docs/development.md).
 
-## Production Deployment
+## License
 
-Panduan lengkap: `DEPLOYMENT.md`
+Lihat [LICENSE](./LICENSE).

@@ -15,6 +15,7 @@ export function generateStaticParams() {
     { slug: ["interview"] },
     { slug: ["calculator"] },
     { slug: ["settings"] },
+    { slug: ["ai-settings"] },
     { slug: ["matcher"] },
     { slug: ["networking"] },
     { slug: ["portfolio"] },

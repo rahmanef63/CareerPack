@@ -9,10 +9,10 @@ import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Calendar } from "@/shared/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover";
+  ResponsivePopover,
+  ResponsivePopoverContent,
+  ResponsivePopoverTrigger,
+} from "@/shared/components/ui/responsive-popover";
 
 export interface DatePickerProps {
   /** ISO date string YYYY-MM-DD */
@@ -63,8 +63,12 @@ export function DatePicker({
   const selected = parseISO(value);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <ResponsivePopover
+      open={open}
+      onOpenChange={setOpen}
+      drawerTitle={placeholder}
+    >
+      <ResponsivePopoverTrigger asChild>
         <Button
           id={id}
           type="button"
@@ -82,8 +86,8 @@ export function DatePicker({
             ? format(selected, "dd MMM yyyy", { locale })
             : placeholder}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      </ResponsivePopoverTrigger>
+      <ResponsivePopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={selected}
@@ -100,7 +104,7 @@ export function DatePicker({
           }}
           defaultMonth={selected}
         />
-      </PopoverContent>
-    </Popover>
+      </ResponsivePopoverContent>
+    </ResponsivePopover>
   );
 }

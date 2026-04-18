@@ -12,7 +12,12 @@ import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import {
+  ResponsiveDialog as Dialog,
+  ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogHeader as DialogHeader,
+  ResponsiveDialogTitle as DialogTitle,
+} from '@/shared/components/ui/responsive-dialog';
 import type { CVData, Education, Experience, Skill, Certification, Project } from '../types';
 import { useCV } from '../hooks/useCV';
 import { useCVAIActions } from '../hooks/useCVAIActions';

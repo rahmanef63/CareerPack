@@ -61,6 +61,10 @@ const SETTINGS: View = dynamic(
   () => import("@/slices/settings").then((m) => m.TweaksPanel),
   { loading: loadingFallback }
 );
+const AI_SETTINGS: View = dynamic(
+  () => import("@/slices/ai-settings").then((m) => m.AISettingsPanel),
+  { loading: loadingFallback }
+);
 
 /**
  * Map slug → View. Key `""` = `/dashboard` root.
@@ -76,6 +80,7 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
   interview: INTERVIEW,
   calculator: CALCULATOR,
   settings: SETTINGS,
+  "ai-settings": AI_SETTINGS,
   matcher: MatcherView,
   networking: NetworkingView,
   portfolio: PortfolioView,

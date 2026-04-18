@@ -13,6 +13,8 @@ import type * as _lib_env from "../_lib/env.js";
 import type * as _lib_rateLimit from "../_lib/rateLimit.js";
 import type * as _lib_sanitize from "../_lib/sanitize.js";
 import type * as ai from "../ai.js";
+import type * as aiSettings from "../aiSettings.js";
+import type * as _lib_aiProviders from "../_lib/aiProviders.js";
 import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
 import type * as calendar from "../calendar.js";
@@ -41,6 +43,8 @@ declare const fullApi: ApiFromModules<{
   "_lib/rateLimit": typeof _lib_rateLimit;
   "_lib/sanitize": typeof _lib_sanitize;
   ai: typeof ai;
+  aiSettings: typeof aiSettings;
+  "_lib/aiProviders": typeof _lib_aiProviders;
   applications: typeof applications;
   auth: typeof auth;
   calendar: typeof calendar;

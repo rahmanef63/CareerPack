@@ -260,6 +260,16 @@ const applicationTables = {
     route: v.optional(v.string()),
     timestamp: v.number(),
   }).index("by_time", ["timestamp"]),
+
+  aiSettings: defineTable({
+    userId: v.id("users"),
+    provider: v.string(),
+    model: v.string(),
+    apiKey: v.string(),
+    baseUrl: v.optional(v.string()),
+    enabled: v.boolean(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 };
 
 export default defineSchema({

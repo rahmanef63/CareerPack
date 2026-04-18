@@ -5,6 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { enforceRateLimit, AI_RATE_LIMITS } from "./_lib/rateLimit";
 import { sanitizeAIInput, wrapUserInput } from "./_lib/sanitize";
 import { requireEnv } from "./_lib/env";
+import { resolveProviderBaseUrl } from "./_lib/aiProviders";
 
 export const _checkAIQuota = internalMutation({
   args: { userId: v.id("users") },
@@ -20,19 +21,54 @@ async function requireQuota(ctx: ActionCtx): Promise<void> {
   await ctx.runMutation(internal.ai._checkAIQuota, { userId });
 }
 
-async function callOpenAI(body: Record<string, unknown>) {
-  const baseUrl = requireEnv("CONVEX_OPENAI_BASE_URL");
-  const apiKey = requireEnv("CONVEX_OPENAI_API_KEY");
-  const response = await fetch(`${baseUrl}/chat/completions`, {
+interface ResolvedAI {
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+  source: "user" | "default";
+}
+
+async function resolveAI(ctx: ActionCtx, fallbackModel: string): Promise<ResolvedAI> {
+  const userId = await getAuthUserId(ctx);
+  if (userId) {
+    const cfg = await ctx.runQuery(internal.aiSettings._getForUser, { userId });
+    if (cfg) {
+      return {
+        baseUrl: resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined),
+        apiKey: cfg.apiKey,
+        model: cfg.model,
+        source: "user",
+      };
+    }
+  }
+  return {
+    baseUrl: requireEnv("CONVEX_OPENAI_BASE_URL").replace(/\/+$/, ""),
+    apiKey: requireEnv("CONVEX_OPENAI_API_KEY"),
+    model: fallbackModel,
+    source: "default",
+  };
+}
+
+async function callAI(
+  ctx: ActionCtx,
+  fallbackModel: string,
+  body: Record<string, unknown>
+) {
+  const cfg = await resolveAI(ctx, fallbackModel);
+  const payload = { ...body, model: cfg.model };
+  const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${cfg.apiKey}`,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
-    throw new Error(`AI gateway error: ${response.status}`);
+    const detail = await response.text().catch(() => "");
+    throw new Error(
+      `AI gateway error (${cfg.source}): ${response.status}${detail ? ` - ${detail.slice(0, 200)}` : ""}`
+    );
   }
   return response.json();
 }
@@ -45,8 +81,7 @@ export const generateCareerAdvice = action({
   handler: async (ctx, args) => {
     await requireQuota(ctx);
 
-    const data = await callOpenAI({
-      model: "gpt-4.1-nano",
+    const data = await callAI(ctx, "gpt-4.1-nano", {
       messages: [
         {
           role: "system",
@@ -77,8 +112,7 @@ export const generateInterviewQuestions = action({
     const type = sanitizeAIInput(args.type, 50);
     const difficulty = sanitizeAIInput(args.difficulty, 20);
 
-    const data = await callOpenAI({
-      model: "gpt-4.1-nano",
+    const data = await callAI(ctx, "gpt-4.1-nano", {
       messages: [
         {
           role: "system",
@@ -125,8 +159,7 @@ export const evaluateInterviewAnswer = action({
 
     const role = sanitizeAIInput(args.role, 100);
 
-    const data = await callOpenAI({
-      model: "gpt-4.1-nano",
+    const data = await callAI(ctx, "gpt-4.1-nano", {
       messages: [
         {
           role: "system",
@@ -158,3 +191,19 @@ export const evaluateInterviewAnswer = action({
   },
 });
 
+export const testConnection = action({
+  args: {},
+  handler: async (ctx) => {
+    await requireQuota(ctx);
+    const data = await callAI(ctx, "gpt-4.1-nano", {
+      messages: [
+        { role: "system", content: "Reply with only the word: OK" },
+        { role: "user", content: "ping" },
+      ],
+      max_tokens: 5,
+      temperature: 0,
+    });
+    const reply = data?.choices?.[0]?.message?.content ?? "";
+    return { ok: true, reply: String(reply).slice(0, 80) };
+  },
+});
