@@ -1,7 +1,12 @@
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
-import { PlaceholderView } from "@/shared/components/PlaceholderView";
-import { Bell, Compass, Folder, HelpCircle, Users } from "lucide-react";
+import {
+  HelpView,
+  MatcherView,
+  NetworkingView,
+  NotificationsView,
+  PortfolioView,
+} from "@/shared/components/DashboardPlaceholders";
 
 /**
  * Registry SSOT untuk catch-all `/dashboard/[[...slug]]`.
@@ -55,43 +60,6 @@ const CALCULATOR: View = dynamic(
 const SETTINGS: View = dynamic(
   () => import("@/slices/settings").then((m) => m.TweaksPanel),
   { loading: loadingFallback }
-);
-
-// Placeholder views (segera hadir) — cukup wrap PlaceholderView
-const MatcherView = () => (
-  <PlaceholderView
-    icon={Compass}
-    title="Pencocok Lowongan"
-    description="AI akan mencocokkan profil Anda dengan lowongan terbaru. Buka Asisten AI lalu ketik /match untuk demo."
-  />
-);
-const NetworkingView = () => (
-  <PlaceholderView
-    icon={Users}
-    title="Jaringan"
-    description="Kelola kontak profesional, mentor, dan rekruter yang Anda kenal."
-  />
-);
-const PortfolioView = () => (
-  <PlaceholderView
-    icon={Folder}
-    title="Portofolio"
-    description="Tampilkan proyek terbaik Anda. Akan ditarik otomatis dari bagian Proyek di CV."
-  />
-);
-const NotificationsView = () => (
-  <PlaceholderView
-    icon={Bell}
-    title="Notifikasi"
-    description="Pemberitahuan terkait progres karir, tenggat dokumen, dan update lowongan akan muncul di sini."
-  />
-);
-const HelpView = () => (
-  <PlaceholderView
-    icon={HelpCircle}
-    title="Pusat Bantuan"
-    description="Tanya jawab, panduan penggunaan, dan kontak dukungan."
-  />
 );
 
 /**

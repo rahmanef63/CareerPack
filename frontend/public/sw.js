@@ -1,7 +1,7 @@
 // CareerPack service worker — minimal, stale-while-revalidate for GET
 // requests. Versioned cache name so new releases evict old assets.
 
-const CACHE = "careerpack-v1";
+const CACHE = "careerpack-v2";
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
