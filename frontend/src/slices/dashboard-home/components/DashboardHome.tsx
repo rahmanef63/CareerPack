@@ -203,7 +203,7 @@ export function DashboardHome() {
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <Button asChild className="justify-between">
-              <Link href="/applications">
+              <Link href="/dashboard/applications">
                 <span className="flex items-center gap-2">
                   <Plus className="w-4 h-4" /> Tambah Lamaran
                 </span>
@@ -211,7 +211,7 @@ export function DashboardHome() {
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-between">
-              <Link href="/cv">
+              <Link href="/dashboard/cv">
                 <span className="flex items-center gap-2">
                   <FileUser className="w-4 h-4" /> Lihat / Edit CV
                 </span>
@@ -219,7 +219,7 @@ export function DashboardHome() {
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-between">
-              <Link href="/interview">
+              <Link href="/dashboard/interview">
                 <span className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" /> Latihan Wawancara
                 </span>
@@ -228,7 +228,7 @@ export function DashboardHome() {
             </Button>
             <Separator />
             <Button asChild variant="ghost" className="justify-between text-career-700">
-              <Link href="/calendar">
+              <Link href="/dashboard/calendar">
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4" /> Mulai chat dengan AI
                 </span>
