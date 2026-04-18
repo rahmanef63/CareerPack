@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-describe("env validator", () => {
+describe("env validator (lazy getter)", () => {
   const origUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
   beforeEach(() => {
@@ -12,17 +12,26 @@ describe("env validator", () => {
     else process.env.NEXT_PUBLIC_CONVEX_URL = origUrl;
   });
 
-  it("throws when NEXT_PUBLIC_CONVEX_URL missing", async () => {
+  it("module import tidak throw walau env kosong", async () => {
     delete process.env.NEXT_PUBLIC_CONVEX_URL;
-    await expect(import("./env")).rejects.toThrow(/NEXT_PUBLIC_CONVEX_URL/);
+    await expect(import("./env")).resolves.toBeDefined();
   });
 
-  it("throws when value is not a valid URL", async () => {
+  it("akses nilai throw kalau env kosong", async () => {
+    delete process.env.NEXT_PUBLIC_CONVEX_URL;
+    const mod = await import("./env");
+    expect(() => mod.env.NEXT_PUBLIC_CONVEX_URL).toThrow(
+      /NEXT_PUBLIC_CONVEX_URL/,
+    );
+  });
+
+  it("throw kalau nilai bukan URL", async () => {
     process.env.NEXT_PUBLIC_CONVEX_URL = "not-a-url";
-    await expect(import("./env")).rejects.toThrow(/URL/);
+    const mod = await import("./env");
+    expect(() => mod.env.NEXT_PUBLIC_CONVEX_URL).toThrow(/URL/);
   });
 
-  it("accepts valid https URL", async () => {
+  it("pulangkan URL valid", async () => {
     process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
     const mod = await import("./env");
     expect(mod.env.NEXT_PUBLIC_CONVEX_URL).toBe("https://example.convex.cloud");
