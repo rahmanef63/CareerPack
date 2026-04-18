@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LoginPage } from "@/features/auth";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { LoginPage } from "@/slices/auth";
+import { useAuth } from "@/slices/shared/hooks/useAuth";
 
 export default function LoginRoute() {
   const router = useRouter();

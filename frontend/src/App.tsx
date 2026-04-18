@@ -2,19 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/features/auth";
-import { HeroSection } from "@/features/hero";
-import { CVGenerator } from "@/features/cv-generator";
-import { SkillRoadmap } from "@/features/skill-roadmap";
-import { DocumentChecklist } from "@/features/document-checklist";
-import { CareerDashboard } from "@/features/career-dashboard";
-import { MockInterview } from "@/features/mock-interview";
-import { FinancialCalculator } from "@/features/financial-calculator";
-import { CalendarView } from "@/features/calendar/components/CalendarView";
-import { TweaksPanel } from "@/features/settings/components/TweaksPanel";
-import { AppShell } from "@/shared/components/AppShell";
-import { PlaceholderView } from "@/shared/components/PlaceholderView";
-import { PullToRefresh } from "@/shared/components/MicroInteractions";
+import { useAuth } from "@/slices/shared/hooks/useAuth";
+import { HeroSection } from "@/slices/hero";
+import { CVGenerator } from "@/slices/cv-generator";
+import { SkillRoadmap } from "@/slices/skill-roadmap";
+import { DocumentChecklist } from "@/slices/document-checklist";
+import { CareerDashboard } from "@/slices/career-dashboard";
+import { MockInterview } from "@/slices/mock-interview";
+import { FinancialCalculator } from "@/slices/financial-calculator";
+import { CalendarView } from "@/slices/calendar/components/CalendarView";
+import { TweaksPanel } from "@/slices/settings/components/TweaksPanel";
+import { AppShell } from "@/slices/shared/components/AppShell";
+import { PlaceholderView } from "@/slices/shared/components/PlaceholderView";
+import { PullToRefresh } from "@/slices/shared/components/MicroInteractions";
+import { AIAgentConsole } from "@/slices/ai-agent";
 import { Bell, Compass, Folder, Users, HelpCircle } from "lucide-react";
 
 export default function App() {
@@ -76,15 +77,15 @@ export default function App() {
         return (
           <PlaceholderView
             icon={Compass}
-            title="Job Matcher"
-            description="AI akan mencocokkan profil Anda dengan lowongan terbaru. Tap AI di nav bar dan ketik /match untuk demo."
+            title="Pencocok Lowongan"
+            description="AI akan mencocokkan profil Anda dengan lowongan terbaru. Ketuk tombol AI di bar navigasi lalu ketik /match untuk demo."
           />
         );
       case "networking":
         return (
           <PlaceholderView
             icon={Users}
-            title="Networking"
+            title="Jaringan"
             description="Kelola kontak profesional, mentor, dan rekruter yang Anda kenal."
           />
         );
@@ -92,8 +93,8 @@ export default function App() {
         return (
           <PlaceholderView
             icon={Folder}
-            title="Portfolio"
-            description="Showcase proyek terbaik Anda. Akan ditarik otomatis dari section Projects di CV."
+            title="Portofolio"
+            description="Tampilkan proyek terbaik Anda. Akan ditarik otomatis dari bagian Proyek di CV."
           />
         );
       case "help":
@@ -101,7 +102,7 @@ export default function App() {
           <PlaceholderView
             icon={HelpCircle}
             title="Pusat Bantuan"
-            description="FAQ, panduan penggunaan, dan kontak support."
+            description="Tanya jawab, panduan penggunaan, dan kontak dukungan."
           />
         );
       default:
@@ -110,7 +111,18 @@ export default function App() {
   };
 
   return (
-    <AppShell currentView={currentView} onViewChange={setCurrentView}>
+    <AppShell
+      currentView={currentView}
+      onViewChange={setCurrentView}
+      renderAIConsole={({ open, setOpen, currentView: cv, onNavigate }) => (
+        <AIAgentConsole
+          open={open}
+          onOpenChange={setOpen}
+          currentView={cv}
+          onNavigate={onNavigate}
+        />
+      )}
+    >
       {renderView()}
     </AppShell>
   );

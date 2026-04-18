@@ -1,0 +1,40 @@
+{
+  "name": "CareerPack",
+  "short_name": "CareerPack",
+  "description": "Starter pack lengkap untuk kesuksesan karir Anda. CV, roadmap karir, checklist dokumen, asisten AI, dan lainnya.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "lang": "id-ID",
+  "dir": "ltr",
+  "categories": ["productivity", "education", "business"],
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
