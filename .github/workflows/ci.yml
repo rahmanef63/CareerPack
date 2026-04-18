@@ -29,5 +29,5 @@ jobs:
       - run: pnpm test
       - name: Build (verify bundler)
         env:
-          NEXT_PUBLIC_CONVEX_URL: https://example.convex.cloud
+          NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL || 'https://example.convex.cloud' }}
         run: pnpm run build
