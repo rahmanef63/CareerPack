@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import {
   Users, Settings, Database, BarChart3, Key,

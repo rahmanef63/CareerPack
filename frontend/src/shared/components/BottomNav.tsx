@@ -1,24 +1,37 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { AIFab } from "./AIFab";
 import { Ripple, useHapticPress } from "./MicroInteractions";
-import { PRIMARY_NAV, MORE_NAV_ICON, type NavItem, type PrimaryNavId } from "./navConfig";
+import {
+  PRIMARY_NAV,
+  MORE_NAV_ICON,
+  type NavItem,
+  activeNavForPath,
+} from "./navConfig";
 
 interface BottomNavProps {
-  current: string;
-  onSelect: (id: PrimaryNavId) => void;
   onAITap: () => void;
   aiActive?: boolean;
+  onMoreTap: () => void;
 }
 
 /**
  * Bottom tab bar khusus mobile/tablet (< lg).
  * Layout: 2 tab kiri · AI FAB (tengah, menonjol) · Kalender · More.
+ * Aktif state dihitung dari `usePathname()` — SSOT lewat navConfig.
  */
-export function BottomNav({ current, onSelect, onAITap, aiActive }: BottomNavProps) {
+export function BottomNav({ onAITap, aiActive, onMoreTap }: BottomNavProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const active = activeNavForPath(pathname);
+
   const leftTabs = PRIMARY_NAV.slice(0, 2);
   const rightTab = PRIMARY_NAV[2];
+
+  const isActive = (id: string) => active?.id === id;
+  const isMoreActive = !PRIMARY_NAV.some((n) => n.id === active?.id);
 
   return (
     <div
@@ -40,18 +53,27 @@ export function BottomNav({ current, onSelect, onAITap, aiActive }: BottomNavPro
           aria-label="Navigasi utama"
         >
           {leftTabs.map((item) => (
-            <NavButton key={item.id} item={item} active={current === item.id} onSelect={onSelect} />
+            <NavButton
+              key={item.id}
+              item={item}
+              active={isActive(item.id)}
+              onClick={() => router.push(item.href)}
+            />
           ))}
 
           <div className="flex justify-center">
             <AIFab onClick={onAITap} active={aiActive} />
           </div>
 
-          <NavButton item={rightTab} active={current === rightTab.id} onSelect={onSelect} />
           <NavButton
-            item={{ id: "more", label: "Lainnya", icon: MORE_NAV_ICON }}
-            active={current === "more"}
-            onSelect={onSelect}
+            item={rightTab}
+            active={isActive(rightTab.id)}
+            onClick={() => router.push(rightTab.href)}
+          />
+          <NavButton
+            item={{ id: "more", label: "Lainnya", icon: MORE_NAV_ICON, href: "#more" }}
+            active={isMoreActive}
+            onClick={onMoreTap}
           />
         </nav>
       </div>
@@ -59,19 +81,19 @@ export function BottomNav({ current, onSelect, onAITap, aiActive }: BottomNavPro
   );
 }
 
-interface NavButtonProps<TId extends PrimaryNavId> {
-  item: NavItem<TId>;
+interface NavButtonProps {
+  item: NavItem;
   active: boolean;
-  onSelect: (id: TId) => void;
+  onClick: () => void;
 }
 
-function NavButton<TId extends PrimaryNavId>({ item, active, onSelect }: NavButtonProps<TId>) {
+function NavButton({ item, active, onClick }: NavButtonProps) {
   const Icon = item.icon;
   const press = useHapticPress();
   return (
     <button
       type="button"
-      onClick={() => onSelect(item.id)}
+      onClick={onClick}
       aria-label={item.label}
       aria-current={active ? "page" : undefined}
       className={cn(

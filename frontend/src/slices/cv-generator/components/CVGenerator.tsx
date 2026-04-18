@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   User, Briefcase, GraduationCap, Award, Folder,

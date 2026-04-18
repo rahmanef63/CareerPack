@@ -1,510 +1,581 @@
-import { useState } from 'react';
-import { 
-  TrendingUp, Briefcase, Calendar, 
-  CheckCircle2, Target, Award, ArrowUpRight,
-  MoreHorizontal, Plus, Filter,
-  Building2
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
-import { Progress } from '@/shared/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { toast } from 'sonner';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { cn } from '@/shared/lib/utils';
-import { 
-  AreaChart, Area, XAxis, YAxis, 
-  CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
-} from 'recharts';
-import type { Application } from '../types';
+"use client";
 
-// Mock data for charts
-const applicationData = [
-  { name: 'Minggu 1', applied: 5, interviews: 1, offers: 0 },
-  { name: 'Minggu 2', applied: 8, interviews: 2, offers: 0 },
-  { name: 'Minggu 3', applied: 12, interviews: 3, offers: 1 },
-  { name: 'Minggu 4', applied: 15, interviews: 4, offers: 1 },
-];
+import { useMemo, useState } from "react";
+import {
+  Plus,
+  MoreHorizontal,
+  Trash2,
+  ExternalLink,
+  Filter,
+  Briefcase,
+  TrendingUp,
+  Target,
+  MessageSquare,
+  ArrowUpRight,
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { cn } from "@/shared/lib/utils";
+import { useApplications } from "../hooks/useApplications";
+import type { Application, ApplicationStatus } from "../types";
 
-const statusData = [
-  { name: 'Dilamar', value: 15, color: '#0ea5e9' },
-  { name: 'Screening', value: 5, color: '#f59e0b' },
-  { name: 'Wawancara', value: 4, color: '#8b5cf6' },
-  { name: 'Tawaran', value: 1, color: '#10b981' },
-  { name: 'Ditolak', value: 3, color: '#ef4444' },
-];
-
-const initialApplications: Application[] = [
-  { id: '1', company: 'Tokopedia', position: 'Frontend Developer', status: 'interview', appliedDate: '2024-01-15', lastUpdate: '2024-01-20' },
-  { id: '2', company: 'Gojek', position: 'Full Stack Engineer', status: 'screening', appliedDate: '2024-01-14', lastUpdate: '2024-01-18' },
-  { id: '3', company: 'Shopee', position: 'React Developer', status: 'applied', appliedDate: '2024-01-13', lastUpdate: '2024-01-13' },
-  { id: '4', company: 'Traveloka', position: 'Software Engineer', status: 'offer', appliedDate: '2024-01-10', lastUpdate: '2024-01-22' },
-  { id: '5', company: 'Bukalapak', position: 'UI Engineer', status: 'rejected', appliedDate: '2024-01-08', lastUpdate: '2024-01-16' },
-];
-
-const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
-  applied: { label: 'Dilamar', color: 'text-career-600', bgColor: 'bg-career-100' },
-  screening: { label: 'Screening', color: 'text-amber-600', bgColor: 'bg-amber-100' },
-  interview: { label: 'Wawancara', color: 'text-purple-600', bgColor: 'bg-purple-100' },
-  offer: { label: 'Tawaran', color: 'text-green-600', bgColor: 'bg-green-100' },
-  rejected: { label: 'Ditolak', color: 'text-red-600', bgColor: 'bg-red-100' },
-  withdrawn: { label: 'Ditarik', color: 'text-slate-600', bgColor: 'bg-slate-100' },
+const STATUS_META: Record<
+  ApplicationStatus,
+  { label: string; className: string }
+> = {
+  applied: { label: "Dilamar", className: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300" },
+  screening: { label: "Screening", className: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" },
+  interview: { label: "Wawancara", className: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300" },
+  offer: { label: "Tawaran", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" },
+  rejected: { label: "Ditolak", className: "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300" },
+  withdrawn: { label: "Ditarik", className: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300" },
 };
 
+const STATUS_FILTER_OPTIONS: Array<{ value: ApplicationStatus | "all"; label: string }> = [
+  { value: "all", label: "Semua Status" },
+  { value: "applied", label: "Dilamar" },
+  { value: "screening", label: "Screening" },
+  { value: "interview", label: "Wawancara" },
+  { value: "offer", label: "Tawaran" },
+  { value: "rejected", label: "Ditolak" },
+  { value: "withdrawn", label: "Ditarik" },
+];
+
 export function CareerDashboard() {
-  const [applications, setApplications] = useState<Application[]>(initialApplications);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newApplication, setNewApplication] = useState<Partial<Application>>({
-    status: 'applied',
-  });
+  const { applications, isLoading, create, updateStatus, remove } = useApplications();
+  const [addOpen, setAddOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "all">("all");
 
-  const stats = {
-    totalApplications: applications.length,
-    interviewsScheduled: applications.filter(a => a.status === 'interview').length,
-    offersReceived: applications.filter(a => a.status === 'offer').length,
-    responseRate: Math.round((applications.filter(a => a.status !== 'applied').length / applications.length) * 100) || 0,
-    weeklyGoal: 10,
-    weeklyProgress: 7,
-  };
+  const stats = useMemo(() => {
+    const total = applications.length;
+    const interview = applications.filter((a) => a.status === "interview").length;
+    const offer = applications.filter((a) => a.status === "offer").length;
+    const responseRate =
+      total === 0
+        ? 0
+        : Math.round(
+            (applications.filter((a) => a.status !== "applied").length / total) * 100
+          );
+    return { total, interview, offer, responseRate };
+  }, [applications]);
 
-  const addApplication = () => {
-    if (!newApplication.company?.trim() || !newApplication.position?.trim()) return;
-    const today = new Date().toISOString().split('T')[0];
-    const application: Application = {
-      id: Date.now().toString(),
-      company: newApplication.company.trim(),
-      position: newApplication.position.trim(),
-      status: (newApplication.status as Application['status']) || 'applied',
-      appliedDate: newApplication.appliedDate || today,
-      lastUpdate: today,
-      notes: newApplication.notes?.trim() || undefined,
-      link: newApplication.link?.trim() || undefined,
-      salary: newApplication.salary?.trim() || undefined,
-    };
-    setApplications([application, ...applications]);
-    setNewApplication({ status: 'applied' });
-    setAddDialogOpen(false);
-    toast.success('Lamaran ditambahkan', {
-      description: `${application.position} @ ${application.company}`,
+  const filteredApps = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return applications.filter((app) => {
+      if (statusFilter !== "all" && app.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        app.company.toLowerCase().includes(q) ||
+        app.position.toLowerCase().includes(q) ||
+        (app.notes ?? "").toLowerCase().includes(q)
+      );
     });
-  };
-
-  const updateStatus = (id: string, status: Application['status']) => {
-    setApplications(prev => prev.map(app => 
-      app.id === id ? { ...app, status, lastUpdate: new Date().toISOString().split('T')[0] } : app
-    ));
-  };
+  }, [applications, searchQuery, statusFilter]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Dashboard Karir</h1>
-          <p className="text-slate-600 mt-2">Pantau progress pencarian kerja Anda</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Lamaran</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Pantau semua lamaran yang sudah Anda kirim.
+          </p>
         </div>
-        <Button 
-          onClick={() => setAddDialogOpen(true)}
+        <Button
+          onClick={() => setAddOpen(true)}
           className="bg-career-600 hover:bg-career-700"
+          aria-label="Tambah lamaran baru"
         >
           <Plus className="w-4 h-4 mr-2" />
           Tambah Lamaran
         </Button>
-      </div>
+      </header>
 
-      {/* Stats Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="border-slate-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Total Lamaran</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.totalApplications}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-career-100 flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-career-600" />
-              </div>
-            </div>
-            <div className="flex items-center gap-1 mt-4 text-sm">
-              <ArrowUpRight className="w-4 h-4 text-green-500" />
-              <span className="text-green-600 font-medium">+3</span>
-              <span className="text-slate-500">minggu ini</span>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stat cards */}
+      <section
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+        aria-label="Ringkasan lamaran"
+      >
+        <StatCard icon={Briefcase} label="Total Lamaran" value={stats.total} tone="sky" />
+        <StatCard icon={MessageSquare} label="Wawancara" value={stats.interview} tone="violet" />
+        <StatCard icon={Target} label="Tawaran" value={stats.offer} tone="emerald" />
+        <StatCard
+          icon={TrendingUp}
+          label="Tingkat Respons"
+          value={`${stats.responseRate}%`}
+          tone="amber"
+        />
+      </section>
 
-        <Card className="border-slate-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Wawancara</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.interviewsScheduled}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
+      {/* Data table */}
+      <Card>
+        <CardHeader className="gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle>Daftar Lamaran</CardTitle>
+              <CardDescription>
+                {filteredApps.length} dari {applications.length} lamaran
+              </CardDescription>
             </div>
-            <div className="flex items-center gap-1 mt-4 text-sm">
-              <ArrowUpRight className="w-4 h-4 text-green-500" />
-              <span className="text-green-600 font-medium">+1</span>
-              <span className="text-slate-500">minggu ini</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Tawaran Diterima</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.offersReceived}</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                <Award className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <div className="flex items-center gap-1 mt-4 text-sm">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
-              <span className="text-green-600 font-medium">Selamat!</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Tingkat Respons</p>
-                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.responseRate}%</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-            <div className="flex items-center gap-1 mt-4 text-sm">
-              <ArrowUpRight className="w-4 h-4 text-green-500" />
-              <span className="text-green-600 font-medium">+5%</span>
-              <span className="text-slate-500">vs minggu lalu</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Weekly Goal */}
-      <Card className="border-slate-200 mb-8">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-career-100 flex items-center justify-center">
-                <Target className="w-5 h-5 text-career-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Target Mingguan</p>
-                <p className="text-sm text-slate-500">Lamar ke {stats.weeklyGoal} pekerjaan minggu ini</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-career-600">{stats.weeklyProgress}/{stats.weeklyGoal}</p>
-              <p className="text-sm text-slate-500">lamaran</p>
+            <div className="flex gap-2">
+              <Input
+                type="search"
+                placeholder="Cari perusahaan, posisi…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-[240px]"
+                aria-label="Cari lamaran"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" aria-label="Filter status">
+                    <Filter className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Filter Status</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup
+                    value={statusFilter}
+                    onValueChange={(v) => setStatusFilter(v as ApplicationStatus | "all")}
+                  >
+                    {STATUS_FILTER_OPTIONS.map((opt) => (
+                      <DropdownMenuRadioItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
-          <Progress value={(stats.weeklyProgress / stats.weeklyGoal) * 100} className="h-3" />
+        </CardHeader>
+        <CardContent className="px-0 sm:px-6">
+          {isLoading ? (
+            <div className="space-y-2 p-6">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : filteredApps.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">
+                {applications.length === 0
+                  ? "Belum ada lamaran. Tambah lamaran pertama Anda!"
+                  : "Tidak ada lamaran yang cocok dengan filter."}
+              </p>
+              {applications.length === 0 && (
+                <Button
+                  onClick={() => setAddOpen(true)}
+                  size="sm"
+                  className="mt-3 bg-career-600 hover:bg-career-700"
+                >
+                  <Plus className="w-4 h-4 mr-1" /> Tambah Lamaran
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Perusahaan</TableHead>
+                    <TableHead>Posisi</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden md:table-cell">Tanggal</TableHead>
+                    <TableHead className="hidden lg:table-cell">Catatan</TableHead>
+                    <TableHead className="w-10">
+                      <span className="sr-only">Aksi</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredApps.map((app) => (
+                    <ApplicationRow
+                      key={app.id}
+                      app={app}
+                      onStatusChange={async (status) => {
+                        try {
+                          await updateStatus(app.id, status);
+                          toast.success(`Status diubah ke ${STATUS_META[status].label}`);
+                        } catch (err) {
+                          toast.error("Gagal mengubah status", {
+                            description: err instanceof Error ? err.message : undefined,
+                          });
+                        }
+                      }}
+                      onDelete={async () => {
+                        try {
+                          await remove(app.id);
+                          toast.success("Lamaran dihapus", {
+                            description: `${app.position} @ ${app.company}`,
+                          });
+                        } catch (err) {
+                          toast.error("Gagal menghapus", {
+                            description: err instanceof Error ? err.message : undefined,
+                          });
+                        }
+                      }}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Charts & Applications */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Charts */}
-        <div className="lg:col-span-2 space-y-6">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="overview">Ringkasan</TabsTrigger>
-              <TabsTrigger value="status">Status</TabsTrigger>
-            </TabsList>
+      <AddApplicationDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onCreate={async (payload) => {
+          try {
+            await create(payload);
+            toast.success("Lamaran ditambahkan", {
+              description: `${payload.position} @ ${payload.company}`,
+            });
+            setAddOpen(false);
+          } catch (err) {
+            toast.error("Gagal menambahkan lamaran", {
+              description: err instanceof Error ? err.message : undefined,
+            });
+          }
+        }}
+      />
+    </div>
+  );
+}
 
-            <TabsContent value="overview">
-              <Card className="border-slate-200">
-                <CardHeader>
-                  <CardTitle className="text-lg">Aktivitas Lamaran</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={applicationData}>
-                        <defs>
-                          <linearGradient id="colorApplied" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorInterviews" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'white', 
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px'
-                          }} 
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="applied" 
-                          stroke="#0ea5e9" 
-                          fillOpacity={1} 
-                          fill="url(#colorApplied)" 
-                          name="Dilamar"
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="interviews" 
-                          stroke="#8b5cf6" 
-                          fillOpacity={1} 
-                          fill="url(#colorInterviews)" 
-                          name="Wawancara"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+type Tone = "sky" | "violet" | "emerald" | "amber";
+const TONE_CLS: Record<Tone, string> = {
+  sky: "text-sky-600 bg-sky-100 dark:bg-sky-950/40 dark:text-sky-300",
+  violet: "text-violet-600 bg-violet-100 dark:bg-violet-950/40 dark:text-violet-300",
+  emerald: "text-emerald-600 bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300",
+  amber: "text-amber-600 bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300",
+};
 
-            <TabsContent value="status">
-              <Card className="border-slate-200">
-                <CardHeader>
-                  <CardTitle className="text-lg">Status Lamaran</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px] flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-4 mt-4">
-                    {statusData.map((item) => (
-                      <div key={item.name} className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="text-sm text-slate-600">{item.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Recent Applications */}
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: typeof Briefcase;
+  label: string;
+  value: number | string;
+  tone: Tone;
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-2 flex-row justify-between items-start space-y-0">
         <div>
-          <Card className="border-slate-200">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Lamaran Terbaru</CardTitle>
-                <Button variant="ghost" size="sm">
-                  <Filter className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {applications.map((app) => {
-                  const status = statusConfig[app.status];
-                  return (
-                    <div 
-                      key={app.id} 
-                      className="p-4 rounded-xl border border-slate-200 hover:border-career-300 hover:bg-career-50/50 transition-all duration-200"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-slate-900 truncate">{app.position}</h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="text-sm text-slate-600">{app.company}</span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge className={cn('text-xs', status.bgColor, status.color)}>
-                              {status.label}
-                            </Badge>
-                            <span className="text-xs text-slate-400">
-                              {app.appliedDate}
-                            </span>
-                          </div>
-                        </div>
-                        <Select 
-                          value={app.status} 
-                          onValueChange={(value) => updateStatus(app.id, value as Application['status'])}
-                        >
-                          <SelectTrigger className="w-8 h-8 p-0 border-0">
-                            <MoreHorizontal className="w-4 h-4 text-slate-400" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="applied">Dilamar</SelectItem>
-                            <SelectItem value="screening">Screening</SelectItem>
-                            <SelectItem value="interview">Wawancara</SelectItem>
-                            <SelectItem value="offer">Tawaran</SelectItem>
-                            <SelectItem value="rejected">Ditolak</SelectItem>
-                            <SelectItem value="withdrawn">Ditarik</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          <CardDescription className="text-xs">{label}</CardDescription>
+          <CardTitle className="text-3xl font-bold mt-1 tabular-nums">{value}</CardTitle>
         </div>
-      </div>
+        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", TONE_CLS[tone])}>
+          <Icon className="w-5 h-5" />
+        </div>
+      </CardHeader>
+      <CardContent className="flex items-center gap-1 text-xs text-muted-foreground">
+        <ArrowUpRight className="w-3 h-3" /> Tetap semangat!
+      </CardContent>
+    </Card>
+  );
+}
 
-      {/* Add Application Dialog */}
-      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Tambah Lamaran Baru</DialogTitle>
-            <DialogDescription>
-              Catat detail lamaran agar mudah ditelusuri saat follow-up.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              addApplication();
-            }}
-            className="space-y-4"
-          >
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="app-company">Nama Perusahaan *</Label>
-                <Input
-                  id="app-company"
-                  placeholder="cth. Tokopedia"
-                  value={newApplication.company || ''}
-                  onChange={(e) => setNewApplication({ ...newApplication, company: e.target.value })}
-                  required
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="app-position">Posisi *</Label>
-                <Input
-                  id="app-position"
-                  placeholder="cth. Software Engineer"
-                  value={newApplication.position || ''}
-                  onChange={(e) => setNewApplication({ ...newApplication, position: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
+interface ApplicationRowProps {
+  app: Application;
+  onStatusChange: (status: ApplicationStatus) => void;
+  onDelete: () => void;
+}
 
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="app-status">Status</Label>
-                <Select
-                  value={newApplication.status}
-                  onValueChange={(value) =>
-                    setNewApplication({ ...newApplication, status: value as Application['status'] })
-                  }
-                >
-                  <SelectTrigger id="app-status">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="applied">Dilamar</SelectItem>
-                    <SelectItem value="screening">Screening</SelectItem>
-                    <SelectItem value="interview">Wawancara</SelectItem>
-                    <SelectItem value="offer">Tawaran</SelectItem>
-                    <SelectItem value="rejected">Ditolak</SelectItem>
-                    <SelectItem value="withdrawn">Ditarik</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="app-date">Tanggal Lamaran</Label>
-                <Input
-                  id="app-date"
-                  type="date"
-                  value={newApplication.appliedDate || new Date().toISOString().split('T')[0]}
-                  onChange={(e) =>
-                    setNewApplication({ ...newApplication, appliedDate: e.target.value })
-                  }
-                />
-              </div>
-            </div>
+function ApplicationRow({ app, onStatusChange, onDelete }: ApplicationRowProps) {
+  const meta = STATUS_META[app.status];
+  return (
+    <TableRow>
+      <TableCell className="font-medium">{app.company}</TableCell>
+      <TableCell>{app.position}</TableCell>
+      <TableCell>
+        <Badge variant="secondary" className={meta.className}>
+          {meta.label}
+        </Badge>
+      </TableCell>
+      <TableCell className="hidden md:table-cell text-muted-foreground text-sm tabular-nums">
+        {app.appliedDate}
+      </TableCell>
+      <TableCell className="hidden lg:table-cell text-muted-foreground text-sm max-w-[240px] truncate">
+        {app.notes || "—"}
+      </TableCell>
+      <TableCell className="text-right">
+        <RowActions app={app} onStatusChange={onStatusChange} onDelete={onDelete} />
+      </TableCell>
+    </TableRow>
+  );
+}
 
+function RowActions({ app, onStatusChange, onDelete }: ApplicationRowProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={`Aksi untuk ${app.company}`}>
+          <MoreHorizontal className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Ubah Status</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={app.status}
+          onValueChange={(v) => onStatusChange(v as ApplicationStatus)}
+        >
+          {(Object.keys(STATUS_META) as ApplicationStatus[]).map((s) => (
+            <DropdownMenuRadioItem key={s} value={s}>
+              {STATUS_META[s].label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        {app.notes && (
+          <DropdownMenuItem disabled>
+            <ExternalLink className="w-4 h-4 mr-2" /> Lihat catatan
+          </DropdownMenuItem>
+        )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={(e) => e.preventDefault()}
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Hapus Lamaran
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Hapus lamaran ini?</AlertDialogTitle>
+              <AlertDialogDescription>
+                <strong>{app.position}</strong> @ {app.company} akan dihapus permanen.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Ya, hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+interface AddApplicationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreate: (payload: {
+    company: string;
+    position: string;
+    location?: string;
+    salary?: string;
+    notes?: string;
+    source?: string;
+  }) => Promise<void>;
+}
+
+function AddApplicationDialog({ open, onOpenChange, onCreate }: AddApplicationDialogProps) {
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
+  const [location, setLocation] = useState("");
+  const [salary, setSalary] = useState("");
+  const [source, setSource] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const reset = () => {
+    setCompany("");
+    setPosition("");
+    setLocation("");
+    setSalary("");
+    setSource("");
+    setNotes("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!company.trim() || !position.trim()) return;
+    setSubmitting(true);
+    try {
+      await onCreate({
+        company: company.trim(),
+        position: position.trim(),
+        location: location.trim() || undefined,
+        salary: salary.trim() || undefined,
+        source: source.trim() || undefined,
+        notes: notes.trim() || undefined,
+      });
+      reset();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) reset();
+        onOpenChange(o);
+      }}
+    >
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tambah Lamaran Baru</DialogTitle>
+          <DialogDescription>
+            Catat detail lamaran agar mudah ditelusuri saat follow-up.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="app-link">Link Lowongan (opsional)</Label>
+              <Label htmlFor="app-company">Nama Perusahaan *</Label>
               <Input
-                id="app-link"
-                type="url"
-                placeholder="https://…"
-                value={newApplication.link || ''}
-                onChange={(e) => setNewApplication({ ...newApplication, link: e.target.value })}
+                id="app-company"
+                placeholder="cth. Tokopedia"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                required
+                autoFocus
               />
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="app-salary">Ekspektasi / Range Gaji (opsional)</Label>
+              <Label htmlFor="app-position">Posisi *</Label>
+              <Input
+                id="app-position"
+                placeholder="cth. Software Engineer"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="app-location">Lokasi</Label>
+              <Input
+                id="app-location"
+                placeholder="cth. Jakarta / Remote"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="app-salary">Ekspektasi Gaji</Label>
               <Input
                 id="app-salary"
                 placeholder="cth. Rp 12–18 juta"
-                value={newApplication.salary || ''}
-                onChange={(e) => setNewApplication({ ...newApplication, salary: e.target.value })}
+                value={salary}
+                onChange={(e) => setSalary(e.target.value)}
               />
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="app-notes">Catatan (opsional)</Label>
-              <Textarea
-                id="app-notes"
-                placeholder="cth. referensi dari Pak Andi, deadline 30 April"
-                value={newApplication.notes || ''}
-                onChange={(e) => setNewApplication({ ...newApplication, notes: e.target.value })}
-                rows={3}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="app-source">Sumber Lowongan</Label>
+            <Select value={source || undefined} onValueChange={setSource}>
+              <SelectTrigger id="app-source">
+                <SelectValue placeholder="Pilih sumber" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Website perusahaan">Website perusahaan</SelectItem>
+                <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                <SelectItem value="JobStreet">JobStreet</SelectItem>
+                <SelectItem value="Glints">Glints</SelectItem>
+                <SelectItem value="Referensi">Referensi teman / mentor</SelectItem>
+                <SelectItem value="Kalibrr">Kalibrr</SelectItem>
+                <SelectItem value="Lainnya">Lainnya</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAddDialogOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button type="submit" className="bg-career-600 hover:bg-career-700">
-                Tambah Lamaran
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="app-notes">Catatan</Label>
+            <Textarea
+              id="app-notes"
+              placeholder="cth. referensi dari Pak Andi, deadline 30 April"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="bg-career-600 hover:bg-career-700"
+            >
+              {submitting ? "Menyimpan…" : "Tambah Lamaran"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

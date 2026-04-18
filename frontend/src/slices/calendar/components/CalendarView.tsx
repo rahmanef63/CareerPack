@@ -25,17 +25,8 @@ import {
 } from "@/shared/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
-
-type AgendaType = "interview" | "deadline" | "followup";
-
-interface AgendaItem {
-  id: string;
-  date: string; // YYYY-MM-DD
-  time: string;
-  title: string;
-  location: string;
-  type: AgendaType;
-}
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { useAgenda, type AgendaItem, type AgendaType } from "../hooks/useAgenda";
 
 const today = new Date();
 function offsetDate(days: number): string {
@@ -43,14 +34,6 @@ function offsetDate(days: number): string {
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
-
-const SEED_AGENDA: AgendaItem[] = [
-  { id: "1", date: offsetDate(1), time: "10:00", title: "Wawancara Tokopedia", location: "Online · Google Meet", type: "interview" },
-  { id: "2", date: offsetDate(3), time: "14:00", title: "Tenggat Lamaran Gojek", location: "Kirim via portal", type: "deadline" },
-  { id: "3", date: offsetDate(5), time: "09:30", title: "Follow-up Shopee", location: "Email rekruter", type: "followup" },
-  { id: "4", date: offsetDate(8), time: "13:00", title: "Wawancara Final Traveloka", location: "Onsite · SCBD", type: "interview" },
-  { id: "5", date: offsetDate(12), time: "16:00", title: "Tenggat Test Bukalapak", location: "Take-home", type: "deadline" },
-];
 
 const TYPE_STYLE: Record<AgendaType, { label: string; cls: string }> = {
   interview: { label: "Wawancara", cls: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300" },
@@ -66,8 +49,8 @@ const TYPE_OPTIONS: ReadonlyArray<{ value: AgendaType; label: string }> = [
 
 export function CalendarView() {
   const [selected, setSelected] = useState<Date | undefined>(today);
-  const [agenda, setAgenda] = useState<AgendaItem[]>(SEED_AGENDA);
   const [addOpen, setAddOpen] = useState(false);
+  const { items: agenda, isLoading, create, remove } = useAgenda();
 
   const datesWithEvents = useMemo(
     () => new Set(agenda.map((a) => a.date)),
@@ -94,18 +77,42 @@ export function CalendarView() {
     [agenda]
   );
 
-  const handleAdd = useCallback((next: AgendaItem) => {
-    setAgenda((prev) => [...prev, next]);
-    setSelected(new Date(next.date));
-    toast.success("Agenda ditambahkan", {
-      description: `${next.title} · ${next.date} ${next.time}`,
-    });
-  }, []);
+  const handleAdd = useCallback(
+    async (input: {
+      title: string;
+      date: string;
+      time: string;
+      location: string;
+      type: AgendaType;
+    }) => {
+      try {
+        await create(input);
+        setSelected(new Date(input.date));
+        toast.success("Agenda ditambahkan", {
+          description: `${input.title} · ${input.date} ${input.time}`,
+        });
+      } catch (err) {
+        toast.error("Gagal menambahkan agenda", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
+    },
+    [create]
+  );
 
-  const handleDelete = useCallback((id: string) => {
-    setAgenda((prev) => prev.filter((a) => a.id !== id));
-    toast.success("Agenda dihapus");
-  }, []);
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await remove(id);
+        toast.success("Agenda dihapus");
+      } catch (err) {
+        toast.error("Gagal menghapus agenda", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      }
+    },
+    [remove]
+  );
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -171,7 +178,12 @@ export function CalendarView() {
               </Button>
             </CardHeader>
             <CardContent>
-              {dayItems.length === 0 ? (
+              {isLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                </div>
+              ) : dayItems.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-6 text-center">
                   Tidak ada agenda di tanggal ini.
                 </p>
@@ -190,7 +202,9 @@ export function CalendarView() {
               <CardTitle className="text-base">Akan Datang</CardTitle>
             </CardHeader>
             <CardContent>
-              {upcoming.length === 0 ? (
+              {isLoading ? (
+                <Skeleton className="h-14 w-full" />
+              ) : upcoming.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
                   Belum ada agenda mendatang.
                 </p>
@@ -273,7 +287,13 @@ interface AddAgendaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultDate: string;
-  onAdd: (item: AgendaItem) => void;
+  onAdd: (input: {
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    type: AgendaType;
+  }) => Promise<void>;
 }
 
 function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDialogProps) {
@@ -291,19 +311,24 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
     setType("interview");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !date) return;
-    onAdd({
-      id: `${Date.now()}`,
-      title: title.trim(),
-      date,
-      time,
-      location: location.trim() || "—",
-      type,
-    });
-    reset();
-    onOpenChange(false);
+    setSubmitting(true);
+    try {
+      await onAdd({
+        title: title.trim(),
+        date,
+        time,
+        location: location.trim() || "—",
+        type,
+      });
+      reset();
+      onOpenChange(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -386,7 +411,7 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Batal
             </Button>
-            <Button type="submit" className="bg-career-600 hover:bg-career-700">
+            <Button type="submit" disabled={submitting} className="bg-career-600 hover:bg-career-700">
               Tambah Agenda
             </Button>
           </DialogFooter>

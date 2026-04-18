@@ -217,6 +217,23 @@ const applicationTables = {
       timestamp: v.number(),
     })),
   }).index("by_user", ["userId"]),
+
+  calendarEvents: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    // YYYY-MM-DD — mudah di-query per hari
+    date: v.string(),
+    // HH:mm
+    time: v.string(),
+    location: v.string(),
+    // "interview" | "deadline" | "followup"
+    type: v.string(),
+    notes: v.optional(v.string()),
+    // Optional link ke jobApplications
+    applicationId: v.optional(v.id("jobApplications")),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_date", ["userId", "date"]),
 };
 
 export default defineSchema({
