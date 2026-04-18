@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AdminDashboard } from "@/features/admin";
-import { useAuth } from "@/features/auth";
+import { AdminDashboard } from "@/slices/admin";
+import { useAuth } from "@/slices/shared/hooks/useAuth";
 
 export default function AdminPage() {
   const router = useRouter();

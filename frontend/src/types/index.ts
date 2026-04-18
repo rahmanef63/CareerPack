@@ -23,13 +23,13 @@ export type {
     SkillCategory,
     ProficiencyLevel,
     ExperienceLevel,
-} from '@/shared/types';
+} from '@/slices/shared/types';
 
 // Auth
 export type {
     AuthUser as User,
     AuthState,
-} from '@/features/auth/types';
+} from '@/slices/shared/types/auth';
 
 // CV
 export type {
@@ -40,41 +40,41 @@ export type {
     Skill,
     Certification,
     Project,
-} from '@/features/cv-generator/types';
+} from '@/slices/cv-generator/types';
 
 // Skill roadmap
 export type {
     RoadmapCategory,
     RoadmapNode,
     RoadmapResource as Resource,
-} from '@/features/skill-roadmap/types';
+} from '@/slices/skill-roadmap/types';
 
 // Document checklist
-export type { ChecklistItem } from '@/features/document-checklist/types';
+export type { ChecklistItem } from '@/slices/document-checklist/types';
 
 // Career dashboard
 export type {
     Application,
     DashboardStats,
-} from '@/features/career-dashboard/types';
+} from '@/slices/career-dashboard/types';
 
 // Mock interview
 export type {
     InterviewQuestion,
     InterviewSession,
-} from '@/features/mock-interview/types';
+} from '@/slices/mock-interview/types';
 
 // Financial calculator
 export type {
     FinancialData,
     CityCostOfLiving,
-} from '@/features/financial-calculator/types';
+} from '@/slices/financial-calculator/types';
 
-// AI chat
+// AI chat (shared contract; ai-chat slice was superseded by ai-agent)
 export type {
     ChatMessage,
     ChatSession,
-} from '@/features/ai-chat/types';
+} from '@/slices/shared/types/chat';
 
 // Admin
-export type { AdminStats } from '@/features/admin/types';
+export type { AdminStats } from '@/slices/admin/types';

@@ -177,9 +177,10 @@ export function generateMockInterviewSessions(count: number): InterviewSession[]
   }));
 }
 
-export function generateMockChatSessions(count: number): ChatSession[] {
+export function generateMockChatSessions(count: number, userId = ''): ChatSession[] {
   return Array.from({ length: count }, (_, i) => ({
     id: generateId(),
+    userId,
     title: `Sesi Chat ${i + 1}`,
     messages: [
       {
@@ -223,7 +224,7 @@ export function generateAllMockData(userCount: number = 10): GeneratedMockData {
     applications[user.id] = generateMockApplications(Math.floor(Math.random() * 5) + 1);
     checklists[user.id] = generateMockChecklist();
     interviewSessions[user.id] = generateMockInterviewSessions(Math.floor(Math.random() * 3));
-    chatSessions[user.id] = generateMockChatSessions(Math.floor(Math.random() * 3));
+    chatSessions[user.id] = generateMockChatSessions(Math.floor(Math.random() * 3), user.id);
   });
 
   return {
