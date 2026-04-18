@@ -37,14 +37,21 @@ export function NavMain({ items, activeId, onAITap, aiActive }: NavMainProps) {
                 tooltip="Asisten AI"
                 isActive={aiActive}
                 onClick={onAITap}
-                aria-label="Buka Asisten AI"
+                aria-label={aiActive ? "Tutup Asisten AI" : "Buka Asisten AI"}
+                aria-pressed={aiActive}
                 className={cn(
-                  "min-w-8 bg-primary text-primary-foreground duration-200 ease-linear",
-                  "hover:bg-primary/90 hover:text-primary-foreground",
-                  "active:bg-primary/90 active:text-primary-foreground",
+                  "min-w-8 duration-200 ease-linear",
+                  // Inactive: gradient AI accent ringan, bukan full primary bg
+                  "bg-gradient-to-r from-sky-500/10 to-indigo-500/10 text-foreground",
+                  "hover:from-sky-500/20 hover:to-indigo-500/20",
+                  // Active: full AI gradient
+                  aiActive &&
+                    "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
                 )}
               >
-                <Sparkles />
+                <Sparkles
+                  className={cn(aiActive ? "" : "text-sky-500")}
+                />
                 <span>Asisten AI</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

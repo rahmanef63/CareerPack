@@ -138,7 +138,7 @@ export function CalendarView() {
           onClick={() => setAddOpen(true)}
           aria-label="Tambah agenda baru"
         >
-          <Plus className="w-4 h-4 mr-1" /> Tambah
+          <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
         </Button>
       </div>
 
@@ -187,7 +187,7 @@ export function CalendarView() {
                 onClick={() => setAddOpen(true)}
                 className="text-xs"
               >
-                <Plus className="w-3 h-3 mr-1" /> Agenda
+                <Plus className="w-3 h-3 mr-1" /> Tambah Agenda
               </Button>
             </CardHeader>
             <CardContent>

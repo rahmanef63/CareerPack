@@ -11,7 +11,6 @@ import {
   Map,
   ListChecks,
   Briefcase,
-  LineChart,
   Wallet,
   Bell,
   Settings as SettingsIcon,
@@ -29,7 +28,6 @@ export type MoreAppId =
   | "roadmap"
   | "checklist"
   | "applications"
-  | "dashboard"
   | "calculator"
   | "notifications"
   | "settings"
@@ -72,11 +70,10 @@ export const PRIMARY_NAV: ReadonlyArray<NavItem<Exclude<PrimaryNavId, "more">>> 
  */
 export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
   { id: "applications", label: "Lamaran", icon: Briefcase, href: "/dashboard/applications", hue: "from-violet-400 to-violet-600" },
-  { id: "roadmap", label: "Roadmap Karir", icon: Map, href: "/dashboard/roadmap", hue: "from-sky-400 to-sky-600" },
+  { id: "interview", label: "Simulasi Wawancara", icon: MessageSquare, href: "/dashboard/interview", hue: "from-pink-400 to-pink-600" },
+  { id: "roadmap", label: "Roadmap Skill", icon: Map, href: "/dashboard/roadmap", hue: "from-sky-400 to-sky-600" },
   { id: "checklist", label: "Ceklis Dokumen", icon: ListChecks, href: "/dashboard/checklist", hue: "from-emerald-400 to-emerald-600" },
-  { id: "dashboard", label: "Ringkasan", icon: LineChart, href: "/dashboard", hue: "from-indigo-400 to-indigo-600" },
-  { id: "calculator", label: "Kalkulator Gaji", icon: Wallet, href: "/dashboard/calculator", hue: "from-amber-400 to-amber-600" },
-  { id: "interview", label: "Persiapan Wawancara", icon: MessageSquare, href: "/dashboard/interview", hue: "from-pink-400 to-pink-600" },
+  { id: "calculator", label: "Kalkulator Keuangan", icon: Wallet, href: "/dashboard/calculator", hue: "from-amber-400 to-amber-600" },
   { id: "matcher", label: "Pencocok Lowongan", icon: Compass, href: "/dashboard/matcher", hue: "from-cyan-400 to-cyan-600", badge: "AI" },
   { id: "networking", label: "Jaringan", icon: Users, href: "/dashboard/networking", hue: "from-rose-400 to-rose-600" },
   { id: "portfolio", label: "Portofolio", icon: Folder, href: "/dashboard/portfolio", hue: "from-orange-400 to-orange-600" },

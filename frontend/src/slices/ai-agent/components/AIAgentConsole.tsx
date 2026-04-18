@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/shared/components/ui/sheet";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
@@ -253,11 +254,18 @@ export function AIAgentConsole({
     send();
   };
 
+  const isMobile = useIsMobile();
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        side="bottom"
-        className="h-[80vh] p-0 rounded-t-3xl flex flex-col bg-card"
+        side={isMobile ? "bottom" : "right"}
+        className={cn(
+          "p-0 flex flex-col bg-card",
+          isMobile
+            ? "h-[85vh] rounded-t-3xl"
+            : "w-full sm:max-w-2xl lg:max-w-3xl",
+        )}
       >
         <SheetHeader className="sr-only">
           <SheetTitle>Asisten AI CareerPack</SheetTitle>

@@ -99,6 +99,7 @@ export function CareerDashboard() {
 
   const stats = useMemo(() => {
     const total = applications.length;
+    const applied = applications.filter((a) => a.status === "applied").length;
     const interview = applications.filter((a) => a.status === "interview").length;
     const offer = applications.filter((a) => a.status === "offer").length;
     const responseRate =
@@ -107,7 +108,7 @@ export function CareerDashboard() {
         : Math.round(
             (applications.filter((a) => a.status !== "applied").length / total) * 100
           );
-    return { total, interview, offer, responseRate };
+    return { total, applied, interview, offer, responseRate };
   }, [applications]);
 
   const filteredApps = useMemo(() => {
@@ -147,14 +148,33 @@ export function CareerDashboard() {
         className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
         aria-label="Ringkasan lamaran"
       >
-        <StatCard icon={Briefcase} label="Total Lamaran" value={stats.total} tone="sky" />
-        <StatCard icon={MessageSquare} label="Wawancara" value={stats.interview} tone="violet" />
-        <StatCard icon={Target} label="Tawaran" value={stats.offer} tone="emerald" />
+        <StatCard
+          icon={Briefcase}
+          label="Total Lamaran"
+          value={stats.total}
+          tone="sky"
+          sub={stats.applied > 0 ? `${stats.applied} masih diproses` : "Mulai melamar"}
+        />
+        <StatCard
+          icon={MessageSquare}
+          label="Wawancara"
+          value={stats.interview}
+          tone="violet"
+          sub={stats.interview > 0 ? "Terus persiapan" : "Belum ada wawancara"}
+        />
+        <StatCard
+          icon={Target}
+          label="Tawaran Diterima"
+          value={stats.offer}
+          tone="emerald"
+          sub={stats.offer > 0 ? "Selamat!" : "Terus semangat"}
+        />
         <StatCard
           icon={TrendingUp}
           label="Tingkat Respons"
           value={`${stats.responseRate}%`}
           tone="amber"
+          sub={stats.responseRate >= 30 ? "Bagus" : "Tingkatkan kualitas CV"}
         />
       </section>
 
@@ -310,11 +330,13 @@ function StatCard({
   label,
   value,
   tone,
+  sub,
 }: {
   icon: typeof Briefcase;
   label: string;
   value: number | string;
   tone: Tone;
+  sub?: string;
 }) {
   return (
     <Card>
@@ -327,9 +349,11 @@ function StatCard({
           <Icon className="w-5 h-5" />
         </div>
       </CardHeader>
-      <CardContent className="flex items-center gap-1 text-xs text-muted-foreground">
-        <ArrowUpRight className="w-3 h-3" /> Tetap semangat!
-      </CardContent>
+      {sub && (
+        <CardContent className="flex items-center gap-1 text-xs text-muted-foreground">
+          <ArrowUpRight className="w-3 h-3" /> {sub}
+        </CardContent>
+      )}
     </Card>
   );
 }

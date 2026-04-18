@@ -80,7 +80,6 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
           items={moreItems}
           activeId={active?.id}
           label="Alat Lainnya"
-          className="mt-auto"
         />
       </SidebarContent>
       <SidebarFooter>

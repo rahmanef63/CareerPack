@@ -94,7 +94,15 @@ export function DashboardHome() {
     return weeks;
   }, [applications]);
 
-  const firstName = (state.user?.name || "").split(" ")[0] || "Anda";
+  // Greeting name: profile fullName > first-name-from-email > "pengguna".
+  // Hindari tampil "Halo, user@domain.com" saat profile belum diisi — useAuth
+  // fallback `name` ke email untuk internal use, tapi UI greeting mesti
+  // manusiawi.
+  const rawName = state.user?.name || "";
+  const looksLikeEmail = rawName.includes("@");
+  const firstName = looksLikeEmail
+    ? rawName.split("@")[0].replace(/[._-]/g, " ").split(" ")[0] || "pengguna"
+    : rawName.split(" ")[0] || "pengguna";
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">

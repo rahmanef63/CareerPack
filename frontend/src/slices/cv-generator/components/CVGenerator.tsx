@@ -342,24 +342,30 @@ export function CVGenerator() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pembuat CV</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {format === 'national'
-              ? 'Format Indonesia · dengan foto, data lengkap'
-              : 'Format Internasional · ATS-friendly, no photo, 1 halaman'}
-          </p>
-        </div>
-        <MagneticTabs<CVFormat>
-          value={format}
-          onChange={setFormat}
-          tabs={[
-            { id: 'national', label: 'Nasional' },
-            { id: 'international', label: 'Internasional' },
-          ]}
-        />
+      <div className="mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pembuat CV</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {format === 'national'
+            ? 'Format Indonesia · dengan foto, data lengkap'
+            : 'Format Internasional · ATS-friendly, no photo, 1 halaman'}
+        </p>
       </div>
+
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium">Format CV</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MagneticTabs<CVFormat>
+            value={format}
+            onChange={setFormat}
+            tabs={[
+              { id: 'national', label: 'Nasional' },
+              { id: 'international', label: 'Internasional' },
+            ]}
+          />
+        </CardContent>
+      </Card>
 
       <div className="mb-6">
         <DocChecklistInline format={format} />
@@ -400,13 +406,23 @@ export function CVGenerator() {
                       <div className="flex-1">
                         <Label htmlFor="cv-photo" className="text-sm">Foto Formal</Label>
                         <p className="text-xs text-muted-foreground mb-2">Wajib untuk format Nasional. Resolusi 4×6.</p>
-                        <Input
+                        <input
                           id="cv-photo"
                           type="file"
                           accept="image/*"
                           onChange={handlePhotoChange}
-                          className="text-sm"
+                          className="sr-only"
                         />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById("cv-photo")?.click()}
+                          className="gap-2"
+                        >
+                          <Camera className="w-4 h-4" />
+                          {photoUrl ? "Ganti Foto" : "Unggah Foto"}
+                        </Button>
                       </div>
                     </div>
                   )}
