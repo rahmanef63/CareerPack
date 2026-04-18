@@ -29,7 +29,7 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@/shared/components/ui/popover";
-import { TypingDots } from "@/shared/components/MicroInteractions";
+import { TypingDots } from "@/shared/components/interactions/MicroInteractions";
 import { cn } from "@/shared/lib/utils";
 import { runAgent, SLASH_COMMANDS } from "../lib/slashCommands";
 import type { AgentAction } from "@/shared/types/agent";
@@ -347,7 +347,7 @@ export function AIAgentConsole({
               >
                 <MessageSquare className="w-4 h-4" />
               </button>
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-500 text-white flex items-center justify-center">
+              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground flex items-center justify-center">
                 <Sparkles className="w-4 h-4" />
               </span>
               <div className="flex-1 min-w-0">
@@ -370,7 +370,7 @@ export function AIAgentConsole({
                 {thinking && (
                   <div className="flex items-center gap-2">
                     <Avatar className="w-7 h-7">
-                      <AvatarFallback className="bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+                      <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground">
                         <Sparkles className="w-3 h-3" />
                       </AvatarFallback>
                     </Avatar>
@@ -400,7 +400,7 @@ export function AIAgentConsole({
                     <Button
                       type="submit"
                       disabled={thinking || !input.trim()}
-                      className="bg-gradient-to-br from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white"
+                      className="bg-gradient-to-br from-brand-from to-brand-to hover:from-brand-from hover:to-brand-to text-brand-foreground"
                       aria-label="Kirim pesan"
                     >
                       <Send className="w-4 h-4" />
@@ -442,7 +442,7 @@ export function AIAgentConsole({
                           value={c.cmd}
                           onSelect={() => setInput(c.cmd + " ")}
                         >
-                          <code className="text-career-700 dark:text-career-300 font-mono text-xs">
+                          <code className="text-brand dark:text-brand font-mono text-xs">
                             {c.cmd}
                           </code>
                           <span className="flex-1">{c.description}</span>
@@ -466,7 +466,7 @@ function MessageBubble({ msg }: { msg: Message }) {
     <div className={cn("flex gap-2", isUser ? "justify-end" : "justify-start")}>
       {!isUser && (
         <Avatar className="w-7 h-7 flex-shrink-0">
-          <AvatarFallback className="bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+          <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground">
             <Sparkles className="w-3 h-3" />
           </AvatarFallback>
         </Avatar>
@@ -476,7 +476,7 @@ function MessageBubble({ msg }: { msg: Message }) {
           className={cn(
             "max-w-[85%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed break-words",
             isUser
-              ? "bg-career-600 text-white rounded-br-md"
+              ? "bg-brand text-brand-foreground rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md"
           )}
         >

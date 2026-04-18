@@ -22,10 +22,10 @@ import type { CVData, Education, Experience, Skill, Certification, Project } fro
 import { useCV } from '../hooks/useCV';
 import { useCVAIActions } from '../hooks/useCVAIActions';
 import { initialCVData, type CVFormat } from '../constants';
-import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/shared/components/MicroInteractions';
+import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/shared/components/interactions/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
 import { CVScoreBadge, computeScore } from './CVScoreBadge';
-import { AnimatedProgress } from '@/shared/components/MicroInteractions';
+import { AnimatedProgress } from '@/shared/components/interactions/MicroInteractions';
 import { InlineAISuggestChip } from './InlineAISuggestChip';
 import { toast } from 'sonner';
 
@@ -300,15 +300,15 @@ export function CVGenerator() {
     }, [isOpen, sectionId]);
 
     return (
-      <Card className="border-slate-200 overflow-hidden">
+      <Card className="border-border overflow-hidden">
         <CardHeader
-          className="bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+          className="bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
           onClick={handleHeaderClick}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-career-100 flex items-center justify-center">
-                <Icon className="w-5 h-5 text-career-600" />
+              <div className="w-10 h-10 rounded-lg bg-brand-muted flex items-center justify-center">
+                <Icon className="w-5 h-5 text-brand" />
               </div>
               <CardTitle className="text-lg">{title}</CardTitle>
             </div>
@@ -321,13 +321,13 @@ export function CVGenerator() {
                     e.stopPropagation();
                     onAdd();
                   }}
-                  className="text-career-600 hover:text-career-700 hover:bg-career-50"
+                  className="text-brand hover:text-brand hover:bg-brand-muted"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   {addLabel}
                 </Button>
               )}
-              {isOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+              {isOpen ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
             </div>
           </div>
         </CardHeader>
@@ -374,7 +374,7 @@ export function CVGenerator() {
       <div className="grid lg:grid-cols-3 gap-8">
         {isCVLoading && (
           <div className="lg:col-span-3 flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-career-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand"></div>
           </div>
         )}
 
@@ -383,11 +383,11 @@ export function CVGenerator() {
           <>
             <div className="lg:col-span-2 space-y-6">
               {/* Personal Information */}
-              <Card className="border-slate-200 overflow-hidden">
-                <CardHeader className="bg-slate-50">
+              <Card className="border-border overflow-hidden">
+                <CardHeader className="bg-muted/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-career-100 flex items-center justify-center">
-                      <User className="w-5 h-5 text-career-600" />
+                    <div className="w-10 h-10 rounded-lg bg-brand-muted flex items-center justify-center">
+                      <User className="w-5 h-5 text-brand" />
                     </div>
                     <CardTitle className="text-lg">Informasi Pribadi</CardTitle>
                   </div>
@@ -530,7 +530,7 @@ export function CVGenerator() {
                               variant="ghost"
                               size="sm"
                               onClick={() => removeExperience(exp.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -597,14 +597,14 @@ export function CVGenerator() {
               >
                 <div className="space-y-6">
                   {cvData.education.map((edu, idx) => (
-                    <div key={edu.id} className="p-4 border border-slate-200 rounded-lg bg-slate-50/50">
+                    <div key={edu.id} className="p-4 border border-border rounded-lg bg-muted/50/50">
                       <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-medium text-slate-900">Pendidikan #{idx + 1}</h4>
+                        <h4 className="font-medium text-foreground">Pendidikan #{idx + 1}</h4>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => removeEducation(edu.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -662,7 +662,7 @@ export function CVGenerator() {
                     </div>
                   ))}
                   {cvData.education.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Belum ada pendidikan. Klik &quot;Tambah Pendidikan&quot; untuk memulai.</p>
+                    <p className="text-center text-muted-foreground py-4">Belum ada pendidikan. Klik &quot;Tambah Pendidikan&quot; untuk memulai.</p>
                   )}
                 </div>
               </SectionCard>
@@ -720,14 +720,14 @@ export function CVGenerator() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeSkill(skill.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   ))}
                   {cvData.skills.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Belum ada skill. Klik &quot;Tambah Skill&quot; untuk memulai.</p>
+                    <p className="text-center text-muted-foreground py-4">Belum ada skill. Klik &quot;Tambah Skill&quot; untuk memulai.</p>
                   )}
                 </div>
               </SectionCard>
@@ -742,14 +742,14 @@ export function CVGenerator() {
               >
                 <div className="space-y-4">
                   {cvData.certifications.map((cert, idx) => (
-                    <div key={cert.id} className="p-4 border border-slate-200 rounded-lg bg-slate-50/50">
+                    <div key={cert.id} className="p-4 border border-border rounded-lg bg-muted/50/50">
                       <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-medium text-slate-900">Sertifikasi #{idx + 1}</h4>
+                        <h4 className="font-medium text-foreground">Sertifikasi #{idx + 1}</h4>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => removeCertification(cert.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -791,7 +791,7 @@ export function CVGenerator() {
                     </div>
                   ))}
                   {cvData.certifications.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Belum ada sertifikasi. Klik &quot;Tambah Sertifikasi&quot; untuk memulai.</p>
+                    <p className="text-center text-muted-foreground py-4">Belum ada sertifikasi. Klik &quot;Tambah Sertifikasi&quot; untuk memulai.</p>
                   )}
                 </div>
               </SectionCard>
@@ -806,14 +806,14 @@ export function CVGenerator() {
               >
                 <div className="space-y-4">
                   {cvData.projects.map((proj, idx) => (
-                    <div key={proj.id} className="p-4 border border-slate-200 rounded-lg bg-slate-50/50">
+                    <div key={proj.id} className="p-4 border border-border rounded-lg bg-muted/50/50">
                       <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-medium text-slate-900">Proyek #{idx + 1}</h4>
+                        <h4 className="font-medium text-foreground">Proyek #{idx + 1}</h4>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => removeProject(proj.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -847,7 +847,7 @@ export function CVGenerator() {
                     </div>
                   ))}
                   {cvData.projects.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Belum ada proyek. Klik &quot;Tambah Proyek&quot; untuk memulai.</p>
+                    <p className="text-center text-muted-foreground py-4">Belum ada proyek. Klik &quot;Tambah Proyek&quot; untuk memulai.</p>
                   )}
                 </div>
               </SectionCard>
@@ -856,10 +856,10 @@ export function CVGenerator() {
             {/* Preview & Actions Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-4">
-                <Card className="border-slate-200">
+                <Card className="border-border">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-career-600" />
+                      <FileText className="w-5 h-5 text-brand" />
                       Pratinjau CV
                     </CardTitle>
                   </CardHeader>
@@ -868,7 +868,7 @@ export function CVGenerator() {
                       <div className="p-4 bg-muted/40 rounded-lg border border-border">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-muted-foreground">Kelengkapan</span>
-                          <span className="text-sm font-semibold text-career-600">
+                          <span className="text-sm font-semibold text-brand">
                             {computeScore(cvData)}%
                           </span>
                         </div>
@@ -877,28 +877,28 @@ export function CVGenerator() {
 
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-600">Info Pribadi</span>
+                          <span className="text-muted-foreground">Info Pribadi</span>
                           {cvData.profile.name ? (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700">Lengkap</Badge>
+                            <Badge variant="secondary" className="bg-success/20 text-success">Lengkap</Badge>
                           ) : (
-                            <Badge variant="secondary" className="bg-amber-100 text-amber-700">Belum Lengkap</Badge>
+                            <Badge variant="secondary" className="bg-warning/20 text-warning">Belum Lengkap</Badge>
                           )}
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-600">Pengalaman</span>
-                          <Badge variant="secondary" className="bg-slate-100">
+                          <span className="text-muted-foreground">Pengalaman</span>
+                          <Badge variant="secondary" className="bg-muted">
                             {cvData.experience.length} item
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-600">Pendidikan</span>
-                          <Badge variant="secondary" className="bg-slate-100">
+                          <span className="text-muted-foreground">Pendidikan</span>
+                          <Badge variant="secondary" className="bg-muted">
                             {cvData.education.length} item
                           </Badge>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-600">Skill</span>
-                          <Badge variant="secondary" className="bg-slate-100">
+                          <span className="text-muted-foreground">Skill</span>
+                          <Badge variant="secondary" className="bg-muted">
                             {cvData.skills.length} item
                           </Badge>
                         </div>
@@ -906,7 +906,7 @@ export function CVGenerator() {
 
                       <div className="pt-4 space-y-2">
                         <Button
-                          className="w-full bg-career-600 hover:bg-career-700"
+                          className="w-full bg-brand hover:bg-brand"
                           onClick={() => setPreviewOpen(true)}
                         >
                           <Eye className="w-4 h-4 mr-2" />
@@ -947,9 +947,9 @@ export function CVGenerator() {
           <DialogHeader>
             <DialogTitle>Pratinjau CV</DialogTitle>
           </DialogHeader>
-          <div ref={cvPreviewRef} className={`bg-white text-slate-900 p-8 border border-slate-200 rounded-lg ${format === 'international' ? 'font-sans text-[14px] leading-snug' : ''}`}>
+          <div ref={cvPreviewRef} className={`bg-card text-foreground p-8 border border-border rounded-lg ${format === 'international' ? 'font-sans text-[14px] leading-snug' : ''}`}>
             <div className="mb-2">
-              <Badge variant="secondary" className="bg-slate-100 text-slate-700">
+              <Badge variant="secondary" className="bg-muted text-foreground">
                 Format: {format === 'national' ? 'Nasional (Indonesia)' : 'Internasional (ATS)'}
               </Badge>
             </div>
@@ -957,28 +957,28 @@ export function CVGenerator() {
             <div className={format === 'international' ? 'space-y-3' : 'space-y-6'}>
               {/* Header */}
               {format === 'international' ? (
-                <div className="border-b border-slate-300 pb-3">
+                <div className="border-b border-border pb-3">
                   <h2 className="text-2xl font-bold uppercase tracking-wide">{cvData.profile.name || 'YOUR NAME'}</h2>
-                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-700">
+                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-foreground">
                     {cvData.profile.email && <span>{cvData.profile.email}</span>}
                     {cvData.profile.phone && <span>· {cvData.profile.phone}</span>}
                     {cvData.profile.location && <span>· {cvData.profile.location}</span>}
                     {cvData.profile.linkedin && <span>· {cvData.profile.linkedin}</span>}
                   </div>
                   {cvData.profile.summary && (
-                    <p className="text-sm mt-2 text-slate-700">{cvData.profile.summary}</p>
+                    <p className="text-sm mt-2 text-foreground">{cvData.profile.summary}</p>
                   )}
                 </div>
               ) : (
-                <div className="flex items-start gap-6 border-b border-slate-200 pb-6">
+                <div className="flex items-start gap-6 border-b border-border pb-6">
                   {photoUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photoUrl} alt="Foto" className="w-24 h-32 object-cover rounded border border-slate-300" />
+                    <img src={photoUrl} alt="Foto" className="w-24 h-32 object-cover rounded border border-border" />
                   )}
                   <div className="flex-1">
-                    <h2 className="text-3xl font-bold text-slate-900">{cvData.profile.name || 'Nama Anda'}</h2>
-                    <p className="text-slate-600 mt-2">{cvData.profile.summary || 'Ringkasan Profesional'}</p>
-                    <div className="flex flex-wrap gap-4 mt-3 text-sm text-slate-500">
+                    <h2 className="text-3xl font-bold text-foreground">{cvData.profile.name || 'Nama Anda'}</h2>
+                    <p className="text-muted-foreground mt-2">{cvData.profile.summary || 'Ringkasan Profesional'}</p>
+                    <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
                       {cvData.profile.email && <span>{cvData.profile.email}</span>}
                       {cvData.profile.phone && <span>{cvData.profile.phone}</span>}
                       {cvData.profile.location && <span>{cvData.profile.location}</span>}
@@ -991,20 +991,20 @@ export function CVGenerator() {
               {/* Experience */}
               {cvData.experience.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Pengalaman Kerja</h3>
+                  <h3 className="text-xl font-bold text-foreground border-b border-border pb-2 mb-4">Pengalaman Kerja</h3>
                   <div className="space-y-4">
                     {cvData.experience.map((exp) => (
                       <div key={exp.id}>
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-semibold text-slate-900">{exp.position}</h4>
-                            <p className="text-slate-600">{exp.company}</p>
+                            <h4 className="font-semibold text-foreground">{exp.position}</h4>
+                            <p className="text-muted-foreground">{exp.company}</p>
                           </div>
-                          <span className="text-sm text-slate-500">
+                          <span className="text-sm text-muted-foreground">
                             {exp.startDate} - {exp.endDate || 'Sekarang'}
                           </span>
                         </div>
-                        <p className="text-slate-600 mt-2 text-sm">{exp.description}</p>
+                        <p className="text-muted-foreground mt-2 text-sm">{exp.description}</p>
                       </div>
                     ))}
                   </div>
@@ -1014,20 +1014,20 @@ export function CVGenerator() {
               {/* Education */}
               {cvData.education.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Pendidikan</h3>
+                  <h3 className="text-xl font-bold text-foreground border-b border-border pb-2 mb-4">Pendidikan</h3>
                   <div className="space-y-4">
                     {cvData.education.map((edu) => (
                       <div key={edu.id}>
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-semibold text-slate-900">{edu.degree} - {edu.fieldOfStudy}</h4>
-                            <p className="text-slate-600">{edu.institution}</p>
+                            <h4 className="font-semibold text-foreground">{edu.degree} - {edu.fieldOfStudy}</h4>
+                            <p className="text-muted-foreground">{edu.institution}</p>
                           </div>
-                          <span className="text-sm text-slate-500">
+                          <span className="text-sm text-muted-foreground">
                             {edu.startDate} - {edu.endDate}
                           </span>
                         </div>
-                        {edu.gpa && <p className="text-slate-600 mt-1 text-sm">IPK: {edu.gpa}</p>}
+                        {edu.gpa && <p className="text-muted-foreground mt-1 text-sm">IPK: {edu.gpa}</p>}
                       </div>
                     ))}
                   </div>
@@ -1037,10 +1037,10 @@ export function CVGenerator() {
               {/* Skills */}
               {cvData.skills.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Skill</h3>
+                  <h3 className="text-xl font-bold text-foreground border-b border-border pb-2 mb-4">Skill</h3>
                   <div className="flex flex-wrap gap-2">
                     {cvData.skills.map((skill) => (
-                      <Badge key={skill.id} variant="secondary" className="bg-slate-100">
+                      <Badge key={skill.id} variant="secondary" className="bg-muted">
                         {skill.name}
                       </Badge>
                     ))}
@@ -1051,12 +1051,12 @@ export function CVGenerator() {
               {/* Certifications */}
               {cvData.certifications.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Sertifikasi</h3>
+                  <h3 className="text-xl font-bold text-foreground border-b border-border pb-2 mb-4">Sertifikasi</h3>
                   <div className="space-y-2">
                     {cvData.certifications.map((cert) => (
                       <div key={cert.id} className="flex justify-between">
                         <span className="font-medium">{cert.name}</span>
-                        <span className="text-slate-500 text-sm">{cert.issuer} • {cert.date}</span>
+                        <span className="text-muted-foreground text-sm">{cert.issuer} • {cert.date}</span>
                       </div>
                     ))}
                   </div>
@@ -1066,13 +1066,13 @@ export function CVGenerator() {
               {/* Projects */}
               {cvData.projects.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-4">Proyek</h3>
+                  <h3 className="text-xl font-bold text-foreground border-b border-border pb-2 mb-4">Proyek</h3>
                   <div className="space-y-4">
                     {cvData.projects.map((proj) => (
                       <div key={proj.id}>
-                        <h4 className="font-semibold text-slate-900">{proj.name}</h4>
-                        <p className="text-slate-600 text-sm mt-1">{proj.description}</p>
-                        {proj.link && <p className="text-career-600 text-sm mt-1">{proj.link}</p>}
+                        <h4 className="font-semibold text-foreground">{proj.name}</h4>
+                        <p className="text-muted-foreground text-sm mt-1">{proj.description}</p>
+                        {proj.link && <p className="text-brand text-sm mt-1">{proj.link}</p>}
                       </div>
                     ))}
                   </div>

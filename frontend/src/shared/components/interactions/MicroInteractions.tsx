@@ -56,7 +56,7 @@ export function SuccessCheck({ size = 28, className }: { size?: number; classNam
       viewBox="0 0 32 32"
       width={size}
       height={size}
-      className={cn("text-green-500", className)}
+      className={cn("text-success", className)}
       fill="none"
       stroke="currentColor"
       strokeWidth={3}
@@ -186,7 +186,7 @@ export function LongPressMenu({
                 }}
                 className={cn(
                   "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left",
-                  it.danger && "text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                  it.danger && "text-destructive hover:bg-destructive/10"
                 )}
               >
                 {it.icon}
@@ -231,13 +231,13 @@ export function MagneticTabs<T extends string>({
     <div
       ref={containerRef}
       className={cn(
-        "relative inline-flex bg-slate-100 dark:bg-slate-800 rounded-full p-1",
+        "relative inline-flex bg-muted rounded-full p-1",
         className
       )}
     >
       <span
         aria-hidden
-        className="absolute top-1 bottom-1 rounded-full bg-white dark:bg-slate-700 shadow-sm transition-all duration-300 ease-out"
+        className="absolute top-1 bottom-1 rounded-full bg-background shadow-sm transition-all duration-300 ease-out"
         style={{ left: indicator.left, width: indicator.width }}
       />
       {tabs.map((t) => (
@@ -247,7 +247,7 @@ export function MagneticTabs<T extends string>({
           onClick={() => onChange(t.id)}
           className={cn(
             "relative z-10 px-4 py-1.5 text-sm font-medium rounded-full flex items-center gap-1.5 transition-colors",
-            value === t.id ? "text-career-700 dark:text-career-200" : "text-slate-600 dark:text-slate-300"
+            value === t.id ? "text-brand" : "text-muted-foreground"
           )}
         >
           {t.icon}
@@ -300,7 +300,7 @@ export function SwipeToDelete({
 
   return (
     <div className={cn("relative overflow-hidden rounded-xl", className)}>
-      <div className="absolute inset-y-0 right-0 flex items-center justify-end pr-4 bg-red-500 text-white text-sm font-semibold">
+      <div className="absolute inset-y-0 right-0 flex items-center justify-end pr-4 bg-destructive text-destructive-foreground text-sm font-semibold">
         Hapus
       </div>
       <div
@@ -363,12 +363,12 @@ export function PullToRefresh({
     <div onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       <div
         aria-hidden
-        className="flex justify-center items-end overflow-hidden text-career-600"
+        className="flex justify-center items-end overflow-hidden text-brand"
         style={{ height: pull, transition: refreshing ? "none" : "height 200ms ease-out" }}
       >
         <div
           className={cn(
-            "w-6 h-6 mb-2 rounded-full border-2 border-career-500 border-t-transparent",
+            "w-6 h-6 mb-2 rounded-full border-2 border-brand border-t-transparent",
             refreshing && "animate-spin"
           )}
           style={{ transform: refreshing ? undefined : `rotate(${pull * 3}deg)` }}
@@ -389,7 +389,16 @@ export function ConfettiBurst({ trigger }: { trigger: number }) {
     if (!trigger) return;
     const host = ref.current;
     if (!host) return;
-    const colors = ["#0ea5e9", "#6366f1", "#ec4899", "#f59e0b", "#10b981"];
+    // Read palette from CSS tokens so confetti follows theme.
+    const root = getComputedStyle(document.documentElement);
+    const hsl = (name: string) => `hsl(${root.getPropertyValue(name).trim()})`;
+    const colors = [
+      hsl("--brand-from"),
+      hsl("--brand-to"),
+      hsl("--warning"),
+      hsl("--success"),
+      hsl("--info"),
+    ];
     for (let i = 0; i < 36; i++) {
       const piece = document.createElement("span");
       const angle = (Math.PI * 2 * i) / 36;
@@ -432,10 +441,10 @@ export function AnimatedProgress({
     return () => window.clearTimeout(id);
   }, [value]);
   return (
-    <div className={cn("h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden", className)}>
+    <div className={cn("h-2 bg-muted rounded-full overflow-hidden", className)}>
       <div
         className={cn(
-          "h-full bg-gradient-to-r from-career-500 to-career-600 rounded-full",
+          "h-full bg-gradient-to-r from-brand-from to-brand-to rounded-full",
           barClassName
         )}
         style={{ width: `${shown}%`, transition: "width 800ms cubic-bezier(0.22,1,0.36,1)" }}
@@ -451,9 +460,9 @@ export function TypingDots({ className }: { className?: string }) {
   const dot: CSSProperties = { animation: "typing-dot 1.2s infinite" };
   return (
     <div className={cn("flex items-center gap-1", className)}>
-      <span className="w-1.5 h-1.5 bg-career-600 rounded-full" style={{ ...dot, animationDelay: "0ms" }} />
-      <span className="w-1.5 h-1.5 bg-career-600 rounded-full" style={{ ...dot, animationDelay: "150ms" }} />
-      <span className="w-1.5 h-1.5 bg-career-600 rounded-full" style={{ ...dot, animationDelay: "300ms" }} />
+      <span className="w-1.5 h-1.5 bg-brand rounded-full" style={{ ...dot, animationDelay: "0ms" }} />
+      <span className="w-1.5 h-1.5 bg-brand rounded-full" style={{ ...dot, animationDelay: "150ms" }} />
+      <span className="w-1.5 h-1.5 bg-brand rounded-full" style={{ ...dot, animationDelay: "300ms" }} />
     </div>
   );
 }

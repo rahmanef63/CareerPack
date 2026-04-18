@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Separator } from "@/shared/components/ui/separator";
-import { Logo } from "./Logo";
+import { Logo } from "../brand/Logo";
 
 export function MarketingFooter() {
   return (

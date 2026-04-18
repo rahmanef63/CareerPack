@@ -1,12 +1,12 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { ThemeProvider } from "@/shared/components/theme-provider"
+import { ThemeProvider } from "@/shared/components/theme/theme-provider"
 import { ConvexClientProvider } from "@/shared/providers/ConvexClientProvider"
 import { AuthProvider } from "@/shared/hooks/useAuth"
 import { AIConfigProvider } from "@/shared/hooks/useAIConfig"
 import { UIPrefsProvider } from "@/shared/hooks/useUIPrefs"
-import { InstallChip } from "@/shared/components/InstallChip"
+import { InstallChip } from "@/shared/components/pwa/InstallChip"
 import { Toaster } from "@/shared/components/ui/sonner"
 
 export function Providers({ children }: { children: ReactNode }) {

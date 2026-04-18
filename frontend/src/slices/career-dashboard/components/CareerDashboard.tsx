@@ -73,12 +73,12 @@ const STATUS_META: Record<
   ApplicationStatus,
   { label: string; className: string }
 > = {
-  applied: { label: "Dilamar", className: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300" },
-  screening: { label: "Screening", className: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" },
-  interview: { label: "Wawancara", className: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300" },
-  offer: { label: "Tawaran", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" },
-  rejected: { label: "Ditolak", className: "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300" },
-  withdrawn: { label: "Ditarik", className: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300" },
+  applied: { label: "Dilamar", className: "bg-info/20 text-info dark:bg-info/20 dark:text-brand/80" },
+  screening: { label: "Screening", className: "bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning/80" },
+  interview: { label: "Wawancara", className: "bg-accent text-brand dark:bg-accent dark:text-brand/80" },
+  offer: { label: "Tawaran", className: "bg-success/20 text-success dark:bg-success/20 dark:text-success/80" },
+  rejected: { label: "Ditolak", className: "bg-destructive/20 text-destructive dark:bg-destructive/20 dark:text-destructive/80" },
+  withdrawn: { label: "Ditarik", className: "bg-muted text-foreground dark:bg-muted dark:text-foreground" },
 };
 
 const STATUS_FILTER_OPTIONS: Array<{ value: ApplicationStatus | "all"; label: string }> = [
@@ -135,7 +135,7 @@ export function CareerDashboard() {
         </div>
         <Button
           onClick={() => setAddOpen(true)}
-          className="bg-career-600 hover:bg-career-700"
+          className="bg-brand hover:bg-brand"
           aria-label="Tambah lamaran baru"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -239,7 +239,7 @@ export function CareerDashboard() {
                 <Button
                   onClick={() => setAddOpen(true)}
                   size="sm"
-                  className="mt-3 bg-career-600 hover:bg-career-700"
+                  className="mt-3 bg-brand hover:bg-brand"
                 >
                   <Plus className="w-4 h-4 mr-1" /> Tambah Lamaran
                 </Button>
@@ -319,10 +319,10 @@ export function CareerDashboard() {
 
 type Tone = "sky" | "violet" | "emerald" | "amber";
 const TONE_CLS: Record<Tone, string> = {
-  sky: "text-sky-600 bg-sky-100 dark:bg-sky-950/40 dark:text-sky-300",
-  violet: "text-violet-600 bg-violet-100 dark:bg-violet-950/40 dark:text-violet-300",
-  emerald: "text-emerald-600 bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300",
-  amber: "text-amber-600 bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300",
+  sky: "text-info bg-info/20 dark:bg-info/20 dark:text-brand/80",
+  violet: "text-brand bg-accent dark:bg-accent dark:text-brand/80",
+  emerald: "text-success bg-success/20 dark:bg-success/20 dark:text-success/80",
+  amber: "text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/80",
 };
 
 function StatCard({
@@ -593,7 +593,7 @@ function AddApplicationDialog({ open, onOpenChange, onCreate }: AddApplicationDi
             <Button
               type="submit"
               disabled={submitting}
-              className="bg-career-600 hover:bg-career-700"
+              className="bg-brand hover:bg-brand"
             >
               {submitting ? "Menyimpan…" : "Tambah Lamaran"}
             </Button>

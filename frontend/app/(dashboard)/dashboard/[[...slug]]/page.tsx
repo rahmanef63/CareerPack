@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { resolveDashboardView } from "@/shared/lib/dashboardRoutes";
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
 
 // Prerender selayaknya static per slug — Next.js akan generate di build time.
 export function generateStaticParams() {

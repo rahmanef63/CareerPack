@@ -87,7 +87,7 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
           className="gap-1.5 hidden sm:inline-flex"
           aria-label="Buka Asisten AI"
         >
-          <Sparkles className="w-4 h-4 text-career-600" />
+          <Sparkles className="w-4 h-4 text-brand" />
           <span>Asisten AI</span>
         </Button>
         <Button
@@ -98,7 +98,7 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
           className="sm:hidden"
           aria-label="Buka Asisten AI"
         >
-          <Sparkles className="w-4 h-4 text-career-600" />
+          <Sparkles className="w-4 h-4 text-brand" />
         </Button>
         <UserMenu
           initials={initials}
@@ -174,7 +174,7 @@ function UserMenu({
         <Button variant="ghost" size="icon" aria-label="Menu akun" className="rounded-full">
           <Avatar className="w-8 h-8">
             <AvatarImage src={avatar} alt={name ?? "Pengguna"} />
-            <AvatarFallback className="bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-xs font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground text-xs font-bold">
               {initials}
             </AvatarFallback>
           </Avatar>

@@ -93,10 +93,10 @@ export function DocumentChecklist() {
         className={cn(
           'group flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer',
           item.completed 
-            ? 'border-green-500 bg-green-50/50' 
+            ? 'border-success/30 bg-success/10' 
             : item.required 
-              ? 'border-slate-200 bg-white hover:border-career-300'
-              : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
+              ? 'border-border bg-card hover:border-brand'
+              : 'border-border bg-muted/50/50 hover:border-border'
         )}
         onClick={() => setSelectedItem(item)}
       >
@@ -108,8 +108,8 @@ export function DocumentChecklist() {
           className={cn(
             'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200',
             item.completed 
-              ? 'bg-green-500 text-white' 
-              : 'bg-slate-100 text-slate-400 hover:bg-career-100 hover:text-career-600'
+              ? 'bg-success text-brand-foreground' 
+              : 'bg-muted text-muted-foreground hover:bg-brand-muted hover:text-brand'
           )}
         >
           {item.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
@@ -120,29 +120,29 @@ export function DocumentChecklist() {
             <div>
               <h4 className={cn(
                 'font-medium',
-                item.completed ? 'text-green-700 line-through' : 'text-slate-900'
+                item.completed ? 'text-success line-through' : 'text-foreground'
               )}>
                 {item.title}
               </h4>
-              <p className="text-sm text-slate-500 mt-0.5">{item.description}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>
             </div>
             <div className="flex items-center gap-2">
               {item.required && (
-                <Badge variant="secondary" className="bg-red-100 text-red-700 text-xs">
+                <Badge variant="secondary" className="bg-destructive/10 text-destructive text-xs">
                   Wajib
                 </Badge>
               )}
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
 
           <div className="flex items-center gap-3 mt-3">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Icon className="w-3.5 h-3.5" />
               {indonesianCategoryLabels[item.subcategory]}
             </div>
             {item.dueDate && (
-              <div className="flex items-center gap-1.5 text-xs text-amber-600">
+              <div className="flex items-center gap-1.5 text-xs text-warning">
                 <Calendar className="w-3.5 h-3.5" />
                 Batas: {item.dueDate}
               </div>
@@ -156,8 +156,8 @@ export function DocumentChecklist() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Ceklis Dokumen</h1>
-        <p className="text-slate-600 mt-2">Kelola semua dokumen yang diperlukan untuk melamar pekerjaan</p>
+        <h1 className="text-3xl font-bold text-foreground">Ceklis Dokumen</h1>
+        <p className="text-muted-foreground mt-2">Kelola semua dokumen yang diperlukan untuk melamar pekerjaan</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -175,36 +175,36 @@ export function DocumentChecklist() {
         <TabsContent value="local" className="space-y-6">
           {/* Progress Overview */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-career-600">{localProgress.percentage}%</div>
-                  <p className="text-sm text-slate-500 mt-1">Progress Keseluruhan</p>
+                  <div className="text-3xl font-bold text-brand">{localProgress.percentage}%</div>
+                  <p className="text-sm text-muted-foreground mt-1">Progress Keseluruhan</p>
                   <Progress value={localProgress.percentage} className="mt-3 h-2" />
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">{localProgress.completed}</div>
-                  <p className="text-sm text-slate-500 mt-1">Selesai</p>
+                  <div className="text-3xl font-bold text-success">{localProgress.completed}</div>
+                  <p className="text-sm text-muted-foreground mt-1">Selesai</p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-amber-600">{localProgress.total - localProgress.completed}</div>
-                  <p className="text-sm text-slate-500 mt-1">Belum Selesai</p>
+                  <div className="text-3xl font-bold text-warning">{localProgress.total - localProgress.completed}</div>
+                  <p className="text-sm text-muted-foreground mt-1">Belum Selesai</p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600">{localProgress.required - localProgress.requiredCompleted}</div>
-                  <p className="text-sm text-slate-500 mt-1">Wajib Tersisa</p>
+                  <div className="text-3xl font-bold text-destructive">{localProgress.required - localProgress.requiredCompleted}</div>
+                  <p className="text-sm text-muted-foreground mt-1">Wajib Tersisa</p>
                 </div>
               </CardContent>
             </Card>
@@ -214,7 +214,7 @@ export function DocumentChecklist() {
           <div className="grid lg:grid-cols-4 gap-6">
             {/* Sidebar Filters */}
             <div className="space-y-4">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Filter className="w-5 h-5" />
@@ -228,8 +228,8 @@ export function DocumentChecklist() {
                       className={cn(
                         'w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200',
                         filterCategory === null 
-                          ? 'bg-career-100 text-career-700' 
-                          : 'hover:bg-slate-50 text-slate-700'
+                          ? 'bg-brand-muted text-brand' 
+                          : 'hover:bg-muted/50 text-foreground'
                       )}
                     >
                       <FileCheck className="w-5 h-5" />
@@ -245,15 +245,15 @@ export function DocumentChecklist() {
                           className={cn(
                             'w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200',
                             filterCategory === subcat 
-                              ? 'bg-career-100 text-career-700' 
-                              : 'hover:bg-slate-50 text-slate-700'
+                              ? 'bg-brand-muted text-brand' 
+                              : 'hover:bg-muted/50 text-foreground'
                           )}
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="w-5 h-5" />
                             {indonesianCategoryLabels[subcat]}
                           </div>
-                          <Badge variant="secondary" className="bg-slate-100">{count}</Badge>
+                          <Badge variant="secondary" className="bg-muted">{count}</Badge>
                         </button>
                       );
                     })}
@@ -261,15 +261,15 @@ export function DocumentChecklist() {
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200 bg-gradient-to-br from-career-50 to-career-100">
+              <Card className="border-border bg-gradient-to-br from-brand-muted to-brand-muted">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-career-500 flex items-center justify-center flex-shrink-0">
-                      <Bell className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
+                      <Bell className="w-5 h-5 text-brand-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-career-900">Pengingat</h4>
-                      <p className="text-sm text-career-700 mt-1">
+                      <h4 className="font-semibold text-brand">Pengingat</h4>
+                      <p className="text-sm text-brand mt-1">
                         SKCK perlu diperpanjang setiap 6 bulan. Atur pengingat!
                       </p>
                     </div>
@@ -280,13 +280,13 @@ export function DocumentChecklist() {
 
             {/* Document List */}
             <div className="lg:col-span-3">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>
                       {filterCategory ? indonesianCategoryLabels[filterCategory] : 'Semua Dokumen'}
                     </CardTitle>
-                    <Badge variant="secondary" className="bg-slate-100">
+                    <Badge variant="secondary" className="bg-muted">
                       {getFilteredItems('local').length} item
                     </Badge>
                   </div>
@@ -306,51 +306,51 @@ export function DocumentChecklist() {
         <TabsContent value="international" className="space-y-6">
           {/* Progress Overview */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-career-600">{internationalProgress.percentage}%</div>
-                  <p className="text-sm text-slate-500 mt-1">Progress Keseluruhan</p>
+                  <div className="text-3xl font-bold text-brand">{internationalProgress.percentage}%</div>
+                  <p className="text-sm text-muted-foreground mt-1">Progress Keseluruhan</p>
                   <Progress value={internationalProgress.percentage} className="mt-3 h-2" />
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">{internationalProgress.completed}</div>
-                  <p className="text-sm text-slate-500 mt-1">Selesai</p>
+                  <div className="text-3xl font-bold text-success">{internationalProgress.completed}</div>
+                  <p className="text-sm text-muted-foreground mt-1">Selesai</p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-amber-600">{internationalProgress.total - internationalProgress.completed}</div>
-                  <p className="text-sm text-slate-500 mt-1">Belum Selesai</p>
+                  <div className="text-3xl font-bold text-warning">{internationalProgress.total - internationalProgress.completed}</div>
+                  <p className="text-sm text-muted-foreground mt-1">Belum Selesai</p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600">{internationalProgress.required - internationalProgress.requiredCompleted}</div>
-                  <p className="text-sm text-slate-500 mt-1">Wajib Tersisa</p>
+                  <div className="text-3xl font-bold text-destructive">{internationalProgress.required - internationalProgress.requiredCompleted}</div>
+                  <p className="text-sm text-muted-foreground mt-1">Wajib Tersisa</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Important Notice */}
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-warning/30 bg-warning/10">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-xl bg-warning flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-6 h-6 text-brand-foreground" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-amber-900">Penting untuk Kerja Luar Negeri</h4>
-                  <p className="text-amber-800 mt-1">
+                  <h4 className="font-semibold text-warning">Penting untuk Kerja Luar Negeri</h4>
+                  <p className="text-warning mt-1">
                     Persyaratan bervariasi sesuai negara. Selalu periksa persyaratan spesifik negara tujuan Anda. 
                     Beberapa dokumen mungkin memerlukan apostille atau legalisasi.
                   </p>
@@ -363,7 +363,7 @@ export function DocumentChecklist() {
           <div className="grid lg:grid-cols-4 gap-6">
             {/* Sidebar Filters */}
             <div className="space-y-4">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Filter className="w-5 h-5" />
@@ -377,8 +377,8 @@ export function DocumentChecklist() {
                       className={cn(
                         'w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200',
                         filterCategory === null 
-                          ? 'bg-career-100 text-career-700' 
-                          : 'hover:bg-slate-50 text-slate-700'
+                          ? 'bg-brand-muted text-brand' 
+                          : 'hover:bg-muted/50 text-foreground'
                       )}
                     >
                       <FileCheck className="w-5 h-5" />
@@ -394,15 +394,15 @@ export function DocumentChecklist() {
                           className={cn(
                             'w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200',
                             filterCategory === subcat 
-                              ? 'bg-career-100 text-career-700' 
-                              : 'hover:bg-slate-50 text-slate-700'
+                              ? 'bg-brand-muted text-brand' 
+                              : 'hover:bg-muted/50 text-foreground'
                           )}
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="w-5 h-5" />
                             {indonesianCategoryLabels[subcat]}
                           </div>
-                          <Badge variant="secondary" className="bg-slate-100">{count}</Badge>
+                          <Badge variant="secondary" className="bg-muted">{count}</Badge>
                         </button>
                       );
                     })}
@@ -410,19 +410,19 @@ export function DocumentChecklist() {
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200 bg-gradient-to-br from-blue-50 to-blue-100">
+              <Card className="border-border bg-gradient-to-br from-info/20 to-info/20">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
-                      <Plane className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-lg bg-info flex items-center justify-center flex-shrink-0">
+                      <Plane className="w-5 h-5 text-brand-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-900">Destinasi Populer</h4>
+                      <h4 className="font-semibold text-info">Destinasi Populer</h4>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-white text-blue-700">Singapura</Badge>
-                        <Badge variant="secondary" className="bg-white text-blue-700">Australia</Badge>
-                        <Badge variant="secondary" className="bg-white text-blue-700">Jepang</Badge>
-                        <Badge variant="secondary" className="bg-white text-blue-700">UAE</Badge>
+                        <Badge variant="secondary" className="bg-card text-info">Singapura</Badge>
+                        <Badge variant="secondary" className="bg-card text-info">Australia</Badge>
+                        <Badge variant="secondary" className="bg-card text-info">Jepang</Badge>
+                        <Badge variant="secondary" className="bg-card text-info">UAE</Badge>
                       </div>
                     </div>
                   </div>
@@ -432,13 +432,13 @@ export function DocumentChecklist() {
 
             {/* Document List */}
             <div className="lg:col-span-3">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>
                       {filterCategory ? indonesianCategoryLabels[filterCategory] : 'Semua Dokumen'}
                     </CardTitle>
-                    <Badge variant="secondary" className="bg-slate-100">
+                    <Badge variant="secondary" className="bg-muted">
                       {getFilteredItems('international').length} item
                     </Badge>
                   </div>
@@ -465,28 +465,28 @@ export function DocumentChecklist() {
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     'w-12 h-12 rounded-xl flex items-center justify-center',
-                    selectedItem.completed ? 'bg-green-500' : 'bg-career-500'
+                    selectedItem.completed ? 'bg-success' : 'bg-brand'
                   )}>
                     {selectedItem.completed ? (
-                      <CheckCircle2 className="w-6 h-6 text-white" />
+                      <CheckCircle2 className="w-6 h-6 text-brand-foreground" />
                     ) : (
-                      <FileText className="w-6 h-6 text-white" />
+                      <FileText className="w-6 h-6 text-brand-foreground" />
                     )}
                   </div>
                   <div>
                     <DialogTitle className="text-xl">{selectedItem.title}</DialogTitle>
-                    <p className="text-sm text-slate-500">{selectedItem.description}</p>
+                    <p className="text-sm text-muted-foreground">{selectedItem.description}</p>
                   </div>
                 </div>
               </DialogHeader>
 
               <div className="space-y-6">
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="bg-slate-100">
+                  <Badge variant="secondary" className="bg-muted">
                     {indonesianCategoryLabels[selectedItem.subcategory]}
                   </Badge>
                   {selectedItem.required && (
-                    <Badge variant="secondary" className="bg-red-100 text-red-700">
+                    <Badge variant="secondary" className="bg-destructive/10 text-destructive">
                       Wajib
                     </Badge>
                   )}
@@ -517,8 +517,8 @@ export function DocumentChecklist() {
                     className={cn(
                       'flex-1',
                       selectedItem.completed
-                        ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                        : 'bg-green-600 hover:bg-green-700'
+                        ? 'bg-muted text-foreground hover:bg-muted'
+                        : 'bg-success hover:bg-success'
                     )}
                     onClick={() => {
                       toggleItem(selectedItem.id);

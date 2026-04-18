@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { BottomNav } from "@/shared/components/BottomNav";
-import { MoreDrawer } from "@/shared/components/MoreDrawer";
+import { BottomNav } from "@/shared/components/layout/BottomNav";
+import { MoreDrawer } from "@/shared/components/layout/MoreDrawer";
 
 interface MobileContainerProps {
   onAITap: () => void;

@@ -153,7 +153,7 @@ export function AISettingsPanel() {
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <header>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-career-600" /> Setelan AI
+          <Sparkles className="w-6 h-6 text-brand" /> Setelan AI
         </h1>
         <p className="text-sm text-muted-foreground">
           Pakai model AI sendiri (OpenRouter, OpenAI, Gemini, Groq, Grok, GLM, DeepSeek, Moonshot, Mistral, atau endpoint kustom OpenAI-compat). Kalau kosong, fitur AI pakai default sistem.
@@ -190,7 +190,7 @@ export function AISettingsPanel() {
                 href={selectedSpec.docsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs text-career-600 inline-flex items-center gap-1 hover:underline"
+                className="text-xs text-brand inline-flex items-center gap-1 hover:underline"
               >
                 Dapatkan API key <ExternalLink className="w-3 h-3" />
               </a>

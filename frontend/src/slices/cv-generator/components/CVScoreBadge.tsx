@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { AnimatedProgress, ConfettiBurst } from "@/shared/components/MicroInteractions";
+import { AnimatedProgress, ConfettiBurst } from "@/shared/components/interactions/MicroInteractions";
 import type { CVData } from "../types";
 
 interface CVScoreBadgeProps {
@@ -17,12 +17,12 @@ export function CVScoreBadge({ cvData }: CVScoreBadgeProps) {
   const tier = score >= 85 ? "Sangat Baik" : score >= 65 ? "Bagus" : score >= 40 ? "Cukup" : "Perlu Ditingkatkan";
   const tierColor =
     score >= 85
-      ? "text-emerald-600"
+      ? "text-success"
       : score >= 65
-      ? "text-career-600"
+      ? "text-brand"
       : score >= 40
-      ? "text-amber-600"
-      : "text-slate-500";
+      ? "text-warning"
+      : "text-muted-foreground";
 
   const [confettiKey, setConfettiKey] = useState(0);
   const passedMilestone = useRef<number>(0);
@@ -38,11 +38,11 @@ export function CVScoreBadge({ cvData }: CVScoreBadgeProps) {
 
   return (
     <>
-      <Card className="border-border bg-gradient-to-br from-career-50 to-background dark:from-career-900/20">
+      <Card className="border-border bg-gradient-to-br from-brand-muted to-background dark:from-brand-from/20">
         <CardContent className="pt-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-career-500 text-white flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-brand text-brand-foreground flex items-center justify-center">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
@@ -64,7 +64,7 @@ export function CVScoreBadge({ cvData }: CVScoreBadgeProps) {
             <ul className="text-xs text-muted-foreground space-y-1 pt-1">
               {tips.slice(0, 3).map((t, i) => (
                 <li key={i} className="flex gap-1.5">
-                  <span className="text-career-600">•</span> {t}
+                  <span className="text-brand">•</span> {t}
                 </li>
               ))}
             </ul>

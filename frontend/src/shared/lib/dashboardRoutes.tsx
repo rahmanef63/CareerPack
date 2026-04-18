@@ -6,7 +6,7 @@ import {
   NetworkingView,
   NotificationsView,
   PortfolioView,
-} from "@/shared/components/DashboardPlaceholders";
+} from "@/shared/components/placeholder/DashboardPlaceholders";
 
 /**
  * Registry SSOT untuk catch-all `/dashboard/[[...slug]]`.

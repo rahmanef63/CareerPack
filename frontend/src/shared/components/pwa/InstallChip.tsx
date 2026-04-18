@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Download, X } from "lucide-react";
-import { usePWAInstall } from "../hooks/usePWAInstall";
+import { usePWAInstall } from "@/shared/hooks/usePWAInstall";
 import { cn } from "@/shared/lib/utils";
 
 /**
@@ -32,7 +32,7 @@ export function InstallChip({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => install()}
-        className="flex items-center gap-1.5 text-sm font-semibold text-career-700 dark:text-career-200"
+        className="flex items-center gap-1.5 text-sm font-semibold text-brand"
       >
         <Download className="w-4 h-4" />
         Pasang Aplikasi

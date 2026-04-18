@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { Logo } from "./Logo";
+import { Logo } from "../brand/Logo";
 
 /**
  * Top bar untuk route `(marketing)` — ringan, tidak ada auth guard.
@@ -35,7 +35,7 @@ export function MarketingHeader() {
           <Button
             asChild
             size="sm"
-            className="bg-gradient-to-br from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white"
+            className="bg-gradient-to-br from-brand-from to-brand-to hover:from-brand-from/90 hover:to-brand-to/90 text-brand-foreground"
           >
             <Link href="/login">Mulai Gratis</Link>
           </Button>

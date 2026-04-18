@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
-import { BrandMark } from '@/shared/components/Logo';
+import { BrandMark } from '@/shared/components/brand/Logo';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -78,22 +78,22 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-career-50 via-white to-career-100 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-muted via-white to-brand-muted p-4">
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="flex items-center justify-center gap-3 mb-8">
                     <div
-                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white"
+                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground"
                         style={{ boxShadow: '0 10px 24px -8px rgba(14,165,233,0.4)' }}
                     >
                         <BrandMark size={24} stroke="#fff" strokeWidth={2.4} />
                     </div>
-                    <span className="text-2xl font-bold bg-gradient-to-r from-career-600 to-career-800 bg-clip-text text-transparent">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-brand-from to-brand-to bg-clip-text text-transparent">
                         CareerPack
                     </span>
                 </div>
 
-                <Card className="border-slate-200 shadow-xl">
+                <Card className="border-border shadow-xl">
                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl">Selamat Datang</CardTitle>
                         <CardDescription>
@@ -118,7 +118,7 @@ export function LoginPage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email</Label>
                                         <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                             <Input
                                                 id="email"
                                                 type="email"
@@ -134,7 +134,7 @@ export function LoginPage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="password">Password</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                             <Input
                                                 id="password"
                                                 type={showPassword ? 'text' : 'password'}
@@ -147,7 +147,7 @@ export function LoginPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
                                             >
                                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
@@ -156,7 +156,7 @@ export function LoginPage() {
 
                                     <Button
                                         type="submit"
-                                        className="w-full bg-career-600 hover:bg-career-700"
+                                        className="w-full bg-brand hover:bg-brand"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? 'Memuat...' : 'Masuk'}
@@ -164,8 +164,8 @@ export function LoginPage() {
                                 </form>
 
                                 {/* Demo Credentials */}
-                                <div className="mt-6 pt-6 border-t border-slate-200">
-                                    <p className="text-sm text-slate-500 text-center mb-3">Akun Demo:</p>
+                                <div className="mt-6 pt-6 border-t border-border">
+                                    <p className="text-sm text-muted-foreground text-center mb-3">Akun Demo:</p>
                                     <div className="flex gap-2">
                                         <Button
                                             type="button"
@@ -188,7 +188,7 @@ export function LoginPage() {
                                             Admin
                                         </Button>
                                     </div>
-                                    <p className="text-xs text-slate-400 text-center mt-2">Password: demouser123</p>
+                                    <p className="text-xs text-muted-foreground text-center mt-2">Password: demouser123</p>
                                 </div>
                             </TabsContent>
 
@@ -197,7 +197,7 @@ export function LoginPage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="name">Nama Lengkap</Label>
                                         <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                             <Input
                                                 id="name"
                                                 type="text"
@@ -213,7 +213,7 @@ export function LoginPage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="register-email">Email</Label>
                                         <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                             <Input
                                                 id="register-email"
                                                 type="email"
@@ -229,7 +229,7 @@ export function LoginPage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="register-password">Password</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                             <Input
                                                 id="register-password"
                                                 type={showPassword ? 'text' : 'password'}
@@ -242,7 +242,7 @@ export function LoginPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
                                             >
                                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
@@ -251,7 +251,7 @@ export function LoginPage() {
 
                                     <Button
                                         type="submit"
-                                        className="w-full bg-career-600 hover:bg-career-700"
+                                        className="w-full bg-brand hover:bg-brand"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? 'Memuat...' : 'Daftar'}
@@ -262,7 +262,7 @@ export function LoginPage() {
                     </CardContent>
                 </Card>
 
-                <p className="text-center text-sm text-slate-500 mt-6">
+                <p className="text-center text-sm text-muted-foreground mt-6">
                     © 2024 CareerPack. Semua hak dilindungi.
                 </p>
             </div>

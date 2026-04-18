@@ -38,9 +38,9 @@ function offsetDate(days: number): string {
 }
 
 const TYPE_STYLE: Record<AgendaType, { label: string; cls: string }> = {
-  interview: { label: "Wawancara", cls: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300" },
-  deadline: { label: "Tenggat", cls: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" },
-  followup: { label: "Follow-up", cls: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300" },
+  interview: { label: "Wawancara", cls: "bg-accent text-brand dark:bg-accent dark:text-brand/80" },
+  deadline: { label: "Tenggat", cls: "bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning/80" },
+  followup: { label: "Follow-up", cls: "bg-info/20 text-info dark:bg-info/20 dark:text-brand/80" },
 };
 
 const TYPE_OPTIONS: ReadonlyArray<{ value: AgendaType; label: string }> = [
@@ -134,7 +134,7 @@ export function CalendarView() {
         </div>
         <Button
           size="sm"
-          className="bg-career-600 hover:bg-career-700 flex-shrink-0"
+          className="bg-brand hover:bg-brand flex-shrink-0"
           onClick={() => setAddOpen(true)}
           aria-label="Tambah agenda baru"
         >
@@ -146,7 +146,7 @@ export function CalendarView() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-career-600" /> Pilih Tanggal
+              <CalendarIcon className="w-4 h-4 text-brand" /> Pilih Tanggal
             </CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center">
@@ -163,7 +163,7 @@ export function CalendarView() {
               }}
               modifiersClassNames={{
                 hasEvent:
-                  "relative font-bold text-career-700 after:absolute after:left-1/2 after:bottom-0.5 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-career-500",
+                  "relative font-bold text-brand after:absolute after:left-1/2 after:bottom-0.5 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-brand",
               }}
             />
           </CardContent>
@@ -423,7 +423,7 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Batal
             </Button>
-            <Button type="submit" disabled={submitting} className="bg-career-600 hover:bg-career-700">
+            <Button type="submit" disabled={submitting} className="bg-brand hover:bg-brand">
               Tambah Agenda
             </Button>
           </ResponsiveDialogFooter>

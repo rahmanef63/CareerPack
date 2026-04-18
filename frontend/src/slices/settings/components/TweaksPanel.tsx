@@ -102,8 +102,8 @@ export function TweaksPanel() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Sun className="w-4 h-4 text-career-600 dark:hidden" />
-            <Moon className="w-4 h-4 text-career-600 hidden dark:inline" />
+            <Sun className="w-4 h-4 text-brand dark:hidden" />
+            <Moon className="w-4 h-4 text-brand hidden dark:inline" />
             Mode Tampilan
           </CardTitle>
         </CardHeader>
@@ -141,7 +141,7 @@ export function TweaksPanel() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-career-600" /> Gaya Tombol AI
+            <Sparkles className="w-4 h-4 text-brand" /> Gaya Tombol AI
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -158,7 +158,7 @@ export function TweaksPanel() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Type className="w-4 h-4 text-career-600" /> Ukuran Huruf
+            <Type className="w-4 h-4 text-brand" /> Ukuran Huruf
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -180,7 +180,7 @@ export function TweaksPanel() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <LayoutPanelTop className="w-4 h-4 text-career-600" /> Gaya Bar Navigasi
+            <LayoutPanelTop className="w-4 h-4 text-brand" /> Gaya Bar Navigasi
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -209,7 +209,7 @@ function PreviewFab({ style }: { style: AIButtonStyle }) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
       <div data-ai-btn={style} className="relative">
-        <div className="ai-fab-bg w-12 h-12 rounded-full flex items-center justify-center text-white">
+        <div className="ai-fab-bg w-12 h-12 rounded-full flex items-center justify-center text-brand-foreground">
           <Sparkles className="w-6 h-6 relative z-10" />
         </div>
       </div>

@@ -4,9 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { NavMain, type NavMainItem } from "@/shared/components/nav-main";
-import { NavSecondary, type NavSecondaryItem } from "@/shared/components/nav-secondary";
-import { NavUser } from "@/shared/components/nav-user";
+import { NavMain, type NavMainItem } from "@/shared/components/layout/nav-main";
+import { NavSecondary, type NavSecondaryItem } from "@/shared/components/layout/nav-secondary";
+import { NavUser } from "@/shared/components/layout/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar";
-import { BrandMark } from "./Logo";
+import { BrandMark } from "../brand/Logo";
 import { PRIMARY_NAV, MORE_APPS, activeNavForPath } from "./navConfig";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -57,11 +57,12 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href="/dashboard">
-                <span
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-indigo-500 text-white"
-                  style={{ boxShadow: "var(--shadow-cta)" }}
-                >
-                  <BrandMark size={18} stroke="#fff" strokeWidth={2.4} />
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground shadow-cta">
+                  <BrandMark
+                    size={18}
+                    stroke="hsl(var(--brand-foreground))"
+                    strokeWidth={2.4}
+                  />
                 </span>
                 <span className="text-base font-semibold">CareerPack</span>
               </Link>

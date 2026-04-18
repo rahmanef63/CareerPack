@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, FileCheck2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Badge } from "@/shared/components/ui/badge";
-import { AnimatedProgress } from "@/shared/components/MicroInteractions";
+import { AnimatedProgress } from "@/shared/components/interactions/MicroInteractions";
 import { cn } from "@/shared/lib/utils";
 
 const APP_DOCS = [
@@ -47,7 +47,7 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-success/20 dark:bg-success/20 text-success dark:text-success/80 flex items-center justify-center flex-shrink-0">
               <FileCheck2 className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -58,7 +58,7 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className={cn(pct === 100 ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-700")}>
+            <Badge variant="secondary" className={cn(pct === 100 ? "bg-success/20 text-success" : "bg-muted text-foreground")}>
               {pct}%
             </Badge>
             {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -75,8 +75,8 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
                 className={cn(
                   "flex items-center gap-3 p-2.5 rounded-lg border transition-colors tap-press cursor-pointer",
                   done[d.id]
-                    ? "border-green-300 bg-green-50/50 dark:bg-green-950/20"
-                    : "border-border hover:border-career-300"
+                    ? "border-success/30 bg-success/10 dark:bg-success/20"
+                    : "border-border hover:border-brand"
                 )}
                 onClick={() => toggle(d.id)}
               >
@@ -85,7 +85,7 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
                   {d.label}
                 </span>
                 {d.required && !done[d.id] && (
-                  <Badge variant="secondary" className="text-[10px] bg-amber-100 text-amber-700">
+                  <Badge variant="secondary" className="text-[10px] bg-warning/20 text-warning">
                     wajib
                   </Badge>
                 )}

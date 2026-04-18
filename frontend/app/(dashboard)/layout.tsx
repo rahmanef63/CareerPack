@@ -4,7 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { ResponsiveContainer } from "@/shared/containers/ResponsiveContainer";
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();

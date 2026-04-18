@@ -41,17 +41,13 @@ export function NavMain({ items, activeId, onAITap, aiActive }: NavMainProps) {
                 aria-pressed={aiActive}
                 className={cn(
                   "min-w-8 duration-200 ease-linear",
-                  // Inactive: gradient AI accent ringan, bukan full primary bg
-                  "bg-gradient-to-r from-sky-500/10 to-indigo-500/10 text-foreground",
-                  "hover:from-sky-500/20 hover:to-indigo-500/20",
-                  // Active: full AI gradient
+                  "bg-gradient-to-r from-brand-from/10 to-brand-to/10 text-foreground",
+                  "hover:from-brand-from/20 hover:to-brand-to/20",
                   aiActive &&
                     "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
                 )}
               >
-                <Sparkles
-                  className={cn(aiActive ? "" : "text-sky-500")}
-                />
+                <Sparkles className={cn(aiActive ? "" : "text-brand")} />
                 <span>Asisten AI</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

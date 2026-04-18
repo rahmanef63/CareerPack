@@ -6,7 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 import { toast } from "sonner";
 import { publish } from "@/shared/lib/aiActionBus";
 import { ACTION_META, type AgentAction } from "../lib/agentActions";
-import { SuccessCheck } from "@/shared/components/MicroInteractions";
+import { SuccessCheck } from "@/shared/components/interactions/MicroInteractions";
 
 interface ApproveActionCardProps {
   action: AgentAction;
@@ -32,7 +32,7 @@ export function ApproveActionCard({ action, onResolved }: ApproveActionCardProps
   return (
     <div className="border border-border rounded-xl p-3 bg-background/60 backdrop-blur-sm space-y-2">
       <div className="flex items-start gap-2">
-        <div className="w-8 h-8 rounded-lg bg-career-100 dark:bg-career-900/40 text-career-700 dark:text-career-200 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-brand-muted dark:bg-brand/20 text-brand dark:text-brand flex items-center justify-center flex-shrink-0">
           <Sparkles className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
@@ -44,7 +44,7 @@ export function ApproveActionCard({ action, onResolved }: ApproveActionCardProps
 
       {state === "pending" && (
         <div className="flex gap-2 pt-1">
-          <Button size="sm" onClick={apply} className="flex-1 bg-career-600 hover:bg-career-700">
+          <Button size="sm" onClick={apply} className="flex-1 bg-brand hover:bg-brand">
             <Check className="w-4 h-4 mr-1" /> {meta.cta}
           </Button>
           <Button size="sm" variant="outline" onClick={dismiss}>
@@ -54,7 +54,7 @@ export function ApproveActionCard({ action, onResolved }: ApproveActionCardProps
       )}
 
       {state === "applied" && (
-        <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 font-medium">
+        <div className="flex items-center gap-2 text-sm text-success dark:text-success/80 font-medium">
           <SuccessCheck size={20} /> Diterapkan
         </div>
       )}

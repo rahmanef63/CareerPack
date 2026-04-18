@@ -5,8 +5,8 @@ import {
   SidebarProvider,
   SidebarInset,
 } from "@/shared/components/ui/sidebar";
-import { AppSidebar } from "@/shared/components/app-sidebar";
-import { SiteHeader } from "@/shared/components/SiteHeader";
+import { AppSidebar } from "@/shared/components/layout/app-sidebar";
+import { SiteHeader } from "@/shared/components/layout/SiteHeader";
 
 interface DesktopContainerProps {
   onAITap: () => void;

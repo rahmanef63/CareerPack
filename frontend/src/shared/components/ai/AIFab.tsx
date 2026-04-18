@@ -2,7 +2,7 @@
 
 import { Sparkles } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { useHapticPress } from "./MicroInteractions";
+import { useHapticPress } from "../interactions/MicroInteractions";
 
 interface AIFabProps {
   onClick: () => void;
@@ -23,7 +23,7 @@ export function AIFab({ onClick, active }: AIFabProps) {
         onClick={onClick}
         aria-label="Buka Asisten AI"
         className={cn(
-          "relative w-14 h-14 rounded-full flex items-center justify-center text-white",
+          "relative w-14 h-14 rounded-full flex items-center justify-center text-brand-foreground",
           "ring-4 ring-background",
           active ? "scale-95" : "animate-pulse-ai"
         )}
@@ -37,7 +37,7 @@ export function AIFab({ onClick, active }: AIFabProps) {
       <span
         className={cn(
           "absolute -bottom-3 text-[10px] font-bold tracking-wide pointer-events-none",
-          active ? "text-indigo-600 dark:text-indigo-300" : "text-slate-500 dark:text-slate-400"
+          active ? "text-brand" : "text-muted-foreground"
         )}
       >
         AI

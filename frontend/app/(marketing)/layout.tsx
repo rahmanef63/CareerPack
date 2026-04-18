@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { MarketingHeader } from "@/shared/components/MarketingHeader";
-import { MarketingFooter } from "@/shared/components/MarketingFooter";
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import { MarketingHeader } from "@/shared/components/layout/MarketingHeader";
+import { MarketingFooter } from "@/shared/components/layout/MarketingFooter";
+import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (

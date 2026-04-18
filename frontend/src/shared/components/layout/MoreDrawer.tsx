@@ -11,7 +11,7 @@ import {
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
-import { StaggerList, useHapticPress } from "./MicroInteractions";
+import { StaggerList, useHapticPress } from "../interactions/MicroInteractions";
 import { MORE_APPS, type MoreAppTile } from "./navConfig";
 
 interface MoreDrawerProps {
@@ -76,11 +76,10 @@ function TileButton({ tile, onClick }: TileButtonProps) {
     >
       <span
         className={cn(
-          "relative w-14 h-14 text-white flex items-center justify-center",
+          "relative w-14 h-14 text-primary-foreground flex items-center justify-center rounded-[32%]",
           "bg-gradient-to-br shadow-md tap-press",
           tile.hue
         )}
-        style={{ borderRadius: "32%" }}
       >
         <Icon className="w-7 h-7" />
         {tile.badge && (
@@ -92,7 +91,7 @@ function TileButton({ tile, onClick }: TileButtonProps) {
           </Badge>
         )}
       </span>
-      <span className="text-[11px] font-medium text-center leading-tight text-foreground/80 group-active:text-career-700">
+      <span className="text-[11px] font-medium text-center leading-tight text-foreground/80 group-active:text-brand">
         {tile.label}
       </span>
     </button>

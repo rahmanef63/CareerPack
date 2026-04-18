@@ -83,41 +83,41 @@ export function MockInterview() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-100 text-green-700';
-      case 'medium': return 'bg-amber-100 text-amber-700';
-      case 'hard': return 'bg-red-100 text-red-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'easy': return 'bg-success/20 text-success';
+      case 'medium': return 'bg-warning/20 text-warning';
+      case 'hard': return 'bg-destructive/10 text-destructive';
+      default: return 'bg-muted text-foreground';
     }
   };
 
   if (sessionComplete) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="border-slate-200">
+        <Card className="border-border">
           <CardContent className="pt-12 pb-12 text-center">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-career-500 to-career-700 flex items-center justify-center mx-auto mb-6">
-              <Trophy className="w-12 h-12 text-white" />
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center mx-auto mb-6">
+              <Trophy className="w-12 h-12 text-brand-foreground" />
             </div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Sesi Selesai!</h2>
-            <p className="text-slate-600 mb-8">Bagus! Anda telah menyelesaikan sesi latihan wawancara</p>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Sesi Selesai!</h2>
+            <p className="text-muted-foreground mb-8">Bagus! Anda telah menyelesaikan sesi latihan wawancara</p>
 
             <div className="grid sm:grid-cols-3 gap-6 max-w-lg mx-auto mb-8">
-              <div className="p-4 bg-career-50 rounded-xl">
-                <p className="text-3xl font-bold text-career-600">{sessionScore}%</p>
-                <p className="text-sm text-career-700">Skor Keseluruhan</p>
+              <div className="p-4 bg-brand-muted rounded-xl">
+                <p className="text-3xl font-bold text-brand">{sessionScore}%</p>
+                <p className="text-sm text-brand">Skor Keseluruhan</p>
               </div>
-              <div className="p-4 bg-green-50 rounded-xl">
-                <p className="text-3xl font-bold text-green-600">{filteredQuestions.length}</p>
-                <p className="text-sm text-green-700">Pertanyaan</p>
+              <div className="p-4 bg-success/10 rounded-xl">
+                <p className="text-3xl font-bold text-success">{filteredQuestions.length}</p>
+                <p className="text-sm text-success">Pertanyaan</p>
               </div>
-              <div className="p-4 bg-purple-50 rounded-xl">
-                <p className="text-3xl font-bold text-purple-600">15m</p>
-                <p className="text-sm text-purple-700">Durasi</p>
+              <div className="p-4 bg-accent/50 rounded-xl">
+                <p className="text-3xl font-bold text-brand">15m</p>
+                <p className="text-sm text-brand">Durasi</p>
               </div>
             </div>
 
             <div className="flex justify-center gap-4">
-              <Button onClick={resetSession} className="bg-career-600 hover:bg-career-700">
+              <Button onClick={resetSession} className="bg-brand hover:bg-brand">
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Sesi Baru
               </Button>
@@ -135,8 +135,8 @@ export function MockInterview() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Simulasi Wawancara</h1>
-        <p className="text-slate-600 mt-2">Latih dengan pertanyaan wawancara umum dan dapatkan feedback instan</p>
+        <h1 className="text-3xl font-bold text-foreground">Simulasi Wawancara</h1>
+        <p className="text-muted-foreground mt-2">Latih dengan pertanyaan wawancara umum dan dapatkan feedback instan</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -152,8 +152,8 @@ export function MockInterview() {
               {/* Progress */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-slate-500">Pertanyaan</span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="text-sm text-muted-foreground">Pertanyaan</span>
+                  <span className="font-semibold text-foreground">
                     {currentQuestionIndex + 1} / {filteredQuestions.length}
                   </span>
                 </div>
@@ -164,14 +164,14 @@ export function MockInterview() {
               </div>
 
               {/* Question Card */}
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex gap-2">
                       <Badge className={getDifficultyColor(currentQuestion.difficulty)}>
                         {indonesianDifficultyLabels[currentQuestion.difficulty]}
                       </Badge>
-                      <Badge variant="secondary" className="bg-slate-100">
+                      <Badge variant="secondary" className="bg-muted">
                         {categoryLabels[currentQuestion.category]}
                       </Badge>
                     </div>
@@ -184,15 +184,15 @@ export function MockInterview() {
                         className={cn(
                           'w-5 h-5',
                           favorites.has(currentQuestion.id) 
-                            ? 'fill-amber-400 text-amber-400' 
-                            : 'text-slate-400'
+                            ? 'fill-amber-400 text-warning/80' 
+                            : 'text-muted-foreground'
                         )} 
                       />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-6">
+                  <h3 className="text-xl font-semibold text-foreground mb-6">
                     {currentQuestion.question}
                   </h3>
 
@@ -205,7 +205,7 @@ export function MockInterview() {
                         onClick={isRecording ? stopRecording : startRecording}
                         className={cn(
                           'rounded-full px-8',
-                          !isRecording && 'bg-career-600 hover:bg-career-700'
+                          !isRecording && 'bg-brand hover:bg-brand'
                         )}
                       >
                         {isRecording ? (
@@ -227,8 +227,8 @@ export function MockInterview() {
                     </div>
 
                     {isRecording && (
-                      <div className="flex items-center justify-center gap-2 text-red-500 animate-pulse">
-                        <div className="w-3 h-3 rounded-full bg-red-500" />
+                      <div className="flex items-center justify-center gap-2 text-destructive animate-pulse">
+                        <div className="w-3 h-3 rounded-full bg-destructive" />
                         Sedang merekam...
                       </div>
                     )}
@@ -244,27 +244,27 @@ export function MockInterview() {
               </Card>
 
               {/* Tips & Answer */}
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-amber-500" />
+                    <Lightbulb className="w-5 h-5 text-warning" />
                     Tips untuk Pertanyaan Ini
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {currentQuestion.tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-2 text-slate-600">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <li key={index} className="flex items-start gap-2 text-muted-foreground">
+                        <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         {tip}
                       </li>
                     ))}
                   </ul>
 
                   {showAnswer && currentQuestion.sampleAnswer && (
-                    <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <p className="font-medium text-green-800 mb-2">Contoh Jawaban:</p>
-                      <p className="text-green-700 text-sm">{currentQuestion.sampleAnswer}</p>
+                    <div className="mt-6 p-4 bg-success/10 rounded-lg border border-success/30">
+                      <p className="font-medium text-success mb-2">Contoh Jawaban:</p>
+                      <p className="text-success text-sm">{currentQuestion.sampleAnswer}</p>
                     </div>
                   )}
 
@@ -275,7 +275,7 @@ export function MockInterview() {
                     >
                       {showAnswer ? 'Sembunyikan' : 'Tampilkan'} Contoh Jawaban
                     </Button>
-                    <Button onClick={nextQuestion} className="bg-career-600 hover:bg-career-700">
+                    <Button onClick={nextQuestion} className="bg-brand hover:bg-brand">
                       Pertanyaan Selanjutnya
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -286,38 +286,38 @@ export function MockInterview() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg">Statistik Sesi</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-slate-500" />
-                        <span className="text-sm text-slate-700">Waktu Berlalu</span>
+                        <Clock className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-sm text-foreground">Waktu Berlalu</span>
                       </div>
-                      <span className="font-semibold text-slate-900">12:34</span>
+                      <span className="font-semibold text-foreground">12:34</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <MessageSquare className="w-5 h-5 text-slate-500" />
-                        <span className="text-sm text-slate-700">Dijawab</span>
+                        <MessageSquare className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-sm text-foreground">Dijawab</span>
                       </div>
-                      <span className="font-semibold text-slate-900">{currentQuestionIndex}</span>
+                      <span className="font-semibold text-foreground">{currentQuestionIndex}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <Star className="w-5 h-5 text-slate-500" />
-                        <span className="text-sm text-slate-700">Favorit</span>
+                        <Star className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-sm text-foreground">Favorit</span>
                       </div>
-                      <span className="font-semibold text-slate-900">{favorites.size}</span>
+                      <span className="font-semibold text-foreground">{favorites.size}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg">Aksi Cepat</CardTitle>
                 </CardHeader>
@@ -348,7 +348,7 @@ export function MockInterview() {
             <Button
               variant={selectedCategory === null ? 'default' : 'outline'}
               onClick={() => setSelectedCategory(null)}
-              className={selectedCategory === null ? 'bg-career-600' : ''}
+              className={selectedCategory === null ? 'bg-brand' : ''}
             >
               Semua Pertanyaan
             </Button>
@@ -357,7 +357,7 @@ export function MockInterview() {
                 key={category}
                 variant={selectedCategory === category ? 'default' : 'outline'}
                 onClick={() => setSelectedCategory(category)}
-                className={selectedCategory === category ? 'bg-career-600' : ''}
+                className={selectedCategory === category ? 'bg-brand' : ''}
               >
                 {categoryLabels[category]}
               </Button>
@@ -370,8 +370,8 @@ export function MockInterview() {
               <Card 
                 key={question.id} 
                 className={cn(
-                  'border-slate-200 cursor-pointer hover:border-career-300 transition-all duration-200',
-                  currentQuestionIndex === index && 'border-career-500 bg-career-50'
+                  'border-border cursor-pointer hover:border-brand transition-all duration-200',
+                  currentQuestionIndex === index && 'border-brand bg-brand-muted'
                 )}
                 onClick={() => {
                   setCurrentQuestionIndex(index);
@@ -385,11 +385,11 @@ export function MockInterview() {
                         <Badge className={getDifficultyColor(question.difficulty)}>
                           {indonesianDifficultyLabels[question.difficulty]}
                         </Badge>
-                        <Badge variant="secondary" className="bg-slate-100">
+                        <Badge variant="secondary" className="bg-muted">
                           {categoryLabels[question.category]}
                         </Badge>
                       </div>
-                      <p className="font-medium text-slate-900">{question.question}</p>
+                      <p className="font-medium text-foreground">{question.question}</p>
                     </div>
                     <Button 
                       variant="ghost" 
@@ -403,8 +403,8 @@ export function MockInterview() {
                         className={cn(
                           'w-5 h-5',
                           favorites.has(question.id) 
-                            ? 'fill-amber-400 text-amber-400' 
-                            : 'text-slate-400'
+                            ? 'fill-amber-400 text-warning/80' 
+                            : 'text-muted-foreground'
                         )} 
                       />
                     </Button>

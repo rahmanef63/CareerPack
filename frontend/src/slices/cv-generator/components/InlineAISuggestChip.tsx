@@ -16,9 +16,9 @@ export function InlineAISuggestChip({ label, onClick, className }: InlineAISugge
       onClick={onClick}
       className={cn(
         "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium",
-        "bg-gradient-to-r from-career-100 to-indigo-100 text-career-700",
-        "dark:from-career-900/40 dark:to-indigo-900/40 dark:text-career-200",
-        "hover:from-career-200 hover:to-indigo-200 dark:hover:from-career-800/60 dark:hover:to-indigo-800/60",
+        "bg-gradient-to-r from-brand-muted to-brand-to/60 text-brand",
+        "dark:from-brand-from/40 dark:to-brand-to/40 dark:text-brand",
+        "hover:from-brand-from hover:to-brand-to dark:hover:from-brand-from/60 dark:hover:to-brand-to/60",
         "tap-press transition-colors",
         className
       )}

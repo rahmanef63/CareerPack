@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, Compass, Folder, HelpCircle, Users } from "lucide-react";
-import { PlaceholderView } from "@/shared/components/PlaceholderView";
+import { PlaceholderView } from "@/shared/components/placeholder/PlaceholderView";
 
 export function MatcherView() {
   return (

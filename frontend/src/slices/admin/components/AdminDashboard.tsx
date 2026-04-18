@@ -84,18 +84,18 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted/50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-career-500 to-career-700 flex items-center justify-center">
-                <Settings className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center">
+                <Settings className="w-5 h-5 text-brand-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Admin Dashboard</h1>
-                <p className="text-xs text-slate-500">Kelola sistem CareerPack</p>
+                <h1 className="text-xl font-bold text-foreground">Admin Dashboard</h1>
+                <p className="text-xs text-muted-foreground">Kelola sistem CareerPack</p>
               </div>
             </div>
             <Button variant="outline" onClick={() => window.location.href = '/'}>
@@ -108,9 +108,9 @@ export function AdminDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {showSuccess && (
-          <Alert className="mb-6 bg-green-50 border-green-200">
-            <CheckCircle2 className="w-4 h-4 text-green-600" />
-            <AlertDescription className="text-green-700">
+          <Alert className="mb-6 bg-success/10 border-success/30">
+            <CheckCircle2 className="w-4 h-4 text-success" />
+            <AlertDescription className="text-success">
               Operasi berhasil dilakukan!
             </AlertDescription>
           </Alert>
@@ -131,24 +131,11 @@ export function AdminDashboard() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Total Pengguna</p>
-                      <p className="text-3xl font-bold text-slate-900">{stats.users}</p>
+                      <p className="text-sm text-muted-foreground">Total Pengguna</p>
+                      <p className="text-3xl font-bold text-foreground">{stats.users}</p>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">CV Dibuat</p>
-                      <p className="text-3xl font-bold text-slate-900">{stats.cvs}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-green-600" />
+                    <div className="w-12 h-12 rounded-xl bg-info/20 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-info" />
                     </div>
                   </div>
                 </CardContent>
@@ -157,11 +144,11 @@ export function AdminDashboard() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Lamaran Dikirim</p>
-                      <p className="text-3xl font-bold text-slate-900">{stats.applications}</p>
+                      <p className="text-sm text-muted-foreground">CV Dibuat</p>
+                      <p className="text-3xl font-bold text-foreground">{stats.cvs}</p>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-purple-600" />
+                    <div className="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-success" />
                     </div>
                   </div>
                 </CardContent>
@@ -170,11 +157,24 @@ export function AdminDashboard() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">Request AI</p>
-                      <p className="text-3xl font-bold text-slate-900">{stats.aiRequests}</p>
+                      <p className="text-sm text-muted-foreground">Lamaran Dikirim</p>
+                      <p className="text-3xl font-bold text-foreground">{stats.applications}</p>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                      <Bot className="w-6 h-6 text-amber-600" />
+                    <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
+                      <BarChart3 className="w-6 h-6 text-brand" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Request AI</p>
+                      <p className="text-3xl font-bold text-foreground">{stats.aiRequests}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center">
+                      <Bot className="w-6 h-6 text-warning" />
                     </div>
                   </div>
                 </CardContent>
@@ -187,30 +187,30 @@ export function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Bot className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-700">AI Assistant</span>
+                      <Bot className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-foreground">AI Assistant</span>
                     </div>
-                    <Badge className={isConfigured ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
+                    <Badge className={isConfigured ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}>
                       {isConfigured ? 'Aktif' : 'Belum Dikonfigurasi'}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Database className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-700">Mock Data</span>
+                      <Database className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-foreground">Mock Data</span>
                     </div>
-                    <Badge className={mockData ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}>
+                    <Badge className={mockData ? 'bg-success/20 text-success' : 'bg-muted text-foreground'}>
                       {mockData ? `${mockData.users.length} Users` : 'Belum Dibuat'}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Layout className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-700">Skill Roadmap</span>
+                      <Layout className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-foreground">Skill Roadmap</span>
                     </div>
-                    <Badge className="bg-green-100 text-green-700">
+                    <Badge className="bg-success/20 text-success">
                       {categories.filter(c => c.isActive).length} Aktif
                     </Badge>
                   </div>
@@ -232,10 +232,10 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                   <div>
-                    <p className="font-medium text-slate-900">Aktifkan AI Assistant</p>
-                    <p className="text-sm text-slate-500">Izinkan pengguna menggunakan fitur AI chat</p>
+                    <p className="font-medium text-foreground">Aktifkan AI Assistant</p>
+                    <p className="text-sm text-muted-foreground">Izinkan pengguna menggunakan fitur AI chat</p>
                   </div>
                   <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
                 </div>
@@ -243,7 +243,7 @@ export function AdminDashboard() {
                 <div className="space-y-2">
                   <Label>API Key Z.ai</Label>
                   <div className="relative">
-                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="password"
                       placeholder="sk-..."
@@ -252,8 +252,8 @@ export function AdminDashboard() {
                       className="pl-10"
                     />
                   </div>
-                  <p className="text-xs text-slate-500">
-                    Dapatkan API key dari <a href="https://docs.z.ai" target="_blank" rel="noopener noreferrer" className="text-career-600 hover:underline">docs.z.ai</a>
+                  <p className="text-xs text-muted-foreground">
+                    Dapatkan API key dari <a href="https://docs.z.ai" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">docs.z.ai</a>
                   </p>
                 </div>
 
@@ -262,7 +262,7 @@ export function AdminDashboard() {
                   <Input
                     value={config.baseUrl}
                     disabled
-                    className="bg-slate-50"
+                    className="bg-muted/50"
                   />
                 </div>
 
@@ -271,7 +271,7 @@ export function AdminDashboard() {
                   <Input
                     value={config.model}
                     disabled
-                    className="bg-slate-50"
+                    className="bg-muted/50"
                   />
                 </div>
 
@@ -279,7 +279,7 @@ export function AdminDashboard() {
                   <div>
                     <div className="flex justify-between mb-2">
                       <Label>Temperature</Label>
-                      <span className="text-sm text-slate-600">{temperature}</span>
+                      <span className="text-sm text-muted-foreground">{temperature}</span>
                     </div>
                     <Slider
                       value={[temperature]}
@@ -288,7 +288,7 @@ export function AdminDashboard() {
                       max={2}
                       step={0.1}
                     />
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Semakin tinggi, semakin kreatif respons AI
                     </p>
                   </div>
@@ -296,7 +296,7 @@ export function AdminDashboard() {
                   <div>
                     <div className="flex justify-between mb-2">
                       <Label>Max Tokens</Label>
-                      <span className="text-sm text-slate-600">{maxTokens}</span>
+                      <span className="text-sm text-muted-foreground">{maxTokens}</span>
                     </div>
                     <Slider
                       value={[maxTokens]}
@@ -310,7 +310,7 @@ export function AdminDashboard() {
 
                 <Button
                   onClick={handleSaveAIConfig}
-                  className="w-full bg-career-600 hover:bg-career-700"
+                  className="w-full bg-brand hover:bg-brand"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Simpan Konfigurasi
@@ -338,8 +338,8 @@ export function AdminDashboard() {
                         className={cn(
                           'p-4 rounded-xl border-2 transition-all duration-200',
                           category.isActive
-                            ? 'border-career-500 bg-career-50'
-                            : 'border-slate-200 bg-white opacity-60'
+                            ? 'border-brand bg-brand-muted'
+                            : 'border-border bg-card opacity-60'
                         )}
                       >
                         <div className="flex items-start justify-between">
@@ -348,11 +348,11 @@ export function AdminDashboard() {
                               'w-10 h-10 rounded-lg flex items-center justify-center',
                               category.color
                             )}>
-                              <Icon className="w-5 h-5 text-white" />
+                              <Icon className="w-5 h-5 text-brand-foreground" />
                             </div>
                             <div>
-                              <p className="font-medium text-slate-900">{category.name}</p>
-                              <p className="text-xs text-slate-500">{category.description}</p>
+                              <p className="font-medium text-foreground">{category.name}</p>
+                              <p className="text-xs text-muted-foreground">{category.description}</p>
                             </div>
                           </div>
                           <Switch
@@ -381,12 +381,12 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="p-4 bg-warning/10 border border-warning/30 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-amber-900">Peringatan</p>
-                      <p className="text-sm text-amber-700">
+                      <p className="font-medium text-warning">Peringatan</p>
+                      <p className="text-sm text-warning">
                         Fitur ini akan menghasilkan data dummy yang disimpan di local storage.
                         Data ini hanya untuk development dan testing.
                       </p>
@@ -395,13 +395,13 @@ export function AdminDashboard() {
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-50 rounded-lg">
-                    <p className="text-sm text-slate-500">Jumlah User</p>
-                    <p className="text-2xl font-bold text-slate-900">10</p>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Jumlah User</p>
+                    <p className="text-2xl font-bold text-foreground">10</p>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-lg">
-                    <p className="text-sm text-slate-500">Data yang Dibuat</p>
-                    <p className="text-2xl font-bold text-slate-900">
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Data yang Dibuat</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {mockData ? 'User, CV, Lamaran, Checklist' : '-'}
                     </p>
                   </div>
@@ -410,7 +410,7 @@ export function AdminDashboard() {
                 <Button
                   onClick={handleGenerateMockData}
                   disabled={isGenerating}
-                  className="w-full bg-career-600 hover:bg-career-700"
+                  className="w-full bg-brand hover:bg-brand"
                 >
                   {isGenerating ? (
                     <>
@@ -427,9 +427,9 @@ export function AdminDashboard() {
 
                 {mockData && (
                   <div className="space-y-4">
-                    <h4 className="font-medium text-slate-900">Preview Data:</h4>
-                    <div className="bg-slate-900 rounded-lg p-4 overflow-auto max-h-64">
-                      <pre className="text-xs text-green-400 font-mono">
+                    <h4 className="font-medium text-foreground">Preview Data:</h4>
+                    <div className="bg-foreground text-background rounded-lg p-4 overflow-auto max-h-64">
+                      <pre className="text-xs font-mono">
                         {JSON.stringify({
                           users: mockData.users.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role })),
                           totalCVs: Object.keys(mockData.cvs).length,

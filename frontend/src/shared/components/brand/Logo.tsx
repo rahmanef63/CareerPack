@@ -62,22 +62,22 @@ export function Logo({
 }: LogoProps) {
   const tileBg =
     variant === "gradient"
-      ? "bg-gradient-to-br from-sky-500 to-indigo-500"
-      : "bg-sky-600";
+      ? "bg-gradient-to-br from-brand-from to-brand-to"
+      : "bg-brand";
   return (
     <div className={cn("inline-flex items-center gap-2.5", className)}>
       <span
         className={cn(
-          "rounded-xl flex items-center justify-center text-white shadow-md",
+          "rounded-xl flex items-center justify-center text-brand-foreground shadow-cta",
           tileBg
         )}
-        style={{
-          width: size,
-          height: size,
-          boxShadow: "0 10px 24px -8px rgba(14,165,233,0.4)",
-        }}
+        style={{ width: size, height: size }}
       >
-        <BrandMark size={size * 0.6} stroke="#fff" strokeWidth={2.4} />
+        <BrandMark
+          size={size * 0.6}
+          stroke="hsl(var(--brand-foreground))"
+          strokeWidth={2.4}
+        />
       </span>
       {showText && (
         <span

@@ -87,8 +87,8 @@ export function FinancialCalculator() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Kalkulator Keuangan</h1>
-        <p className="text-slate-600 mt-2">Rencanakan keuangan Anda dan bandingkan biaya hidup antar kota</p>
+        <h1 className="text-3xl font-bold text-foreground">Kalkulator Keuangan</h1>
+        <p className="text-muted-foreground mt-2">Rencanakan keuangan Anda dan bandingkan biaya hidup antar kota</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -102,10 +102,10 @@ export function FinancialCalculator() {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Input Section */}
             <div className="lg:col-span-2 space-y-6">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Wallet className="w-5 h-5 text-career-600" />
+                    <Wallet className="w-5 h-5 text-brand" />
                     Pendapatan Bulanan
                   </CardTitle>
                 </CardHeader>
@@ -114,7 +114,7 @@ export function FinancialCalculator() {
                     <div>
                       <div className="flex justify-between mb-2">
                         <Label>Gaji Bulanan (IDR)</Label>
-                        <span className="font-semibold text-career-600">
+                        <span className="font-semibold text-brand">
                           {formatCurrency(monthlyIncome)}
                         </span>
                       </div>
@@ -136,10 +136,10 @@ export function FinancialCalculator() {
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Calculator className="w-5 h-5 text-career-600" />
+                    <Calculator className="w-5 h-5 text-brand" />
                     Pengeluaran Bulanan
                   </CardTitle>
                 </CardHeader>
@@ -154,7 +154,7 @@ export function FinancialCalculator() {
                               <Icon className="w-4 h-4" style={{ color: category.color }} />
                               <Label className="text-sm">{category.label}</Label>
                             </div>
-                            <span className="font-medium text-slate-700">
+                            <span className="font-medium text-foreground">
                               {formatCurrency(expenses[category.id as keyof typeof expenses])}
                             </span>
                           </div>
@@ -175,59 +175,59 @@ export function FinancialCalculator() {
 
             {/* Summary Section */}
             <div className="space-y-6">
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg">Ringkasan Budget</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="p-4 bg-career-50 rounded-lg">
-                      <p className="text-sm text-career-700">Pendapatan Bulanan</p>
-                      <p className="text-2xl font-bold text-career-900">
+                    <div className="p-4 bg-brand-muted rounded-lg">
+                      <p className="text-sm text-brand">Pendapatan Bulanan</p>
+                      <p className="text-2xl font-bold text-brand">
                         {formatCurrency(monthlyIncome)}
                       </p>
                     </div>
 
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <p className="text-sm text-red-700">Total Pengeluaran</p>
-                      <p className="text-2xl font-bold text-red-900">
+                    <div className="p-4 bg-destructive/10 rounded-lg">
+                      <p className="text-sm text-destructive">Total Pengeluaran</p>
+                      <p className="text-2xl font-bold text-destructive">
                         {formatCurrency(totalExpenses)}
                       </p>
                     </div>
 
                     <div className={cn(
                       'p-4 rounded-lg',
-                      savings >= 0 ? 'bg-green-50' : 'bg-amber-50'
+                      savings >= 0 ? 'bg-success/10' : 'bg-warning/10'
                     )}>
                       <p className={cn(
                         'text-sm',
-                        savings >= 0 ? 'text-green-700' : 'text-amber-700'
+                        savings >= 0 ? 'text-success' : 'text-warning'
                       )}>
                         Tabungan Bulanan
                       </p>
                       <p className={cn(
                         'text-2xl font-bold',
-                        savings >= 0 ? 'text-green-900' : 'text-amber-900'
+                        savings >= 0 ? 'text-success' : 'text-warning'
                       )}>
                         {formatCurrency(savings)}
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-200">
+                    <div className="pt-4 border-t border-border">
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-600">Tingkat Tabungan</span>
+                        <span className="text-muted-foreground">Tingkat Tabungan</span>
                         <span className={cn(
                           'font-bold',
-                          savingsRate >= 20 ? 'text-green-600' : 'text-amber-600'
+                          savingsRate >= 20 ? 'text-success' : 'text-warning'
                         )}>
                           {savingsRate.toFixed(1)}%
                         </span>
                       </div>
-                      <div className="mt-2 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
                         <div 
                           className={cn(
                             'h-full rounded-full transition-all duration-300',
-                            savingsRate >= 20 ? 'bg-green-500' : 'bg-amber-500'
+                            savingsRate >= 20 ? 'bg-success' : 'bg-warning'
                           )}
                           style={{ width: `${Math.max(0, Math.min(100, savingsRate))}%` }}
                         />
@@ -237,7 +237,7 @@ export function FinancialCalculator() {
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-lg">Rincian Pengeluaran</CardTitle>
                 </CardHeader>
@@ -266,13 +266,13 @@ export function FinancialCalculator() {
               </Card>
 
               {savingsRate < 20 && (
-                <Card className="border-amber-200 bg-amber-50">
+                <Card className="border-warning/30 bg-warning/10">
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-amber-900">Tingkat Tabungan Rendah</p>
-                        <p className="text-sm text-amber-700 mt-1">
+                        <p className="font-medium text-warning">Tingkat Tabungan Rendah</p>
+                        <p className="text-sm text-warning mt-1">
                           Cobalah menyisihkan minimal 20% pendapatan untuk tabungan. Pertimbangkan untuk mengurangi pengeluaran hiburan.
                         </p>
                       </div>
@@ -285,7 +285,7 @@ export function FinancialCalculator() {
         </TabsContent>
 
         <TabsContent value="salary" className="space-y-6">
-          <Card className="border-slate-200">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="text-lg">Pilih Posisi</CardTitle>
             </CardHeader>
@@ -309,33 +309,33 @@ export function FinancialCalculator() {
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <div className="grid sm:grid-cols-3 gap-4">
-                  <Card className="border-slate-200">
+                  <Card className="border-border">
                     <CardContent className="pt-6 text-center">
-                      <p className="text-sm text-slate-500">Minimum</p>
-                      <p className="text-xl font-bold text-slate-900 mt-1">
+                      <p className="text-sm text-muted-foreground">Minimum</p>
+                      <p className="text-xl font-bold text-foreground mt-1">
                         {formatCurrency(salaryData.salaryRange.min)}
                       </p>
                     </CardContent>
                   </Card>
-                  <Card className="border-slate-200">
+                  <Card className="border-border">
                     <CardContent className="pt-6 text-center">
-                      <p className="text-sm text-slate-500">Median</p>
-                      <p className="text-xl font-bold text-career-600 mt-1">
+                      <p className="text-sm text-muted-foreground">Median</p>
+                      <p className="text-xl font-bold text-brand mt-1">
                         {formatCurrency(salaryData.salaryRange.median)}
                       </p>
                     </CardContent>
                   </Card>
-                  <Card className="border-slate-200">
+                  <Card className="border-border">
                     <CardContent className="pt-6 text-center">
-                      <p className="text-sm text-slate-500">Maksimum</p>
-                      <p className="text-xl font-bold text-slate-900 mt-1">
+                      <p className="text-sm text-muted-foreground">Maksimum</p>
+                      <p className="text-xl font-bold text-foreground mt-1">
                         {formatCurrency(salaryData.salaryRange.max)}
                       </p>
                     </CardContent>
                   </Card>
                 </div>
 
-                <Card className="border-slate-200">
+                <Card className="border-border">
                   <CardHeader>
                     <CardTitle className="text-lg">Rentang Gaji</CardTitle>
                   </CardHeader>
@@ -358,14 +358,14 @@ export function FinancialCalculator() {
               </div>
 
               <div className="space-y-6">
-                <Card className="border-slate-200">
+                <Card className="border-border">
                   <CardHeader>
                     <CardTitle className="text-lg">Skill Utama</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {salaryData.topSkills.map((skill) => (
-                        <Badge key={skill} variant="secondary" className="bg-career-100 text-career-700">
+                        <Badge key={skill} variant="secondary" className="bg-brand-muted text-brand">
                           {skill}
                         </Badge>
                       ))}
@@ -373,7 +373,7 @@ export function FinancialCalculator() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-slate-200">
+                <Card className="border-border">
                   <CardHeader>
                     <CardTitle className="text-lg">Tren Pasar</CardTitle>
                   </CardHeader>
@@ -381,18 +381,18 @@ export function FinancialCalculator() {
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         'w-12 h-12 rounded-xl flex items-center justify-center',
-                        salaryData.demandTrend === 'increasing' ? 'bg-green-100' : 'bg-amber-100'
+                        salaryData.demandTrend === 'increasing' ? 'bg-success/20' : 'bg-warning/20'
                       )}>
                         <TrendingUp className={cn(
                           'w-6 h-6',
-                          salaryData.demandTrend === 'increasing' ? 'text-green-600' : 'text-amber-600'
+                          salaryData.demandTrend === 'increasing' ? 'text-success' : 'text-warning'
                         )} />
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900 capitalize">
+                        <p className="font-semibold text-foreground capitalize">
                           {salaryData.demandTrend === 'increasing' ? 'Meningkat' : 'Stabil'}
                         </p>
-                        <p className="text-sm text-slate-500">Tren Permintaan</p>
+                        <p className="text-sm text-muted-foreground">Tren Permintaan</p>
                       </div>
                     </div>
                   </CardContent>
@@ -403,7 +403,7 @@ export function FinancialCalculator() {
         </TabsContent>
 
         <TabsContent value="compare" className="space-y-6">
-          <Card className="border-slate-200">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="text-lg">Pilih Kota untuk Dibandingkan</CardTitle>
             </CardHeader>
@@ -444,7 +444,7 @@ export function FinancialCalculator() {
           </Card>
 
           <div className="grid lg:grid-cols-2 gap-6">
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Perbandingan Biaya</CardTitle>
               </CardHeader>
@@ -464,7 +464,7 @@ export function FinancialCalculator() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200">
+            <Card className="border-border">
               <CardHeader>
                 <CardTitle className="text-lg">Detail Kota</CardTitle>
               </CardHeader>
@@ -477,36 +477,36 @@ export function FinancialCalculator() {
                         key={cityName} 
                         className={cn(
                           'p-4 rounded-xl',
-                          index === 0 ? 'bg-career-50' : 'bg-purple-50'
+                          index === 0 ? 'bg-brand-muted' : 'bg-accent/50'
                         )}
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <div className={cn(
                             'w-10 h-10 rounded-lg flex items-center justify-center',
-                            index === 0 ? 'bg-career-500' : 'bg-purple-500'
+                            index === 0 ? 'bg-brand' : 'bg-accent-foreground'
                           )}>
-                            <MapPin className="w-5 h-5 text-white" />
+                            <MapPin className="w-5 h-5 text-brand-foreground" />
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-900">{city.name}</p>
-                            <p className="text-sm text-slate-500">{city.country}</p>
+                            <p className="font-semibold text-foreground">{city.name}</p>
+                            <p className="text-sm text-muted-foreground">{city.country}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <p className="text-xs text-slate-500">Indeks Biaya</p>
+                            <p className="text-xs text-muted-foreground">Indeks Biaya</p>
                             <p className={cn(
                               'font-semibold',
-                              index === 0 ? 'text-career-700' : 'text-purple-700'
+                              index === 0 ? 'text-brand' : 'text-brand'
                             )}>
                               {city.costIndex}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-slate-500">Indeks Sewa</p>
+                            <p className="text-xs text-muted-foreground">Indeks Sewa</p>
                             <p className={cn(
                               'font-semibold',
-                              index === 0 ? 'text-career-700' : 'text-purple-700'
+                              index === 0 ? 'text-brand' : 'text-brand'
                             )}>
                               {city.rentIndex}
                             </p>

@@ -34,7 +34,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { useApplications } from "@/shared/hooks/useApplications";
 import { useAgenda } from "@/shared/hooks/useAgenda";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
 
 const CHART_CONFIG = {
   lamaran: { label: "Lamaran", color: "var(--chart-sky)" },
@@ -235,7 +235,7 @@ export function DashboardHome() {
               </Link>
             </Button>
             <Separator />
-            <Button asChild variant="ghost" className="justify-between text-career-700">
+            <Button asChild variant="ghost" className="justify-between text-brand">
               <Link href="/dashboard/calendar">
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4" /> Mulai chat dengan AI
@@ -348,10 +348,10 @@ function typeLabel(t: string): string {
 
 type Tone = "sky" | "violet" | "green" | "amber";
 const TONE_CLS: Record<Tone, string> = {
-  sky: "text-sky-600 bg-sky-100 dark:bg-sky-950/40 dark:text-sky-300",
-  violet: "text-violet-600 bg-violet-100 dark:bg-violet-950/40 dark:text-violet-300",
-  green: "text-emerald-600 bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300",
-  amber: "text-amber-600 bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300",
+  sky: "text-info bg-info/20 dark:bg-info/20 dark:text-brand/80",
+  violet: "text-brand bg-accent dark:bg-accent dark:text-brand/80",
+  green: "text-success bg-success/20 dark:bg-success/20 dark:text-success/80",
+  amber: "text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/80",
 };
 
 interface StatCardProps {

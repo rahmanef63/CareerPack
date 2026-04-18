@@ -27,6 +27,26 @@ const config: Config = {
   				DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
   				foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)'
   			},
+  			success: {
+  				DEFAULT: 'hsl(var(--success) / <alpha-value>)',
+  				foreground: 'hsl(var(--success-foreground) / <alpha-value>)'
+  			},
+  			warning: {
+  				DEFAULT: 'hsl(var(--warning) / <alpha-value>)',
+  				foreground: 'hsl(var(--warning-foreground) / <alpha-value>)'
+  			},
+  			info: {
+  				DEFAULT: 'hsl(var(--info) / <alpha-value>)',
+  				foreground: 'hsl(var(--info-foreground) / <alpha-value>)'
+  			},
+  			brand: {
+  				DEFAULT: 'hsl(var(--brand) / <alpha-value>)',
+  				foreground: 'hsl(var(--brand-foreground) / <alpha-value>)',
+  				from: 'hsl(var(--brand-from) / <alpha-value>)',
+  				to: 'hsl(var(--brand-to) / <alpha-value>)',
+  				muted: 'hsl(var(--brand-muted) / <alpha-value>)',
+  				'muted-foreground': 'hsl(var(--brand-muted-foreground) / <alpha-value>)'
+  			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
@@ -74,7 +94,11 @@ const config: Config = {
   			xs: 'calc(var(--radius) - 6px)'
   		},
   		boxShadow: {
-  			xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+  			xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+  			cta: 'var(--shadow-cta)'
+  		},
+  		backgroundImage: {
+  			'brand-gradient': 'var(--brand-gradient)'
   		},
   		keyframes: {
   			'accordion-down': {

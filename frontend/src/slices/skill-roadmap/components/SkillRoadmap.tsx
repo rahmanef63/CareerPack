@@ -331,17 +331,17 @@ export function SkillRoadmap() {
     return (
       <div className={cn('relative', level > 0 && 'ml-8 mt-4')}>
         {level > 0 && (
-          <div className="absolute -left-6 top-6 w-6 h-px bg-slate-300" />
+          <div className="absolute -left-6 top-6 w-6 h-px bg-muted" />
         )}
         
         <div 
           className={cn(
             'relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-300',
-            isCompleted 
-              ? 'border-green-500 bg-green-50/50' 
+            isCompleted
+              ? 'border-success bg-success/10'
               : isLocked
-                ? 'border-slate-200 bg-slate-50 opacity-60'
-                : 'border-slate-200 bg-white hover:border-career-300 hover:shadow-md'
+                ? 'border-border bg-muted/50 opacity-60'
+                : 'border-border bg-card hover:border-brand hover:shadow-md'
           )}
           onClick={() => !isLocked && setSelectedNode(node)}
         >
@@ -350,10 +350,10 @@ export function SkillRoadmap() {
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               isCompleted 
-                ? 'bg-green-500 text-white' 
+                ? 'bg-success text-brand-foreground' 
                 : isLocked
-                  ? 'bg-slate-200 text-slate-400'
-                  : 'bg-career-100 text-career-600 hover:bg-career-200'
+                  ? 'bg-muted text-muted-foreground'
+                  : 'bg-brand-muted text-brand hover:bg-brand/30'
             )}
           >
             {isCompleted ? (
@@ -370,13 +370,13 @@ export function SkillRoadmap() {
               <div>
                 <h4 className={cn(
                   'font-semibold text-lg',
-                  isCompleted ? 'text-green-700' : 'text-slate-900'
+                  isCompleted ? 'text-success' : 'text-foreground'
                 )}>
                   {node.title}
                 </h4>
-                <p className="text-slate-600 text-sm mt-1">{node.description}</p>
+                <p className="text-muted-foreground text-sm mt-1">{node.description}</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mt-3">
@@ -384,18 +384,18 @@ export function SkillRoadmap() {
                 variant="secondary" 
                 className={cn(
                   'text-xs',
-                  node.difficulty === 'beginner' && 'bg-green-100 text-green-700',
-                  node.difficulty === 'intermediate' && 'bg-amber-100 text-amber-700',
-                  node.difficulty === 'advanced' && 'bg-red-100 text-red-700',
+                  node.difficulty === 'beginner' && 'bg-success/20 text-success',
+                  node.difficulty === 'intermediate' && 'bg-warning/20 text-warning',
+                  node.difficulty === 'advanced' && 'bg-destructive/10 text-destructive',
                 )}
               >
                 {getDifficultyLabel(node.difficulty)}
               </Badge>
-              <div className="flex items-center gap-1 text-xs text-slate-500">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="w-3.5 h-3.5" />
                 {node.estimatedHours} jam
               </div>
-              <div className="flex items-center gap-1 text-xs text-slate-500">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <BookOpen className="w-3.5 h-3.5" />
                 {node.resources.length} sumber
               </div>
@@ -410,7 +410,7 @@ export function SkillRoadmap() {
 
         {hasChildren && (
           <div className="relative mt-4">
-            <div className="absolute left-5 top-0 bottom-0 w-px bg-slate-200" />
+            <div className="absolute left-5 top-0 bottom-0 w-px bg-muted" />
             {node.children?.map((child) => (
               <RoadmapNodeComponent key={child.id} node={child} level={level + 1} />
             ))}
@@ -427,12 +427,12 @@ export function SkillRoadmap() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-career-500 to-career-700 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-brand-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">Roadmap Skill</h1>
+          <h1 className="text-3xl font-bold text-foreground">Roadmap Skill</h1>
         </div>
-        <p className="text-slate-600">Jalur pembelajaran terstruktur untuk menguasai skill yang diminati</p>
+        <p className="text-muted-foreground">Jalur pembelajaran terstruktur untuk menguasai skill yang diminati</p>
       </div>
 
       {/* Category Selection */}
@@ -446,21 +446,21 @@ export function SkillRoadmap() {
               className={cn(
                 'flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200',
                 selectedCategory === category.id
-                  ? 'border-career-500 bg-career-50'
-                  : 'border-slate-200 bg-white hover:border-career-200 hover:bg-slate-50'
+                  ? 'border-brand bg-brand-muted'
+                  : 'border-border bg-card hover:border-brand hover:bg-muted/50'
               )}
               title={category.description}
             >
               <div className={cn(
                 'w-10 h-10 rounded-lg flex items-center justify-center',
                 category.color,
-                selectedCategory === category.id && 'ring-4 ring-career-200'
+                selectedCategory === category.id && 'ring-4 ring-brand'
               )}>
-                <Icon className="w-5 h-5 text-white" />
+                <Icon className="w-5 h-5 text-brand-foreground" />
               </div>
               <span className={cn(
                 'text-xs font-medium text-center leading-tight',
-                selectedCategory === category.id ? 'text-career-700' : 'text-slate-700'
+                selectedCategory === category.id ? 'text-brand' : 'text-foreground'
               )}>
                 {category.name}
               </span>
@@ -472,20 +472,20 @@ export function SkillRoadmap() {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Roadmap */}
         <div className="lg:col-span-2">
-          <Card className="border-slate-200">
-            <CardHeader className="border-b border-slate-100">
+          <Card className="border-border">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl">
                     {indonesianRoadmapCategories.find(c => c.id === selectedCategory)?.name}
                   </CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Selesaikan setiap topik untuk membuka level berikutnya
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-career-600">{progress}%</div>
-                  <div className="text-xs text-slate-500">Selesai</div>
+                  <div className="text-2xl font-bold text-brand">{progress}%</div>
+                  <div className="text-xs text-muted-foreground">Selesai</div>
                 </div>
               </div>
               <Progress value={progress} className="mt-4 h-2" />
@@ -503,43 +503,43 @@ export function SkillRoadmap() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Progress Stats */}
-          <Card className="border-slate-200">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="text-lg">Progres Anda</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-career-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-brand-muted rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Trophy className="w-5 h-5 text-career-600" />
-                    <span className="text-sm font-medium text-slate-700">Topik Selesai</span>
+                    <Trophy className="w-5 h-5 text-brand" />
+                    <span className="text-sm font-medium text-foreground">Topik Selesai</span>
                   </div>
-                  <span className="font-bold text-career-700">
+                  <span className="font-bold text-brand">
                     {completedNodes.size}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-slate-700">Jam Belajar</span>
+                    <Clock className="w-5 h-5 text-success" />
+                    <span className="text-sm font-medium text-foreground">Jam Belajar</span>
                   </div>
-                  <span className="font-bold text-green-700">
+                  <span className="font-bold text-success">
                     {completedNodes.size * 15}+
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Star className="w-5 h-5 text-amber-600" />
-                    <span className="text-sm font-medium text-slate-700">Streak Saat Ini</span>
+                    <Star className="w-5 h-5 text-warning" />
+                    <span className="text-sm font-medium text-foreground">Streak Saat Ini</span>
                   </div>
-                  <span className="font-bold text-amber-700">5 hari</span>
+                  <span className="font-bold text-warning">5 hari</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Recommended Resources */}
-          <Card className="border-slate-200">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="text-lg">Sumber Belajar</CardTitle>
             </CardHeader>
@@ -553,16 +553,16 @@ export function SkillRoadmap() {
                       href={resource.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-career-300 hover:bg-career-50 transition-all duration-200"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-brand hover:bg-brand-muted transition-all duration-200"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-career-100 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-career-600" />
+                      <div className="w-10 h-10 rounded-lg bg-brand-muted flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-brand" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 text-sm truncate">{resource.title}</p>
-                        <p className="text-xs text-slate-500 capitalize">{resource.type}</p>
+                        <p className="font-medium text-foreground text-sm truncate">{resource.title}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{resource.type}</p>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-slate-400" />
+                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
                     </a>
                   );
                 })}
@@ -571,15 +571,15 @@ export function SkillRoadmap() {
           </Card>
 
           {/* Tips Card */}
-          <Card className="border-slate-200 bg-gradient-to-br from-career-50 to-career-100">
+          <Card className="border-border bg-gradient-to-br from-brand-muted to-brand-muted">
             <CardContent className="pt-6">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-career-500 flex items-center justify-center flex-shrink-0">
-                  <Lightbulb className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="w-5 h-5 text-brand-foreground" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-career-900">Tips Belajar</h4>
-                  <ul className="text-sm text-career-700 mt-2 space-y-1">
+                  <h4 className="font-semibold text-brand">Tips Belajar</h4>
+                  <ul className="text-sm text-brand mt-2 space-y-1">
                     <li>• Belajar secara konsisten setiap hari</li>
                     <li>• Praktikkan dengan membuat proyek</li>
                     <li>• Bergabung dengan komunitas</li>
@@ -601,17 +601,17 @@ export function SkillRoadmap() {
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     'w-12 h-12 rounded-xl flex items-center justify-center',
-                    completedNodes.has(selectedNode.id) ? 'bg-green-500' : 'bg-career-500'
+                    completedNodes.has(selectedNode.id) ? 'bg-success' : 'bg-brand'
                   )}>
                     {completedNodes.has(selectedNode.id) ? (
-                      <CheckCircle2 className="w-6 h-6 text-white" />
+                      <CheckCircle2 className="w-6 h-6 text-brand-foreground" />
                     ) : (
-                      <BookOpen className="w-6 h-6 text-white" />
+                      <BookOpen className="w-6 h-6 text-brand-foreground" />
                     )}
                   </div>
                   <div>
                     <DialogTitle className="text-xl">{selectedNode.title}</DialogTitle>
-                    <p className="text-sm text-slate-500">{selectedNode.description}</p>
+                    <p className="text-sm text-muted-foreground">{selectedNode.description}</p>
                   </div>
                 </div>
               </DialogHeader>
@@ -621,21 +621,21 @@ export function SkillRoadmap() {
                   <Badge 
                     variant="secondary" 
                     className={cn(
-                      selectedNode.difficulty === 'beginner' && 'bg-green-100 text-green-700',
-                      selectedNode.difficulty === 'intermediate' && 'bg-amber-100 text-amber-700',
-                      selectedNode.difficulty === 'advanced' && 'bg-red-100 text-red-700',
+                      selectedNode.difficulty === 'beginner' && 'bg-success/20 text-success',
+                      selectedNode.difficulty === 'intermediate' && 'bg-warning/20 text-warning',
+                      selectedNode.difficulty === 'advanced' && 'bg-destructive/10 text-destructive',
                     )}
                   >
                     {getDifficultyLabel(selectedNode.difficulty)}
                   </Badge>
-                  <Badge variant="secondary" className="bg-slate-100">
+                  <Badge variant="secondary" className="bg-muted">
                     <Clock className="w-3 h-3 mr-1" />
                     {selectedNode.estimatedHours} jam
                   </Badge>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-slate-900 mb-3">Sumber Belajar</h4>
+                  <h4 className="font-semibold text-foreground mb-3">Sumber Belajar</h4>
                   <div className="space-y-3">
                     {selectedNode.resources.map((resource) => {
                       const Icon = getResourceIcon(resource.type);
@@ -645,25 +645,25 @@ export function SkillRoadmap() {
                           href={resource.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-career-300 hover:bg-career-50 transition-all duration-200"
+                          className="flex items-center gap-4 p-4 rounded-xl border border-border hover:border-brand hover:bg-brand-muted transition-all duration-200"
                         >
-                          <div className="w-12 h-12 rounded-xl bg-career-100 flex items-center justify-center flex-shrink-0">
-                            <Icon className="w-6 h-6 text-career-600" />
+                          <div className="w-12 h-12 rounded-xl bg-brand-muted flex items-center justify-center flex-shrink-0">
+                            <Icon className="w-6 h-6 text-brand" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-slate-900">{resource.title}</p>
+                            <p className="font-medium text-foreground">{resource.title}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline" className="text-xs capitalize">
                                 {resource.type}
                               </Badge>
                               {resource.free && (
-                                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                                <Badge variant="secondary" className="text-xs bg-success/20 text-success">
                                   Gratis
                                 </Badge>
                               )}
                             </div>
                           </div>
-                          <ExternalLink className="w-5 h-5 text-slate-400" />
+                          <ExternalLink className="w-5 h-5 text-muted-foreground" />
                         </a>
                       );
                     })}
@@ -672,14 +672,14 @@ export function SkillRoadmap() {
 
                 {selectedNode.prerequisites.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-slate-900 mb-3">Prasyarat</h4>
+                    <h4 className="font-semibold text-foreground mb-3">Prasyarat</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedNode.prerequisites.map((prereq) => (
                         <Badge 
                           key={prereq} 
                           variant="secondary"
                           className={cn(
-                            completedNodes.has(prereq) && 'bg-green-100 text-green-700'
+                            completedNodes.has(prereq) && 'bg-success/20 text-success'
                           )}
                         >
                           {prereq}
@@ -694,8 +694,8 @@ export function SkillRoadmap() {
                     className={cn(
                       'w-full',
                       completedNodes.has(selectedNode.id)
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : 'bg-career-600 hover:bg-career-700'
+                        ? 'bg-success hover:bg-success'
+                        : 'bg-brand hover:bg-brand'
                     )}
                     onClick={(e) => toggleNodeCompletion(selectedNode.id, e)}
                   >
