@@ -1,44 +1,31 @@
 "use client";
 
-import { Home, FileUser, Calendar, LayoutGrid, type LucideIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { AIFab } from "./AIFab";
 import { Ripple, useHapticPress } from "./MicroInteractions";
-
-export type NavView = "home" | "cv" | "calendar" | "more";
-
-interface NavItem {
-  id: NavView;
-  label: string;
-  icon: LucideIcon;
-  badge?: number;
-}
-
-const ITEMS: NavItem[] = [
-  { id: "home", label: "Beranda", icon: Home },
-  { id: "cv", label: "CV", icon: FileUser },
-  { id: "calendar", label: "Kalender", icon: Calendar, badge: 0 },
-  { id: "more", label: "Lainnya", icon: LayoutGrid },
-];
+import { PRIMARY_NAV, MORE_NAV_ICON, type NavItem, type PrimaryNavId } from "./navConfig";
 
 interface BottomNavProps {
   current: string;
-  onSelect: (id: NavView) => void;
+  onSelect: (id: PrimaryNavId) => void;
   onAITap: () => void;
   aiActive?: boolean;
 }
 
+/**
+ * Bottom tab bar khusus mobile/tablet (< lg).
+ * Layout: 2 tab kiri · AI FAB (tengah, menonjol) · Kalender · More.
+ */
 export function BottomNav({ current, onSelect, onAITap, aiActive }: BottomNavProps) {
-  const left = ITEMS.slice(0, 2);
-  const right = ITEMS.slice(2);
+  const leftTabs = PRIMARY_NAV.slice(0, 2);
+  const rightTab = PRIMARY_NAV[2];
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40"
+      className="fixed inset-x-0 bottom-0 z-40 lg:hidden"
       style={{ paddingBottom: "var(--safe-bottom)" }}
     >
       <div className="nav-shell relative bg-card border-t border-border">
-        {/* Notch SVG cutout for [data-nav-style="notched"] */}
         <svg
           aria-hidden
           viewBox="0 0 100 28"
@@ -48,8 +35,11 @@ export function BottomNav({ current, onSelect, onAITap, aiActive }: BottomNavPro
           <path d="M0 28 Q 0 0 30 0 Q 50 0 50 14 Q 50 0 70 0 Q 100 0 100 28 Z" fill="currentColor" />
         </svg>
 
-        <nav className="grid grid-cols-5 h-[var(--nav-height)] items-center max-w-3xl mx-auto px-2">
-          {left.map((item) => (
+        <nav
+          className="grid grid-cols-5 h-[var(--nav-height)] items-center max-w-3xl mx-auto px-2"
+          aria-label="Navigasi utama"
+        >
+          {leftTabs.map((item) => (
             <NavButton key={item.id} item={item} active={current === item.id} onSelect={onSelect} />
           ))}
 
@@ -57,34 +47,37 @@ export function BottomNav({ current, onSelect, onAITap, aiActive }: BottomNavPro
             <AIFab onClick={onAITap} active={aiActive} />
           </div>
 
-          {right.map((item) => (
-            <NavButton key={item.id} item={item} active={current === item.id} onSelect={onSelect} />
-          ))}
+          <NavButton item={rightTab} active={current === rightTab.id} onSelect={onSelect} />
+          <NavButton
+            item={{ id: "more", label: "Lainnya", icon: MORE_NAV_ICON }}
+            active={current === "more"}
+            onSelect={onSelect}
+          />
         </nav>
       </div>
     </div>
   );
 }
 
-function NavButton({
-  item,
-  active,
-  onSelect,
-}: {
-  item: NavItem;
+interface NavButtonProps<TId extends PrimaryNavId> {
+  item: NavItem<TId>;
   active: boolean;
-  onSelect: (id: NavView) => void;
-}) {
+  onSelect: (id: TId) => void;
+}
+
+function NavButton<TId extends PrimaryNavId>({ item, active, onSelect }: NavButtonProps<TId>) {
   const Icon = item.icon;
   const press = useHapticPress();
   return (
     <button
       type="button"
       onClick={() => onSelect(item.id)}
+      aria-label={item.label}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "relative flex flex-col items-center justify-center gap-1 h-full rounded-xl mx-1 px-1",
         "text-[11px] font-medium transition-colors tap-press",
-        active ? "text-career-700 dark:text-career-200" : "text-slate-500 dark:text-slate-400"
+        active ? "text-career-700 dark:text-career-200" : "text-muted-foreground"
       )}
       {...press}
     >
@@ -96,11 +89,6 @@ function NavButton({
         )}
       >
         <Icon className={cn("w-5 h-5", active && "animate-badge-bounce")} />
-        {!!item.badge && item.badge > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center animate-badge-bounce">
-            {item.badge}
-          </span>
-        )}
       </span>
       <span className="truncate max-w-[64px]">{item.label}</span>
     </button>
