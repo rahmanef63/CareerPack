@@ -34,6 +34,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { useApplications } from "@/slices/career-dashboard/hooks/useApplications";
 import { useAgenda } from "@/slices/calendar/hooks/useAgenda";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 
 const CHART_CONFIG = {
   lamaran: { label: "Lamaran", color: "var(--chart-sky)" },
@@ -43,7 +44,6 @@ const CHART_CONFIG = {
 export function DashboardHome() {
   const { state } = useAuth();
   const { applications, isLoading: loadingApps } = useApplications();
-  const { items: agenda, isLoading: loadingAgenda } = useAgenda();
 
   const stats = useMemo(() => {
     const interview = applications.filter((a) => a.status === "interview").length;
@@ -93,17 +93,6 @@ export function DashboardHome() {
     });
     return weeks;
   }, [applications]);
-
-  const upcomingAgenda = useMemo(
-    () =>
-      agenda
-        .filter((a) => a.date >= new Date().toISOString().slice(0, 10))
-        .sort((a, b) =>
-          a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date)
-        )
-        .slice(0, 4),
-    [agenda]
-  );
 
   const firstName = (state.user?.name || "").split(" ")[0] || "Anda";
 
@@ -250,69 +239,95 @@ export function DashboardHome() {
         </Card>
       </div>
 
-      {/* Upcoming agenda */}
-      <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle>Agenda Terdekat</CardTitle>
-            <CardDescription>
-              Wawancara, tenggat, dan follow-up mendatang
-            </CardDescription>
-          </div>
-          <Button asChild size="sm" variant="outline">
-            <Link href="/calendar">Lihat semua</Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {loadingAgenda ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">Memuat…</p>
-          ) : upcomingAgenda.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-sm text-muted-foreground">
-                Belum ada agenda mendatang.
-              </p>
-              <Button asChild size="sm" className="mt-3">
-                <Link href="/calendar">
-                  <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {upcomingAgenda.map((it) => (
-                <li
-                  key={it.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/40"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-background border flex flex-col items-center justify-center">
-                    <span className="text-[9px] uppercase text-muted-foreground font-medium">
-                      {new Date(it.date).toLocaleDateString("id-ID", {
-                        month: "short",
-                      })}
-                    </span>
-                    <span className="text-sm font-bold leading-none">
-                      {new Date(it.date).getDate()}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{it.title}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-2">
-                      <Clock className="w-3 h-3" /> {it.time} · {it.location}
-                    </p>
-                  </div>
-                  <Badge variant="secondary" className="capitalize text-[10px]">
-                    {typeLabel(it.type)}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-        <CardFooter className="text-xs text-muted-foreground">
-          {upcomingAgenda.length} agenda ditampilkan
-        </CardFooter>
-      </Card>
+      {/* Upcoming agenda — terbungkus ErrorBoundary supaya kalau
+          query Convex (calendar) belum di-deploy, dashboard tetap render. */}
+      <ErrorBoundary title="Agenda Terdekat tidak tersedia">
+        <AgendaSection />
+      </ErrorBoundary>
     </div>
+  );
+}
+
+/**
+ * Section terisolasi: hook `useAgenda` dipanggil di sini, bukan di
+ * top-level DashboardHome. Kalau query throw, ErrorBoundary parent
+ * yang menangkap.
+ */
+function AgendaSection() {
+  const { items: agenda, isLoading: loadingAgenda } = useAgenda();
+  const upcomingAgenda = useMemo(
+    () =>
+      agenda
+        .filter((a) => a.date >= new Date().toISOString().slice(0, 10))
+        .sort((a, b) =>
+          a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date)
+        )
+        .slice(0, 4),
+    [agenda]
+  );
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center justify-between space-y-0">
+        <div>
+          <CardTitle>Agenda Terdekat</CardTitle>
+          <CardDescription>
+            Wawancara, tenggat, dan follow-up mendatang
+          </CardDescription>
+        </div>
+        <Button asChild size="sm" variant="outline">
+          <Link href="/dashboard/calendar">Lihat semua</Link>
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {loadingAgenda ? (
+          <p className="text-sm text-muted-foreground py-6 text-center">Memuat…</p>
+        ) : upcomingAgenda.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-sm text-muted-foreground">
+              Belum ada agenda mendatang.
+            </p>
+            <Button asChild size="sm" className="mt-3">
+              <Link href="/dashboard/calendar">
+                <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {upcomingAgenda.map((it) => (
+              <li
+                key={it.id}
+                className="flex items-center gap-3 p-3 rounded-lg bg-muted/40"
+              >
+                <div className="w-10 h-10 rounded-lg bg-background border flex flex-col items-center justify-center">
+                  <span className="text-[9px] uppercase text-muted-foreground font-medium">
+                    {new Date(it.date).toLocaleDateString("id-ID", {
+                      month: "short",
+                    })}
+                  </span>
+                  <span className="text-sm font-bold leading-none">
+                    {new Date(it.date).getDate()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{it.title}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> {it.time} · {it.location}
+                  </p>
+                </div>
+                <Badge variant="secondary" className="capitalize text-[10px]">
+                  {typeLabel(it.type)}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+      <CardFooter className="text-xs text-muted-foreground">
+        {upcomingAgenda.length} agenda ditampilkan
+      </CardFooter>
+    </Card>
   );
 }
 
