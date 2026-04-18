@@ -1,6 +1,8 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LogOut, Sparkles } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,23 +19,22 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { BrandMark } from "./Logo";
-import { PRIMARY_NAV, MORE_APPS } from "./navConfig";
-import type { NavId } from "./navConfig";
+import { PRIMARY_NAV, MORE_APPS, activeNavForPath } from "./navConfig";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { cn } from "@/shared/lib/utils";
 
 interface DesktopSidebarProps {
-  current: string;
-  onSelect: (id: NavId) => void;
   onAITap: () => void;
   aiActive: boolean;
 }
 
-export function DesktopSidebar({
-  current,
-  onSelect,
-  onAITap,
-  aiActive,
-}: DesktopSidebarProps) {
+/**
+ * Sidebar persisten di desktop (≥lg). Collapsible icon-mode via Cmd/Ctrl+B.
+ * Tidak membuat SidebarProvider sendiri — owner (DesktopContainer) yang bungkus.
+ */
+export function DesktopSidebar({ onAITap, aiActive }: DesktopSidebarProps) {
+  const pathname = usePathname();
+  const active = activeNavForPath(pathname);
   const { state, logout } = useAuth();
   const user = state.user;
   const initials = (user?.name || "U").slice(0, 1).toUpperCase();
@@ -61,15 +62,18 @@ export function DesktopSidebar({
             <SidebarMenu>
               {PRIMARY_NAV.map((item) => {
                 const Icon = item.icon;
+                const isActive = active?.id === item.id;
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
+                      asChild
                       tooltip={item.label}
-                      isActive={current === item.id}
-                      onClick={() => onSelect(item.id)}
+                      isActive={isActive}
                     >
-                      <Icon />
-                      <span>{item.label}</span>
+                      <Link href={item.href} aria-current={isActive ? "page" : undefined}>
+                        <Icon />
+                        <span>{item.label}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -80,12 +84,14 @@ export function DesktopSidebar({
                   tooltip="Asisten AI"
                   isActive={aiActive}
                   onClick={onAITap}
-                  className="data-[active=true]:bg-gradient-to-r data-[active=true]:from-sky-500/10 data-[active=true]:to-indigo-500/10"
+                  aria-label="Buka Asisten AI"
+                  className={cn(
+                    "data-[active=true]:bg-gradient-to-r",
+                    "data-[active=true]:from-sky-500/10 data-[active=true]:to-indigo-500/10"
+                  )}
                 >
-                  <span className="relative inline-flex w-5 h-5 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
-                    <svg viewBox="0 0 24 24" className="w-3 h-3" fill="currentColor" aria-hidden>
-                      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z" />
-                    </svg>
+                  <span className="relative inline-flex size-5 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
+                    <Sparkles className="w-3 h-3" />
                   </span>
                   <span>Asisten AI</span>
                 </SidebarMenuButton>
@@ -102,15 +108,18 @@ export function DesktopSidebar({
             <SidebarMenu>
               {MORE_APPS.map((item) => {
                 const Icon = item.icon;
+                const isActive = active?.id === item.id;
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
+                      asChild
                       tooltip={item.label}
-                      isActive={current === item.id}
-                      onClick={() => onSelect(item.id)}
+                      isActive={isActive}
                     >
-                      <Icon />
-                      <span>{item.label}</span>
+                      <Link href={item.href} aria-current={isActive ? "page" : undefined}>
+                        <Icon />
+                        <span>{item.label}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

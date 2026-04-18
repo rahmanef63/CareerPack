@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from 'react';
 import { 
   Calculator, Wallet, Home, Utensils, Car, 

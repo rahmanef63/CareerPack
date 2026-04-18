@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
@@ -34,7 +36,7 @@ export function LoginPage() {
         try {
             const success = await login({ email: loginEmail, password: loginPassword });
             if (success) {
-                router.push('/');
+                router.push('/dashboard');
             } else {
                 setError('Email atau password salah');
             }
@@ -57,7 +59,7 @@ export function LoginPage() {
                 name: registerName
             });
             if (success) {
-                router.push('/');
+                router.push('/dashboard');
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Registrasi gagal');

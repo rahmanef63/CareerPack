@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { 
   FileCheck, CheckCircle2, Circle, AlertCircle, 

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from 'react';
 import { 
   CheckCircle2, Circle, Lock, BookOpen, Video, 

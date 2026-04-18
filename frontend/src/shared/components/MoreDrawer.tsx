@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -11,21 +12,20 @@ import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
 import { StaggerList, useHapticPress } from "./MicroInteractions";
-import { MORE_APPS, type MoreAppId, type MoreAppTile } from "./navConfig";
-
-export type MoreView = MoreAppId;
+import { MORE_APPS, type MoreAppTile } from "./navConfig";
 
 interface MoreDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (id: MoreAppId) => void;
 }
 
 /**
- * App-launcher bottom sheet (mobile). Memakai shadcn Sheet
- * (focus-trap + escape + click-outside terpasang otomatis).
+ * App-launcher bottom sheet (mobile). Semua tile → router.push(href).
+ * Tidak ada prop `onSelect` — nav ditangani langsung.
  */
-export function MoreDrawer({ open, onOpenChange, onSelect }: MoreDrawerProps) {
+export function MoreDrawer({ open, onOpenChange }: MoreDrawerProps) {
+  const router = useRouter();
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -45,7 +45,7 @@ export function MoreDrawer({ open, onOpenChange, onSelect }: MoreDrawerProps) {
                   key={tile.id}
                   tile={tile}
                   onClick={() => {
-                    onSelect(tile.id);
+                    router.push(tile.href);
                     onOpenChange(false);
                   }}
                 />

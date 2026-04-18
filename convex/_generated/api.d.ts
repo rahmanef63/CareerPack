@@ -11,6 +11,7 @@
 import type * as ai from "../ai.js";
 import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
+import type * as calendar from "../calendar.js";
 import type * as chat from "../chat.js";
 import type * as cv from "../cv.js";
 import type * as documents from "../documents.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   applications: typeof applications;
   auth: typeof auth;
+  calendar: typeof calendar;
   chat: typeof chat;
   cv: typeof cv;
   documents: typeof documents;
