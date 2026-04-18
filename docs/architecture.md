@@ -22,7 +22,7 @@ CareerPack/
 │  ├─ src/
 │  │  ├─ shared/
 │  │  │  ├─ components/                 App shell (Sidebar, BottomNav, Header, FAB, …)
-│  │  │  │  └─ ui/                      shadcn primitives (≈50 files, ~28 actively imported)
+│  │  │  │  └─ ui/                      shadcn primitives (36 files, all imported)
 │  │  │  ├─ containers/                 ResponsiveContainer → Desktop/Mobile
 │  │  │  ├─ hooks/                      useAuth, useAIConfig, useUIPrefs, useAgenda, useApplications, usePWAInstall, use-mobile
 │  │  │  ├─ providers/                  ConvexClientProvider, Providers root
@@ -74,9 +74,8 @@ Semua via catch-all: `app/(dashboard)/dashboard/[[...slug]]/page.tsx`.
 | `interview` | `mock-interview` → `MockInterview` |
 | `calculator` | `financial-calculator` → `FinancialCalculator` |
 | `settings` | `settings` → `TweaksPanel` |
+| `ai-settings` | `ai-settings` → `AISettingsPanel` |
 | `matcher` / `networking` / `portfolio` / `notifications` / `help` | `DashboardPlaceholders` (coming-soon) |
-
-Catatan: slice `ai-settings` ada tapi belum di-register ke `DASHBOARD_VIEWS`/`navConfig` — masih in progress, lihat [features/ai-settings.md](./features/ai-settings.md).
 
 Registry: `frontend/src/shared/lib/dashboardRoutes.tsx`. Tambah feature baru = daftar satu baris di `DASHBOARD_VIEWS` + item di `navConfig.ts`.
 
@@ -103,17 +102,16 @@ Setiap slice self-contained di `src/slices/<kebab-name>/`:
 
 ```
 <slice>/
-├─ index.ts             Barrel — export komponen publik + types
-├─ config.ts            Feature manifest (key, route, enabled) — registry placeholder
-├─ components/          React components (prefix file = UpperCamelCase)
-├─ hooks/               Slice-local hooks (lintas slice? pindah ke shared/)
-├─ types/index.ts       Types scoped ke slice (re-export dari @/shared/types kalau cross-cutting)
-├─ constants/index.ts   Data statis (hanya kalau ada)
+├─ index.ts             Barrel — export komponen publik + types (wajib)
+├─ components/          React components (wajib, prefix file = UpperCamelCase)
+├─ hooks/               Slice-local hooks (opsional — lintas slice? pindah ke shared/)
+├─ types/index.ts       Types scoped ke slice (opsional)
+├─ constants/index.ts   Data statis (opsional)
 ├─ lib/                 Helpers murni (opsional)
 └─ utils/               Utilities (opsional, mis. mockDataGenerator)
 ```
 
-Folder `constants/`, `hooks/`, `lib/`, `types/` bisa kosong (`export {}`) — itu scaffolding feature contract. Tidak semua slice butuh semua folder.
+Semua sub-folder opsional — buat hanya kalau ada isi. Jangan biarkan stub kosong (`export {}`) — dihapus saat cleanup.
 
 **Aturan coupling:**
 - Slice TIDAK boleh import dari slice lain (kecuali via `@/shared/*`).

@@ -18,7 +18,7 @@
 | `financial-calculator` | `/dashboard/calculator` | [financial-calculator.md](./financial-calculator.md) |
 | `settings` | `/dashboard/settings` | [settings.md](./settings.md) |
 | `ai-agent` | (FAB global) | [ai-agent.md](./ai-agent.md) |
-| `ai-settings` | (belum di-route — in progress) | [ai-settings.md](./ai-settings.md) |
+| `ai-settings` | `/dashboard/ai-settings` | [ai-settings.md](./ai-settings.md) |
 | `admin` | `/admin` | [admin.md](./admin.md) |
 
 ## Placeholders (coming-soon stubs)

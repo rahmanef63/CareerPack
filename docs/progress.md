@@ -1,34 +1,48 @@
 # Progress Tracker
 
+Last updated: 2026-04-18.
+
 ## Current Stack
-- Frontend: Next.js App Router (`frontend/`)
-- State/UI: React + Tailwind + shadcn components
-- Backend: Convex (`convex/`)
-- Default dev mode: Convex cloud dev (`pnpm run backend:dev`)
+
+- Frontend: Next.js 15 App Router (`frontend/`, slice-based di `src/slices/`)
+- State/UI: React 19 + Tailwind 3 + shadcn (36 UI files aktif)
+- Backend: Convex (`convex/`) — self-hosted default (Dokploy), cloud tetap didukung
+- Auth: `@convex-dev/auth` — Password (PBKDF2-SHA256 100k) + Anonymous provider
+- AI: per-user provider config (OpenAI / OpenRouter / Groq / dll) via slice `ai-settings`
 
 ## Migration Status
-- [x] Migrated from root Vite app to `frontend/` Next.js app
-- [x] Replaced react-router with Next.js App Router pages (`/`, `/login`, `/admin`)
-- [x] Moved feature slices to `frontend/src/features`
-- [x] Enforced feature contract:
-  - `components/`, `lib/`, `hooks/`, `constants/`, `types/`
-  - `config.ts`, `manifest.ts`, `index.ts`
-- [x] Preserved Convex backend functions in `convex/`
-- [x] Added optional self-hosted Convex setup under `backend/convex-self-hosted`
 
-## Auth and Data Notes
-- [x] Convex auth flow connected in frontend
-- [x] Added seed mutation (`convex/seed.ts`) for starter data
-- [ ] Keep using Convex cloud/dev as default until self-hosted flow is fully stabilized
+- [x] Vite → Next.js App Router (`frontend/`)
+- [x] React Router → App Router route tree (`(marketing)`, `(dashboard)`, `/admin`)
+- [x] Feature folders pindah ke `src/slices/` (bukan `features/` — dokumen lama sudah dihapus)
+- [x] Catch-all dashboard `/dashboard/[[...slug]]` + registry `DASHBOARD_VIEWS`
+- [x] Unused files dihapus (21 shadcn UI + empty stubs + slice config vestigial + shared/index barrel)
+- [x] AI action flow: heuristic offline + OpenAI-compat online via `convex/ai.ts`
+- [x] Per-user AI provider config (`slices/ai-settings` + `convex/aiSettings`)
+- [x] GitHub Actions: CI (typecheck+lint+test+build) + auto-deploy Convex on `convex/**` push
+- [x] Docs lengkap: `docs/architecture.md`, `backend.md`, `auth.md`, `development.md`, `deployment.md`, `features/*`
 
-## Next Cleanup Targets
-- [x] Remove/refresh old planning notes that are no longer relevant
-- [x] Add smoke test checklist for login, seed, and core dashboard flow
-- [ ] Add production deployment notes for Next.js + Convex
+## Active Slices (13)
+
+`hero`, `auth`, `dashboard-home`, `cv-generator`, `calendar`, `career-dashboard`, `skill-roadmap`, `document-checklist`, `mock-interview`, `financial-calculator`, `settings`, `ai-agent`, `ai-settings`, `admin`.
+
+Placeholder (coming-soon): `matcher`, `networking`, `portfolio`, `notifications`, `help` — render via `DashboardPlaceholders`.
+
+## Known Work Remaining
+
+- [ ] Wire admin dashboard ke real Convex query (saat ini masih pakai `mockDataGenerator`)
+- [ ] Tambah `requireAdmin(ctx)` helper di `convex/_lib/auth.ts` + module `convex/admin.ts`
+- [ ] Implement forgot-password flow (reset token + email provider)
+- [ ] Profil editor di `settings/TweaksPanel` — sekarang hanya UI prefs, belum edit profile
+- [ ] PDF export untuk CV Generator (saat ini print-to-PDF via browser)
 
 ## Smoke Test Checklist
-- [ ] `pnpm run dev` sukses (Convex push + Next.js start)
-- [ ] Login existing user berhasil
-- [ ] Login user baru (auto sign-up flow) berhasil
-- [ ] `pnpm run backend:push` sukses tanpa error schema/function
-- [ ] Admin page guard bekerja (`/admin` hanya untuk role admin)
+
+- [ ] `pnpm dev` sukses (Convex push + Next.js start)
+- [ ] Login user baru → seed auto-jalan
+- [ ] Login user existing → dashboard load + data visible
+- [ ] `pnpm backend:deploy` sukses tanpa schema error
+- [ ] `/admin` redirect `/` untuk user non-admin
+- [ ] AI action (mis. generate interview questions) lewat rate limit check
+- [ ] AI Settings: save + testConnection sukses
+- [ ] PWA install prompt muncul + service worker register

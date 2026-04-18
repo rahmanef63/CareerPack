@@ -1,36 +1,42 @@
-# Implementation Plan (Current)
+# Implementation Plan
 
-Dokumen ini menggantikan rencana migrasi lama yang sudah tidak relevan.
+Last sync: 2026-04-18. Dokumen ringkas — detail ada di [`docs/`](./docs/README.md).
 
 ## Objective
 
-Menjaga codebase stabil dengan baseline:
-- Next.js frontend di `frontend/`
-- Convex backend di `convex/`
-- Convex cloud dev sebagai mode default
-- Self-hosted backend sebagai opsi lanjutan
+Jaga baseline stabil:
+
+- Next.js 15 frontend di `frontend/` (slice-based, App Router)
+- Convex backend di `convex/` (schema 16 tables, auth + AI actions)
+- Self-hosted Convex (Dokploy) sebagai mode prod default
+- Convex cloud sebagai alternatif
 
 ## Completed
 
-- Migrasi dari root Vite app ke `frontend/` Next.js App Router
-- Workspace `pnpm` di root
-- Integrasi Convex auth/client di frontend
-- Struktur feature slices distandarkan
-- Script root disederhanakan (`dev`, `backend:dev`, `backend:push`)
+- Migrasi Vite → Next.js selesai
+- Semua slice self-contained di `src/slices/` (13 slice)
+- Convex auth stable (PBKDF2-SHA256 100k, backward-compat hash)
+- Per-user AI provider (slice `ai-settings` + `convex/aiSettings.ts`)
+- CI: typecheck, lint, test, build (GH Actions)
+- Auto-deploy Convex saat `convex/**` berubah di main
+- Cleanup unused file: 21 shadcn UI + vestigial configs + empty stubs + unused shared barrel
+- Dokumentasi lengkap: architecture / backend / auth / development / deployment / per-feature
 
 ## In Progress
 
-- Hardening auth flow agar tidak menghasilkan error transien pada first login
-- Penyederhanaan dokumen operasional developer
+- (user-driven) polishing beberapa slice UI
 
-## Next Tasks
+## Next Targets
 
-1. Tambah smoke test manual checklist (`login`, `register`, `seed`, `core navigation`)
-2. Rapikan fitur yang masih memakai pola legacy React Router internal
-3. Tambah guide deploy production (frontend + convex)
+1. Admin module backend — `convex/admin.ts` + `requireAdmin` guard → replace mockDataGenerator di AdminDashboard
+2. Forgot-password flow — token reset + email provider
+3. Profile editor di settings
+4. PDF export CV (html2pdf atau server-side Puppeteer action)
+5. Tambah Convex scheduled function untuk reminder notification (agenda + document expiry)
 
 ## Definition of Done
 
-- `pnpm run dev` dapat dipakai sebagai jalur default tanpa setup tambahan selain `.env.local`.
-- Auth flow stabil untuk user baru maupun user existing.
-- Semua dokumentasi sinkron dengan struktur saat ini.
+- `pnpm dev` jalan dengan hanya `.env.local` + `frontend/.env.local` di-set
+- Auth flow stabil (user baru + existing)
+- Dokumentasi sinkron struktur codebase (run `pnpm typecheck && pnpm lint && pnpm test` hijau)
+- Docs entry-points lengkap: `README.md` → `docs/README.md` → topic-specific doc
