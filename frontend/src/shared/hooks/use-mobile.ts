@@ -1,6 +1,11 @@
 import * as React from "react"
 
-const MOBILE_BREAKPOINT = 768
+/**
+ * Breakpoint "mobile + tablet". Di bawah nilai ini, AppShell pakai
+ * BottomNav + sidebar off-canvas (Sheet). ≥ nilai ini, sidebar
+ * persisten di kiri. Sinkron dengan kelas Tailwind `lg:` (1024px).
+ */
+const MOBILE_BREAKPOINT = 1024
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)

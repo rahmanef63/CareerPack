@@ -10,7 +10,9 @@ import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { toast } from 'sonner';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
@@ -71,19 +73,25 @@ export function CareerDashboard() {
   };
 
   const addApplication = () => {
-    if (newApplication.company && newApplication.position) {
-      const application: Application = {
-        id: Date.now().toString(),
-        company: newApplication.company,
-        position: newApplication.position,
-        status: newApplication.status as Application['status'] || 'applied',
-        appliedDate: new Date().toISOString().split('T')[0],
-        lastUpdate: new Date().toISOString().split('T')[0],
-      };
-      setApplications([application, ...applications]);
-      setNewApplication({ status: 'applied' });
-      setAddDialogOpen(false);
-    }
+    if (!newApplication.company?.trim() || !newApplication.position?.trim()) return;
+    const today = new Date().toISOString().split('T')[0];
+    const application: Application = {
+      id: Date.now().toString(),
+      company: newApplication.company.trim(),
+      position: newApplication.position.trim(),
+      status: (newApplication.status as Application['status']) || 'applied',
+      appliedDate: newApplication.appliedDate || today,
+      lastUpdate: today,
+      notes: newApplication.notes?.trim() || undefined,
+      link: newApplication.link?.trim() || undefined,
+      salary: newApplication.salary?.trim() || undefined,
+    };
+    setApplications([application, ...applications]);
+    setNewApplication({ status: 'applied' });
+    setAddDialogOpen(false);
+    toast.success('Lamaran ditambahkan', {
+      description: `${application.position} @ ${application.company}`,
+    });
   };
 
   const updateStatus = (id: string, status: Application['status']) => {
@@ -377,48 +385,124 @@ export function CareerDashboard() {
 
       {/* Add Application Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Tambah Lamaran Baru</DialogTitle>
+            <DialogDescription>
+              Catat detail lamaran agar mudah ditelusuri saat follow-up.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addApplication();
+            }}
+            className="space-y-4"
+          >
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="app-company">Nama Perusahaan *</Label>
+                <Input
+                  id="app-company"
+                  placeholder="cth. Tokopedia"
+                  value={newApplication.company || ''}
+                  onChange={(e) => setNewApplication({ ...newApplication, company: e.target.value })}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="app-position">Posisi *</Label>
+                <Input
+                  id="app-position"
+                  placeholder="cth. Software Engineer"
+                  value={newApplication.position || ''}
+                  onChange={(e) => setNewApplication({ ...newApplication, position: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="app-status">Status</Label>
+                <Select
+                  value={newApplication.status}
+                  onValueChange={(value) =>
+                    setNewApplication({ ...newApplication, status: value as Application['status'] })
+                  }
+                >
+                  <SelectTrigger id="app-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="applied">Dilamar</SelectItem>
+                    <SelectItem value="screening">Screening</SelectItem>
+                    <SelectItem value="interview">Wawancara</SelectItem>
+                    <SelectItem value="offer">Tawaran</SelectItem>
+                    <SelectItem value="rejected">Ditolak</SelectItem>
+                    <SelectItem value="withdrawn">Ditarik</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="app-date">Tanggal Lamaran</Label>
+                <Input
+                  id="app-date"
+                  type="date"
+                  value={newApplication.appliedDate || new Date().toISOString().split('T')[0]}
+                  onChange={(e) =>
+                    setNewApplication({ ...newApplication, appliedDate: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label>Nama Perusahaan</Label>
-              <Input 
-                placeholder="contoh: Tokopedia"
-                value={newApplication.company || ''}
-                onChange={(e) => setNewApplication({ ...newApplication, company: e.target.value })}
+              <Label htmlFor="app-link">Link Lowongan (opsional)</Label>
+              <Input
+                id="app-link"
+                type="url"
+                placeholder="https://…"
+                value={newApplication.link || ''}
+                onChange={(e) => setNewApplication({ ...newApplication, link: e.target.value })}
               />
             </div>
+
             <div className="space-y-2">
-              <Label>Posisi</Label>
-              <Input 
-                placeholder="contoh: Software Engineer"
-                value={newApplication.position || ''}
-                onChange={(e) => setNewApplication({ ...newApplication, position: e.target.value })}
+              <Label htmlFor="app-salary">Ekspektasi / Range Gaji (opsional)</Label>
+              <Input
+                id="app-salary"
+                placeholder="cth. Rp 12–18 juta"
+                value={newApplication.salary || ''}
+                onChange={(e) => setNewApplication({ ...newApplication, salary: e.target.value })}
               />
             </div>
+
             <div className="space-y-2">
-              <Label>Status</Label>
-              <Select 
-                value={newApplication.status} 
-                onValueChange={(value) => setNewApplication({ ...newApplication, status: value as Application['status'] })}
+              <Label htmlFor="app-notes">Catatan (opsional)</Label>
+              <Textarea
+                id="app-notes"
+                placeholder="cth. referensi dari Pak Andi, deadline 30 April"
+                value={newApplication.notes || ''}
+                onChange={(e) => setNewApplication({ ...newApplication, notes: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAddDialogOpen(false)}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="applied">Dilamar</SelectItem>
-                  <SelectItem value="screening">Screening</SelectItem>
-                  <SelectItem value="interview">Wawancara</SelectItem>
-                  <SelectItem value="offer">Tawaran</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={addApplication} className="w-full bg-career-600 hover:bg-career-700">
-              Tambah Lamaran
-            </Button>
-          </div>
+                Batal
+              </Button>
+              <Button type="submit" className="bg-career-600 hover:bg-career-700">
+                Tambah Lamaran
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
