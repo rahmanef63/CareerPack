@@ -101,6 +101,130 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ===== App-launcher redesign keyframes ===== */
+
+@keyframes pulse-ai {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.45),
+                0 10px 30px -10px rgba(2, 132, 199, 0.5);
+    transform: translateY(-18px) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(14, 165, 233, 0),
+                0 14px 36px -10px rgba(2, 132, 199, 0.65);
+    transform: translateY(-18px) scale(1.04);
+  }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translate3d(0,0,0) rotate(0); opacity: 1; }
+  100% { transform: translate3d(var(--cx,0), 220px, 0) rotate(var(--cr,360deg)); opacity: 0; }
+}
+
+@keyframes checkmark-draw {
+  0%   { stroke-dashoffset: 60; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes stagger-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes badge-bounce {
+  0%, 100% { transform: scale(1); }
+  30%      { transform: scale(1.25); }
+  60%      { transform: scale(0.92); }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+.animate-pulse-ai {
+  animation: pulse-ai 2.4s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: ripple 0.55s ease-out forwards;
+}
+
+.animate-checkmark {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: checkmark-draw 0.45s ease-out forwards;
+}
+
+.animate-stagger-in {
+  animation: stagger-in 0.32s ease-out backwards;
+}
+
+.animate-badge-bounce {
+  animation: badge-bounce 0.45s ease-out;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(148, 163, 184, 0.10) 0%,
+    rgba(148, 163, 184, 0.25) 50%,
+    rgba(148, 163, 184, 0.10) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.tap-press {
+  transition: transform 120ms ease-out;
+}
+.tap-press:active {
+  transform: scale(0.96);
+}
+
+/* AI button style variants — driven by [data-ai-btn] on <html> */
+[data-ai-btn="solid"] .ai-fab-bg {
+  background: linear-gradient(180deg, #0284c7, #0369a1);
+}
+[data-ai-btn="gradient"] .ai-fab-bg {
+  background: conic-gradient(from 180deg at 50% 50%, #38bdf8, #6366f1, #ec4899, #f59e0b, #38bdf8);
+}
+[data-ai-btn="glow"] .ai-fab-bg {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4),
+              0 0 32px 4px rgba(99, 102, 241, 0.55);
+}
+
+/* Nav style variants */
+[data-nav-style="flat"] .nav-shell {
+  border-radius: 0;
+  margin: 0;
+  box-shadow: 0 -1px 0 rgba(15, 23, 42, 0.06);
+}
+[data-nav-style="floating"] .nav-shell {
+  border-radius: 1.25rem;
+  margin: 0 0.75rem 0.75rem;
+  box-shadow: 0 12px 30px -8px rgba(2, 132, 199, 0.25);
+}
+[data-nav-style="notched"] .nav-shell {
+  border-radius: 1.25rem 1.25rem 0 0;
+  margin: 0;
+  box-shadow: 0 -8px 24px -6px rgba(15, 23, 42, 0.12);
+}
+[data-nav-style="notched"] .nav-notch {
+  display: block;
+}
+
 /* Print styles for CV */
 @media print {
   .no-print {

@@ -1,8 +1,8 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   User, Briefcase, GraduationCap, Award, Folder,
   Plus, Trash2, Download, Eye, Sparkles,
-  ChevronDown, ChevronUp, FileText, Save
+  ChevronDown, ChevronUp, FileText, Save, GripVertical, Camera
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -13,7 +13,12 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import type { CVData, Education, Experience, Skill, Certification, Project } from '../types';
 import { useCV } from '../hooks/useCV';
-import { useEffect } from 'react';
+import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/shared/components/MicroInteractions';
+import { DocChecklistInline } from './DocChecklistInline';
+import { CVScoreBadge } from './CVScoreBadge';
+import { InlineAISuggestChip } from './InlineAISuggestChip';
+import { subscribe } from '@/shared/lib/aiActionBus';
+import { toast } from 'sonner';
 
 const initialCVData: CVData = {
   profile: {
@@ -34,15 +39,28 @@ const initialCVData: CVData = {
   projects: [],
 };
 
+type CVFormat = 'national' | 'international';
+
 export function CVGenerator() {
   const { cvData: remoteCVData, saveCV, isLoading: isCVLoading } = useCV();
   const [cvData, setCvData] = useState<CVData>(initialCVData);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [format, setFormat] = useState<CVFormat>('national');
+  const [photoUrl, setPhotoUrl] = useState<string>('');
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>('personal');
   const cvPreviewRef = useRef<HTMLDivElement>(null);
+
+  const setExperienceList = useCallback((next: Experience[]) => {
+    setCvData(prev => ({ ...prev, experience: next }));
+  }, []);
+  const setSkillsList = useCallback((next: Skill[]) => {
+    setCvData(prev => ({ ...prev, skills: next }));
+  }, []);
+  const expDrag = useDragReorder<Experience>(cvData.experience, setExperienceList);
+  const skillDrag = useDragReorder<Skill>(cvData.skills, setSkillsList);
 
   // Load data from Convex
   useEffect(() => {
@@ -51,6 +69,89 @@ export function CVGenerator() {
       setIsDataLoaded(true);
     }
   }, [remoteCVData, isDataLoaded]);
+
+  // Subscribe to AI agent actions
+  useEffect(() => {
+    const unsubFill = subscribe('cv.fillExperience', (action) => {
+      if (action.type !== 'cv.fillExperience') return;
+      const newExp: Experience = {
+        id: Date.now().toString(),
+        company: action.payload.company,
+        position: action.payload.position,
+        startDate: action.payload.startDate ?? '',
+        endDate: action.payload.endDate ?? '',
+        description: action.payload.description,
+        achievements: [],
+      };
+      setCvData(prev => ({ ...prev, experience: [newExp, ...prev.experience] }));
+      setActiveSection('experience');
+    });
+    const unsubSummary = subscribe('cv.improveSummary', (action) => {
+      if (action.type !== 'cv.improveSummary') return;
+      setCvData(prev => ({
+        ...prev,
+        profile: { ...prev.profile, summary: action.payload.summary },
+      }));
+    });
+    const unsubSkills = subscribe('cv.addSkills', (action) => {
+      if (action.type !== 'cv.addSkills') return;
+      const additions: Skill[] = action.payload.skills.map((s, i) => ({
+        id: `${Date.now()}-${i}`,
+        name: s.name,
+        category: s.category,
+        proficiency: 3,
+      }));
+      setCvData(prev => ({ ...prev, skills: [...prev.skills, ...additions] }));
+    });
+    const unsubFormat = subscribe('cv.setFormat', (action) => {
+      if (action.type !== 'cv.setFormat') return;
+      setFormat(action.payload.format);
+    });
+    return () => {
+      unsubFill();
+      unsubSummary();
+      unsubSkills();
+      unsubFormat();
+    };
+  }, []);
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPhotoUrl(typeof reader.result === 'string' ? reader.result : '');
+    reader.readAsDataURL(file);
+  };
+
+  const aiSuggestSummary = () => {
+    setCvData(prev => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        summary:
+          prev.profile.summary ||
+          'Profesional muda dengan etos kerja kuat, fokus pada problem solving dan kolaborasi tim. Berorientasi pada dampak terukur dan pengembangan diri berkelanjutan.',
+      },
+    }));
+    toast.success('Saran AI diterapkan ke ringkasan');
+  };
+
+  const aiSuggestExperienceDesc = (id: string) => {
+    setCvData(prev => ({
+      ...prev,
+      experience: prev.experience.map(e =>
+        e.id === id
+          ? {
+              ...e,
+              description:
+                e.description ||
+                'Memimpin inisiatif end-to-end yang menghasilkan peningkatan efisiensi 30%. Berkolaborasi lintas tim untuk mendelivery fitur tepat waktu dengan kualitas tinggi.',
+            }
+          : e,
+      ),
+    }));
+    toast.success('Saran AI diterapkan');
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -290,10 +391,28 @@ export function CVGenerator() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Pembuat CV</h1>
-        <p className="text-slate-600 mt-2">Buat CV yang ramah ATS dan menarik perhatian rekruter</p>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pembuat CV</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {format === 'national'
+              ? 'Format Indonesia · dengan foto, data lengkap'
+              : 'Format Internasional · ATS-friendly, no photo, 1 halaman'}
+          </p>
+        </div>
+        <MagneticTabs<CVFormat>
+          value={format}
+          onChange={setFormat}
+          tabs={[
+            { id: 'national', label: 'Nasional' },
+            { id: 'international', label: 'Internasional' },
+          ]}
+        />
+      </div>
+
+      <div className="mb-6">
+        <DocChecklistInline format={format} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -318,6 +437,29 @@ export function CVGenerator() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-6">
+                  {format === 'national' && (
+                    <div className="mb-4 flex items-center gap-4">
+                      <div className="relative w-20 h-24 rounded-lg overflow-hidden border-2 border-dashed border-border bg-muted/40 flex items-center justify-center">
+                        {photoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={photoUrl} alt="Foto CV" className="w-full h-full object-cover" />
+                        ) : (
+                          <Camera className="w-6 h-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <Label htmlFor="cv-photo" className="text-sm">Foto Formal</Label>
+                        <p className="text-xs text-muted-foreground mb-2">Wajib untuk format Nasional. Resolusi 4×6.</p>
+                        <Input
+                          id="cv-photo"
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoChange}
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="profile-name">Nama Lengkap</Label>
@@ -375,7 +517,10 @@ export function CVGenerator() {
                       />
                     </div>
                     <div className="sm:col-span-2 space-y-2">
-                      <Label htmlFor="profile-summary">Ringkasan Profesional</Label>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="profile-summary">Ringkasan Profesional</Label>
+                        <InlineAISuggestChip label="Saran AI" onClick={aiSuggestSummary} />
+                      </div>
                       <Textarea
                         id="profile-summary"
                         placeholder="Tulis ringkasan singkat tentang latar belakang profesional dan tujuan karir Anda..."
@@ -396,66 +541,82 @@ export function CVGenerator() {
                 onAdd={addExperience}
                 addLabel="Tambah Pekerjaan"
               >
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {cvData.experience.map((exp, idx) => (
-                    <div key={exp.id} className="p-4 border border-slate-200 rounded-lg bg-slate-50/50">
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-medium text-slate-900">Pengalaman #{idx + 1}</h4>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeExperience(exp.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                    <SwipeToDelete key={exp.id} onDelete={() => removeExperience(exp.id)}>
+                      <div
+                        draggable
+                        onDragStart={expDrag.onDragStart(exp.id)}
+                        onDragOver={expDrag.onDragOver(exp.id)}
+                        onDragEnd={expDrag.onDragEnd}
+                        className="p-4 border border-border rounded-lg bg-muted/40"
+                      >
+                        <div className="flex justify-between items-start mb-4 gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="cursor-grab active:cursor-grabbing text-muted-foreground" aria-label="Drag handle">
+                              <GripVertical className="w-4 h-4" />
+                            </span>
+                            <h4 className="font-medium text-foreground truncate">Pengalaman #{idx + 1}</h4>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <InlineAISuggestChip label="AI" onClick={() => aiSuggestExperienceDesc(exp.id)} />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeExperience(exp.id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Perusahaan</Label>
+                            <Input
+                              placeholder="Nama Perusahaan"
+                              value={exp.company}
+                              onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Jabatan</Label>
+                            <Input
+                              placeholder="Posisi Pekerjaan"
+                              value={exp.position}
+                              onChange={(e) => updateExperience(exp.id, 'position', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Tanggal Mulai</Label>
+                            <Input
+                              type="month"
+                              value={exp.startDate}
+                              onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Tanggal Selesai</Label>
+                            <Input
+                              type="month"
+                              value={exp.endDate}
+                              onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+                            />
+                          </div>
+                          <div className="sm:col-span-2 space-y-2">
+                            <Label>Deskripsi</Label>
+                            <Textarea
+                              placeholder="Jelaskan tanggung jawab dan pencapaian Anda..."
+                              value={exp.description}
+                              onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Perusahaan</Label>
-                          <Input
-                            placeholder="Nama Perusahaan"
-                            value={exp.company}
-                            onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Jabatan</Label>
-                          <Input
-                            placeholder="Posisi Pekerjaan"
-                            value={exp.position}
-                            onChange={(e) => updateExperience(exp.id, 'position', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Tanggal Mulai</Label>
-                          <Input
-                            type="month"
-                            value={exp.startDate}
-                            onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Tanggal Selesai</Label>
-                          <Input
-                            type="month"
-                            value={exp.endDate}
-                            onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
-                          />
-                        </div>
-                        <div className="sm:col-span-2 space-y-2">
-                          <Label>Deskripsi</Label>
-                          <Textarea
-                            placeholder="Jelaskan tanggung jawab dan pencapaian Anda..."
-                            value={exp.description}
-                            onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    </SwipeToDelete>
                   ))}
                   {cvData.experience.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Belum ada pengalaman. Klik &quot;Tambah Pekerjaan&quot; untuk memulai.</p>
+                    <p className="text-center text-muted-foreground py-4">Belum ada pengalaman. Klik &quot;Tambah Pekerjaan&quot; untuk memulai. <span className="text-xs italic">(Tip: swipe kiri untuk hapus, drag untuk urutkan)</span></p>
                   )}
                 </div>
               </SectionCard>
@@ -548,10 +709,20 @@ export function CVGenerator() {
                 onAdd={addSkill}
                 addLabel="Tambah Skill"
               >
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {cvData.skills.map((skill) => (
-                    <div key={skill.id} className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg bg-slate-50/50">
-                      <div className="flex-1 grid sm:grid-cols-3 gap-4">
+                    <div
+                      key={skill.id}
+                      draggable
+                      onDragStart={skillDrag.onDragStart(skill.id)}
+                      onDragOver={skillDrag.onDragOver(skill.id)}
+                      onDragEnd={skillDrag.onDragEnd}
+                      className="flex items-center gap-3 p-3 border border-border rounded-lg bg-muted/40"
+                    >
+                      <span className="cursor-grab active:cursor-grabbing text-muted-foreground" aria-label="Drag handle">
+                        <GripVertical className="w-4 h-4" />
+                      </span>
+                      <div className="flex-1 grid sm:grid-cols-3 gap-3">
                         <Input
                           placeholder="Nama skill (contoh: JavaScript)"
                           value={skill.name}
@@ -808,21 +979,7 @@ export function CVGenerator() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-slate-200 bg-gradient-to-br from-career-50 to-career-100">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-career-500 flex items-center justify-center flex-shrink-0">
-                        <Sparkles className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-career-900">Saran AI</h4>
-                        <p className="text-sm text-career-700 mt-1">
-                          Tambahkan lebih banyak pencapaian yang terukur di bagian pengalaman untuk meningkatkan peluang Anda hingga 40%.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <CVScoreBadge cvData={cvData} />
               </div>
             </div>
           </>
@@ -835,20 +992,46 @@ export function CVGenerator() {
           <DialogHeader>
             <DialogTitle>Pratinjau CV</DialogTitle>
           </DialogHeader>
-          <div ref={cvPreviewRef} className="bg-white p-8 border border-slate-200 rounded-lg">
+          <div ref={cvPreviewRef} className={`bg-white text-slate-900 p-8 border border-slate-200 rounded-lg ${format === 'international' ? 'font-sans text-[14px] leading-snug' : ''}`}>
+            <div className="mb-2">
+              <Badge variant="secondary" className="bg-slate-100 text-slate-700">
+                Format: {format === 'national' ? 'Nasional (Indonesia)' : 'Internasional (ATS)'}
+              </Badge>
+            </div>
             {/* CV Preview Content */}
-            <div className="space-y-6">
+            <div className={format === 'international' ? 'space-y-3' : 'space-y-6'}>
               {/* Header */}
-              <div className="text-center border-b border-slate-200 pb-6">
-                <h2 className="text-3xl font-bold text-slate-900">{cvData.profile.name || 'Nama Anda'}</h2>
-                <p className="text-slate-600 mt-2">{cvData.profile.summary || 'Ringkasan Profesional'}</p>
-                <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm text-slate-500">
-                  {cvData.profile.email && <span>{cvData.profile.email}</span>}
-                  {cvData.profile.phone && <span>{cvData.profile.phone}</span>}
-                  {cvData.profile.location && <span>{cvData.profile.location}</span>}
-                  {cvData.profile.linkedin && <span>{cvData.profile.linkedin}</span>}
+              {format === 'international' ? (
+                <div className="border-b border-slate-300 pb-3">
+                  <h2 className="text-2xl font-bold uppercase tracking-wide">{cvData.profile.name || 'YOUR NAME'}</h2>
+                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-700">
+                    {cvData.profile.email && <span>{cvData.profile.email}</span>}
+                    {cvData.profile.phone && <span>· {cvData.profile.phone}</span>}
+                    {cvData.profile.location && <span>· {cvData.profile.location}</span>}
+                    {cvData.profile.linkedin && <span>· {cvData.profile.linkedin}</span>}
+                  </div>
+                  {cvData.profile.summary && (
+                    <p className="text-sm mt-2 text-slate-700">{cvData.profile.summary}</p>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-start gap-6 border-b border-slate-200 pb-6">
+                  {photoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoUrl} alt="Foto" className="w-24 h-32 object-cover rounded border border-slate-300" />
+                  )}
+                  <div className="flex-1">
+                    <h2 className="text-3xl font-bold text-slate-900">{cvData.profile.name || 'Nama Anda'}</h2>
+                    <p className="text-slate-600 mt-2">{cvData.profile.summary || 'Ringkasan Profesional'}</p>
+                    <div className="flex flex-wrap gap-4 mt-3 text-sm text-slate-500">
+                      {cvData.profile.email && <span>{cvData.profile.email}</span>}
+                      {cvData.profile.phone && <span>{cvData.profile.phone}</span>}
+                      {cvData.profile.location && <span>{cvData.profile.location}</span>}
+                      {cvData.profile.linkedin && <span>{cvData.profile.linkedin}</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Experience */}
               {cvData.experience.length > 0 && (
