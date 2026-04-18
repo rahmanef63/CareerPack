@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { resolveDashboardView } from "@/shared/lib/dashboardRoutes";
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 
 // Prerender selayaknya static per slug — Next.js akan generate di build time.
 export function generateStaticParams() {
@@ -30,5 +31,9 @@ export default async function DashboardCatchAllPage({ params }: PageProps) {
   const { slug } = await params;
   const View = resolveDashboardView(slug);
   if (!View) notFound();
-  return <View />;
+  return (
+    <ErrorBoundary>
+      <View />
+    </ErrorBoundary>
+  );
 }
