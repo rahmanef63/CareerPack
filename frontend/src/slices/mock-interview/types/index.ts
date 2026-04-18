@@ -2,7 +2,7 @@
  * Mock Interview feature types.
  */
 
-import type { InterviewCategory, DifficultyLevel } from '@/slices/shared/types';
+import type { InterviewCategory, DifficultyLevel } from '@/shared/types';
 
 export type { InterviewCategory, DifficultyLevel };
 

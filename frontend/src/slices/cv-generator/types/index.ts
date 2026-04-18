@@ -2,7 +2,7 @@
  * CV Generator feature types.
  */
 
-import type { ExperienceLevel, SkillCategory, ProficiencyLevel } from '@/slices/shared/types';
+import type { ExperienceLevel, SkillCategory, ProficiencyLevel } from '@/shared/types';
 
 export type { ExperienceLevel, SkillCategory, ProficiencyLevel };
 

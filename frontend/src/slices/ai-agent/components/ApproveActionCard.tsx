@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Check, X, Sparkles } from "lucide-react";
-import { Button } from "@/slices/shared/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { toast } from "sonner";
-import { publish } from "@/slices/shared/lib/aiActionBus";
+import { publish } from "@/shared/lib/aiActionBus";
 import { ACTION_META, type AgentAction } from "../lib/agentActions";
-import { SuccessCheck } from "@/slices/shared/components/MicroInteractions";
+import { SuccessCheck } from "@/shared/components/MicroInteractions";
 
 interface ApproveActionCardProps {
   action: AgentAction;

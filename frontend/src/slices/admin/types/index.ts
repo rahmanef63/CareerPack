@@ -2,7 +2,7 @@
  * Admin feature types.
  */
 
-export type { AIConfig } from '@/slices/shared/types';
+export type { AIConfig } from '@/shared/types';
 
 export interface AdminStats {
     totalUsers: number;

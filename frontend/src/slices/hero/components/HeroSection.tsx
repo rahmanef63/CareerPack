@@ -3,9 +3,9 @@ import {
   ArrowRight, Sparkles, Target,
   TrendingUp, Users, CheckCircle
 } from 'lucide-react';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { BrandMark } from '@/slices/shared/components/Logo';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { BrandMark } from '@/shared/components/Logo';
 
 interface HeroSectionProps {
   onGetStarted: () => void;

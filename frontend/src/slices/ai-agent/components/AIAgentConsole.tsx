@@ -7,16 +7,16 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from "@/slices/shared/components/ui/drawer";
-import { Button } from "@/slices/shared/components/ui/button";
-import { Input } from "@/slices/shared/components/ui/input";
-import { ScrollArea } from "@/slices/shared/components/ui/scroll-area";
-import { TypingDots } from "@/slices/shared/components/MicroInteractions";
-import { cn } from "@/lib/utils";
+} from "@/shared/components/ui/drawer";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { TypingDots } from "@/shared/components/MicroInteractions";
+import { cn } from "@/shared/lib/utils";
 import { runAgent, SLASH_COMMANDS } from "../lib/slashCommands";
 import type { AgentAction } from "../lib/agentActions";
 import { ApproveActionCard } from "./ApproveActionCard";
-import { subscribe } from "@/slices/shared/lib/aiActionBus";
+import { subscribe } from "@/shared/lib/aiActionBus";
 
 interface Msg {
   id: string;

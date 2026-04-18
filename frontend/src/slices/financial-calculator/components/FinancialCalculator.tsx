@@ -4,15 +4,15 @@ import {
   Zap, Film, MoreHorizontal, TrendingUp, 
   MapPin, AlertCircle
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/slices/shared/components/ui/card';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Input } from '@/slices/shared/components/ui/input';
-import { Label } from '@/slices/shared/components/ui/label';
-import { Slider } from '@/slices/shared/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/slices/shared/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/slices/shared/components/ui/select';
-import { cn } from '@/lib/utils';
-import { indonesianCityCostOfLiving, indonesianJobMarketData } from '@/data/indonesianData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Slider } from '@/shared/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { cn } from '@/shared/lib/utils';
+import { indonesianCityCostOfLiving, indonesianJobMarketData } from '@/shared/data/indonesianData';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, PieChart, Pie, Cell

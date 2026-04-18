@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { type CVData, type SkillCategory, type ProficiencyLevel } from '../types';
-import { useAuth } from '@/slices/shared/hooks/useAuth';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { api } from "../../../../../convex/_generated/api";
 import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
 

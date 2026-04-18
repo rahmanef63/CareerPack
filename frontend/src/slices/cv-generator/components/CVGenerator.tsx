@@ -4,20 +4,20 @@ import {
   Plus, Trash2, Download, Eye, Sparkles,
   ChevronDown, ChevronUp, FileText, Save, GripVertical, Camera
 } from 'lucide-react';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Input } from '@/slices/shared/components/ui/input';
-import { Label } from '@/slices/shared/components/ui/label';
-import { Textarea } from '@/slices/shared/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/slices/shared/components/ui/card';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/slices/shared/components/ui/dialog';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import type { CVData, Education, Experience, Skill, Certification, Project } from '../types';
 import { useCV } from '../hooks/useCV';
-import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/slices/shared/components/MicroInteractions';
+import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/shared/components/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
 import { CVScoreBadge } from './CVScoreBadge';
 import { InlineAISuggestChip } from './InlineAISuggestChip';
-import { subscribe } from '@/slices/shared/lib/aiActionBus';
+import { subscribe } from '@/shared/lib/aiActionBus';
 import { toast } from 'sonner';
 
 const initialCVData: CVData = {

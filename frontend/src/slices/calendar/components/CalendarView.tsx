@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { Calendar as CalendarIcon, Clock, MapPin, Plus } from "lucide-react";
-import { Calendar } from "@/slices/shared/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/slices/shared/components/ui/card";
-import { Badge } from "@/slices/shared/components/ui/badge";
-import { Button } from "@/slices/shared/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { cn } from "@/shared/lib/utils";
 
 interface AgendaItem {
   id: string;

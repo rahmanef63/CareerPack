@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, FileCheck2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/slices/shared/components/ui/card";
-import { Checkbox } from "@/slices/shared/components/ui/checkbox";
-import { Badge } from "@/slices/shared/components/ui/badge";
-import { AnimatedProgress } from "@/slices/shared/components/MicroInteractions";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Badge } from "@/shared/components/ui/badge";
+import { AnimatedProgress } from "@/shared/components/MicroInteractions";
+import { cn } from "@/shared/lib/utils";
 
 const APP_DOCS = [
   { id: "cv", label: "CV PDF", required: true },

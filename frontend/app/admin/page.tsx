@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AdminDashboard } from "@/slices/admin";
-import { useAuth } from "@/slices/shared/hooks/useAuth";
+import { useAuth } from "@/shared/hooks/useAuth";
 
 export default function AdminPage() {
   const router = useRouter();

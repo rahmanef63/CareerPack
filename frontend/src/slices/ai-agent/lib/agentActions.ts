@@ -9,4 +9,4 @@ export {
   type AgentAction,
   type AgentActionType,
   type AgentActionMeta,
-} from "@/slices/shared/types/agent";
+} from "@/shared/types/agent";

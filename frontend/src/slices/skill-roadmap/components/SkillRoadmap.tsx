@@ -7,14 +7,14 @@ import {
   Users, Kanban, Handshake, Headphones, Image,
   Layout, Sparkles, Lightbulb
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/slices/shared/components/ui/card';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Progress } from '@/slices/shared/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/slices/shared/components/ui/dialog';
-import { cn } from '@/lib/utils';
-import { indonesianRoadmapCategories } from '@/data/indonesianData';
-import type { Resource } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { Progress } from '@/shared/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { cn } from '@/shared/lib/utils';
+import { indonesianRoadmapCategories } from '@/shared/data/indonesianData';
+import type { RoadmapResource as Resource } from '../types';
 
 const iconMap: Record<string, React.ElementType> = {
   Layout, Code, Server, Cloud, BarChart3, Palette, Smartphone,

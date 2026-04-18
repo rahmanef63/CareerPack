@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
-import { BrandMark } from '@/slices/shared/components/Logo';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Input } from '@/slices/shared/components/ui/input';
-import { Label } from '@/slices/shared/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/slices/shared/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/slices/shared/components/ui/tabs';
-import { Alert, AlertDescription } from '@/slices/shared/components/ui/alert';
-import { useAuth } from '@/slices/shared/hooks/useAuth';
+import { BrandMark } from '@/shared/components/Logo';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 export function LoginPage() {
     const router = useRouter();

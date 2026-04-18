@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, TrendingUp } from "lucide-react";
-import { Card, CardContent } from "@/slices/shared/components/ui/card";
-import { AnimatedProgress, ConfettiBurst } from "@/slices/shared/components/MicroInteractions";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { AnimatedProgress, ConfettiBurst } from "@/shared/components/MicroInteractions";
 import type { CVData } from "../types";
 
 interface CVScoreBadgeProps {

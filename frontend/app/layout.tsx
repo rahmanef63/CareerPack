@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
-import "../src/index.css"
-import "../src/App.css"
-import { Providers } from "@/app/providers"
+import "@/shared/styles/index.css"
+import "@/shared/styles/App.css"
+import { Providers } from "@/shared/providers/Providers"
 
 export const metadata: Metadata = {
   applicationName: "CareerPack",

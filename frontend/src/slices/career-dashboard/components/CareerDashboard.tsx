@@ -5,21 +5,21 @@ import {
   MoreHorizontal, Plus, Filter,
   Building2
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/slices/shared/components/ui/card';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Progress } from '@/slices/shared/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/slices/shared/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/slices/shared/components/ui/dialog';
-import { Input } from '@/slices/shared/components/ui/input';
-import { Label } from '@/slices/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/slices/shared/components/ui/select';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { Progress } from '@/shared/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { cn } from '@/shared/lib/utils';
 import { 
   AreaChart, Area, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
 } from 'recharts';
-import type { Application } from '@/types';
+import type { Application } from '../types';
 
 // Mock data for charts
 const applicationData = [

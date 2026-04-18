@@ -1,15 +1,15 @@
 "use client";
 
 import { Sparkles, Type, LayoutPanelTop } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/slices/shared/components/ui/card";
-import { Button } from "@/slices/shared/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { cn } from "@/shared/lib/utils";
 import {
   useUIPrefs,
   type AIButtonStyle,
   type FontScale,
   type NavStyle,
-} from "@/slices/shared/hooks/useUIPrefs";
+} from "@/shared/hooks/useUIPrefs";
 
 export function TweaksPanel() {
   const prefs = useUIPrefs();

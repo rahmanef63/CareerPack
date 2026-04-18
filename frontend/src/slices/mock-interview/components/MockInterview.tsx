@@ -5,14 +5,14 @@ import {
   Lightbulb, ChevronRight, Star, Clock, Trophy,
   Save, Share2, RotateCcw
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/slices/shared/components/ui/card';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/slices/shared/components/ui/tabs';
-import { Progress } from '@/slices/shared/components/ui/progress';
-import { Textarea } from '@/slices/shared/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { indonesianInterviewQuestions, indonesianDifficultyLabels } from '@/data/indonesianData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Progress } from '@/shared/components/ui/progress';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { cn } from '@/shared/lib/utils';
+import { indonesianInterviewQuestions, indonesianDifficultyLabels } from '@/shared/data/indonesianData';
 
 const categoryLabels: Record<string, string> = {
   behavioral: 'Perilaku',

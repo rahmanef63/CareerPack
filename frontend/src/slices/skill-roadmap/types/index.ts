@@ -2,7 +2,7 @@
  * Skill Roadmap feature types.
  */
 
-import type { SkillDifficultyLevel, ResourceType } from '@/slices/shared/types';
+import type { SkillDifficultyLevel, ResourceType } from '@/shared/types';
 
 export type { SkillDifficultyLevel, ResourceType };
 

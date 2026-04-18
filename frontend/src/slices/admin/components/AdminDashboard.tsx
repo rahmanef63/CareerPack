@@ -7,19 +7,19 @@ import {
   Calculator, Users2, Kanban, Handshake, Headphones,
   Image, Video, Palette, Smartphone, BarChart4
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/slices/shared/components/ui/card';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Input } from '@/slices/shared/components/ui/input';
-import { Label } from '@/slices/shared/components/ui/label';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/slices/shared/components/ui/tabs';
-import { Slider } from '@/slices/shared/components/ui/slider';
-import { Switch } from '@/slices/shared/components/ui/switch';
-import { Alert, AlertDescription } from '@/slices/shared/components/ui/alert';
-import { useAIConfig } from '@/slices/shared/hooks/useAIConfig';
-import { generateAllMockData, type GeneratedMockData } from '@/utils/mockDataGenerator';
-import { indonesianRoadmapCategories } from '@/data/indonesianData';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Badge } from '@/shared/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Slider } from '@/shared/components/ui/slider';
+import { Switch } from '@/shared/components/ui/switch';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
+import { useAIConfig } from '@/shared/hooks/useAIConfig';
+import { generateAllMockData, type GeneratedMockData } from '@/slices/admin/utils/mockDataGenerator';
+import { indonesianRoadmapCategories } from '@/shared/data/indonesianData';
+import { cn } from '@/shared/lib/utils';
 
 const iconComponents: Record<string, React.ElementType> = {
   Layout, Server, Cloud, TrendingUp, FileText, Calculator, Users2, Kanban,

@@ -2,7 +2,7 @@
  * Document Checklist feature types.
  */
 
-import type { DocumentCategory, DocumentSubcategory } from '@/slices/shared/types';
+import type { DocumentCategory, DocumentSubcategory } from '@/shared/types';
 
 export type { DocumentCategory, DocumentSubcategory };
 

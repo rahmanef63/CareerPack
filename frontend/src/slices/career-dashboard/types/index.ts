@@ -2,7 +2,7 @@
  * Career Dashboard feature types.
  */
 
-import type { ApplicationStatus } from '@/slices/shared/types';
+import type { ApplicationStatus } from '@/shared/types';
 
 export type { ApplicationStatus };
 

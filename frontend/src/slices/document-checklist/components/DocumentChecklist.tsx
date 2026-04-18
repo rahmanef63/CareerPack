@@ -5,18 +5,18 @@ import {
   Wallet, GraduationCap, Briefcase, Globe, 
   ChevronRight, Download, Bell, Filter
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/slices/shared/components/ui/card';
-import { Button } from '@/slices/shared/components/ui/button';
-import { Badge } from '@/slices/shared/components/ui/badge';
-import { Progress } from '@/slices/shared/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/slices/shared/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/slices/shared/components/ui/dialog';
-import { Input } from '@/slices/shared/components/ui/input';
-import { Label } from '@/slices/shared/components/ui/label';
-import { Textarea } from '@/slices/shared/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { indonesianDocumentChecklist, indonesianCategoryLabels } from '@/data/indonesianData';
-import type { ChecklistItem } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { Progress } from '@/shared/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { cn } from '@/shared/lib/utils';
+import { indonesianDocumentChecklist, indonesianCategoryLabels } from '@/shared/data/indonesianData';
+import type { ChecklistItem } from '../types';
 
 const categoryIcons: Record<string, React.ElementType> = {
   identity: FileText,
