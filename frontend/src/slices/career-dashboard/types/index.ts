@@ -14,6 +14,8 @@ export interface Application {
     appliedDate: string;
     lastUpdate: string;
     notes?: string;
+    link?: string;
+    salary?: string;
 }
 
 export interface DashboardStats {

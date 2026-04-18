@@ -14,6 +14,7 @@ import { Progress } from '@/shared/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { cn } from '@/shared/lib/utils';
 import { indonesianRoadmapCategories } from '@/shared/data/indonesianData';
+import { toast } from 'sonner';
 import type { RoadmapResource as Resource } from '../types';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -265,10 +266,15 @@ export function SkillRoadmap() {
     e.stopPropagation();
     setCompletedNodes(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(nodeId)) {
+      const wasCompleted = newSet.has(nodeId);
+      if (wasCompleted) {
         newSet.delete(nodeId);
+        toast('Tanda selesai dibatalkan');
       } else {
         newSet.add(nodeId);
+        toast.success('Topik ditandai selesai', {
+          description: 'Progress roadmap diperbarui.',
+        });
       }
       return newSet;
     });

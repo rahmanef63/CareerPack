@@ -15,7 +15,8 @@ import type { CVData, Education, Experience, Skill, Certification, Project } fro
 import { useCV } from '../hooks/useCV';
 import { MagneticTabs, SwipeToDelete, useDragReorder } from '@/shared/components/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
-import { CVScoreBadge } from './CVScoreBadge';
+import { CVScoreBadge, computeScore } from './CVScoreBadge';
+import { AnimatedProgress } from '@/shared/components/MicroInteractions';
 import { InlineAISuggestChip } from './InlineAISuggestChip';
 import { subscribe } from '@/shared/lib/aiActionBus';
 import { toast } from 'sonner';
@@ -899,25 +900,14 @@ export function CVGenerator() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                      <div className="p-4 bg-muted/40 rounded-lg border border-border">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-slate-600">Kelengkapan</span>
+                          <span className="text-sm text-muted-foreground">Kelengkapan</span>
                           <span className="text-sm font-semibold text-career-600">
-                            {Math.round(
-                              (Object.values(cvData.profile).filter(v => v && v !== '').length / Object.keys(cvData.profile).length) * 100
-                            )}%
+                            {computeScore(cvData)}%
                           </span>
                         </div>
-                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-career-500 to-career-600 rounded-full transition-all duration-300"
-                            style={{
-                              width: `${Math.round(
-                                (Object.values(cvData.profile).filter(v => v && v !== '').length / Object.keys(cvData.profile).length) * 100
-                              )}%`
-                            }}
-                          />
-                        </div>
+                        <AnimatedProgress value={computeScore(cvData)} />
                       </div>
 
                       <div className="space-y-2">
