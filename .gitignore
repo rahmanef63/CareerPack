@@ -15,6 +15,9 @@ frontend/out
 .env
 .env.local
 .env.*.local
+# Convex self-hosted CLI targets — berisi CONVEX_SELF_HOSTED_ADMIN_KEY
+backend/convex-self-hosted/convex.env
+backend/convex-self-hosted/convex.prod.env
 
 # IDE
 .vscode/*

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.24.0",
   "scripts": {
-    "dev": "pnpm run backend:push && pnpm --filter careerpack-frontend dev",
+    "dev": "pnpm run backend:dev-sync && pnpm --filter careerpack-frontend dev",
     "build": "pnpm --filter careerpack-frontend build",
     "start": "pnpm --filter careerpack-frontend start",
     "lint": "pnpm --filter careerpack-frontend lint",
@@ -15,15 +15,10 @@
     "frontend:build": "pnpm --filter careerpack-frontend build",
     "frontend:start": "pnpm --filter careerpack-frontend start",
     "frontend:lint": "pnpm --filter careerpack-frontend lint",
-    "backend:dev": "pnpm exec convex dev",
-    "backend:push": "pnpm exec convex dev --once --typecheck disable",
-    "backend:deploy": "pnpm exec convex deploy",
-    "backend:selfhosted:up": "docker compose -f backend/convex-self-hosted/docker-compose.yml up -d",
-    "backend:selfhosted:down": "docker compose -f backend/convex-self-hosted/docker-compose.yml down",
-    "backend:selfhosted:logs": "docker compose -f backend/convex-self-hosted/docker-compose.yml logs -f",
-    "backend:selfhosted:admin-key": "docker compose -f backend/convex-self-hosted/docker-compose.yml exec -T backend ./generate_admin_key.sh",
-    "backend:selfhosted:push": "pnpm exec convex dev --once --typecheck disable --env-file backend/convex-self-hosted/convex.env",
-    "backend:selfhosted:seed": "pnpm exec convex dev --once --typecheck disable --run seed:seedForCurrentUser --env-file backend/convex-self-hosted/convex.env",
+    "backend:dev": "pnpm exec convex dev --env-file backend/convex-self-hosted/convex.env",
+    "backend:dev-sync": "pnpm exec convex dev --once --typecheck disable --env-file backend/convex-self-hosted/convex.env",
+    "backend:deploy": "pnpm exec convex deploy --yes --env-file backend/convex-self-hosted/convex.env",
+    "backend:admin-key": "docker exec -i $(docker ps --filter name=careerpack-convex --filter status=running --format '{{.Names}}' | grep backend | head -1) ./generate_admin_key.sh",
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
