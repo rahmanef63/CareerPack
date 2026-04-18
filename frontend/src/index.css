@@ -78,6 +78,39 @@
   --font-scale: 1;
   --nav-height: 4.5rem;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* CareerPack design-system semantic tokens (mirrors
+     careerpack-design-system/colors_and_type.css). Brand colors
+     already live in tailwind.config as `career-{50..900}`. */
+
+  /* Status pairs: bg + fg per Application status vocabulary */
+  --status-applied-bg:   #e0f2fe;  --status-applied-fg:   #0284c7;
+  --status-screening-bg: #fef3c7;  --status-screening-fg: #d97706;
+  --status-interview-bg: #ede9fe;  --status-interview-fg: #7c3aed;
+  --status-offer-bg:     #dcfce7;  --status-offer-fg:     #16a34a;
+  --status-rejected-bg:  #fee2e2;  --status-rejected-fg:  #dc2626;
+  --status-withdrawn-bg: #f1f5f9;  --status-withdrawn-fg: #475569;
+
+  /* Chart palette (Recharts defaults, tinted to brand) */
+  --chart-sky:    #0ea5e9;
+  --chart-amber:  #f59e0b;
+  --chart-violet: #8b5cf6;
+  --chart-green:  #10b981;
+  --chart-red:    #ef4444;
+
+  /* Brand CTA glow: tinted shadow used on primary CTAs at size xl */
+  --shadow-cta: 0 10px 24px -8px rgb(14 165 233 / 0.4);
+
+  /* Brand diagonal gradient — used on logo tile, AI FAB, AI agent header */
+  --brand-gradient: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+}
+
+/* Gradient text utility — hero headline, brand wordmarks */
+.brand-gradient-text {
+  background: linear-gradient(90deg, #0284c7 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 html {

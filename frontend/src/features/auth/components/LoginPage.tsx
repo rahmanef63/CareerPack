@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Briefcase, Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
+import { BrandMark } from '@/shared/components/Logo';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -79,8 +80,11 @@ export function LoginPage() {
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="flex items-center justify-center gap-3 mb-8">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-career-500 to-career-700 flex items-center justify-center">
-                        <Briefcase className="w-6 h-6 text-white" />
+                    <div
+                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white"
+                        style={{ boxShadow: '0 10px 24px -8px rgba(14,165,233,0.4)' }}
+                    >
+                        <BrandMark size={24} stroke="#fff" strokeWidth={2.4} />
                     </div>
                     <span className="text-2xl font-bold bg-gradient-to-r from-career-600 to-career-800 bg-clip-text text-transparent">
                         CareerPack

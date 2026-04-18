@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { 
-  Briefcase, ArrowRight, Sparkles, Target, 
-  TrendingUp, Users, CheckCircle 
+import {
+  ArrowRight, Sparkles, Target,
+  TrendingUp, Users, CheckCircle
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
+import { BrandMark } from '@/shared/components/Logo';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -72,7 +73,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="text-slate-900">Semua yang Anda Butuhkan</span>
                 <br />
-                <span className="bg-gradient-to-r from-career-600 to-career-800 bg-clip-text text-transparent">
+                <span className="brand-gradient-text">
                   Untuk Karir Impian
                 </span>
               </h1>
@@ -150,8 +151,11 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               {/* Main Card */}
               <div className="bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 animate-float">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-career-500 to-career-700 flex items-center justify-center">
-                    <Briefcase className="w-7 h-7 text-white" />
+                  <div
+                    className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white"
+                    style={{ boxShadow: '0 10px 24px -8px rgba(14,165,233,0.4)' }}
+                  >
+                    <BrandMark size={28} stroke="#fff" strokeWidth={2.4} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Dashboard Karir</h3>
