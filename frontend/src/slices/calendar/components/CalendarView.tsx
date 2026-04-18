@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Calendar as CalendarIcon, Clock, MapPin, Plus, Trash2 } from "lucide-react";
+import { id as localeID } from "react-day-picker/locale";
 import { Calendar } from "@/shared/components/ui/calendar";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -50,7 +52,14 @@ const TYPE_OPTIONS: ReadonlyArray<{ value: AgendaType; label: string }> = [
 export function CalendarView() {
   const [selected, setSelected] = useState<Date | undefined>(today);
   const [addOpen, setAddOpen] = useState(false);
+  const [timeZone, setTimeZone] = useState<string | undefined>(undefined);
   const { items: agenda, isLoading, create, remove } = useAgenda();
+
+  // Detect user's timezone kat client saja — elak hydration mismatch
+  // sebab server dan client boleh beza timezone.
+  useEffect(() => {
+    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }, []);
 
   const datesWithEvents = useMemo(
     () => new Set(agenda.map((a) => a.date)),
@@ -145,6 +154,10 @@ export function CalendarView() {
               mode="single"
               selected={selected}
               onSelect={setSelected}
+              locale={localeID}
+              timeZone={timeZone}
+              captionLayout="dropdown"
+              className="rounded-lg border"
               modifiers={{
                 hasEvent: (date) => datesWithEvents.has(date.toISOString().slice(0, 10)),
               }}
@@ -361,12 +374,11 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="agenda-date">Tanggal</Label>
-              <Input
+              <DatePicker
                 id="agenda-date"
-                type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
+                onChange={setDate}
+                placeholder="Pilih tanggal"
               />
             </div>
             <div className="space-y-2">

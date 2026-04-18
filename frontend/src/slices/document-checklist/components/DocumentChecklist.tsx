@@ -13,9 +13,9 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
+import { DatePicker } from '@/shared/components/ui/date-picker';
 import { cn } from '@/shared/lib/utils';
 import { indonesianDocumentChecklist, indonesianCategoryLabels } from '@/shared/data/indonesianData';
 import type { ChecklistItem } from '../types';
@@ -490,10 +490,10 @@ export function DocumentChecklist() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Tenggat Waktu (Opsional)</Label>
-                    <Input 
-                      type="date"
-                      value={selectedItem.dueDate || ''}
-                      onChange={(e) => updateItem(selectedItem.id, { dueDate: e.target.value })}
+                    <DatePicker
+                      value={selectedItem.dueDate || undefined}
+                      onChange={(v) => updateItem(selectedItem.id, { dueDate: v })}
+                      placeholder="Pilih tenggat"
                     />
                   </div>
 
