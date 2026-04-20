@@ -284,6 +284,69 @@ const applicationTables = {
   })
     .index("by_user", ["userId"])
     .index("by_hash", ["tokenHash"]),
+
+  portfolioItems: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    description: v.string(),
+    // "project" | "certification" | "publication"
+    category: v.string(),
+    // Emoji rendered as cover art — cheap, no file upload needed.
+    coverEmoji: v.optional(v.string()),
+    // Tailwind gradient hue (e.g. "from-cyan-400 to-cyan-600")
+    coverGradient: v.optional(v.string()),
+    link: v.optional(v.string()),
+    techStack: v.optional(v.array(v.string())),
+    // ISO date string "YYYY-MM-DD" — when the item happened.
+    date: v.string(),
+    featured: v.boolean(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_category", ["userId", "category"])
+    .index("by_user_featured", ["userId", "featured"]),
+
+  contacts: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    // "recruiter" | "mentor" | "peer" | "other"
+    role: v.string(),
+    company: v.optional(v.string()),
+    position: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    avatarEmoji: v.optional(v.string()),
+    avatarHue: v.optional(v.string()),
+    // UNIX ms. When last interaction happened.
+    lastInteraction: v.optional(v.number()),
+    favorite: v.boolean(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_role", ["userId", "role"])
+    .index("by_user_last", ["userId", "lastInteraction"]),
+
+  jobListings: defineTable({
+    // Seed data — no userId. Public catalog.
+    title: v.string(),
+    company: v.string(),
+    location: v.string(),
+    // "remote" | "hybrid" | "onsite"
+    workMode: v.string(),
+    // "full-time" | "part-time" | "contract" | "internship"
+    employmentType: v.string(),
+    seniority: v.string(),
+    salaryMin: v.optional(v.number()),
+    salaryMax: v.optional(v.number()),
+    currency: v.optional(v.string()),
+    description: v.string(),
+    requiredSkills: v.array(v.string()),
+    postedAt: v.number(),
+    applyUrl: v.optional(v.string()),
+    companyLogo: v.optional(v.string()),
+  })
+    .index("by_posted", ["postedAt"])
+    .index("by_workMode", ["workMode", "postedAt"]),
 };
 
 export default defineSchema({
