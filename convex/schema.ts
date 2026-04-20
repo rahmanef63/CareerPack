@@ -13,6 +13,10 @@ const applicationTables = {
     bio: v.optional(v.string()),
     skills: v.optional(v.array(v.string())),
     interests: v.optional(v.array(v.string())),
+    // Absent = "user". Only admin-gated mutation can set "admin" / "moderator".
+    role: v.optional(
+      v.union(v.literal("admin"), v.literal("moderator"), v.literal("user")),
+    ),
     // Legacy fields for backward compatibility
     email: v.optional(v.string()),
     linkedinUrl: v.optional(v.string()),
