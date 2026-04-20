@@ -12,6 +12,7 @@ import type * as _lib_auth from "../_lib/auth.js";
 import type * as _lib_env from "../_lib/env.js";
 import type * as _lib_rateLimit from "../_lib/rateLimit.js";
 import type * as _lib_sanitize from "../_lib/sanitize.js";
+import type * as admin from "../admin.js";
 import type * as ai from "../ai.js";
 import type * as aiSettings from "../aiSettings.js";
 import type * as _lib_aiProviders from "../_lib/aiProviders.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   "_lib/env": typeof _lib_env;
   "_lib/rateLimit": typeof _lib_rateLimit;
   "_lib/sanitize": typeof _lib_sanitize;
+  admin: typeof admin;
   ai: typeof ai;
   aiSettings: typeof aiSettings;
   "_lib/aiProviders": typeof _lib_aiProviders;
