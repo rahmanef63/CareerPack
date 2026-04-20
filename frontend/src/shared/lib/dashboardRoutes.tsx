@@ -7,6 +7,7 @@ import {
   NotificationsView,
   PortfolioView,
 } from "@/shared/components/placeholder/DashboardPlaceholders";
+import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
 
 /**
  * Registry SSOT untuk catch-all `/dashboard/[[...slug]]`.
@@ -18,12 +19,7 @@ import {
  */
 type View = ComponentType;
 
-const loadingFallback = () => (
-  <div className="min-h-[50vh] flex items-center justify-center" role="status">
-    <div className="animate-spin w-8 h-8 border-4 border-career-600 border-t-transparent rounded-full" />
-    <span className="sr-only">Memuat…</span>
-  </div>
-);
+const loadingFallback = () => <LoadingScreen fullScreen={false} />;
 
 const HOME: View = dynamic(
   () => import("@/slices/dashboard-home").then((m) => m.DashboardHome),

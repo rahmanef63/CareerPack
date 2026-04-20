@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: userProfile._id,
         email: userProfile.email || "",
         name: userProfile.profile?.fullName || userProfile.email || "User",
-        role: "user",
+        role: userProfile.profile?.role ?? "user",
         lastLogin: new Date().toISOString(),
         isActive: true,
         createdAt: userProfile._creationTime.toString(),
