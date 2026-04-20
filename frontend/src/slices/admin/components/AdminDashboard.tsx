@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from 'react';
+import { useQuery } from 'convex/react';
 import {
   Users, Settings, Database, BarChart3, Key,
-  Play, Save, RefreshCw,
-  CheckCircle2, AlertCircle, Bot, ChevronLeft,
+  Save,
+  CheckCircle2, Bot, ChevronLeft,
   Layout, Server, Cloud, TrendingUp, FileText,
   Calculator, Users2, Kanban, Handshake, Headphones,
   Image, Video, Palette, Smartphone, BarChart4
 } from 'lucide-react';
+import { api } from '../../../../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -19,7 +21,6 @@ import { Slider } from '@/shared/components/ui/slider';
 import { Switch } from '@/shared/components/ui/switch';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { useAIConfig } from '@/shared/hooks/useAIConfig';
-import { generateAllMockData, type GeneratedMockData } from '@/slices/admin/utils/mockDataGenerator';
 import { indonesianRoadmapCategories } from '@/shared/data/indonesianData';
 import { cn } from '@/shared/lib/utils';
 
@@ -31,17 +32,16 @@ const iconComponents: Record<string, React.ElementType> = {
 export function AdminDashboard() {
   const { config, updateConfig, isConfigured } = useAIConfig();
   const [activeTab, setActiveTab] = useState('overview');
-  const [mockData, setMockData] = useState<GeneratedMockData | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // AI Config state
+  const stats = useQuery(api.admin.getGlobalStats);
+  const isLoadingStats = stats === undefined;
+
   const [apiKey, setApiKey] = useState(config.apiKey);
   const [temperature, setTemperature] = useState(config.temperature);
   const [maxTokens, setMaxTokens] = useState(config.maxTokens);
   const [isEnabled, setIsEnabled] = useState(config.isEnabled);
 
-  // Roadmap categories state
   const [categories, setCategories] = useState(indonesianRoadmapCategories);
 
   const handleSaveAIConfig = () => {
@@ -55,33 +55,38 @@ export function AdminDashboard() {
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
-  const handleGenerateMockData = async () => {
-    setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const data = generateAllMockData(10);
-    setMockData(data);
-    setIsGenerating(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
   const handleToggleCategory = (categoryId: string) => {
     setCategories(prev => prev.map(cat =>
       cat.id === categoryId ? { ...cat, isActive: !cat.isActive } : cat
     ));
   };
 
-  const stats = mockData ? {
-    users: mockData.users.length,
-    cvs: Object.keys(mockData.cvs).length,
-    applications: Object.values(mockData.applications).flat().length,
-    aiRequests: Math.floor(Math.random() * 1000) + 500,
-  } : {
-    users: 0,
-    cvs: 0,
-    applications: 0,
-    aiRequests: 0,
-  };
+  const statCards = [
+    {
+      label: 'Total Pengguna',
+      value: stats?.totalUsers,
+      icon: Users,
+      tint: 'bg-info/20 text-info',
+    },
+    {
+      label: 'CV Dibuat',
+      value: stats?.totalCVs,
+      icon: FileText,
+      tint: 'bg-success/20 text-success',
+    },
+    {
+      label: 'Lamaran Dikirim',
+      value: stats?.totalApplications,
+      icon: BarChart3,
+      tint: 'bg-accent text-brand',
+    },
+    {
+      label: 'Request AI (30 hari)',
+      value: stats?.aiUsage.lastMonth,
+      icon: Bot,
+      tint: 'bg-warning/20 text-warning',
+    },
+  ] as const;
 
   return (
     <div className="min-h-screen bg-muted/50">
@@ -117,68 +122,32 @@ export function AdminDashboard() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="overview">Ringkasan</TabsTrigger>
             <TabsTrigger value="ai">Konfigurasi AI</TabsTrigger>
             <TabsTrigger value="roadmap">Skill Roadmap</TabsTrigger>
-            <TabsTrigger value="devtools">DevTools</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Pengguna</p>
-                      <p className="text-3xl font-bold text-foreground">{stats.users}</p>
+              {statCards.map(({ label, value, icon: Icon, tint }) => (
+                <Card key={label}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{label}</p>
+                        <p className="text-3xl font-bold text-foreground">
+                          {isLoadingStats ? '—' : value ?? 0}
+                        </p>
+                      </div>
+                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', tint.split(' ')[0])}>
+                        <Icon className={cn('w-6 h-6', tint.split(' ')[1])} />
+                      </div>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-info/20 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-info" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">CV Dibuat</p>
-                      <p className="text-3xl font-bold text-foreground">{stats.cvs}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-success/20 flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-success" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Lamaran Dikirim</p>
-                      <p className="text-3xl font-bold text-foreground">{stats.applications}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-brand" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Request AI</p>
-                      <p className="text-3xl font-bold text-foreground">{stats.aiRequests}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center">
-                      <Bot className="w-6 h-6 text-warning" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
             <Card>
@@ -198,11 +167,20 @@ export function AdminDashboard() {
                   </div>
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Database className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-foreground">Mock Data</span>
+                      <Users className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-foreground">Pengguna Aktif (30 hari)</span>
                     </div>
-                    <Badge className={mockData ? 'bg-success/20 text-success' : 'bg-muted text-foreground'}>
-                      {mockData ? `${mockData.users.length} Users` : 'Belum Dibuat'}
+                    <Badge className="bg-info/20 text-info">
+                      {isLoadingStats ? '—' : stats?.activeUsers ?? 0}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Database className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-foreground">Request AI (total)</span>
+                    </div>
+                    <Badge className="bg-muted text-foreground">
+                      {isLoadingStats ? '—' : stats?.aiUsage.totalRequests ?? 0}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
@@ -364,81 +342,6 @@ export function AdminDashboard() {
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* DevTools Tab */}
-          <TabsContent value="devtools" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  Mock Data Generator
-                </CardTitle>
-                <CardDescription>
-                  Generate data dummy untuk testing dan development
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-4 bg-warning/10 border border-warning/30 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-warning">Peringatan</p>
-                      <p className="text-sm text-warning">
-                        Fitur ini akan menghasilkan data dummy yang disimpan di local storage.
-                        Data ini hanya untuk development dan testing.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Jumlah User</p>
-                    <p className="text-2xl font-bold text-foreground">10</p>
-                  </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Data yang Dibuat</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {mockData ? 'User, CV, Lamaran, Checklist' : '-'}
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleGenerateMockData}
-                  disabled={isGenerating}
-                  className="w-full bg-brand hover:bg-brand"
-                >
-                  {isGenerating ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      Membuat Data...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Generate Mock Data
-                    </>
-                  )}
-                </Button>
-
-                {mockData && (
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-foreground">Preview Data:</h4>
-                    <div className="bg-foreground text-background rounded-lg p-4 overflow-auto max-h-64">
-                      <pre className="text-xs font-mono">
-                        {JSON.stringify({
-                          users: mockData.users.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role })),
-                          totalCVs: Object.keys(mockData.cvs).length,
-                          totalApplications: Object.values(mockData.applications).flat().length,
-                        }, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
