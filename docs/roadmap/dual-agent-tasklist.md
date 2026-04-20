@@ -74,13 +74,13 @@ Token: 32-byte random → URL-safe base64. Hash pakai scheme sama dengan passwor
 
 ### Agent A
 
-| ID | Task | File utama | Blocks | Acceptance |
+| ID | Task | File utama | Blocks | Status |
 |---|---|---|---|---|
-| A1 | Add `role` field ke `userProfiles` | `convex/schema.ts` | A2, A3 | `pnpm backend:dev-sync` hijau |
-| A2 | `requireAdmin(ctx)` helper | `convex/_lib/auth.ts` | A3 | Unit test tambah di `convex/_lib/auth.test.ts` (mock ctx) |
-| A3 | `convex/admin.ts` — 4 endpoint | `convex/admin.ts` (baru) | A4 | Sesuai contract §2, semua gated `requireAdmin` |
-| A4 | Wire `AdminDashboard` ke real query | `slices/admin/components/AdminDashboard.tsx` | — | `mockDataGenerator` import hilang; loading + empty state ada |
-| A5 | Forgot-password backend | `convex/schema.ts`, `convex/passwordReset.ts` (baru) | B2 | Sesuai contract §3; token hashed at rest; no email enumeration |
+| A1 | Add `role` field ke `userProfiles` | `convex/schema.ts` | A2, A3 | ✅ done (`a51b42f`) |
+| A2 | `requireAdmin(ctx)` helper | `convex/_lib/auth.ts` | A3 | ✅ done (`a494422`) |
+| A3 | `convex/admin.ts` — 4 endpoint | `convex/admin.ts` (baru) | A4 | ✅ done (`9103eb8`) |
+| A4 | Wire `AdminDashboard` ke real query | `slices/admin/components/AdminDashboard.tsx` | — | ✅ done (`a57d696`) |
+| A5 | Forgot-password backend | `convex/schema.ts`, `convex/passwordReset.ts` (baru) | B2 | ✅ done (`5667690`) — **B2 unblocked setelah agent-a merge ke main** |
 
 ### Agent B
 
