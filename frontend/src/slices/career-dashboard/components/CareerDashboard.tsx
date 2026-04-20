@@ -43,27 +43,27 @@ import {
   ResponsiveDialogTitle as DialogTitle,
 } from "@/shared/components/ui/responsive-dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+  ResponsiveDropdownMenu as DropdownMenu,
+  ResponsiveDropdownMenuContent as DropdownMenuContent,
+  ResponsiveDropdownMenuItem as DropdownMenuItem,
+  ResponsiveDropdownMenuLabel as DropdownMenuLabel,
+  ResponsiveDropdownMenuSeparator as DropdownMenuSeparator,
+  ResponsiveDropdownMenuRadioGroup as DropdownMenuRadioGroup,
+  ResponsiveDropdownMenuRadioItem as DropdownMenuRadioItem,
+  ResponsiveDropdownMenuTrigger as DropdownMenuTrigger,
+} from "@/shared/components/ui/responsive-dropdown-menu";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/shared/components/ui/alert-dialog";
+  ResponsiveAlertDialog as AlertDialog,
+  ResponsiveAlertDialogAction as AlertDialogAction,
+  ResponsiveAlertDialogCancel as AlertDialogCancel,
+  ResponsiveAlertDialogContent as AlertDialogContent,
+  ResponsiveAlertDialogDescription as AlertDialogDescription,
+  ResponsiveAlertDialogFooter as AlertDialogFooter,
+  ResponsiveAlertDialogHeader as AlertDialogHeader,
+  ResponsiveAlertDialogTitle as AlertDialogTitle,
+  ResponsiveAlertDialogTrigger as AlertDialogTrigger,
+} from "@/shared/components/ui/responsive-alert-dialog";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
 import { useApplications } from "../hooks/useApplications";
