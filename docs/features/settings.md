@@ -20,7 +20,20 @@ settings/
 
 ## Data Flow
 
-Tidak pakai Convex. State lewat `UIPrefsProvider` di `@/shared/hooks/useUIPrefs`:
+### Profile (Convex)
+
+Card "Profil Saya" di atas UI prefs. Wire:
+
+| Source | Convex op |
+|---|---|
+| Hydrate | `api.users.getCurrentUser` — baca `currentUser.profile` kalau ada |
+| Save | `api.users.createOrUpdateProfile` — upsert by userId |
+
+Field: `fullName`, `phone?`, `location`, `targetRole`, `experienceLevel`, `bio?`, `skills[]`, `interests[]`. `skills` + `interests` dirender sebagai `Badge` chip (input + tombol `+`, Enter = tambah, klik `×` pada chip = hapus). Validasi client-side: `fullName`, `location`, `targetRole`, `experienceLevel` wajib. Toast `sonner` on sukses/gagal.
+
+### UI preferences (localStorage)
+
+State lewat `UIPrefsProvider` di `@/shared/hooks/useUIPrefs`:
 
 ```ts
 type FontScale = "sm" | "md" | "lg";
@@ -57,7 +70,7 @@ Tidak ada state internal — semua controlled dari context.
 
 ## Extending
 
-- Profile editor (name, bio, skills, interests) → form wire ke `createOrUpdateProfile`.
+- [x] Profile editor (name, bio, skills, interests) → form wire ke `createOrUpdateProfile`.
 - Language switcher (id / en) — butuh i18n layer (next-intl / i18next).
 - Export data (GDPR-style) → action dump semua tabel user ke JSON.
 - Account deletion → butuh cascade delete di Convex.
