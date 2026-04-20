@@ -27,6 +27,7 @@ import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as interviews from "../interviews.js";
 import type * as notifications from "../notifications.js";
+import type * as passwordReset from "../passwordReset.js";
 import type * as roadmaps from "../roadmaps.js";
 import type * as router from "../router.js";
 import type * as seed from "../seed.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   interviews: typeof interviews;
   notifications: typeof notifications;
+  passwordReset: typeof passwordReset;
   roadmaps: typeof roadmaps;
   router: typeof router;
   seed: typeof seed;

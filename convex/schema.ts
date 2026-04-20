@@ -274,6 +274,16 @@ const applicationTables = {
     enabled: v.boolean(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
+
+  passwordResetTokens: defineTable({
+    userId: v.id("users"),
+    // PBKDF2-SHA256 100k, format "pbkdf2v2_<saltHex>_<hashHex>"
+    tokenHash: v.string(),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_hash", ["tokenHash"]),
 };
 
 export default defineSchema({
