@@ -34,3 +34,15 @@ export async function requireOwnedDoc<T extends OwnableTable>(
   if (ownerId !== userId) throw new Error(`${notFoundLabel} tidak ditemukan`);
   return doc;
 }
+
+export async function requireAdmin(
+  ctx: QueryCtx | MutationCtx,
+): Promise<Id<"users">> {
+  const userId = await requireUser(ctx);
+  const profile = await ctx.db
+    .query("userProfiles")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .first();
+  if (profile?.role !== "admin") throw new Error("Bukan admin");
+  return userId;
+}
