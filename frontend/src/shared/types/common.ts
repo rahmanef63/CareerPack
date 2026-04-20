@@ -2,8 +2,8 @@
  * Common types and enums used across multiple features.
  */
 
-// User & Auth
-export type UserRole = 'user' | 'admin';
+// User & Auth — must stay aligned with convex/schema.ts userProfiles.role union.
+export type UserRole = 'user' | 'admin' | 'moderator';
 
 // Experience levels
 export type ExperienceLevel = 'fresh-graduate' | 'entry-level' | 'mid-level' | 'senior';
