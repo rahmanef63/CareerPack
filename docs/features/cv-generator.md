@@ -59,11 +59,11 @@ AI: `useCVAIActions` publish ke `aiActionBus` (mis. "improve bullet", "suggest s
 ## Catatan Desain
 
 - Satu user = satu CV aktif di UI. Schema dukung multi-CV (`isDefault`), tapi belum diselector.
-- Export = print-friendly HTML (CSS `@media print`) → user `Ctrl+P`, simpan PDF. Tidak pakai library PDF karena ATS lebih suka text-selectable HTML-ish output.
+- Export PDF lewat `html2pdf.js` (dynamic import di click handler → tidak bloat initial bundle). Tombol "Ekspor PDF" ada di preview Dialog + sidebar ("Unduh PDF"). Output text-selectable (html2canvas → jsPDF). Ctrl+P native browser tetap support untuk print langsung.
 - Score dihitung client-side di `CVScoreBadge.computeScore(cvData)` — heuristik ringan (completeness, keyword, length). Tidak panggil AI.
 
 ## Extending
 
 - Multi-CV picker: tambah selector UI → update `useCV` untuk switch `activeCVId`.
 - Template variant (modern/classic) → tambah `CVFormat` values + kondisikan rendering preview.
-- Real PDF export → `html2pdf.js` atau server action via Convex action + Puppeteer.
+- [x] Real PDF export → `html2pdf.js` (dynamic import, A4 portrait). Server-side Puppeteer → future, kalau butuh konsistensi cross-browser.

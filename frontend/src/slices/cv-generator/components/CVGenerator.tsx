@@ -269,8 +269,52 @@ export function CVGenerator() {
     }));
   };
 
-  const downloadCV = () => {
-    alert('Fitur download CV akan menghasilkan PDF di sini!');
+  const [isExporting, setIsExporting] = useState(false);
+  const exportCVToPDF = async () => {
+    const node = cvPreviewRef.current;
+    if (!node) {
+      if (!previewOpen) {
+        setPreviewOpen(true);
+        toast.info('Buka pratinjau dulu, lalu ekspor');
+      }
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const { default: html2pdf } = await import('html2pdf.js');
+      const safeName = (cvData.profile.name || 'cv')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'cv';
+      await html2pdf()
+        .from(node)
+        .set({
+          filename: `cv-${safeName}.pdf`,
+          margin: 10,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        })
+        .save();
+      toast.success('PDF berhasil diunduh');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Gagal ekspor PDF';
+      toast.error(msg);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportClick = () => {
+    if (!previewOpen) {
+      setPreviewOpen(true);
+      setTimeout(() => {
+        void exportCVToPDF();
+      }, 50);
+      return;
+    }
+    void exportCVToPDF();
   };
 
   const SectionCard = ({
@@ -924,10 +968,11 @@ export function CVGenerator() {
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={downloadCV}
+                          onClick={handleExportClick}
+                          disabled={isExporting}
                         >
                           <Download className="w-4 h-4 mr-2" />
-                          Download PDF
+                          {isExporting ? 'Mengekspor...' : 'Unduh PDF'}
                         </Button>
                       </div>
                     </div>
@@ -945,7 +990,24 @@ export function CVGenerator() {
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Pratinjau CV</DialogTitle>
+            <div className="flex items-center justify-between gap-2">
+              <DialogTitle>Pratinjau CV</DialogTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={exportCVToPDF}
+                disabled={isExporting}
+                className="gap-2 mr-8"
+              >
+                <Download className="w-4 h-4" />
+                {isExporting ? 'Mengekspor...' : 'Ekspor PDF'}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Tekan <kbd className="px-1 py-0.5 rounded bg-muted text-[11px]">Ctrl</kbd>+
+              <kbd className="px-1 py-0.5 rounded bg-muted text-[11px]">P</kbd> untuk print-to-PDF native browser.
+            </p>
           </DialogHeader>
           <div ref={cvPreviewRef} className={`bg-card text-foreground p-8 border border-border rounded-lg ${format === 'international' ? 'font-sans text-[14px] leading-snug' : ''}`}>
             <div className="mb-2">
