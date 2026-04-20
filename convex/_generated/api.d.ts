@@ -27,6 +27,7 @@ import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as interviews from "../interviews.js";
 import type * as matcher from "../matcher.js";
+import type * as networking from "../networking.js";
 import type * as notifications from "../notifications.js";
 import type * as passwordReset from "../passwordReset.js";
 import type * as portfolio from "../portfolio.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   interviews: typeof interviews;
   matcher: typeof matcher;
+  networking: typeof networking;
   notifications: typeof notifications;
   passwordReset: typeof passwordReset;
   portfolio: typeof portfolio;
