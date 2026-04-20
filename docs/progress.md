@@ -1,6 +1,6 @@
 # Progress Tracker
 
-Last updated: 2026-04-18.
+Last updated: 2026-04-20.
 
 ## Current Stack
 
@@ -30,13 +30,20 @@ Placeholder (coming-soon): `matcher`, `networking`, `portfolio`, `notifications`
 
 ## Known Work Remaining
 
-Dual-agent split → [`roadmap/dual-agent-tasklist.md`](./roadmap/dual-agent-tasklist.md).
+Dulu split dual-agent → akhirnya dikerjakan single-agent, semua selesai di branch `agent-a/backend-admin-forgot`. Lihat [`roadmap/dual-agent-tasklist.md`](./roadmap/dual-agent-tasklist.md) untuk arsip konteks + commit hash.
 
-- [ ] **A1–A4** Admin: `role` field + `requireAdmin` + `convex/admin.ts` + wire `AdminDashboard` to real queries
-- [ ] **A5** Forgot-password backend (reset token + `convex/passwordReset.ts`)
-- [ ] **B1** Profil editor di `settings/TweaksPanel` — sekarang hanya UI prefs, belum edit profile
-- [ ] **B2** Forgot-password frontend (pages + link di LoginPage)
-- [ ] **B3** PDF export untuk CV Generator (saat ini print-to-PDF via browser)
+- [x] **A1–A4** Admin: `role` field + `requireAdmin` + `convex/admin.ts` + wire `AdminDashboard` to real queries
+- [x] **A5** Forgot-password backend (reset token + `convex/passwordReset.ts`, PBKDF2 hash + 30m TTL)
+- [x] **B1** Profil editor di `settings/TweaksPanel` (wire ke `api.users.createOrUpdateProfile`)
+- [x] **B2** Forgot-password frontend (`/forgot-password` + `/reset-password/[token]` + link di LoginPage)
+- [x] **B3** PDF export untuk CV Generator (`html2pdf.js`, dynamic import)
+
+### Follow-ups (next round)
+
+- [ ] V2 password reset: integrasi email delivery (Resend/SMTP) — ganti `errorLogs` insert di `convex/passwordReset.ts`
+- [ ] Seed admin user awal — sementara harus manual `updateUserRole` via Convex dashboard
+- [ ] Rate limit per-IP untuk `requestReset` (saat ini hanya default Convex)
+- [ ] Activity tracking → `userProfiles.lastActiveAt` supaya `admin.listAllUsers` bisa nyajikan kolom itu (sekarang optional dan selalu absent)
 
 ## Smoke Test Checklist
 
