@@ -8,6 +8,7 @@ import { AIConfigProvider } from "@/shared/hooks/useAIConfig"
 import { UIPrefsProvider } from "@/shared/hooks/useUIPrefs"
 import { InstallChip } from "@/shared/components/pwa/InstallChip"
 import { Toaster } from "@/shared/components/ui/sonner"
+import { TooltipProvider } from "@/shared/components/ui/tooltip"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -16,9 +17,11 @@ export function Providers({ children }: { children: ReactNode }) {
         <AuthProvider>
           <AIConfigProvider>
             <UIPrefsProvider>
-              {children}
-              <InstallChip />
-              <Toaster />
+              <TooltipProvider delayDuration={300}>
+                {children}
+                <InstallChip />
+                <Toaster />
+              </TooltipProvider>
             </UIPrefsProvider>
           </AIConfigProvider>
         </AuthProvider>
