@@ -7,17 +7,10 @@ import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
-import { BrandMark } from "@/shared/components/brand/Logo";
+import { AuthShell } from "@/shared/containers/AuthShell";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 
 function validatePassword(password: string): string | null {
@@ -71,96 +64,77 @@ export default function ResetPasswordPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-muted via-white to-brand-muted p-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground"
-            style={{ boxShadow: "0 10px 24px -8px rgba(14,165,233,0.4)" }}
-          >
-            <BrandMark size={24} stroke="#fff" strokeWidth={2.4} />
-          </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-brand-from to-brand-to bg-clip-text text-transparent">
-            CareerPack
-          </span>
-        </div>
-
-        <Card className="border-border shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Reset Password</CardTitle>
-            <CardDescription>
-              Masukkan kata sandi baru untuk akun Anda.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Kata sandi baru</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    placeholder="Min 8 karakter, huruf + angka"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirm">Konfirmasi sandi</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="confirm"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    placeholder="Ulangi sandi"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full bg-brand hover:bg-brand"
-                disabled={isLoading || !password || !confirm}
+    <AuthShell
+      title="Reset Password"
+      description="Masukkan kata sandi baru untuk akun Anda."
+    >
+      <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="password">Kata sandi baru</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="Min 8 karakter, huruf + angka"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10 pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
               >
-                {isLoading ? "Menyimpan..." : "Reset sandi"}
-              </Button>
-            </form>
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
 
-            <Link
-              href="/login"
-              className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground pt-2"
-            >
-              <ArrowLeft className="h-3 w-3" />
-              Kembali ke halaman masuk
-            </Link>
-          </CardContent>
-        </Card>
+          <div className="space-y-2">
+            <Label htmlFor="confirm">Konfirmasi sandi</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="confirm"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="Ulangi sandi"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full bg-brand hover:bg-brand"
+            disabled={isLoading || !password || !confirm}
+          >
+            {isLoading ? "Menyimpan..." : "Reset sandi"}
+          </Button>
+        </form>
+
+        <Link
+          href="/login"
+          className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground pt-2"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          Kembali ke halaman masuk
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 }

@@ -4,11 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
-import { BrandMark } from '@/shared/components/brand/Logo';
+import { AuthShell } from '@/shared/containers/AuthShell';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -79,36 +78,22 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-muted via-white to-brand-muted p-4">
-            <div className="w-full max-w-md">
-                {/* Logo */}
-                <div className="flex items-center justify-center gap-3 mb-8">
-                    <div
-                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground"
-                        style={{ boxShadow: '0 10px 24px -8px rgba(14,165,233,0.4)' }}
-                    >
-                        <BrandMark size={24} stroke="#fff" strokeWidth={2.4} />
-                    </div>
-                    <span className="text-2xl font-bold bg-gradient-to-r from-brand-from to-brand-to bg-clip-text text-transparent">
-                        CareerPack
-                    </span>
-                </div>
+        <AuthShell
+            title="Selamat Datang"
+            description="Masuk atau daftar untuk memulai perjalanan karir Anda"
+            footer={
+                <p className="text-center text-sm text-muted-foreground mt-6">
+                    © 2024 CareerPack. Semua hak dilindungi.
+                </p>
+            }
+        >
+            {error && (
+                <Alert variant="destructive" className="mb-4">
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
 
-                <Card className="border-border shadow-xl">
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl">Selamat Datang</CardTitle>
-                        <CardDescription>
-                            Masuk atau daftar untuk memulai perjalanan karir Anda
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {error && (
-                            <Alert variant="destructive" className="mb-4">
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
-
-                        <Tabs defaultValue="login" className="w-full">
+            <Tabs defaultValue="login" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 mb-6">
                                 <TabsTrigger value="login">Masuk</TabsTrigger>
                                 <TabsTrigger value="register">Daftar</TabsTrigger>
@@ -269,13 +254,6 @@ export function LoginPage() {
                                 </form>
                             </TabsContent>
                         </Tabs>
-                    </CardContent>
-                </Card>
-
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                    © 2024 CareerPack. Semua hak dilindungi.
-                </p>
-            </div>
-        </div>
+        </AuthShell>
     );
 }
