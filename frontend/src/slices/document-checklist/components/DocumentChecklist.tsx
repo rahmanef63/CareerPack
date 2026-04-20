@@ -161,7 +161,7 @@ export function DocumentChecklist() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList variant="equal" cols={2} className="max-w-md">
           <TabsTrigger value="local" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             Kerja Lokal

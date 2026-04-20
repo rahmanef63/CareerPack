@@ -148,7 +148,7 @@ export function NetworkingView() {
         />
 
         <Tabs value={filter} onValueChange={(v) => setFilter(v as ContactFilter)}>
-          <TabsList className="w-full justify-start overflow-x-auto lg:w-auto">
+          <TabsList variant="pills">
             <TabsTrigger value="all" className="gap-2">
               Semua
               <Badge variant="secondary" className="h-5 rounded-full px-1.5">

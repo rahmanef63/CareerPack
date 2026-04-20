@@ -92,7 +92,7 @@ export function FinancialCalculator() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-lg grid-cols-3">
+        <TabsList variant="equal" cols={3} className="max-w-lg">
           <TabsTrigger value="budget">Perencanaan Budget</TabsTrigger>
           <TabsTrigger value="salary">Info Gaji</TabsTrigger>
           <TabsTrigger value="compare">Bandingkan Kota</TabsTrigger>

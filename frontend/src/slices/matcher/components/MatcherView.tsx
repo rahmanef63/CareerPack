@@ -98,7 +98,7 @@ export function MatcherView() {
 
       {/* Filter tabs */}
       <Tabs value={filter} onValueChange={(v) => setFilter(v as WorkModeFilter)}>
-        <TabsList className="w-full justify-start overflow-x-auto lg:w-auto">
+        <TabsList variant="pills">
           <TabsTrigger value="all">Semua</TabsTrigger>
           <TabsTrigger value="remote">Remote</TabsTrigger>
           <TabsTrigger value="hybrid">Hybrid</TabsTrigger>

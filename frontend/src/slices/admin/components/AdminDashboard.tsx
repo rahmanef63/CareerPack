@@ -122,7 +122,7 @@ export function AdminDashboard() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+          <TabsList variant="equal" cols={3} className="max-w-2xl">
             <TabsTrigger value="overview">Ringkasan</TabsTrigger>
             <TabsTrigger value="ai">Konfigurasi AI</TabsTrigger>
             <TabsTrigger value="roadmap">Skill Roadmap</TabsTrigger>

@@ -140,7 +140,7 @@ export function MockInterview() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList variant="equal" cols={2} className="max-w-md">
           <TabsTrigger value="practice">Mode Latihan</TabsTrigger>
           <TabsTrigger value="questions">Bank Soal</TabsTrigger>
         </TabsList>
