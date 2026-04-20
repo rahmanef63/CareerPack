@@ -30,11 +30,13 @@ Placeholder (coming-soon): `matcher`, `networking`, `portfolio`, `notifications`
 
 ## Known Work Remaining
 
-- [ ] Wire admin dashboard ke real Convex query (saat ini masih pakai `mockDataGenerator`)
-- [ ] Tambah `requireAdmin(ctx)` helper di `convex/_lib/auth.ts` + module `convex/admin.ts`
-- [ ] Implement forgot-password flow (reset token + email provider)
-- [ ] Profil editor di `settings/TweaksPanel` — sekarang hanya UI prefs, belum edit profile
-- [ ] PDF export untuk CV Generator (saat ini print-to-PDF via browser)
+Dual-agent split → [`roadmap/dual-agent-tasklist.md`](./roadmap/dual-agent-tasklist.md).
+
+- [ ] **A1–A4** Admin: `role` field + `requireAdmin` + `convex/admin.ts` + wire `AdminDashboard` to real queries
+- [ ] **A5** Forgot-password backend (reset token + `convex/passwordReset.ts`)
+- [ ] **B1** Profil editor di `settings/TweaksPanel` — sekarang hanya UI prefs, belum edit profile
+- [ ] **B2** Forgot-password frontend (pages + link di LoginPage)
+- [ ] **B3** PDF export untuk CV Generator (saat ini print-to-PDF via browser)
 
 ## Smoke Test Checklist
 
