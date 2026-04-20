@@ -22,11 +22,11 @@ Last updated: 2026-04-20.
 - [x] GitHub Actions: CI (typecheck+lint+test+build) + auto-deploy Convex on `convex/**` push
 - [x] Docs lengkap: `docs/architecture.md`, `backend.md`, `auth.md`, `development.md`, `deployment.md`, `features/*`
 
-## Active Slices (13)
+## Active Slices (18)
 
-`hero`, `auth`, `dashboard-home`, `cv-generator`, `calendar`, `career-dashboard`, `skill-roadmap`, `document-checklist`, `mock-interview`, `financial-calculator`, `settings`, `ai-agent`, `ai-settings`, `admin`.
+`hero`, `auth`, `dashboard-home`, `cv-generator`, `calendar`, `career-dashboard`, `skill-roadmap`, `document-checklist`, `mock-interview`, `financial-calculator`, `settings`, `ai-agent`, `ai-settings`, `admin`, `matcher`, `networking`, `portfolio`, `notifications`.
 
-Placeholder (coming-soon): `matcher`, `networking`, `portfolio`, `notifications`, `help` — render via `DashboardPlaceholders`.
+Placeholder (remaining): `help` — rendered via `DashboardPlaceholders`.
 
 ## Known Work Remaining
 

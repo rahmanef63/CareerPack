@@ -1,12 +1,6 @@
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
-import {
-  HelpView,
-  MatcherView,
-  NetworkingView,
-  NotificationsView,
-  PortfolioView,
-} from "@/shared/components/placeholder/DashboardPlaceholders";
+import { HelpView } from "@/shared/components/placeholder/DashboardPlaceholders";
 import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
 
 /**
@@ -61,6 +55,22 @@ const AI_SETTINGS: View = dynamic(
   () => import("@/slices/ai-settings").then((m) => m.AISettingsPanel),
   { loading: loadingFallback }
 );
+const MATCHER: View = dynamic(
+  () => import("@/slices/matcher").then((m) => m.MatcherView),
+  { loading: loadingFallback }
+);
+const NETWORKING: View = dynamic(
+  () => import("@/slices/networking").then((m) => m.NetworkingView),
+  { loading: loadingFallback }
+);
+const PORTFOLIO: View = dynamic(
+  () => import("@/slices/portfolio").then((m) => m.PortfolioView),
+  { loading: loadingFallback }
+);
+const NOTIFICATIONS: View = dynamic(
+  () => import("@/slices/notifications").then((m) => m.NotificationsView),
+  { loading: loadingFallback }
+);
 
 /**
  * Map slug → View. Key `""` = `/dashboard` root.
@@ -77,10 +87,10 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
   calculator: CALCULATOR,
   settings: SETTINGS,
   "ai-settings": AI_SETTINGS,
-  matcher: MatcherView,
-  networking: NetworkingView,
-  portfolio: PortfolioView,
-  notifications: NotificationsView,
+  matcher: MATCHER,
+  networking: NETWORKING,
+  portfolio: PORTFOLIO,
+  notifications: NOTIFICATIONS,
   help: HelpView,
 };
 
