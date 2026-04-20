@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, User, Shield } from 'lucide-react';
 import { BrandMark } from '@/shared/components/brand/Logo';
@@ -152,6 +153,15 @@ export function LoginPage() {
                                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
                                         </div>
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <Link
+                                            href="/forgot-password"
+                                            className="text-sm text-muted-foreground hover:text-foreground"
+                                        >
+                                            Lupa password?
+                                        </Link>
                                     </div>
 
                                     <Button

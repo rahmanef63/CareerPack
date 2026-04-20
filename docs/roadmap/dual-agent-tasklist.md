@@ -84,11 +84,15 @@ Token: 32-byte random → URL-safe base64. Hash pakai scheme sama dengan passwor
 
 ### Agent B
 
-| ID | Task | File utama | BlockedBy | Acceptance |
+| ID | Task | File utama | BlockedBy | Status |
 |---|---|---|---|---|
-| B1 | Profile editor card di TweaksPanel | `slices/settings/components/TweaksPanel.tsx` | — (uses existing `createOrUpdateProfile`) | Field: fullName, phone, location, targetRole, experienceLevel, bio, skills[], interests[]. Optimistic save + toast |
-| B2 | Forgot-password UI | `app/(marketing)/forgot-password/page.tsx` (baru), `app/(marketing)/reset-password/[token]/page.tsx` (baru), `slices/auth/components/LoginPage.tsx` | A5 merged | "Lupa password?" link → request flow; reset page verify token + new password |
-| B3 | PDF export CV Generator | `slices/cv-generator/components/CVGenerator.tsx`, `package.json` (add lib) | — | Button "Export PDF" di preview dialog; output text-selectable; ATS-friendly layout preserved |
+| B1 | Profile editor card di TweaksPanel | `slices/settings/components/TweaksPanel.tsx` | — | ✅ done (`f87d053`, originally `3487d85` by Agent B, cherry-picked ke agent-a saat konsolidasi single-agent) |
+| B2 | Forgot-password UI | `app/(marketing)/forgot-password/page.tsx`, `app/(marketing)/reset-password/[token]/page.tsx`, `slices/auth/components/LoginPage.tsx` | A5 | ✅ done (Agent A setelah dual-agent digabung) |
+| B3 | PDF export CV Generator | `slices/cv-generator/components/CVGenerator.tsx`, `package.json` | — | ✅ done (`5ff1703`, originally `d633651` by Agent B, cherry-picked) |
+
+### Single-agent consolidation note
+
+Setelah B1 + B3 selesai oleh sesi Agent B, user memutuskan pivot ke single-agent. Komitmen Agent B (`3487d85`, `d633651`) di-cherry-pick ke branch `agent-a/backend-admin-forgot` supaya satu branch tunggal lolos ke PR. Branch `agent-b/profile-pdf-forgot-ui` tidak perlu di-merge terpisah — sudah ter-replay via cherry-pick.
 
 ## Urutan eksekusi
 
