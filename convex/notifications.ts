@@ -60,3 +60,23 @@ export const markAllNotificationsAsRead = mutation({
     );
   },
 });
+
+export const deleteNotification = mutation({
+  args: { notificationId: v.id("notifications") },
+  handler: async (ctx, args) => {
+    await requireOwnedDoc(ctx, args.notificationId, "Notifikasi");
+    await ctx.db.delete(args.notificationId);
+  },
+});
+
+export const deleteAllNotifications = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUser(ctx);
+    const notifications = await ctx.db
+      .query("notifications")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    await Promise.all(notifications.map((n) => ctx.db.delete(n._id)));
+  },
+});
