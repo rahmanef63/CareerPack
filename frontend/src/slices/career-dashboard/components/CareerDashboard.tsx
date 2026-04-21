@@ -29,12 +29,11 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
+  ResponsiveSelect,
+  ResponsiveSelectContent,
+  ResponsiveSelectItem,
+  ResponsiveSelectTrigger,
+} from "@/shared/components/ui/responsive-select";
 import {
   ResponsiveDialog as Dialog,
   ResponsiveDialogContent as DialogContent,
@@ -558,20 +557,18 @@ function AddApplicationDialog({ open, onOpenChange, onCreate }: AddApplicationDi
 
           <div className="space-y-2">
             <Label htmlFor="app-source">Sumber Lowongan</Label>
-            <Select value={source || undefined} onValueChange={setSource}>
-              <SelectTrigger id="app-source">
-                <SelectValue placeholder="Pilih sumber" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Website perusahaan">Website perusahaan</SelectItem>
-                <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                <SelectItem value="JobStreet">JobStreet</SelectItem>
-                <SelectItem value="Glints">Glints</SelectItem>
-                <SelectItem value="Referensi">Referensi teman / mentor</SelectItem>
-                <SelectItem value="Kalibrr">Kalibrr</SelectItem>
-                <SelectItem value="Lainnya">Lainnya</SelectItem>
-              </SelectContent>
-            </Select>
+            <ResponsiveSelect value={source || undefined} onValueChange={setSource}>
+              <ResponsiveSelectTrigger id="app-source" placeholder="Pilih sumber" />
+              <ResponsiveSelectContent drawerTitle="Sumber lowongan">
+                <ResponsiveSelectItem value="Website perusahaan">Website perusahaan</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="LinkedIn">LinkedIn</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="JobStreet">JobStreet</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="Glints">Glints</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="Referensi">Referensi teman / mentor</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="Kalibrr">Kalibrr</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="Lainnya">Lainnya</ResponsiveSelectItem>
+              </ResponsiveSelectContent>
+            </ResponsiveSelect>
           </div>
 
           <div className="space-y-2">

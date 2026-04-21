@@ -13,7 +13,12 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Slider } from '@/shared/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import {
+  ResponsiveSelect as Select,
+  ResponsiveSelectContent as SelectContent,
+  ResponsiveSelectItem as SelectItem,
+  ResponsiveSelectTrigger as SelectTrigger,
+} from '@/shared/components/ui/responsive-select';
 import { cn } from '@/shared/lib/utils';
 import { indonesianCityCostOfLiving, indonesianJobMarketData } from '@/shared/data/indonesianData';
 import { 
@@ -292,9 +297,7 @@ export function FinancialCalculator() {
             </CardHeader>
             <CardContent>
               <Select value={targetPosition} onValueChange={setTargetPosition}>
-                <SelectTrigger className="w-full max-w-md">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-full max-w-md" />
                 <SelectContent>
                   {indonesianJobMarketData.map((job) => (
                     <SelectItem key={job.position} value={job.position}>
@@ -413,9 +416,7 @@ export function FinancialCalculator() {
                 <div>
                   <Label className="mb-2 block">Kota Anda</Label>
                   <Select value={selectedCity} onValueChange={setSelectedCity}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger />
                     <SelectContent>
                       {indonesianCityCostOfLiving.map((city) => (
                         <SelectItem key={city.name} value={city.name}>
@@ -428,9 +429,7 @@ export function FinancialCalculator() {
                 <div>
                   <Label className="mb-2 block">Bandingkan Dengan</Label>
                   <Select value={compareCity} onValueChange={setCompareCity}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger />
                     <SelectContent>
                       {indonesianCityCostOfLiving.map((city) => (
                         <SelectItem key={city.name} value={city.name}>
