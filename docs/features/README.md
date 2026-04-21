@@ -1,13 +1,13 @@
 # Features
 
-12 slice aktif + 5 placeholder coming-soon. Setiap feature self-contained di `frontend/src/slices/<name>/`.
+18 slice aktif + 1 placeholder tersisa. Setiap feature self-contained di `frontend/src/slices/<name>/`.
 
 ## Active Slices
 
 | Slice | Route | Dokumen |
 |---|---|---|
 | `hero` | `/` | [hero.md](./hero.md) |
-| `auth` | `/login` | [auth.md](./auth.md) |
+| `auth` | `/login` + `/forgot-password` + `/reset-password/[token]` | [auth.md](./auth.md) |
 | `dashboard-home` | `/dashboard` | [dashboard-home.md](./dashboard-home.md) |
 | `cv-generator` | `/dashboard/cv` | [cv-generator.md](./cv-generator.md) |
 | `calendar` | `/dashboard/calendar` | [calendar.md](./calendar.md) |
@@ -20,15 +20,15 @@
 | `ai-agent` | (FAB global) | [ai-agent.md](./ai-agent.md) |
 | `ai-settings` | `/dashboard/ai-settings` | [ai-settings.md](./ai-settings.md) |
 | `admin` | `/admin` | [admin.md](./admin.md) |
+| `matcher` | `/dashboard/matcher` | [matcher.md](./matcher.md) |
+| `networking` | `/dashboard/networking` | [networking.md](./networking.md) |
+| `portfolio` | `/dashboard/portfolio` | [portfolio.md](./portfolio.md) |
+| `notifications` | `/dashboard/notifications` | [notifications.md](./notifications.md) |
 
 ## Placeholders (coming-soon stubs)
 
-Rendered via `DashboardPlaceholders` — tidak ada slice terpisah. Definisi di `frontend/src/shared/components/DashboardPlaceholders.tsx`:
+Rendered via `DashboardPlaceholders` — tidak ada slice terpisah. Definisi di `frontend/src/shared/components/placeholder/DashboardPlaceholders.tsx`:
 
-- `matcher` — AI Job Matcher
-- `networking` — LinkedIn / kontak
-- `portfolio` — Portfolio builder
-- `notifications` — In-app notifications
 - `help` — Help Center
 
 ## Feature Doc Template
