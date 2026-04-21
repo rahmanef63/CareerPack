@@ -66,7 +66,7 @@ export function MatcherView() {
           >
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">
-              {seeding ? "Memuat…" : "Seed Demo"}
+              {seeding ? "Memuat…" : "Muat Contoh Lowongan"}
             </span>
           </Button>
         }
@@ -113,7 +113,7 @@ export function MatcherView() {
                 Belum ada lowongan
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Klik Seed Demo di atas untuk memuat katalog contoh.
+                Klik &ldquo;Muat Contoh Lowongan&rdquo; di atas untuk memuat katalog contoh.
               </p>
             </div>
           ) : isLoading ? (

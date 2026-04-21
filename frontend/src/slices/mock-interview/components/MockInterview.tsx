@@ -210,7 +210,7 @@ export function MockInterview() {
                     Bisa lewati kapan saja
                   </span>
                 </div>
-                <Button onClick={startSession} className="gap-2">
+                <Button onClick={startSession} className="gap-2 bg-brand hover:bg-brand">
                   <Play className="h-4 w-4" />
                   Mulai Sesi
                 </Button>

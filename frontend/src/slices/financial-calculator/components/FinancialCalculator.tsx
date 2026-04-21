@@ -21,10 +21,16 @@ import {
 } from '@/shared/components/ui/responsive-select';
 import { cn } from '@/shared/lib/utils';
 import { indonesianCityCostOfLiving, indonesianJobMarketData } from '@/shared/data/indonesianData';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
+import {
+  ResponsiveTooltip as HelpTooltip,
+  ResponsiveTooltipContent,
+  ResponsiveTooltipTrigger,
+} from '@/shared/components/ui/responsive-tooltip';
+import { Info } from 'lucide-react';
 
 const expenseCategories = [
   { id: 'housing', label: 'Tempat Tinggal/Sewa', icon: Home, color: '#0ea5e9' },
@@ -98,6 +104,13 @@ export function FinancialCalculator() {
   const parseNumberID = (raw: string): number => {
     const digits = raw.replace(/[^\d]/g, "");
     return digits ? Number(digits) : 0;
+  };
+
+  // Axis-friendly short IDR: "Rp 10jt", "Rp 300rb".
+  const formatShortIDR = (value: number): string => {
+    if (value >= 1_000_000) return `Rp ${Math.round(value / 1_000_000)}jt`;
+    if (value >= 1_000) return `Rp ${Math.round(value / 1_000)}rb`;
+    return `Rp ${value}`;
   };
 
   return (
@@ -364,16 +377,45 @@ export function FinancialCalculator() {
                     <CardTitle className="text-lg">Rentang Gaji</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[200px]">
+                    <div className="h-[220px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={[salaryData.salaryRange]}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                          <XAxis dataKey="name" stroke="#64748b" />
-                          <YAxis stroke="#64748b" />
-                          <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                          <Bar dataKey="min" fill="#94a3b8" name="Minimum" />
-                          <Bar dataKey="median" fill="#0ea5e9" name="Median" />
-                          <Bar dataKey="max" fill="#0284c7" name="Maksimum" />
+                        <BarChart
+                          data={[
+                            { label: 'Minimum', value: salaryData.salaryRange.min, fill: '#94a3b8' },
+                            { label: 'Median', value: salaryData.salaryRange.median, fill: '#0ea5e9' },
+                            { label: 'Maksimum', value: salaryData.salaryRange.max, fill: '#0284c7' },
+                          ]}
+                          margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                          <XAxis
+                            dataKey="label"
+                            stroke="#64748b"
+                            fontSize={12}
+                            tickLine={false}
+                            axisLine={false}
+                          />
+                          <YAxis
+                            stroke="#64748b"
+                            fontSize={11}
+                            tickFormatter={formatShortIDR}
+                            tickLine={false}
+                            axisLine={false}
+                            width={56}
+                          />
+                          <Tooltip
+                            cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                            formatter={(value: number) => [formatCurrency(value), 'Gaji']}
+                          />
+                          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                            {[
+                              { fill: '#94a3b8' },
+                              { fill: '#0ea5e9' },
+                              { fill: '#0284c7' },
+                            ].map((entry, i) => (
+                              <Cell key={i} fill={entry.fill} />
+                            ))}
+                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -466,18 +508,58 @@ export function FinancialCalculator() {
           <div className="grid lg:grid-cols-2 gap-6">
             <Card className="border-border">
               <CardHeader>
-                <CardTitle className="text-lg">Perbandingan Biaya</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  Perbandingan Biaya
+                  <HelpTooltip>
+                    <ResponsiveTooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                        aria-label="Apa itu indeks biaya?"
+                      >
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </ResponsiveTooltipTrigger>
+                    <ResponsiveTooltipContent>
+                      <p className="font-medium">Skor indeks biaya</p>
+                      <p className="text-muted-foreground">
+                        Jakarta = 100 (baseline). Skor 280 artinya 2,8× lebih
+                        mahal dari Jakarta. Angka relatif — bukan rupiah.
+                      </p>
+                    </ResponsiveTooltipContent>
+                  </HelpTooltip>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={cityComparisonData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                      <YAxis stroke="#64748b" />
-                      <Tooltip />
-                      <Bar dataKey={selectedCity} fill="#0ea5e9" />
-                      <Bar dataKey={compareCity} fill="#8b5cf6" />
+                    <BarChart
+                      data={cityComparisonData}
+                      margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
+                      barCategoryGap="20%"
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        stroke="#64748b"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#64748b"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        width={36}
+                      />
+                      <Tooltip cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} />
+                      <Legend
+                        wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+                        iconType="circle"
+                      />
+                      <Bar dataKey={selectedCity} fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey={compareCity} fill="#8b5cf6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

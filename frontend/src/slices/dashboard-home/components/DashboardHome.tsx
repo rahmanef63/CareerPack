@@ -129,7 +129,7 @@ export function DashboardHome() {
 
       {/* Section cards */}
       <section
-        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 md:grid-cols-4"
         aria-label="Ringkasan statistik"
       >
         <StatCard
@@ -287,7 +287,7 @@ export function DashboardHome() {
             <CardDescription>Lompat ke tugas utama</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            <Button asChild className="justify-between">
+            <Button asChild className="justify-between bg-brand hover:bg-brand">
               <Link href="/dashboard/applications">
                 <span className="flex items-center gap-2">
                   <Plus className="w-4 h-4" /> Tambah Lamaran
