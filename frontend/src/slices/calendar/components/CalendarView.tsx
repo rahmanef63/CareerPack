@@ -8,6 +8,7 @@ import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -125,22 +126,20 @@ export function CalendarView() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6 gap-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold truncate">Kalender Karir</h1>
-          <p className="text-sm text-muted-foreground">
-            Wawancara, tenggat lamaran, dan follow-up Anda
-          </p>
-        </div>
-        <Button
-          size="sm"
-          className="bg-brand hover:bg-brand flex-shrink-0"
-          onClick={() => setAddOpen(true)}
-          aria-label="Tambah agenda baru"
-        >
-          <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
-        </Button>
-      </div>
+      <ResponsivePageHeader
+        title="Kalender Karir"
+        description="Wawancara, tenggat lamaran, dan follow-up Anda"
+        actions={
+          <Button
+            size="sm"
+            className="bg-brand hover:bg-brand"
+            onClick={() => setAddOpen(true)}
+            aria-label="Tambah agenda baru"
+          >
+            <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
+          </Button>
+        }
+      />
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>

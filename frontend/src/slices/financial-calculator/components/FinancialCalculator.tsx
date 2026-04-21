@@ -7,6 +7,7 @@ import {
   MapPin, AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
 import { Badge } from '@/shared/components/ui/badge';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -86,10 +87,10 @@ export function FinancialCalculator() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Kalkulator Keuangan</h1>
-        <p className="text-muted-foreground mt-2">Rencanakan keuangan Anda dan bandingkan biaya hidup antar kota</p>
-      </div>
+      <ResponsivePageHeader
+        title="Kalkulator Keuangan"
+        description="Rencanakan keuangan Anda dan bandingkan biaya hidup antar kota"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList variant="equal" cols={3} className="max-w-lg">

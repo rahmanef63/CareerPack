@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
+import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Badge } from "@/shared/components/ui/badge";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -126,22 +127,20 @@ export function CareerDashboard() {
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Lamaran</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Pantau semua lamaran yang sudah Anda kirim.
-          </p>
-        </div>
-        <Button
-          onClick={() => setAddOpen(true)}
-          className="bg-brand hover:bg-brand"
-          aria-label="Tambah lamaran baru"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Tambah Lamaran
-        </Button>
-      </header>
+      <ResponsivePageHeader
+        title="Lamaran"
+        description="Pantau semua lamaran yang sudah Anda kirim."
+        actions={
+          <Button
+            onClick={() => setAddOpen(true)}
+            className="bg-brand hover:bg-brand"
+            aria-label="Tambah lamaran baru"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Tambah Lamaran
+          </Button>
+        }
+      />
 
       {/* Stat cards */}
       <section

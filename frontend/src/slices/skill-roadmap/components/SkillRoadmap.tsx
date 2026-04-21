@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
+import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
 import {
@@ -425,15 +426,17 @@ export function SkillRoadmap() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-brand-foreground" />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">Roadmap Skill</h1>
-        </div>
-        <p className="text-muted-foreground">Jalur pembelajaran terstruktur untuk menguasai skill yang diminati</p>
-      </div>
+      <ResponsivePageHeader
+        title={
+          <span className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5 text-brand-foreground" />
+            </span>
+            Roadmap Skill
+          </span>
+        }
+        description="Jalur pembelajaran terstruktur untuk menguasai skill yang diminati"
+      />
 
       {/* Category Selection */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-3 mb-8">

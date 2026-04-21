@@ -8,6 +8,7 @@ import {
   Save, Share2, RotateCcw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
@@ -134,10 +135,10 @@ export function MockInterview() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Simulasi Wawancara</h1>
-        <p className="text-muted-foreground mt-2">Latih dengan pertanyaan wawancara umum dan dapatkan feedback instan</p>
-      </div>
+      <ResponsivePageHeader
+        title="Simulasi Wawancara"
+        description="Latih dengan pertanyaan wawancara umum dan dapatkan feedback instan"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList variant="equal" cols={2} className="max-w-md">

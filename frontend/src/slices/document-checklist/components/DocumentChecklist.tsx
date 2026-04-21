@@ -8,6 +8,7 @@ import {
   ChevronRight, Download, Bell, Filter
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
@@ -155,10 +156,10 @@ export function DocumentChecklist() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Ceklis Dokumen</h1>
-        <p className="text-muted-foreground mt-2">Kelola semua dokumen yang diperlukan untuk melamar pekerjaan</p>
-      </div>
+      <ResponsivePageHeader
+        title="Ceklis Dokumen"
+        description="Kelola semua dokumen yang diperlukan untuk melamar pekerjaan"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList variant="equal" cols={2} className="max-w-md">
