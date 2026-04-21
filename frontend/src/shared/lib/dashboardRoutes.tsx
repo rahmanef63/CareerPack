@@ -48,11 +48,7 @@ const CALCULATOR: View = dynamic(
   { loading: loadingFallback }
 );
 const SETTINGS: View = dynamic(
-  () => import("@/slices/settings").then((m) => m.TweaksPanel),
-  { loading: loadingFallback }
-);
-const AI_SETTINGS: View = dynamic(
-  () => import("@/slices/ai-settings").then((m) => m.AISettingsPanel),
+  () => import("@/slices/settings").then((m) => m.SettingsView),
   { loading: loadingFallback }
 );
 const MATCHER: View = dynamic(
@@ -86,7 +82,9 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
   interview: INTERVIEW,
   calculator: CALCULATOR,
   settings: SETTINGS,
-  "ai-settings": AI_SETTINGS,
+  // Legacy bookmark `/dashboard/ai-settings` masih resolve ke page
+  // Pengaturan yang sama — user bisa pindah ke tab "AI & Integrasi" manual.
+  "ai-settings": SETTINGS,
   matcher: MATCHER,
   networking: NETWORKING,
   portfolio: PORTFOLIO,

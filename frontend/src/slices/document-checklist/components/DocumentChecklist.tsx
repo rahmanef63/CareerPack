@@ -162,7 +162,7 @@ export function DocumentChecklist() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList variant="equal" cols={2} className="max-w-md">
+        <TabsList variant="equal" cols={2}>
           <TabsTrigger value="local" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             Kerja Lokal

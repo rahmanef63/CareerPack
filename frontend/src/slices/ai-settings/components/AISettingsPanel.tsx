@@ -3,14 +3,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { toast } from "sonner";
-import { Sparkles, Eye, EyeOff, ExternalLink, Wand2, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  ShieldAlert,
+  Sparkles,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -18,6 +27,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+  ResponsiveAlertDialogTrigger,
+} from "@/shared/components/ui/responsive-alert-dialog";
+import { cn } from "@/shared/lib/utils";
 
 interface ProviderOption {
   id: string;
@@ -44,7 +65,12 @@ const EMPTY_FORM: FormState = {
   enabled: true,
 };
 
-export function AISettingsPanel() {
+export interface AISettingsPanelProps {
+  /** When embedded (di dalam SettingsView), skip outer container + header. */
+  embedded?: boolean;
+}
+
+export function AISettingsPanel({ embedded = false }: AISettingsPanelProps = {}) {
   const providers = useQuery(api.aiSettings.listProviders) as ProviderOption[] | undefined;
   const current = useQuery(api.aiSettings.getMine);
   const save = useMutation(api.aiSettings.setMine);
@@ -138,7 +164,6 @@ export function AISettingsPanel() {
   };
 
   const onClear = async () => {
-    if (!confirm("Hapus konfigurasi AI kustom? Akan kembali ke default bawaan.")) return;
     try {
       await clear({});
       toast.success("Konfigurasi AI dihapus");
@@ -148,27 +173,52 @@ export function AISettingsPanel() {
   };
 
   const loading = providers === undefined || current === undefined;
+  const aiEnabled = form.enabled;
 
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-      <header>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-brand" /> Setelan AI
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Pakai model AI sendiri (OpenRouter, OpenAI, Gemini, Groq, Grok, GLM, DeepSeek, Moonshot, Mistral, atau endpoint kustom OpenAI-compat). Kalau kosong, fitur AI pakai default sistem.
-        </p>
-      </header>
+  const body = (
+    <>
+      {!embedded && (
+        <header>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-brand" /> Setelan AI
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Pakai model AI sendiri (OpenRouter, OpenAI, Gemini, Groq, Grok, GLM, DeepSeek, Moonshot, Mistral, atau endpoint kustom OpenAI-compat). Kalau kosong, fitur AI pakai default sistem.
+          </p>
+        </header>
+      )}
 
-      <Alert>
-        <AlertDescription className="text-xs">
-          API key disimpan di backend Convex Anda. Jangan share akun dengan orang lain — kunci bisa dipakai sepanjang akun aktif.
+      <Alert className="border-warning/40 bg-warning/10">
+        <ShieldAlert className="h-4 w-4 text-warning" />
+        <AlertTitle className="text-warning">Jaga kerahasiaan API key</AlertTitle>
+        <AlertDescription className="text-xs text-warning/90">
+          Kunci ini memberikan akses ke akun provider (OpenAI, Groq, dll.) atas
+          nama Anda. Jangan share screenshot atau paste ke chat publik. Kami
+          simpan terenkripsi di backend — tapi yang ada di layar bisa bocor.
         </AlertDescription>
       </Alert>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Provider & Model</CardTitle>
+      <Card className={cn(!aiEnabled && "opacity-60")}>
+        <CardHeader className="pb-2 flex-row items-start justify-between space-y-0">
+          <div>
+            <CardTitle className="text-base">Provider &amp; Model</CardTitle>
+            {!aiEnabled && (
+              <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                AI kustom nonaktif — field hanya bisa diubah saat diaktifkan.
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="enabled-top" className="text-xs text-muted-foreground">
+              Aktifkan
+            </Label>
+            <Switch
+              id="enabled-top"
+              checked={form.enabled}
+              onCheckedChange={(v) => update("enabled", v)}
+            />
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -272,29 +322,38 @@ export function AISettingsPanel() {
             </p>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <Label htmlFor="enabled" className="text-sm font-medium">
-                Aktifkan AI kustom
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Kalau off, semua fitur AI pakai default sistem.
-              </p>
-            </div>
-            <Switch
-              id="enabled"
-              checked={form.enabled}
-              onCheckedChange={(v) => update("enabled", v)}
-            />
-          </div>
         </CardContent>
       </Card>
 
       <div className="flex flex-wrap gap-2 justify-end">
         {current && (
-          <Button variant="outline" onClick={onClear} disabled={saving}>
-            <Trash2 className="w-4 h-4 mr-2" /> Hapus
-          </Button>
+          <ResponsiveAlertDialog>
+            <ResponsiveAlertDialogTrigger asChild>
+              <Button variant="outline" disabled={saving}>
+                <Trash2 className="w-4 h-4 mr-2" /> Hapus
+              </Button>
+            </ResponsiveAlertDialogTrigger>
+            <ResponsiveAlertDialogContent>
+              <ResponsiveAlertDialogHeader>
+                <ResponsiveAlertDialogTitle>
+                  Hapus konfigurasi AI?
+                </ResponsiveAlertDialogTitle>
+                <ResponsiveAlertDialogDescription>
+                  Provider, model, API key, dan base URL yang tersimpan akan
+                  dihapus. Fitur AI akan kembali memakai default sistem.
+                </ResponsiveAlertDialogDescription>
+              </ResponsiveAlertDialogHeader>
+              <ResponsiveAlertDialogFooter>
+                <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
+                <ResponsiveAlertDialogAction
+                  variant="destructive"
+                  onClick={onClear}
+                >
+                  Ya, hapus
+                </ResponsiveAlertDialogAction>
+              </ResponsiveAlertDialogFooter>
+            </ResponsiveAlertDialogContent>
+          </ResponsiveAlertDialog>
         )}
         <Button variant="outline" onClick={onTest} disabled={testing || !current?.enabled}>
           <Wand2 className="w-4 h-4 mr-2" />
@@ -304,6 +363,9 @@ export function AISettingsPanel() {
           {saving ? "Menyimpan…" : "Simpan"}
         </Button>
       </div>
-    </div>
+    </>
   );
+
+  if (embedded) return <div className="space-y-4">{body}</div>;
+  return <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">{body}</div>;
 }

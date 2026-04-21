@@ -19,7 +19,6 @@ import {
   Folder,
   Compass,
   HelpCircle,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,7 +30,6 @@ export type MoreAppId =
   | "calculator"
   | "notifications"
   | "settings"
-  | "ai-settings"
   | "interview"
   | "networking"
   | "portfolio"
@@ -78,8 +76,7 @@ export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
   { id: "networking", label: "Jaringan", icon: Users, href: "/dashboard/networking", hue: "from-rose-400 to-rose-600" },
   { id: "portfolio", label: "Portofolio", icon: Folder, href: "/dashboard/portfolio", hue: "from-orange-400 to-orange-600" },
   { id: "notifications", label: "Notifikasi", icon: Bell, href: "/dashboard/notifications", hue: "from-yellow-400 to-yellow-600" },
-  { id: "settings", label: "Profil & Tampilan", icon: SettingsIcon, href: "/dashboard/settings", hue: "from-slate-500 to-slate-700" },
-  { id: "ai-settings", label: "Setelan AI", icon: Sparkles, href: "/dashboard/ai-settings", hue: "from-fuchsia-400 to-fuchsia-600", badge: "AI" },
+  { id: "settings", label: "Pengaturan", icon: SettingsIcon, href: "/dashboard/settings", hue: "from-slate-500 to-slate-700" },
   { id: "help", label: "Pusat Bantuan", icon: HelpCircle, href: "/dashboard/help", hue: "from-teal-400 to-teal-600" },
 ];
 
