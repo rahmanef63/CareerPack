@@ -90,6 +90,16 @@ export function FinancialCalculator() {
     }).format(value);
   };
 
+  // Locale-aware thousand separator for raw numeric inputs (no Rp prefix).
+  const formatNumberID = (value: number): string =>
+    value === 0 ? "" : value.toLocaleString("id-ID");
+
+  // Parse back — strip non-digits. Empty → 0.
+  const parseNumberID = (raw: string): number => {
+    const digits = raw.replace(/[^\d]/g, "");
+    return digits ? Number(digits) : 0;
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <ResponsivePageHeader
@@ -132,12 +142,22 @@ export function FinancialCalculator() {
                         className="w-full"
                       />
                     </div>
-                    <Input
-                      type="number"
-                      value={monthlyIncome}
-                      onChange={(e) => setMonthlyIncome(Number(e.target.value))}
-                      className="mt-2"
-                    />
+                    <div className="relative mt-2">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        Rp
+                      </span>
+                      <Input
+                        inputMode="numeric"
+                        value={formatNumberID(monthlyIncome)}
+                        onChange={(e) =>
+                          setMonthlyIncome(parseNumberID(e.target.value))
+                        }
+                        className="pl-9 tabular-nums"
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Rentang slider: Rp 0 – Rp 50.000.000 / bulan
+                    </p>
                   </div>
                 </CardContent>
               </Card>

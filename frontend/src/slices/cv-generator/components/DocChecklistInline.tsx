@@ -10,13 +10,13 @@ import { cn } from "@/shared/lib/utils";
 
 const APP_DOCS = [
   { id: "cv", label: "CV PDF", required: true },
-  { id: "cover", label: "Cover Letter", required: true },
-  { id: "portfolio", label: "Portofolio / Link Project", required: false },
+  { id: "cover", label: "Surat Lamaran (Cover Letter)", required: true },
+  { id: "portfolio", label: "Portofolio (link proyek online)", required: false },
   { id: "transkrip", label: "Transkrip Nilai", required: true },
   { id: "sertifikat", label: "Sertifikat Pendukung", required: false },
   { id: "referensi", label: "Surat Referensi", required: false },
   { id: "ktp", label: "Scan KTP", required: true },
-  { id: "foto", label: "Foto Formal", required: true },
+  { id: "foto", label: "Foto Formal (ukuran 4×6 cm)", required: true },
 ];
 
 type Format = "national" | "international";

@@ -81,6 +81,18 @@ const STATUS_META: Record<
   withdrawn: { label: "Ditarik", className: "bg-muted text-foreground dark:bg-muted dark:text-foreground" },
 };
 
+// Applied date format — accept ISO "YYYY-MM-DD" string atau number ms,
+// render "10 Apr 2026". Gunakan locale id-ID. Fallback ke raw kalau gagal.
+function formatAppliedDate(value: string | number): string {
+  const d = typeof value === "number" ? new Date(value) : new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 const STATUS_FILTER_OPTIONS: Array<{ value: ApplicationStatus | "all"; label: string }> = [
   { value: "all", label: "Semua Status" },
   { value: "applied", label: "Dilamar" },
@@ -374,7 +386,7 @@ function ApplicationRow({ app, onStatusChange, onDelete }: ApplicationRowProps) 
         </Badge>
       </TableCell>
       <TableCell className="hidden md:table-cell text-muted-foreground text-sm tabular-nums">
-        {app.appliedDate}
+        {formatAppliedDate(app.appliedDate)}
       </TableCell>
       <TableCell className="hidden lg:table-cell text-muted-foreground text-sm max-w-[240px] truncate">
         {app.notes || "—"}

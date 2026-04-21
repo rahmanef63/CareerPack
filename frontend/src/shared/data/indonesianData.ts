@@ -193,10 +193,11 @@ export const indonesianDocumentChecklist = [
   {
     id: 'doc-2',
     title: 'NPWP (Nomor Pokok Wajib Pajak)',
-    description: 'Nomor identitas perpajakan wajib pajak',
+    description:
+      'Nomor identitas perpajakan — biasanya diurus setelah diterima kerja. Belum punya? Tidak masalah untuk fresh graduate.',
     category: 'local' as const,
     subcategory: 'identity' as const,
-    required: true,
+    required: false,
     completed: false,
   },
   {
