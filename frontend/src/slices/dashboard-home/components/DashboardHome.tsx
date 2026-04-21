@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import {
   Briefcase,
   FileUser,
+  Info,
   MessageSquare,
   TrendingUp,
   Target,
@@ -13,6 +14,11 @@ import {
   ArrowUpRight,
   Sparkles,
 } from "lucide-react";
+import {
+  ResponsiveTooltip,
+  ResponsiveTooltipContent,
+  ResponsiveTooltipTrigger,
+} from "@/shared/components/ui/responsive-tooltip";
 import {
   Card,
   CardContent,
@@ -30,7 +36,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/shared/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { useApplications } from "@/shared/hooks/useApplications";
 import { useAgenda } from "@/shared/hooks/useAgenda";
 import { useAuth } from "@/shared/hooks/useAuth";
@@ -49,6 +55,7 @@ export function DashboardHome() {
     const interview = applications.filter((a) => a.status === "interview").length;
     const offer = applications.filter((a) => a.status === "offer").length;
     const applied = applications.filter((a) => a.status === "applied").length;
+    const RESPONSE_MIN = 5;
     const responseRate =
       applications.length === 0
         ? 0
@@ -57,12 +64,17 @@ export function DashboardHome() {
               applications.length) *
               100
           );
+    // "Tingkat Respons" butuh baseline data cukup agar tidak menyesatkan.
+    // 1 lamaran + 1 wawancara = 100% teknis benar tapi tidak bermakna.
+    const responseRateReliable = applications.length >= RESPONSE_MIN;
     return {
       total: applications.length,
       interview,
       offer,
       applied,
       responseRate,
+      responseRateReliable,
+      responseMin: RESPONSE_MIN,
     };
   }, [applications]);
 
@@ -131,7 +143,34 @@ export function DashboardHome() {
           icon={MessageSquare}
           label="Wawancara"
           value={loadingApps ? "—" : stats.interview}
-          sub={stats.interview > 0 ? "Siapkan jawaban STAR" : "Belum ada wawancara"}
+          sub={
+            stats.interview > 0 ? (
+              <span className="inline-flex items-center gap-1">
+                Siapkan jawaban STAR
+                <ResponsiveTooltip>
+                  <ResponsiveTooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                      aria-label="Apa itu STAR?"
+                    >
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </ResponsiveTooltipTrigger>
+                  <ResponsiveTooltipContent>
+                    <p className="font-medium">Metode STAR</p>
+                    <p className="text-muted-foreground">
+                      Situation, Task, Action, Result — kerangka jawab
+                      pertanyaan wawancara perilaku. Ceritakan situasi + tugas
+                      + aksi yang kamu ambil + hasilnya.
+                    </p>
+                  </ResponsiveTooltipContent>
+                </ResponsiveTooltip>
+              </span>
+            ) : (
+              "Belum ada wawancara"
+            )
+          }
           tone="violet"
         />
         <StatCard
@@ -144,11 +183,21 @@ export function DashboardHome() {
         <StatCard
           icon={TrendingUp}
           label="Tingkat Respons"
-          value={loadingApps ? "—" : `${stats.responseRate}%`}
+          value={
+            loadingApps
+              ? "—"
+              : stats.responseRateReliable
+                ? `${stats.responseRate}%`
+                : "—"
+          }
           sub={
-            stats.responseRate >= 50
-              ? "Di atas rata-rata"
-              : "Tingkatkan kualitas CV"
+            loadingApps
+              ? ""
+              : stats.responseRateReliable
+                ? stats.responseRate >= 50
+                  ? "Di atas rata-rata"
+                  : "Tingkatkan kualitas CV"
+                : `Butuh min. ${stats.responseMin} lamaran untuk statistik akurat`
           }
           tone="amber"
         />
@@ -164,43 +213,71 @@ export function DashboardHome() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={CHART_CONFIG} className="aspect-auto h-[260px] w-full">
-              <AreaChart data={chartData} margin={{ top: 8, left: 0, right: 8 }}>
-                <defs>
-                  <linearGradient id="fill-lamaran" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-lamaran)" stopOpacity={0.5} />
-                    <stop offset="95%" stopColor="var(--color-lamaran)" stopOpacity={0.05} />
-                  </linearGradient>
-                  <linearGradient id="fill-wawancara" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-wawancara)" stopOpacity={0.5} />
-                    <stop offset="95%" stopColor="var(--color-wawancara)" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  fontSize={11}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  dataKey="lamaran"
-                  type="monotone"
-                  stroke="var(--color-lamaran)"
-                  fill="url(#fill-lamaran)"
-                  stackId="a"
-                />
-                <Area
-                  dataKey="wawancara"
-                  type="monotone"
-                  stroke="var(--color-wawancara)"
-                  fill="url(#fill-wawancara)"
-                  stackId="a"
-                />
-              </AreaChart>
-            </ChartContainer>
+            {stats.total === 0 ? (
+              <div className="flex h-[260px] flex-col items-center justify-center gap-3 text-center">
+                <TrendingUp className="h-8 w-8 text-muted-foreground" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    Belum ada data tren
+                  </p>
+                  <p className="max-w-xs text-xs text-muted-foreground">
+                    Tambah lamaran pertama untuk mulai melihat grafik
+                    mingguan di sini.
+                  </p>
+                </div>
+                <Button asChild size="sm">
+                  <Link href="/dashboard/applications">
+                    <Plus className="h-4 w-4 mr-1" /> Tambah lamaran
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <ChartContainer config={CHART_CONFIG} className="aspect-auto h-[260px] w-full">
+                <AreaChart data={chartData} margin={{ top: 8, left: 0, right: 8 }}>
+                  <defs>
+                    <linearGradient id="fill-lamaran" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-lamaran)" stopOpacity={0.5} />
+                      <stop offset="95%" stopColor="var(--color-lamaran)" stopOpacity={0.05} />
+                    </linearGradient>
+                    <linearGradient id="fill-wawancara" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-wawancara)" stopOpacity={0.5} />
+                      <stop offset="95%" stopColor="var(--color-wawancara)" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis
+                    dataKey="name"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    fontSize={11}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tickLine={false}
+                    axisLine={false}
+                    width={24}
+                    fontSize={11}
+                    domain={[0, (dataMax: number) => Math.max(dataMax, 3)]}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    dataKey="lamaran"
+                    type="monotone"
+                    stroke="var(--color-lamaran)"
+                    fill="url(#fill-lamaran)"
+                    stackId="a"
+                  />
+                  <Area
+                    dataKey="wawancara"
+                    type="monotone"
+                    stroke="var(--color-wawancara)"
+                    fill="url(#fill-wawancara)"
+                    stackId="a"
+                  />
+                </AreaChart>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -358,7 +435,7 @@ interface StatCardProps {
   icon: typeof Briefcase;
   label: string;
   value: number | string;
-  sub: string;
+  sub: React.ReactNode;
   tone: Tone;
 }
 
@@ -375,7 +452,7 @@ function StatCard({ icon: Icon, label, value, sub, tone }: StatCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-xs text-muted-foreground">{sub}</p>
+        <div className="text-xs text-muted-foreground">{sub}</div>
       </CardContent>
     </Card>
   );
