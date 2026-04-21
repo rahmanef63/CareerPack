@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from 'react';
-import { 
-  MessageSquare, Pause, Mic, 
+import { useEffect, useState } from 'react';
+import {
+  MessageSquare, Pause, Mic,
   Video, CheckCircle2,
   Lightbulb, ChevronRight, Star, Clock, Trophy,
-  Save, Share2, RotateCcw
+  Save, Share2, RotateCcw, Play, Info,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
@@ -34,6 +34,30 @@ export function MockInterview() {
   const [sessionScore, setSessionScore] = useState(0);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  // Timer: null = session hasn't started. Elapsed recomputed via interval while active.
+  const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
+
+  useEffect(() => {
+    if (!sessionStartedAt || sessionComplete) return;
+    const id = window.setInterval(() => {
+      setElapsedMs(Date.now() - sessionStartedAt);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [sessionStartedAt, sessionComplete]);
+
+  const elapsedLabel = (() => {
+    if (!sessionStartedAt) return "—";
+    const totalSec = Math.floor(elapsedMs / 1000);
+    const m = Math.floor(totalSec / 60).toString().padStart(2, "0");
+    const s = (totalSec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  })();
+
+  const startSession = () => {
+    setSessionStartedAt(Date.now());
+    setElapsedMs(0);
+  };
 
   const filteredQuestions = selectedCategory 
     ? indonesianInterviewQuestions.filter(q => q.category === selectedCategory)
@@ -68,6 +92,8 @@ export function MockInterview() {
     setUserAnswer('');
     setSessionComplete(false);
     setSessionScore(0);
+    setSessionStartedAt(null);
+    setElapsedMs(0);
   };
 
   const toggleFavorite = (questionId: string) => {
@@ -141,28 +167,74 @@ export function MockInterview() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList variant="equal" cols={2} className="max-w-md">
-          <TabsTrigger value="practice">Mode Latihan</TabsTrigger>
-          <TabsTrigger value="questions">Bank Soal</TabsTrigger>
-        </TabsList>
+        <div className="space-y-1">
+          <TabsList variant="equal" cols={2} className="max-w-md">
+            <TabsTrigger value="practice">Mode Latihan</TabsTrigger>
+            <TabsTrigger value="questions">Bank Soal</TabsTrigger>
+          </TabsList>
+          <p className="text-xs text-muted-foreground">
+            {activeTab === "practice"
+              ? "Jawab satu per satu dengan timer berjalan."
+              : "Jelajahi kumpulan pertanyaan tanpa sesi — baik untuk persiapan."}
+          </p>
+        </div>
 
         <TabsContent value="practice" className="space-y-6">
+          {!sessionStartedAt ? (
+            <Card className="border-border">
+              <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-muted">
+                  <Play className="h-7 w-7 text-brand" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-semibold text-foreground">
+                    Siap mulai latihan?
+                  </h3>
+                  <p className="max-w-md text-sm text-muted-foreground">
+                    Kami akan bantu kamu latihan jawab pertanyaan wawancara umum.
+                    Setiap pertanyaan punya tips sebelum kamu menjawab. Timer baru
+                    berjalan saat kamu klik tombol di bawah.
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1">
+                    <MessageSquare className="h-3 w-3" />
+                    {filteredQuestions.length} pertanyaan
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1">
+                    <Clock className="h-3 w-3" />
+                    Waktu bebas
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1">
+                    <Info className="h-3 w-3" />
+                    Bisa lewati kapan saja
+                  </span>
+                </div>
+                <Button onClick={startSession} className="gap-2">
+                  <Play className="h-4 w-4" />
+                  Mulai Sesi
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Main Practice Area */}
             <div className="lg:col-span-2 space-y-6">
               {/* Progress */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-muted-foreground">Pertanyaan</span>
-                  <span className="font-semibold text-foreground">
-                    {currentQuestionIndex + 1} / {filteredQuestions.length}
-                  </span>
-                </div>
-                <Progress 
-                  value={((currentQuestionIndex + 1) / filteredQuestions.length) * 100} 
-                  className="w-32 h-2" 
-                />
-              </div>
+              <Card className="border-border">
+                <CardContent className="py-3">
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Progres sesi</span>
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {currentQuestionIndex + 1} / {filteredQuestions.length}
+                    </span>
+                  </div>
+                  <Progress
+                    value={((currentQuestionIndex + 1) / filteredQuestions.length) * 100}
+                    className="h-2"
+                  />
+                </CardContent>
+              </Card>
 
               {/* Question Card */}
               <Card className="border-border">
@@ -298,7 +370,7 @@ export function MockInterview() {
                         <Clock className="w-5 h-5 text-muted-foreground" />
                         <span className="text-sm text-foreground">Waktu Berlalu</span>
                       </div>
-                      <span className="font-semibold text-foreground">12:34</span>
+                      <span className="font-semibold text-foreground tabular-nums">{elapsedLabel}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3">
@@ -341,6 +413,7 @@ export function MockInterview() {
               </Card>
             </div>
           </div>
+          )}
         </TabsContent>
 
         <TabsContent value="questions" className="space-y-6">
