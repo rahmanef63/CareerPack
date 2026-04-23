@@ -385,7 +385,7 @@ export function CVGenerator() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
       <div className="mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pembuat CV</h1>
         <p className="text-sm text-muted-foreground mt-1">

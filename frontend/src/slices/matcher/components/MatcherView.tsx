@@ -65,9 +65,7 @@ export function MatcherView() {
             className="gap-2"
           >
             <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {seeding ? "Memuat…" : "Muat Contoh Lowongan"}
-            </span>
+            <span>{seeding ? "Memuat…" : "Muat Contoh Lowongan"}</span>
           </Button>
         }
       />

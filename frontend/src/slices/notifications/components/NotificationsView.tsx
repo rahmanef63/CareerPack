@@ -254,7 +254,7 @@ export function NotificationsView() {
                     className="gap-2"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Bersihkan</span>
+                    <span>Bersihkan</span>
                   </Button>
                 </ResponsiveAlertDialogTrigger>
                 <ResponsiveAlertDialogContent>
