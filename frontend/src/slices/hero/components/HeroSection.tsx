@@ -43,11 +43,11 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
 
   return (
     <div ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-muted via-white to-brand-muted" />
-      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/30/30 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand/30/20 rounded-full blur-3xl" />
-      
+      {/* Background Elements — theme-aware so dark mode doesn't flash white */}
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-muted via-background to-brand-muted" />
+      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/30 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand/20 rounded-full blur-3xl" />
+
       {/* Grid Pattern */}
       <div
         className="absolute inset-0 opacity-[0.03]"
