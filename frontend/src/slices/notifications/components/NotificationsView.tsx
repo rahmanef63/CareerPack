@@ -227,7 +227,7 @@ export function NotificationsView() {
         description={
           unreadCount > 0
             ? `${unreadCount} belum dibaca`
-            : "Kamu sudah pantau semua"
+            : "Semua sudah dibaca"
         }
         actions={
           <>

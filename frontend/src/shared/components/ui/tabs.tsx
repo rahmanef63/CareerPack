@@ -43,18 +43,21 @@ const EQUAL_COLS_CLASS: Record<NonNullable<TabsListProps["cols"]>, string> = {
 }
 
 const VARIANT_LIST_CLASS: Record<TabsListVariant, string> = {
+  // Note: no `items-center` on any variant — children should stretch to
+  // fill the list height so the full list area (h-11 mobile / h-9 desktop
+  // per TabsList) becomes the touch target, not just the trigger content.
   pills:
     // Scroll-aware row; fits content, but if it overflows we scroll + hide
     // native scrollbar for a clean mobile feel.
-    "inline-flex w-max min-w-full max-w-full items-center gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
+    "inline-flex w-max min-w-full max-w-full gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   equal:
     // Grid fills container; each trigger = fr. Auto-cols-fr used when no
     // `cols` prop supplied. Still scrollable if total min-width exceeds viewport.
-    "grid w-full items-center gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
+    "grid w-full gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
     "auto-cols-fr [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   segmented:
-    "inline-flex w-max min-w-full max-w-full items-center gap-1 overflow-x-auto rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm " +
+    "inline-flex w-max min-w-full max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm " +
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
 }
 
