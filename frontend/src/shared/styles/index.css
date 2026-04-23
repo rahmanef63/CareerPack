@@ -96,6 +96,12 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Reserve scrollbar gutter so layout width stays constant whether
+     * content overflows or not. Prevents sub-pixel "jitter" on tablists
+     * when switching tabs with differing content heights. */
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background text-foreground;
   }
