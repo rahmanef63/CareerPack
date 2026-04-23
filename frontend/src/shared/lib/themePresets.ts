@@ -211,10 +211,39 @@ export function applyPreset(
   }
 
   // Mode tokens — convert colors to HSL components for tailwind alpha compat.
+  const resolved: Record<string, string> = {};
   for (const [rawKey, raw] of Object.entries(modeVars)) {
     const key = targetKeyFor(rawKey);
     const value = convertValue(rawKey, raw);
     root.style.setProperty(`--${key}`, value);
+    resolved[key] = value;
+  }
+
+  // Bridge registry → CareerPack's `--brand*` aliases so legacy
+  // `bg-brand*`, `from-brand-from`, etc. track the active preset's
+  // primary/accent rather than the stale values from index.css.
+  if (resolved["primary"]) {
+    root.style.setProperty("--brand", resolved["primary"]);
+    root.style.setProperty("--brand-from", resolved["primary"]);
+  }
+  if (resolved["primary-foreground"]) {
+    root.style.setProperty("--brand-foreground", resolved["primary-foreground"]);
+  }
+  // brand-to: prefer chart-4 (visually distinct complement) → chart-2 → accent.
+  const brandToSrc =
+    resolved["chart-4"] ?? resolved["chart-2"] ?? resolved["accent"];
+  if (brandToSrc) {
+    root.style.setProperty("--brand-to", brandToSrc);
+  }
+  // brand-muted / -muted-foreground: derive from secondary (light chip surface).
+  if (resolved["secondary"]) {
+    root.style.setProperty("--brand-muted", resolved["secondary"]);
+  }
+  if (resolved["secondary-foreground"]) {
+    root.style.setProperty(
+      "--brand-muted-foreground",
+      resolved["secondary-foreground"],
+    );
   }
 }
 
