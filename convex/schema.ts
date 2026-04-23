@@ -265,6 +265,36 @@ const applicationTables = {
     timestamp: v.number(),
   }).index("by_time", ["timestamp"]),
 
+  // Audit trail for role changes via api.admin.updateUserRole. Append-only.
+  roleAuditLogs: defineTable({
+    actorUserId: v.id("users"),
+    targetUserId: v.id("users"),
+    previousRole: v.union(
+      v.literal("admin"),
+      v.literal("moderator"),
+      v.literal("user"),
+    ),
+    newRole: v.union(
+      v.literal("admin"),
+      v.literal("moderator"),
+      v.literal("user"),
+    ),
+    timestamp: v.number(),
+  })
+    .index("by_time", ["timestamp"])
+    .index("by_target", ["targetUserId", "timestamp"]),
+
+  // User-submitted feedback via Pusat Bantuan form.
+  feedback: defineTable({
+    // Optional: anonymous feedback allowed; userId populated when signed in.
+    userId: v.optional(v.id("users")),
+    subject: v.string(),
+    message: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_time", ["timestamp"])
+    .index("by_user_time", ["userId", "timestamp"]),
+
   aiSettings: defineTable({
     userId: v.id("users"),
     provider: v.string(),

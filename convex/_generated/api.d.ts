@@ -22,6 +22,7 @@ import type * as calendar from "../calendar.js";
 import type * as chat from "../chat.js";
 import type * as cv from "../cv.js";
 import type * as documents from "../documents.js";
+import type * as feedback from "../feedback.js";
 import type * as financial from "../financial.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   cv: typeof cv;
   documents: typeof documents;
+  feedback: typeof feedback;
   financial: typeof financial;
   goals: typeof goals;
   http: typeof http;

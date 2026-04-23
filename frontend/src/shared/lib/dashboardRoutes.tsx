@@ -1,6 +1,5 @@
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
-import { HelpView } from "@/shared/components/placeholder/DashboardPlaceholders";
 import { PageSkeleton } from "@/shared/components/feedback/PageSkeleton";
 
 /**
@@ -67,6 +66,10 @@ const NOTIFICATIONS: View = dynamic(
   () => import("@/slices/notifications").then((m) => m.NotificationsView),
   { loading: loadingFallback }
 );
+const HELP: View = dynamic(
+  () => import("@/slices/help").then((m) => m.HelpView),
+  { loading: loadingFallback }
+);
 
 /**
  * Map slug → View. Key `""` = `/dashboard` root.
@@ -89,7 +92,7 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
   networking: NETWORKING,
   portfolio: PORTFOLIO,
   notifications: NOTIFICATIONS,
-  help: HelpView,
+  help: HELP,
 };
 
 export type DashboardSlug = keyof typeof DASHBOARD_VIEWS;
