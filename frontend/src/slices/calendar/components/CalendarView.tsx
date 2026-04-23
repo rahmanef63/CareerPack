@@ -125,7 +125,7 @@ export function CalendarView() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="w-full max-w-5xl mx-auto px-4 py-6">
       <ResponsivePageHeader
         title="Kalender Karir"
         description="Wawancara, tenggat lamaran, dan follow-up Anda"
