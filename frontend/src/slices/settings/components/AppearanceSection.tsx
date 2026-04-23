@@ -14,6 +14,7 @@ import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/components/ui/toggle-group";
+import { ThemePresetPicker } from "./ThemePresetPicker";
 import {
   ResponsiveAlertDialog,
   ResponsiveAlertDialogAction,
@@ -108,6 +109,7 @@ export function AppearanceSection() {
 
   return (
     <div className="space-y-4">
+      <ThemePresetPicker />
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">

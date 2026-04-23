@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import { ThemeProvider } from "@/shared/components/theme/theme-provider"
+import { ThemePresetProvider } from "@/shared/providers/ThemePresetProvider"
 import { ConvexClientProvider } from "@/shared/providers/ConvexClientProvider"
 import { AuthProvider } from "@/shared/hooks/useAuth"
 import { AIConfigProvider } from "@/shared/hooks/useAIConfig"
@@ -13,6 +14,7 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip"
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+     <ThemePresetProvider>
       <ConvexClientProvider>
         <AuthProvider>
           <AIConfigProvider>
@@ -26,6 +28,7 @@ export function Providers({ children }: { children: ReactNode }) {
           </AIConfigProvider>
         </AuthProvider>
       </ConvexClientProvider>
+     </ThemePresetProvider>
     </ThemeProvider>
   )
 }
