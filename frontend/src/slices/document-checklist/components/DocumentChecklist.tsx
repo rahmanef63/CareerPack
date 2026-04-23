@@ -12,6 +12,7 @@ import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-hea
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
+import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import {
   ResponsiveDialog as Dialog,
@@ -293,11 +294,13 @@ export function DocumentChecklist() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {getFilteredItems('local').map((item) => (
-                      <ChecklistItemCard key={item.id} item={item} />
-                    ))}
-                  </div>
+                  <ScrollArea className="h-[70vh] max-h-[720px] pr-2">
+                    <div className="space-y-3">
+                      {getFilteredItems('local').map((item) => (
+                        <ChecklistItemCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>
@@ -445,11 +448,13 @@ export function DocumentChecklist() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {getFilteredItems('international').map((item) => (
-                      <ChecklistItemCard key={item.id} item={item} />
-                    ))}
-                  </div>
+                  <ScrollArea className="h-[70vh] max-h-[720px] pr-2">
+                    <div className="space-y-3">
+                      {getFilteredItems('international').map((item) => (
+                        <ChecklistItemCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>
