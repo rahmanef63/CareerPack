@@ -53,7 +53,7 @@ function MobileTopBar() {
     <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur">
       <span className="flex items-center gap-2 text-sm font-semibold">
         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground">
-          <BrandMark size={14} stroke="hsl(var(--brand-foreground))" strokeWidth={2.4} />
+          <BrandMark size={14} stroke="oklch(var(--brand-foreground))" strokeWidth={2.4} />
         </span>
         CareerPack
       </span>

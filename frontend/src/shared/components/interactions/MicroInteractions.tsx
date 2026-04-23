@@ -13,7 +13,7 @@ import { cn } from "@/shared/lib/utils";
 // ============================================================
 // Ripple — wrap a button-like element. Captures pointer pos.
 // ============================================================
-export function Ripple({ color = "hsl(var(--brand) / 0.45)" }: { color?: string }) {
+export function Ripple({ color = "oklch(var(--brand) / 0.45)" }: { color?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {

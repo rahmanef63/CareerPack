@@ -53,7 +53,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
         className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage:
-            `linear-gradient(hsl(var(--brand)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--brand)) 1px, transparent 1px)`,
+            `linear-gradient(oklch(var(--brand)) 1px, transparent 1px), linear-gradient(90deg, oklch(var(--brand)) 1px, transparent 1px)`,
           backgroundSize: '50px 50px',
         }}
       />
@@ -156,11 +156,11 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                 <div className="flex items-center gap-4 mb-6">
                   <div
                     className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground"
-                    style={{ boxShadow: '0 10px 24px -8px hsl(var(--brand) / 0.4)' }}
+                    style={{ boxShadow: '0 10px 24px -8px oklch(var(--brand) / 0.4)' }}
                   >
                     <BrandMark
                       size={28}
-                      stroke="hsl(var(--brand-foreground))"
+                      stroke="oklch(var(--brand-foreground))"
                       strokeWidth={2.4}
                     />
                   </div>
