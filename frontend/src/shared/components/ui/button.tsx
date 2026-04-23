@@ -5,7 +5,12 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/shared/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // `transition-all 150ms` + `hover:-translate-y-0.5 hover:shadow-md` +
+  // `active:translate-y-0` gives every button a subtle lift on hover.
+  // Brutalism presets read punchy (offset shadow + 2px border), refined
+  // presets read polished (soft shadow + rounded) because the lift motion
+  // is identical; only the theme tokens change.
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -17,8 +22,10 @@ const buttonVariants = cva(
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        ghost:
+          "hover:bg-accent hover:text-accent-foreground hover:shadow-none hover:translate-y-0",
+        link:
+          "text-primary underline-offset-4 hover:underline hover:shadow-none hover:translate-y-0",
       },
       size: {
         default: "h-9 px-4 py-2",

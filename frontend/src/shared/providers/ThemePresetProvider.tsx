@@ -9,23 +9,30 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useTheme } from "next-themes";
 import {
   DEFAULT_PRESET_NAME,
   applyPreset,
-  clearInlinePreset,
-  findPreset,
+  bootPreset,
+  getSavedPreset,
   loadRegistry,
-  type ThemePresetItem,
+  previewPreset,
+  restoreSavedPreset,
   type ThemeRegistry,
 } from "@/shared/lib/themePresets";
 
-const STORAGE_KEY = "careerpack:theme-preset";
+/**
+ * Thin provider that boots the preset on first mount and exposes the
+ * current name + a `setPreset` commit handler. All heavy lifting (style
+ * tag injection, preview, restore, transition pulse) lives in
+ * `shared/lib/themePresets.ts`.
+ */
 
 interface ThemePresetContextValue {
   presetName: string;
   registry: ThemeRegistry | null;
   setPreset: (name: string) => void;
+  preview: (name: string | null) => void;
+  restore: () => void;
   isReady: boolean;
 }
 
@@ -33,37 +40,28 @@ const ThemePresetContext = createContext<ThemePresetContextValue>({
   presetName: DEFAULT_PRESET_NAME,
   registry: null,
   setPreset: () => {},
+  preview: () => {},
+  restore: () => {},
   isReady: false,
 });
 
-function readStoredPreset(): string {
-  if (typeof window === "undefined") return DEFAULT_PRESET_NAME;
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored) return stored;
-  } catch {
-    // Ignore storage errors (private mode, quota, etc.)
-  }
-  return DEFAULT_PRESET_NAME;
-}
-
-function resolvedMode(resolved: string | undefined): "light" | "dark" {
-  return resolved === "dark" ? "dark" : "light";
-}
-
 export function ThemePresetProvider({ children }: { children: ReactNode }) {
-  const { resolvedTheme } = useTheme();
-  const mode = resolvedMode(resolvedTheme);
   const [registry, setRegistry] = useState<ThemeRegistry | null>(null);
   const [presetName, setPresetName] = useState<string>(DEFAULT_PRESET_NAME);
   const [isReady, setIsReady] = useState(false);
 
-  // Hydrate from storage after mount to avoid SSR mismatch.
+  // Boot: read localStorage + apply persisted preset on first client render.
   useEffect(() => {
-    setPresetName(readStoredPreset());
+    const saved = getSavedPreset();
+    if (saved) setPresetName(saved);
+    void bootPreset()
+      .catch(() => {
+        // Fail open — base theme stays.
+      })
+      .finally(() => setIsReady(true));
   }, []);
 
-  // Load registry once.
+  // Load registry once for the switcher UI.
   useEffect(() => {
     let cancelled = false;
     loadRegistry()
@@ -71,51 +69,29 @@ export function ThemePresetProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setRegistry(r);
       })
       .catch(() => {
-        if (!cancelled) setIsReady(true); // fail open, base theme stays
+        // Ignore; switcher will render empty if unavailable.
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // Apply preset on mode or name change.
-  useEffect(() => {
-    if (!registry) return;
-
-    // Default preset values are already baked into index.css for zero-FOUC
-    // first paint. Applying them again via inline style is redundant AND
-    // introduces a brief mismatch window. Short-circuit.
-    if (presetName === DEFAULT_PRESET_NAME) {
-      clearInlinePreset();
-      setIsReady(true);
-      return;
-    }
-
-    const preset = findPreset(registry, presetName);
-    if (!preset) {
-      clearInlinePreset();
-      setIsReady(true);
-      return;
-    }
-    // Pass allPresets so applyPreset can wipe EVERY observed registry key
-    // before writing — prevents leftover inline styles from a previously
-    // active preset from leaking into the new one.
-    applyPreset(preset, mode, registry.items);
-    setIsReady(true);
-  }, [registry, presetName, mode]);
-
   const setPreset = useCallback((name: string) => {
     setPresetName(name);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, name);
-    } catch {
-      // Ignore.
-    }
+    void applyPreset(name);
+  }, []);
+
+  const preview = useCallback((name: string | null) => {
+    void previewPreset(name);
+  }, []);
+
+  const restore = useCallback(() => {
+    void restoreSavedPreset();
   }, []);
 
   const value = useMemo<ThemePresetContextValue>(
-    () => ({ presetName, registry, setPreset, isReady }),
-    [presetName, registry, setPreset, isReady],
+    () => ({ presetName, registry, setPreset, preview, restore, isReady }),
+    [presetName, registry, setPreset, preview, restore, isReady],
   );
 
   return (
@@ -130,4 +106,4 @@ export function useThemePreset(): ThemePresetContextValue {
 }
 
 export { DEFAULT_PRESET_NAME };
-export type { ThemePresetItem };
+export type { ThemeRegistry };

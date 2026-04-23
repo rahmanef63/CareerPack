@@ -118,6 +118,16 @@
     --font-serif: var(--font-source-serif-4), Georgia, serif;
 
     --spacing: 0.25rem;
+
+    /* Infra hooks for preset families (future-ready — presets may override).
+       --density-y:  vertical container rhythm (used via py-[var(--density-y)])
+       --border-width: baseline border thickness (2px default)
+       --tracking-brutal*: uppercase/display tracking (brutalism families)
+    */
+    --density-y: 3rem;
+    --border-width: 2px;
+    --tracking-brutal: 0.2em;
+    --tracking-brutal-sm: 0.15em;
   }
 
   .dark {
@@ -191,6 +201,22 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--letter-spacing);
   }
+}
+
+/* Theme-swap transition — `html.theme-transition` class is added by the
+   preset switcher for 260 ms around every apply/preview call. The rule
+   animates every theme-sensitive property in sync so color / radius /
+   shadow / tracking / font changes feel intentional. Normal hover /
+   focus states remain snappy because the class is only present during
+   the swap window. */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition-property: background-color, color, border-color, border-radius,
+    box-shadow, letter-spacing, font-family !important;
+  transition-duration: 220ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 :root {

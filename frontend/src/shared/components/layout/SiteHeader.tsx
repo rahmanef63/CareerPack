@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { ThemeMenu } from "@/shared/components/theme/ThemeMenu";
+import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { labelForPath } from "./navConfig";
 
@@ -75,6 +76,7 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-1.5">
+        <ThemePresetSwitcher />
         <ThemeToggle />
         <Button
           type="button"
