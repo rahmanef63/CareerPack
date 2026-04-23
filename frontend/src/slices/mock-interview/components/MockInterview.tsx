@@ -119,7 +119,7 @@ export function MockInterview() {
 
   if (sessionComplete) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="border-border">
           <CardContent className="pt-12 pb-12 text-center">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center mx-auto mb-6">
@@ -160,7 +160,7 @@ export function MockInterview() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <ResponsivePageHeader
         title="Simulasi Wawancara"
         description="Latih dengan pertanyaan wawancara umum dan dapatkan feedback instan"

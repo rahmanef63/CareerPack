@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 import { HelpView } from "@/shared/components/placeholder/DashboardPlaceholders";
-import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
+import { PageSkeleton } from "@/shared/components/feedback/PageSkeleton";
 
 /**
  * Registry SSOT untuk catch-all `/dashboard/[[...slug]]`.
@@ -13,7 +13,7 @@ import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
  */
 type View = ComponentType;
 
-const loadingFallback = () => <LoadingScreen fullScreen={false} />;
+const loadingFallback = () => <PageSkeleton />;
 
 const HOME: View = dynamic(
   () => import("@/slices/dashboard-home").then((m) => m.DashboardHome),
