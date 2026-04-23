@@ -11,8 +11,12 @@
  * strings. CareerPack's tailwind.config uses `hsl(var(--*) / <alpha-value>)`
  * patterns everywhere, so we parse oklch via the browser and re-emit as
  * HSL components ("H S% L%") before applying. Non-color tokens (radius,
- * font-*, tracking-*, shadow-*) pass through unchanged.
+ * tracking-*, shadow-*) pass through unchanged. Font tokens go through
+ * `rewriteFontValue` so self-hosted families (next/font in app/layout.tsx)
+ * win over preset-specified literal names.
  */
+
+import { rewriteFontValue } from "./registryFonts";
 
 export interface ThemePresetItem {
   name: string;
@@ -212,17 +216,29 @@ export function applyPreset(
   const themeVars = preset.cssVars?.theme ?? {};
   const modeVars = preset.cssVars?.[mode] ?? {};
 
-  // Theme-level tokens (radius, fonts, tracking, shadows) — pass through.
+  const writeVar = (rawKey: string, raw: string) => {
+    const key = targetKeyFor(rawKey);
+    let value: string;
+    if (rawKey === "font-sans" || rawKey === "font-mono" || rawKey === "font-serif") {
+      value = rewriteFontValue(raw);
+    } else {
+      value = convertValue(rawKey, raw);
+    }
+    root.style.setProperty(`--${key}`, value);
+    return { key, value };
+  };
+
+  // Theme-level tokens (radius, fonts, tracking). Applied first so mode
+  // tokens with matching keys take precedence (registry commonly ships
+  // fonts + radius in BOTH theme and mode blocks).
   for (const [key, raw] of Object.entries(themeVars)) {
-    root.style.setProperty(`--${key}`, raw);
+    writeVar(key, raw);
   }
 
-  // Mode tokens — convert colors to HSL components for tailwind alpha compat.
+  // Mode tokens — track resolved values for downstream brand-alias writes.
   const resolved: Record<string, string> = {};
   for (const [rawKey, raw] of Object.entries(modeVars)) {
-    const key = targetKeyFor(rawKey);
-    const value = convertValue(rawKey, raw);
-    root.style.setProperty(`--${key}`, value);
+    const { key, value } = writeVar(rawKey, raw);
     resolved[key] = value;
   }
 
