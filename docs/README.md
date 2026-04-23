@@ -11,7 +11,11 @@ Peta lengkap context project. Setiap dokumen self-contained — bisa dibaca terp
 | [auth.md](./auth.md) | Paham flow login / sign-up / guard |
 | [development.md](./development.md) | Setup lokal, env, scripts, testing, konvensi |
 | [deployment.md](./deployment.md) | Deploy Convex self-hosted + frontend (Vercel / Dokploy) |
-| [features/README.md](./features/README.md) | Index per-fitur (12 slice) |
+| **[rules.md](./rules.md)** | **Non-negotiable conventions — R1..R15 (baca sebelum commit)** |
+| **[guides.md](./guides.md)** | **Step-by-step recipes (add slice, Convex mutation, theme token, preset, etc.)** |
+| [features/README.md](./features/README.md) | Index per-fitur (14 slice) |
+| [qa/quality-report-2026-04-23.md](./qa/quality-report-2026-04-23.md) | Audit terakhir — ship-readiness snapshot |
+| [qa/ui-sweep-prompt.md](./qa/ui-sweep-prompt.md) | QA protocol v2.1 — copy-paste ke auditor agent |
 
 ## Quick Map
 
