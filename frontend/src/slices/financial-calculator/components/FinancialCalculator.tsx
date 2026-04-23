@@ -34,17 +34,41 @@ import { Info } from 'lucide-react';
 import { api } from '../../../../../convex/_generated/api';
 import type { Doc, Id } from '../../../../../convex/_generated/dataModel';
 import { iconFor } from '../constants/budgetIcons';
-import { CHART_COLORS } from '../constants/chartColors';
+import { useChartColors } from '../hooks/useChartColors';
 import { BudgetVariableForm } from './BudgetVariableForm';
 
 type BudgetVar = Doc<"budgetVariables">;
 
+type PeriodView = 'monthly' | 'yearly';
+
+const SLIDER_BASE_MAX = 50_000_000;
+const SLIDER_STEP = 500_000;
+
+/** Pick a slider max that always exceeds the current income so the handle
+ *  stays reachable. Rounds up to the next 10jt above the income. */
+function dynamicSliderMax(income: number): number {
+  if (income <= SLIDER_BASE_MAX) return SLIDER_BASE_MAX;
+  return Math.ceil(income / 10_000_000) * 10_000_000;
+}
+
 export function FinancialCalculator() {
   const [activeTab, setActiveTab] = useState('budget');
   const [monthlyIncome, setMonthlyIncome] = useState(15000000);
+  const [periodView, setPeriodView] = useState<PeriodView>('monthly');
   const [selectedCity, setSelectedCity] = useState('Jakarta');
   const [compareCity, setCompareCity] = useState('Singapore');
   const [targetPosition, setTargetPosition] = useState('Software Engineer');
+
+  // UI math scalar — 1 for monthly view, 12 for yearly. Internal state
+  // (monthlyIncome, budget envelopes) remains monthly so Convex storage
+  // is canonical; only the displayed numbers scale.
+  const periodMultiplier = periodView === 'yearly' ? 12 : 1;
+  const periodSuffix = periodView === 'yearly' ? ' / tahun' : ' / bulan';
+
+  // Recharts SVG attrs don't resolve `var(--x)` reliably across browsers,
+  // so the chart palette is computed from `:root` at runtime and refreshes
+  // on theme / preset change. Returns oklch(...) strings.
+  const chartColors = useChartColors();
 
   // Backend-persisted budget envelopes (per-user, seeded on first visit).
   const variables = useQuery(api.budgetVariables.listMine);
@@ -186,26 +210,40 @@ export function FinancialCalculator() {
             {/* Input Section */}
             <div className="lg:col-span-2 space-y-6">
               <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Wallet className="w-5 h-5 text-brand" />
-                    Pendapatan Bulanan
-                  </CardTitle>
+                <CardHeader className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Wallet className="w-5 h-5 text-brand" />
+                      Pendapatan
+                    </CardTitle>
+                    <Tabs
+                      value={periodView}
+                      onValueChange={(v) => setPeriodView(v as PeriodView)}
+                      className="w-auto"
+                    >
+                      <TabsList variant="equal" cols={2} className="h-8 w-[180px]">
+                        <TabsTrigger value="monthly" className="text-xs">Bulanan</TabsTrigger>
+                        <TabsTrigger value="yearly" className="text-xs">Tahunan</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between mb-2">
-                        <Label>Gaji Bulanan (IDR)</Label>
+                        <Label>
+                          {periodView === 'yearly' ? 'Gaji Tahunan (IDR)' : 'Gaji Bulanan (IDR)'}
+                        </Label>
                         <span className="font-semibold text-brand">
-                          {formatCurrency(monthlyIncome)}
+                          {formatCurrency(monthlyIncome * periodMultiplier)}
                         </span>
                       </div>
                       <Slider
                         value={[monthlyIncome]}
                         onValueChange={([value]) => setMonthlyIncome(value)}
-                        max={50000000}
-                        step={500000}
+                        max={dynamicSliderMax(monthlyIncome)}
+                        step={SLIDER_STEP}
                         className="w-full"
                       />
                     </div>
@@ -215,15 +253,29 @@ export function FinancialCalculator() {
                       </span>
                       <Input
                         inputMode="numeric"
-                        value={formatNumberID(monthlyIncome)}
-                        onChange={(e) =>
-                          setMonthlyIncome(parseNumberID(e.target.value))
-                        }
+                        value={formatNumberID(monthlyIncome * periodMultiplier)}
+                        onChange={(e) => {
+                          const parsed = parseNumberID(e.target.value);
+                          // Input accepts either monthly or yearly depending on view.
+                          // Normalize back to monthly for internal state.
+                          setMonthlyIncome(
+                            periodView === 'yearly' ? Math.round(parsed / 12) : parsed,
+                          );
+                        }}
                         className="pl-9 tabular-nums"
+                        aria-label={
+                          periodView === 'yearly'
+                            ? 'Masukkan gaji tahunan'
+                            : 'Masukkan gaji bulanan'
+                        }
                       />
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Rentang slider: Rp 0 – Rp 50.000.000 / bulan
+                      Slider sampai {formatCurrency(dynamicSliderMax(monthlyIncome))}
+                      {periodSuffix === ' / bulan' ? ' / bulan' : ''}
+                      {monthlyIncome > SLIDER_BASE_MAX && (
+                        <> · rentang slider otomatis menyesuaikan input manual Anda</>
+                      )}
                     </p>
                   </div>
                 </CardContent>
@@ -306,28 +358,32 @@ export function FinancialCalculator() {
             <div className="space-y-6">
               <Card className="border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg">Ringkasan Budget</CardTitle>
+                  <CardTitle className="text-lg">
+                    Ringkasan Budget {periodView === 'yearly' ? 'Tahunan' : 'Bulanan'}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="p-4 bg-brand-muted rounded-lg">
-                      <p className="text-sm text-brand">Pendapatan Bulanan</p>
+                      <p className="text-sm text-brand">
+                        {periodView === 'yearly' ? 'Pendapatan Tahunan' : 'Pendapatan Bulanan'}
+                      </p>
                       <p className="text-2xl font-bold text-brand">
-                        {formatCurrency(monthlyIncome)}
+                        {formatCurrency(monthlyIncome * periodMultiplier)}
                       </p>
                     </div>
 
                     <div className="p-4 bg-destructive/10 rounded-lg">
                       <p className="text-sm text-destructive">Total Pengeluaran</p>
                       <p className="text-2xl font-bold text-destructive">
-                        {formatCurrency(totalExpenses)}
+                        {formatCurrency(totalExpenses * periodMultiplier)}
                       </p>
                     </div>
 
                     <div className="p-4 bg-success/10 rounded-lg">
                       <p className="text-sm text-success">Tabungan Direncanakan</p>
                       <p className="text-2xl font-bold text-success">
-                        {formatCurrency(totalSavings)}
+                        {formatCurrency(totalSavings * periodMultiplier)}
                       </p>
                     </div>
 
@@ -345,7 +401,7 @@ export function FinancialCalculator() {
                         'text-2xl font-bold',
                         unallocated >= 0 ? 'text-info' : 'text-warning'
                       )}>
-                        {formatCurrency(unallocated)}
+                        {formatCurrency(unallocated * periodMultiplier)}
                       </p>
                     </div>
 
@@ -478,22 +534,22 @@ export function FinancialCalculator() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           data={[
-                            { label: 'Minimum', value: salaryData.salaryRange.min, fill: CHART_COLORS.barMin },
-                            { label: 'Median', value: salaryData.salaryRange.median, fill: CHART_COLORS.barMid },
-                            { label: 'Maksimum', value: salaryData.salaryRange.max, fill: CHART_COLORS.barMax },
+                            { label: 'Minimum', value: salaryData.salaryRange.min, fill: chartColors.barMin },
+                            { label: 'Median', value: salaryData.salaryRange.median, fill: chartColors.barMid },
+                            { label: 'Maksimum', value: salaryData.salaryRange.max, fill: chartColors.barMax },
                           ]}
                           margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.gridLine} vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke={chartColors.gridLine} vertical={false} />
                           <XAxis
                             dataKey="label"
-                            stroke={CHART_COLORS.tickText}
+                            stroke={chartColors.tickText}
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                           />
                           <YAxis
-                            stroke={CHART_COLORS.tickText}
+                            stroke={chartColors.tickText}
                             fontSize={11}
                             tickFormatter={formatShortIDR}
                             tickLine={false}
@@ -501,14 +557,14 @@ export function FinancialCalculator() {
                             width={56}
                           />
                           <Tooltip
-                            cursor={{ fill: CHART_COLORS.cursorFill }}
+                            cursor={{ fill: chartColors.cursorFill }}
                             formatter={(value: number) => [formatCurrency(value), 'Gaji']}
                           />
                           <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                             {[
-                              { fill: CHART_COLORS.barMin },
-                              { fill: CHART_COLORS.barMid },
-                              { fill: CHART_COLORS.barMax },
+                              { fill: chartColors.barMin },
+                              { fill: chartColors.barMid },
+                              { fill: chartColors.barMax },
                             ].map((entry, i) => (
                               <Cell key={i} fill={entry.fill} />
                             ))}
@@ -635,28 +691,28 @@ export function FinancialCalculator() {
                       margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
                       barCategoryGap="20%"
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.gridLine} vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={chartColors.gridLine} vertical={false} />
                       <XAxis
                         dataKey="name"
-                        stroke={CHART_COLORS.tickText}
+                        stroke={chartColors.tickText}
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
-                        stroke={CHART_COLORS.tickText}
+                        stroke={chartColors.tickText}
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
                         width={36}
                       />
-                      <Tooltip cursor={{ fill: CHART_COLORS.cursorFill }} />
+                      <Tooltip cursor={{ fill: chartColors.cursorFill }} />
                       <Legend
                         wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
                         iconType="circle"
                       />
-                      <Bar dataKey={selectedCity} fill={CHART_COLORS.compareA} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey={compareCity} fill={CHART_COLORS.compareB} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey={selectedCity} fill={chartColors.compareA} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey={compareCity} fill={chartColors.compareB} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
