@@ -1,13 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import {
   LogOut,
   Moon,
   Sparkles,
   Sun,
-  Monitor,
   User as UserIcon,
   Shield,
 } from "lucide-react";
@@ -28,11 +26,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { ThemeMenu } from "@/shared/components/theme/ThemeMenu";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { labelForPath } from "./navConfig";
 
@@ -119,31 +116,15 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
 }
 
 function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const current = theme === "light" || theme === "dark" || theme === "system" ? theme : "system";
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Ganti tema">
+    <ThemeMenu
+      trigger={
+        <Button variant="ghost" size="icon" aria-label="Ganti tema & preset">
           <Sun className="w-4 h-4 dark:hidden" />
           <Moon className="w-4 h-4 hidden dark:inline" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuLabel>Mode Tampilan</DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={current} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">
-            <Sun className="w-4 h-4 mr-2" /> Terang
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
-            <Moon className="w-4 h-4 mr-2" /> Gelap
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
-            <Monitor className="w-4 h-4 mr-2" /> Sistem
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      }
+    />
   );
 }
 
