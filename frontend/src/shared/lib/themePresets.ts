@@ -1,19 +1,21 @@
 /**
  * Theme preset loader — sources theme definitions from
  * `/r/registry.json` which is a verbatim copy of the tweakcn theme
- * registry bundled with superspace (see /home/rahman/projects/superspace/
- * public/r/registry.json, read-only reference).
+ * registry bundled with superspace.
  *
- * Registry format:
- *   { items: [{ name, title, cssVars: { theme, light, dark }, ... }] }
+ * Approach (mirrors /home/rahman/projects/superspace/frontend/shared/theme/
+ * components/layout/active-theme.tsx):
  *
- * Each `cssVars.{light|dark}` block stores values in oklch(...) or hex
- * strings. CareerPack's tailwind.config uses `hsl(var(--*) / <alpha-value>)`
- * patterns everywhere, so we parse oklch via the browser and re-emit as
- * HSL components ("H S% L%") before applying. Non-color tokens (radius,
- * tracking-*, shadow-*) pass through unchanged. Font tokens go through
- * `rewriteFontValue` so self-hosted families (next/font in app/layout.tsx)
- * win over preset-specified literal names.
+ *   1. Fetch registry.json once, cache in module state.
+ *   2. On preset apply, write registry values DIRECTLY to inline CSS
+ *      custom properties on documentElement — no color-space conversion.
+ *   3. Before applying, strip `oklch(...)` or `hsl(...)` wrappers so
+ *      Tailwind's `<alpha-value>` placeholder (set up in tailwind.config
+ *      to use `oklch(var(--x) / <alpha-value>)`) can compose alpha
+ *      correctly.
+ *   4. No conversion to sRGB/HSL — keeps vivid OKLCH colors perceptually
+ *      accurate and avoids the gamut-clamping that was desaturating
+ *      presets like cosmic-night, catppuccin, bubblegum, etc.
  */
 
 import { rewriteFontValue } from "./registryFonts";
@@ -48,8 +50,6 @@ export async function loadRegistry(): Promise<ThemeRegistry> {
       return r.json() as Promise<ThemeRegistry>;
     })
     .then((data) => {
-      // Filter to only usable style items (first entry is the registry
-      // header, not a theme).
       const items = data.items.filter(
         (i) => i.cssVars?.light && i.cssVars?.dark,
       );
@@ -66,69 +66,32 @@ export function findPreset(
   return registry.items.find((i) => i.name === name);
 }
 
-// -----------------------------------------------------------------------------
-// OKLCH → HSL conversion via the browser's computed color space. Avoids a
-// dedicated color library; works in all browsers that support oklch() which
-// is a superset of the browsers that run CareerPack (Chrome 111+, Firefox
-// 113+, Safari 15.4+).
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Wrapper stripper — extracts raw components from an OKLCH or HSL string so
+// they can be consumed by tailwind utilities declared as
+// `oklch(var(--x) / <alpha-value>)` or `hsl(var(--x) / <alpha-value>)`.
+//
+//   "oklch(0.62 0.19 259.81)"  →  "0.62 0.19 259.81"
+//   "hsl(217 91% 59%)"         →  "217 91% 59%"
+//   "0.62 0.19 259.81"         →  "0.62 0.19 259.81"  (already stripped)
+//
+// Other formats (rgb, hex, named colors) pass through unchanged — they
+// shouldn't appear in registry color values, but we don't corrupt them if
+// present.
+// ---------------------------------------------------------------------------
 
-const hslCache = new Map<string, string>();
-
-function parseRgb(rgbStr: string): [number, number, number, number] {
-  const m = rgbStr.match(
-    /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[\s/,]+([\d.]+))?/,
-  );
-  if (!m) return [0, 0, 0, 1];
-  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), m[4] ? parseFloat(m[4]) : 1];
+function stripColorWrapper(value: string): string {
+  const trimmed = value.trim();
+  const oklch = trimmed.match(/^oklch\(([^)]+)\)$/i);
+  if (oklch) return oklch[1].trim();
+  const hsl = trimmed.match(/^hsl\(([^)]+)\)$/i);
+  if (hsl) return hsl[1].replace(/,/g, " ").trim();
+  return trimmed;
 }
 
-function rgbToHslComponents(r: number, g: number, b: number): string {
-  const rn = r / 255;
-  const gn = g / 255;
-  const bn = b / 255;
-  const max = Math.max(rn, gn, bn);
-  const min = Math.min(rn, gn, bn);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0);
-    else if (max === gn) h = (bn - rn) / d + 2;
-    else h = (rn - gn) / d + 4;
-    h /= 6;
-  }
-  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-}
-
-function toHslComponents(value: string): string {
-  const cached = hslCache.get(value);
-  if (cached) return cached;
-  if (typeof document === "undefined") return value; // SSR safety; apply runs client-side anyway
-
-  const probe = document.createElement("div");
-  probe.style.color = value;
-  probe.style.display = "none";
-  document.body.appendChild(probe);
-  const computed = getComputedStyle(probe).color;
-  document.body.removeChild(probe);
-
-  if (!computed.startsWith("rgb")) {
-    hslCache.set(value, value);
-    return value;
-  }
-  const [r, g, b] = parseRgb(computed);
-  const out = rgbToHslComponents(r, g, b);
-  hslCache.set(value, out);
-  return out;
-}
-
-// CSS vars that should be converted to HSL-component format so they stay
-// compatible with `hsl(var(--x) / <alpha-value>)` in tailwind config.
-// Includes both the registry name (`sidebar`) and the CareerPack target
-// name (`sidebar-background`) so `convertValue` catches either input.
+// Registry keys that hold color values — stripped to components so Tailwind
+// can inject alpha. Everything else (radius, fonts, tracking, shadow scale
+// strings, shadow primitives) passes through as-is.
 const COLOR_VAR_NAMES = new Set([
   "background",
   "foreground",
@@ -160,8 +123,8 @@ const COLOR_VAR_NAMES = new Set([
   "chart-3",
   "chart-4",
   "chart-5",
-  "sidebar",              // registry key (gets aliased to sidebar-background)
-  "sidebar-background",   // CareerPack target alias
+  "sidebar",
+  "sidebar-background",
   "sidebar-foreground",
   "sidebar-primary",
   "sidebar-primary-foreground",
@@ -175,43 +138,65 @@ const COLOR_VAR_NAMES = new Set([
   "brand-to",
   "brand-muted",
   "brand-muted-foreground",
-  // Shadow color is stored as raw HSL components so `hsl(var(--shadow-color)
-  // / 0.10)` in index.css composes correctly. Registry ships it wrapped
-  // in hsl() — convertValue strips the wrapper.
   "shadow-color",
 ]);
 
-// Alias mapping: registry uses `sidebar` (no suffix) to mean sidebar bg.
-// CareerPack's tailwind config references `--sidebar-background`.
+// Alias: registry uses `sidebar` (no suffix) for the sidebar surface;
+// CareerPack's tailwind config reads `--sidebar-background`.
 const SIDEBAR_BG_KEY = "sidebar";
 const SIDEBAR_BG_TARGET = "sidebar-background";
-
-function convertValue(key: string, value: string): string {
-  if (!COLOR_VAR_NAMES.has(key) && !COLOR_VAR_NAMES.has(targetKeyFor(key))) {
-    return value;
-  }
-  if (typeof value !== "string") return value;
-  const trimmed = value.trim();
-  if (trimmed.startsWith("oklch(") || trimmed.startsWith("rgb(") || trimmed.startsWith("rgba(") || trimmed.startsWith("#")) {
-    return toHslComponents(trimmed);
-  }
-  // hsl(...) wrapper → strip to components
-  const hslMatch = trimmed.match(/^hsl\(([^)]+)\)$/i);
-  if (hslMatch) return hslMatch[1].replace(/,/g, " ").trim();
-  return value;
-}
 
 function targetKeyFor(registryKey: string): string {
   if (registryKey === SIDEBAR_BG_KEY) return SIDEBAR_BG_TARGET;
   return registryKey;
 }
 
+// Collect every key observed across the registry so `applyPreset` can wipe
+// previously-written vars before applying a new preset. Lazily populated —
+// first applyPreset call that sees the registry fills this set.
+const OBSERVED_KEYS = new Set<string>();
+
+function rememberKeys(preset: ThemePresetItem): void {
+  for (const block of ["theme", "light", "dark"] as const) {
+    const vars = preset.cssVars?.[block];
+    if (!vars) continue;
+    for (const key of Object.keys(vars)) {
+      OBSERVED_KEYS.add(targetKeyFor(key));
+    }
+  }
+}
+
 export function applyPreset(
   preset: ThemePresetItem,
   mode: "light" | "dark",
+  allPresets?: ThemePresetItem[],
 ): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
+
+  rememberKeys(preset);
+  if (allPresets) {
+    for (const p of allPresets) rememberKeys(p);
+  }
+
+  // Wipe every previously-observed custom property so switching between
+  // presets doesn't leak stale inline overrides (especially crucial when
+  // two presets overlap on some keys but differ on others — without this,
+  // a shadow string from preset A could linger under preset B).
+  for (const key of OBSERVED_KEYS) {
+    root.style.removeProperty(`--${key}`);
+    // Brand aliases aren't in the registry; wipe manually.
+  }
+  for (const brandKey of [
+    "brand",
+    "brand-foreground",
+    "brand-from",
+    "brand-to",
+    "brand-muted",
+    "brand-muted-foreground",
+  ]) {
+    root.style.removeProperty(`--${brandKey}`);
+  }
 
   const themeVars = preset.cssVars?.theme ?? {};
   const modeVars = preset.cssVars?.[mode] ?? {};
@@ -221,30 +206,28 @@ export function applyPreset(
     let value: string;
     if (rawKey === "font-sans" || rawKey === "font-mono" || rawKey === "font-serif") {
       value = rewriteFontValue(raw);
+    } else if (COLOR_VAR_NAMES.has(rawKey) || COLOR_VAR_NAMES.has(key)) {
+      value = stripColorWrapper(raw);
     } else {
-      value = convertValue(rawKey, raw);
+      value = raw;
     }
     root.style.setProperty(`--${key}`, value);
     return { key, value };
   };
 
-  // Theme-level tokens (radius, fonts, tracking). Applied first so mode
-  // tokens with matching keys take precedence (registry commonly ships
-  // fonts + radius in BOTH theme and mode blocks).
-  for (const [key, raw] of Object.entries(themeVars)) {
-    writeVar(key, raw);
-  }
+  // Theme block first (radius, fonts, tracking scale), then mode block
+  // (colors, shadows, mode-specific fonts/radius/letter-spacing). Mode
+  // wins on overlapping keys, which matches superspace's behavior.
+  for (const [key, raw] of Object.entries(themeVars)) writeVar(key, raw);
 
-  // Mode tokens — track resolved values for downstream brand-alias writes.
   const resolved: Record<string, string> = {};
   for (const [rawKey, raw] of Object.entries(modeVars)) {
     const { key, value } = writeVar(rawKey, raw);
     resolved[key] = value;
   }
 
-  // Bridge registry → CareerPack's `--brand*` aliases so legacy
-  // `bg-brand*`, `from-brand-from`, etc. track the active preset's
-  // primary/accent rather than the stale values from index.css.
+  // Brand family aliases → primary / chart-4 / secondary so existing
+  // `bg-brand*` callsites track the active preset.
   if (resolved["primary"]) {
     root.style.setProperty("--brand", resolved["primary"]);
     root.style.setProperty("--brand-from", resolved["primary"]);
@@ -252,13 +235,9 @@ export function applyPreset(
   if (resolved["primary-foreground"]) {
     root.style.setProperty("--brand-foreground", resolved["primary-foreground"]);
   }
-  // brand-to: prefer chart-4 (visually distinct complement) → chart-2 → accent.
   const brandToSrc =
     resolved["chart-4"] ?? resolved["chart-2"] ?? resolved["accent"];
-  if (brandToSrc) {
-    root.style.setProperty("--brand-to", brandToSrc);
-  }
-  // brand-muted / -muted-foreground: derive from secondary (light chip surface).
+  if (brandToSrc) root.style.setProperty("--brand-to", brandToSrc);
   if (resolved["secondary"]) {
     root.style.setProperty("--brand-muted", resolved["secondary"]);
   }
@@ -273,8 +252,6 @@ export function applyPreset(
 export function clearInlinePreset(): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  // Strip all inline custom-property overrides so the base stylesheet's
-  // defaults take over. Iterate the element's own style declarations only.
   const names: string[] = [];
   for (let i = 0; i < root.style.length; i++) {
     const n = root.style[i];

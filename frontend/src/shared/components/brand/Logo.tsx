@@ -75,7 +75,7 @@ export function Logo({
       >
         <BrandMark
           size={size * 0.6}
-          stroke="hsl(var(--brand-foreground))"
+          stroke="oklch(var(--brand-foreground))"
           strokeWidth={2.4}
         />
       </span>

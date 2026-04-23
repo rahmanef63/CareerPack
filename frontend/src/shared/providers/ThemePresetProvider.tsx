@@ -97,7 +97,10 @@ export function ThemePresetProvider({ children }: { children: ReactNode }) {
       setIsReady(true);
       return;
     }
-    applyPreset(preset, mode);
+    // Pass allPresets so applyPreset can wipe EVERY observed registry key
+    // before writing — prevents leftover inline styles from a previously
+    // active preset from leaking into the new one.
+    applyPreset(preset, mode, registry.items);
     setIsReady(true);
   }, [registry, presetName, mode]);
 

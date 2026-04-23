@@ -17,68 +17,68 @@ const config: Config = {
   			// silently dropping the alpha modifier and rendering full
   			// opacity. Applies uniformly so there are no "some colors
   			// blend, others don't" surprises across the codebase.
-  			border: 'hsl(var(--border) / <alpha-value>)',
-  			input: 'hsl(var(--input) / <alpha-value>)',
-  			ring: 'hsl(var(--ring) / <alpha-value>)',
-  			background: 'hsl(var(--background) / <alpha-value>)',
-  			foreground: 'hsl(var(--foreground) / <alpha-value>)',
+  			border: 'oklch(var(--border) / <alpha-value>)',
+  			input: 'oklch(var(--input) / <alpha-value>)',
+  			ring: 'oklch(var(--ring) / <alpha-value>)',
+  			background: 'oklch(var(--background) / <alpha-value>)',
+  			foreground: 'oklch(var(--foreground) / <alpha-value>)',
   			primary: {
-  				DEFAULT: 'hsl(var(--primary) / <alpha-value>)',
-  				foreground: 'hsl(var(--primary-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
+  				foreground: 'oklch(var(--primary-foreground) / <alpha-value>)'
   			},
   			secondary: {
-  				DEFAULT: 'hsl(var(--secondary) / <alpha-value>)',
-  				foreground: 'hsl(var(--secondary-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--secondary) / <alpha-value>)',
+  				foreground: 'oklch(var(--secondary-foreground) / <alpha-value>)'
   			},
   			destructive: {
-  				DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
-  				foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--destructive) / <alpha-value>)',
+  				foreground: 'oklch(var(--destructive-foreground) / <alpha-value>)'
   			},
   			success: {
-  				DEFAULT: 'hsl(var(--success) / <alpha-value>)',
-  				foreground: 'hsl(var(--success-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--success) / <alpha-value>)',
+  				foreground: 'oklch(var(--success-foreground) / <alpha-value>)'
   			},
   			warning: {
-  				DEFAULT: 'hsl(var(--warning) / <alpha-value>)',
-  				foreground: 'hsl(var(--warning-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--warning) / <alpha-value>)',
+  				foreground: 'oklch(var(--warning-foreground) / <alpha-value>)'
   			},
   			info: {
-  				DEFAULT: 'hsl(var(--info) / <alpha-value>)',
-  				foreground: 'hsl(var(--info-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--info) / <alpha-value>)',
+  				foreground: 'oklch(var(--info-foreground) / <alpha-value>)'
   			},
   			brand: {
-  				DEFAULT: 'hsl(var(--brand) / <alpha-value>)',
-  				foreground: 'hsl(var(--brand-foreground) / <alpha-value>)',
-  				from: 'hsl(var(--brand-from) / <alpha-value>)',
-  				to: 'hsl(var(--brand-to) / <alpha-value>)',
-  				muted: 'hsl(var(--brand-muted) / <alpha-value>)',
-  				'muted-foreground': 'hsl(var(--brand-muted-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--brand) / <alpha-value>)',
+  				foreground: 'oklch(var(--brand-foreground) / <alpha-value>)',
+  				from: 'oklch(var(--brand-from) / <alpha-value>)',
+  				to: 'oklch(var(--brand-to) / <alpha-value>)',
+  				muted: 'oklch(var(--brand-muted) / <alpha-value>)',
+  				'muted-foreground': 'oklch(var(--brand-muted-foreground) / <alpha-value>)'
   			},
   			muted: {
-  				DEFAULT: 'hsl(var(--muted) / <alpha-value>)',
-  				foreground: 'hsl(var(--muted-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--muted) / <alpha-value>)',
+  				foreground: 'oklch(var(--muted-foreground) / <alpha-value>)'
   			},
   			accent: {
-  				DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
-  				foreground: 'hsl(var(--accent-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
+  				foreground: 'oklch(var(--accent-foreground) / <alpha-value>)'
   			},
   			popover: {
-  				DEFAULT: 'hsl(var(--popover) / <alpha-value>)',
-  				foreground: 'hsl(var(--popover-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--popover) / <alpha-value>)',
+  				foreground: 'oklch(var(--popover-foreground) / <alpha-value>)'
   			},
   			card: {
-  				DEFAULT: 'hsl(var(--card) / <alpha-value>)',
-  				foreground: 'hsl(var(--card-foreground) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--card) / <alpha-value>)',
+  				foreground: 'oklch(var(--card-foreground) / <alpha-value>)'
   			},
   			sidebar: {
-  				DEFAULT: 'hsl(var(--sidebar-background) / <alpha-value>)',
-  				foreground: 'hsl(var(--sidebar-foreground) / <alpha-value>)',
-  				primary: 'hsl(var(--sidebar-primary) / <alpha-value>)',
-  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground) / <alpha-value>)',
-  				accent: 'hsl(var(--sidebar-accent) / <alpha-value>)',
-  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground) / <alpha-value>)',
-  				border: 'hsl(var(--sidebar-border) / <alpha-value>)',
-  				ring: 'hsl(var(--sidebar-ring) / <alpha-value>)'
+  				DEFAULT: 'oklch(var(--sidebar-background) / <alpha-value>)',
+  				foreground: 'oklch(var(--sidebar-foreground) / <alpha-value>)',
+  				primary: 'oklch(var(--sidebar-primary) / <alpha-value>)',
+  				'primary-foreground': 'oklch(var(--sidebar-primary-foreground) / <alpha-value>)',
+  				accent: 'oklch(var(--sidebar-accent) / <alpha-value>)',
+  				'accent-foreground': 'oklch(var(--sidebar-accent-foreground) / <alpha-value>)',
+  				border: 'oklch(var(--sidebar-border) / <alpha-value>)',
+  				ring: 'oklch(var(--sidebar-ring) / <alpha-value>)'
   			},
   			career: {
   				'50': '#f0f9ff',
@@ -93,11 +93,11 @@ const config: Config = {
   				'900': '#0c4a6e'
   			},
   			chart: {
-  				'1': 'hsl(var(--chart-1) / <alpha-value>)',
-  				'2': 'hsl(var(--chart-2) / <alpha-value>)',
-  				'3': 'hsl(var(--chart-3) / <alpha-value>)',
-  				'4': 'hsl(var(--chart-4) / <alpha-value>)',
-  				'5': 'hsl(var(--chart-5) / <alpha-value>)'
+  				'1': 'oklch(var(--chart-1) / <alpha-value>)',
+  				'2': 'oklch(var(--chart-2) / <alpha-value>)',
+  				'3': 'oklch(var(--chart-3) / <alpha-value>)',
+  				'4': 'oklch(var(--chart-4) / <alpha-value>)',
+  				'5': 'oklch(var(--chart-5) / <alpha-value>)'
   			}
   		},
   		borderRadius: {

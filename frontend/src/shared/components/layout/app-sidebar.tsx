@@ -60,7 +60,7 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground shadow-cta">
                   <BrandMark
                     size={18}
-                    stroke="hsl(var(--brand-foreground))"
+                    stroke="oklch(var(--brand-foreground))"
                     strokeWidth={2.4}
                   />
                 </span>
