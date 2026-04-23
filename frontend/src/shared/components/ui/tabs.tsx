@@ -66,7 +66,9 @@ const TabsList = React.forwardRef<
     ref={ref}
     data-variant={variant}
     className={cn(
-      "h-9",
+      // WCAG 2.5.5 minimum 44×44 on mobile; compact 36px on sm+ for
+      // information-dense desktop layouts.
+      "h-11 sm:h-9",
       VARIANT_LIST_CLASS[variant],
       variant === "equal" && cols !== undefined && EQUAL_COLS_CLASS[cols],
       className,

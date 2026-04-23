@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { X } from "lucide-react";
 
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/utils";
@@ -113,6 +114,12 @@ export function ResponsiveDialogContent({
       className={cn("max-h-[92vh]", drawerClassName)}
       {...(props as React.ComponentProps<typeof DrawerContent>)}
     >
+      <DrawerClose
+        aria-label="Tutup"
+        className="absolute right-2 top-2 z-10 inline-flex h-11 w-11 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        <X className="h-4 w-4" />
+      </DrawerClose>
       <div className="overflow-y-auto px-4 pb-4">{children}</div>
     </DrawerContent>
   );
