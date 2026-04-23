@@ -96,6 +96,16 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Reserve scrollbar gutter so layout width stays constant whether
+     * content overflows or not. Prevents ~15px layout width jitter on
+     * tablists (and everywhere else) when switching between subpages
+     * whose content length triggers vs. clears the vertical scrollbar.
+     * Side effect: marketing routes (short hero, no scroll) now have a
+     * 15px reserved gutter on the right edge. Accepted as the tradeoff
+     * for layout stability across the app. */
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background text-foreground;
   }
