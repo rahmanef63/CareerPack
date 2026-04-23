@@ -122,9 +122,18 @@ export function FinancialCalculator() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList variant="equal" cols={3}>
-          <TabsTrigger value="budget">Perencanaan Budget</TabsTrigger>
-          <TabsTrigger value="salary">Info Gaji</TabsTrigger>
-          <TabsTrigger value="compare">Bandingkan Kota</TabsTrigger>
+          <TabsTrigger value="budget">
+            <span className="sm:hidden">Budget</span>
+            <span className="hidden sm:inline">Perencanaan Budget</span>
+          </TabsTrigger>
+          <TabsTrigger value="salary">
+            <span className="sm:hidden">Gaji</span>
+            <span className="hidden sm:inline">Info Gaji</span>
+          </TabsTrigger>
+          <TabsTrigger value="compare">
+            <span className="sm:hidden">Kota</span>
+            <span className="hidden sm:inline">Bandingkan Kota</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="budget" className="space-y-6">
