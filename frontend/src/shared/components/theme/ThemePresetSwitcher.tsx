@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Palette, RotateCcw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { cn } from "@/shared/lib/utils";
 import {
   DEFAULT_PRESET_NAME,
@@ -31,6 +30,11 @@ export function ThemePresetSwitcher({
     if (!registry) return [];
     return groupPresets(registry.items);
   }, [registry]);
+
+  const presetCount = useMemo(
+    () => groups.reduce((sum, g) => sum + g.items.length, 0),
+    [groups],
+  );
 
   // Close on outside click / Escape, restore saved preset.
   useEffect(() => {
@@ -87,12 +91,16 @@ export function ThemePresetSwitcher({
       </Button>
       {open && (
         <div
-          className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
+          className="absolute right-0 top-full z-50 mt-2 flex h-[min(80vh,32rem)] w-80 flex-col rounded-lg border border-border bg-popover text-popover-foreground shadow-lg"
           onMouseLeave={() => restore()}
         >
-          <div className="flex items-center justify-between border-b border-border px-3 py-2">
+          {/* Header (fixed) */}
+          <div className="flex shrink-0 items-center justify-between border-b border-border px-3 py-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Preset Tema
+              Preset Tema{" "}
+              <span className="text-[10px] font-normal text-muted-foreground/70">
+                ({presetCount})
+              </span>
             </span>
             <button
               type="button"
@@ -109,7 +117,10 @@ export function ThemePresetSwitcher({
             </button>
           </div>
 
-          <ScrollArea className="max-h-[28rem]">
+          {/* Scrollable list (native overflow so shadcn ScrollArea quirks
+              don't hide rows on browsers that don't size Radix's Root
+              without an explicit height). */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             {groups.length === 0 && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
                 Memuat preset…
@@ -117,7 +128,7 @@ export function ThemePresetSwitcher({
             )}
             {groups.map((grp) => (
               <div key={grp.id}>
-                <div className="sticky top-0 z-10 bg-muted/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+                <div className="sticky top-0 z-10 border-b border-border/30 bg-popover/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
                   {grp.label}
                 </div>
                 {grp.items.map((p) => {
@@ -156,7 +167,7 @@ export function ThemePresetSwitcher({
                 })}
               </div>
             ))}
-          </ScrollArea>
+          </div>
         </div>
       )}
     </div>
