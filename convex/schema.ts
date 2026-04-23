@@ -22,7 +22,27 @@ const applicationTables = {
     linkedinUrl: v.optional(v.string()),
     portfolioUrl: v.optional(v.string()),
     preferredIndustries: v.optional(v.array(v.string())),
-  }).index("by_user", ["userId"]),
+
+    /* ------------------------------------------------------------------
+     * Public profile (careerpack.org/<slug>). OPT-IN by default.
+     * See convex/publicProfile.ts for validation + enumeration-resistant
+     * read path. Fields prefixed `public*` and listed below are whitelisted
+     * for the public query — adding a new public field requires explicit
+     * allow-list in `listPublicFieldsFor` to prevent accidental leakage.
+     * ------------------------------------------------------------------ */
+    publicEnabled: v.optional(v.boolean()),
+    publicSlug: v.optional(v.string()),         // lowercased, validated server-side
+    publicHeadline: v.optional(v.string()),     // 1-line tagline for the card
+    publicBioShow: v.optional(v.boolean()),     // echo user's `bio` publicly if true
+    publicSkillsShow: v.optional(v.boolean()),  // echo `skills` array publicly
+    publicTargetRoleShow: v.optional(v.boolean()),
+    publicContactEmail: v.optional(v.string()), // alternate email for recruiter contact
+    publicLinkedinUrl: v.optional(v.string()),
+    publicPortfolioUrl: v.optional(v.string()),
+    publicAllowIndex: v.optional(v.boolean()),  // default false → <meta noindex>
+  })
+    .index("by_user", ["userId"])
+    .index("by_public_slug", ["publicSlug"]),
 
   jobApplications: defineTable({
     userId: v.id("users"),

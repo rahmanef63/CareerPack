@@ -33,6 +33,7 @@ import type * as networking from "../networking.js";
 import type * as notifications from "../notifications.js";
 import type * as passwordReset from "../passwordReset.js";
 import type * as portfolio from "../portfolio.js";
+import type * as publicProfile from "../publicProfile.js";
 import type * as roadmaps from "../roadmaps.js";
 import type * as router from "../router.js";
 import type * as seed from "../seed.js";
@@ -70,6 +71,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   passwordReset: typeof passwordReset;
   portfolio: typeof portfolio;
+  publicProfile: typeof publicProfile;
   roadmaps: typeof roadmaps;
   router: typeof router;
   seed: typeof seed;

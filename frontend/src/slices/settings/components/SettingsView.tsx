@@ -13,6 +13,7 @@ import {
 import { AISettingsPanel } from "@/slices/ai-settings";
 import { AppearanceSection } from "./AppearanceSection";
 import { ProfileSection } from "./ProfileSection";
+import { PublicProfileSection } from "./PublicProfileSection";
 
 type SettingsTab = "profile" | "appearance" | "ai";
 
@@ -47,6 +48,7 @@ export function SettingsView() {
         </TabsList>
         <TabsContent value="profile" className="space-y-4">
           <ProfileSection />
+          <PublicProfileSection />
         </TabsContent>
         <TabsContent value="appearance">
           <AppearanceSection />

@@ -30,7 +30,7 @@ export interface ThemeRegistry {
   items: ThemePresetItem[];
 }
 
-export const DEFAULT_PRESET_NAME = "cosmic-night";
+export const DEFAULT_PRESET_NAME = "modern-minimal";
 
 let registryCache: ThemeRegistry | null = null;
 let registryPromise: Promise<ThemeRegistry> | null = null;
