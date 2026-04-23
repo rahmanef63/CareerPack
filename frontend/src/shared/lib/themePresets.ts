@@ -123,6 +123,8 @@ function toHslComponents(value: string): string {
 
 // CSS vars that should be converted to HSL-component format so they stay
 // compatible with `hsl(var(--x) / <alpha-value>)` in tailwind config.
+// Includes both the registry name (`sidebar`) and the CareerPack target
+// name (`sidebar-background`) so `convertValue` catches either input.
 const COLOR_VAR_NAMES = new Set([
   "background",
   "foreground",
@@ -154,7 +156,8 @@ const COLOR_VAR_NAMES = new Set([
   "chart-3",
   "chart-4",
   "chart-5",
-  "sidebar",
+  "sidebar",              // registry key (gets aliased to sidebar-background)
+  "sidebar-background",   // CareerPack target alias
   "sidebar-foreground",
   "sidebar-primary",
   "sidebar-primary-foreground",
@@ -168,6 +171,10 @@ const COLOR_VAR_NAMES = new Set([
   "brand-to",
   "brand-muted",
   "brand-muted-foreground",
+  // Shadow color is stored as raw HSL components so `hsl(var(--shadow-color)
+  // / 0.10)` in index.css composes correctly. Registry ships it wrapped
+  // in hsl() — convertValue strips the wrapper.
+  "shadow-color",
 ]);
 
 // Alias mapping: registry uses `sidebar` (no suffix) to mean sidebar bg.

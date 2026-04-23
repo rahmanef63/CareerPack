@@ -1,8 +1,23 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
+import { Inter, JetBrains_Mono } from "next/font/google"
 import "@/shared/styles/index.css"
 import "@/shared/styles/App.css"
 import { Providers } from "@/shared/providers/Providers"
+
+// Self-hosted Google Fonts via next/font. Matches default --font-sans /
+// --font-mono tokens in index.css (modern-minimal preset). Preset switches
+// that specify other fonts fall back to system chain until loaded.
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans-inter",
+  display: "swap",
+})
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-jetbrains",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   applicationName: "CareerPack",
@@ -40,7 +55,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html
+      lang="id"
+      suppressHydrationWarning
+      className={`${inter.variable} ${jetbrainsMono.variable}`}
+    >
       <body>
         <Providers>{children}</Providers>
       </body>

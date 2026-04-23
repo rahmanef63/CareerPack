@@ -94,15 +94,35 @@ const config: Config = {
   			}
   		},
   		borderRadius: {
-  			xl: 'calc(var(--radius) + 4px)',
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)',
+  			xl: 'var(--radius-xl)',
+  			lg: 'var(--radius-lg)',
+  			md: 'var(--radius-md)',
+  			sm: 'var(--radius-sm)',
   			xs: 'calc(var(--radius) - 6px)'
   		},
   		boxShadow: {
-  			xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+  			'2xs': 'var(--shadow-2xs)',
+  			xs: 'var(--shadow-xs)',
+  			sm: 'var(--shadow-sm)',
+  			DEFAULT: 'var(--shadow)',
+  			md: 'var(--shadow-md)',
+  			lg: 'var(--shadow-lg)',
+  			xl: 'var(--shadow-xl)',
+  			'2xl': 'var(--shadow-2xl)',
   			cta: 'var(--shadow-cta)'
+  		},
+  		letterSpacing: {
+  			tighter: 'var(--tracking-tighter)',
+  			tight: 'var(--tracking-tight)',
+  			normal: 'var(--tracking-normal)',
+  			wide: 'var(--tracking-wide)',
+  			wider: 'var(--tracking-wider)',
+  			widest: 'var(--tracking-widest)'
+  		},
+  		fontFamily: {
+  			sans: ['var(--font-sans)'],
+  			mono: ['var(--font-mono)'],
+  			serif: ['var(--font-serif)']
   		},
   		backgroundImage: {
   			'brand-gradient': 'var(--brand-gradient)'
