@@ -11,6 +11,7 @@ import {
   Image, Video, Palette, Smartphone, BarChart4
 } from 'lucide-react';
 import { api } from '../../../../../convex/_generated/api';
+import { UsersPanel } from './UsersPanel';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -122,10 +123,11 @@ export function AdminDashboard() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList variant="equal" cols={3}>
+          <TabsList variant="equal" cols={4}>
             <TabsTrigger value="overview">Ringkasan</TabsTrigger>
+            <TabsTrigger value="users">Pengguna</TabsTrigger>
             <TabsTrigger value="ai">Konfigurasi AI</TabsTrigger>
-            <TabsTrigger value="roadmap">Skill Roadmap</TabsTrigger>
+            <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -195,6 +197,11 @@ export function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <UsersPanel />
           </TabsContent>
 
           {/* AI Config Tab */}

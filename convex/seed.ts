@@ -2,6 +2,22 @@ import { mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
+/**
+ * Parse `ADMIN_BOOTSTRAP_EMAILS` — comma-separated list of emails that
+ * auto-promote to role=admin on their next `seedForCurrentUser` call
+ * (which runs on every login via `useAuth.login` → `seedForCurrentUser`).
+ * Lowercased + trimmed. Empty string = no admins seeded.
+ */
+function adminBootstrapEmails(): Set<string> {
+  const raw = process.env.ADMIN_BOOTSTRAP_EMAILS ?? "";
+  return new Set(
+    raw
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter((e) => e.length > 0),
+  );
+}
+
 export const seedForCurrentUser = mutation({
   args: {
     email: v.optional(v.string()),
@@ -30,6 +46,10 @@ export const seedForCurrentUser = mutation({
 
     const now = Date.now();
 
+    const authUser = await ctx.db.get(userId);
+    const authEmail = (authUser as { email?: string } | null)?.email?.toLowerCase() ?? "";
+    const shouldBeAdmin = authEmail.length > 0 && adminBootstrapEmails().has(authEmail);
+
     const existingProfile = await ctx.db
       .query("userProfiles")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -46,7 +66,13 @@ export const seedForCurrentUser = mutation({
         bio: "Actively preparing for tech interviews and job applications.",
         skills: ["React", "TypeScript", "Tailwind CSS"],
         interests: ["Web Development", "Product Design"],
+        ...(shouldBeAdmin ? { role: "admin" as const } : {}),
       });
+    } else if (shouldBeAdmin && existingProfile.role !== "admin") {
+      // Existing user whose email was just added to the env list — promote
+      // on next login. Does not demote anyone; role removal is manual via
+      // api.admin.updateUserRole.
+      await ctx.db.patch(existingProfile._id, { role: "admin" });
     }
 
     const existingCv = await ctx.db
