@@ -295,6 +295,25 @@ const applicationTables = {
     .index("by_time", ["timestamp"])
     .index("by_user_time", ["userId", "timestamp"]),
 
+  // Per-user budget envelope categories for the Financial Calculator.
+  // Seeded with a default set (housing, food, transport, utilities,
+  // entertainment, others, tabungan) on first access; user may rename,
+  // change value, reorder, delete, or add custom categories.
+  budgetVariables: defineTable({
+    userId: v.id("users"),
+    label: v.string(),
+    value: v.number(),
+    iconName: v.string(),          // lucide icon name, validated client-side against whitelist
+    color: v.string(),             // hex string, #rrggbb
+    order: v.number(),             // for sorting
+    kind: v.union(                 // semantic: expense (counted against income) vs savings (goal envelope)
+      v.literal("expense"),
+      v.literal("savings"),
+    ),
+  })
+    .index("by_user_order", ["userId", "order"])
+    .index("by_user", ["userId"]),
+
   aiSettings: defineTable({
     userId: v.id("users"),
     provider: v.string(),

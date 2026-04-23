@@ -17,6 +17,7 @@ import type * as ai from "../ai.js";
 import type * as aiSettings from "../aiSettings.js";
 import type * as _lib_aiProviders from "../_lib/aiProviders.js";
 import type * as applications from "../applications.js";
+import type * as budgetVariables from "../budgetVariables.js";
 import type * as auth from "../auth.js";
 import type * as calendar from "../calendar.js";
 import type * as chat from "../chat.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   aiSettings: typeof aiSettings;
   "_lib/aiProviders": typeof _lib_aiProviders;
   applications: typeof applications;
+  budgetVariables: typeof budgetVariables;
   auth: typeof auth;
   calendar: typeof calendar;
   chat: typeof chat;
