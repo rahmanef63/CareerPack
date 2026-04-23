@@ -124,7 +124,9 @@ const config: Config = {
   			normal: 'var(--tracking-normal)',
   			wide: 'var(--tracking-wide)',
   			wider: 'var(--tracking-wider)',
-  			widest: 'var(--tracking-widest)'
+  			widest: 'var(--tracking-widest)',
+  			brutal: 'var(--tracking-brutal, 0.2em)',
+  			'brutal-sm': 'var(--tracking-brutal-sm, 0.15em)'
   		},
   		fontFamily: {
   			sans: ['var(--font-sans)'],

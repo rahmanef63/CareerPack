@@ -6,6 +6,7 @@ import { BottomNav } from "@/shared/components/layout/BottomNav";
 import { MoreDrawer } from "@/shared/components/layout/MoreDrawer";
 import { Button } from "@/shared/components/ui/button";
 import { ThemeMenu } from "@/shared/components/theme/ThemeMenu";
+import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
 import { BrandMark } from "@/shared/components/brand/Logo";
 
 interface MobileContainerProps {
@@ -57,19 +58,22 @@ function MobileTopBar() {
         </span>
         CareerPack
       </span>
-      <ThemeMenu
-        trigger={
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Ganti tema & preset"
-            className="h-11 w-11"
-          >
-            <Sun className="h-4 w-4 dark:hidden" />
-            <Moon className="hidden h-4 w-4 dark:inline" />
-          </Button>
-        }
-      />
+      <div className="flex items-center gap-1">
+        <ThemePresetSwitcher size="mobile" />
+        <ThemeMenu
+          trigger={
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Ganti mode terang/gelap"
+              className="h-11 w-11"
+            >
+              <Sun className="h-4 w-4 dark:hidden" />
+              <Moon className="hidden h-4 w-4 dark:inline" />
+            </Button>
+          }
+        />
+      </div>
     </header>
   );
 }

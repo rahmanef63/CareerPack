@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Logo } from "../brand/Logo";
+import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
 
 /**
  * Top bar untuk route `(marketing)` — ringan, tidak ada auth guard.
@@ -20,6 +21,7 @@ export function MarketingHeader() {
           <Logo size={28} />
         </Link>
         <nav className="flex items-center gap-2">
+          <ThemePresetSwitcher />
           <Button
             type="button"
             variant="ghost"
