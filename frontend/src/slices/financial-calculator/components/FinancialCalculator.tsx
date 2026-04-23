@@ -594,7 +594,7 @@ export function FinancialCalculator() {
                         <div className="flex items-center gap-3 mb-4">
                           <div className={cn(
                             'w-10 h-10 rounded-lg flex items-center justify-center',
-                            index === 0 ? 'bg-brand' : 'bg-accent-foreground'
+                            index === 0 ? 'bg-brand' : 'bg-brand-to'
                           )}>
                             <MapPin className="w-5 h-5 text-brand-foreground" />
                           </div>
