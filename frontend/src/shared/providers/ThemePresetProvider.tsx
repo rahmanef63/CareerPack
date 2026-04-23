@@ -81,6 +81,16 @@ export function ThemePresetProvider({ children }: { children: ReactNode }) {
   // Apply preset on mode or name change.
   useEffect(() => {
     if (!registry) return;
+
+    // Default preset values are already baked into index.css for zero-FOUC
+    // first paint. Applying them again via inline style is redundant AND
+    // introduces a brief mismatch window. Short-circuit.
+    if (presetName === DEFAULT_PRESET_NAME) {
+      clearInlinePreset();
+      setIsReady(true);
+      return;
+    }
+
     const preset = findPreset(registry, presetName);
     if (!preset) {
       clearInlinePreset();
