@@ -42,7 +42,13 @@
     --accent: 264 55% 55%;                 /* oklch(0.502 0.212 280) */
     --accent-foreground: 0 0% 98.5%;
 
-    /* Destructive — red-orange */
+    /* Destructive — red-orange. NOTE: superspace's preset sets
+       --destructive-foreground to the same value as --destructive (used
+       as icon stroke, never combined with bg-destructive), and their
+       Button variant hardcodes `text-white`. CareerPack's shadcn Button
+       consumes `text-destructive-foreground`, so we keep --destructive-
+       foreground as near-white for readable destructive CTAs. Intentional
+       deviation from the preset for a11y contrast. */
     --destructive: 15 75% 53%;             /* oklch(0.577 0.245 27) */
     --destructive-foreground: 0 0% 98.5%;
 
@@ -110,7 +116,7 @@
     --accent-foreground: 0 0% 98.5%;
 
     --destructive: 0 40% 35%;              /* oklch(0.396 0.141 26) */
-    --destructive-foreground: 0 60% 55%;   /* oklch(0.637 0.237 25) */
+    --destructive-foreground: 0 0% 98.5%;  /* a11y override; see light block note */
 
     --success: 142 65% 40%;
     --success-foreground: 0 0% 98.5%;
