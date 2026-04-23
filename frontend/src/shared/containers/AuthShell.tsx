@@ -38,9 +38,13 @@ export function AuthShell({
         >
           <span
             className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground"
-            style={{ boxShadow: "0 10px 24px -8px rgba(14,165,233,0.4)" }}
+            style={{ boxShadow: "0 10px 24px -8px hsl(var(--brand) / 0.4)" }}
           >
-            <BrandMark size={24} stroke="#fff" strokeWidth={2.4} />
+            <BrandMark
+              size={24}
+              stroke="hsl(var(--brand-foreground))"
+              strokeWidth={2.4}
+            />
           </span>
           <span className="text-2xl font-bold bg-gradient-to-r from-brand-from to-brand-to bg-clip-text text-transparent">
             CareerPack

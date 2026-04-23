@@ -34,6 +34,7 @@ import { Info } from 'lucide-react';
 import { api } from '../../../../../convex/_generated/api';
 import type { Doc, Id } from '../../../../../convex/_generated/dataModel';
 import { iconFor } from '../constants/budgetIcons';
+import { CHART_COLORS } from '../constants/chartColors';
 import { BudgetVariableForm } from './BudgetVariableForm';
 
 type BudgetVar = Doc<"budgetVariables">;
@@ -477,22 +478,22 @@ export function FinancialCalculator() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                           data={[
-                            { label: 'Minimum', value: salaryData.salaryRange.min, fill: '#94a3b8' },
-                            { label: 'Median', value: salaryData.salaryRange.median, fill: '#0ea5e9' },
-                            { label: 'Maksimum', value: salaryData.salaryRange.max, fill: '#0284c7' },
+                            { label: 'Minimum', value: salaryData.salaryRange.min, fill: CHART_COLORS.barMin },
+                            { label: 'Median', value: salaryData.salaryRange.median, fill: CHART_COLORS.barMid },
+                            { label: 'Maksimum', value: salaryData.salaryRange.max, fill: CHART_COLORS.barMax },
                           ]}
                           margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                          <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.gridLine} vertical={false} />
                           <XAxis
                             dataKey="label"
-                            stroke="#64748b"
+                            stroke={CHART_COLORS.tickText}
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                           />
                           <YAxis
-                            stroke="#64748b"
+                            stroke={CHART_COLORS.tickText}
                             fontSize={11}
                             tickFormatter={formatShortIDR}
                             tickLine={false}
@@ -500,14 +501,14 @@ export function FinancialCalculator() {
                             width={56}
                           />
                           <Tooltip
-                            cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                            cursor={{ fill: CHART_COLORS.cursorFill }}
                             formatter={(value: number) => [formatCurrency(value), 'Gaji']}
                           />
                           <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                             {[
-                              { fill: '#94a3b8' },
-                              { fill: '#0ea5e9' },
-                              { fill: '#0284c7' },
+                              { fill: CHART_COLORS.barMin },
+                              { fill: CHART_COLORS.barMid },
+                              { fill: CHART_COLORS.barMax },
                             ].map((entry, i) => (
                               <Cell key={i} fill={entry.fill} />
                             ))}
@@ -634,28 +635,28 @@ export function FinancialCalculator() {
                       margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
                       barCategoryGap="20%"
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.gridLine} vertical={false} />
                       <XAxis
                         dataKey="name"
-                        stroke="#64748b"
+                        stroke={CHART_COLORS.tickText}
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
-                        stroke="#64748b"
+                        stroke={CHART_COLORS.tickText}
                         fontSize={11}
                         tickLine={false}
                         axisLine={false}
                         width={36}
                       />
-                      <Tooltip cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} />
+                      <Tooltip cursor={{ fill: CHART_COLORS.cursorFill }} />
                       <Legend
                         wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
                         iconType="circle"
                       />
-                      <Bar dataKey={selectedCity} fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey={compareCity} fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey={selectedCity} fill={CHART_COLORS.compareA} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey={compareCity} fill={CHART_COLORS.compareB} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
