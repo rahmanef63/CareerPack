@@ -1,10 +1,20 @@
-# QA UI/UX Audit Prompt — CareerPack (v2)
+# QA UI/UX Audit Prompt — CareerPack (v2.1)
 
 **Target:** UI/UX regression audit per deploy or per major PR on `careerpack.org`.
 **Auditor:** human tester or UI-focused agent with browser access.
 **Session-based:** copy the section below into the auditor context. Re-use as-is; append lessons learned at the end after each run (§9).
 
-**Change log vs v1:** this version codifies lessons from the 2026-04-23 audits (PR #3/#4/#5). Major adds: §0.3 viewport-innerWidth validation; §0.5 horizontal-overflow element-identification protocol; §1 expanded exclusion list; §2.3 responsive-tab-label math; §2.8 WCAG 2.5.5 vs 2.5.8 explicit; §2.14 feature-parity checklist desktop↔mobile; §4 terse-finding enforcement; §9 lessons-learned template.
+**Change log v2 → v2.1 (after PR #5 audit on 2026-04-23 pm):**
+- §2.4 touch-target policy refined: 44×44 required ONLY on touch breakpoints (<lg); 36×36 acceptable on pointer breakpoints (≥lg) where primary input is mouse.
+- §2.3 responsive dual-label pattern (sm:hidden + hidden sm:inline) documented so auditors don't flag it as a duplicate-label bug.
+- §2.15 extended: seed-data distinction also applies to derived chart data (a chart rendering real data can look "wrong" if the seed is sparse).
+- §2.16 new: class-vs-rendered audit. A Tailwind class promising h-11 but computed 36 is a precedence issue (items-center on parent, cn() dedup, upstream flex) — measure AND report both className and getComputedStyle.
+- §1 adds "verified-rendered" column so auditors can re-flag partially-fixed items instead of assuming commit = shipped.
+- §6 mandates explicit DEFERRED labeling for axe/Lighthouse/SR when tooling lacks them (prevents implicit "looks fine" claims).
+- §7 adds Radix Tabs pointer-event gotcha (`.click()` alone doesn't switch tab state; need pointerdown/mousedown/pointerup/mouseup/click sequence).
+- §8 notes automation-only time budget (~1 hour upper bound when axe/Lighthouse/mobile/tablet all DEFERRED).
+
+**Change log v1 → v2:** §0.3 viewport validation, §0.5 overflow offender-naming, §1 expanded, §2.3 tab-label math, §2.8 WCAG tiers, §2.14 feature parity, §4 terse-finding enforcement, §9 lessons template.
 
 ---
 
@@ -97,24 +107,29 @@ Font-scale: verify `lg` once per slice (biggest layout stress).
 
 Regressions only. If one of these broke again, report with "REGRESSION of <ID>" prefix.
 
-| ID | Finding | Resolved in |
-|---|---|---|
-| SIDEBAR-SSOT | Sidebar items changing across routes | 021bc18 |
-| CTA-BLACK | Default Button renders black instead of sky | 710854b (token cascade) |
-| TAB-VARIANT-API | Raw TabsList className overrides | 4112d9b + 2b3db6e |
-| CALC-TAB-WIDTH | Bandingkan Kota tablist shrinking 775→481px | 910313b |
-| DIALOG-CLOSE-EN | "Close" announced to screen readers | 9cb3384 + 79e1573 |
-| SKELETON-SPINNER | Generic Loader2 as route fallback | 9b4aa86 |
-| LEVEL-SELECT-NATIVE | Settings experienceLevel native `<select>` | f4496e6 |
-| SCROLLBAR-JITTER | ~15px width delta across subpages | e08b980 |
-| MATCHER-SEED-DEMO | "Seed Demo" English label | eb2d257 |
-| CALC-MOBILE-CLIP | "Perencanaan Budget" clipped in 3-col tabs at 414px | c82a238 |
-| CV-MOBILE-OVERFLOW | CV editor 19px horizontal overflow at 414px | c82a238 (stop-gap `overflow-x-hidden`) |
-| HEADERCTA-ICONONLY | "+ Tambah" / "Muat Contoh Lowongan" icon-only on mobile | c82a238 |
-| TAB-TOUCH-H9 | Pills TabsList 28px fails WCAG 2.5.5 | 7dfcbf0 (h-11 sm:h-9) |
-| DIALOG-CLOSE-HIT | Dialog/Sheet close icon 16×16 fails WCAG | 7dfcbf0 |
-| DRAWER-NO-CLOSE | Mobile bottom-sheet no visible close X | 7dfcbf0 |
-| MOBILE-THEME-PARITY | Theme toggle 3 taps deep on mobile | 3979a6e (slim top bar) |
+`Verified-rendered` column = last date the fix was empirically confirmed IN PRODUCTION (not just "merged"). If the date is older than the current deploy, re-verify before trusting.
+
+| ID | Finding | Resolved in | Verified-rendered |
+|---|---|---|---|
+| SIDEBAR-SSOT | Sidebar items changing across routes | 021bc18 | 2026-04-23 |
+| CTA-BLACK | Default Button renders black instead of sky | 710854b (token cascade) | 2026-04-23 |
+| TAB-VARIANT-API | Raw TabsList className overrides | 4112d9b + 2b3db6e | 2026-04-23 |
+| CALC-TAB-WIDTH | Bandingkan Kota tablist shrinking 775→481px | 910313b | 2026-04-23 |
+| DIALOG-CLOSE-EN | "Close" announced to screen readers | 9cb3384 + 79e1573 | 2026-04-23 |
+| SKELETON-SPINNER | Generic Loader2 as route fallback | 9b4aa86 | 2026-04-23 (inferred) |
+| LEVEL-SELECT-NATIVE | Settings experienceLevel native `<select>` | f4496e6 | 2026-04-23 |
+| SCROLLBAR-JITTER | ~15px width delta across subpages | e08b980 | 2026-04-23 |
+| MATCHER-SEED-DEMO | "Seed Demo" English label | eb2d257 | 2026-04-23 |
+| CALC-MOBILE-CLIP | "Perencanaan Budget" clipped in 3-col tabs at 414px | c82a238 | 2026-04-23 (desktop pattern); mobile re-verify pending |
+| CV-MOBILE-OVERFLOW | CV editor 19px horizontal overflow at 414px | c82a238 (stop-gap `overflow-x-hidden`) | pending mobile re-verify |
+| HEADERCTA-ICONONLY | "+ Tambah" / "Muat Contoh Lowongan" icon-only on mobile | c82a238 | 2026-04-23 |
+| TAB-TOUCH-H9 | Pills/equal TabsList 28px fails WCAG 2.5.5 on touch | 7dfcbf0 (h-11 sm:h-9) + stretch-fix | pending re-verify post stretch-fix |
+| DIALOG-CLOSE-HIT | Dialog/Sheet close icon 16×16 fails WCAG on touch | 7dfcbf0 | 2026-04-23 (class shipped; desktop sm:h-9 intentional per §2.4) |
+| DRAWER-NO-CLOSE | Mobile bottom-sheet no visible close X | 7dfcbf0 | pending mobile re-verify |
+| MOBILE-THEME-PARITY | Theme toggle 3 taps deep on mobile | 3979a6e (slim top bar) | pending mobile re-verify |
+| CALC-SGP-TOKEN | Singapore icon `bg-accent-foreground` near-black | (post-v2-audit fix) | pending |
+| TAB-TRIGGER-STRETCH | TabsTrigger rendering 28h inside 36h list | (post-v2-audit fix removing items-center) | pending |
+| NOTIF-KAMU-ANDA | Notifications subtitle "Kamu" → "Semua sudah dibaca" | (post-v2-audit fix) | pending |
 
 ### Design-calls deferred — escalate to product, do NOT file as bugs
 - Checklist checked state semantic green vs brand sky.
@@ -149,16 +164,17 @@ Score each KPI per slice: ✅ PASS / 🟡 PARTIAL / 🔴 FAIL / ⚪ N/A.
   label_px_needed < (viewport - 2×horizontal_padding) / N - trigger_padding(~24px)
   ```
   If fails on any target breakpoint, require responsive short labels OR variant swap to `pills` below that breakpoint.
-- Pills tab height: 44px mobile, 36px desktop (post TAB-TOUCH-H9 fix).
+- **Responsive dual-label pattern** (NOT a bug): a single trigger may contain both `<span className="sm:hidden">Short</span>` and `<span className="hidden sm:inline">Long Label</span>`. Only one is visible per breakpoint. DOM textContent shows both concatenated ("ShortLong Label") — do NOT file this as a duplicate-label bug.
+- Tab height: `h-11 sm:h-9` on the list. Triggers should stretch to fill (no `items-center` on list container); if you measure trigger height < list height, that's a class-precedence bug (§2.16).
 
 ### §2.4 Responsive
 - `< lg (1024)`: MobileContainer renders slim top bar (brand + theme) + BottomNav + FAB + MoreDrawer.
 - `≥ lg`: DesktopContainer renders Sidebar + SiteHeader.
 - Transition smooth on live resize.
-- Touch target per WCAG:
-  - **AA (2.5.8):** 24×24 minimum for all interactive elements.
-  - **AAA (2.5.5):** 44×44 target. CareerPack brand policy = **AAA**.
-  - Measure via DevTools Inspect → Computed width/height. Flag if any < 44 on mobile.
+- Touch-target policy (refined v2.1):
+  - **Touch breakpoints (<lg):** 44×44 AAA required. Measure via DevTools; flag any < 44.
+  - **Pointer breakpoints (≥lg):** 36×36 acceptable (mouse/trackpad accuracy). 24×24 WCAG AA floor. Flag < 24.
+  - Rationale: WCAG 2.5.5 AAA is written for touch input; enforcing 44 on desktop sacrifices density without user benefit.
 - Landscape mobile (812×390) survives.
 
 ### §2.5 Navigation
@@ -235,11 +251,39 @@ Enumerate equivalents. Mobile must expose the feature in ≤2 taps OR flag as pa
 | Admin link | UserMenu (role=admin) | ?? (design-call) |
 | Search | ?? (future) | ?? |
 
-### §2.15 Seed data vs component bug (NEW in v2)
+### §2.15 Seed data vs component bug (v2, extended v2.1)
 Before filing a bug on "wrong value displayed":
 1. Check `convex/seed*.ts` / demo fixture for the current value.
 2. If seed has invalid value (e.g., `experienceLevel: "junior"` vs EXPERIENCE_OPTIONS `entry|mid|senior|lead`), file as **seed-fixture bug**, not component bug.
 3. Component is correct if it falls back to raw value when no option matches.
+4. **v2.1 extension — derived/aggregate data:** a chart rendering real data can look "wrong" when seed is sparse (e.g., Tren Lamaran with 1 application shows 7 zero-weeks + 1 spike — that IS the correct visualization of sparse data). Do not file "chart inconsistent" without checking the source dataset first.
+
+### §2.16 Class-vs-rendered audit (NEW in v2.1)
+When a Tailwind class promises a dimension but getComputedStyle returns a different value, it is a class-precedence bug, not a "just bump it" issue.
+
+Example: `<button className="... h-11 w-11 ...">` rendering as 36×36.
+
+Common root causes:
+- Parent has `items-center` on flex/grid, preventing child stretch (CareerPack `TabsList` had this; see v2.1 change log).
+- `cn()` dedup kept a later `h-9` declaration.
+- Upstream Radix/shadcn primitive injects conflicting classes via `data-slot=*`.
+- Inline style or CSS variable overrides class.
+
+Measurement protocol:
+```js
+// Paste in DevTools Console on the element
+const el = $0;  // or document.querySelector('...')
+console.log({
+  className: el.className,
+  computed: {
+    width: getComputedStyle(el).width,
+    height: getComputedStyle(el).height,
+    padding: getComputedStyle(el).padding,
+  },
+  rect: el.getBoundingClientRect(),
+});
+```
+Report BOTH the className AND the computed style. A finding "class is h-11 but renders 36px" is actionable; "button is only 36px" is not.
 
 ---
 
@@ -419,11 +463,14 @@ Store `docs/qa/screenshots/YYYY-MM-DD/<slice>-<label>.png`.
 - ❌ Do not file "tab style inconsistent" if slices use different `variant` prop legitimately — pills vs equal vs segmented are INTENTIONAL.
 - ❌ Do not audit mobile via any tool that fails §0.3 viewport check.
 - ❌ Do not file "horizontal overflow" without naming the offending element per §0.5.
-- ❌ Do not re-file §1 exclusion items without "REGRESSION" prefix.
+- ❌ Do not re-file §1 exclusion items without "REGRESSION" prefix. Check the "verified-rendered" date — if older than current deploy, re-verify first.
 - ❌ Do not paste multi-paragraph narratives per finding. One line only. Group by severity.
 - ❌ Do not flag "raw value displayed" without §2.15 seed check first.
 - ❌ Do not merge desktop-only verification as sufficient for mobile-relevant changes.
-- ❌ Do not claim axe/Lighthouse "looks fine" without attached report. If you can't run it, label DEFERRED.
+- ❌ Do not claim axe/Lighthouse "looks fine" without attached report. **MANDATORY:** if tooling cannot run them, include an axe row + Lighthouse row in §4 scorecard with status DEFERRED and a one-line reason. Omitting them silently is a protocol violation.
+- ❌ Do not flag "icon button < 44px" on desktop without checking §2.4 policy (36+ acceptable for pointer input).
+- ❌ Do not flag "class says h-11 but renders smaller" as "bump it" — follow §2.16 measurement protocol, report both className and computed style.
+- ❌ Do not file "dual-label" bug when you see concatenated text in a TabsTrigger; check for responsive pattern per §2.3.
 
 ---
 
@@ -441,10 +488,19 @@ Store `docs/qa/screenshots/YYYY-MM-DD/<slice>-<label>.png`.
 - [ ] Optional: Playwright/Puppeteer for automated visual regression
 
 ### Tool gotchas
-- **Extension viewport claims**: always verify §0.3 `window.innerWidth`. Multiple extensions resize only outer chrome.
+- **Extension viewport claims**: always verify §0.3 `window.innerWidth`. Multiple extensions resize only outer chrome — treat any auto-resize as suspicious until innerWidth confirms.
 - **CDN cache on production**: Dokploy / Cloudflare serve stale CSS for up to 5 min after deploy. Verify §0.2 hash.
 - **Browser cache on auditor side**: Incognito + `?_=<ts>` mandatory.
 - **axe "needs review" !== pass**: treat as serious until manually verified.
+- **Radix primitives + JS click**: `.click()` alone does NOT switch Radix Tabs / Select / Dialog state. Dispatch the full pointer sequence:
+  ```js
+  const el = document.querySelector('[role="tab"][value="foo"]');
+  ['pointerdown','mousedown','pointerup','mouseup','click'].forEach(type => {
+    el.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerType: 'mouse' }));
+  });
+  ```
+  Applies to all Radix-backed shadcn components. If your automation seems to "not click," this is usually why.
+- **getBoundingClientRect vs computed style**: they can disagree if CSS transforms or zoom are applied. For §2.16 class-vs-rendered audits, trust `getBoundingClientRect` for visual size and `getComputedStyle().height` for declared intrinsic size. Report both.
 
 ---
 
@@ -464,6 +520,8 @@ Store `docs/qa/screenshots/YYYY-MM-DD/<slice>-<label>.png`.
 | **Total** | **~7.5 hours** |
 
 Skip breakpoints your tool can't verify. Label those sections DEFERRED explicitly. Do not infer mobile layout from desktop DOM.
+
+**Automation-only run reality check (v2.1):** if you run from a browser-automation agent with no axe, no Lighthouse, no NVDA, and §0.3 viewport resize blocked → realistic time is ~1 hour (desktop sweep only). The §8 estimate assumes full tooling. Declare your constraints up front in the report header so reviewers know which sections to trust.
 
 ---
 
@@ -507,5 +565,6 @@ COPY EVERYTHING ABOVE THIS LINE INTO THE AUDITOR PROMPT
 
 ## Version history
 
+- **v2.1** (2026-04-23 pm): after v2 audit run by automation auditor. §2.4 touch-target policy refined (44 on touch, 36 on pointer); §2.3 documents responsive dual-label pattern; §2.15 extended to derived chart data; §2.16 NEW class-vs-rendered audit; §1 "verified-rendered" column; §6 mandates explicit DEFERRED labeling; §7 Radix pointer-event sequence; §8 automation-only realism. Exclusion list +3 IDs: CALC-SGP-TOKEN, TAB-TRIGGER-STRETCH, NOTIF-KAMU-ANDA.
 - **v2** (2026-04-23): after PR #3/#4/#5. Adds §0.3 viewport validation, §0.5 overflow offender-naming protocol, §2.3 tab-label math, §2.8 WCAG AA/AAA split, §2.14 feature-parity table, §2.15 seed vs component distinction, §4 terse-finding enforcement, §9 lessons template. Expanded §1 exclusion list with 7 new IDs.
 - **v1** (2026-04-23 earlier): initial prompt after PR #3 merge. Basic KPI matrix, per-slice dive, output format.
