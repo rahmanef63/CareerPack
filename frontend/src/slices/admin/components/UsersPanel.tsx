@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import { toast } from "sonner";
 import { Search, UserCog } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
@@ -39,18 +39,26 @@ const DATE_FMT = new Intl.DateTimeFormat("id-ID", {
 
 export function UsersPanel() {
   const [query, setQuery] = useState("");
-  const users = useQuery(api.admin.listAllUsers, { limit: 50 });
+  const {
+    results,
+    status,
+    loadMore,
+  } = usePaginatedQuery(
+    api.admin.listAllUsers,
+    {},
+    { initialNumItems: 25 },
+  );
   const updateRole = useMutation(api.admin.updateUserRole);
 
   const filtered = useMemo(() => {
-    if (!users) return null;
+    if (!results) return null;
     const q = query.trim().toLowerCase();
-    if (!q) return users.page;
-    return users.page.filter((u) =>
+    if (!q) return results;
+    return results.filter((u) =>
       (u.email ?? "").toLowerCase().includes(q) ||
       (u.name ?? "").toLowerCase().includes(q),
     );
-  }, [users, query]);
+  }, [results, query]);
 
   const handleRoleChange = async (userId: Id<"users">, newRole: Role) => {
     try {
@@ -83,11 +91,11 @@ export function UsersPanel() {
           />
         </div>
 
-        {users === undefined && (
+        {status === "LoadingFirstPage" && (
           <p className="text-sm text-muted-foreground">Memuat pengguna…</p>
         )}
 
-        {filtered && filtered.length === 0 && (
+        {filtered && filtered.length === 0 && status !== "LoadingFirstPage" && (
           <p className="text-sm text-muted-foreground">
             {query ? "Tidak ada pengguna yang cocok." : "Belum ada pengguna."}
           </p>
@@ -148,10 +156,21 @@ export function UsersPanel() {
           </div>
         )}
 
-        {users && !users.isDone && (
+        {status === "CanLoadMore" && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadMore(25)}
+            >
+              Muat lebih banyak
+            </Button>
+          </div>
+        )}
+        {status === "LoadingMore" && (
           <div className="flex justify-center pt-2">
             <Button variant="outline" size="sm" disabled>
-              Muat lebih banyak (cursor pagination)
+              Memuat…
             </Button>
           </div>
         )}

@@ -1,20 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
 import {
   BookOpen,
+  Briefcase,
+  Calculator,
+  Calendar,
   ChevronDown,
   FileText,
   HelpCircle,
   Keyboard,
+  ListChecks,
   Mail,
+  Map,
   MessageCircle,
+  MessageSquare,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { api } from "../../../../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Label } from "@/shared/components/ui/label";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 
 interface FAQItem {
@@ -75,9 +88,27 @@ const SUPPORT_EMAIL = "support@careerpack.org";
 const GITHUB_URL = "https://github.com/rahmanef63/CareerPack";
 const APP_VERSION = "1.0.0";
 
+interface FeatureGuide {
+  icon: React.ElementType;
+  title: string;
+  href: string;
+  description: string;
+}
+
+const FEATURE_GUIDES: ReadonlyArray<FeatureGuide> = [
+  { icon: FileText, title: "CV Builder", href: "/dashboard/cv", description: "Editor ATS-friendly dengan preview + ekspor PDF." },
+  { icon: Briefcase, title: "Lamaran", href: "/dashboard/applications", description: "Lacak semua lamaran, status, dan jadwal wawancara." },
+  { icon: Calendar, title: "Kalender", href: "/dashboard/calendar", description: "Agenda wawancara, deadline, dan pengingat." },
+  { icon: Map, title: "Roadmap Skill", href: "/dashboard/roadmap", description: "Rencana belajar per kategori karir." },
+  { icon: ListChecks, title: "Ceklis Dokumen", href: "/dashboard/checklist", description: "Daftar dokumen wajib untuk melamar." },
+  { icon: MessageSquare, title: "Simulasi Wawancara", href: "/dashboard/interview", description: "Latihan pertanyaan HR + teknis dengan timer." },
+  { icon: Calculator, title: "Kalkulator Keuangan", href: "/dashboard/calculator", description: "Perencanaan budget + bandingkan gaji antar kota." },
+  { icon: Sparkles, title: "AI Assistant", href: "/dashboard", description: "Bantuan menulis, review CV, draft surat lamaran." },
+];
+
 export function HelpView() {
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 overflow-x-hidden">
       <ResponsivePageHeader
         title="Pusat Bantuan"
         description="Jawaban cepat, panduan singkat, dan cara menghubungi tim CareerPack."
@@ -128,6 +159,24 @@ export function HelpView() {
                 {item.a}
               </div>
             </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <BookOpen className="h-5 w-5 text-brand" />
+          Panduan per Fitur
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {FEATURE_GUIDES.map((g) => (
+            <QuickLink
+              key={g.href}
+              icon={g.icon}
+              title={g.title}
+              href={g.href}
+              description={g.description}
+            />
           ))}
         </div>
       </section>
@@ -210,6 +259,8 @@ export function HelpView() {
         </Card>
       </section>
 
+      <FeedbackSection />
+
       <section className="flex flex-col items-start gap-2 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-0.5">
           <p className="text-sm font-medium">Versi aplikasi</p>
@@ -254,5 +305,80 @@ function QuickLink({ icon: Icon, title, href, description }: QuickLinkProps) {
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
     </Link>
+  );
+}
+
+function FeedbackSection() {
+  const submit = useMutation(api.feedback.submitFeedback);
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await submit({ subject, message });
+      toast.success("Terima kasih — masukan Anda sudah terkirim.");
+      setSubject("");
+      setMessage("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Gagal mengirim masukan");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="space-y-3">
+      <h2 className="flex items-center gap-2 text-lg font-semibold">
+        <MessageCircle className="h-5 w-5 text-brand" />
+        Kirim Masukan
+      </h2>
+      <Card>
+        <CardHeader>
+          <CardDescription>
+            Saran, kritik, atau ide fitur. Akan terbaca langsung oleh tim CareerPack.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="feedback-subject">Subjek</Label>
+              <Input
+                id="feedback-subject"
+                placeholder="Saran fitur, bug, dst."
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                maxLength={120}
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="feedback-message">Pesan</Label>
+              <Textarea
+                id="feedback-message"
+                placeholder="Ceritakan pengalaman atau ide Anda…"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={5}
+                minLength={5}
+                maxLength={4000}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                {message.length} / 4000 karakter
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={submitting || subject.trim().length === 0 || message.trim().length < 5}>
+                {submitting ? "Mengirim…" : "Kirim Masukan"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </section>
   );
 }

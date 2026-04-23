@@ -1,7 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { requireAdmin } from "./_lib/auth";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
@@ -46,17 +47,12 @@ export const getGlobalStats = query({
 
 export const listAllUsers = query({
   args: {
-    cursor: v.optional(v.union(v.string(), v.null())),
-    limit: v.optional(v.number()),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const numItems = clampPageSize(args.limit);
 
-    const result = await ctx.db.query("users").paginate({
-      cursor: args.cursor ?? null,
-      numItems,
-    });
+    const result = await ctx.db.query("users").paginate(args.paginationOpts);
 
     const profiles = await Promise.all(
       result.page.map((u) =>
@@ -126,6 +122,22 @@ export const updateUserRole = mutation({
   handler: async (ctx, args) => {
     const callerId = await requireAdmin(ctx);
 
+    // Prevent last-admin lockout: an admin cannot demote themselves if
+    // they are the only admin in the system. Demoting to non-admin would
+    // leave no one able to restore admin access via the UI (only via
+    // ADMIN_BOOTSTRAP_EMAILS env + re-login).
+    if (callerId === args.userId && args.role !== "admin") {
+      const allProfiles = await ctx.db.query("userProfiles").collect();
+      const otherAdmins = allProfiles.filter(
+        (p) => p.role === "admin" && p.userId !== callerId,
+      );
+      if (otherAdmins.length === 0) {
+        throw new Error(
+          "Tidak bisa menurunkan peran Anda sendiri: Anda satu-satunya admin. Tetapkan admin lain dulu.",
+        );
+      }
+    }
+
     const targetUser = await ctx.db.get(args.userId);
     if (!targetUser) throw new Error("Pengguna tidak ditemukan");
 
@@ -134,26 +146,101 @@ export const updateUserRole = mutation({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .first();
 
+    const previousRole = (profile?.role ?? "user") as "admin" | "moderator" | "user";
+
     if (profile) {
       await ctx.db.patch(profile._id, { role: args.role });
-      return;
+    } else {
+      const targetName =
+        (targetUser as { name?: string; email?: string }).name ??
+        (targetUser as { email?: string }).email ??
+        "Pengguna";
+
+      await ctx.db.insert("userProfiles", {
+        userId: args.userId,
+        fullName: targetName,
+        location: "",
+        targetRole: "",
+        experienceLevel: "",
+        role: args.role,
+      });
     }
 
-    const targetName =
-      (targetUser as { name?: string; email?: string }).name ??
-      (targetUser as { email?: string }).email ??
-      "Pengguna";
+    // Audit log entry — admin actions on roles are always traceable.
+    if (previousRole !== args.role) {
+      await ctx.db.insert("roleAuditLogs", {
+        actorUserId: callerId,
+        targetUserId: args.userId,
+        previousRole,
+        newRole: args.role,
+        timestamp: Date.now(),
+      });
+    }
+  },
+});
 
-    await ctx.db.insert("userProfiles", {
-      userId: args.userId,
-      fullName: targetName,
-      location: "",
-      targetRole: "",
-      experienceLevel: "",
-      role: args.role,
-    });
+export const listRoleAuditLogs = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const numItems = clampPageSize(args.limit);
 
-    // Reference callerId so lint doesn't flag — also useful if we add audit log later.
-    void (callerId as Id<"users">);
+    const logs = await ctx.db
+      .query("roleAuditLogs")
+      .withIndex("by_time")
+      .order("desc")
+      .take(numItems);
+
+    const enriched = await Promise.all(
+      logs.map(async (log) => {
+        const [actor, target] = await Promise.all([
+          ctx.db.get(log.actorUserId),
+          ctx.db.get(log.targetUserId),
+        ]);
+        return {
+          _id: log._id,
+          actorEmail: (actor as { email?: string } | null)?.email ?? null,
+          targetEmail: (target as { email?: string } | null)?.email ?? null,
+          previousRole: log.previousRole,
+          newRole: log.newRole,
+          timestamp: log.timestamp,
+        };
+      }),
+    );
+
+    return enriched;
+  },
+});
+
+export const listFeedback = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const numItems = clampPageSize(args.limit);
+
+    const items = await ctx.db
+      .query("feedback")
+      .withIndex("by_time")
+      .order("desc")
+      .take(numItems);
+
+    const enriched = await Promise.all(
+      items.map(async (f) => {
+        const user = f.userId ? await ctx.db.get(f.userId) : null;
+        return {
+          _id: f._id,
+          subject: f.subject,
+          message: f.message,
+          submitterEmail: (user as { email?: string } | null)?.email ?? null,
+          timestamp: f.timestamp,
+        };
+      }),
+    );
+
+    return enriched;
   },
 });
