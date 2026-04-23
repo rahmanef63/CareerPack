@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo } from 'react';
-import { 
-  Calculator, Wallet, Home, Utensils, Car, 
-  Zap, Film, MoreHorizontal, TrendingUp, 
-  MapPin, AlertCircle
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery } from 'convex/react';
+import {
+  Calculator, Wallet, TrendingUp, MapPin, AlertCircle, Pencil
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
@@ -12,6 +11,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Slider } from '@/shared/components/ui/slider';
+import { Button } from '@/shared/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import {
   ResponsiveSelect as Select,
@@ -31,39 +31,87 @@ import {
   ResponsiveTooltipTrigger,
 } from '@/shared/components/ui/responsive-tooltip';
 import { Info } from 'lucide-react';
+import { api } from '../../../../../convex/_generated/api';
+import type { Doc, Id } from '../../../../../convex/_generated/dataModel';
+import { iconFor } from '../constants/budgetIcons';
+import { BudgetVariableForm } from './BudgetVariableForm';
 
-const expenseCategories = [
-  { id: 'housing', label: 'Tempat Tinggal/Sewa', icon: Home, color: '#0ea5e9' },
-  { id: 'food', label: 'Makanan & Belanja', icon: Utensils, color: '#10b981' },
-  { id: 'transportation', label: 'Transportasi', icon: Car, color: '#f59e0b' },
-  { id: 'utilities', label: 'Utilitas', icon: Zap, color: '#8b5cf6' },
-  { id: 'entertainment', label: 'Hiburan', icon: Film, color: '#ec4899' },
-  { id: 'others', label: 'Lainnya', icon: MoreHorizontal, color: '#64748b' },
-];
+type BudgetVar = Doc<"budgetVariables">;
 
 export function FinancialCalculator() {
   const [activeTab, setActiveTab] = useState('budget');
   const [monthlyIncome, setMonthlyIncome] = useState(15000000);
-  const [expenses, setExpenses] = useState({
-    housing: 5000000,
-    food: 2500000,
-    transportation: 1500000,
-    utilities: 1000000,
-    entertainment: 1000000,
-    others: 1000000,
-  });
   const [selectedCity, setSelectedCity] = useState('Jakarta');
   const [compareCity, setCompareCity] = useState('Singapore');
   const [targetPosition, setTargetPosition] = useState('Software Engineer');
 
-  const totalExpenses = Object.values(expenses).reduce((a, b) => a + b, 0);
-  const savings = monthlyIncome - totalExpenses;
-  const savingsRate = (savings / monthlyIncome) * 100;
+  // Backend-persisted budget envelopes (per-user, seeded on first visit).
+  const variables = useQuery(api.budgetVariables.listMine);
+  const seedDefaults = useMutation(api.budgetVariables.seedDefaults);
+  const updateVariable = useMutation(api.budgetVariables.updateVariable);
 
-  const expenseData = expenseCategories.map(cat => ({
-    name: cat.label,
-    value: expenses[cat.id as keyof typeof expenses],
-    color: cat.color,
+  // Auto-seed defaults on first render after auth resolves empty list.
+  const seedAttempted = useRef(false);
+  useEffect(() => {
+    if (variables && variables.length === 0 && !seedAttempted.current) {
+      seedAttempted.current = true;
+      seedDefaults().catch(() => {
+        // Non-fatal; user will see empty state with "Tambah Variabel" CTA.
+      });
+    }
+  }, [variables, seedDefaults]);
+
+  // Local slider mirror — keeps UI snappy while drag in progress. Persists
+  // the final value to Convex 400 ms after last change (debounced).
+  const [localValues, setLocalValues] = useState<Record<string, number>>({});
+  const debounceTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => {
+    if (!variables) return;
+    setLocalValues((prev) => {
+      const next: Record<string, number> = { ...prev };
+      for (const v of variables) {
+        // Only hydrate from server if user isn't actively editing that row.
+        if (!(v._id in next)) next[v._id] = v.value;
+      }
+      return next;
+    });
+  }, [variables]);
+
+  const handleSliderChange = (id: string, value: number) => {
+    setLocalValues((prev) => ({ ...prev, [id]: value }));
+    const existing = debounceTimers.current.get(id);
+    if (existing) clearTimeout(existing);
+    const t = setTimeout(() => {
+      updateVariable({ id: id as Id<"budgetVariables">, value }).catch(() => {
+        // If save fails, next query refetch will resync.
+      });
+      debounceTimers.current.delete(id);
+    }, 400);
+    debounceTimers.current.set(id, t);
+  };
+
+  const sortedVars: BudgetVar[] = useMemo(
+    () => (variables ? [...variables].sort((a, b) => a.order - b.order) : []),
+    [variables],
+  );
+
+  const effectiveValue = (v: BudgetVar) =>
+    v._id in localValues ? localValues[v._id] : v.value;
+
+  const expenseVars = sortedVars.filter((v) => v.kind === 'expense');
+  const savingsVars = sortedVars.filter((v) => v.kind === 'savings');
+
+  const totalExpenses = expenseVars.reduce((sum, v) => sum + effectiveValue(v), 0);
+  const totalSavings = savingsVars.reduce((sum, v) => sum + effectiveValue(v), 0);
+  const totalAllocated = totalExpenses + totalSavings;
+  const unallocated = monthlyIncome - totalAllocated;
+  const savingsRate = monthlyIncome > 0 ? (totalSavings / monthlyIncome) * 100 : 0;
+
+  const expenseData = sortedVars.map((v) => ({
+    name: v.label,
+    value: effectiveValue(v),
+    color: v.color,
   }));
 
   const getCityData = (cityName: string) => {
@@ -82,10 +130,6 @@ export function FinancialCalculator() {
   }, [selectedCity, compareCity]);
 
   const salaryData = indonesianJobMarketData.find(j => j.position === targetPosition);
-
-  const updateExpense = (category: string, value: number) => {
-    setExpenses(prev => ({ ...prev, [category]: value }));
-  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -185,30 +229,66 @@ export function FinancialCalculator() {
               </Card>
 
               <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calculator className="w-5 h-5 text-brand" />
-                    Pengeluaran Bulanan
-                  </CardTitle>
+                <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Calculator className="w-5 h-5 text-brand" />
+                      Variabel Anggaran Bulanan
+                    </CardTitle>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Pengeluaran &amp; tabungan — drag slider, edit label, atau tambah baru.
+                    </p>
+                  </div>
+                  <BudgetVariableForm />
                 </CardHeader>
                 <CardContent>
+                  {variables === undefined && (
+                    <p className="text-sm text-muted-foreground">Memuat variabel…</p>
+                  )}
+                  {variables && variables.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Belum ada variabel. Menyiapkan default…
+                    </p>
+                  )}
                   <div className="space-y-6">
-                    {expenseCategories.map((category) => {
-                      const Icon = category.icon;
+                    {[...expenseVars, ...savingsVars].map((v) => {
+                      const Icon = iconFor(v.iconName);
+                      const current = effectiveValue(v);
                       return (
-                        <div key={category.id}>
-                          <div className="flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2">
-                              <Icon className="w-4 h-4" style={{ color: category.color }} />
-                              <Label className="text-sm">{category.label}</Label>
+                        <div key={v._id}>
+                          <div className="flex justify-between items-center mb-2 gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Icon className="w-4 h-4 shrink-0" style={{ color: v.color }} />
+                              <Label className="text-sm truncate">{v.label}</Label>
+                              {v.kind === 'savings' && (
+                                <Badge variant="secondary" className="bg-success/15 text-success text-[10px]">
+                                  Tabungan
+                                </Badge>
+                              )}
                             </div>
-                            <span className="font-medium text-foreground">
-                              {formatCurrency(expenses[category.id as keyof typeof expenses])}
-                            </span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <span className="font-medium text-foreground text-sm">
+                                {formatCurrency(current)}
+                              </span>
+                              <BudgetVariableForm
+                                existing={v}
+                                trigger={
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    aria-label={`Edit ${v.label}`}
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                }
+                              />
+                            </div>
                           </div>
                           <Slider
-                            value={[expenses[category.id as keyof typeof expenses]]}
-                            onValueChange={([value]) => updateExpense(category.id, value)}
+                            value={[current]}
+                            onValueChange={([value]) => handleSliderChange(v._id, value)}
                             max={10000000}
                             step={100000}
                             className="w-full"
@@ -243,21 +323,28 @@ export function FinancialCalculator() {
                       </p>
                     </div>
 
+                    <div className="p-4 bg-success/10 rounded-lg">
+                      <p className="text-sm text-success">Tabungan Direncanakan</p>
+                      <p className="text-2xl font-bold text-success">
+                        {formatCurrency(totalSavings)}
+                      </p>
+                    </div>
+
                     <div className={cn(
                       'p-4 rounded-lg',
-                      savings >= 0 ? 'bg-success/10' : 'bg-warning/10'
+                      unallocated >= 0 ? 'bg-info/10' : 'bg-warning/10'
                     )}>
                       <p className={cn(
                         'text-sm',
-                        savings >= 0 ? 'text-success' : 'text-warning'
+                        unallocated >= 0 ? 'text-info' : 'text-warning'
                       )}>
-                        Tabungan Bulanan
+                        {unallocated >= 0 ? 'Belum Dialokasikan' : 'Kelebihan Alokasi'}
                       </p>
                       <p className={cn(
                         'text-2xl font-bold',
-                        savings >= 0 ? 'text-success' : 'text-warning'
+                        unallocated >= 0 ? 'text-info' : 'text-warning'
                       )}>
-                        {formatCurrency(savings)}
+                        {formatCurrency(unallocated)}
                       </p>
                     </div>
 
