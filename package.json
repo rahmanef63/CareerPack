@@ -1,0 +1,46 @@
+{
+  "name": "careerpack",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "dev": "pnpm run backend:dev-sync && pnpm --filter careerpack-frontend dev",
+    "build": "pnpm --filter careerpack-frontend build",
+    "start": "pnpm --filter careerpack-frontend start",
+    "lint": "pnpm --filter careerpack-frontend lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "cd frontend && pnpm exec tsc --noEmit && pnpm exec tsc --noEmit -p ../convex/tsconfig.json",
+    "frontend:dev": "pnpm --filter careerpack-frontend dev",
+    "frontend:build": "pnpm --filter careerpack-frontend build",
+    "frontend:start": "pnpm --filter careerpack-frontend start",
+    "frontend:lint": "pnpm --filter careerpack-frontend lint",
+    "backend:dev": "pnpm exec convex dev --env-file backend/convex-self-hosted/convex.env",
+    "backend:dev-sync": "pnpm exec convex dev --once --typecheck disable --env-file backend/convex-self-hosted/convex.env",
+    "backend:deploy": "pnpm exec convex deploy --yes --env-file backend/convex-self-hosted/convex.env",
+    "backend:admin-key": "docker exec -i $(docker ps --filter name=careerpack-convex --filter status=running --format '{{.Names}}' | grep backend | head -1) ./generate_admin_key.sh",
+    "pwa:assets": "node scripts/generate-pwa-assets.mjs",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx}": [
+      "bash -c 'cd frontend && pnpm exec eslint --max-warnings=0 --fix'"
+    ],
+    "convex/**/*.ts": [
+      "bash -c 'cd frontend && pnpm exec tsc --noEmit -p ../convex/tsconfig.json'"
+    ]
+  },
+  "devDependencies": {
+    "@convex-dev/auth": "^0.0.90",
+    "@types/node": "^24.10.13",
+    "@vitest/coverage-v8": "^4.1.4",
+    "convex": "^1.31.7",
+    "lint-staged": "^16.4.0",
+    "sharp": "^0.34.5",
+    "simple-git-hooks": "^2.13.1",
+    "vitest": "^4.1.4"
+  }
+}

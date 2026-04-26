@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+.next
+**/.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.vscode
+.idea
+*.log
+README.md
+DEPLOYMENT.md
+implementation_plan.md
+backend/convex-self-hosted/data

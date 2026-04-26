@@ -1,0 +1,294 @@
+import { mutation } from "../_generated/server";
+import { v } from "convex/values";
+import { requireUser } from "../_shared/auth";
+import {
+  sanitizeBlocks,
+  sanitizeHeaderBg,
+  sanitizeAccent,
+} from "./blocks";
+
+const SLUG_MIN = 3;
+const SLUG_MAX = 30;
+const SLUG_REGEX = /^[a-z][a-z0-9-]+[a-z0-9]$/;
+
+const HEADLINE_MAX = 120;
+const EMAIL_MAX = 120;
+const URL_MAX = 300;
+
+const RESERVED_SLUGS = new Set<string>([
+  "_next", "api", "r", "static", "assets", "public",
+  "icon", "apple-icon", "apple-touch-icon", "favicon",
+  "manifest", "robots", "sitemap", "well-known",
+  "login", "logout", "signin", "signup", "register",
+  "forgot-password", "reset-password", "verify", "auth",
+  "dashboard", "admin", "settings", "help", "profile",
+  "account", "terms", "privacy", "cookies", "legal",
+  "about", "contact", "pricing", "home", "docs", "blog",
+  "faq", "support", "careers", "press", "root", "null",
+  "undefined", "error", "404", "500", "status",
+  "careerpack", "anthropic", "claude",
+]);
+
+function assertSlug(raw: string): string {
+  const slug = raw.trim().toLowerCase();
+  if (slug.length < SLUG_MIN || slug.length > SLUG_MAX) {
+    throw new Error(`Slug harus ${SLUG_MIN}-${SLUG_MAX} karakter`);
+  }
+  if (!SLUG_REGEX.test(slug)) {
+    throw new Error(
+      "Slug hanya boleh huruf kecil, angka, dan tanda '-'. Harus diawali huruf, diakhiri huruf/angka.",
+    );
+  }
+  if (RESERVED_SLUGS.has(slug)) {
+    throw new Error("Slug ini dipakai sistem, pilih yang lain");
+  }
+  if (slug.includes("--")) {
+    throw new Error("Slug tidak boleh mengandung '--' berurutan");
+  }
+  return slug;
+}
+
+function containsControlChar(text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code === 9 || code === 10 || code === 13) continue;
+    if (code < 32 || code === 127) return true;
+  }
+  return false;
+}
+
+function assertShortText(value: string, max: number, label: string): string {
+  const trimmed = value.trim();
+  if (trimmed.length > max) throw new Error(`${label} maksimal ${max} karakter`);
+  if (containsControlChar(trimmed)) {
+    throw new Error(`${label} mengandung karakter tidak valid`);
+  }
+  return trimmed;
+}
+
+function assertUrl(raw: string, label: string): string {
+  const value = raw.trim();
+  if (value.length === 0) return "";
+  if (value.length > URL_MAX) throw new Error(`${label} terlalu panjang`);
+  if (!/^https?:\/\//i.test(value)) {
+    throw new Error(`${label} harus diawali http:// atau https://`);
+  }
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error(`${label} harus http atau https`);
+    }
+    return url.toString();
+  } catch {
+    throw new Error(`${label} bukan URL valid`);
+  }
+}
+
+function assertEmail(raw: string): string {
+  const value = raw.trim();
+  if (value.length === 0) return "";
+  if (value.length > EMAIL_MAX) throw new Error("Email terlalu panjang");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    throw new Error("Email kontak publik tidak valid");
+  }
+  return value;
+}
+
+export const createOrUpdateProfile = mutation({
+  args: {
+    fullName: v.string(),
+    phone: v.optional(v.string()),
+    location: v.string(),
+    targetRole: v.string(),
+    experienceLevel: v.string(),
+    skills: v.array(v.string()),
+    interests: v.array(v.string()),
+    bio: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+
+    const existingProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    const profileData = { userId, ...args };
+
+    if (existingProfile) {
+      await ctx.db.patch(existingProfile._id, profileData);
+      return existingProfile._id;
+    }
+    return await ctx.db.insert("userProfiles", profileData);
+  },
+});
+
+export const updateAvatar = mutation({
+  args: {
+    storageId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+
+    if (args.storageId !== undefined) {
+      const record = await ctx.db
+        .query("files")
+        .withIndex("by_storage", (q) => q.eq("storageId", args.storageId!))
+        .first();
+      if (!record || record.tenantId !== userId.toString()) {
+        throw new Error("File tidak ditemukan");
+      }
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile) {
+      throw new Error("Isi profil dulu lalu coba lagi");
+    }
+
+    await ctx.db.patch(profile._id, {
+      avatarStorageId: args.storageId,
+    });
+  },
+});
+
+export const updateMyPublicProfile = mutation({
+  args: {
+    enabled: v.optional(v.boolean()),
+    slug: v.optional(v.string()),
+    headline: v.optional(v.string()),
+    bioShow: v.optional(v.boolean()),
+    skillsShow: v.optional(v.boolean()),
+    targetRoleShow: v.optional(v.boolean()),
+    contactEmail: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    portfolioUrl: v.optional(v.string()),
+    allowIndex: v.optional(v.boolean()),
+    avatarShow: v.optional(v.boolean()),
+    portfolioShow: v.optional(v.boolean()),
+    /* ----- Personal Branding builder ------------------------------ */
+    mode: v.optional(v.union(v.literal("auto"), v.literal("custom"))),
+    autoToggles: v.optional(
+      v.object({
+        showExperience: v.optional(v.boolean()),
+        showEducation: v.optional(v.boolean()),
+        showCertifications: v.optional(v.boolean()),
+        showProjects: v.optional(v.boolean()),
+        showSocial: v.optional(v.boolean()),
+      }),
+    ),
+    theme: v.optional(
+      v.union(
+        v.literal("linktree"),
+        v.literal("bento"),
+        v.literal("magazine"),
+      ),
+    ),
+    headerBg: v.optional(
+      v.object({
+        kind: v.union(
+          v.literal("gradient"),
+          v.literal("solid"),
+          v.literal("image"),
+          v.literal("none"),
+        ),
+        value: v.string(),
+      }),
+    ),
+    accent: v.optional(v.string()),
+    /* Share & Export opt-ins (see profile/schema.ts). */
+    htmlExport: v.optional(v.boolean()),
+    embedExport: v.optional(v.boolean()),
+    promptExport: v.optional(v.boolean()),
+    blocks: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          type: v.string(),
+          hidden: v.optional(v.boolean()),
+          payload: v.any(),
+        }),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile) {
+      throw new Error("Profil belum dibuat — lengkapi profil dulu di Pengaturan");
+    }
+
+    const patch: Record<string, unknown> = {};
+
+    if (args.slug !== undefined) {
+      const slug = assertSlug(args.slug);
+      const collision = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_public_slug", (q) => q.eq("publicSlug", slug))
+        .first();
+      if (collision && collision.userId !== userId) {
+        throw new Error("Slug sudah dipakai, pilih yang lain");
+      }
+      patch.publicSlug = slug;
+    }
+
+    if (args.enabled !== undefined) {
+      if (args.enabled) {
+        const hasSlug =
+          args.slug !== undefined
+            ? Boolean(args.slug.trim())
+            : Boolean(profile.publicSlug);
+        if (!hasSlug) {
+          throw new Error("Tetapkan slug sebelum mengaktifkan profil publik");
+        }
+      }
+      patch.publicEnabled = args.enabled;
+    }
+
+    if (args.headline !== undefined) {
+      patch.publicHeadline = assertShortText(args.headline, HEADLINE_MAX, "Headline");
+    }
+    if (args.bioShow !== undefined) patch.publicBioShow = args.bioShow;
+    if (args.skillsShow !== undefined) patch.publicSkillsShow = args.skillsShow;
+    if (args.targetRoleShow !== undefined) patch.publicTargetRoleShow = args.targetRoleShow;
+    if (args.contactEmail !== undefined) patch.publicContactEmail = assertEmail(args.contactEmail);
+    if (args.linkedinUrl !== undefined) patch.publicLinkedinUrl = assertUrl(args.linkedinUrl, "LinkedIn");
+    if (args.portfolioUrl !== undefined) patch.publicPortfolioUrl = assertUrl(args.portfolioUrl, "Portfolio");
+    if (args.allowIndex !== undefined) patch.publicAllowIndex = args.allowIndex;
+    if (args.avatarShow !== undefined) patch.publicAvatarShow = args.avatarShow;
+    if (args.portfolioShow !== undefined) patch.publicPortfolioShow = args.portfolioShow;
+
+    if (args.mode !== undefined) patch.publicMode = args.mode;
+    if (args.autoToggles !== undefined) patch.publicAutoToggles = args.autoToggles;
+    if (args.theme !== undefined) patch.publicTheme = args.theme;
+    if (args.headerBg !== undefined) {
+      const cleaned = sanitizeHeaderBg(args.headerBg);
+      if (!cleaned) throw new Error("Header background tidak valid");
+      patch.publicHeaderBg = cleaned;
+    }
+    if (args.accent !== undefined) {
+      if (args.accent === "") {
+        patch.publicAccent = undefined;
+      } else {
+        const cleaned = sanitizeAccent(args.accent);
+        if (!cleaned) throw new Error("Aksen warna harus format hex #rrggbb");
+        patch.publicAccent = cleaned;
+      }
+    }
+    if (args.htmlExport !== undefined) patch.publicHtmlExport = args.htmlExport;
+    if (args.embedExport !== undefined) patch.publicEmbedExport = args.embedExport;
+    if (args.promptExport !== undefined) patch.publicPromptExport = args.promptExport;
+    if (args.blocks !== undefined) {
+      patch.publicBlocks = sanitizeBlocks(args.blocks);
+    }
+
+    await ctx.db.patch(profile._id, patch);
+    return { ok: true as const };
+  },
+});

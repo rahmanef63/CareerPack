@@ -1,0 +1,269 @@
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px oklch(var(--brand) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px oklch(var(--brand) / 0.6);
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: oklch(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--muted-foreground) / 0.6);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: oklch(var(--background));
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(var(--border));
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--muted-foreground) / 0.5);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid oklch(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Selection styles */
+::selection {
+  background: oklch(var(--brand) / 0.2);
+  color: inherit;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===== App-launcher redesign keyframes ===== */
+
+@keyframes pulse-ai {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(var(--brand) / 0.45),
+                0 10px 30px -10px oklch(var(--brand) / 0.5);
+    transform: translateY(-18px) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 14px oklch(var(--brand) / 0),
+                0 14px 36px -10px oklch(var(--brand) / 0.65);
+    transform: translateY(-18px) scale(1.04);
+  }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translate3d(0,0,0) rotate(0); opacity: 1; }
+  100% { transform: translate3d(var(--cx,0), 220px, 0) rotate(var(--cr,360deg)); opacity: 0; }
+}
+
+@keyframes checkmark-draw {
+  0%   { stroke-dashoffset: 60; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes stagger-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes badge-bounce {
+  0%, 100% { transform: scale(1); }
+  30%      { transform: scale(1.25); }
+  60%      { transform: scale(0.92); }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+.animate-pulse-ai {
+  animation: pulse-ai 2.4s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: ripple 0.55s ease-out forwards;
+}
+
+.animate-checkmark {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: checkmark-draw 0.45s ease-out forwards;
+}
+
+.animate-stagger-in {
+  animation: stagger-in 0.32s ease-out backwards;
+}
+
+.animate-badge-bounce {
+  animation: badge-bounce 0.45s ease-out;
+}
+
+/* Swipe affordance hint — chevron drifts a few px in its forward
+   direction with a soft fade so the user clocks the swipe without
+   the motion being intrusive. Used in CV preview dialog overlay. */
+@keyframes swipe-hint-left {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50%      { transform: translateX(-6px); opacity: 1; }
+}
+@keyframes swipe-hint-right {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50%      { transform: translateX(6px); opacity: 1; }
+}
+.animate-swipe-hint-left  { animation: swipe-hint-left  1.6s ease-in-out infinite; }
+.animate-swipe-hint-right { animation: swipe-hint-right 1.6s ease-in-out infinite; }
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(var(--muted-foreground) / 0.10) 0%,
+    oklch(var(--muted-foreground) / 0.25) 50%,
+    oklch(var(--muted-foreground) / 0.10) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.tap-press {
+  transition: transform 120ms ease-out;
+}
+.tap-press:active {
+  transform: scale(0.96);
+}
+
+/* AI button style variants — driven by [data-ai-btn] on <html>
+   Defaults align with the design system: sky→indigo diagonal carries
+   the brand on every primary surface (logo tile, FAB, AI agent header). */
+[data-ai-btn="solid"] .ai-fab-bg {
+  background: linear-gradient(180deg, oklch(var(--brand-from)), oklch(var(--brand-to)));
+  box-shadow: 0 8px 24px -6px oklch(var(--brand) / 0.45);
+}
+[data-ai-btn="gradient"] .ai-fab-bg {
+  background: linear-gradient(135deg, oklch(var(--brand-from)) 0%, oklch(var(--brand-to)) 100%);
+  box-shadow: 0 8px 24px -6px oklch(var(--brand-to) / 0.45);
+}
+[data-ai-btn="glow"] .ai-fab-bg {
+  background: linear-gradient(135deg, oklch(var(--brand-from)), oklch(var(--brand-to)));
+  box-shadow: 0 0 0 0 oklch(var(--brand) / 0.4),
+              0 0 28px 4px oklch(var(--brand-to) / 0.55);
+}
+
+/* Sparkle ring — orbits the FAB to draw the eye to the AI affordance */
+@keyframes ai-fab-ring {
+  0%, 100% { transform: scale(1);    opacity: 0.55; }
+  50%      { transform: scale(1.18); opacity: 0;    }
+}
+.ai-fab-ring {
+  border: 1.5px solid oklch(var(--brand-to) / 0.55);
+  animation: ai-fab-ring 2s ease-in-out infinite;
+}
+[data-ai-btn="solid"] .ai-fab-ring { border-color: oklch(var(--brand) / 0.55); }
+[data-ai-btn="glow"]  .ai-fab-ring { border-color: oklch(var(--brand-to) / 0.6); }
+
+/* Nav style variants */
+[data-nav-style="flat"] .nav-shell {
+  border-radius: 0;
+  margin: 0;
+  box-shadow: 0 -1px 0 oklch(var(--foreground) / 0.06);
+}
+[data-nav-style="floating"] .nav-shell {
+  border-radius: 1.25rem;
+  margin: 0 0.75rem 0.75rem;
+  box-shadow: 0 12px 30px -8px oklch(var(--brand) / 0.25);
+}
+[data-nav-style="notched"] .nav-shell {
+  border-radius: 1.25rem 1.25rem 0 0;
+  margin: 0;
+  box-shadow: 0 -8px 24px -6px oklch(var(--foreground) / 0.12);
+}
+
+/* Print styles for CV */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   CareerPack theme — "Modern Minimal" preset baked at CSS level.
+   Values copied verbatim from /r/registry.json (modern-minimal item),
+   stripped of their `oklch(...)` wrapper so tailwind utilities declared
+   as `oklch(var(--x) / <alpha-value>)` compose alpha correctly.
+   Matching runtime preset name = "modern-minimal" — switching to it via
+   Settings → Tampilan is a no-op.
+
+   Color format: OKLCH components `L C H` (e.g., `0.62 0.19 259.81`).
+   Modern browsers (Chrome 111+, Safari 15.4+, Firefox 113+) parse this
+   natively; colors stay perceptually accurate instead of being clamped
+   to sRGB during a conversion step.
+   ============================================================================ */
+
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 1.00 0 0;                /* oklch(1.00 0 0) */
+    --foreground: 0.32 0 0;
+    --card: 1.00 0 0;
+    --card-foreground: 0.32 0 0;
+    --popover: 1.00 0 0;
+    --popover-foreground: 0.32 0 0;
+
+    /* Primary — modern-minimal blue */
+    --primary: 0.62 0.19 259.81;
+    --primary-foreground: 1.00 0 0;
+
+    --secondary: 0.97 0.00 264.54;
+    --secondary-foreground: 0.45 0.03 256.80;
+    /* Warm-stone neutrals (hue ~80) — pairs with Fraunces display
+     * for editorial warmth. Cool blue-gray (hue 247/264) felt clinical.
+     * --background stays pure white so cards retain max contrast. */
+    --muted: 0.97 0.01 80;
+    --muted-foreground: 0.52 0.02 70;
+
+    --accent: 0.95 0.03 236.82;
+    --accent-foreground: 0.38 0.14 265.52;
+
+    --destructive: 0.64 0.21 25.33;
+    --destructive-foreground: 1.00 0 0;
+
+    /* Domain semantic tones — CareerPack-specific, not in tweakcn registry.
+       Kept as OKLCH for consistency with the rest of the palette. */
+    --success: 0.70 0.17 152;               /* approx oklch of green */
+    --success-foreground: 1.00 0 0;
+    --warning: 0.80 0.17 80;                /* amber */
+    --warning-foreground: 0.32 0 0;
+    --info: 0.65 0.18 236;                  /* sky */
+    --info-foreground: 1.00 0 0;
+
+    --border: 0.92 0.008 80;               /* warm hairline (hue 80) */
+    --input: 0.93 0.01 264.53;
+    --ring: 0.62 0.19 259.81;
+    --radius: 0.375rem;
+
+    --chart-1: 0.62 0.19 259.81;
+    --chart-2: 0.55 0.22 262.88;
+    --chart-3: 0.49 0.22 264.38;
+    --chart-4: 0.42 0.18 265.64;
+    --chart-5: 0.38 0.14 265.52;
+
+    /* Sidebar (registry key `sidebar` → aliased to `sidebar-background`) */
+    --sidebar-background: 0.98 0.00 247.84;
+    --sidebar-foreground: 0.32 0 0;
+    --sidebar-primary: 0.62 0.19 259.81;
+    --sidebar-primary-foreground: 1.00 0 0;
+    --sidebar-accent: 0.95 0.03 236.82;
+    --sidebar-accent-foreground: 0.38 0.14 265.52;
+    --sidebar-border: 0.93 0.01 264.53;
+    --sidebar-ring: 0.62 0.19 259.81;
+
+    /* Brand family — aliased to primary / chart-4 / accent */
+    --brand: 0.62 0.19 259.81;
+    --brand-foreground: 1.00 0 0;
+    --brand-from: 0.62 0.19 259.81;
+    --brand-to: 0.42 0.18 265.64;
+    --brand-muted: 0.95 0.03 236.82;
+    --brand-muted-foreground: 0.38 0.14 265.52;
+
+    /* Radius scale */
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    /* Tracking scale */
+    --letter-spacing: 0em;
+    --tracking-normal: var(--letter-spacing);
+    --tracking-tighter: calc(var(--letter-spacing) - 0.05em);
+    --tracking-tight: calc(var(--letter-spacing) - 0.025em);
+    --tracking-wide: calc(var(--letter-spacing) + 0.025em);
+    --tracking-wider: calc(var(--letter-spacing) + 0.05em);
+    --tracking-widest: calc(var(--letter-spacing) + 0.1em);
+
+    /* Shadow primitives — shadow-color stays HSL components because the
+       shadow-scale strings below compose it via hsl(var(--shadow-color) /
+       alpha); mixing OKLCH and HSL here would need color-mix. */
+    --shadow-color: 0 0% 0%;
+    --shadow-opacity: 0.1;
+    --shadow-blur: 3px;
+    --shadow-spread: 0px;
+    --shadow-offset-x: 0;
+    --shadow-offset-y: 1px;
+
+    --shadow-2xs: 0 1px 3px 0px hsl(var(--shadow-color) / 0.05);
+    --shadow-xs:  0 1px 3px 0px hsl(var(--shadow-color) / 0.05);
+    --shadow-sm:  0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 1px 2px -1px hsl(var(--shadow-color) / 0.10);
+    --shadow:     0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 1px 2px -1px hsl(var(--shadow-color) / 0.10);
+    --shadow-md:  0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 2px 4px -1px hsl(var(--shadow-color) / 0.10);
+    --shadow-lg:  0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 4px 6px -1px hsl(var(--shadow-color) / 0.10);
+    --shadow-xl:  0 1px 3px 0px hsl(var(--shadow-color) / 0.10), 0 8px 10px -1px hsl(var(--shadow-color) / 0.10);
+    --shadow-2xl: 0 1px 3px 0px hsl(var(--shadow-color) / 0.25);
+
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    --font-serif: var(--font-source-serif-4), Georgia, serif;
+
+    --spacing: 0.25rem;
+
+    /* Infra hooks for preset families (future-ready — presets may override).
+       --density-y:  vertical container rhythm (used via py-[var(--density-y)])
+       --border-width: baseline border thickness (2px default)
+       --tracking-brutal*: uppercase/display tracking (brutalism families)
+    */
+    --density-y: 3rem;
+    --border-width: 2px;
+    --tracking-brutal: 0.2em;
+    --tracking-brutal-sm: 0.15em;
+  }
+
+  .dark {
+    --background: 0.20 0 0;
+    --foreground: 0.92 0 0;
+    --card: 0.27 0 0;
+    --card-foreground: 0.92 0 0;
+    --popover: 0.27 0 0;
+    --popover-foreground: 0.92 0 0;
+
+    --primary: 0.62 0.19 259.81;
+    --primary-foreground: 1.00 0 0;
+    --secondary: 0.27 0 0;
+    --secondary-foreground: 0.92 0 0;
+    --muted: 0.27 0 0;
+    --muted-foreground: 0.72 0 0;
+
+    --accent: 0.38 0.14 265.52;
+    --accent-foreground: 0.88 0.06 254.13;
+
+    --destructive: 0.64 0.21 25.33;
+    --destructive-foreground: 1.00 0 0;
+
+    --success: 0.65 0.17 152;
+    --success-foreground: 1.00 0 0;
+    --warning: 0.75 0.17 80;
+    --warning-foreground: 1.00 0 0;
+    --info: 0.60 0.18 236;
+    --info-foreground: 1.00 0 0;
+
+    --border: 0.37 0 0;
+    --input: 0.37 0 0;
+    --ring: 0.62 0.19 259.81;
+
+    --chart-1: 0.71 0.14 254.62;
+    --chart-2: 0.62 0.19 259.81;
+    --chart-3: 0.55 0.22 262.88;
+    --chart-4: 0.49 0.22 264.38;
+    --chart-5: 0.42 0.18 265.64;
+
+    --sidebar-background: 0.20 0 0;
+    --sidebar-foreground: 0.92 0 0;
+    --sidebar-primary: 0.62 0.19 259.81;
+    --sidebar-primary-foreground: 1.00 0 0;
+    --sidebar-accent: 0.38 0.14 265.52;
+    --sidebar-accent-foreground: 0.88 0.06 254.13;
+    --sidebar-border: 0.37 0 0;
+    --sidebar-ring: 0.62 0.19 259.81;
+
+    --brand: 0.62 0.19 259.81;
+    --brand-foreground: 1.00 0 0;
+    --brand-from: 0.62 0.19 259.81;
+    --brand-to: 0.49 0.22 264.38;
+    --brand-muted: 0.38 0.14 265.52;
+    --brand-muted-foreground: 0.88 0.06 254.13;
+
+    --letter-spacing: 0em;
+    --shadow-color: 0 0% 0%;
+    --shadow-opacity: 0.2;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scrollbar-gutter: stable;
+    /* iOS Safari auto-zooms inputs whose computed font-size is < 16 CSS px.
+       Setting the html font-size baseline + the per-element rule below
+       guarantees no element trips the threshold without disabling user
+       pinch-zoom (kept enabled — accessibility). */
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: var(--letter-spacing);
+  }
+}
+
+/* Prevent iOS focus-zoom on every form control. Apple's WebKit zooms
+   any input whose computed font-size is < 16 CSS px. Tailwind utility
+   classes (text-sm = 14 px, text-xs = 12 px) live in @layer utilities,
+   which beats @layer base specificity, so we MUST !important on mobile
+   to outrank `text-sm` / `text-xs` on the same element. Desktop (≥ md)
+   has no auto-zoom — small fonts are fine, so the rule scopes to the
+   mobile breakpoint only. */
+@media (max-width: 767.98px) {
+  input,
+  textarea,
+  select,
+  [contenteditable="true"],
+  [role="combobox"],
+  [role="textbox"] {
+    font-size: max(16px, 1rem) !important;
+    line-height: 1.4;
+  }
+}
+
+/* Theme-swap transition — `html.theme-transition` class is added by the
+   preset switcher for 260 ms around every apply/preview call. The rule
+   animates every theme-sensitive property in sync so color / radius /
+   shadow / tracking / font changes feel intentional. Normal hover /
+   focus states remain snappy because the class is only present during
+   the swap window. */
+
+/* Drag-handle polish (#7) — tactile feedback when grabbing list items
+   (CV sections, skills, experience). Cursor states signal affordance,
+   active compression gives physical feel without a motion library. */
+.drag-handle {
+  cursor: grab;
+  transition: transform 120ms cubic-bezier(0.2, 0.8, 0.25, 1),
+              background-color 120ms;
+}
+.drag-handle:active,
+.drag-handle[data-dragging="true"] {
+  cursor: grabbing;
+  transform: scale(0.94);
+}
+[draggable="true"][data-dragging="true"] {
+  opacity: 0.55;
+  transform: rotate(1.5deg) scale(1.01);
+  box-shadow: 0 18px 38px -12px oklch(var(--foreground) / 0.3);
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition-property: background-color, color, border-color, border-radius,
+    box-shadow, letter-spacing, font-family !important;
+  transition-duration: 220ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:root {
+  --font-scale: 1;
+  /* Bottom nav vertical real estate. 5rem (80 px) ≈ Instagram /
+     Threads / TikTok mobile tab bars — gives icons + labels +
+     breathing room above the safe-area inset. Keep changes here
+     in sync with mobile-only paddingBottom on dashboard <main>
+     (frontend/src/shared/containers/MobileContainer.tsx). */
+  --nav-height: 5rem;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Top safe-area + minimum baseline. iOS standalone PWA returns the
+     notch height (≈44–59 px). Regular browser tabs return 0 — we
+     still want a 12 px breathing room so the brand mark isn't glued
+     to the viewport edge. `max()` picks the larger of the two so
+     non-PWA users get baseline comfort + PWA users get full notch
+     clearance. */
+  --safe-top: max(0.75rem, env(safe-area-inset-top, 0px));
+
+  /* Status pairs derived from semantic tones */
+  --status-applied-bg:   oklch(var(--info) / 0.12);   --status-applied-fg:   oklch(var(--info));
+  --status-screening-bg: oklch(var(--warning) / 0.18); --status-screening-fg: oklch(var(--warning));
+  --status-interview-bg: oklch(var(--brand) / 0.15);   --status-interview-fg: oklch(var(--brand));
+  --status-offer-bg:     oklch(var(--success) / 0.15); --status-offer-fg:     oklch(var(--success));
+  --status-rejected-bg:  oklch(var(--destructive) / 0.15); --status-rejected-fg: oklch(var(--destructive));
+  --status-withdrawn-bg: oklch(var(--muted));          --status-withdrawn-fg: oklch(var(--muted-foreground));
+
+  --chart-sky:    oklch(var(--info));
+  --chart-amber:  oklch(var(--warning));
+  --chart-violet: oklch(var(--brand));
+  --chart-green:  oklch(var(--success));
+  --chart-red:    oklch(var(--destructive));
+
+  --shadow-cta: 0 10px 24px -8px oklch(var(--brand) / 0.4);
+  --brand-gradient: linear-gradient(135deg, oklch(var(--brand-from)) 0%, oklch(var(--brand-to)) 100%);
+}
+
+.brand-gradient-text {
+  background: linear-gradient(
+    90deg,
+    oklch(var(--brand-from)) 0%,
+    oklch(var(--brand-to)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale));
+}

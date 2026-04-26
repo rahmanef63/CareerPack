@@ -1,0 +1,9 @@
+# Marker file signaling deploy tooling to provision a Convex self-hosted
+# backend as a separate compose service. The Next.js frontend is built and
+# deployed from the root Dockerfile.
+#
+# For local development of the self-hosted backend, see backend/convex-self-hosted/.
+services:
+  marker:
+    image: tianon/true
+    restart: "no"

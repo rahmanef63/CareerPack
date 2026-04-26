@@ -1,0 +1,66 @@
+# Dependencies
+node_modules
+frontend/node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+dist-ssr
+frontend/.next
+frontend/out
+*.local
+
+# Environment files
+.env
+.env.local
+.env.*.local
+# Convex self-hosted CLI targets — berisi CONVEX_SELF_HOSTED_ADMIN_KEY
+backend/convex-self-hosted/convex.env
+backend/convex-self-hosted/convex.prod.env
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+*.lcov
+
+# Cache
+.cache
+.temp
+.tmp
+*.tsbuildinfo
+
+# Misc
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?)
+
+# Claude Code: track shared config (hooks, skills, repo settings)
+# but ignore personal/runtime state.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+!.claude/skills/
+.claude/settings.local.json
+# si-coder is personal Dokploy deployment automation — not project code,
+# not relevant to public contributors.
+.claude/skills/si-coder/

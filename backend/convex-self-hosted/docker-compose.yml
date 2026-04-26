@@ -1,0 +1,24 @@
+services:
+  backend:
+    image: ${CONVEX_SELF_HOSTED_IMAGE:-ghcr.io/get-convex/convex-backend:latest}
+    container_name: careerpack-convex-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3210:3210"
+    volumes:
+      - convex_data:/convex/data
+    # Convex exposes /version as a lightweight readiness probe. If the
+    # backend is wedged (DB connection lost, panic recovering), the
+    # container becomes unhealthy and Dokploy restarts it instead of
+    # silently serving 5xx for hours.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3210/version || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  convex_data:
