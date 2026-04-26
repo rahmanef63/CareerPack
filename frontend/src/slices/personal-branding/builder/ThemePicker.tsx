@@ -16,18 +16,6 @@ const THEMES: ReadonlyArray<{
   premium?: boolean;
 }> = [
   {
-    id: "linktree",
-    preview: <LinktreeMini />,
-  },
-  {
-    id: "bento",
-    preview: <BentoMini />,
-  },
-  {
-    id: "magazine",
-    preview: <MagazineMini />,
-  },
-  {
     id: "template-v1",
     preview: <PurpleGlassMini />,
     premium: true,
@@ -90,63 +78,7 @@ export function ThemePicker({ value, onChange }: Props) {
   );
 }
 
-function LinktreeMini() {
-  return (
-    <div className="flex h-full w-full flex-col items-center gap-1.5 px-3 pt-4">
-      <span className="h-7 w-7 rounded-full bg-gradient-to-br from-brand-from to-brand-to" />
-      <span className="h-1.5 w-12 rounded-full bg-foreground/40" />
-      <span className="h-1 w-10 rounded-full bg-foreground/20" />
-      <div className="mt-2 w-full space-y-1.5">
-        {[0, 1, 2, 3].map((i) => (
-          <span
-            key={i}
-            className={cn(
-              "block h-3 w-full rounded-md",
-              i === 0
-                ? "bg-gradient-to-r from-brand-from to-brand-to opacity-90"
-                : "bg-foreground/15",
-            )}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function BentoMini() {
-  return (
-    <div className="grid h-full w-full grid-cols-2 gap-1 p-2">
-      <div className="col-span-2 h-6 rounded bg-foreground/40" />
-      <div className="h-10 rounded bg-foreground/15" />
-      <div className="row-span-2 rounded bg-gradient-to-br from-brand-from to-brand-to opacity-80" />
-      <div className="h-10 rounded bg-foreground/15" />
-      <div className="h-6 rounded bg-foreground/15" />
-      <div className="h-6 rounded bg-foreground/25" />
-    </div>
-  );
-}
-
-function MagazineMini() {
-  return (
-    <div className="flex h-full w-full flex-col px-3 pt-3">
-      <span className="font-display text-[11px] font-bold leading-tight">
-        Nama
-      </span>
-      <span className="mb-1.5 h-1 w-10 rounded-full bg-foreground/40" />
-      <span className="h-3 w-3/4 rounded bg-foreground/30" />
-      <div className="mt-2 space-y-0.5">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <span
-            key={i}
-            className="block h-1 w-full rounded-full bg-foreground/15"
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* Premium HTML template mini-previews — match each template's aesthetic */
+/* HTML template mini-previews — match each template's aesthetic */
 
 function PurpleGlassMini() {
   return (

@@ -55,6 +55,40 @@ const SECURITY_HEADERS = [
   },
 ]
 
+/**
+ * Personal-branding HTML templates live in /public/personal-branding/templates/
+ * and are framed inside the app's theme renderer. The default
+ * `frame-ancestors 'none'` + `X-Frame-Options: DENY` would block that even
+ * when same-origin. We relax to `'self'` only for this static path.
+ *
+ * Loaded fonts (Google Fonts), images (unsplash), and inline styles in those
+ * templates also need their own CSP — so we widen `style-src`, `font-src`,
+ * `img-src` for this path while keeping app-wide rules tight.
+ */
+const TEMPLATE_HEADERS = [
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https:",
+      "frame-ancestors 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join("; "),
+  },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+]
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
@@ -62,7 +96,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        source: "/personal-branding/templates/:path*",
+        headers: TEMPLATE_HEADERS,
+      },
+      {
+        // Negative-lookahead excludes the templates path so the browser
+        // doesn't receive two CSP headers (intersection = most restrictive,
+        // which would re-add `frame-ancestors 'none'`).
+        source: "/((?!personal-branding/templates/).*)",
         headers: SECURITY_HEADERS,
       },
     ]

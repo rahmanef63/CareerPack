@@ -9,11 +9,16 @@ import { useDemoPBOverlay } from "@/shared/hooks/useDemoOverlay";
 import {
   DEFAULT_AUTO_TOGGLES,
 } from "../../../../../convex/profile/autoBlocks";
-import type {
-  Block,
-  HeaderBg,
-  PersonalBrandingTheme,
+import {
+  TEMPLATE_THEMES,
+  type Block,
+  type HeaderBg,
+  type PersonalBrandingTheme,
 } from "../blocks/types";
+
+function isKnownTheme(t: unknown): t is PersonalBrandingTheme {
+  return typeof t === "string" && (TEMPLATE_THEMES as readonly string[]).includes(t);
+}
 import type { AutoToggles } from "../../../../../convex/profile/autoBlocks";
 import { DEFAULT_FORM_STATE } from "./defaults";
 import { validateSlug } from "./slugValidation";
@@ -75,7 +80,7 @@ function seedFromServer(data: ServerData): FormState {
     allowIndex: Boolean(data.allowIndex),
 
     mode: ((data.mode as Mode) ?? "auto") as Mode,
-    theme: ((data.theme as PersonalBrandingTheme) ?? "linktree"),
+    theme: (isKnownTheme(data.theme) ? (data.theme as PersonalBrandingTheme) : "template-v2"),
     headerBg: data.headerBg ?? null,
     autoToggles: {
       showExperience:
@@ -211,11 +216,7 @@ export function usePBForm(): PBForm {
             portfolioShow: state.portfolioShow,
             mode: state.mode,
             autoToggles: state.autoToggles,
-            // Convex-generated types lag behind the validator until the
-            // dev backend runs `pnpm backend:dev` again. Server validator
-            // accepts the wider union (template-v1..v3) — see
-            // convex/profile/{schema,mutations}.ts.
-            theme: state.theme as "linktree" | "bento" | "magazine",
+            theme: state.theme,
             headerBg: state.headerBg ?? null,
             htmlExport: state.htmlExport,
             embedExport: state.embedExport,
@@ -237,11 +238,7 @@ export function usePBForm(): PBForm {
             portfolioShow: state.portfolioShow,
             mode: state.mode,
             autoToggles: state.autoToggles,
-            // Convex-generated types lag behind the validator until the
-            // dev backend runs `pnpm backend:dev` again. Server validator
-            // accepts the wider union (template-v1..v3) — see
-            // convex/profile/{schema,mutations}.ts.
-            theme: state.theme as "linktree" | "bento" | "magazine",
+            theme: state.theme,
             headerBg: state.headerBg ?? undefined,
             blocks: state.blocks,
             htmlExport: state.htmlExport,

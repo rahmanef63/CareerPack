@@ -127,7 +127,26 @@ export function QuickFillDialog({
         res.goals.added +
         res.applications.added +
         res.contacts.added;
-      notify.success(`Berhasil mengimpor ${totalAdded} item`);
+      const totalSkipped =
+        res.portfolio.skipped +
+        res.goals.skipped +
+        res.applications.skipped +
+        res.contacts.skipped;
+      if (totalAdded === 0) {
+        // Server accepted the call but every section was rejected —
+        // tell the user so they don't think it succeeded silently.
+        notify.warning(
+          totalSkipped > 0
+            ? `Tidak ada item yang masuk — ${totalSkipped} dilewati. Cek pratinjau di hasil import.`
+            : "Tidak ada item yang masuk. Pastikan JSON punya section yang dikenal (profile / cv / portfolio / goals / applications / contacts) dengan field minimum.",
+        );
+      } else if (totalSkipped > 0) {
+        notify.success(
+          `Berhasil mengimpor ${totalAdded} item (${totalSkipped} dilewati)`,
+        );
+      } else {
+        notify.success(`Berhasil mengimpor ${totalAdded} item`);
+      }
     } catch (err) {
       notify.fromError(err, "Gagal mengimpor");
     } finally {

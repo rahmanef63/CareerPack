@@ -545,7 +545,7 @@ export interface DemoPBSeed {
   avatarShow: boolean;
   portfolioShow: boolean;
   mode: "auto" | "custom";
-  theme: "linktree" | "bento" | "magazine";
+  theme: "template-v1" | "template-v2" | "template-v3";
   headerBg: { kind: "gradient" | "solid" | "image" | "none"; value: string } | null;
   autoToggles: {
     showExperience: boolean;
@@ -573,7 +573,7 @@ export const DEMO_PB: DemoPBSeed = {
   avatarShow: true,
   portfolioShow: true,
   mode: "auto",
-  theme: "linktree",
+  theme: "template-v2",
   headerBg: { kind: "gradient", value: "from-cyan-400 to-violet-600" },
   autoToggles: {
     showExperience: true,

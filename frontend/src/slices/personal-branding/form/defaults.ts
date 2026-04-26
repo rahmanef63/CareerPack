@@ -26,7 +26,7 @@ export const DEFAULT_FORM_STATE: FormState = {
   allowIndex: false,
 
   mode: "auto",
-  theme: "linktree",
+  theme: "template-v2",
   headerBg: null,
   autoToggles: DEFAULT_AUTO_TOGGLES,
   blocks: [],

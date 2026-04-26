@@ -1,16 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-import { cn } from "@/shared/lib/utils";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { BrandMark } from "@/shared/components/brand/Logo";
-import { ParangPattern } from "@/shared/components/decor/ParangPattern";
-import { BlockRenderer } from "./BlockRenderer";
 import {
   TEMPLATE_URLS,
-  isTemplateTheme,
+  TEMPLATE_THEMES,
   type Block,
   type HeaderBg,
   type PersonalBrandingTheme,
@@ -30,8 +26,10 @@ interface ProfileShape {
 }
 
 /**
- * Public-page renderer dispatcher. Each theme picks a different layout
- * for the hero + how it tiles the block list.
+ * Public-page renderer dispatcher. Only template-v1/v2/v3 are
+ * supported. Legacy themes (linktree/bento/magazine) from existing
+ * profiles fall back to template-v2 at render time — schema validator
+ * still accepts them for backward read-compatibility.
  */
 export function PersonalBrandingPage({
   profile,
@@ -43,35 +41,28 @@ export function PersonalBrandingPage({
   const accentVar = profile.accent
     ? ({ "--branding-accent": profile.accent } as React.CSSProperties)
     : undefined;
-  if (isTemplateTheme(profile.theme)) {
-    return (
-      <div className="min-h-screen bg-background text-foreground" style={accentVar}>
-        <TemplateLayout theme={profile.theme} displayName={profile.displayName} />
-        {brand && <BrandFooter slug={profile.slug} displayName={profile.displayName} />}
-      </div>
-    );
-  }
-
+  const theme = normalizeTheme(profile.theme);
   return (
-    <div
-      className="min-h-screen bg-background text-foreground"
-      style={accentVar}
-    >
-      {profile.theme === "magazine" ? (
-        <MagazineLayout profile={profile} />
-      ) : profile.theme === "bento" ? (
-        <BentoLayout profile={profile} />
-      ) : (
-        <LinktreeLayout profile={profile} />
-      )}
+    <div className="min-h-screen bg-background text-foreground" style={accentVar}>
+      <TemplateLayout theme={theme} displayName={profile.displayName} />
       {brand && <BrandFooter slug={profile.slug} displayName={profile.displayName} />}
     </div>
   );
 }
 
+function normalizeTheme(t: PersonalBrandingTheme): TemplateTheme {
+  return (TEMPLATE_THEMES as readonly string[]).includes(t)
+    ? (t as TemplateTheme)
+    : "template-v2";
+}
+
 // ---------------------------------------------------------------------
 // Static HTML Template — iframe + skeleton fallback
 // ---------------------------------------------------------------------
+
+/** In-memory cache shared across re-mounts so switching themes doesn't
+ *  re-fetch templates already seen this session. */
+const TEMPLATE_HTML_CACHE = new Map<TemplateTheme, string>();
 
 function TemplateLayout({
   theme,
@@ -80,24 +71,66 @@ function TemplateLayout({
   theme: TemplateTheme;
   displayName: string;
 }) {
-  const [loaded, setLoaded] = useState(false);
   const url = TEMPLATE_URLS[theme];
+  const [html, setHtml] = useState<string | null>(
+    () => TEMPLATE_HTML_CACHE.get(theme) ?? null,
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const cached = TEMPLATE_HTML_CACHE.get(theme);
+    if (cached) {
+      setHtml(cached);
+      setError(null);
+      return;
+    }
+    setHtml(null);
+    setError(null);
+    fetch(url, { cache: "force-cache" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.text();
+      })
+      .then((text) => {
+        if (cancelled) return;
+        TEMPLATE_HTML_CACHE.set(theme, text);
+        setHtml(text);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : "Gagal memuat template");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [theme, url]);
 
   return (
     <div className="relative w-full" style={{ minHeight: "calc(100vh - 64px)" }}>
-      {!loaded && <TemplateSkeleton />}
-      <iframe
-        key={theme}
-        src={url}
-        title={`Template ${theme} untuk ${displayName}`}
-        loading="eager"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-        onLoad={() => setLoaded(true)}
-        className={cn(
-          "h-[calc(100vh-64px)] w-full border-0 bg-background transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0",
-        )}
-      />
+      {!html && !error && <TemplateSkeleton />}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+          <div className="max-w-md space-y-2 rounded-xl border border-destructive/40 bg-destructive/5 p-6 text-sm">
+            <p className="font-semibold text-destructive">Template gagal dimuat</p>
+            <p className="text-muted-foreground">{error}</p>
+            <p className="text-xs text-muted-foreground">URL: {url}</p>
+          </div>
+        </div>
+      )}
+      {html && (
+        // srcDoc renders the HTML inline as `about:srcdoc` — no separate
+        // network request to the template URL, so reverse-proxy CSP
+        // headers (frame-ancestors) on that URL don't apply.
+        <iframe
+          key={theme}
+          srcDoc={html}
+          title={`Template ${theme} untuk ${displayName}`}
+          loading="eager"
+          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
+          className="h-[calc(100vh-64px)] w-full border-0 bg-background"
+        />
+      )}
     </div>
   );
 }
@@ -169,245 +202,6 @@ function TemplateSkeleton() {
       </p>
     </div>
   );
-}
-
-// ---------------------------------------------------------------------
-// Linktree — vertical centered stack
-// ---------------------------------------------------------------------
-
-function LinktreeLayout({ profile }: { profile: ProfileShape }) {
-  return (
-    <main className="mx-auto flex max-w-xl flex-col items-center px-4 pb-16 sm:px-6">
-      <Hero
-        profile={profile}
-        align="center"
-        className="pt-14 pb-8"
-      />
-      <div className="w-full space-y-3">
-        {profile.blocks.map((b) => (
-          <BlockRenderer key={b.id} block={b} />
-        ))}
-      </div>
-    </main>
-  );
-}
-
-// ---------------------------------------------------------------------
-// Bento — asymmetric grid
-// ---------------------------------------------------------------------
-
-function BentoLayout({ profile }: { profile: ProfileShape }) {
-  return (
-    <main className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
-      <Hero profile={profile} align="left" className="pt-14 pb-10" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {profile.blocks.map((b) => (
-          <BentoCell key={b.id} block={b} />
-        ))}
-      </div>
-    </main>
-  );
-}
-
-function BentoCell({ block }: { block: Block }) {
-  // Heading + image + embed take a wider span — visual rhythm.
-  const span =
-    block.type === "heading" || block.type === "embed"
-      ? "sm:col-span-2"
-      : block.type === "image"
-        ? "sm:col-span-2 lg:col-span-2"
-        : "";
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
-        span,
-      )}
-    >
-      <BlockRenderer block={block} />
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------
-// Magazine — editorial reading column
-// ---------------------------------------------------------------------
-
-function MagazineLayout({ profile }: { profile: ProfileShape }) {
-  return (
-    <main>
-      <Hero profile={profile} align="left" className="border-b border-border/60 py-16 sm:py-20" wide />
-      <article className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6 sm:py-16">
-        {profile.blocks.map((b) => (
-          <BlockRenderer key={b.id} block={b} />
-        ))}
-      </article>
-    </main>
-  );
-}
-
-// ---------------------------------------------------------------------
-// Hero
-// ---------------------------------------------------------------------
-
-function Hero({
-  profile,
-  align,
-  className,
-  wide,
-}: {
-  profile: ProfileShape;
-  align: "center" | "left";
-  className?: string;
-  wide?: boolean;
-}) {
-  const bg = profile.headerBg;
-  const isCentered = align === "center";
-  const inner = (
-    <div
-      className={cn(
-        "relative mx-auto",
-        wide ? "max-w-5xl" : "max-w-3xl",
-        "px-4 sm:px-6",
-      )}
-    >
-      <div
-        className={cn(
-          "flex flex-col gap-5",
-          isCentered ? "items-center text-center" : "items-start text-left",
-        )}
-      >
-        {profile.avatarUrl && (
-          <div className="relative">
-            <span
-              aria-hidden
-              className="absolute -inset-1 rounded-full bg-gradient-to-br from-brand-from to-brand-to opacity-70 blur-[2px]"
-            />
-            <Image
-              src={profile.avatarUrl}
-              alt={`Foto profil ${profile.displayName}`}
-              width={144}
-              height={144}
-              unoptimized
-              className="relative h-28 w-28 rounded-full object-cover ring-4 ring-background sm:h-32 sm:w-32"
-            />
-          </div>
-        )}
-        <div className={cn("space-y-2 max-w-2xl", isCentered ? "" : "")}>
-          <h1
-            className={cn(
-              "font-display text-4xl font-semibold tracking-tight",
-              wide && "sm:text-5xl lg:text-6xl",
-            )}
-            style={
-              bg && (bg.kind === "gradient" || bg.kind === "image" || bg.kind === "solid")
-                ? { color: pickHeroTextColor(bg) }
-                : undefined
-            }
-          >
-            {profile.displayName}
-          </h1>
-          {profile.targetRole && (
-            <p
-              className="text-base font-medium opacity-90 sm:text-lg"
-              style={
-                bg && bg.kind !== "none"
-                  ? { color: pickHeroTextColor(bg) }
-                  : undefined
-              }
-            >
-              {profile.targetRole}
-            </p>
-          )}
-          {profile.headline && (
-            <p
-              className="text-sm leading-relaxed opacity-85 sm:text-base"
-              style={
-                bg && bg.kind !== "none"
-                  ? { color: pickHeroTextColor(bg) }
-                  : undefined
-              }
-            >
-              {profile.headline}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  if (!bg || bg.kind === "none") {
-    return (
-      <section
-        className={cn(
-          "relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-brand-muted/40 via-background to-background",
-          className,
-        )}
-      >
-        <ParangPattern className="text-brand/20" />
-        <div className="relative">{inner}</div>
-      </section>
-    );
-  }
-
-  if (bg.kind === "gradient") {
-    return (
-      <section
-        className={cn(
-          "relative overflow-hidden bg-gradient-to-br",
-          bg.value,
-          className,
-        )}
-      >
-        <ParangPattern className="text-white/20" />
-        <div className="relative">{inner}</div>
-      </section>
-    );
-  }
-
-  if (bg.kind === "solid") {
-    return (
-      <section
-        className={cn("relative overflow-hidden", className)}
-        style={{ background: bg.value }}
-      >
-        <div className="relative">{inner}</div>
-      </section>
-    );
-  }
-
-  // image
-  return (
-    <section
-      className={cn("relative overflow-hidden", className)}
-      style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.55)), url("${bg.value}")`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="relative">{inner}</div>
-    </section>
-  );
-}
-
-function pickHeroTextColor(bg: HeaderBg): string {
-  if (bg.kind === "image" || bg.kind === "gradient") return "#ffffff";
-  if (bg.kind === "solid") return getReadableTextColor(bg.value);
-  return "inherit";
-}
-
-function getReadableTextColor(hex: string): string {
-  const m = /^#?([0-9a-f]{6}|[0-9a-f]{3})$/i.exec(hex);
-  if (!m) return "#ffffff";
-  let h = m[1];
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  // YIQ luminance heuristic.
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-  return yiq >= 128 ? "#0f172a" : "#ffffff";
 }
 
 function BrandFooter({ slug, displayName }: { slug: string; displayName: string }) {

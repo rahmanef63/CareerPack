@@ -26,32 +26,24 @@ export {
   parseEmbedUrl,
 } from "../../../../../convex/profile/blocks";
 
-export type PersonalBrandingTheme =
-  | "linktree"
-  | "bento"
-  | "magazine"
-  | "template-v1"
-  | "template-v2"
-  | "template-v3";
+/**
+ * Three full-page HTML templates served from
+ * `/public/personal-branding/templates/`. Only these three are
+ * supported as theme options — legacy block-driven themes
+ * (linktree/bento/magazine) are deprecated. Schema validators still
+ * accept the old strings for backward read-compat; the renderer maps
+ * them to template-v2 at display time.
+ */
+export const TEMPLATE_THEMES = ["template-v1", "template-v2", "template-v3"] as const;
+export type TemplateTheme = (typeof TEMPLATE_THEMES)[number];
+export type PersonalBrandingTheme = TemplateTheme;
 
 export interface HeaderBg {
   kind: "gradient" | "solid" | "image" | "none";
   value: string;
 }
 
-/**
- * Themes split into two families:
- * 1. Block-driven layouts (linktree/bento/magazine) — render via React with
- *    user's blocks, accent, and headerBg.
- * 2. Static HTML templates (template-v*) — full-page premium templates
- *    served from /public/personal-branding/templates/. Editable blocks are
- *    not used; user picks one and replaces placeholder content via the
- *    template-edit flow.
- */
-export const TEMPLATE_THEMES = ["template-v1", "template-v2", "template-v3"] as const;
-export type TemplateTheme = (typeof TEMPLATE_THEMES)[number];
-
-export function isTemplateTheme(theme: PersonalBrandingTheme): theme is TemplateTheme {
+export function isTemplateTheme(theme: string): theme is TemplateTheme {
   return (TEMPLATE_THEMES as readonly string[]).includes(theme);
 }
 
@@ -62,18 +54,6 @@ export const TEMPLATE_URLS: Record<TemplateTheme, string> = {
 };
 
 export const THEME_LABELS: Record<PersonalBrandingTheme, { label: string; tagline: string }> = {
-  linktree: {
-    label: "Stack Klasik",
-    tagline: "Tumpukan vertikal — paling ramah scrolling, mirip Linktree.",
-  },
-  bento: {
-    label: "Bento Grid",
-    tagline: "Grid asimetris — tile besar/kecil, gaya Apple landing.",
-  },
-  magazine: {
-    label: "Editorial",
-    tagline: "Hero serif + bagian baca panjang. Cocok untuk blog/portfolio.",
-  },
   "template-v1": {
     label: "Purple Glass",
     tagline: "Template gelap glassmorphism — animasi penuh, magnetic buttons.",

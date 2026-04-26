@@ -343,10 +343,10 @@ export const getBySlug = query({
       allowIndex: Boolean(profile.publicAllowIndex),
       avatarUrl,
       portfolio,
-      // Personal Branding builder additions — default theme=linktree
-      // when unset so existing pages keep working.
+      // Personal Branding builder additions — default theme=template-v2
+      // (Editorial Cream) when unset so new and legacy profiles render.
       mode,
-      theme: profile.publicTheme ?? "linktree",
+      theme: profile.publicTheme ?? "template-v2",
       headerBg: profile.publicHeaderBg ?? null,
       accent: profile.publicAccent ?? null,
       blocks,
@@ -379,7 +379,7 @@ export const getMyPublicProfile = query({
       portfolioShow: Boolean(profile.publicPortfolioShow),
       mode: profile.publicMode ?? "auto",
       autoToggles: profile.publicAutoToggles ?? null,
-      theme: profile.publicTheme ?? "linktree",
+      theme: profile.publicTheme ?? "template-v2",
       headerBg: profile.publicHeaderBg ?? null,
       accent: profile.publicAccent ?? null,
       htmlExport: Boolean(profile.publicHtmlExport),

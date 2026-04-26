@@ -61,21 +61,33 @@ export const quickFill = mutation({
           .query("userProfiles")
           .withIndex("by_user", (q) => q.eq("userId", userId))
           .first();
-        const data = {
-          userId,
-          fullName: cleaned.fullName,
-          phone: cleaned.phone,
-          location: cleaned.location,
-          targetRole: cleaned.targetRole,
-          experienceLevel: cleaned.experienceLevel,
-          bio: cleaned.bio,
-          skills: cleaned.skills,
-          interests: cleaned.interests,
-        };
         if (existing) {
-          await ctx.db.patch(existing._id, data);
+          // Patch: only the fields AI actually provided. Convex strips
+          // undefined keys, but empty arrays would still wipe existing
+          // skills/interests — sanitizer already drops those.
+          await ctx.db.patch(existing._id, {
+            fullName: cleaned.fullName,
+            location: cleaned.location,
+            targetRole: cleaned.targetRole,
+            phone: cleaned.phone,
+            bio: cleaned.bio,
+            experienceLevel: cleaned.experienceLevel,
+            skills: cleaned.skills,
+            interests: cleaned.interests,
+          });
         } else {
-          await ctx.db.insert("userProfiles", data);
+          // New row: required schema fields need defaults if AI was sparse.
+          await ctx.db.insert("userProfiles", {
+            userId,
+            fullName: cleaned.fullName,
+            location: cleaned.location,
+            targetRole: cleaned.targetRole,
+            experienceLevel: cleaned.experienceLevel ?? "junior",
+            phone: cleaned.phone,
+            bio: cleaned.bio,
+            skills: cleaned.skills,
+            interests: cleaned.interests,
+          });
         }
         result.profile = true;
       }
