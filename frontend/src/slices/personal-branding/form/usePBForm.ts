@@ -211,7 +211,11 @@ export function usePBForm(): PBForm {
             portfolioShow: state.portfolioShow,
             mode: state.mode,
             autoToggles: state.autoToggles,
-            theme: state.theme,
+            // Convex-generated types lag behind the validator until the
+            // dev backend runs `pnpm backend:dev` again. Server validator
+            // accepts the wider union (template-v1..v3) — see
+            // convex/profile/{schema,mutations}.ts.
+            theme: state.theme as "linktree" | "bento" | "magazine",
             headerBg: state.headerBg ?? null,
             htmlExport: state.htmlExport,
             embedExport: state.embedExport,
@@ -233,7 +237,11 @@ export function usePBForm(): PBForm {
             portfolioShow: state.portfolioShow,
             mode: state.mode,
             autoToggles: state.autoToggles,
-            theme: state.theme,
+            // Convex-generated types lag behind the validator until the
+            // dev backend runs `pnpm backend:dev` again. Server validator
+            // accepts the wider union (template-v1..v3) — see
+            // convex/profile/{schema,mutations}.ts.
+            theme: state.theme as "linktree" | "bento" | "magazine",
             headerBg: state.headerBg ?? undefined,
             blocks: state.blocks,
             htmlExport: state.htmlExport,

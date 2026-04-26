@@ -185,6 +185,9 @@ export const updateMyPublicProfile = mutation({
         v.literal("linktree"),
         v.literal("bento"),
         v.literal("magazine"),
+        v.literal("template-v1"),
+        v.literal("template-v2"),
+        v.literal("template-v3"),
       ),
     ),
     headerBg: v.optional(
