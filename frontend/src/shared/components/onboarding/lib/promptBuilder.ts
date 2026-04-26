@@ -172,11 +172,23 @@ ${spec.intro}
 
 ATURAN OUTPUT — patuhi keras:
 1. Output HANYA JSON valid. Jangan ada markdown code-fence, jangan ada teks penjelasan.
-2. Format tanggal: YYYY-MM-DD (atau YYYY-MM untuk pengalaman / pendidikan startDate / endDate).
-3. Bahasa Indonesia untuk konten user-facing (summary, description, bio, achievements).
-4. Skip section yang user tidak sebut — jangan bikin objek kosong, jangan placeholder palsu.
-5. Untuk array yang dimasukkan: minimum 1 item dengan data nyata, JANGAN copy-paste contoh ini.
-6. Kunci JSON harus persis sama dengan schema di bawah.
+2. Root JSON harus langsung berisi key section ('profile'/'cv'/dst) — JANGAN bungkus dalam 'data' / 'response' / 'result'.
+3. Untuk CV: 'fullName' + 'email' WAJIB di dalam 'personalInfo' (nested object), bukan di root cv.
+4. Field wajib per section (kalau salah, section dilewati):
+   - profile: fullName + location + targetRole (string non-kosong)
+   - cv: personalInfo.fullName + personalInfo.email
+   - cv.experience[*]: company + position + startDate (YYYY-MM)
+   - cv.education[*]: institution
+   - cv.skills[*]: name
+   - portfolio[*]: title + description + date (YYYY-MM-DD)
+   - goals[*]: title + description
+   - applications[*]: company + position
+   - contacts[*]: name
+5. Format tanggal: YYYY-MM-DD (atau YYYY-MM untuk experience.startDate/endDate, education.startDate/endDate).
+6. Bahasa Indonesia untuk konten user-facing (summary, description, bio, achievements).
+7. Skip section yang user tidak sebut — jangan bikin objek kosong, jangan placeholder palsu.
+8. Untuk array yang dimasukkan: minimum 1 item dengan data nyata, JANGAN copy-paste contoh ini.
+9. Kunci JSON harus persis sama dengan schema di bawah.
 
 SCHEMA (JSON tanpa contoh):
 ${schema}

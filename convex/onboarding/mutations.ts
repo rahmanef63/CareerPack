@@ -98,14 +98,27 @@ export const quickFill = mutation({
       const cleaned = sanitizeCV(payload.cv);
       if (!cleaned) {
         result.warnings.push(
-          "CV dilewati: butuh personalInfo.fullName + personalInfo.email.",
+          "CV dilewati: butuh personalInfo.fullName + personalInfo.email (atau alias di root: fullName/name + email).",
         );
       } else {
         await ctx.db.insert("cvs", {
           userId,
-          ...cleaned,
+          ...cleaned.cv,
         });
         result.cv = true;
+        // Surface per-array drops so the user can see "CV imported but
+        // 5 experience items were rejected".
+        const d = cleaned.dropped;
+        const dropDetails: string[] = [];
+        if (d.experience) dropDetails.push(`${d.experience} pengalaman (butuh company + position + startDate)`);
+        if (d.education) dropDetails.push(`${d.education} pendidikan (butuh institution)`);
+        if (d.skills) dropDetails.push(`${d.skills} skill (butuh name)`);
+        if (d.certifications) dropDetails.push(`${d.certifications} sertifikasi (butuh name)`);
+        if (d.languages) dropDetails.push(`${d.languages} bahasa (butuh language + proficiency)`);
+        if (d.projects) dropDetails.push(`${d.projects} proyek (butuh name)`);
+        if (dropDetails.length > 0) {
+          result.warnings.push(`CV: dilewati ${dropDetails.join("; ")}.`);
+        }
       }
     }
 
