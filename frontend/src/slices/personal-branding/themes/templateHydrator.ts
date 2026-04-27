@@ -43,7 +43,17 @@ const HYDRATOR_SOURCE = String.raw`
     try { return JSON.parse(el.textContent || 'null'); } catch (e) { return null; }
   }
   var d = read();
-  if (!d) return;
+  if (!d) {
+    try { console.warn('[CareerPack hydrator] no __cp_data, skipping'); } catch (e) {}
+    return;
+  }
+  try {
+    console.log('[CareerPack hydrator] running', {
+      name: (d.identity && d.identity.name) || '',
+      headline: (d.identity && d.identity.headline) || '',
+      has: d.has || {}
+    });
+  } catch (e) {}
 
   function setText(el, val) {
     if (val === undefined || val === null) val = '';

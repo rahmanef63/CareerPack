@@ -26,7 +26,9 @@ import { useDemoProfileOverlay } from "@/shared/hooks/useDemoOverlay";
 import { api } from "../../../../../convex/_generated/api";
 
 import { usePBForm } from "../form/usePBForm";
+import { usePreviewBranding } from "../form/usePreviewBranding";
 import type { Mode } from "../form/types";
+import { BrandingValidationCard } from "../sections/BrandingValidationCard";
 import { IdentityCard } from "../sections/IdentityCard";
 import { HeroTogglesCard } from "../sections/HeroTogglesCard";
 import { ContactCard } from "../sections/ContactCard";
@@ -63,6 +65,7 @@ import { PreviewDialog } from "./PreviewDialog";
 export function PersonalBrandingView() {
   const form = usePBForm();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const previewData = usePreviewBranding(form.state);
 
   // Profile snapshot — used by ExportCard to fill the AI-prompt body
   // with the user's actual data. Both branches always run (rules of
@@ -170,6 +173,7 @@ export function PersonalBrandingView() {
         {/* ===== Otomatis ===== */}
         <TabsContent value="auto" className="mt-4 space-y-4">
           <ThemeCard bind={form.bind} />
+          <BrandingValidationCard branding={previewData?.branding} />
           <HeaderBgCard bind={form.bind} />
           <AutoConfigCard bind={form.bind} />
           <IdentityCard
