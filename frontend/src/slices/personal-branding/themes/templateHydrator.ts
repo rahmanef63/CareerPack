@@ -312,5 +312,76 @@ const HYDRATOR_SOURCE = String.raw`
 })();
 `;
 
+/**
+ * Anchor + resize helper — runs in BOTH mock and hydrated iframes so
+ * the picker preview thumbnails behave correctly too. Intentionally
+ * separate from the data hydrator (which is gated on __cp_data).
+ *
+ * - Anchor nav (#about): in a sandboxed about:srcdoc without
+ *   `allow-same-origin`, navigating to a hash treats the URL as
+ *   cross-document and can fail with SecurityError ("sad face"
+ *   iframe). Intercept clicks and scrollIntoView the target by ID.
+ * - Auto-resize: postMessages the document height to the parent so
+ *   the parent can size the iframe to its content (avoids the
+ *   "viewport-clipped iframe, only hero visible" UX bug).
+ */
+const IFRAME_HELPERS_SOURCE = String.raw`
+(function() {
+  // ---- Anchor nav (D4) -----------------------------------------
+  document.addEventListener('click', function(e) {
+    var t = e.target;
+    while (t && t !== document.body && t.tagName !== 'A') t = t.parentNode;
+    if (!t || t.tagName !== 'A') return;
+    var href = t.getAttribute('href') || '';
+    if (href.charAt(0) !== '#' || href.length < 2) return;
+    var id = href.slice(1);
+    var target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    try {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      target.scrollIntoView();
+    }
+  }, true);
+
+  // ---- Auto-resize via postMessage (D1, D10) -------------------
+  function postSize() {
+    try {
+      var h = Math.max(
+        document.documentElement.scrollHeight,
+        document.body ? document.body.scrollHeight : 0
+      );
+      window.parent.postMessage({ type: 'cp-resize', h: h }, '*');
+    } catch (e) {}
+  }
+  if (document.readyState === 'complete') {
+    postSize();
+  } else {
+    window.addEventListener('load', postSize);
+  }
+  // Re-post on viewport changes so responsive layouts update.
+  window.addEventListener('resize', postSize);
+  if (typeof ResizeObserver !== 'undefined' && document.body) {
+    try {
+      var ro = new ResizeObserver(function() { postSize(); });
+      ro.observe(document.body);
+    } catch (e) {}
+  }
+  // Fallback periodic ping for first 5s in case observers miss something.
+  var pings = 0;
+  var iv = setInterval(function() {
+    postSize();
+    pings += 1;
+    if (pings > 10) clearInterval(iv);
+  }, 500);
+})();
+`;
+
 /** Stringified hydrator for inlining into the iframe srcDoc. */
 export const TEMPLATE_HYDRATOR_JS = HYDRATOR_SOURCE;
+
+/** Always-injected helpers (anchor nav + auto-resize). Independent of
+ *  whether the parent passed real branding data — needed even for
+ *  mock-content "see template" mode so the iframe still resizes. */
+export const TEMPLATE_IFRAME_HELPERS_JS = IFRAME_HELPERS_SOURCE;

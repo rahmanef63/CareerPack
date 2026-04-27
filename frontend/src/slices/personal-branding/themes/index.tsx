@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { BrandMark } from "@/shared/components/brand/Logo";
@@ -12,7 +13,10 @@ import {
   type PersonalBrandingTheme,
   type TemplateTheme,
 } from "../blocks/types";
-import { TEMPLATE_HYDRATOR_JS } from "./templateHydrator";
+import {
+  TEMPLATE_HYDRATOR_JS,
+  TEMPLATE_IFRAME_HELPERS_JS,
+} from "./templateHydrator";
 
 /** Branding payload mirrors `convex/profile/brandingPayload.ts`. The
  *  iframe templates read it from `window.__careerpack` and use
@@ -95,20 +99,25 @@ interface ProfileShape {
 export function PersonalBrandingPage({
   profile,
   brand = true,
+  showBranding = true,
 }: {
   profile: ProfileShape;
   brand?: boolean;
+  /** When false, render the template with its baked mock content +
+   *  fluff sections (no `__cp_data` injection). Used by Preview's
+   *  "Tampilkan Template" tab. */
+  showBranding?: boolean;
 }) {
   const accentVar = profile.accent
     ? ({ "--branding-accent": profile.accent } as React.CSSProperties)
     : undefined;
   const theme = normalizeTheme(profile.theme);
   return (
-    <div className="min-h-screen bg-background text-foreground" style={accentVar}>
+    <div className="bg-background text-foreground" style={accentVar}>
       <TemplateLayout
         theme={theme}
         displayName={profile.displayName}
-        branding={profile.branding}
+        branding={showBranding ? profile.branding : undefined}
       />
       {brand && <BrandFooter slug={profile.slug} displayName={profile.displayName} />}
     </div>
@@ -143,6 +152,11 @@ function TemplateLayout({
     () => TEMPLATE_HTML_CACHE.get(theme) ?? null,
   );
   const [error, setError] = useState<string | null>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
+  // Iframe content height reported by the inner postMessage. Falls
+  // back to a sensible viewport-clamp until the first message arrives,
+  // so the iframe never renders at 0px.
+  const [iframeHeight, setIframeHeight] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -173,6 +187,33 @@ function TemplateLayout({
     };
   }, [theme, url]);
 
+  // Listen for `cp-resize` from the iframe so we can size the wrapper
+  // to its content. Without this the iframe was clamped to viewport
+  // height and visitors only saw the hero — D1/D10 in QA.
+  useEffect(() => {
+    function onMessage(event: MessageEvent) {
+      const data = event.data as { type?: string; h?: number } | null;
+      if (!data || data.type !== "cp-resize" || typeof data.h !== "number") return;
+      // Only trust messages from our own iframe. With sandboxed
+      // about:srcdoc the source is window-equal but origin is null,
+      // so we compare windows directly.
+      if (iframeRef.current && event.source !== iframeRef.current.contentWindow) {
+        return;
+      }
+      // Clamp to a sane upper bound to avoid runaway documents.
+      const clamped = Math.max(400, Math.min(20000, Math.round(data.h)));
+      setIframeHeight((prev) => (prev === clamped ? prev : clamped));
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
+  // Reset height when theme/branding key changes — we'll get a fresh
+  // postMessage from the new iframe contents.
+  useEffect(() => {
+    setIframeHeight(null);
+  }, [theme, branding]);
+
   // Inject branding payload + hydrator so the iframe can replace mock
   // copy with the user's real data and hide empty sections. The
   // hydrator runs after DOMContentLoaded inside the iframe; the
@@ -202,12 +243,16 @@ function TemplateLayout({
         // `key` includes the branding identity name so a profile change
         // remounts the iframe (cheaper than postMessage for now).
         <iframe
+          ref={iframeRef}
           key={`${theme}:${branding?.identity.name ?? ""}`}
           srcDoc={hydratedHtml}
           title={`Template ${theme} untuk ${displayName}`}
           loading="eager"
           sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
-          className="h-[calc(100vh-64px)] w-full border-0 bg-background"
+          className="block w-full border-0 bg-background"
+          style={{
+            height: iframeHeight ? `${iframeHeight}px` : "calc(100vh - 64px)",
+          }}
         />
       )}
     </div>
@@ -320,7 +365,23 @@ export type { ProfileShape };
  * content (still useful for the picker preview thumbnails).
  */
 function injectBrandingIntoHtml(html: string, branding?: BrandingPayload): string {
-  if (!branding) return html;
+  let result = html;
+  // ---- Always-injected helpers (anchor nav + auto-resize) -------
+  // Run regardless of whether real branding is present so the
+  // mock-content "Tampilkan Template" tab also resizes correctly
+  // and has working in-iframe nav.
+  const helpersScript = `\n<script>${TEMPLATE_IFRAME_HELPERS_JS}</script>\n`;
+
+  if (!branding) {
+    if (result.includes("</body>")) {
+      result = result.replace("</body>", `${helpersScript}</body>`);
+    } else if (result.includes("</html>")) {
+      result = result.replace("</html>", `${helpersScript}</html>`);
+    } else {
+      result += helpersScript;
+    }
+    return result;
+  }
   // Stringify safely — avoid `</script>` collisions and HTML-escape
   // unicode line/paragraph separators that JSON.stringify outputs raw.
   const json = JSON.stringify(branding)
@@ -329,7 +390,6 @@ function injectBrandingIntoHtml(html: string, branding?: BrandingPayload): strin
     .replace(/\u2029/g, "\\u2029");
   const dataScript = `\n<script id="__cp_data" type="application/json">${json}</script>\n`;
   const hydratorScript = `\n<script>${TEMPLATE_HYDRATOR_JS}</script>\n`;
-  let result = html;
 
   // Data must come BEFORE the template's own inline scripts so per-
   // template mounts (e.g. v2's casesMount, skillsMount) can read it
@@ -340,14 +400,15 @@ function injectBrandingIntoHtml(html: string, branding?: BrandingPayload): strin
     result = `${dataScript}${result}`;
   }
 
-  // Hydrator runs last — fills simple slots (name/headline/avatar/
-  // contact/bio) and hides empty sections.
+  // Helpers + hydrator run last — fills slots, hides empty sections,
+  // wires anchor nav + iframe auto-resize.
+  const tail = `${helpersScript}${hydratorScript}`;
   if (result.includes("</body>")) {
-    result = result.replace("</body>", `${hydratorScript}</body>`);
+    result = result.replace("</body>", `${tail}</body>`);
   } else if (result.includes("</html>")) {
-    result = result.replace("</html>", `${hydratorScript}</html>`);
+    result = result.replace("</html>", `${tail}</html>`);
   } else {
-    result = result + hydratorScript;
+    result = result + tail;
   }
   return result;
 }

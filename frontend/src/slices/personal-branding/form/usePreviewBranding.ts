@@ -15,7 +15,7 @@ import type { FormState } from "./types";
  * consumers can branch on loading state.
  */
 export function usePreviewBranding(state: FormState):
-  | { branding: BrandingPayload; cv: BrandingCv | null }
+  | { branding: BrandingPayload }
   | undefined {
   const me = useQuery(api.profile.queries.getCurrentUser);
   const cvs = useQuery(api.cv.queries.getUserCVs);
@@ -136,21 +136,6 @@ export function usePreviewBranding(state: FormState):
         contact: Boolean(contactEmail || linkedin || portfolioUrl),
       },
     };
-    const cvShape: BrandingCv | null = defaultCv
-      ? {
-          experience: defaultCv.experience,
-          education: defaultCv.education,
-          certifications: defaultCv.certifications,
-          projects: defaultCv.projects,
-        }
-      : null;
-    return { branding, cv: cvShape };
+    return { branding };
   }, [state, me, defaultCv, portfolio]);
-}
-
-export interface BrandingCv {
-  experience: ReadonlyArray<unknown>;
-  education: ReadonlyArray<unknown>;
-  certifications: ReadonlyArray<unknown>;
-  projects: ReadonlyArray<unknown>;
 }

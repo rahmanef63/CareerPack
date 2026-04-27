@@ -29,11 +29,18 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = "CardHeader"
 
+/**
+ * Renders an `<h3>` by default so screen-reader users can navigate the
+ * page by heading. Override via `as` for nested cards (e.g. `as="h4"`)
+ * or non-heading contexts where the visual still wants the title look.
+ */
 const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement> & {
+    as?: "h2" | "h3" | "h4" | "h5" | "h6" | "div";
+  }
+>(({ className, as: Tag = "h3", ...props }, ref) => (
+  <Tag
     ref={ref}
     className={cn("font-semibold leading-none tracking-tight", className)}
     {...props}

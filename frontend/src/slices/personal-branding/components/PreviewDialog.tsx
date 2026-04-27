@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "convex/react";
+import { Eye, FileImage } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import {
   ResponsiveDialog,
@@ -9,7 +10,12 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/shared/components/ui/responsive-dialog";
-import { PersonalBrandingPage, type BrandingPayload } from "../themes";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { PersonalBrandingPage } from "../themes";
 import {
   buildAutoBlocks,
   type AutoCVInput,
@@ -17,6 +23,7 @@ import {
 } from "../../../../../convex/profile/autoBlocks";
 import type { Block } from "../blocks/types";
 import type { FormState } from "../form/types";
+import { usePreviewBranding } from "../form/usePreviewBranding";
 
 export interface PreviewDialogProps {
   open: boolean;
@@ -25,11 +32,19 @@ export interface PreviewDialogProps {
   slugTrimmed: string;
 }
 
+type PreviewMode = "mine" | "template";
+
 /**
- * Live preview wrapper. Renders the public page through the same theme
- * dispatcher visitors see. Auto mode regenerates blocks client-side
- * via buildAutoBlocks() so the editor preview stays in lock-step with
- * the server's auto rebuild — they share `convex/profile/autoBlocks.ts`.
+ * Live preview — two tabs:
+ *   - **Data Saya** (default): hydrate template with real CV + Profile
+ *     + Portfolio data. WYSIWYG of what visitors will see.
+ *   - **Template**: render the template's baked editorial mock
+ *     (testimonials, fake metrics, lorem ipsum) so the user can
+ *     evaluate the design itself before committing data.
+ *
+ * Branding payload is built via the shared `usePreviewBranding` hook
+ * so it stays in lock-step with the validation card on the parent
+ * page (single source of truth for what the iframe sees).
  */
 export function PreviewDialog({
   open,
@@ -40,9 +55,9 @@ export function PreviewDialog({
   const me = useQuery(api.profile.queries.getCurrentUser);
   const cvs = useQuery(api.cv.queries.getUserCVs);
   const portfolio = useQuery(api.portfolio.queries.listPortfolio);
-  // Pick the richest CV — prefer the one with the most experience entries
-  // so an empty `isDefault: true` demo CV doesn't shadow a freshly
-  // imported real CV. Tie-break by most recent _creationTime.
+  const previewData = usePreviewBranding(state);
+  const [mode, setMode] = useState<PreviewMode>("mine");
+
   const defaultCv = useMemo(() => {
     if (!cvs || cvs.length === 0) return null;
     const ranked = [...cvs].sort((a, b) => {
@@ -53,6 +68,19 @@ export function PreviewDialog({
     });
     return ranked[0];
   }, [cvs]);
+
+  // Defensive cleanup: vaul's drawer occasionally leaves
+  // `pointer-events: none` on body when toggled rapidly. Force-clear
+  // on close so the dashboard stays scrollable. (D11)
+  useEffect(() => {
+    if (!open) {
+      const t = window.setTimeout(() => {
+        document.body.style.pointerEvents = "";
+        document.body.style.overflow = "";
+      }, 250);
+      return () => window.clearTimeout(t);
+    }
+  }, [open]);
 
   const previewBlocks = useMemo<Block[]>(() => {
     if (state.mode === "custom") return state.blocks.filter((b) => !b.hidden);
@@ -93,114 +121,6 @@ export function PreviewDialog({
     });
   }, [state, me, portfolio, defaultCv]);
 
-  // Build the structured branding payload mirror of what the server's
-  // getBySlug returns — so the editor preview hydrates the dynamic
-  // template iframe with the same shape visitors will see live.
-  const previewBranding = useMemo<BrandingPayload | undefined>(() => {
-    if (!me) return undefined;
-    const cvSummary = defaultCv?.personalInfo?.summary ?? "";
-    const bio = state.bioShow ? me.profile?.bio ?? "" : "";
-    const cvSkills = (defaultCv?.skills ?? [])
-      .map((s) => s.name)
-      .filter((n): n is string => typeof n === "string" && n.length > 0);
-    const profileSkills = state.skillsShow ? me.profile?.skills ?? [] : [];
-    const seen = new Set<string>();
-    const skills: string[] = [];
-    for (const s of [...profileSkills, ...cvSkills]) {
-      const k = s.trim().toLowerCase();
-      if (!k || seen.has(k)) continue;
-      seen.add(k);
-      skills.push(s.trim());
-    }
-    const experience = (defaultCv?.experience ?? []).map((e) => ({
-      company: e.company ?? "",
-      position: e.position ?? "",
-      startDate: e.startDate ?? "",
-      endDate: e.endDate ?? "",
-      current: Boolean(e.current),
-      description: e.description ?? "",
-      achievements: e.achievements ?? [],
-    }));
-    const education = (defaultCv?.education ?? []).map((e) => ({
-      institution: e.institution ?? "",
-      degree: e.degree ?? "",
-      field: e.field ?? "",
-      startDate: e.startDate ?? "",
-      endDate: e.endDate ?? "",
-      gpa: e.gpa ?? "",
-    }));
-    const certifications = (defaultCv?.certifications ?? []).map((c) => ({
-      name: c.name ?? "",
-      issuer: c.issuer ?? "",
-      date: c.date ?? "",
-    }));
-    const cvProjects = (defaultCv?.projects ?? []).map((p) => ({
-      name: p.name ?? "",
-      description: p.description ?? "",
-      technologies: p.technologies ?? [],
-      link: p.link ?? "",
-    }));
-    const projects: BrandingPayload["projects"] = [
-      ...(state.portfolioShow ? portfolio ?? [] : []).map((p) => ({
-        id: p._id as unknown as string,
-        title: p.title,
-        description: p.description,
-        category: p.category,
-        link: p.link ?? "",
-        date: p.date,
-        techStack: p.techStack ?? [],
-        featured: p.featured,
-        coverEmoji: p.coverEmoji ?? null,
-        coverUrl: (p as { coverUrl?: string | null }).coverUrl ?? null,
-      })),
-      ...cvProjects.map((p, i) => ({
-        id: `cv-project-${i}`,
-        title: p.name,
-        description: p.description,
-        category: "project",
-        link: p.link,
-        date: "",
-        techStack: p.technologies,
-        featured: false,
-        coverEmoji: null,
-        coverUrl: null,
-      })),
-    ].filter((p) => p.title.trim().length > 0);
-    const contactEmail = state.contactEmail ?? "";
-    const linkedin = state.linkedinUrl ?? "";
-    const portfolioUrl = state.portfolioUrl ?? "";
-    return {
-      identity: {
-        name: me.profile?.fullName || me.name || "",
-        headline: state.headline,
-        targetRole: state.targetRoleShow ? me.profile?.targetRole ?? "" : "",
-        location: me.profile?.location ?? "",
-        avatarUrl: state.avatarShow ? me.avatarUrl ?? null : null,
-        contact: { email: contactEmail, linkedin, portfolio: portfolioUrl },
-      },
-      about: { bio, summary: cvSummary },
-      skills,
-      experience,
-      education,
-      certifications,
-      languages: (defaultCv?.languages ?? []).map((l) => ({
-        language: l.language ?? "",
-        proficiency: l.proficiency ?? "",
-      })),
-      projects,
-      has: {
-        about: Boolean(bio.trim() || cvSummary.trim()),
-        skills: skills.length > 0,
-        experience: experience.length > 0,
-        education: education.length > 0,
-        certifications: certifications.length > 0,
-        languages: (defaultCv?.languages ?? []).length > 0,
-        projects: projects.length > 0,
-        contact: Boolean(contactEmail || linkedin || portfolioUrl),
-      },
-    };
-  }, [state, me, defaultCv, portfolio]);
-
   const previewProfile = useMemo(
     () => ({
       slug: slugTrimmed || "preview",
@@ -212,9 +132,9 @@ export function PreviewDialog({
       theme: state.theme,
       headerBg: state.headerBg,
       accent: null,
-      branding: previewBranding,
+      branding: previewData?.branding,
     }),
-    [state, slugTrimmed, me, previewBlocks, previewBranding],
+    [state, slugTrimmed, me, previewBlocks, previewData],
   );
 
   return (
@@ -225,11 +145,38 @@ export function PreviewDialog({
         drawerClassName="max-h-[95vh]"
         aria-describedby={undefined}
       >
-        <ResponsiveDialogHeader className="p-4">
+        <ResponsiveDialogHeader className="flex flex-row items-center justify-between gap-4 p-4">
           <ResponsiveDialogTitle>Preview halaman publik</ResponsiveDialogTitle>
+          <Tabs
+            value={mode}
+            onValueChange={(v) => setMode(v as PreviewMode)}
+            className="ml-auto"
+          >
+            <TabsList variant="pills">
+              <TabsTrigger value="mine" className="gap-1.5 text-xs">
+                <Eye className="h-3.5 w-3.5" />
+                <span>Data Saya</span>
+              </TabsTrigger>
+              <TabsTrigger value="template" className="gap-1.5 text-xs">
+                <FileImage className="h-3.5 w-3.5" />
+                <span>Template</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </ResponsiveDialogHeader>
         <div className="border-t border-border bg-background">
-          <PersonalBrandingPage profile={previewProfile} brand={false} />
+          {mode === "template" && (
+            <p className="border-b border-border bg-amber-50/40 px-4 py-2 text-[11px] text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+              💡 Mode <strong>Template</strong> — menampilkan konten contoh
+              template (testimoni, metrik, lorem ipsum). Pakai untuk menilai
+              desain sebelum mengisi data.
+            </p>
+          )}
+          <PersonalBrandingPage
+            profile={previewProfile}
+            brand={false}
+            showBranding={mode === "mine"}
+          />
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>

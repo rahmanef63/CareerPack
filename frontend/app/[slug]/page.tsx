@@ -117,7 +117,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     (profile.targetRole ? `${profile.targetRole} — CareerPack` : "Personal brand CareerPack");
 
   return {
-    title: `${profile.displayName} · CareerPack`,
+    // Root layout title.template = "%s · CareerPack" appends the suffix —
+    // pass just the name so we don't render "Name · CareerPack · CareerPack".
+    title: profile.displayName,
     description,
     openGraph: {
       title: profile.displayName,

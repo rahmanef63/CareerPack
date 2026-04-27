@@ -265,7 +265,7 @@ export function usePBForm(): PBForm {
         }
         notify.success(
           finalEnabled
-            ? `Halaman publik aktif di careerpack.org/${slugTrimmed}`
+            ? `Tersimpan — careerpack.org/${slugTrimmed} update dalam beberapa detik (cache ISR ~60s).`
             : "Tersimpan sebagai draft (belum publik)",
         );
       } catch (err) {
