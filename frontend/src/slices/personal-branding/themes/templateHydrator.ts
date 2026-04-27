@@ -241,6 +241,21 @@ const HYDRATOR_SOURCE = String.raw`
   hideSection('languages', !has.languages);
   hideSection('contact', !has.contact);
 
+  // ---- Fluff sections (no user-data source) ---------------------
+  // Templates ship with editorial fluff (testimonials, fake metrics,
+  // process steps, FAQ, blog grids) that have no equivalent in
+  // CV/profile. When real branding data is present we always hide
+  // them — otherwise the live page shows quotes from people who
+  // don't exist + made-up stats that confuse the visitor.
+  // Designers can still preview them by removing the data-cp-fluff
+  // attribute (the picker thumbnails render WITHOUT __cp_data so
+  // fluff stays visible there).
+  var fluffNodes = document.querySelectorAll('[data-cp-fluff]');
+  for (var f = 0; f < fluffNodes.length; f++) {
+    fluffNodes[f].style.display = 'none';
+    fluffNodes[f].setAttribute('data-cp-hidden', '1');
+  }
+
   // ---- Empty placeholders ---------------------------------------
   // data-cp-empty="<name>" elements are inverse: shown ONLY when the
   // section is empty. Useful for "Belum ada proyek" hints inside a
