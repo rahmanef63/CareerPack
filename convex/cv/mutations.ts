@@ -121,6 +121,19 @@ export const deleteCV = mutation({
   },
 });
 
+export const bulkDeleteCVs = mutation({
+  args: { cvIds: v.array(v.id("cvs")) },
+  handler: async (ctx, args) => {
+    let deleted = 0;
+    for (const id of args.cvIds) {
+      await requireOwnedDoc(ctx, id, "CV");
+      await ctx.db.delete(id);
+      deleted++;
+    }
+    return { deleted };
+  },
+});
+
 // Quota check used by cv/actions.ts translate(). Called from action via
 // internal.cv.mutations._checkTranslateQuota.
 export const _checkTranslateQuota = internalMutation({

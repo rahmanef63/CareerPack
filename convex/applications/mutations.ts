@@ -69,3 +69,16 @@ export const deleteApplication = mutation({
     await ctx.db.delete(args.applicationId);
   },
 });
+
+export const bulkDeleteApplications = mutation({
+  args: { applicationIds: v.array(v.id("jobApplications")) },
+  handler: async (ctx, args) => {
+    let deleted = 0;
+    for (const id of args.applicationIds) {
+      await requireOwnedDoc(ctx, id, "Lamaran");
+      await ctx.db.delete(id);
+      deleted++;
+    }
+    return { deleted };
+  },
+});

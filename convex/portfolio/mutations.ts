@@ -78,6 +78,19 @@ export const deletePortfolioItem = mutation({
   },
 });
 
+export const bulkDeletePortfolioItems = mutation({
+  args: { itemIds: v.array(v.id("portfolioItems")) },
+  handler: async (ctx, args) => {
+    let deleted = 0;
+    for (const id of args.itemIds) {
+      await requireOwnedDoc(ctx, id, "Portofolio");
+      await ctx.db.delete(id);
+      deleted++;
+    }
+    return { deleted };
+  },
+});
+
 export const togglePortfolioFeatured = mutation({
   args: { itemId: v.id("portfolioItems") },
   handler: async (ctx, args) => {

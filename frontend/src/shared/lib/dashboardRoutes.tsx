@@ -78,6 +78,10 @@ const PERSONAL_BRANDING: View = dynamic(
   () => import("@/slices/personal-branding").then((m) => m.PersonalBrandingView),
   { loading: loadingFallback }
 );
+const DATABASE: View = dynamic(
+  () => import("@/slices/database").then((m) => m.DatabaseView),
+  { loading: loadingFallback }
+);
 
 /**
  * Map slug → View. Key `""` = `/dashboard` root.
@@ -105,6 +109,7 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
   // the component renders a LoadingScreen + redirects non-super-admins.
   "admin-panel": ADMIN_PANEL,
   "personal-branding": PERSONAL_BRANDING,
+  database: DATABASE,
 };
 
 export type DashboardSlug = keyof typeof DASHBOARD_VIEWS;

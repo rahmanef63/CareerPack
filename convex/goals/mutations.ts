@@ -107,3 +107,16 @@ export const deleteGoal = mutation({
     await ctx.db.delete(args.goalId);
   },
 });
+
+export const bulkDeleteGoals = mutation({
+  args: { goalIds: v.array(v.id("careerGoals")) },
+  handler: async (ctx, args) => {
+    let deleted = 0;
+    for (const id of args.goalIds) {
+      await requireOwnedDoc(ctx, id, "Goal");
+      await ctx.db.delete(id);
+      deleted++;
+    }
+    return { deleted };
+  },
+});

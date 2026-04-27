@@ -82,6 +82,19 @@ export const deleteContact = mutation({
   },
 });
 
+export const bulkDeleteContacts = mutation({
+  args: { contactIds: v.array(v.id("contacts")) },
+  handler: async (ctx, args) => {
+    let deleted = 0;
+    for (const id of args.contactIds) {
+      await requireOwnedDoc(ctx, id, "Kontak");
+      await ctx.db.delete(id);
+      deleted++;
+    }
+    return { deleted };
+  },
+});
+
 export const toggleContactFavorite = mutation({
   args: { contactId: v.id("contacts") },
   handler: async (ctx, args) => {

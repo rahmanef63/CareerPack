@@ -21,6 +21,7 @@ import {
   HelpCircle,
   ShieldAlert,
   Globe,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ export type MoreAppId =
   | "portfolio"
   | "matcher"
   | "personal-branding"
+  | "database"
   | "help"
   | "admin-panel";
 
@@ -86,6 +88,7 @@ export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
   { id: "networking", label: "Jaringan", icon: Users, href: "/dashboard/networking", hue: "from-rose-400 to-rose-600" },
   { id: "portfolio", label: "Portofolio", icon: Folder, href: "/dashboard/portfolio", hue: "from-orange-400 to-orange-600" },
   { id: "personal-branding", label: "Personal Branding", icon: Globe, href: "/dashboard/personal-branding", hue: "from-fuchsia-400 to-fuchsia-600" },
+  { id: "database", label: "Database", icon: Database, href: "/dashboard/database", hue: "from-indigo-400 to-indigo-600" },
   { id: "notifications", label: "Notifikasi", icon: Bell, href: "/dashboard/notifications", hue: "from-yellow-400 to-yellow-600" },
   { id: "settings", label: "Pengaturan", icon: SettingsIcon, href: "/dashboard/settings", hue: "from-slate-500 to-slate-700" },
   { id: "help", label: "Pusat Bantuan", icon: HelpCircle, href: "/dashboard/help", hue: "from-teal-400 to-teal-600" },
