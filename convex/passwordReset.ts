@@ -107,15 +107,14 @@ export const requestReset = mutation({
       expiresAt: now + TOKEN_TTL_MS,
     });
 
-    // V1 delivery: log to errorLogs so dev/admin can retrieve the link.
-    // V2 replaces this with an email action via Resend/SMTP.
-    await ctx.db.insert("errorLogs", {
-      userId: user._id,
-      source: "password-reset",
-      message: `Reset link: /reset-password/${rawToken}`,
-      route: "/forgot-password",
-      timestamp: now,
-    });
+    // V1 delivery: emit to backend log stream only (Convex dashboard /
+    // `convex logs`). NEVER write the raw token to a queryable table —
+    // earlier versions wrote to `errorLogs`, which any admin could read
+    // via `viewErrorLogs` and use to take over any account. V2 replaces
+    // this with an email action via Resend/SMTP.
+    console.log(
+      `[password-reset] issued for userId=${user._id} link=/reset-password/${rawToken}`,
+    );
 
     return { ok: true as const };
   },

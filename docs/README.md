@@ -12,6 +12,7 @@ Peta lengkap context project. Setiap dokumen self-contained — bisa dibaca terp
 | [auth.md](./auth.md) | Paham flow login / sign-up / guard |
 | [development.md](./development.md) | Setup lokal, env, scripts, testing, konvensi |
 | [deployment.md](./deployment.md) | Deploy Convex self-hosted + frontend (Vercel / Dokploy) |
+| [db-backup.md](./db-backup.md) | Backup Convex volume (planned, on-VPS two-layer recipe) |
 | **[rules.md](./rules.md)** | **Non-negotiable conventions — R1..R15 (baca sebelum commit)** |
 | **[guides.md](./guides.md)** | **Step-by-step recipes (add slice, Convex mutation, theme token, preset, etc.)** |
 | [features/README.md](./features/README.md) | **Portable feature docs** — 21 entries with cp commands, schema migrations, npm deps for transplanting to other projects |

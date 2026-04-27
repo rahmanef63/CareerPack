@@ -158,3 +158,30 @@ export const notify = {
 };
 
 export type Notify = typeof notify;
+
+/**
+ * Wrap a mutation call with consistent success/error toasts. Eliminates
+ * the `try { await mut(); notify.success } catch (e) { notify.fromError }`
+ * ritual repeated 30+ times across slices. Re-throws on failure so
+ * callers that need to gate UI (e.g. close a dialog only on success)
+ * can still `await ... .catch()`.
+ *
+ * Usage:
+ *   await withMutationToast(
+ *     () => createApplication(args),
+ *     { success: "Lamaran tersimpan", error: "Gagal menyimpan lamaran" },
+ *   );
+ */
+export async function withMutationToast<T>(
+  fn: () => Promise<T>,
+  opts: { success?: string; error: string },
+): Promise<T> {
+  try {
+    const result = await fn();
+    if (opts.success) notify.success(opts.success);
+    return result;
+  } catch (err) {
+    notify.fromError(err, opts.error);
+    throw err;
+  }
+}

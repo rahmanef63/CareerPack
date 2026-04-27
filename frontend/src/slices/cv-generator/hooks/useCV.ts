@@ -225,8 +225,12 @@ export function useCV() {
             }
             return true;
         } catch (error) {
+            // Re-throw so the caller's try/catch can run notify.fromError.
+            // Earlier the hook swallowed errors and returned false, but
+            // CVGenerator.handleSave never inspected the return value, so
+            // failures silently looked like successes.
             console.error("Failed to save CV:", error);
-            return false;
+            throw error;
         }
     }, [activeCVId, createCVMutation, updateCVMutation, isAuthenticated]);
 

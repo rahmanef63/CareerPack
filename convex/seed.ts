@@ -1,6 +1,5 @@
 import { mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { v } from "convex/values";
 
 /**
  * Parse `ADMIN_BOOTSTRAP_EMAILS` — comma-separated list of emails that
@@ -19,30 +18,13 @@ function adminBootstrapEmails(): Set<string> {
 }
 
 export const seedForCurrentUser = mutation({
-  args: {
-    email: v.optional(v.string()),
-    name: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    let userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      const users = await ctx.db.query("users").collect();
-      const matchedUser = users.find((u) => {
-        const currentEmail = (u as { email?: string }).email;
-        return args.email ? currentEmail === args.email : false;
-      });
-
-      if (matchedUser) {
-        userId = matchedUser._id;
-      } else if (users.length > 0) {
-        userId = users[0]._id;
-      } else {
-        throw new Error(
-          "No auth user found. Sign up once from the app first, then run seed again."
-        );
-      }
-    }
+  args: {},
+  handler: async (ctx) => {
+    // Auth required. Earlier versions had an unauth fallback that picked
+    // the "first user in the DB" if no email matched — that path was a
+    // public oracle + plant-into-victim-account exploit. Removed.
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Tidak terautentikasi");
 
     const now = Date.now();
 

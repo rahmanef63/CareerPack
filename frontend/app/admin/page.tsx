@@ -1,10 +1,10 @@
 import { RouteGuard } from "@/shared/components/auth/RouteGuard";
-import { AdminDashboard } from "@/slices/admin";
+import { AdminPanel } from "@/slices/admin-panel";
 
 export default function AdminPage() {
   return (
     <RouteGuard mode="role" requiredRole="admin">
-      <AdminDashboard />
+      <AdminPanel />
     </RouteGuard>
   );
 }

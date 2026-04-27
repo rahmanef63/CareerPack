@@ -1,12 +1,26 @@
 services:
   backend:
+    # SECURITY: do NOT use `:latest` in production. Override
+    # CONVEX_SELF_HOSTED_IMAGE in Dokploy env to a versioned/digest tag
+    # so a `docker pull` during redeploy can't ship a breaking change
+    # silently. Example pinned form:
+    #   ghcr.io/get-convex/convex-backend:62ef0ae6b91bc7e44b3a82a1e80b1f0d
+    # Find current stable tag at https://github.com/get-convex/convex-backend/releases
     image: ${CONVEX_SELF_HOSTED_IMAGE:-ghcr.io/get-convex/convex-backend:latest}
     container_name: careerpack-convex-backend
     restart: unless-stopped
     env_file:
       - .env
+    # Bind to localhost only — Dokploy's reverse proxy reaches the
+    # container via the internal Docker network, so 0.0.0.0 binding is
+    # unnecessary and risks accidentally exposing port 3210 directly to
+    # the internet if the proxy/firewall is misconfigured.
     ports:
-      - "3210:3210"
+      - "127.0.0.1:3210:3210"
+    # SECURITY/RELIABILITY: this volume holds ALL user data + uploaded
+    # files. Treat it as the project's only durable asset. Backup plan
+    # (planned, two-layer on-VPS): see docs/db-backup.md
+    # Never `docker volume rm` without a fresh backup.
     volumes:
       - convex_data:/convex/data
     # Convex exposes /version as a lightweight readiness probe. If the

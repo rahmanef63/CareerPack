@@ -149,11 +149,25 @@ export function usePBForm(): PBForm {
   const [state, setState] = useState<FormState>(DEFAULT_FORM_STATE);
   const [saving, setSaving] = useState(false);
   const seededRef = useRef(false);
+  // Reset the seed guard on auth-mode flip — otherwise loading the page
+  // unauth (or in demo) seeds the empty/demo branch, then signing in
+  // would never re-seed from the real `data` payload because the ref
+  // sticks at `true`.
+  const lastAuthModeRef = useRef<"demo" | "auth" | "none">("none");
 
   // Hydrate once when server data arrives. Subsequent server-side
   // changes (e.g. cron, admin edit) intentionally don't overwrite
   // local edits — would feel like a phantom reset. User can refresh.
   useEffect(() => {
+    const mode: "demo" | "auth" | "none" = isDemo
+      ? "demo"
+      : isAuthenticated
+        ? "auth"
+        : "none";
+    if (mode !== lastAuthModeRef.current) {
+      seededRef.current = false;
+      lastAuthModeRef.current = mode;
+    }
     if (seededRef.current) return;
     if (isDemo) {
       seededRef.current = true;
@@ -168,7 +182,7 @@ export function usePBForm(): PBForm {
     if (!data) return;
     seededRef.current = true;
     setState(seedFromServer(data as ServerData));
-  }, [data, isDemo, demoPB.state]);
+  }, [data, isDemo, isAuthenticated, demoPB.state]);
 
   const set: SetField = useCallback((key, value) => {
     setState((s) => ({ ...s, [key]: value }));

@@ -4,6 +4,7 @@ import { api } from "../../../../../../convex/_generated/api";
 import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
+import { formatDate } from "@/shared/lib/formatDate";
 import { defineResource } from "../../lib/defineResource";
 
 type Application = Doc<"jobApplications">;
@@ -23,7 +24,7 @@ const columns: ReadonlyArray<ColumnDef<Application>> = [
     id: "appliedDate",
     header: "Tanggal Apply",
     accessor: (r) => new Date(r.appliedDate),
-    cell: (r) => new Date(r.appliedDate).toLocaleDateString("id-ID"),
+    cell: (r) => formatDate(r.appliedDate),
   },
   { id: "source", header: "Sumber", accessor: (r) => r.source, hideOnMobile: true },
 ];

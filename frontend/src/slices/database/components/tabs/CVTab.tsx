@@ -4,6 +4,7 @@ import { api } from "../../../../../../convex/_generated/api";
 import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
+import { formatDate } from "@/shared/lib/formatDate";
 import { defineResource } from "../../lib/defineResource";
 
 type CV = Doc<"cvs">;
@@ -20,7 +21,7 @@ const columns: ReadonlyArray<ColumnDef<CV>> = [
     id: "createdAt",
     header: "Dibuat",
     accessor: (r) => new Date(r._creationTime),
-    cell: (r) => new Date(r._creationTime).toLocaleDateString("id-ID"),
+    cell: (r) => formatDate(r._creationTime),
   },
 ];
 
@@ -76,7 +77,7 @@ export const CVTab = defineResource<CV>({
                   {app.position} · {app.company}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {new Date(app.appliedDate).toLocaleDateString("id-ID")}
+                  {formatDate(app.appliedDate)}
                   {app.location && ` · ${app.location}`}
                 </p>
               </div>
@@ -102,7 +103,7 @@ export const CVTab = defineResource<CV>({
                   {scan.jobCompany && ` · ${scan.jobCompany}`}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {new Date(scan.createdAt).toLocaleDateString("id-ID")}
+                  {formatDate(scan.createdAt)}
                 </p>
               </div>
               <Badge

@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { toast } from "sonner";
 import { useState, type ReactNode } from "react";
-import type { Id } from "../../../../../convex/_generated/dataModel";
 import type {
   ColumnDef,
   FilterDef,
@@ -162,8 +161,11 @@ export function defineResource<T extends { _id: string }>(
             (DEFAULT_EXPORT_SHAPE as (r: T) => unknown)
           }
           onBulkDelete={async (ids) =>
+            // Cast to the row's own Id<TableName>[] (derived from T["_id"])
+            // — honest for every resource. The runtime contract is
+            // enforced by the Convex validator on the mutation side.
             (await bulkDelete({
-              ids: ids as Id<"cvs">[], // Erased at runtime; bulkDelete factory carries the literal type.
+              ids: ids as unknown as ReadonlyArray<T["_id"]>,
             })) as { deleted: number }
           }
           onImport={handleImport}

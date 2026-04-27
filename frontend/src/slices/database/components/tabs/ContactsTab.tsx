@@ -4,6 +4,7 @@ import { api } from "../../../../../../convex/_generated/api";
 import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
+import { formatDate } from "@/shared/lib/formatDate";
 import { defineResource } from "../../lib/defineResource";
 
 type Contact = Doc<"contacts">;
@@ -29,10 +30,7 @@ const columns: ReadonlyArray<ColumnDef<Contact>> = [
     id: "lastInteraction",
     header: "Terakhir",
     accessor: (r) => (r.lastInteraction ? new Date(r.lastInteraction) : null),
-    cell: (r) =>
-      r.lastInteraction
-        ? new Date(r.lastInteraction).toLocaleDateString("id-ID")
-        : "—",
+    cell: (r) => (r.lastInteraction ? formatDate(r.lastInteraction) : "—"),
   },
 ];
 

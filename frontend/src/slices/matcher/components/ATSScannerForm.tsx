@@ -23,6 +23,7 @@ import {
 } from "@/shared/components/ui/tabs";
 import { useATSScan, useATSScan_byId } from "../hooks/useATSScan";
 import { ATSResultCard } from "./ATSResultCard";
+import { useAuth } from "@/shared/hooks/useAuth";
 import type { JobListing } from "../types";
 
 interface ATSScannerFormProps {
@@ -31,8 +32,13 @@ interface ATSScannerFormProps {
 }
 
 export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
-  const cvs = useQuery(api.cv.queries.getUserCVs);
+  // Skip the CV query for unauth / demo users — `getUserCVs` requires
+  // auth via `requireUser`, otherwise it throws on the server.
+  const { state } = useAuth();
+  const cvsEnabled = state.isAuthenticated && !state.isDemo;
+  const cvs = useQuery(api.cv.queries.getUserCVs, cvsEnabled ? {} : "skip");
   const [cvId, setCvId] = useState<Id<"cvs"> | "">("");
+  const [userPickedCv, setUserPickedCv] = useState(false);
   const [mode, setMode] = useState<"paste" | "listing">(
     initialListing ? "listing" : "paste",
   );
@@ -46,12 +52,14 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
   // Default-pick the user's NEWEST CV when the list resolves. Convex
   // collect() returns insertion order (oldest first), so picking [0]
   // would surface a stale CV after QuickFill or createCV inserts a
-  // fresh row.
+  // fresh row. Once the user actively picks (or clears) their CV, we
+  // honor that choice and stop auto-selecting.
   useEffect(() => {
+    if (userPickedCv) return;
     if (cvId || !cvs || cvs.length === 0) return;
     const newest = [...cvs].sort((a, b) => b._creationTime - a._creationTime)[0];
     setCvId(newest._id);
-  }, [cvs, cvId]);
+  }, [cvs, cvId, userPickedCv]);
 
   const listings = useQuery(
     api.matcher.queries.listJobs,
@@ -112,7 +120,10 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
           ) : (
             <ResponsiveSelect
               value={cvId}
-              onValueChange={(v) => setCvId(v as Id<"cvs">)}
+              onValueChange={(v) => {
+                setCvId(v as Id<"cvs">);
+                setUserPickedCv(true);
+              }}
             >
               <ResponsiveSelectTrigger placeholder="Pilih CV…" />
               <ResponsiveSelectContent drawerTitle="Pilih CV">

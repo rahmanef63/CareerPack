@@ -4,6 +4,7 @@ import { api } from "../../../../../../convex/_generated/api";
 import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
+import { formatDate } from "@/shared/lib/formatDate";
 import { defineResource } from "../../lib/defineResource";
 
 type Goal = Doc<"careerGoals">;
@@ -32,7 +33,7 @@ const columns: ReadonlyArray<ColumnDef<Goal>> = [
     id: "targetDate",
     header: "Target",
     accessor: (r) => new Date(r.targetDate),
-    cell: (r) => new Date(r.targetDate).toLocaleDateString("id-ID"),
+    cell: (r) => formatDate(r.targetDate),
     hideOnMobile: true,
   },
 ];

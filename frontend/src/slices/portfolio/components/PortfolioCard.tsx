@@ -6,6 +6,7 @@ import { ExternalLink, Star, Trash2 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { formatMonthYear } from "@/shared/lib/formatDate";
 import type { PortfolioItem } from "../types";
 import { CATEGORY_LABELS } from "../constants";
 
@@ -76,10 +77,7 @@ export function PortfolioCard({
             {item.title}
           </h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {new Date(item.date).toLocaleDateString("id-ID", {
-              month: "short",
-              year: "numeric",
-            })}
+            {formatMonthYear(item.date)}
           </p>
         </div>
         <p className="line-clamp-2 text-sm text-muted-foreground">

@@ -119,6 +119,20 @@ Each domain folder contains `schema.ts` (table fragment), and any of
 
 Login flow (`useAuth.login`) is **login-or-register in one call**: query `userExistsByEmail` first, then `signIn` with `flow: "signIn"` or `flow: "signUp"`. After success, `seedForCurrentUser()` bootstraps starter CV/checklist/roadmap; failures are logged and swallowed.
 
+## Hard constraints — DO NOT violate
+
+**Tech stack is fixed. Never propose swapping or adding a new engine/framework/provider. Audit and fix what exists; do not invent new dependencies.**
+
+- **Database**: Convex (self-hosted on Dokploy) is the *only* data store. **Treat Convex as a black box** — do not reference, propose, or audit its internal storage engine (whatever Convex uses under the hood is not the user's concern). **Do not propose Postgres, MySQL, Supabase, Firebase, Mongo, Prisma, Drizzle, SQLite tooling, or any external DB** — even as "optional" or "for scale". Reactive queries + realtime are non-negotiable; that's why Convex was chosen. When auditing data persistence, flag at the Convex abstraction layer only (volume backup, image pin, port binding, admin key rotation, env hygiene).
+- **Auth**: `@convex-dev/auth` with `Password` + `Anonymous` providers + custom PBKDF2-SHA256 100k iter (Scrypt timed out behind Dokploy's reverse proxy — see `convex/auth.ts`). **Do not propose Clerk, Auth0, NextAuth, BetterAuth, or swapping to Argon2/bcrypt** without explicit user request. Bumping iter count = OK; replacing the algorithm = NOT OK.
+- **Frontend**: Next.js 15 App Router + React 19 + Tailwind + shadcn/ui. **Do not propose Remix, SvelteKit, Astro, Vite-only SPA, Material UI, Chakra, Radix-only, etc.**
+- **Deploy**: Dokploy (Docker Compose). **Do not propose Vercel, Railway, Fly.io, Render, AWS ECS, Kubernetes** even when discussing self-hosted concerns.
+- **AI**: OpenAI-compatible proxy via `_shared/aiProviders.ts`. **Do not propose direct provider SDKs** — pipeline must stay `requireQuota → sanitizeAIInput → wrapUserInput → proxy`.
+- **Package manager**: pnpm@10.24.0. Never propose npm/yarn/bun migrations.
+- **Test runner**: Vitest. Never propose Jest/Mocha/Playwright migrations.
+
+When auditing, flag risks **within the existing stack** (missing backups, weak iter count, unrate-limited mutations, fragile cron, etc.). If a finding requires a stack swap to fix, restate as "needs hardening of existing X" — never as "migrate to Y".
+
 ## Conventions
 
 - TS strict, `@/*` → `frontend/src/*`.
@@ -138,4 +152,5 @@ Login flow (`useAuth.login`) is **login-or-register in one call**: query `userEx
 - [docs/backend.md](./docs/backend.md) — every Convex module + schema
 - [docs/auth.md](./docs/auth.md) — provider rationale + route guard patterns
 - [docs/development.md](./docs/development.md) — env matrix, dev-loop options (self-hosted Docker vs Convex cloud)
+- [docs/db-backup.md](./docs/db-backup.md) — Convex volume backup plan (two-layer on-VPS recipe, TBD)
 - [docs/features/](./docs/features/) — per-slice deep dives (one file per slice)

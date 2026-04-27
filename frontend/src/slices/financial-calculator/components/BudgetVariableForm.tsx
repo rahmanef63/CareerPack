@@ -14,6 +14,16 @@ import {
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
 } from "@/shared/components/ui/responsive-dialog";
+import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+} from "@/shared/components/ui/responsive-alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -52,6 +62,7 @@ export function BudgetVariableForm({ existing, trigger }: BudgetVariableFormProp
   const [color, setColor] = useState(existing?.color ?? BUDGET_COLOR_PALETTE[0]);
   const [kind, setKind] = useState<Kind>(existing?.kind ?? "expense");
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   // Reset form when opening (especially for create mode)
   useEffect(() => {
@@ -97,10 +108,10 @@ export function BudgetVariableForm({ existing, trigger }: BudgetVariableFormProp
 
   const handleDelete = async () => {
     if (!existing) return;
-    if (!confirm(`Hapus "${existing.label}"?`)) return;
     try {
       await remove({ id: existing._id as Id<"budgetVariables"> });
       notify.success("Variabel dihapus");
+      setConfirmDeleteOpen(false);
       setOpen(false);
     } catch (err) {
       notify.fromError(err, "Gagal menghapus");
@@ -218,7 +229,7 @@ export function BudgetVariableForm({ existing, trigger }: BudgetVariableFormProp
                 variant="ghost"
                 size="sm"
                 className="text-destructive hover:text-destructive"
-                onClick={handleDelete}
+                onClick={() => setConfirmDeleteOpen(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Hapus
@@ -235,6 +246,28 @@ export function BudgetVariableForm({ existing, trigger }: BudgetVariableFormProp
           </div>
         </form>
       </ResponsiveDialogContent>
+
+      <ResponsiveAlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <ResponsiveAlertDialogContent>
+          <ResponsiveAlertDialogHeader>
+            <ResponsiveAlertDialogTitle>
+              Hapus &quot;{existing?.label}&quot;?
+            </ResponsiveAlertDialogTitle>
+            <ResponsiveAlertDialogDescription>
+              Variabel anggaran akan dihapus permanen. Aksi ini tidak bisa dibatalkan.
+            </ResponsiveAlertDialogDescription>
+          </ResponsiveAlertDialogHeader>
+          <ResponsiveAlertDialogFooter>
+            <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
+            <ResponsiveAlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Hapus
+            </ResponsiveAlertDialogAction>
+          </ResponsiveAlertDialogFooter>
+        </ResponsiveAlertDialogContent>
+      </ResponsiveAlertDialog>
     </ResponsiveDialog>
   );
 }

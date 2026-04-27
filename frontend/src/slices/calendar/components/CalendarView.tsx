@@ -27,6 +27,7 @@ import {
   ResponsiveSelectTrigger,
 } from "@/shared/components/ui/responsive-select";
 import { notify } from "@/shared/lib/notify";
+import { formatMonthShort, formatWeekdayLong } from "@/shared/lib/formatDate";
 import { cn } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useAgenda, type AgendaItem, type AgendaType } from "@/shared/hooks/useAgenda";
@@ -183,13 +184,7 @@ export function CalendarView() {
           <Card>
             <CardHeader className="pb-2 flex-row justify-between items-center space-y-0">
               <CardTitle className="text-base">
-                {selected
-                  ? selected.toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    })
-                  : "Pilih tanggal"}
+                {selected ? formatWeekdayLong(selected) : "Pilih tanggal"}
               </CardTitle>
               <Button
                 variant="ghost"
@@ -265,7 +260,7 @@ function AgendaRow({ item, compact, onDelete }: AgendaRowProps) {
     <li className="group flex items-start gap-3 p-3 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors">
       <div className="flex flex-col items-center justify-center min-w-[44px] text-center">
         <span className="text-[10px] font-medium text-muted-foreground uppercase">
-          {new Date(item.date).toLocaleDateString("id-ID", { month: "short" })}
+          {formatMonthShort(item.date)}
         </span>
         <span className="text-lg font-bold text-foreground leading-none">
           {new Date(item.date).getDate()}
@@ -326,6 +321,14 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
   const [time, setTime] = useState("09:00");
   const [location, setLocation] = useState("");
   const [type, setType] = useState<AgendaType>("interview");
+
+  // Resync `date` whenever the dialog (re)opens with a new defaultDate.
+  // Without this, picking a new calendar day → opening the dialog →
+  // canceling → picking another day → reopening would still show the
+  // first day because useState only seeds once.
+  useEffect(() => {
+    if (open) setDate(defaultDate);
+  }, [open, defaultDate]);
 
   const reset = () => {
     setTitle("");

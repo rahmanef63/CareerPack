@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { notify } from "@/shared/lib/notify";
+import { formatDateShort } from "@/shared/lib/formatDate";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Button } from "@/shared/components/ui/button";
@@ -96,10 +97,7 @@ function formatRelative(ts: number): string {
   if (diff < 60 * 60_000) return `${Math.floor(diff / 60_000)}m`;
   if (diff < 24 * 60 * 60_000) return `${Math.floor(diff / (60 * 60_000))}j`;
   if (diff < 7 * DAY_MS) return `${Math.floor(diff / DAY_MS)}h`;
-  return new Date(ts).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "short",
-  });
+  return formatDateShort(ts);
 }
 
 interface NotificationRowProps {

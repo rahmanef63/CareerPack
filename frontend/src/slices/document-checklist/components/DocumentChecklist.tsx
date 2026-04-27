@@ -64,6 +64,9 @@ export function DocumentChecklist() {
 
   const demoChecklist = useDemoChecklistOverlay();
 
+  // Reset the guard if the seed mutation throws — otherwise a transient
+  // network blip would block the seed for the entire component lifetime,
+  // leaving the user with an empty checklist until they hard-reload.
   const seedAttempted = useRef(false);
   useEffect(() => {
     if (isDemo) return; // localStorage already seeded
@@ -81,7 +84,8 @@ export function DocumentChecklist() {
         required: d.required,
       })),
     }).catch(() => {
-      // Non-fatal; next refetch will retry if query resubscribes.
+      // Allow one auto-retry on next reactive query tick.
+      seedAttempted.current = false;
     });
   }, [checklist, seedChecklist, isDemo]);
 

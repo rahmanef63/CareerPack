@@ -23,6 +23,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/utils";
+import { formatDate } from "@/shared/lib/formatDate";
 import type { ColumnDef, FilterDef, SortState } from "./types";
 import { nextSortState } from "./comparators";
 import { useTableState } from "./useTableState";
@@ -483,7 +484,7 @@ function renderDefaultCell(value: unknown): ReactNode {
   if (value === null || value === undefined || value === "") return (
     <span className="text-muted-foreground/60">—</span>
   );
-  if (value instanceof Date) return value.toLocaleDateString("id-ID");
+  if (value instanceof Date) return formatDate(value);
   if (typeof value === "boolean") return value ? "Ya" : "Tidak";
   return String(value);
 }

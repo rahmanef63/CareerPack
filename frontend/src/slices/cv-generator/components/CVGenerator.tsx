@@ -18,6 +18,12 @@ import { Textarea } from '@/shared/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import {
+  ResponsiveSelect,
+  ResponsiveSelectContent,
+  ResponsiveSelectItem,
+  ResponsiveSelectTrigger,
+} from '@/shared/components/ui/responsive-select';
+import {
   ResponsiveDialog as Dialog,
   ResponsiveDialogContent as DialogContent,
   ResponsiveDialogHeader as DialogHeader,
@@ -219,6 +225,9 @@ export function CVGenerator() {
     setIsSaving(true);
     try {
       await saveCV(cvData);
+      notify.success("CV tersimpan");
+    } catch (err) {
+      notify.fromError(err, "Gagal menyimpan CV");
     } finally {
       setIsSaving(false);
     }
@@ -1037,27 +1046,31 @@ export function CVGenerator() {
                           value={skill.name}
                           onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
                         />
-                        <select
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <ResponsiveSelect
                           value={skill.category}
-                          onChange={(e) => updateSkill(skill.id, 'category', e.target.value)}
+                          onValueChange={(v) => updateSkill(skill.id, 'category', v)}
                         >
-                          <option value="technical">Teknis</option>
-                          <option value="soft">Soft Skill</option>
-                          <option value="language">Bahasa</option>
-                          <option value="tool">Tool</option>
-                        </select>
-                        <select
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          value={skill.proficiency}
-                          onChange={(e) => updateSkill(skill.id, 'proficiency', parseInt(e.target.value))}
+                          <ResponsiveSelectTrigger />
+                          <ResponsiveSelectContent drawerTitle="Kategori skill">
+                            <ResponsiveSelectItem value="technical">Teknis</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="soft">Soft Skill</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="language">Bahasa</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="tool">Tool</ResponsiveSelectItem>
+                          </ResponsiveSelectContent>
+                        </ResponsiveSelect>
+                        <ResponsiveSelect
+                          value={String(skill.proficiency)}
+                          onValueChange={(v) => updateSkill(skill.id, 'proficiency', parseInt(v))}
                         >
-                          <option value={1}>Pemula</option>
-                          <option value={2}>Dasar</option>
-                          <option value={3}>Menengah</option>
-                          <option value={4}>Mahir</option>
-                          <option value={5}>Ahli</option>
-                        </select>
+                          <ResponsiveSelectTrigger />
+                          <ResponsiveSelectContent drawerTitle="Tingkat keahlian">
+                            <ResponsiveSelectItem value="1">Pemula</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="2">Dasar</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="3">Menengah</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="4">Mahir</ResponsiveSelectItem>
+                            <ResponsiveSelectItem value="5">Ahli</ResponsiveSelectItem>
+                          </ResponsiveSelectContent>
+                        </ResponsiveSelect>
                       </div>
                       <Button
                         variant="ghost"

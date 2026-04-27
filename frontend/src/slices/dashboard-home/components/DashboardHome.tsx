@@ -32,6 +32,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { useApplications } from "@/shared/hooks/useApplications";
+import { formatDateShort, formatMonthShort } from "@/shared/lib/formatDate";
 import { useAgenda } from "@/shared/hooks/useAgenda";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
@@ -109,7 +110,7 @@ export function DashboardHome() {
       const d = new Date();
       d.setDate(d.getDate() - i * 7);
       weeks.push({
-        name: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+        name: formatDateShort(d),
         lamaran: 0,
         wawancara: 0,
       });
@@ -358,9 +359,7 @@ function AgendaSection() {
               >
                 <div className="w-10 h-10 rounded-lg bg-background border flex flex-col items-center justify-center">
                   <span className="text-[9px] uppercase text-muted-foreground font-medium">
-                    {new Date(it.date).toLocaleDateString("id-ID", {
-                      month: "short",
-                    })}
+                    {formatMonthShort(it.date)}
                   </span>
                   <span className="text-sm font-bold leading-none">
                     {new Date(it.date).getDate()}

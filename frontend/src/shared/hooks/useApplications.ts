@@ -6,6 +6,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id, Doc } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoApplicationsOverlay } from "@/shared/hooks/useDemoOverlay";
+import { withMutationToast } from "@/shared/lib/notify";
 import type { Application, ApplicationStatus } from "@/shared/types";
 
 type ConvexApplication = Doc<"jobApplications">;
@@ -54,34 +55,50 @@ export function useApplications() {
 
   const realApplications: Application[] = raw ? raw.map(fromConvex) : [];
 
+  // Each wrapper toasts on failure + re-throws so callers that need to
+  // gate UI on success (close dialog, reset form) can still `await`.
+  // Success toasts stay at the call site — the message is contextual
+  // (e.g. "Status diubah ke Wawancara") and can't be statically named
+  // here.
   const create = useCallback(
     async (input: CreateApplicationInput) => {
-      await createMutation({
-        company: input.company,
-        position: input.position,
-        location: input.location ?? "",
-        salary: input.salary,
-        source: input.source ?? "Website perusahaan",
-        notes: input.notes,
-      });
+      await withMutationToast(
+        () =>
+          createMutation({
+            company: input.company,
+            position: input.position,
+            location: input.location ?? "",
+            salary: input.salary,
+            source: input.source ?? "Website perusahaan",
+            notes: input.notes,
+          }),
+        { error: "Gagal menambahkan lamaran" },
+      );
     },
     [createMutation],
   );
 
   const updateStatus = useCallback(
     async (id: string, status: ApplicationStatus, notes?: string) => {
-      await updateStatusMutation({
-        applicationId: id as Id<"jobApplications">,
-        status,
-        notes,
-      });
+      await withMutationToast(
+        () =>
+          updateStatusMutation({
+            applicationId: id as Id<"jobApplications">,
+            status,
+            notes,
+          }),
+        { error: "Gagal mengubah status lamaran" },
+      );
     },
     [updateStatusMutation],
   );
 
   const remove = useCallback(
     async (id: string) => {
-      await deleteMutation({ applicationId: id as Id<"jobApplications"> });
+      await withMutationToast(
+        () => deleteMutation({ applicationId: id as Id<"jobApplications"> }),
+        { error: "Gagal menghapus lamaran" },
+      );
     },
     [deleteMutation],
   );

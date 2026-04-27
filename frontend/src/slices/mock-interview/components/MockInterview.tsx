@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { notify } from "@/shared/lib/notify";
 import {
@@ -37,11 +37,26 @@ export function MockInterview() {
   const [userAnswer, setUserAnswer] = useState('');
   const [sessionComplete, setSessionComplete] = useState(false);
   const [sessionScore, setSessionScore] = useState(0);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  // Persisted to localStorage — survives reloads so users don't lose
+  // their starred questions every session.
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = window.localStorage.getItem("careerpack:mock-favorites");
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? new Set(arr) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   // Timer: null = session hasn't started. Elapsed recomputed via interval while active.
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
+  // In-flight flag for `startSession` so a double-click doesn't create
+  // two interview docs.
+  const [isStarting, setIsStarting] = useState(false);
 
   // Convex persistence: create doc on startSession, accumulate answers in
   // a ref, finalize with completeInterview on session end. Past sessions
@@ -72,6 +87,8 @@ export function MockInterview() {
   })();
 
   const startSession = async () => {
+    if (isStarting || sessionStartedAt) return;
+    setIsStarting(true);
     setSessionStartedAt(Date.now());
     setElapsedMs(0);
     try {
@@ -89,16 +106,28 @@ export function MockInterview() {
     } catch (err) {
       notify.fromError(err, 'Gagal memulai sesi');
       interviewIdRef.current = null;
+      // Roll back the timer so user can retry without "ghost session" UI.
+      setSessionStartedAt(null);
+    } finally {
+      setIsStarting(false);
     }
   };
 
-  const filteredQuestions = selectedCategory 
-    ? indonesianInterviewQuestions.filter(q => q.category === selectedCategory)
-    : indonesianInterviewQuestions;
+  const filteredQuestions = useMemo(
+    () =>
+      selectedCategory
+        ? indonesianInterviewQuestions.filter(q => q.category === selectedCategory)
+        : indonesianInterviewQuestions,
+    [selectedCategory],
+  );
 
   const currentQuestion = filteredQuestions[currentQuestionIndex];
 
-  const categories = [...new Set(indonesianInterviewQuestions.map(q => q.category))];
+  // Static — questions list is module-scoped, no need to recompute.
+  const categories = useMemo(
+    () => [...new Set(indonesianInterviewQuestions.map(q => q.category))],
+    [],
+  );
 
   const startRecording = () => {
     setIsRecording(true);
@@ -171,6 +200,14 @@ export function MockInterview() {
       } else {
         newSet.add(questionId);
       }
+      try {
+        window.localStorage.setItem(
+          "careerpack:mock-favorites",
+          JSON.stringify([...newSet]),
+        );
+      } catch {
+        // localStorage full / disabled — favorites stay in memory only.
+      }
       return newSet;
     });
   };
@@ -205,7 +242,7 @@ export function MockInterview() {
                 <p className="text-sm text-success">Pertanyaan</p>
               </div>
               <div className="p-4 bg-accent/50 rounded-xl">
-                <p className="text-3xl font-bold text-brand">15m</p>
+                <p className="text-3xl font-bold text-brand">{elapsedLabel}</p>
                 <p className="text-sm text-brand">Durasi</p>
               </div>
             </div>
@@ -281,9 +318,13 @@ export function MockInterview() {
                     Bisa lewati kapan saja
                   </span>
                 </div>
-                <Button onClick={startSession} className="gap-2 bg-brand hover:bg-brand">
+                <Button
+                  onClick={startSession}
+                  disabled={isStarting}
+                  className="gap-2 bg-brand hover:bg-brand"
+                >
                   <Play className="h-4 w-4" />
-                  Mulai Sesi
+                  {isStarting ? "Memulai…" : "Mulai Sesi"}
                 </Button>
               </CardContent>
             </Card>

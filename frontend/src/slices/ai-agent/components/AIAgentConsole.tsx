@@ -333,6 +333,13 @@ export function AIAgentConsole({
 
   const deleteSession = useCallback(
     (id: string) => {
+      // Cancel any pending debounced upsert for this session — otherwise
+      // the timer fires after deletion and recreates a phantom session.
+      const pending = pendingUpserts.current.get(id);
+      if (pending) {
+        clearTimeout(pending);
+        pendingUpserts.current.delete(id);
+      }
       deleteSessionMutation({ sessionId: id }).catch(() => null);
       setSessions((prev) => {
         const next = prev.filter((s) => s.id !== id);

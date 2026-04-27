@@ -20,6 +20,7 @@ import {
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { QuickFillButton } from "@/shared/components/onboarding";
+import { formatDate } from "@/shared/lib/formatDate";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Badge } from "@/shared/components/ui/badge";
 import { Input } from "@/shared/components/ui/input";
@@ -79,15 +80,10 @@ const STATUS_META: Record<
   withdrawn: { label: "Ditarik", className: "bg-muted text-foreground dark:bg-muted dark:text-foreground" },
 };
 
-function formatAppliedDate(value: string | number): string {
-  const d = typeof value === "number" ? new Date(value) : new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  return d.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+// `formatDate` from shared/lib already produces "23 Apr 2026" with the
+// id-ID locale. Kept this thin alias for readability where the call
+// site says "appliedDate" — saves an inline cast at every cell.
+const formatAppliedDate = formatDate;
 
 export function CareerDashboard() {
   const { applications, isLoading, create, updateStatus, remove } =
@@ -112,6 +108,9 @@ export function CareerDashboard() {
     return { total, applied, interview, offer, responseRate };
   }, [applications]);
 
+  // Error toasts come from `useApplications` (withMutationToast). We
+  // only need to handle the success message here — and `await` will
+  // throw on failure, so the success notify is correctly skipped.
   const handleStatusChange = async (
     app: Application,
     status: ApplicationStatus,
@@ -119,8 +118,8 @@ export function CareerDashboard() {
     try {
       await updateStatus(app.id, status);
       notify.success(`Status diubah ke ${STATUS_META[status].label}`);
-    } catch (err) {
-      notify.fromError(err, "Gagal mengubah status");
+    } catch {
+      // Already toasted by hook.
     }
   };
 
@@ -130,8 +129,8 @@ export function CareerDashboard() {
       notify.success("Lamaran dihapus", {
         description: `${app.position} @ ${app.company}`,
       });
-    } catch (err) {
-      notify.fromError(err, "Gagal menghapus");
+    } catch {
+      // Already toasted by hook.
     } finally {
       setDeleteCandidate(null);
     }
@@ -357,8 +356,8 @@ export function CareerDashboard() {
               description: `${payload.position} @ ${payload.company}`,
             });
             setAddOpen(false);
-          } catch (err) {
-            notify.fromError(err, "Gagal menambahkan lamaran");
+          } catch {
+            // Already toasted by hook.
           }
         }}
       />

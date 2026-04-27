@@ -20,6 +20,12 @@ import {
   ResponsiveSelectTrigger as SelectTrigger,
 } from '@/shared/components/ui/responsive-select';
 import { cn } from '@/shared/lib/utils';
+import {
+  formatIDR,
+  formatNumberID,
+  parseNumberID,
+  formatShortIDR,
+} from '@/shared/lib/formatCurrency';
 import { indonesianCityCostOfLiving, indonesianJobMarketData } from '@/shared/data/indonesianData';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -145,17 +151,22 @@ export function FinancialCalculator() {
   const expenseVars = sortedVars.filter((v) => v.kind === 'expense');
   const savingsVars = sortedVars.filter((v) => v.kind === 'savings');
 
-  // Debounced save of plan snapshot whenever monthlyIncome changes and
-  // the query has resolved at least once (avoids hydrating-then-writing
-  // an empty income over a stored value on mount).
+  // Debounced save of plan snapshot whenever monthlyIncome OR a
+  // budget-variable value changes. 800ms debounce absorbs slider drag
+  // chatter; we deliberately depend on `sortedVars` + `localValues`
+  // rather than `effectiveValue` so the captured closure isn't stale
+  // when the user edits a slider (was a real bug — saved snapshots
+  // lagged the UI by one keystroke).
   useEffect(() => {
     if (plan === undefined || !incomeHydrated.current) return;
     if (planDebounce.current) clearTimeout(planDebounce.current);
     planDebounce.current = setTimeout(() => {
+      const valueOf = (v: BudgetVar) =>
+        v._id in localValues ? localValues[v._id] : v.value;
       const bucketize = (kind: string) =>
         sortedVars
           .filter((v) => v.label.toLowerCase().includes(kind))
-          .reduce((s, v) => s + effectiveValue(v), 0);
+          .reduce((s, v) => s + valueOf(v), 0);
       savePlan({
         type: 'salary',
         targetSalary: monthlyIncome,
@@ -175,8 +186,7 @@ export function FinancialCalculator() {
     return () => {
       if (planDebounce.current) clearTimeout(planDebounce.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monthlyIncome]);
+  }, [monthlyIncome, sortedVars, localValues, plan, savePlan]);
 
   const totalExpenses = expenseVars.reduce((sum, v) => sum + effectiveValue(v), 0);
   const totalSavings = savingsVars.reduce((sum, v) => sum + effectiveValue(v), 0);
@@ -207,31 +217,10 @@ export function FinancialCalculator() {
 
   const salaryData = indonesianJobMarketData.find(j => j.position === targetPosition);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  // Locale-aware thousand separator for raw numeric inputs (no Rp prefix).
-  const formatNumberID = (value: number): string =>
-    value === 0 ? "" : value.toLocaleString("id-ID");
-
-  // Parse back — strip non-digits. Empty → 0.
-  const parseNumberID = (raw: string): number => {
-    const digits = raw.replace(/[^\d]/g, "");
-    return digits ? Number(digits) : 0;
-  };
-
-  // Axis-friendly short IDR: "Rp 10jt", "Rp 300rb".
-  const formatShortIDR = (value: number): string => {
-    if (value >= 1_000_000) return `Rp ${Math.round(value / 1_000_000)}jt`;
-    if (value >= 1_000) return `Rp ${Math.round(value / 1_000)}rb`;
-    return `Rp ${value}`;
-  };
+  // Currency + number formatters now live in `@/shared/lib/formatCurrency`.
+  // `formatCurrency` here is a thin alias for legacy call sites (tests +
+  // older JSX) so the rename doesn't ripple through every cell.
+  const formatCurrency = formatIDR;
 
   return (
     <PageContainer size="lg">

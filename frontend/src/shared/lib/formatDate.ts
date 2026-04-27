@@ -82,6 +82,27 @@ export function formatMonthShort(v: DateInput): string {
   return new Intl.DateTimeFormat("id-ID", { month: "short" }).format(d);
 }
 
+/** "Apr 2026" — short month + year, no day. Portfolio card date. */
+export function formatMonthYear(v: DateInput): string {
+  const d = toDate(v);
+  if (!d) return "—";
+  return new Intl.DateTimeFormat("id-ID", {
+    month: "short",
+    year: "numeric",
+  }).format(d);
+}
+
+/** "Jumat, 23 April" — weekday + day + long month, no year. Calendar header. */
+export function formatWeekdayLong(v: DateInput): string {
+  const d = toDate(v);
+  if (!d) return "—";
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(d);
+}
+
 /** "baru saja" / "5 menit lalu" / "3 hari lalu" / falls to formatDate
  *  when older than 30 days. Relative-time Indonesian. */
 export function formatRelative(v: DateInput): string {

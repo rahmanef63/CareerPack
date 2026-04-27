@@ -168,8 +168,8 @@ export function ProfileSection() {
           skills: profile.skills,
           interests: profile.interests,
         });
-        notify.success("Profil tersimpan");
       }
+      notify.success("Profil tersimpan");
     } catch (err) {
       notify.fromError(err, "Gagal menyimpan profil");
     } finally {
