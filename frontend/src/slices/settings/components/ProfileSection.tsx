@@ -298,7 +298,7 @@ export function ProfileSection() {
               Level Pengalaman <span className="text-destructive">*</span>
             </Label>
             <ResponsiveSelect
-              value={profile.experienceLevel || undefined}
+              value={profile.experienceLevel ?? ""}
               onValueChange={(v) => setField("experienceLevel", v)}
             >
               <ResponsiveSelectTrigger

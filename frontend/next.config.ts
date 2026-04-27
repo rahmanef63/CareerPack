@@ -27,11 +27,15 @@ const SECURITY_HEADERS = [
       // 'unsafe-inline' covers Next.js's runtime style inlining.
       // 'unsafe-eval' is needed for next-themes hydration script.
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
+      // Google Fonts allowed globally so personal-branding template iframes
+      // (rendered via srcDoc) inherit a CSP that lets them load Inter /
+      // Cormorant / Manrope. about:srcdoc inherits the parent's CSP and
+      // meta-CSP can only tighten, not relax — so it must be set here.
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // Convex storage returns image URLs; data: covers favicons + base64
       // splash; blob: covers next/image runtime.
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://fonts.gstatic.com",
       // Convex WebSocket origin + HTTP actions.
       "connect-src 'self' https: wss:",
       "frame-ancestors 'none'",

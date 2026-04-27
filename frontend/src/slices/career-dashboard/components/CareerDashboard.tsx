@@ -563,7 +563,7 @@ function AddApplicationDialog({
           <div className="space-y-2">
             <Label htmlFor="app-source">Sumber Lowongan</Label>
             <ResponsiveSelect
-              value={source || undefined}
+              value={source ?? ""}
               onValueChange={setSource}
             >
               <ResponsiveSelectTrigger id="app-source" placeholder="Pilih sumber" />
