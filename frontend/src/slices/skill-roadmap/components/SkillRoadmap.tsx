@@ -278,18 +278,24 @@ export function SkillRoadmap() {
   const seedRoadmap = useMutation(api.roadmap.mutations.seedRoadmap);
   const updateSkillProgress = useMutation(api.roadmap.mutations.updateSkillProgress);
   const hydrated = useRef(false);
+  const hydratedRoadmapId = useRef<string | null>(null);
 
+  // Re-hydrate when the roadmap doc's identity changes (first load,
+  // or after a fresh seedRoadmap that replaced the doc). Local
+  // completion toggles patch the same _id, so they don't trigger a
+  // hydration loop.
   useEffect(() => {
     if (roadmap === undefined) return;
-    if (hydrated.current) return;
     hydrated.current = true;
-    if (roadmap) {
-      setSelectedCategory(roadmap.careerPath);
-      const done = new Set(
-        roadmap.skills.filter((s) => s.status === "completed").map((s) => s.id),
-      );
-      setCompletedNodes(done);
-    }
+    if (!roadmap) return;
+    const idStr = String(roadmap._id);
+    if (hydratedRoadmapId.current === idStr) return;
+    hydratedRoadmapId.current = idStr;
+    setSelectedCategory(roadmap.careerPath);
+    const done = new Set(
+      roadmap.skills.filter((s) => s.status === "completed").map((s) => s.id),
+    );
+    setCompletedNodes(done);
   }, [roadmap]);
 
   const roadmapData = useMemo(() => generateRoadmapNodes(selectedCategory), [selectedCategory]);

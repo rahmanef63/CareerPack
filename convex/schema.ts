@@ -19,6 +19,7 @@ import { portfolioTables } from "./portfolio/schema";
 import { contactsTables } from "./contacts/schema";
 import { filesTables } from "./files/schema";
 import { matcherTables } from "./matcher/schema";
+import { onboardingTables } from "./onboarding/schema";
 
 // Auth-adjacent table — kept inline here so it lives next to the
 // passwordReset.ts module which owns the writes. (passwordReset.ts is
@@ -55,4 +56,5 @@ export default defineSchema({
   ...contactsTables,
   ...filesTables,
   ...matcherTables,
+  ...onboardingTables,
 });

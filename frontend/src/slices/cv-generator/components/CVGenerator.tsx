@@ -51,9 +51,9 @@ import { cn } from '@/shared/lib/utils';
 import { notify } from '@/shared/lib/notify';
 
 export function CVGenerator() {
-  const { cvData: remoteCVData, saveCV, isLoading: isCVLoading } = useCV();
+  const { cvData: remoteCVData, saveCV, isLoading: isCVLoading, activeCVId } = useCV();
   const [cvData, setCvData] = useState<CVData>(initialCVData);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [hydratedFromId, setHydratedFromId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [format, setFormat] = useState<CVFormat>('national');
 
@@ -150,13 +150,18 @@ export function CVGenerator() {
   const expDrag = useDragReorder<Experience>(cvData.experience, setExperienceList);
   const skillDrag = useDragReorder<Skill>(cvData.skills, setSkillsList);
 
-  // Load data from Convex
+  // Hydrate form from the active Convex CV. Watching the CV's id (not
+  // a one-shot boolean) means a freshly-imported QuickFill CV becomes
+  // active — useCV picks the newest — and the form swaps over without
+  // a page reload. Demo mode has no activeCVId, so we use the literal
+  // "demo" sentinel so demo data still loads once.
   useEffect(() => {
-    if (remoteCVData && !isDataLoaded) {
-      setCvData(remoteCVData);
-      setIsDataLoaded(true);
-    }
-  }, [remoteCVData, isDataLoaded]);
+    if (!remoteCVData) return;
+    const idStr = activeCVId ? String(activeCVId) : "demo";
+    if (hydratedFromId === idStr) return;
+    setCvData(remoteCVData);
+    setHydratedFromId(idStr);
+  }, [remoteCVData, activeCVId, hydratedFromId]);
 
   // AI agent bus subscriptions — wire di hook terpisah (lihat useCVAIActions)
   useCVAIActions({

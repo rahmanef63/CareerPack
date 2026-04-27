@@ -44,11 +44,14 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
     initialListing?._id ?? "",
   );
 
-  // Default-pick the user's first CV when the list resolves.
+  // Default-pick the user's NEWEST CV when the list resolves. Convex
+  // collect() returns insertion order (oldest first), so picking [0]
+  // would surface a stale CV after QuickFill or createCV inserts a
+  // fresh row.
   useEffect(() => {
-    if (!cvId && cvs && cvs.length > 0) {
-      setCvId(cvs[0]._id);
-    }
+    if (cvId || !cvs || cvs.length === 0) return;
+    const newest = [...cvs].sort((a, b) => b._creationTime - a._creationTime)[0];
+    setCvId(newest._id);
   }, [cvs, cvId]);
 
   const listings = useQuery(

@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
   AlertCircle,
   Check,
   CheckCircle2,
   ClipboardCopy,
   Loader2,
+  RotateCcw,
   Send,
   Sparkles,
 } from "lucide-react";
@@ -40,6 +41,7 @@ import {
 import { buildPrompt } from "./lib/promptBuilder";
 import { parseQuickFillJSON } from "./lib/parser";
 import { buildPreview } from "./lib/preview";
+import { useAuth } from "@/shared/hooks/useAuth";
 
 interface Props {
   open: boolean;
@@ -59,7 +61,7 @@ const SCOPE_ORDER: QuickFillScope[] = [
   "contacts",
 ];
 
-type Step = "prompt" | "paste";
+type Step = "prompt" | "paste" | "history";
 
 /**
  * Quick Fill — 2-step wizard.
@@ -75,6 +77,8 @@ export function QuickFillDialog({
   initialScope = "all",
 }: Props) {
   const quickFill = useMutation(api.onboarding.mutations.quickFill);
+  const { state: authState } = useAuth();
+  const isDemo = authState.isDemo;
 
   const [scope, setScope] = useState<QuickFillScope>(initialScope);
 
@@ -102,7 +106,11 @@ export function QuickFillDialog({
   }, [parsed]);
 
   const canSubmit = Boolean(
-    parsed?.ok && preview && preview.totalCount > 0 && preview.fatalErrors.length === 0,
+    parsed?.ok &&
+      preview &&
+      preview.totalCount > 0 &&
+      preview.fatalErrors.length === 0 &&
+      !isDemo,
   );
 
   const handleCopyPrompt = async () => {
@@ -118,7 +126,7 @@ export function QuickFillDialog({
     if (!parsed?.ok) return;
     setSubmitting(true);
     try {
-      const res = await quickFill({ payload: parsed.value });
+      const res = await quickFill({ payload: parsed.value, scope });
       setServerResult(res);
       const totalAdded =
         (res.profile ? 1 : 0) +
@@ -184,6 +192,29 @@ export function QuickFillDialog({
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
+        {isDemo && (
+          // Promoted out of the scrollable body so the user sees the
+          // block-reason as the FIRST thing in the dialog. Anonymous
+          // Tamu sessions write to Convex but read from localStorage —
+          // imports succeed silently and never show in the UI.
+          <div className="shrink-0 rounded-lg border-2 border-destructive bg-destructive/10 p-4 text-sm">
+            <p className="flex items-center gap-2 font-bold text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              Mode demo (Tamu) — Import diblokir
+            </p>
+            <p className="mt-1.5 leading-snug text-destructive/90">
+              Akun demo menyimpan data <strong>hanya di browser lokal</strong>.
+              Quick Fill menulis ke server, jadi hasil import <strong>tidak akan terlihat</strong>{" "}
+              di CV / Portfolio / dst — itu sebabnya CV Anda terus muncul sebagai
+              data demo bawaan.
+            </p>
+            <p className="mt-2 leading-snug text-destructive/90">
+              <strong>Solusi:</strong> Logout → klik &ldquo;Login&rdquo; → daftar pakai
+              email asli (gratis), lalu jalankan Isi Cepat dari akun tersebut.
+            </p>
+          </div>
+        )}
+
         <div className="-mx-4 flex-1 overflow-y-auto px-4 sm:-mx-6 sm:px-6">
         {serverResult ? (
           <ResultPanel
@@ -197,12 +228,15 @@ export function QuickFillDialog({
           />
         ) : (
           <Tabs value={step} onValueChange={(v) => setStep(v as Step)}>
-            <TabsList variant="pills" className="mt-2">
+            <TabsList variant="pills" className="mt-2 flex-wrap">
               <TabsTrigger value="prompt" className="gap-1.5">
                 <span className="font-semibold">1.</span> Salin Prompt
               </TabsTrigger>
               <TabsTrigger value="paste" className="gap-1.5">
                 <span className="font-semibold">2.</span> Tempel & Kirim
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-1.5">
+                Riwayat
               </TabsTrigger>
             </TabsList>
 
@@ -386,6 +420,10 @@ export function QuickFillDialog({
                 </Button>
               </div>
             </TabsContent>
+
+            <TabsContent value="history" className="mt-4">
+              <BatchHistoryPanel />
+            </TabsContent>
           </Tabs>
         )}
         </div>
@@ -547,6 +585,131 @@ function ResultPanel({
           Selesai
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Riwayat tab — shows every Quick Fill batch the user has run, newest
+ * first, with an Undo button. Undo only deletes the rows the batch
+ * inserted, preserving anything the user has manually added since.
+ */
+function BatchHistoryPanel() {
+  const batches = useQuery(api.onboarding.queries.listBatches, {});
+  const undoBatch = useMutation(api.onboarding.mutations.undoBatch);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const handleUndo = async (batchId: string) => {
+    if (busyId) return;
+    if (!confirm("Yakin batalkan import ini? Item yang dimasukkan batch ini akan dihapus permanen, profil dikembalikan ke versi sebelum import.")) {
+      return;
+    }
+    setBusyId(batchId);
+    try {
+      const res = await undoBatch({ batchId: batchId as Parameters<typeof undoBatch>[0]["batchId"] });
+      notify.success(`Dibatalkan — ${res.deleted} item dihapus`);
+    } catch (err) {
+      notify.fromError(err, "Gagal membatalkan");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (batches === undefined) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  if (batches.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+        Belum ada riwayat. Setelah Anda menjalankan Isi Cepat, semua import akan
+        muncul di sini — bisa di-undo individual kalau salah data.
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">
+        Hapus seluruh isi import ini sekaligus jika datanya salah. Profil akan
+        dikembalikan ke versi sebelum import (kalau batch ini menyentuh profil).
+      </p>
+      {batches.map((b) => {
+        const counts: string[] = [];
+        if (b.profileTouched) counts.push("profil");
+        if (b.cvIds.length) counts.push(`${b.cvIds.length} CV`);
+        if (b.portfolioIds.length) counts.push(`${b.portfolioIds.length} portofolio`);
+        if (b.goalIds.length) counts.push(`${b.goalIds.length} goal`);
+        if (b.applicationIds.length) counts.push(`${b.applicationIds.length} lamaran`);
+        if (b.contactIds.length) counts.push(`${b.contactIds.length} kontak`);
+        const label = counts.length > 0 ? counts.join(" · ") : "kosong";
+        const date = new Date(b.createdAt);
+        const dateStr = date.toLocaleString("id-ID", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const isBusy = busyId === b._id;
+        return (
+          <div
+            key={b._id}
+            className={cn(
+              "rounded-lg border bg-card p-3",
+              b.undone ? "border-border opacity-60" : "border-border",
+            )}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] uppercase">
+                    {b.scope}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{dateStr}</span>
+                  {b.undone && (
+                    <Badge
+                      variant="outline"
+                      className="border-destructive/40 text-[10px] text-destructive"
+                    >
+                      Sudah dibatalkan
+                    </Badge>
+                  )}
+                </div>
+                <p className="mt-1 text-sm font-medium">{label}</p>
+                {b.warnings.length > 0 && (
+                  <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">
+                    {b.warnings[0]}
+                  </p>
+                )}
+              </div>
+              <div className="shrink-0">
+                {b.undone ? (
+                  <span className="text-[11px] text-muted-foreground">—</span>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={() => handleUndo(b._id)}
+                    disabled={isBusy}
+                  >
+                    {isBusy ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-3.5 w-3.5" />
+                    )}
+                    Batalkan
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { BrandMark } from "@/shared/components/brand/Logo";
 import {
@@ -12,6 +12,64 @@ import {
   type PersonalBrandingTheme,
   type TemplateTheme,
 } from "../blocks/types";
+import { TEMPLATE_HYDRATOR_JS } from "./templateHydrator";
+
+/** Branding payload mirrors `convex/profile/brandingPayload.ts`. The
+ *  iframe templates read it from `window.__careerpack` and use
+ *  `data-cp` markers + `has` flags to populate / hide sections. */
+export interface BrandingPayload {
+  identity: {
+    name: string;
+    headline: string;
+    targetRole: string;
+    location: string;
+    avatarUrl: string | null;
+    contact: { email: string; linkedin: string; portfolio: string };
+  };
+  about: { bio: string; summary: string };
+  skills: string[];
+  experience: Array<{
+    company: string;
+    position: string;
+    startDate: string;
+    endDate: string;
+    current: boolean;
+    description: string;
+    achievements: string[];
+  }>;
+  education: Array<{
+    institution: string;
+    degree: string;
+    field: string;
+    startDate: string;
+    endDate: string;
+    gpa: string;
+  }>;
+  certifications: Array<{ name: string; issuer: string; date: string }>;
+  languages: Array<{ language: string; proficiency: string }>;
+  projects: Array<{
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    link: string;
+    date: string;
+    techStack: string[];
+    featured: boolean;
+    coverEmoji: string | null;
+    coverUrl: string | null;
+  }>;
+  has: {
+    about: boolean;
+    skills: boolean;
+    experience: boolean;
+    education: boolean;
+    certifications: boolean;
+    languages: boolean;
+    projects: boolean;
+    contact: boolean;
+  };
+}
 
 interface ProfileShape {
   slug: string;
@@ -23,6 +81,9 @@ interface ProfileShape {
   theme: PersonalBrandingTheme;
   headerBg: HeaderBg | null;
   accent: string | null;
+  /** Optional — when present, fed into the iframe so templates render
+   *  with real data and hide empty sections. */
+  branding?: BrandingPayload;
 }
 
 /**
@@ -44,7 +105,11 @@ export function PersonalBrandingPage({
   const theme = normalizeTheme(profile.theme);
   return (
     <div className="min-h-screen bg-background text-foreground" style={accentVar}>
-      <TemplateLayout theme={theme} displayName={profile.displayName} />
+      <TemplateLayout
+        theme={theme}
+        displayName={profile.displayName}
+        branding={profile.branding}
+      />
       {brand && <BrandFooter slug={profile.slug} displayName={profile.displayName} />}
     </div>
   );
@@ -67,9 +132,11 @@ const TEMPLATE_HTML_CACHE = new Map<TemplateTheme, string>();
 function TemplateLayout({
   theme,
   displayName,
+  branding,
 }: {
   theme: TemplateTheme;
   displayName: string;
+  branding?: BrandingPayload;
 }) {
   const url = TEMPLATE_URLS[theme];
   const [html, setHtml] = useState<string | null>(
@@ -106,6 +173,16 @@ function TemplateLayout({
     };
   }, [theme, url]);
 
+  // Inject branding payload + hydrator so the iframe can replace mock
+  // copy with the user's real data and hide empty sections. The
+  // hydrator runs after DOMContentLoaded inside the iframe; the
+  // template files themselves carry `data-cp` markers (see
+  // public/personal-branding/templates/*.html).
+  const hydratedHtml = useMemo(() => {
+    if (!html) return html;
+    return injectBrandingIntoHtml(html, branding);
+  }, [html, branding]);
+
   return (
     <div className="relative w-full" style={{ minHeight: "calc(100vh - 64px)" }}>
       {!html && !error && <TemplateSkeleton />}
@@ -118,13 +195,15 @@ function TemplateLayout({
           </div>
         </div>
       )}
-      {html && (
+      {hydratedHtml && (
         // srcDoc renders the HTML inline as `about:srcdoc` — no separate
         // network request to the template URL, so reverse-proxy CSP
         // headers (frame-ancestors) on that URL don't apply.
+        // `key` includes the branding identity name so a profile change
+        // remounts the iframe (cheaper than postMessage for now).
         <iframe
-          key={theme}
-          srcDoc={html}
+          key={`${theme}:${branding?.identity.name ?? ""}`}
+          srcDoc={hydratedHtml}
           title={`Template ${theme} untuk ${displayName}`}
           loading="eager"
           sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
@@ -228,3 +307,47 @@ function BrandFooter({ slug, displayName }: { slug: string; displayName: string 
 }
 
 export type { ProfileShape };
+
+/**
+ * Splice branding payload + hydrator script into the template HTML.
+ * Injects right before `</body>` so it runs after the template's own
+ * markup is parsed but before `DOMContentLoaded` fires for the
+ * template's own scripts (which we want — hydration must happen
+ * before any of those scripts measure layout / animate sections that
+ * we may end up hiding).
+ *
+ * If `branding` is omitted, the template renders its hardcoded mock
+ * content (still useful for the picker preview thumbnails).
+ */
+function injectBrandingIntoHtml(html: string, branding?: BrandingPayload): string {
+  if (!branding) return html;
+  // Stringify safely — avoid `</script>` collisions and HTML-escape
+  // unicode line/paragraph separators that JSON.stringify outputs raw.
+  const json = JSON.stringify(branding)
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+  const dataScript = `\n<script id="__cp_data" type="application/json">${json}</script>\n`;
+  const hydratorScript = `\n<script>${TEMPLATE_HYDRATOR_JS}</script>\n`;
+  let result = html;
+
+  // Data must come BEFORE the template's own inline scripts so per-
+  // template mounts (e.g. v2's casesMount, skillsMount) can read it
+  // when they execute. Splice into end of <head>.
+  if (result.includes("</head>")) {
+    result = result.replace("</head>", `${dataScript}</head>`);
+  } else {
+    result = `${dataScript}${result}`;
+  }
+
+  // Hydrator runs last — fills simple slots (name/headline/avatar/
+  // contact/bio) and hides empty sections.
+  if (result.includes("</body>")) {
+    result = result.replace("</body>", `${hydratorScript}</body>`);
+  } else if (result.includes("</html>")) {
+    result = result.replace("</html>", `${hydratorScript}</html>`);
+  } else {
+    result = result + hydratorScript;
+  }
+  return result;
+}

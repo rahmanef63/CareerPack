@@ -66,7 +66,7 @@ export function ProfileSection() {
   const demoProfile = useDemoProfileOverlay();
 
   const [profile, setProfile] = useState<ProfileState>(EMPTY_PROFILE);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydratedFrom, setHydratedFrom] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
@@ -74,15 +74,31 @@ export function ProfileSection() {
   const hasProfile = isDemo ? true : !!currentUser?.profile;
   const avatarUrl = isDemo ? null : currentUser?.avatarUrl ?? null;
 
+  // Re-hydrate whenever the upstream profile content changes. One-shot
+  // boolean missed the QuickFill case where Convex patches the profile
+  // while this form is open. We key on a fingerprint of the meaningful
+  // fields — stable while the user types locally (Convex copy hasn't
+  // changed), updates when the server actually patches.
   useEffect(() => {
-    if (hydrated) return;
     if (isDemo) {
-      setProfile(demoProfile.profile);
-      setHydrated(true);
+      if (hydratedFrom !== "demo") {
+        setProfile(demoProfile.profile);
+        setHydratedFrom("demo");
+      }
       return;
     }
     if (currentUser?.profile) {
       const p = currentUser.profile;
+      const fingerprint = [
+        p.fullName ?? "",
+        p.targetRole ?? "",
+        p.location ?? "",
+        p.experienceLevel ?? "",
+        p.bio ?? "",
+        (p.skills ?? []).join(","),
+        (p.interests ?? []).join(","),
+      ].join("|");
+      if (hydratedFrom === fingerprint) return;
       setProfile({
         fullName: p.fullName ?? "",
         phone: p.phone ?? "",
@@ -93,9 +109,9 @@ export function ProfileSection() {
         skills: p.skills ?? [],
         interests: p.interests ?? [],
       });
-      setHydrated(true);
+      setHydratedFrom(fingerprint);
     }
-  }, [currentUser, hydrated, isDemo, demoProfile.profile]);
+  }, [currentUser, hydratedFrom, isDemo, demoProfile.profile]);
 
   const setField = <K extends keyof ProfileState>(key: K, value: ProfileState[K]) => {
     setProfile((prev) => ({ ...prev, [key]: value }));

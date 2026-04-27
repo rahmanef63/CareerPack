@@ -839,9 +839,9 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="container hero-grid">
         <div class="hero-content">
-          <span class="eyebrow">Personal Brand • Job Hunter Template</span>
-          <h1 class="hero-title" id="hero-title">I turn experience into a <span class="gradient-text">clear career signal</span> employers remember.</h1>
-          <p class="hero-copy">A premium portfolio template for job hunters who want to present skills, projects, process, and credibility with the polish of a modern product landing page.</p>
+          <span class="eyebrow" data-cp="target-role">Personal Brand • Job Hunter Template</span>
+          <h1 class="hero-title" id="hero-title" data-cp="name">I turn experience into a <span class="gradient-text">clear career signal</span> employers remember.</h1>
+          <p class="hero-copy" data-cp="headline">A premium portfolio template for job hunters who want to present skills, projects, process, and credibility with the polish of a modern product landing page.</p>
           <div class="hero-cta">
             <a href="#contact" class="btn btn-primary">Book Interview <span aria-hidden="true">→</span></a>
             <a href="#projects" class="btn btn-ghost">View Projects <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z" stroke="currentColor" stroke-width="1.7"/></svg></a>
@@ -850,8 +850,8 @@
         <div class="hero-visual" aria-label="Career profile dashboard preview">
           <div class="portrait-glow" aria-hidden="true"></div>
           <div class="portrait-ring" aria-hidden="true"></div>
-          <figure class="portrait-wrap" aria-hidden="true">
-            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=950&q=86" alt="" width="950" height="1200" fetchpriority="high" />
+          <figure class="portrait-wrap" aria-hidden="true" data-cp-avatar-wrap>
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=950&q=86" alt="" width="950" height="1200" fetchpriority="high" data-cp="avatar" data-cp-mode="src" />
           </figure>
           <article class="float-card overview" aria-label="Career overview preview">
             <p class="mini-title">Career Overview</p>
@@ -885,12 +885,12 @@
       </div>
     </section>
 
-    <section class="section" id="about" aria-labelledby="philosophy-title">
+    <section class="section" id="about" aria-labelledby="philosophy-title" data-cp-section="about">
       <div class="container">
         <div class="section-head">
-          <p class="section-kicker">How I Present</p>
+          <p class="section-kicker">About</p>
           <h2 id="philosophy-title">My Career Positioning</h2>
-          <p>Three proof pillars that make the profile easy to scan, trust, and remember.</p>
+          <p data-cp="bio">Three proof pillars that make the profile easy to scan, trust, and remember.</p>
         </div>
         <div class="philosophy-grid">
           <article class="principle"><div class="principle-icon"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-4.5 7-11V5l-7-3-7 3v5c0 6.5 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><path d="m9 12 2 2 4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Clarity First</h3><p>Lead with a focused role direction, concise value proposition, and evidence-backed career narrative.</p></div></article>
@@ -900,32 +900,58 @@
       </div>
     </section>
 
-    <section class="section" id="skills" aria-labelledby="skills-title">
+    <section class="section" id="skills" aria-labelledby="skills-title" data-cp-section="skills">
       <div class="container">
         <div class="section-head">
           <p class="section-kicker">Skills & Value Areas</p>
           <h2 id="skills-title" class="sr-only">Skills & Value Areas</h2>
         </div>
-        <div class="services-grid">
-          <article class="glass-card service-card skill-card"><div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/></svg></div><h3>Role Positioning</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae erat at nibh pretium cursus.</p><a class="arrow-link" href="#contact" aria-label="Role Positioning">→</a></article>
-          <article class="glass-card service-card skill-card"><div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 7v10M4 12h6M10 7v10M14 7h6v6h-6zM14 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Portfolio Storytelling</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer commodo justo non mauris facilisis.</p><a class="arrow-link" href="#contact" aria-label="Portfolio Storytelling">→</a></article>
-          <article class="glass-card service-card skill-card"><div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 20V10h4v10M10 20V5h4v15M15 20v-8h4v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Product Thinking</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur vitae libero sed arcu gravida.</p><a class="arrow-link" href="#contact" aria-label="Product Thinking">→</a></article>
-          <article class="glass-card service-card skill-card"><div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 6v5M17 6v10M4 12h16M11 12v6M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="7" cy="11" r="1.7" fill="currentColor"/><circle cx="17" cy="16" r="1.7" fill="currentColor"/><circle cx="11" cy="18" r="1.7" fill="currentColor"/></svg></div><h3>Execution & Delivery</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut ipsum non lectus fermentum.</p><a class="arrow-link" href="#contact" aria-label="Execution and Delivery">→</a></article>
-          <article class="glass-card service-card skill-card"><div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v13H4zM8 10h8M8 14h4M17 3v3M7 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Communication Signal</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent luctus augue non magna volutpat.</p><a class="arrow-link" href="#contact" aria-label="Communication Signal">→</a></article>
+        <div class="services-grid" data-cp-list="skills">
+          <article class="glass-card service-card skill-card" data-cp-template><div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/></svg></div><h3 data-cp="skill-name">Skill Name</h3><a class="arrow-link" href="#contact" aria-hidden="true">→</a></article>
         </div>
       </div>
     </section>
 
-    <section class="section" id="projects" aria-labelledby="projects-title">
+    <section class="section" id="experience" aria-labelledby="experience-title" data-cp-section="experience">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">Experience</p>
+          <h2 id="experience-title">Career Highlights</h2>
+        </div>
+        <div class="services-grid" data-cp-list="experience">
+          <article class="glass-card service-card" data-cp-template>
+            <div class="service-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 7h16v13H4zM8 7V4h8v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3 data-cp="exp-position">Position</h3>
+            <p style="margin:0 0 6px;font-weight:600;color:#e7e3f0" data-cp="exp-company">Company</p>
+            <p style="margin:0 0 10px;font-size:13px;color:rgba(231,227,240,.65)" data-cp="exp-period">Period</p>
+            <p data-cp="exp-description">Description</p>
+            <ul style="margin:10px 0 0;padding-left:18px;font-size:14px;line-height:1.55" data-cp-list="exp-achievements">
+              <li data-cp-template data-cp="achievement">Achievement</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-title" data-cp-section="projects">
       <div class="container">
         <div class="section-head">
           <p class="section-kicker">Selected Projects</p>
           <h2 id="projects-title" class="sr-only">Selected Projects</h2>
         </div>
-        <div class="case-grid" id="caseCarousel">
-          <article class="glass-card case-card project-card"><div><span class="tag">Project 01</span><h3>Project 01 Title Placeholder</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer feugiat arcu sed luctus cursus.</p></div><a class="arrow-link" href="#contact">View Project →</a><div class="case-visual"><div class="bar-chart"><span class="bar" style="height:46px"></span><span class="bar" style="height:68px"></span><span class="bar" style="height:84px"></span><span class="bar" style="height:112px"></span></div></div></article>
-          <article class="glass-card case-card project-card large"><div><span class="tag">Project 02</span><h3>Project 02 Title Placeholder</h3><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque.</p></div><a class="arrow-link" href="#contact">View Project →</a><div class="case-visual"><div class="orbit"></div></div></article>
-          <article class="glass-card case-card project-card"><div><span class="tag">Project 03</span><h3>Project 03 Title Placeholder</h3><p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium.</p></div><a class="arrow-link" href="#contact">View Project →</a><div class="case-visual"><div class="prism"></div></div></article>
+        <div class="case-grid" id="caseCarousel" data-cp-list="projects">
+          <article class="glass-card case-card project-card" data-cp-template>
+            <div>
+              <span class="tag" data-cp="proj-category">project</span>
+              <h3 data-cp="proj-title">Project Title</h3>
+              <p data-cp="proj-description">Project description.</p>
+              <div data-cp-list="proj-tech" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+                <span data-cp-template data-cp="tech-name" class="tag">Tech</span>
+              </div>
+            </div>
+            <a class="arrow-link" data-cp="proj-link" data-cp-mode="href" href="#contact">View Project →</a>
+            <div class="case-visual"><div class="orbit"></div></div>
+          </article>
         </div>
       </div>
     </section>
@@ -978,12 +1004,12 @@
       </div>
     </section>
 
-    <section class="section" id="contact" aria-labelledby="cta-title">
+    <section class="section" id="contact" aria-labelledby="cta-title" data-cp-section="contact">
       <div class="container">
         <div class="final-cta">
           <div class="cta-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M5 19c5-1.5 10.5-6.6 14-14-7.4 3.5-12.5 9-14 14Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m12 12-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15 5c1 2 2 3 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
           <div><h2 id="cta-title">Ready to discuss the role?</h2><p>Use this section as the final recruiter CTA: interview request, portfolio review, or direct contact.</p></div>
-          <div class="cta-actions"><a class="btn btn-primary" href="mailto:hello@example.com">Contact Me →</a><a class="btn btn-ghost" href="#projects">Explore Projects <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
+          <div class="cta-actions"><a class="btn btn-primary" href="mailto:hello@example.com" data-cp="contact-email-href" data-cp-mode="href">Contact Me →</a><a class="btn btn-ghost" href="#" data-cp="contact-linkedin" data-cp-mode="href">LinkedIn <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z" stroke="currentColor" stroke-width="1.7"/></svg></a></div>
         </div>
       </div>
     </section>

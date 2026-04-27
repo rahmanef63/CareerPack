@@ -11,7 +11,7 @@ import { BrandMark } from "@/shared/components/brand/Logo";
 import { ParangPattern } from "@/shared/components/decor/ParangPattern";
 import { Reveal } from "@/shared/components/motion/Reveal";
 import { cn } from "@/shared/lib/utils";
-import { PersonalBrandingPage } from "@/slices/personal-branding/themes";
+import { PersonalBrandingPage, type BrandingPayload } from "@/slices/personal-branding/themes";
 import type {
   Block as PBBlock,
   HeaderBg as PBHeaderBg,
@@ -89,6 +89,7 @@ async function fetchPublicProfile(slug: string): Promise<{
   headerBg: { kind: string; value: string } | null;
   accent: string | null;
   blocks: ReadonlyArray<{ id: string; type: string; payload: unknown }>;
+  branding?: BrandingPayload;
   updatedAt: number;
 } | null> {
   if (!CONVEX_URL) return null;
@@ -159,6 +160,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           theme: (profile.theme ?? "linktree") as PBTheme,
           headerBg: (profile.headerBg ?? null) as PBHeaderBg | null,
           accent: profile.accent ?? null,
+          branding: profile.branding,
         }}
       />
     );

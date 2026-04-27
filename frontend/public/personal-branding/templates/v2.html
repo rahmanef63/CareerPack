@@ -1761,17 +1761,17 @@
     <section class="hero container reveal section" id="top">
       <div class="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Career Proof. Portfolio. Interview Signal.</p>
-          <h1 class="hero-title">I turn experience into career proof recruiters can understand with <em>confidence.</em></h1>
-          <p class="hero-lead">Replace this with a short, specific value proposition. Use this area to explain the role you target, the proof you bring, and the outcome your work supports.</p>
+          <p class="eyebrow" data-cp="target-role">Career Proof. Portfolio. Interview Signal.</p>
+          <h1 class="hero-title" data-cp="name">I turn experience into career proof recruiters can understand with <em>confidence.</em></h1>
+          <p class="hero-lead" data-cp="headline">Replace this with a short, specific value proposition. Use this area to explain the role you target, the proof you bring, and the outcome your work supports.</p>
           <div class="hero-actions">
             <a class="btn btn-primary magnetic" href="#contact">Book Interview <span>→</span></a>
             <a class="btn btn-ghost magnetic" href="#projects">View Projects <span>↗</span></a>
           </div>
         </div>
         <div class="hero-visual tilt-zone">
-          <div class="portrait">
-            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1200&q=80" alt="Template portrait placeholder" />
+          <div class="portrait" data-cp-avatar-wrap>
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1200&q=80" alt="Template portrait placeholder" data-cp="avatar" data-cp-mode="src" />
           </div>
           <aside class="float-card clarity-card">
             <h3>Helping recruiters understand your strongest career signal.</h3>
@@ -1842,23 +1842,32 @@
       </div>
     </section>
 
-    <section class="section block container reveal" id="about">
+    <section class="section block container reveal" id="about" data-cp-section="about">
       <div class="section-head">
         <div>
           <p class="eyebrow">About</p>
           <h2 class="title">A concise profile built for career clarity</h2>
         </div>
-        <p class="copy">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Replace this section with a short career narrative, target role, working style, and the evidence a recruiter should remember.</p>
+        <p class="copy" data-cp="bio">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Replace this section with a short career narrative, target role, working style, and the evidence a recruiter should remember.</p>
       </div>
     </section>
 
-    <section class="section block container reveal" id="skills">
+    <section class="section block container reveal" id="experience" data-cp-section="experience">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Experience</p>
+          <h2 class="title">Career highlights</h2>
+        </div>
+      </div>
+      <div class="services stagger" id="experienceMount"></div>
+    </section>
+
+    <section class="section block container reveal" id="skills" data-cp-section="skills">
       <div class="section-head">
         <div>
           <p class="eyebrow">Capabilities</p>
           <h2 class="title">Career strengths you can adapt</h2>
         </div>
-        <p class="copy">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec facilisis, risus sed feugiat dignissim, lorem sapien aliquam nunc, non cursus mi justo sed arcu.</p>
       </div>
       <div class="services stagger" id="skillsMount"></div>
     </section>
@@ -1876,7 +1885,7 @@
       </div>
     </section>
 
-    <section class="section block work-wrap" id="projects">
+    <section class="section block work-wrap" id="projects" data-cp-section="projects">
       <div class="container reveal">
         <div class="section-head">
           <div>
@@ -1886,10 +1895,6 @@
           <a class="text-link" href="#contact">View All Projects <span>→</span></a>
         </div>
         <div class="cases stagger" id="casesMount"></div>
-        <div class="mobile-deck">
-          <div class="deck" id="deckMount"></div>
-          <div class="deck-progress"><span id="deckProgress"></span></div>
-        </div>
       </div>
     </section>
 
@@ -1922,13 +1927,13 @@
             </div>
           </div>
         </article>
-        <article class="cta-panel" id="contact">
+        <article class="cta-panel" id="contact" data-cp-section="contact">
           <div>
             <h2>Ready to discuss the role?</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Replace this with a clear final call-to-action.</p>
             <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <a class="btn btn-primary magnetic" href="mailto:hello@example.com">Contact Me <span>→</span></a>
-              <a class="btn btn-ghost magnetic" href="#projects">View Projects <span>↗</span></a>
+              <a class="btn btn-primary magnetic" href="mailto:hello@example.com" data-cp="contact-email-href" data-cp-mode="href">Contact Me <span>→</span></a>
+              <a class="btn btn-ghost magnetic" href="#" data-cp="contact-linkedin" data-cp-mode="href">LinkedIn <span>↗</span></a>
             </div>
           </div>
           <img loading="lazy" class="cta-visual" src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=700&q=80" alt="Decorative placeholder image" />
@@ -2045,21 +2050,106 @@
       ]
     };
 
-    $('#skillsMount').innerHTML = data.skills.map(([t, p, icon]) =>
-      `<article class="service skill-card"><div class="service-icon"><svg viewBox="0 0 48 48"><path d="${icon}"/></svg></div><h3>${t}</h3><p>${p}</p><a class="text-link" href="#contact">Learn More <span>→</span></a></article>`
-    ).join('');
+    /* === BRANDING PAYLOAD INTAKE ===
+     * If the iframe parent injected `<script id="__cp_data">`, swap
+     * the mock data above for the real user data. Each list keeps the
+     * existing card markup so the editorial cream aesthetic stays
+     * consistent. */
+    let cp = null;
+    try {
+      const cpEl = document.getElementById('__cp_data');
+      if (cpEl) cp = JSON.parse(cpEl.textContent || 'null');
+    } catch (e) { cp = null; }
+    function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+    /* Skills — render real skill names as plain cards (no icon). */
+    if (cp && cp.has && cp.has.skills && cp.skills.length) {
+      $('#skillsMount').innerHTML = cp.skills.map(function(s){
+        return '<article class="service skill-card"><h3>' + escHtml(s) + '</h3></article>';
+      }).join('');
+    } else {
+      $('#skillsMount').innerHTML = data.skills.map(([t, p, icon]) =>
+        `<article class="service skill-card"><div class="service-icon"><svg viewBox="0 0 48 48"><path d="${icon}"/></svg></div><h3>${t}</h3><p>${p}</p><a class="text-link" href="#contact">Learn More <span>→</span></a></article>`
+      ).join('');
+    }
+
+    /* Experience — built from CV experience blocks. */
+    var expMount = $('#experienceMount');
+    if (expMount && cp && cp.has && cp.has.experience && cp.experience.length) {
+      expMount.innerHTML = cp.experience.map(function(e){
+        var period = e.current
+          ? escHtml(e.startDate) + ' — Sekarang'
+          : (e.startDate && e.endDate)
+            ? escHtml(e.startDate) + ' — ' + escHtml(e.endDate)
+            : escHtml(e.startDate || e.endDate || '');
+        var ach = (e.achievements && e.achievements.length)
+          ? '<ul style="margin:10px 0 0;padding-left:18px;font-size:14px;line-height:1.55">'
+              + e.achievements.map(function(a){ return '<li>' + escHtml(a) + '</li>'; }).join('')
+            + '</ul>'
+          : '';
+        return '<article class="service skill-card">'
+          + '<h3>' + escHtml(e.position) + '</h3>'
+          + '<p style="margin:0 0 4px;font-weight:600">' + escHtml(e.company) + '</p>'
+          + '<p style="margin:0 0 10px;font-size:13px;opacity:.65">' + period + '</p>'
+          + (e.description ? '<p>' + escHtml(e.description) + '</p>' : '')
+          + ach
+          + '</article>';
+      }).join('');
+    } else if (expMount) {
+      // No experience yet — leave the section hidden via data-cp-section.
+    }
 
     $('#toolsMount').innerHTML = data.tools.map(([name, path]) =>
       `<div class="tool-tile" title="${name}"><svg viewBox="0 0 24 24"><path d="${path}"/></svg><span>${name}</span></div>`
     ).join('');
 
-    const caseHTML = ([cat, t, p, img], i) =>
-      `<article class="case project-card"><div class="case-img"><img loading="lazy" src="${img}" alt="Project ${i + 1} placeholder"/></div><div class="case-body"><p class="case-kicker">${cat}</p><h3>${t}</h3><div class="tags"><span class="tag">Metric 01</span><span class="tag">Metric 02</span></div><p>${p}</p><a class="text-link" href="#contact">View Project <span>→</span></a></div></article>`;
-    $('#casesMount').innerHTML = data.cases.map(caseHTML).join('');
-
-    $('#deckMount').innerHTML = data.cases.map(([cat, t, p, img], i) =>
-      `<article class="deck-card project-card"><img loading="lazy" src="${img}" alt="Project ${i + 1} placeholder"/><div class="deck-body"><p class="case-kicker">${cat}</p><h3>${t}</h3><div class="tags"><span class="tag">Metric 01</span><span class="tag">Metric 02</span></div><p>${p}</p></div></article>`
-    ).join('');
+    /* Cases (Projects) — portfolio + CV projects. */
+    function caseHTMLFromCP(p, i) {
+      var cover = p.coverUrl
+        ? '<div class="case-img"><img loading="lazy" src="' + escHtml(p.coverUrl) + '" alt="' + escHtml(p.title) + '"/></div>'
+        : '<div class="case-img" style="display:flex;align-items:center;justify-content:center;font-size:48px">' + (p.coverEmoji || '🚀') + '</div>';
+      var techs = (p.techStack || []).slice(0, 4)
+        .map(function(t){ return '<span class="tag">' + escHtml(t) + '</span>'; }).join('');
+      var link = p.link
+        ? '<a class="text-link" href="' + escHtml(p.link) + '" target="_blank" rel="noopener">View Project <span>→</span></a>'
+        : '';
+      return '<article class="case project-card">'
+        + cover
+        + '<div class="case-body">'
+        +   '<p class="case-kicker">' + escHtml(p.category || ('Project ' + (i+1))) + '</p>'
+        +   '<h3>' + escHtml(p.title) + '</h3>'
+        +   (techs ? '<div class="tags">' + techs + '</div>' : '')
+        +   (p.description ? '<p>' + escHtml(p.description) + '</p>' : '')
+        +   link
+        + '</div></article>';
+    }
+    function deckHTMLFromCP(p, i) {
+      var img = p.coverUrl
+        ? '<img loading="lazy" src="' + escHtml(p.coverUrl) + '" alt="' + escHtml(p.title) + '"/>'
+        : '<div style="aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font-size:64px">' + (p.coverEmoji || '🚀') + '</div>';
+      var techs = (p.techStack || []).slice(0, 3)
+        .map(function(t){ return '<span class="tag">' + escHtml(t) + '</span>'; }).join('');
+      return '<article class="deck-card project-card">'
+        + img
+        + '<div class="deck-body">'
+        +   '<p class="case-kicker">' + escHtml(p.category || ('Project ' + (i+1))) + '</p>'
+        +   '<h3>' + escHtml(p.title) + '</h3>'
+        +   (techs ? '<div class="tags">' + techs + '</div>' : '')
+        +   (p.description ? '<p>' + escHtml(p.description) + '</p>' : '')
+        + '</div></article>';
+    }
+    if (cp && cp.has && cp.has.projects && cp.projects.length) {
+      $('#casesMount').innerHTML = cp.projects.map(caseHTMLFromCP).join('');
+      $('#deckMount').innerHTML = cp.projects.map(deckHTMLFromCP).join('');
+    } else {
+      const caseHTML = ([cat, t, p, img], i) =>
+        `<article class="case project-card"><div class="case-img"><img loading="lazy" src="${img}" alt="Project ${i + 1} placeholder"/></div><div class="case-body"><p class="case-kicker">${cat}</p><h3>${t}</h3><div class="tags"><span class="tag">Metric 01</span><span class="tag">Metric 02</span></div><p>${p}</p><a class="text-link" href="#contact">View Project <span>→</span></a></div></article>`;
+      $('#casesMount').innerHTML = data.cases.map(caseHTML).join('');
+      $('#deckMount').innerHTML = data.cases.map(([cat, t, p, img], i) =>
+        `<article class="deck-card project-card"><img loading="lazy" src="${img}" alt="Project ${i + 1} placeholder"/><div class="deck-body"><p class="case-kicker">${cat}</p><h3>${t}</h3><div class="tags"><span class="tag">Metric 01</span><span class="tag">Metric 02</span></div><p>${p}</p></div></article>`
+      ).join('');
+    }
 
     $('#stepsMount').innerHTML = data.steps.map(([n, t, p]) =>
       `<article class="step process-card"><div class="step-no">${n}</div><h3>${t}</h3><p>${p}</p></article>`

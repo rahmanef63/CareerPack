@@ -50,6 +50,7 @@ import type * as mockInterview_queries from "../mockInterview/queries.js";
 import type * as notifications_mutations from "../notifications/mutations.js";
 import type * as notifications_queries from "../notifications/queries.js";
 import type * as onboarding_mutations from "../onboarding/mutations.js";
+import type * as onboarding_queries from "../onboarding/queries.js";
 import type * as onboarding_sanitize from "../onboarding/sanitize.js";
 import type * as onboarding_types from "../onboarding/types.js";
 import type * as passwordReset from "../passwordReset.js";
@@ -113,6 +114,7 @@ declare const fullApi: ApiFromModules<{
   "notifications/mutations": typeof notifications_mutations;
   "notifications/queries": typeof notifications_queries;
   "onboarding/mutations": typeof onboarding_mutations;
+  "onboarding/queries": typeof onboarding_queries;
   "onboarding/sanitize": typeof onboarding_sanitize;
   "onboarding/types": typeof onboarding_types;
   passwordReset: typeof passwordReset;

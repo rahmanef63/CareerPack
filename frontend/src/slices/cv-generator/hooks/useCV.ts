@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { type CVData, type CVDisplayPrefs, type CVTemplateId, type SkillCategory, type ProficiencyLevel } from '../types';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -55,19 +55,57 @@ export function useCV() {
     const demo = useDemoCVOverlay();
 
     const [activeCVId, setActiveCVId] = useState<Id<"cvs"> | null>(null);
+    // Track the newest id we've already auto-selected so we can detect
+    // when a brand-new CV appears (QuickFill insert / createCV) and
+    // switch the picker over to it. Without this guard the picker would
+    // re-fire on every Convex live update and clobber a manual pick.
+    const lastAutoSelected = useRef<string | null>(null);
 
-    // Auto-select first CV
+    // Newest CV first — matters when QuickFill inserts a fresh row
+    // and we want it to become the visible/active CV without the user
+    // having to manually swap. _creationTime is millisecond ts on every
+    // Convex doc.
+    const sortedCVs = useMemo(() => {
+        if (!cvs) return cvs;
+        return [...cvs].sort((a, b) => b._creationTime - a._creationTime);
+    }, [cvs]);
+
+    // Auto-select newest CV. Three triggers:
+    //   1. First load — activeCVId null → pick newest.
+    //   2. New CV appeared (QuickFill / createCV) — newest id differs
+    //      from the one we last auto-selected → switch.
+    //   3. Active CV got deleted (undo) — stillExists false → fall back
+    //      to current newest.
     useEffect(() => {
-        if (cvs && cvs.length > 0 && !activeCVId) {
-            setActiveCVId(cvs[0]._id);
+        if (!sortedCVs || sortedCVs.length === 0) return;
+        const newest = sortedCVs[0]._id;
+        const newestStr = String(newest);
+        const stillExists = activeCVId
+            ? sortedCVs.some((c) => c._id === activeCVId)
+            : false;
+
+        if (!activeCVId) {
+            setActiveCVId(newest);
+            lastAutoSelected.current = newestStr;
+            return;
         }
-    }, [cvs, activeCVId]);
+        if (!stillExists) {
+            setActiveCVId(newest);
+            lastAutoSelected.current = newestStr;
+            return;
+        }
+        // Newest changed since our last auto-pick → fresh insert. Swap.
+        if (lastAutoSelected.current && lastAutoSelected.current !== newestStr) {
+            setActiveCVId(newest);
+            lastAutoSelected.current = newestStr;
+        }
+    }, [sortedCVs, activeCVId]);
 
     // Convert schema format to frontend CVData format if needed
     // Schema: personalInfo has linkedin, portfolio now.
     // Schema skills: {id, name, category, proficiency} matches frontend Skill
 
-    const activeCV: Doc<"cvs"> | undefined = cvs?.find((c) => c._id === activeCVId);
+    const activeCV: Doc<"cvs"> | undefined = sortedCVs?.find((c) => c._id === activeCVId);
 
     // Helper to map backend data to frontend structure
     const cvData: CVData | null = activeCV ? {
@@ -198,6 +236,7 @@ export function useCV() {
             saveCV: demo.saveCV,
             isLoading: demo.isLoading,
             createCV: createCVMutation,
+            activeCVId: null as Id<"cvs"> | null,
         };
     }
 
@@ -205,6 +244,7 @@ export function useCV() {
         cvData,
         saveCV,
         isLoading: cvs === undefined,
-        createCV: createCVMutation
+        createCV: createCVMutation,
+        activeCVId,
     };
 }

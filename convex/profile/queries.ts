@@ -8,6 +8,7 @@ import {
   type AutoCVInput,
   type AutoPortfolioItem,
 } from "./autoBlocks";
+import { buildBrandingPayload } from "./brandingPayload";
 
 // ---------------------------------------------------------------------
 // Current user / private profile
@@ -330,6 +331,32 @@ export const getBySlug = query({
       });
     }
 
+    // Pull the user's primary CV (newest first) so dynamic templates
+    // can populate hero / about / skills / projects / experience from
+    // real CV data instead of mock content. Cheap — single doc.
+    const cvDoc = await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", profile.userId))
+      .order("desc")
+      .first();
+
+    const branding = buildBrandingPayload({
+      profile: {
+        fullName: profile.fullName,
+        publicHeadline: profile.publicHeadline ?? "",
+        targetRole: profile.publicTargetRoleShow ? profile.targetRole : "",
+        location: profile.location ?? "",
+        bio: profile.publicBioShow ? (profile.bio ?? "") : "",
+        skills: profile.publicSkillsShow ? (profile.skills ?? []) : [],
+        avatarUrl,
+        contactEmail: profile.publicContactEmail ?? "",
+        linkedinUrl: profile.publicLinkedinUrl ?? "",
+        portfolioUrl: profile.publicPortfolioUrl ?? "",
+      },
+      cv: cvDoc,
+      portfolio,
+    });
+
     return {
       slug: profile.publicSlug ?? slug,
       displayName: profile.fullName,
@@ -350,6 +377,10 @@ export const getBySlug = query({
       headerBg: profile.publicHeaderBg ?? null,
       accent: profile.publicAccent ?? null,
       blocks,
+      // Dynamic data feed for the iframe templates — all sections
+      // user has populated, with empty ones omitted so the hydrator
+      // script can hide them.
+      branding,
       updatedAt: profile._creationTime,
     };
   },
