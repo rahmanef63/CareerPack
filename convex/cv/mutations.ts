@@ -1,7 +1,32 @@
-import { mutation, internalMutation } from "../_generated/server";
+import { mutation, internalMutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
+import type { Id } from "../_generated/dataModel";
+
+/**
+ * Cascade FK references when a CV is deleted. `atsScans.cvId` is a
+ * REQUIRED FK so the row would be unreadable if left dangling — must
+ * delete. `jobApplications.cvId` is optional, so we just unset it
+ * (preserves the application record + its history).
+ */
+async function cascadeRemoveCV(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  cvId: Id<"cvs">,
+) {
+  const scans = await ctx.db
+    .query("atsScans")
+    .withIndex("by_user_cv", (q) => q.eq("userId", userId).eq("cvId", cvId))
+    .collect();
+  for (const s of scans) await ctx.db.delete(s._id);
+
+  const apps = await ctx.db
+    .query("jobApplications")
+    .withIndex("by_user_cv", (q) => q.eq("userId", userId).eq("cvId", cvId))
+    .collect();
+  for (const a of apps) await ctx.db.patch(a._id, { cvId: undefined });
+}
 
 export const createCV = mutation({
   args: {
@@ -117,16 +142,25 @@ export const deleteCV = mutation({
   args: { cvId: v.id("cvs") },
   handler: async (ctx, args) => {
     await requireOwnedDoc(ctx, args.cvId, "CV");
+    const userId = await requireUser(ctx);
+    await cascadeRemoveCV(ctx, userId, args.cvId);
     await ctx.db.delete(args.cvId);
   },
 });
 
+/**
+ * Bulk delete with FK cascade — can't use the generic
+ * `makeBulkDelete` factory because we need to clean up atsScans +
+ * jobApplications.cvId per id before the row goes away.
+ */
 export const bulkDeleteCVs = mutation({
-  args: { cvIds: v.array(v.id("cvs")) },
+  args: { ids: v.array(v.id("cvs")) },
   handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
     let deleted = 0;
-    for (const id of args.cvIds) {
+    for (const id of args.ids) {
       await requireOwnedDoc(ctx, id, "CV");
+      await cascadeRemoveCV(ctx, userId, id);
       await ctx.db.delete(id);
       deleted++;
     }

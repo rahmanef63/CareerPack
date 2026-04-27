@@ -1,38 +1,23 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
-import { toast } from "sonner";
 import { api } from "../../../../../../convex/_generated/api";
-import type { Doc, Id } from "../../../../../../convex/_generated/dataModel";
+import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
-import { ResourceTable } from "../ResourceTable";
+import { defineResource } from "../../lib/defineResource";
 
 type Contact = Doc<"contacts">;
 
 const columns: ReadonlyArray<ColumnDef<Contact>> = [
-  {
-    id: "name",
-    header: "Nama",
-    accessor: (r) => r.name,
-  },
+  { id: "name", header: "Nama", accessor: (r) => r.name },
   {
     id: "role",
     header: "Peran",
     accessor: (r) => r.role,
     cell: (r) => <Badge variant="outline">{r.role}</Badge>,
   },
-  {
-    id: "company",
-    header: "Perusahaan",
-    accessor: (r) => r.company ?? null,
-  },
-  {
-    id: "email",
-    header: "Email",
-    accessor: (r) => r.email ?? null,
-    hideOnMobile: true,
-  },
+  { id: "company", header: "Perusahaan", accessor: (r) => r.company ?? null },
+  { id: "email", header: "Email", accessor: (r) => r.email ?? null, hideOnMobile: true },
   {
     id: "favorite",
     header: "Favorit",
@@ -65,52 +50,26 @@ const filters: ReadonlyArray<FilterDef<Contact>> = [
   },
 ];
 
-export function ContactsTab() {
-  const data = useQuery(api.contacts.queries.listContacts);
-  const bulkDelete = useMutation(api.contacts.mutations.bulkDeleteContacts);
-  const quickFill = useMutation(api.onboarding.mutations.quickFill);
-
-  return (
-    <ResourceTable<Contact>
-      data={data}
-      isLoading={data === undefined}
-      columns={columns}
-      filters={filters}
-      rowKey={(r) => r._id}
-      searchAccessor={(r) =>
-        `${r.name} ${r.company ?? ""} ${r.position ?? ""} ${r.email ?? ""} ${r.role}`
-      }
-      searchPlaceholder="Cari kontak…"
-      resourceLabel="kontak"
-      exportPrefix="contacts"
-      exportShape={({ _id: _i, _creationTime: _t, userId: _u, ...rest }) => rest}
-      onBulkDelete={async (ids) =>
-        bulkDelete({ contactIds: ids as Id<"contacts">[] })
-      }
-      onImport={async (parsed) => {
-        const contacts = Array.isArray(parsed)
-          ? parsed
-          : isContactsWrapper(parsed)
-            ? parsed.contacts
-            : null;
-        if (!contacts) {
-          toast.error("Format tidak dikenali — array atau `{ contacts: [...] }`.");
-          return;
-        }
-        const res = await quickFill({ payload: { contacts }, scope: "contacts" });
-        toast.success(
-          `${res.contacts.added} kontak ditambahkan${
-            res.contacts.skipped > 0 ? ` (${res.contacts.skipped} dilewati)` : ""
-          }.`,
-        );
-      }}
-      emptyMessage="Belum ada kontak."
-    />
-  );
-}
-
-function isContactsWrapper(v: unknown): v is { contacts: unknown[] } {
-  if (typeof v !== "object" || v === null) return false;
-  const obj = v as Record<string, unknown>;
-  return Array.isArray(obj.contacts);
-}
+export const ContactsTab = defineResource<Contact>({
+  query: api.contacts.queries.listContacts,
+  bulkDelete: api.contacts.mutations.bulkDeleteContacts,
+  quickFill: api.onboarding.mutations.quickFill,
+  resourceLabel: "kontak",
+  exportPrefix: "contacts",
+  columns,
+  filters,
+  rowKey: (r) => r._id,
+  searchAccessor: (r) =>
+    `${r.name} ${r.company ?? ""} ${r.position ?? ""} ${r.email ?? ""} ${r.role}`,
+  searchPlaceholder: "Cari kontak…",
+  emptyMessage: "Belum ada kontak.",
+  importConfig: {
+    wrapperKey: "contacts",
+    mode: "array",
+    scope: "contacts",
+    formatSuccess: (res) =>
+      `${res.contacts.added} kontak ditambahkan${
+        res.contacts.skipped > 0 ? ` (${res.contacts.skipped} dilewati)` : ""
+      }.`,
+  },
+});

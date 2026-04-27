@@ -56,6 +56,8 @@ export interface ResourceTableProps<T> {
   resourceLabel: string;
   /** Empty-state message when there is genuinely no data. */
   emptyMessage?: ReactNode;
+  /** Optional row click — opens detail / relations drawer. */
+  onRowClick?: (row: T) => void;
 }
 
 export function ResourceTable<T>({
@@ -72,6 +74,7 @@ export function ResourceTable<T>({
   onImport,
   resourceLabel,
   emptyMessage,
+  onRowClick,
 }: ResourceTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -150,6 +153,7 @@ export function ResourceTable<T>({
         onSelectionChange={setSelectedIds}
         isLoading={isLoading}
         emptyMessage={emptyMessage}
+        onRowClick={onRowClick}
         toolbarActions={
           <div className="flex flex-wrap items-center gap-2">
             {onImport && (

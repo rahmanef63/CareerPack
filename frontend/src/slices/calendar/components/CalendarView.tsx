@@ -21,12 +21,11 @@ import {
   ResponsiveDialogTitle,
 } from "@/shared/components/ui/responsive-dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
+  ResponsiveSelect,
+  ResponsiveSelectContent,
+  ResponsiveSelectItem,
+  ResponsiveSelectTrigger,
+} from "@/shared/components/ui/responsive-select";
 import { notify } from "@/shared/lib/notify";
 import { cn } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/components/ui/skeleton";
@@ -406,21 +405,19 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
           </div>
           <div className="space-y-2">
             <Label htmlFor="agenda-type">Jenis</Label>
-            <Select
+            <ResponsiveSelect
               value={type}
               onValueChange={(v) => setType(v as AgendaType)}
             >
-              <SelectTrigger id="agenda-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
+              <ResponsiveSelectTrigger id="agenda-type" />
+              <ResponsiveSelectContent drawerTitle="Jenis agenda">
                 {TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
+                  <ResponsiveSelectItem key={opt.value} value={opt.value}>
                     {opt.label}
-                  </SelectItem>
+                  </ResponsiveSelectItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </ResponsiveSelectContent>
+            </ResponsiveSelect>
           </div>
           <div className="space-y-2">
             <Label htmlFor="agenda-location">Lokasi / Platform</Label>

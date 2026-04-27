@@ -10,12 +10,11 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
+  ResponsiveSelect,
+  ResponsiveSelectContent,
+  ResponsiveSelectItem,
+  ResponsiveSelectTrigger,
+} from "@/shared/components/ui/responsive-select";
 import {
   Tabs,
   TabsContent,
@@ -111,21 +110,19 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
               Belum ada CV — buat CV dulu di menu CV Generator.
             </p>
           ) : (
-            <Select
+            <ResponsiveSelect
               value={cvId}
               onValueChange={(v) => setCvId(v as Id<"cvs">)}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Pilih CV…" />
-              </SelectTrigger>
-              <SelectContent>
+              <ResponsiveSelectTrigger placeholder="Pilih CV…" />
+              <ResponsiveSelectContent drawerTitle="Pilih CV">
                 {(cvs ?? []).map((c) => (
-                  <SelectItem key={c._id} value={c._id}>
+                  <ResponsiveSelectItem key={c._id} value={c._id}>
                     {c.title}
-                  </SelectItem>
+                  </ResponsiveSelectItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </ResponsiveSelectContent>
+            </ResponsiveSelect>
           )}
         </div>
 
@@ -178,21 +175,19 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
                 Contoh Lowongan&rdquo;.
               </p>
             ) : (
-              <Select
+              <ResponsiveSelect
                 value={listingId}
                 onValueChange={(v) => setListingId(v as Id<"jobListings">)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih lowongan…" />
-                </SelectTrigger>
-                <SelectContent>
+                <ResponsiveSelectTrigger placeholder="Pilih lowongan…" />
+                <ResponsiveSelectContent drawerTitle="Pilih lowongan">
                   {listings.map((l) => (
-                    <SelectItem key={l._id} value={l._id}>
+                    <ResponsiveSelectItem key={l._id} value={l._id}>
                       {l.title} — {l.company}
-                    </SelectItem>
+                    </ResponsiveSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </ResponsiveSelectContent>
+              </ResponsiveSelect>
             )}
           </TabsContent>
         </Tabs>

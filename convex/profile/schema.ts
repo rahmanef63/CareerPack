@@ -116,5 +116,12 @@ export const profileTables = {
     avatarStorageId: v.optional(v.string()),
   })
     .index("by_user", ["userId"])
-    .index("by_public_slug", ["publicSlug"]),
+    .index("by_public_slug", ["publicSlug"])
+    /**
+     * Lets `admin/mutations.ts` count admins (the "are you the only
+     * admin left?" check) without scanning every profile row. Replaces
+     * three `.collect()` calls in updateUserRole / deleteUser /
+     * bulkDeleteUsers — O(users) → O(admins).
+     */
+    .index("by_role", ["role"]),
 };

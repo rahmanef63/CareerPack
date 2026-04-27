@@ -1,46 +1,21 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
-import { toast } from "sonner";
 import { api } from "../../../../../../convex/_generated/api";
-import type { Doc, Id } from "../../../../../../convex/_generated/dataModel";
+import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
-import { ResourceTable } from "../ResourceTable";
+import { Badge } from "@/shared/components/ui/badge";
+import { defineResource } from "../../lib/defineResource";
 
 type CV = Doc<"cvs">;
+type Application = Doc<"jobApplications">;
+type ATSScan = Doc<"atsScans">;
 
 const columns: ReadonlyArray<ColumnDef<CV>> = [
-  {
-    id: "title",
-    header: "Judul",
-    accessor: (r) => r.title,
-    width: "w-1/3",
-  },
-  {
-    id: "fullName",
-    header: "Nama",
-    accessor: (r) => r.personalInfo.fullName,
-  },
-  {
-    id: "template",
-    header: "Template",
-    accessor: (r) => r.template,
-    hideOnMobile: true,
-  },
-  {
-    id: "experience",
-    header: "Pengalaman",
-    accessor: (r) => r.experience.length,
-    align: "right",
-    hideOnMobile: true,
-  },
-  {
-    id: "skills",
-    header: "Skill",
-    accessor: (r) => r.skills.length,
-    align: "right",
-    hideOnMobile: true,
-  },
+  { id: "title", header: "Judul", accessor: (r) => r.title, width: "w-1/3" },
+  { id: "fullName", header: "Nama", accessor: (r) => r.personalInfo.fullName },
+  { id: "template", header: "Template", accessor: (r) => r.template, hideOnMobile: true },
+  { id: "experience", header: "Pengalaman", accessor: (r) => r.experience.length, align: "right", hideOnMobile: true },
+  { id: "skills", header: "Skill", accessor: (r) => r.skills.length, align: "right", hideOnMobile: true },
   {
     id: "createdAt",
     header: "Dibuat",
@@ -63,48 +38,83 @@ const filters: ReadonlyArray<FilterDef<CV>> = [
   },
 ];
 
-export function CVTab() {
-  const data = useQuery(api.cv.queries.getUserCVs);
-  const bulkDelete = useMutation(api.cv.mutations.bulkDeleteCVs);
-  const quickFill = useMutation(api.onboarding.mutations.quickFill);
-
-  return (
-    <ResourceTable<CV>
-      data={data}
-      isLoading={data === undefined}
-      columns={columns}
-      filters={filters}
-      rowKey={(r) => r._id}
-      searchAccessor={(r) =>
-        `${r.title} ${r.personalInfo.fullName} ${r.personalInfo.email} ${r.template}`
-      }
-      searchPlaceholder="Cari CV (judul, nama, email)…"
-      resourceLabel="CV"
-      exportPrefix="cv"
-      exportShape={({ _id: _i, _creationTime: _t, userId: _u, ...rest }) => rest}
-      onBulkDelete={async (ids) =>
-        bulkDelete({ cvIds: ids as Id<"cvs">[] })
-      }
-      onImport={async (parsed) => {
-        // Accept either a single CV object or `{ cv: {...} }` wrapper.
-        const payload = isCVWrapper(parsed) ? parsed : { cv: parsed };
-        const res = await quickFill({ payload, scope: "cv" });
-        if (res.cv) {
-          toast.success("CV ditambahkan dari JSON.");
-        } else {
-          toast.error(
-            res.warnings[0] ??
-              "CV tidak dapat diimpor — periksa format JSON.",
+export const CVTab = defineResource<CV>({
+  query: api.cv.queries.getUserCVs,
+  bulkDelete: api.cv.mutations.bulkDeleteCVs,
+  quickFill: api.onboarding.mutations.quickFill,
+  resourceLabel: "CV",
+  exportPrefix: "cv",
+  columns,
+  filters,
+  rowKey: (r) => r._id,
+  searchAccessor: (r) =>
+    `${r.title} ${r.personalInfo.fullName} ${r.personalInfo.email} ${r.template}`,
+  searchPlaceholder: "Cari CV (judul, nama, email)…",
+  emptyMessage: "Belum ada CV. Buat dari halaman CV atau impor JSON.",
+  importConfig: {
+    wrapperKey: "cv",
+    mode: "object",
+    scope: "cv",
+    formatSuccess: (res) => (res.cv ? "CV ditambahkan dari JSON." : null),
+  },
+  relatedDrawer: {
+    title: (r) => r.title,
+    subtitle: (r) =>
+      `${r.personalInfo.fullName} · ${r.experience.length} pengalaman · ${r.skills.length} skill`,
+    sections: [
+      {
+        title: "Lamaran pakai CV ini",
+        query: api.cv.queries.getApplicationsByCV,
+        getArgs: (r) => ({ cvId: r._id }),
+        emptyMessage: "Belum ada lamaran yang menautkan CV ini.",
+        renderItem: (item) => {
+          const app = item as Application;
+          return (
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium">
+                  {app.position} · {app.company}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {new Date(app.appliedDate).toLocaleDateString("id-ID")}
+                  {app.location && ` · ${app.location}`}
+                </p>
+              </div>
+              <Badge variant="outline" className="shrink-0">
+                {app.status}
+              </Badge>
+            </div>
           );
-        }
-      }}
-      emptyMessage="Belum ada CV. Buat dari halaman CV atau impor JSON."
-    />
-  );
-}
-
-function isCVWrapper(v: unknown): v is { cv: unknown } {
-  return (
-    typeof v === "object" && v !== null && "cv" in (v as Record<string, unknown>)
-  );
-}
+        },
+      },
+      {
+        title: "Riwayat ATS Scan",
+        query: api.cv.queries.getATSScansByCV,
+        getArgs: (r) => ({ cvId: r._id }),
+        emptyMessage: "Belum pernah di-scan ATS.",
+        renderItem: (item) => {
+          const scan = item as ATSScan;
+          return (
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium">
+                  {scan.jobTitle}
+                  {scan.jobCompany && ` · ${scan.jobCompany}`}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {new Date(scan.createdAt).toLocaleDateString("id-ID")}
+                </p>
+              </div>
+              <Badge
+                variant={scan.score >= 70 ? "default" : "secondary"}
+                className="shrink-0"
+              >
+                {scan.score} · {scan.grade}
+              </Badge>
+            </div>
+          );
+        },
+      },
+    ],
+  },
+});

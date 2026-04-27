@@ -13,5 +13,6 @@ export const calendarTables = {
     applicationId: v.optional(v.id("jobApplications")),
   })
     .index("by_user", ["userId"])
-    .index("by_user_date", ["userId", "date"]),
+    .index("by_user_date", ["userId", "date"])
+    .index("by_user_application", ["userId", "applicationId"]),
 };

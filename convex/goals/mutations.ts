@@ -1,6 +1,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
+import { makeBulkDelete } from "../_shared/bulkDelete";
 
 const MAX_TITLE_LEN = 120;
 const MAX_DESC_LEN = 2000;
@@ -108,15 +109,4 @@ export const deleteGoal = mutation({
   },
 });
 
-export const bulkDeleteGoals = mutation({
-  args: { goalIds: v.array(v.id("careerGoals")) },
-  handler: async (ctx, args) => {
-    let deleted = 0;
-    for (const id of args.goalIds) {
-      await requireOwnedDoc(ctx, id, "Goal");
-      await ctx.db.delete(id);
-      deleted++;
-    }
-    return { deleted };
-  },
-});
+export const bulkDeleteGoals = makeBulkDelete("careerGoals", "Goal");

@@ -16,12 +16,11 @@ import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Switch } from "@/shared/components/ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
+  ResponsiveSelect,
+  ResponsiveSelectContent,
+  ResponsiveSelectItem,
+  ResponsiveSelectTrigger,
+} from "@/shared/components/ui/responsive-select";
 import {
   type Block,
   type BlockType,
@@ -160,16 +159,16 @@ function BlockFields({ draft, update }: FieldsProps) {
           </div>
           <div className="space-y-1">
             <Label>Ukuran</Label>
-            <Select
+            <ResponsiveSelect
               value={p.size ?? "lg"}
               onValueChange={(v) => update("size", v)}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="lg">Besar</SelectItem>
-                <SelectItem value="md">Sedang</SelectItem>
-              </SelectContent>
-            </Select>
+              <ResponsiveSelectTrigger />
+              <ResponsiveSelectContent drawerTitle="Ukuran heading">
+                <ResponsiveSelectItem value="lg">Besar</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="md">Sedang</ResponsiveSelectItem>
+              </ResponsiveSelectContent>
+            </ResponsiveSelect>
           </div>
         </>
       );
@@ -249,17 +248,17 @@ function BlockFields({ draft, update }: FieldsProps) {
           </div>
           <div className="space-y-1">
             <Label>Variasi</Label>
-            <Select
+            <ResponsiveSelect
               value={p.variant ?? "primary"}
               onValueChange={(v) => update("variant", v)}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="primary">Primary (gradient)</SelectItem>
-                <SelectItem value="secondary">Secondary (outline)</SelectItem>
-                <SelectItem value="ghost">Ghost (dashed)</SelectItem>
-              </SelectContent>
-            </Select>
+              <ResponsiveSelectTrigger />
+              <ResponsiveSelectContent drawerTitle="Variasi tombol">
+                <ResponsiveSelectItem value="primary">Primary (gradient)</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="secondary">Secondary (outline)</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="ghost">Ghost (dashed)</ResponsiveSelectItem>
+              </ResponsiveSelectContent>
+            </ResponsiveSelect>
           </div>
         </>
       );
@@ -277,7 +276,7 @@ function BlockFields({ draft, update }: FieldsProps) {
               key={i}
               className="grid gap-2 rounded-md border border-border p-2 sm:grid-cols-[8rem_1fr_auto]"
             >
-              <Select
+              <ResponsiveSelect
                 value={it.platform}
                 onValueChange={(v) => {
                   const next = items.slice();
@@ -285,15 +284,15 @@ function BlockFields({ draft, update }: FieldsProps) {
                   update("items", next);
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Platform" /></SelectTrigger>
-                <SelectContent>
+                <ResponsiveSelectTrigger placeholder="Platform" />
+                <ResponsiveSelectContent drawerTitle="Platform sosial">
                   {SOCIAL_PLATFORMS.map((s) => (
-                    <SelectItem key={s} value={s}>
+                    <ResponsiveSelectItem key={s} value={s}>
                       {s}
-                    </SelectItem>
+                    </ResponsiveSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </ResponsiveSelectContent>
+              </ResponsiveSelect>
               <Input
                 value={it.url}
                 placeholder="https://…"
@@ -443,16 +442,16 @@ function BlockFields({ draft, update }: FieldsProps) {
       return (
         <div className="space-y-1">
           <Label>Gaya</Label>
-          <Select
+          <ResponsiveSelect
             value={p.style ?? "line"}
             onValueChange={(v) => update("style", v)}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="line">Garis</SelectItem>
-              <SelectItem value="dot">Tiga titik</SelectItem>
-            </SelectContent>
-          </Select>
+            <ResponsiveSelectTrigger />
+            <ResponsiveSelectContent drawerTitle="Gaya divider">
+              <ResponsiveSelectItem value="line">Garis</ResponsiveSelectItem>
+              <ResponsiveSelectItem value="dot">Tiga titik</ResponsiveSelectItem>
+            </ResponsiveSelectContent>
+          </ResponsiveSelect>
         </div>
       );
     }

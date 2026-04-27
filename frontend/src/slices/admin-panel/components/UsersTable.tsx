@@ -1,15 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
   CheckCircle2,
   ChevronDown,
   Loader2,
-  Search,
   Shield,
   Trash2,
   UserMinus,
@@ -28,23 +24,6 @@ import {
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Checkbox } from "@/shared/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,17 +44,10 @@ import {
 } from "@/shared/components/ui/responsive-alert-dialog";
 import { formatDate } from "@/shared/lib/formatDate";
 import { cn } from "@/shared/lib/utils";
+import { DataTable } from "@/shared/components/data-table";
+import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 
 type Role = "admin" | "moderator" | "user";
-type AccountFilter = "all" | "real" | "anonymous";
-type SortKey =
-  | "createdAt"
-  | "email"
-  | "fullName"
-  | "targetRole"
-  | "role"
-  | "skillsCount";
-type SortDir = "asc" | "desc";
 
 type RowData = NonNullable<
   ReturnType<typeof useQuery<typeof api.admin.queries.listUsersWithProfiles>>
@@ -95,15 +67,9 @@ const NEXT_ROLE: Record<Role, Role> = {
 
 /**
  * Super-admin users table — search, sort, filter, multi-select with
- * bulk role-change + bulk delete.
- *
- * Data source: api.admin.queries.listUsersWithProfiles (top 200).
- * Mutations: api.admin.mutations.{updateUserRole, deleteUser, bulkDeleteUsers}.
- *
- * Selection state survives filter / sort / search changes — we key
- * by userId so a user that drops out of the visible page stays
- * selected if they come back. Bulk action bar floats once ≥ 1 row
- * is selected.
+ * bulk role-change + bulk delete. Built on the shared `<DataTable>`
+ * primitive so behaviour stays in lock-step with the Database hub
+ * tabs (selection model, mobile card fallback, sort indicators).
  */
 export function UsersTable() {
   const users = useQuery(api.admin.queries.listUsersWithProfiles);
@@ -111,13 +77,7 @@ export function UsersTable() {
   const deleteOne = useMutation(api.admin.mutations.deleteUser);
   const bulkDelete = useMutation(api.admin.mutations.bulkDeleteUsers);
 
-  const [query, setQuery] = useState("");
-  const [filterRole, setFilterRole] = useState<"all" | Role>("all");
-  const [filterAccount, setFilterAccount] = useState<AccountFilter>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("createdAt");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
-
-  const [selected, setSelected] = useState<Set<Id<"users">>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [pendingId, setPendingId] = useState<Id<"users"> | null>(null);
   const [confirm, setConfirm] = useState<
     | { kind: "delete-one"; userId: Id<"users">; label: string }
@@ -125,73 +85,6 @@ export function UsersTable() {
     | null
   >(null);
   const [busy, setBusy] = useState(false);
-
-  // ---- derived list ----
-  const filtered = useMemo(() => {
-    if (!users) return [];
-    const q = query.trim().toLowerCase();
-    let out = users.filter((u) => {
-      if (filterRole !== "all" && u.role !== filterRole) return false;
-      if (filterAccount === "real" && !u.email) return false;
-      if (filterAccount === "anonymous" && u.email) return false;
-      if (q) {
-        const hay = [
-          u.email,
-          u.name,
-          u.fullName,
-          u.targetRole,
-          u.location,
-          u.experienceLevel,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-    out = [...out].sort((a, b) => cmp(a, b, sortKey, sortDir));
-    return out;
-  }, [users, query, filterRole, filterAccount, sortKey, sortDir]);
-
-  const visibleIds = useMemo(
-    () => filtered.map((u) => u.userId),
-    [filtered],
-  );
-  const allVisibleSelected =
-    visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
-  const someVisibleSelected =
-    !allVisibleSelected && visibleIds.some((id) => selected.has(id));
-
-  const toggleAll = () => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (allVisibleSelected) {
-        for (const id of visibleIds) next.delete(id);
-      } else {
-        for (const id of visibleIds) next.add(id);
-      }
-      return next;
-    });
-  };
-  const toggleOne = (id: Id<"users">) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-  const clearSelection = () => setSelected(new Set());
-
-  const onSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir(key === "createdAt" || key === "skillsCount" ? "desc" : "asc");
-    }
-  };
 
   const handleRoleChange = async (userId: Id<"users">, role: Role) => {
     setPendingId(userId);
@@ -209,7 +102,7 @@ export function UsersTable() {
     setBusy(true);
     try {
       await deleteOne({ userId });
-      setSelected((prev) => {
+      setSelectedIds((prev) => {
         const next = new Set(prev);
         next.delete(userId);
         return next;
@@ -227,7 +120,7 @@ export function UsersTable() {
     setBusy(true);
     try {
       const res = await bulkDelete({ userIds: ids });
-      clearSelection();
+      setSelectedIds(new Set());
       notify.success(`${res.deleted} pengguna dihapus`);
     } catch (err) {
       notify.fromError(err, "Gagal menghapus massal");
@@ -236,6 +129,176 @@ export function UsersTable() {
       setConfirm(null);
     }
   };
+
+  const columns: ReadonlyArray<ColumnDef<RowData>> = [
+    {
+      id: "email",
+      header: "Email",
+      accessor: (r) => r.email ?? "",
+      cell: (r) =>
+        r.email ? (
+          <span className="font-mono text-xs">{r.email}</span>
+        ) : (
+          <span className="italic text-muted-foreground">(anonim)</span>
+        ),
+    },
+    {
+      id: "fullName",
+      header: "Nama",
+      accessor: (r) => r.fullName || r.name || "",
+      cell: (r) => r.fullName || r.name || "—",
+    },
+    {
+      id: "targetRole",
+      header: "Target Role",
+      accessor: (r) => r.targetRole || "",
+      cell: (r) => r.targetRole || "—",
+      hideOnMobile: true,
+    },
+    {
+      id: "location",
+      header: "Lokasi",
+      accessor: (r) => r.location || "",
+      cell: (r) => r.location || "—",
+      hideOnMobile: true,
+    },
+    {
+      id: "experienceLevel",
+      header: "Level",
+      accessor: (r) => r.experienceLevel || "",
+      cell: (r) => r.experienceLevel || "—",
+      hideOnMobile: true,
+    },
+    {
+      id: "role",
+      header: "Role",
+      accessor: (r) => r.role,
+      cell: (r) => (
+        <Badge
+          className={cn(
+            "border-transparent text-[10px]",
+            ROLE_BADGE[r.role as Role] ?? ROLE_BADGE.user,
+          )}
+        >
+          {r.role}
+        </Badge>
+      ),
+    },
+    {
+      id: "skillsCount",
+      header: "Skills",
+      accessor: (r) => r.skillsCount,
+      align: "right",
+      hideOnMobile: true,
+    },
+    {
+      id: "createdAt",
+      header: "Daftar",
+      accessor: (r) => r.createdAt,
+      cell: (r) => (
+        <span className="text-xs text-muted-foreground">
+          {formatDate(r.createdAt)}
+        </span>
+      ),
+      align: "right",
+    },
+    {
+      id: "actions",
+      header: "",
+      accessor: () => "",
+      sortable: false,
+      hideMobileLabel: true,
+      cell: (r) => {
+        const isPending = pendingId === r.userId;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                disabled={isPending || busy}
+                aria-label="Aksi pengguna"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel className="text-xs">
+                {r.email || "Pengguna anonim"}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() =>
+                  handleRoleChange(r.userId, NEXT_ROLE[r.role as Role])
+                }
+              >
+                <UserCog className="mr-2 h-4 w-4" />
+                Set role: {NEXT_ROLE[r.role as Role]}
+              </DropdownMenuItem>
+              {(r.role as Role) !== "admin" && (
+                <DropdownMenuItem
+                  onSelect={() => handleRoleChange(r.userId, "admin")}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Jadikan admin
+                </DropdownMenuItem>
+              )}
+              {(r.role as Role) !== "user" && (
+                <DropdownMenuItem
+                  onSelect={() => handleRoleChange(r.userId, "user")}
+                >
+                  <UserMinus className="mr-2 h-4 w-4" />
+                  Turunkan ke user
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() =>
+                  setConfirm({
+                    kind: "delete-one",
+                    userId: r.userId,
+                    label: r.email || r.fullName || "pengguna ini",
+                  })
+                }
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Hapus akun
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const filters: ReadonlyArray<FilterDef<RowData>> = [
+    {
+      id: "role",
+      label: "Role",
+      accessor: (r) => r.role,
+      options: [
+        { value: "admin", label: "Admin" },
+        { value: "moderator", label: "Moderator" },
+        { value: "user", label: "User" },
+      ],
+    },
+    {
+      id: "account",
+      label: "Tipe akun",
+      accessor: (r) => (r.email ? "real" : "anonymous"),
+      options: [
+        { value: "real", label: "Akun terdaftar" },
+        { value: "anonymous", label: "Demo / Anonim" },
+      ],
+    },
+  ];
 
   return (
     <Card>
@@ -246,284 +309,60 @@ export function UsersTable() {
           aksi massal.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[14rem]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari email, nama, target role, lokasi…"
-              className="pl-9"
-              aria-label="Cari pengguna"
-            />
-          </div>
-          <Select
-            value={filterRole}
-            onValueChange={(v) => setFilterRole(v as "all" | Role)}
-          >
-            <SelectTrigger className="w-[10rem]">
-              <SelectValue placeholder="Role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua role</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="moderator">Moderator</SelectItem>
-              <SelectItem value="user">User</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={filterAccount}
-            onValueChange={(v) => setFilterAccount(v as AccountFilter)}
-          >
-            <SelectTrigger className="w-[12rem]">
-              <SelectValue placeholder="Tipe akun" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua akun</SelectItem>
-              <SelectItem value="real">Akun terdaftar (email)</SelectItem>
-              <SelectItem value="anonymous">Demo / Anonim</SelectItem>
-            </SelectContent>
-          </Select>
-          <Badge variant="outline" className="ml-auto whitespace-nowrap">
-            {filtered.length} dari {users?.length ?? 0}
-          </Badge>
-        </div>
-
-        {/* Bulk action bar */}
-        {selected.size > 0 && (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-brand/40 bg-brand-muted/40 p-2 text-sm">
-            <CheckCircle2 className="h-4 w-4 text-brand" />
-            <span className="font-medium">
-              {selected.size} dipilih
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={clearSelection}
-              className="h-7"
-            >
-              Bersihkan
-            </Button>
-            <span className="ml-auto" />
+      <CardContent>
+        <DataTable<RowData>
+          data={users ?? []}
+          columns={columns}
+          filters={filters}
+          rowKey={(r) => r.userId}
+          searchAccessor={(r) =>
+            [
+              r.email,
+              r.name,
+              r.fullName,
+              r.targetRole,
+              r.location,
+              r.experienceLevel,
+            ]
+              .filter(Boolean)
+              .join(" ")
+          }
+          searchPlaceholder="Cari email, nama, target role, lokasi…"
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+          isLoading={users === undefined}
+          emptyMessage="Belum ada pengguna."
+          bulkActions={
             <Button
               type="button"
               variant="destructive"
               size="sm"
               disabled={busy}
               onClick={() =>
-                setConfirm({ kind: "delete-bulk", ids: Array.from(selected) })
+                setConfirm({
+                  kind: "delete-bulk",
+                  ids: Array.from(selectedIds) as Id<"users">[],
+                })
               }
-              className="gap-1.5"
+              className="h-9 gap-1.5"
             >
               {busy ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5" />
               )}
-              Hapus terpilih
+              Hapus
             </Button>
-          </div>
-        )}
-
-        {/* Table */}
-        {users === undefined ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            Memuat…
-          </p>
-        ) : filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            {query || filterRole !== "all" || filterAccount !== "all"
-              ? "Tidak ada pengguna cocok dengan filter."
-              : "Belum ada pengguna."}
-          </p>
-        ) : (
-          <div className="rounded-md border border-border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10">
-                    <Checkbox
-                      checked={
-                        allVisibleSelected
-                          ? true
-                          : someVisibleSelected
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                      aria-label="Pilih semua"
-                    />
-                  </TableHead>
-                  <SortableHeader
-                    label="Email"
-                    column="email"
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={onSort}
-                  />
-                  <SortableHeader
-                    label="Nama"
-                    column="fullName"
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={onSort}
-                  />
-                  <SortableHeader
-                    label="Target Role"
-                    column="targetRole"
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={onSort}
-                  />
-                  <TableHead>Lokasi</TableHead>
-                  <TableHead>Level</TableHead>
-                  <SortableHeader
-                    label="Role"
-                    column="role"
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={onSort}
-                  />
-                  <SortableHeader
-                    label="Skills"
-                    column="skillsCount"
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={onSort}
-                    align="right"
-                  />
-                  <SortableHeader
-                    label="Daftar"
-                    column="createdAt"
-                    sortKey={sortKey}
-                    sortDir={sortDir}
-                    onSort={onSort}
-                    align="right"
-                  />
-                  <TableHead className="w-12" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((u) => {
-                  const isSel = selected.has(u.userId);
-                  const isPending = pendingId === u.userId;
-                  return (
-                    <TableRow
-                      key={u.userId}
-                      data-state={isSel ? "selected" : undefined}
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked={isSel}
-                          onCheckedChange={() => toggleOne(u.userId)}
-                          aria-label={`Pilih ${u.email || u.name || u.userId}`}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {u.email || (
-                          <span className="italic text-muted-foreground">
-                            (anonim)
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{u.fullName || u.name || "—"}</TableCell>
-                      <TableCell>{u.targetRole || "—"}</TableCell>
-                      <TableCell>{u.location || "—"}</TableCell>
-                      <TableCell>{u.experienceLevel || "—"}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={cn(
-                            "border-transparent text-[10px]",
-                            ROLE_BADGE[u.role as Role] ?? ROLE_BADGE.user,
-                          )}
-                        >
-                          {u.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {u.skillsCount}
-                      </TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground">
-                        {formatDate(u.createdAt)}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              disabled={isPending || busy}
-                              aria-label="Aksi pengguna"
-                            >
-                              {isPending ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-52">
-                            <DropdownMenuLabel className="text-xs">
-                              {u.email || "Pengguna anonim"}
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onSelect={() =>
-                                handleRoleChange(u.userId, NEXT_ROLE[u.role as Role])
-                              }
-                            >
-                              <UserCog className="mr-2 h-4 w-4" />
-                              Set role: {NEXT_ROLE[u.role as Role]}
-                            </DropdownMenuItem>
-                            {(u.role as Role) !== "admin" && (
-                              <DropdownMenuItem
-                                onSelect={() =>
-                                  handleRoleChange(u.userId, "admin")
-                                }
-                              >
-                                <Shield className="mr-2 h-4 w-4" />
-                                Jadikan admin
-                              </DropdownMenuItem>
-                            )}
-                            {(u.role as Role) !== "user" && (
-                              <DropdownMenuItem
-                                onSelect={() =>
-                                  handleRoleChange(u.userId, "user")
-                                }
-                              >
-                                <UserMinus className="mr-2 h-4 w-4" />
-                                Turunkan ke user
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onSelect={() =>
-                                setConfirm({
-                                  kind: "delete-one",
-                                  userId: u.userId,
-                                  label: u.email || u.fullName || "pengguna ini",
-                                })
-                              }
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus akun
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+          }
+          toolbarActions={
+            selectedIds.size > 0 ? (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 text-brand" />
+                pilihan tersimpan walau filter berubah
+              </span>
+            ) : null
+          }
+        />
       </CardContent>
 
       <ResponsiveAlertDialog
@@ -542,7 +381,7 @@ export function UsersTable() {
           <ResponsiveAlertDialogFooter>
             <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
             <ResponsiveAlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              variant="destructive"
               onClick={(e) => {
                 e.preventDefault();
                 if (confirm?.kind === "delete-one") {
@@ -575,7 +414,7 @@ export function UsersTable() {
           <ResponsiveAlertDialogFooter>
             <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
             <ResponsiveAlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              variant="destructive"
               onClick={(e) => {
                 e.preventDefault();
                 if (confirm?.kind === "delete-bulk") {
@@ -589,52 +428,5 @@ export function UsersTable() {
         </ResponsiveAlertDialogContent>
       </ResponsiveAlertDialog>
     </Card>
-  );
-}
-
-function cmp(a: RowData, b: RowData, key: SortKey, dir: SortDir): number {
-  const sign = dir === "asc" ? 1 : -1;
-  if (key === "createdAt" || key === "skillsCount") {
-    return sign * (Number(a[key]) - Number(b[key]));
-  }
-  const av = String(a[key] ?? "").toLowerCase();
-  const bv = String(b[key] ?? "").toLowerCase();
-  return sign * av.localeCompare(bv);
-}
-
-interface SortableHeaderProps {
-  label: string;
-  column: SortKey;
-  sortKey: SortKey;
-  sortDir: SortDir;
-  onSort: (col: SortKey) => void;
-  align?: "left" | "right";
-}
-
-function SortableHeader({
-  label,
-  column,
-  sortKey,
-  sortDir,
-  onSort,
-  align = "left",
-}: SortableHeaderProps) {
-  const active = sortKey === column;
-  const Icon = active ? (sortDir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
-  return (
-    <TableHead className={align === "right" ? "text-right" : ""}>
-      <button
-        type="button"
-        onClick={() => onSort(column)}
-        className={cn(
-          "inline-flex items-center gap-1 text-left font-medium transition-colors hover:text-foreground",
-          active ? "text-foreground" : "text-muted-foreground",
-          align === "right" && "ml-auto flex-row-reverse",
-        )}
-      >
-        {label}
-        <Icon className="h-3 w-3 opacity-70" />
-      </button>
-    </TableHead>
   );
 }

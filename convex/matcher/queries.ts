@@ -121,6 +121,26 @@ export const getScan = query({
   },
 });
 
+/**
+ * Reverse relation: every ATS scan this user has run against a
+ * specific job listing. Lets the matcher tab show "you've scanned
+ * this 3× — best score 78" inline on a JobCard.
+ */
+export const getATSScansByListing = query({
+  args: { listingId: v.id("jobListings") },
+  handler: async (ctx, args) => {
+    const userId = await optionalUser(ctx);
+    if (!userId) return [];
+    return await ctx.db
+      .query("atsScans")
+      .withIndex("by_user_listing", (q) =>
+        q.eq("userId", userId).eq("jobListingId", args.listingId),
+      )
+      .order("desc")
+      .collect();
+  },
+});
+
 // ---------------------------------------------------------------------
 // Internal helpers — used by actions.scanCV
 // ---------------------------------------------------------------------

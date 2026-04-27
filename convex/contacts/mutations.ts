@@ -1,6 +1,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
+import { makeBulkDelete } from "../_shared/bulkDelete";
 
 export const createContact = mutation({
   args: {
@@ -82,18 +83,7 @@ export const deleteContact = mutation({
   },
 });
 
-export const bulkDeleteContacts = mutation({
-  args: { contactIds: v.array(v.id("contacts")) },
-  handler: async (ctx, args) => {
-    let deleted = 0;
-    for (const id of args.contactIds) {
-      await requireOwnedDoc(ctx, id, "Kontak");
-      await ctx.db.delete(id);
-      deleted++;
-    }
-    return { deleted };
-  },
-});
+export const bulkDeleteContacts = makeBulkDelete("contacts", "Kontak");
 
 export const toggleContactFavorite = mutation({
   args: { contactId: v.id("contacts") },

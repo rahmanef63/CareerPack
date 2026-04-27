@@ -27,6 +27,8 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
     "contacts",
     "budgetVariables",
     "aiSettings",
+    "atsScans",
+    "quickFillBatches",
   ] as const;
 
   for (const table of owned) {
@@ -98,9 +100,12 @@ export const updateUserRole = mutation({
     const callerId = await requireAdmin(ctx);
 
     if (callerId === args.userId && args.role !== "admin") {
-      const allProfiles = await ctx.db.query("userProfiles").collect();
-      const otherAdmins = allProfiles.filter(
-        (p) => p.role === "admin" && p.userId !== callerId,
+      const adminProfiles = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .collect();
+      const otherAdmins = adminProfiles.filter(
+        (p) => p.userId !== callerId,
       );
       if (otherAdmins.length === 0) {
         throw new Error(
@@ -154,9 +159,12 @@ export const deleteUser = mutation({
   handler: async (ctx, args) => {
     const callerId = await requireAdmin(ctx);
     if (callerId === args.userId) {
-      const allProfiles = await ctx.db.query("userProfiles").collect();
-      const otherAdmins = allProfiles.filter(
-        (p) => p.role === "admin" && p.userId !== callerId,
+      const adminProfiles = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .collect();
+      const otherAdmins = adminProfiles.filter(
+        (p) => p.userId !== callerId,
       );
       if (otherAdmins.length === 0) {
         throw new Error(
@@ -175,9 +183,12 @@ export const bulkDeleteUsers = mutation({
     const callerId = await requireAdmin(ctx);
     const ids = args.userIds.slice(0, 100);
     if (ids.includes(callerId)) {
-      const allProfiles = await ctx.db.query("userProfiles").collect();
-      const otherAdmins = allProfiles.filter(
-        (p) => p.role === "admin" && p.userId !== callerId,
+      const adminProfiles = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_role", (q) => q.eq("role", "admin"))
+        .collect();
+      const otherAdmins = adminProfiles.filter(
+        (p) => p.userId !== callerId,
       );
       if (otherAdmins.length === 0) {
         throw new Error(

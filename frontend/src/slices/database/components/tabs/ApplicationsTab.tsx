@@ -1,33 +1,18 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
-import { toast } from "sonner";
 import { api } from "../../../../../../convex/_generated/api";
-import type { Doc, Id } from "../../../../../../convex/_generated/dataModel";
+import type { Doc } from "../../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
-import { ResourceTable } from "../ResourceTable";
+import { defineResource } from "../../lib/defineResource";
 
 type Application = Doc<"jobApplications">;
+type CalendarEvent = Doc<"calendarEvents">;
 
 const columns: ReadonlyArray<ColumnDef<Application>> = [
-  {
-    id: "company",
-    header: "Perusahaan",
-    accessor: (r) => r.company,
-  },
-  {
-    id: "position",
-    header: "Posisi",
-    accessor: (r) => r.position,
-    width: "w-1/4",
-  },
-  {
-    id: "location",
-    header: "Lokasi",
-    accessor: (r) => r.location,
-    hideOnMobile: true,
-  },
+  { id: "company", header: "Perusahaan", accessor: (r) => r.company },
+  { id: "position", header: "Posisi", accessor: (r) => r.position, width: "w-1/4" },
+  { id: "location", header: "Lokasi", accessor: (r) => r.location, hideOnMobile: true },
   {
     id: "status",
     header: "Status",
@@ -40,12 +25,7 @@ const columns: ReadonlyArray<ColumnDef<Application>> = [
     accessor: (r) => new Date(r.appliedDate),
     cell: (r) => new Date(r.appliedDate).toLocaleDateString("id-ID"),
   },
-  {
-    id: "source",
-    header: "Sumber",
-    accessor: (r) => r.source,
-    hideOnMobile: true,
-  },
+  { id: "source", header: "Sumber", accessor: (r) => r.source, hideOnMobile: true },
 ];
 
 const filters: ReadonlyArray<FilterDef<Application>> = [
@@ -64,57 +44,58 @@ const filters: ReadonlyArray<FilterDef<Application>> = [
   },
 ];
 
-export function ApplicationsTab() {
-  const data = useQuery(api.applications.queries.getUserApplications);
-  const bulkDelete = useMutation(api.applications.mutations.bulkDeleteApplications);
-  const quickFill = useMutation(api.onboarding.mutations.quickFill);
-
-  return (
-    <ResourceTable<Application>
-      data={data}
-      isLoading={data === undefined}
-      columns={columns}
-      filters={filters}
-      rowKey={(r) => r._id}
-      searchAccessor={(r) =>
-        `${r.company} ${r.position} ${r.location} ${r.status} ${r.source}`
-      }
-      searchPlaceholder="Cari lamaran…"
-      resourceLabel="lamaran"
-      exportPrefix="applications"
-      exportShape={({ _id: _i, _creationTime: _t, userId: _u, ...rest }) => rest}
-      onBulkDelete={async (ids) =>
-        bulkDelete({ applicationIds: ids as Id<"jobApplications">[] })
-      }
-      onImport={async (parsed) => {
-        const applications = Array.isArray(parsed)
-          ? parsed
-          : isApplicationsWrapper(parsed)
-            ? parsed.applications
-            : null;
-        if (!applications) {
-          toast.error("Format tidak dikenali — array atau `{ applications: [...] }`.");
-          return;
-        }
-        const res = await quickFill({
-          payload: { applications },
-          scope: "applications",
-        });
-        toast.success(
-          `${res.applications.added} lamaran ditambahkan${
-            res.applications.skipped > 0
-              ? ` (${res.applications.skipped} dilewati)`
-              : ""
-          }.`,
-        );
-      }}
-      emptyMessage="Belum ada lamaran."
-    />
-  );
-}
-
-function isApplicationsWrapper(v: unknown): v is { applications: unknown[] } {
-  if (typeof v !== "object" || v === null) return false;
-  const obj = v as Record<string, unknown>;
-  return Array.isArray(obj.applications);
-}
+export const ApplicationsTab = defineResource<Application>({
+  query: api.applications.queries.getUserApplications,
+  bulkDelete: api.applications.mutations.bulkDeleteApplications,
+  quickFill: api.onboarding.mutations.quickFill,
+  resourceLabel: "lamaran",
+  exportPrefix: "applications",
+  columns,
+  filters,
+  rowKey: (r) => r._id,
+  searchAccessor: (r) =>
+    `${r.company} ${r.position} ${r.location} ${r.status} ${r.source}`,
+  searchPlaceholder: "Cari lamaran…",
+  emptyMessage: "Belum ada lamaran.",
+  importConfig: {
+    wrapperKey: "applications",
+    mode: "array",
+    scope: "applications",
+    formatSuccess: (res) =>
+      `${res.applications.added} lamaran ditambahkan${
+        res.applications.skipped > 0
+          ? ` (${res.applications.skipped} dilewati)`
+          : ""
+      }.`,
+  },
+  relatedDrawer: {
+    title: (r) => `${r.position} · ${r.company}`,
+    subtitle: (r) =>
+      `${r.location}${r.salary ? ` · ${r.salary}` : ""} · ${r.status}`,
+    sections: [
+      {
+        title: "Agenda terkait",
+        query: api.applications.queries.getCalendarEventsByApplication,
+        getArgs: (r) => ({ applicationId: r._id }),
+        emptyMessage: "Belum ada agenda yang terhubung ke lamaran ini.",
+        renderItem: (item) => {
+          const ev = item as CalendarEvent;
+          return (
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium">{ev.title}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {ev.date} · {ev.time}
+                  {ev.location && ` · ${ev.location}`}
+                </p>
+              </div>
+              <Badge variant="outline" className="shrink-0">
+                {ev.type}
+              </Badge>
+            </div>
+          );
+        },
+      },
+    ],
+  },
+});

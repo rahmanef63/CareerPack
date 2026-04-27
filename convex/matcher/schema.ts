@@ -59,5 +59,6 @@ export const matcherTables = {
     createdAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_user_cv", ["userId", "cvId"]),
+    .index("by_user_cv", ["userId", "cvId"])
+    .index("by_user_listing", ["userId", "jobListingId"]),
 };
