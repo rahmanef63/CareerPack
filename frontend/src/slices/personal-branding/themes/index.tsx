@@ -17,6 +17,19 @@ import {
   TEMPLATE_HYDRATOR_JS,
   TEMPLATE_IFRAME_HELPERS_JS,
 } from "./templateHydrator";
+import {
+  BrandingShowMoreDialog,
+  type ShowMoreList,
+} from "../components/BrandingShowMoreDialog";
+
+const VALID_SHOW_MORE_LISTS: ReadonlySet<ShowMoreList> = new Set([
+  "projects",
+  "skills",
+  "experience",
+  "education",
+  "certifications",
+  "languages",
+]);
 
 /** Branding payload mirrors `convex/profile/brandingPayload.ts`. The
  *  iframe templates read it from `window.__careerpack` and use
@@ -157,6 +170,11 @@ function TemplateLayout({
   // back to a sensible viewport-clamp until the first message arrives,
   // so the iframe never renders at 0px.
   const [iframeHeight, setIframeHeight] = useState<number | null>(null);
+  // Active show-more list — null means dialog closed. Posted by the
+  // hydrator from inside the iframe (cp-show-more event) because the
+  // modal can't live inside the iframe (position:fixed pins to the
+  // iframe viewport which scrolls with the parent).
+  const [showMoreList, setShowMoreList] = useState<ShowMoreList | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -187,22 +205,36 @@ function TemplateLayout({
     };
   }, [theme, url]);
 
-  // Listen for `cp-resize` from the iframe so we can size the wrapper
-  // to its content. Without this the iframe was clamped to viewport
-  // height and visitors only saw the hero — D1/D10 in QA.
+  // Listen for `cp-resize` + `cp-show-more` from the iframe.
+  // - cp-resize: sizes the wrapper to content (D1/D10 fix — without
+  //   it the iframe was clamped to viewport height).
+  // - cp-show-more: hydrator caps long lists at a threshold and
+  //   appends a "Lihat semua" button; click postMessages here so the
+  //   parent opens a modal (can't render modal inside the iframe —
+  //   position:fixed pins to iframe viewport which scrolls with parent).
   useEffect(() => {
     function onMessage(event: MessageEvent) {
-      const data = event.data as { type?: string; h?: number } | null;
-      if (!data || data.type !== "cp-resize" || typeof data.h !== "number") return;
+      const data = event.data as
+        | { type?: string; h?: number; list?: string }
+        | null;
+      if (!data || typeof data.type !== "string") return;
       // Only trust messages from our own iframe. With sandboxed
       // about:srcdoc the source is window-equal but origin is null,
       // so we compare windows directly.
       if (iframeRef.current && event.source !== iframeRef.current.contentWindow) {
         return;
       }
-      // Clamp to a sane upper bound to avoid runaway documents.
-      const clamped = Math.max(400, Math.min(20000, Math.round(data.h)));
-      setIframeHeight((prev) => (prev === clamped ? prev : clamped));
+      if (data.type === "cp-resize" && typeof data.h === "number") {
+        const clamped = Math.max(400, Math.min(20000, Math.round(data.h)));
+        setIframeHeight((prev) => (prev === clamped ? prev : clamped));
+        return;
+      }
+      if (data.type === "cp-show-more" && typeof data.list === "string") {
+        const listName = data.list as ShowMoreList;
+        if (VALID_SHOW_MORE_LISTS.has(listName)) {
+          setShowMoreList(listName);
+        }
+      }
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
@@ -255,6 +287,11 @@ function TemplateLayout({
           }}
         />
       )}
+      <BrandingShowMoreDialog
+        branding={branding}
+        listName={showMoreList}
+        onClose={() => setShowMoreList(null)}
+      />
     </div>
   );
 }
