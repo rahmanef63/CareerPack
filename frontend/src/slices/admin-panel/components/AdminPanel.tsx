@@ -43,12 +43,27 @@ import { UsersTable } from "./UsersTable";
 export function AdminPanel() {
   const router = useRouter();
 
-  // Non-throwing probe — undefined = loading, false = not super-admin.
-  const amI = useQuery(api.admin.queries.amISuperAdmin);
-  const overview = useQuery(api.admin.queries.getOverview, amI ? {} : "skip");
-  const profileAggs = useQuery(api.admin.queries.getProfileAggregates, amI ? {} : "skip");
-  const adoption = useQuery(api.admin.queries.getFeatureAdoption, amI ? {} : "skip");
-  const trend = useQuery(api.admin.queries.getSignupTrend, amI ? {} : "skip");
+  // Two-tier gating: `amIAdmin` lets role-bootstrapped admins in.
+  // `amISuperAdmin` controls the analytics charts which still query
+  // privileged data (full `users` table, profile aggregates).
+  const amIAdmin = useQuery(api.admin.queries.amIAdmin);
+  const amISuperAdmin = useQuery(api.admin.queries.amISuperAdmin);
+  const overview = useQuery(
+    api.admin.queries.getOverview,
+    amISuperAdmin ? {} : "skip",
+  );
+  const profileAggs = useQuery(
+    api.admin.queries.getProfileAggregates,
+    amISuperAdmin ? {} : "skip",
+  );
+  const adoption = useQuery(
+    api.admin.queries.getFeatureAdoption,
+    amISuperAdmin ? {} : "skip",
+  );
+  const trend = useQuery(
+    api.admin.queries.getSignupTrend,
+    amISuperAdmin ? {} : "skip",
+  );
 
   // Transform signup trend for the chart (short date label). Hook must
   // run unconditionally (rules-of-hooks) — safe to read `trend` when
@@ -62,13 +77,14 @@ export function AdminPanel() {
     [trend],
   );
 
-  // Client-side redirect for non-super-admins. Server enforces
-  // independently, so this is just to keep the URL clean.
+  // Client-side redirect for non-admins. Server enforces independently
+  // on every query — this just keeps the URL clean for users with no
+  // admin role at all.
   useEffect(() => {
-    if (amI === false) router.replace("/dashboard");
-  }, [amI, router]);
+    if (amIAdmin === false) router.replace("/dashboard");
+  }, [amIAdmin, router]);
 
-  if (amI === undefined || amI === false) return <LoadingScreen />;
+  if (amIAdmin === undefined || amIAdmin === false) return <LoadingScreen />;
 
   return (
     <PageContainer size="xl" className="space-y-6">
@@ -78,10 +94,29 @@ export function AdminPanel() {
             <ShieldAlert className="w-5 h-5 text-brand" /> Admin Panel
           </span>
         }
-        description="Analitik semua pengguna untuk panduan keputusan produk."
+        description={
+          amISuperAdmin
+            ? "Analitik semua pengguna untuk panduan keputusan produk."
+            : "Kelola pengguna, role, dan akses akun."
+        }
       />
 
-      {/* KPI strip */}
+      {!amISuperAdmin && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Akses terbatas</CardTitle>
+            <CardDescription>
+              Anda login sebagai admin (peran). Analitik agregat hanya
+              tersedia untuk akun super-admin (set <code>SUPER_ADMIN_EMAIL</code>{" "}
+              di env backend untuk membuka panel statistik penuh).
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {/* Analytics — super-admin only */}
+      {amISuperAdmin && (
+        <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={UsersIcon}
@@ -251,9 +286,12 @@ export function AdminPanel() {
         </CardContent>
       </Card>
 
+        </>
+      )}{/* end super-admin analytics block */}
+
       {/* Pengguna — search/sort/filter/multi-select powered table.
-       *  Lifted out of this file to keep AdminPanel focused on the
-       *  analytics dashboards. Owns its own loading + empty states. */}
+       *  Available to every role-admin (not just super-admin); the
+       *  underlying query gates with `requireAdmin`. */}
       <UsersTable />
     </PageContainer>
   );

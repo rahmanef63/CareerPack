@@ -40,7 +40,19 @@ export function PreviewDialog({
   const me = useQuery(api.profile.queries.getCurrentUser);
   const cvs = useQuery(api.cv.queries.getUserCVs);
   const portfolio = useQuery(api.portfolio.queries.listPortfolio);
-  const defaultCv = (cvs ?? []).find((c) => c.isDefault) ?? cvs?.[0] ?? null;
+  // Pick the richest CV — prefer the one with the most experience entries
+  // so an empty `isDefault: true` demo CV doesn't shadow a freshly
+  // imported real CV. Tie-break by most recent _creationTime.
+  const defaultCv = useMemo(() => {
+    if (!cvs || cvs.length === 0) return null;
+    const ranked = [...cvs].sort((a, b) => {
+      const aRich = a.experience.length + a.skills.length + a.education.length;
+      const bRich = b.experience.length + b.skills.length + b.education.length;
+      if (aRich !== bRich) return bRich - aRich;
+      return b._creationTime - a._creationTime;
+    });
+    return ranked[0];
+  }, [cvs]);
 
   const previewBlocks = useMemo<Block[]>(() => {
     if (state.mode === "custom") return state.blocks.filter((b) => !b.hidden);

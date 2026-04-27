@@ -282,9 +282,13 @@ export const getBySlug = query({
       blocks = (profile.publicBlocks ?? []).filter((b) => !b.hidden);
     } else {
       // ---- Auto: pull CV + portfolio + apply toggles ----
+      // Newest first — without `.order("desc")` Convex returns the
+      // oldest doc, which on a fresh account is the seeded demo CV
+      // and overrides anything imported via Quick Fill.
       const cv = await ctx.db
         .query("cvs")
         .withIndex("by_user", (q) => q.eq("userId", profile.userId))
+        .order("desc")
         .first();
       const portfolioRows = await ctx.db
         .query("portfolioItems")

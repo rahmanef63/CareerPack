@@ -1,7 +1,12 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
-import { requireAdmin, isSuperAdminCaller, requireSuperAdmin } from "../_shared/auth";
+import {
+  requireAdmin,
+  isSuperAdminCaller,
+  requireSuperAdmin,
+  optionalUser,
+} from "../_shared/auth";
 import type { Doc } from "../_generated/dataModel";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -203,6 +208,27 @@ export const amISuperAdmin = query({
   },
 });
 
+/**
+ * Non-throwing probe — true when the caller is either the super-admin
+ * or has `role: "admin"` on their profile. Drives nav visibility for
+ * the Admin Panel tile so role-bootstrapped admins (via
+ * `ADMIN_BOOTSTRAP_EMAILS`) see the entry without needing
+ * `SUPER_ADMIN_EMAIL` set.
+ */
+export const amIAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    if (await isSuperAdminCaller(ctx)) return true;
+    const userId = await optionalUser(ctx);
+    if (!userId) return false;
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    return profile?.role === "admin";
+  },
+});
+
 export const getOverview = query({
   args: {},
   handler: async (ctx) => {
@@ -381,7 +407,10 @@ export const getSignupTrend = query({
 export const listUsersWithProfiles = query({
   args: {},
   handler: async (ctx) => {
-    await requireSuperAdmin(ctx);
+    // User-management table is the core admin tool — gated by role,
+    // not by super-admin email. Super-admin still passes via
+    // requireAdmin's email-bypass branch.
+    await requireAdmin(ctx);
 
     const users = await ctx.db
       .query("users")
