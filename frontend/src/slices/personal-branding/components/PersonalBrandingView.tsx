@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import {
+  Code2,
+  Download,
   Eye,
+  Globe2,
   Layers,
   Palette,
   Settings as SettingsIcon,
@@ -44,28 +47,36 @@ import {
   ExportCard,
   type ExportProfileSnapshot,
 } from "../sections/ExportCard";
+import { ImportCard } from "../sections/ImportCard";
 import { PreviewDialog } from "./PreviewDialog";
+
+type TopView = "auto" | "custom" | "import" | "html" | "embed";
 
 /**
  * Personal Branding builder — thin orchestrator.
  *
- * State + persistence live in `usePBForm()`. UI is composed of
- * per-concern cards (IdentityCard, ContactCard, etc.) that each
- * accept `bind` + optional override props. Adding a new editable
- * field is now a 4-touchpoint change (FormState → defaults →
- * hydrate → owning section). All other sections stay untouched.
+ * Top-level tabs (5):
+ *   - **Otomatis** — page is auto-built from CV + Profil + Portofolio.
+ *   - **Manual** — drag-style block builder.
+ *   - **Impor** — paste resume / LinkedIn → AI fills CV + profile.
+ *   - **HTML** — copy a self-contained profile card to embed in any
+ *     site (blog, README, portfolio).
+ *   - **Embed** — copy an iframe snippet to drop into Notion / Wix /
+ *     Wordpress.
  *
- * Modes (Otomatis vs Manual) reuse the same Theme + HeaderBg + Hero
- * + Contact + Indexing cards — no UI duplication. Only the
- * primary content surface differs:
- *   - Otomatis: AutoConfigCard (section toggles, page is auto-built
- *     from CV + Profil + Portofolio server-side)
- *   - Manual: ManualBlocksCard (drag-style block builder)
+ * Otomatis + Manual write to `form.mode` (the rendering choice the
+ * server stores). Impor / HTML / Embed are independent action panels;
+ * they don't touch `form.mode`.
  */
 export function PersonalBrandingView() {
   const form = usePBForm();
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewData = usePreviewBranding(form.state);
+  // Top-level tab state — initialised from server-stored mode so a
+  // user who saved Manual still lands on Manual on next visit.
+  const [view, setView] = useState<TopView>(
+    () => (form.state.mode === "custom" ? "custom" : "auto"),
+  );
 
   // Profile snapshot — used by ExportCard to fill the AI-prompt body
   // with the user's actual data. Both branches always run (rules of
@@ -107,16 +118,16 @@ export function PersonalBrandingView() {
     ? `/${form.serverState.slug}`
     : "";
 
-  const mode = form.bind("mode");
-
-  const exportCard = (
-    <ExportCard
-      bind={form.bind}
-      state={form.state}
-      slugTrimmed={form.slugTrimmed}
-      profile={profileSnapshot}
-    />
-  );
+  function handleViewChange(next: string) {
+    const v = next as TopView;
+    setView(v);
+    if (v === "auto" || v === "custom") {
+      // Sync render-mode for Otomatis / Manual; other tabs leave it alone.
+      const modeBind = form.bind("mode");
+      const targetMode: Mode = v;
+      if (modeBind.value !== targetMode) modeBind.onChange(targetMode);
+    }
+  }
 
   return (
     <PageContainer size="lg" className="space-y-6">
@@ -149,11 +160,8 @@ export function PersonalBrandingView() {
 
       <StatusBanner status={liveStatus} url={livePublicUrl} />
 
-      <Tabs
-        value={mode.value}
-        onValueChange={(v) => mode.onChange(v as Mode)}
-      >
-        <TabsList variant="pills">
+      <Tabs value={view} onValueChange={handleViewChange}>
+        <TabsList variant="pills" className="flex-wrap">
           <TabsTrigger value="auto" className="gap-1.5">
             <Zap className="h-4 w-4" />
             <span>Otomatis</span>
@@ -167,6 +175,18 @@ export function PersonalBrandingView() {
           <TabsTrigger value="custom" className="gap-1.5">
             <Wrench className="h-4 w-4" />
             <span>Manual</span>
+          </TabsTrigger>
+          <TabsTrigger value="import" className="gap-1.5">
+            <Download className="h-4 w-4" />
+            <span>Impor</span>
+          </TabsTrigger>
+          <TabsTrigger value="html" className="gap-1.5">
+            <Code2 className="h-4 w-4" />
+            <span>HTML</span>
+          </TabsTrigger>
+          <TabsTrigger value="embed" className="gap-1.5">
+            <Globe2 className="h-4 w-4" />
+            <span>Embed</span>
           </TabsTrigger>
         </TabsList>
 
@@ -184,7 +204,6 @@ export function PersonalBrandingView() {
           />
           <HeroTogglesCard bind={form.bind} />
           <ContactCard bind={form.bind} />
-          {exportCard}
           <IndexingCard bind={form.bind} />
           <SaveActions
             saving={form.saving}
@@ -237,7 +256,6 @@ export function PersonalBrandingView() {
               />
               <HeroTogglesCard bind={form.bind} />
               <ContactCard bind={form.bind} />
-              {exportCard}
               <IndexingCard bind={form.bind} />
               <SaveActions
                 saving={form.saving}
@@ -246,6 +264,37 @@ export function PersonalBrandingView() {
               />
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        {/* ===== Impor ===== */}
+        <TabsContent value="import" className="mt-4 space-y-4">
+          <ImportCard />
+        </TabsContent>
+
+        {/* ===== HTML ===== */}
+        <TabsContent value="html" className="mt-4 space-y-4">
+          <ExportCard
+            bind={form.bind}
+            state={form.state}
+            slugTrimmed={form.slugTrimmed}
+            profile={profileSnapshot}
+            only="html"
+            title="Ekspor sebagai kartu HTML"
+            description="Snippet HTML self-contained — tempel ke website mana pun (blog, portofolio sendiri, README)."
+          />
+        </TabsContent>
+
+        {/* ===== Embed ===== */}
+        <TabsContent value="embed" className="mt-4 space-y-4">
+          <ExportCard
+            bind={form.bind}
+            state={form.state}
+            slugTrimmed={form.slugTrimmed}
+            profile={profileSnapshot}
+            only="embed"
+            title="Embed iframe"
+            description="Iframe yang menyematkan halaman publik Anda — cocok untuk Notion, Wix, Wordpress."
+          />
         </TabsContent>
       </Tabs>
 

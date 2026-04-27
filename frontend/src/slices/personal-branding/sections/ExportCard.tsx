@@ -47,6 +47,9 @@ export interface ExportCardProps extends SectionOverrides {
   profile: ExportProfileSnapshot;
   /** Origin override for snippets. Defaults to careerpack.org. */
   origin?: string;
+  /** When set, render only one of the three formats (used by the
+   *  top-level HTML / Embed tabs that promote a single sub-tab). */
+  only?: "html" | "embed" | "prompt";
 }
 
 const DEFAULT_ORIGIN = "https://careerpack.org";
@@ -60,6 +63,7 @@ export function ExportCard({
   title = "Bagikan & Ekspor",
   description = "Tiga format ringkas untuk pakai data profil di luar CareerPack — masing-masing toggle independen.",
   className,
+  only,
 }: ExportCardProps) {
   const html = bind("htmlExport");
   const embed = bind("embedExport");
@@ -121,26 +125,28 @@ export function ExportCard({
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="html">
-          <TabsList variant="pills">
-            <TabsTrigger value="html" className="gap-1.5">
-              <Code2 className="h-4 w-4" />
-              <span>HTML</span>
-              {html.value && <Dot />}
-            </TabsTrigger>
-            <TabsTrigger value="embed" className="gap-1.5">
-              <Globe2 className="h-4 w-4" />
-              <span>Embed</span>
-              {embed.value && <Dot />}
-            </TabsTrigger>
-            <TabsTrigger value="prompt" className="gap-1.5">
-              <Sparkles className="h-4 w-4" />
-              <span>Prompt AI</span>
-              {prompt.value && <Dot />}
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue={only ?? "html"}>
+          {!only && (
+            <TabsList variant="pills">
+              <TabsTrigger value="html" className="gap-1.5">
+                <Code2 className="h-4 w-4" />
+                <span>HTML</span>
+                {html.value && <Dot />}
+              </TabsTrigger>
+              <TabsTrigger value="embed" className="gap-1.5">
+                <Globe2 className="h-4 w-4" />
+                <span>Embed</span>
+                {embed.value && <Dot />}
+              </TabsTrigger>
+              <TabsTrigger value="prompt" className="gap-1.5">
+                <Sparkles className="h-4 w-4" />
+                <span>Prompt AI</span>
+                {prompt.value && <Dot />}
+              </TabsTrigger>
+            </TabsList>
+          )}
 
-          <TabsContent value="html" className="mt-4">
+          <TabsContent value="html" className={only ? "mt-0" : "mt-4"}>
             <ExportPanel
               enabled={html.value}
               onToggle={html.onChange}
@@ -155,7 +161,7 @@ export function ExportCard({
             />
           </TabsContent>
 
-          <TabsContent value="embed" className="mt-4">
+          <TabsContent value="embed" className={only ? "mt-0" : "mt-4"}>
             <ExportPanel
               enabled={embed.value}
               onToggle={embed.onChange}
@@ -170,7 +176,7 @@ export function ExportCard({
             />
           </TabsContent>
 
-          <TabsContent value="prompt" className="mt-4">
+          <TabsContent value="prompt" className={only ? "mt-0" : "mt-4"}>
             <ExportPanel
               enabled={prompt.value}
               onToggle={prompt.onChange}
