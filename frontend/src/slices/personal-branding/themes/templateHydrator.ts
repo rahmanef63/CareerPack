@@ -240,6 +240,33 @@ const HYDRATOR_SOURCE = String.raw`
     fill(node, 'lang-proficiency', item.proficiency);
   });
 
+  // ---- Force reveal animations active --------------------------
+  // Templates wrap content in .reveal / .js-reveal which start at
+  // opacity:0 and fade in only after IntersectionObserver fires
+  // .is-visible / .in-view. In a sandboxed srcdoc iframe the IO
+  // races against the iframe's initial 0x0 size and frequently
+  // never fires, leaving the hero stuck invisible — even though
+  // the hydrator filled the text. Force the visible state here
+  // (and inject a CSS override) so real-data renders are
+  // bullet-proof. Mock previews in the picker still animate.
+  try {
+    var revealEls = document.querySelectorAll('.reveal, .js-reveal, .stagger');
+    for (var ri = 0; ri < revealEls.length; ri++) {
+      revealEls[ri].classList.add('is-visible', 'in-view');
+    }
+    var styleOverride = document.createElement('style');
+    styleOverride.setAttribute('data-cp-style', 'reveal-override');
+    styleOverride.textContent =
+      '.reveal, .js-reveal, .stagger, .motion-ready .js-reveal {' +
+        'opacity: 1 !important;' +
+        'transform: none !important;' +
+        'filter: none !important;' +
+      '}';
+    document.head.appendChild(styleOverride);
+  } catch (e) {
+    try { console.warn('[CareerPack hydrator] reveal override failed', e); } catch (_) {}
+  }
+
   // ---- Section visibility ---------------------------------------
   var has = d.has || {};
   hideSection('about', !has.about);
