@@ -109,6 +109,7 @@ export function usePreviewBranding(state: FormState):
     const contactEmail = state.contactEmail ?? "";
     const linkedin = state.linkedinUrl ?? "";
     const portfolioUrl = state.portfolioUrl ?? "";
+    const t = state.autoToggles;
     const branding: BrandingPayload = {
       identity: {
         name: me.profile?.fullName || me.name || "",
@@ -125,14 +126,29 @@ export function usePreviewBranding(state: FormState):
       certifications,
       languages,
       projects,
+      availability: state.availableForHire
+        ? { open: true, note: state.availabilityNote }
+        : undefined,
+      cta:
+        state.ctaLabel.trim() && state.ctaUrl.trim()
+          ? {
+              label: state.ctaLabel.trim(),
+              url: state.ctaUrl.trim(),
+              type: state.ctaType,
+            }
+          : undefined,
+      sectionOrder:
+        state.sectionOrder.length > 0 ? state.sectionOrder : undefined,
       has: {
-        about: Boolean(bio.trim() || cvSummary.trim()),
-        skills: skills.length > 0,
-        experience: experience.length > 0,
-        education: education.length > 0,
-        certifications: certifications.length > 0,
-        languages: languages.length > 0,
-        projects: projects.length > 0,
+        // Mirror the backend: respect user toggles in addition to data
+        // presence so the preview matches what visitors will see.
+        about: state.bioShow && Boolean(bio.trim() || cvSummary.trim()),
+        skills: state.skillsShow && skills.length > 0,
+        experience: t.showExperience && experience.length > 0,
+        education: t.showEducation && education.length > 0,
+        certifications: t.showCertifications && certifications.length > 0,
+        languages: t.showLanguages && languages.length > 0,
+        projects: t.showProjects && projects.length > 0,
         contact: Boolean(contactEmail || linkedin || portfolioUrl),
       },
     };

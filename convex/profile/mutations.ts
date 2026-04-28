@@ -14,6 +14,19 @@ const SLUG_REGEX = /^[a-z][a-z0-9-]+[a-z0-9]$/;
 const HEADLINE_MAX = 120;
 const EMAIL_MAX = 120;
 const URL_MAX = 300;
+const AVAILABILITY_NOTE_MAX = 80;
+const CTA_LABEL_MAX = 40;
+
+const ALLOWED_SECTIONS = new Set([
+  "about",
+  "skills",
+  "experience",
+  "education",
+  "certifications",
+  "languages",
+  "projects",
+  "contact",
+]);
 
 const RESERVED_SLUGS = new Set<string>([
   "_next", "api", "r", "static", "assets", "public",
@@ -178,8 +191,22 @@ export const updateMyPublicProfile = mutation({
         showCertifications: v.optional(v.boolean()),
         showProjects: v.optional(v.boolean()),
         showSocial: v.optional(v.boolean()),
+        showLanguages: v.optional(v.boolean()),
       }),
     ),
+    availableForHire: v.optional(v.boolean()),
+    availabilityNote: v.optional(v.string()),
+    ctaLabel: v.optional(v.string()),
+    ctaUrl: v.optional(v.string()),
+    ctaType: v.optional(
+      v.union(
+        v.literal("link"),
+        v.literal("email"),
+        v.literal("calendly"),
+        v.literal("download"),
+      ),
+    ),
+    sectionOrder: v.optional(v.array(v.string())),
     theme: v.optional(
       v.union(
         v.literal("linktree"),
@@ -289,6 +316,55 @@ export const updateMyPublicProfile = mutation({
     if (args.promptExport !== undefined) patch.publicPromptExport = args.promptExport;
     if (args.blocks !== undefined) {
       patch.publicBlocks = sanitizeBlocks(args.blocks);
+    }
+
+    if (args.availableForHire !== undefined) {
+      patch.publicAvailableForHire = args.availableForHire;
+    }
+    if (args.availabilityNote !== undefined) {
+      patch.publicAvailabilityNote = assertShortText(
+        args.availabilityNote,
+        AVAILABILITY_NOTE_MAX,
+        "Catatan ketersediaan",
+      );
+    }
+    if (args.ctaLabel !== undefined) {
+      patch.publicCtaLabel = assertShortText(
+        args.ctaLabel,
+        CTA_LABEL_MAX,
+        "Label CTA",
+      );
+    }
+    if (args.ctaUrl !== undefined) {
+      const raw = args.ctaUrl.trim();
+      if (raw.length === 0) {
+        patch.publicCtaUrl = "";
+      } else if (raw.length > URL_MAX) {
+        throw new Error("URL CTA terlalu panjang");
+      } else if (raw.startsWith("mailto:")) {
+        // Accept mailto: as-is for type=email — assertEmail validates
+        // the address part. Strip the prefix before sending in.
+        const addr = raw.slice("mailto:".length);
+        if (assertEmail(addr).length === 0) {
+          throw new Error("Alamat email pada CTA tidak valid");
+        }
+        patch.publicCtaUrl = `mailto:${addr.trim()}`;
+      } else {
+        patch.publicCtaUrl = assertUrl(raw, "URL CTA");
+      }
+    }
+    if (args.ctaType !== undefined) patch.publicCtaType = args.ctaType;
+    if (args.sectionOrder !== undefined) {
+      const seen = new Set<string>();
+      const cleaned: string[] = [];
+      for (const s of args.sectionOrder) {
+        const k = s.trim();
+        if (!ALLOWED_SECTIONS.has(k)) continue;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        cleaned.push(k);
+      }
+      patch.publicSectionOrder = cleaned;
     }
 
     await ctx.db.patch(profile._id, patch);

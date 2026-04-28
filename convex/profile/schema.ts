@@ -71,8 +71,38 @@ export const profileTables = {
         showCertifications: v.optional(v.boolean()),
         showProjects: v.optional(v.boolean()),
         showSocial: v.optional(v.boolean()),
+        showLanguages: v.optional(v.boolean()),
       }),
     ),
+    /**
+     * "Available for hire" badge — surfaces an at-a-glance status near
+     * the hero on the public page. Note is short-form (≤80 chars):
+     * e.g. "Open for senior frontend roles · Q3 2026".
+     */
+    publicAvailableForHire: v.optional(v.boolean()),
+    publicAvailabilityNote: v.optional(v.string()),
+    /**
+     * Primary call-to-action button rendered in the hero. Type is a
+     * semantic hint so the hydrator can pick the right icon and the
+     * UI can validate URL shape (mailto: vs http vs calendly).
+     */
+    publicCtaLabel: v.optional(v.string()),
+    publicCtaUrl: v.optional(v.string()),
+    publicCtaType: v.optional(
+      v.union(
+        v.literal("link"),
+        v.literal("email"),
+        v.literal("calendly"),
+        v.literal("download"),
+      ),
+    ),
+    /**
+     * User-controlled order of branding sections on the public page.
+     * Hydrator reorders DOM nodes carrying `data-cp-section` markers
+     * to match this list. Sections not in the list keep their
+     * template-default order. Empty/null = template default.
+     */
+    publicSectionOrder: v.optional(v.array(v.string())),
     publicTheme: v.optional(
       v.union(
         v.literal("linktree"),

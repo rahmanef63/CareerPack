@@ -76,6 +76,13 @@ export interface BrandingPayload {
     coverEmoji: string | null;
     coverUrl: string | null;
   }>;
+  availability?: { open: boolean; note: string };
+  cta?: {
+    label: string;
+    url: string;
+    type: "link" | "email" | "calendly" | "download";
+  };
+  sectionOrder?: string[];
   has: {
     about: boolean;
     skills: boolean;

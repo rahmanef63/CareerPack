@@ -34,7 +34,35 @@ export const DEFAULT_FORM_STATE: FormState = {
   htmlExport: false,
   embedExport: false,
   promptExport: false,
+
+  availableForHire: false,
+  availabilityNote: "",
+  ctaLabel: "",
+  ctaUrl: "",
+  ctaType: "link",
+  sectionOrder: [],
 };
+
+/** Canonical section order — used by SectionLayoutCard as the
+ *  baseline when the user hasn't reordered yet. */
+export const DEFAULT_SECTION_ORDER: ReadonlyArray<{
+  key: string;
+  label: string;
+}> = [
+  { key: "about", label: "Tentang" },
+  { key: "skills", label: "Skills" },
+  { key: "experience", label: "Pengalaman" },
+  { key: "projects", label: "Proyek" },
+  { key: "education", label: "Pendidikan" },
+  { key: "certifications", label: "Sertifikasi" },
+  { key: "languages", label: "Bahasa" },
+  { key: "contact", label: "Kontak" },
+];
+
+export const FIELD_LIMITS_PB = {
+  availabilityNoteMax: 80,
+  ctaLabelMax: 40,
+} as const;
 
 /** Field-length constraints used across the builder. Exposed as
  *  constants so sections can consume them via props for parity with

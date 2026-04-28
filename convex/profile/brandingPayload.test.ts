@@ -226,6 +226,92 @@ describe("buildBrandingPayload", () => {
     ).toBe(true);
   });
 
+  it("toggles override has-flags even when data is present", () => {
+    // Has experience data — but user toggled it off. has.experience
+    // must be false so the hydrator hides the section.
+    const out = buildBrandingPayload({
+      profile: { ...emptyProfile, bio: "bio text", skills: ["React"] },
+      cv: fullCv(),
+      portfolio: [],
+      toggles: {
+        showExperience: false,
+        showEducation: false,
+        showProjects: false,
+        showCertifications: false,
+        showLanguages: false,
+        showBio: false,
+        showSkills: false,
+      },
+    });
+    expect(out.has.experience).toBe(false);
+    expect(out.has.education).toBe(false);
+    expect(out.has.certifications).toBe(false);
+    expect(out.has.languages).toBe(false);
+    expect(out.has.about).toBe(false);
+    expect(out.has.skills).toBe(false);
+    expect(out.has.projects).toBe(false);
+  });
+
+  it("availability open=false is dropped, open=true with note carries", () => {
+    const dropped = buildBrandingPayload({
+      profile: emptyProfile,
+      cv: null,
+      portfolio: [],
+      availability: { open: false, note: "x" },
+    });
+    expect(dropped.availability).toBeUndefined();
+
+    const kept = buildBrandingPayload({
+      profile: emptyProfile,
+      cv: null,
+      portfolio: [],
+      availability: { open: true, note: "Remote · Q3" },
+    });
+    expect(kept.availability).toEqual({ open: true, note: "Remote · Q3" });
+  });
+
+  it("cta requires both label AND url; trims; otherwise omitted", () => {
+    const noUrl = buildBrandingPayload({
+      profile: emptyProfile,
+      cv: null,
+      portfolio: [],
+      cta: { label: "Book", url: "  ", type: "calendly" },
+    });
+    expect(noUrl.cta).toBeUndefined();
+
+    const ok = buildBrandingPayload({
+      profile: emptyProfile,
+      cv: null,
+      portfolio: [],
+      cta: { label: "  Book a call ", url: " https://cal.com/me ", type: "calendly" },
+    });
+    expect(ok.cta).toEqual({
+      label: "Book a call",
+      url: "https://cal.com/me",
+      type: "calendly",
+    });
+  });
+
+  it("sectionOrder empty → undefined; non-empty → carries through", () => {
+    expect(
+      buildBrandingPayload({
+        profile: emptyProfile,
+        cv: null,
+        portfolio: [],
+        sectionOrder: [],
+      }).sectionOrder,
+    ).toBeUndefined();
+
+    expect(
+      buildBrandingPayload({
+        profile: emptyProfile,
+        cv: null,
+        portfolio: [],
+        sectionOrder: ["projects", "experience", "skills"],
+      }).sectionOrder,
+    ).toEqual(["projects", "experience", "skills"]);
+  });
+
   it("identity slot keys all carry through", () => {
     const out = buildBrandingPayload({
       profile: {

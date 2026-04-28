@@ -24,6 +24,7 @@ import { DEFAULT_FORM_STATE } from "./defaults";
 import { validateSlug } from "./slugValidation";
 import type {
   Bind,
+  CtaType,
   FieldKey,
   FormState,
   Mode,
@@ -59,6 +60,12 @@ interface ServerData {
   htmlExport?: boolean;
   embedExport?: boolean;
   promptExport?: boolean;
+  availableForHire?: boolean;
+  availabilityNote?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  ctaType?: string | null;
+  sectionOrder?: string[] | null;
 }
 
 function seedFromServer(data: ServerData): FormState {
@@ -94,12 +101,27 @@ function seedFromServer(data: ServerData): FormState {
         data.autoToggles?.showProjects ?? DEFAULT_AUTO_TOGGLES.showProjects,
       showSocial:
         data.autoToggles?.showSocial ?? DEFAULT_AUTO_TOGGLES.showSocial,
+      showLanguages:
+        data.autoToggles?.showLanguages ?? DEFAULT_AUTO_TOGGLES.showLanguages,
     },
     blocks: data.blocks ?? [],
     htmlExport: Boolean(data.htmlExport),
     embedExport: Boolean(data.embedExport),
     promptExport: Boolean(data.promptExport),
+    availableForHire: Boolean(data.availableForHire),
+    availabilityNote: data.availabilityNote ?? "",
+    ctaLabel: data.ctaLabel ?? "",
+    ctaUrl: data.ctaUrl ?? "",
+    ctaType: (isCtaType(data.ctaType) ? data.ctaType : "link") as CtaType,
+    sectionOrder: Array.isArray(data.sectionOrder) ? data.sectionOrder : [],
   };
+}
+
+function isCtaType(t: unknown): t is CtaType {
+  return (
+    typeof t === "string" &&
+    (t === "link" || t === "email" || t === "calendly" || t === "download")
+  );
 }
 
 export interface PBForm {
@@ -122,6 +144,14 @@ export interface PBForm {
   /** Server snapshot — drives the StatusBanner so it shows ground
    *  truth rather than dirty form state. null while loading. */
   serverState: ServerData | null;
+  /** Epoch-ms timestamp of the most recent successful save (manual or
+   *  auto). null before the first save in this session. Drives the
+   *  "Tersimpan otomatis · Xs lalu" indicator. */
+  lastSavedAt: number | null;
+  /** True while the auto-save debounce window is pending — i.e. the
+   *  user has unsaved typing in the last <1.5s. Used by the indicator
+   *  to show "Menyimpan…" between manual saves. */
+  autoSavePending: boolean;
 }
 
 /**
@@ -148,6 +178,8 @@ export function usePBForm(): PBForm {
 
   const [state, setState] = useState<FormState>(DEFAULT_FORM_STATE);
   const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [autoSavePending, setAutoSavePending] = useState(false);
   const seededRef = useRef(false);
   // Reset the seed guard on auth-mode flip — otherwise loading the page
   // unauth (or in demo) seeds the empty/demo branch, then signing in
@@ -258,17 +290,28 @@ export function usePBForm(): PBForm {
             htmlExport: state.htmlExport,
             embedExport: state.embedExport,
             promptExport: state.promptExport,
+            availableForHire: state.availableForHire,
+            availabilityNote: state.availabilityNote,
+            ctaLabel: state.ctaLabel,
+            ctaUrl: state.ctaUrl,
+            ctaType: state.ctaType,
+            sectionOrder: state.sectionOrder,
           });
         }
         if (opts.activate) {
           setState((s) => ({ ...s, enabled: true }));
         }
-        notify.success(
-          finalEnabled
-            ? `Tersimpan — careerpack.org/${slugTrimmed} update dalam beberapa detik (cache ISR ~60s).`
-            : "Tersimpan sebagai draft (belum publik)",
-        );
+        setLastSavedAt(Date.now());
+        if (!opts.silent) {
+          notify.success(
+            finalEnabled
+              ? `Tersimpan — careerpack.org/${slugTrimmed} update dalam beberapa detik (cache ISR ~60s).`
+              : "Tersimpan sebagai draft (belum publik)",
+          );
+        }
       } catch (err) {
+        // Always toast errors — even silent auto-saves shouldn't fail
+        // quietly and leave the user thinking everything saved fine.
         notify.fromError(err, "Gagal menyimpan");
       } finally {
         setSaving(false);
@@ -276,6 +319,41 @@ export function usePBForm(): PBForm {
     },
     [state, saving, slugValidation, slugTrimmed, update, isDemo, demoPB],
   );
+
+  // ----------------------------------------------------------------
+  // Auto-save loop
+  // ----------------------------------------------------------------
+  // Debounces 1500ms after the last edit, then silently calls submit.
+  // Skipped in demo mode (no backend) and when the slug isn't valid
+  // yet (would just throw and toast). The first effect run after
+  // hydration is also a no-op — `seededRef` is freshly true and the
+  // state hasn't drifted from the server yet. We snapshot the
+  // last-submitted state in `lastSubmittedRef` so re-renders that
+  // don't actually mutate any field don't fire a save.
+  const submitRef = useRef(submit);
+  submitRef.current = submit;
+  const lastSubmittedRef = useRef<string>("");
+  useEffect(() => {
+    if (isDemo) return;
+    if (!seededRef.current) return;
+    if (!canEnable) return;
+    // Snapshot the form state we'd save — JSON for cheap deep-equal.
+    // Excludes `enabled` so toggling enabled via Save & Publish doesn't
+    // get mistaken for a re-save trigger.
+    const snapshot = JSON.stringify({ ...state, enabled: undefined });
+    if (snapshot === lastSubmittedRef.current) return;
+    setAutoSavePending(true);
+    const t = window.setTimeout(() => {
+      lastSubmittedRef.current = snapshot;
+      submitRef.current({ silent: true }).finally(() => {
+        setAutoSavePending(false);
+      });
+    }, 1500);
+    return () => {
+      window.clearTimeout(t);
+      setAutoSavePending(false);
+    };
+  }, [state, isDemo, canEnable]);
 
   return {
     state,
@@ -289,5 +367,7 @@ export function usePBForm(): PBForm {
     serverState: isDemo
       ? ({ ...demoPB.state, blocks: [] } as ServerData)
       : ((data as ServerData | null) ?? null),
+    lastSavedAt,
+    autoSavePending,
   };
 }

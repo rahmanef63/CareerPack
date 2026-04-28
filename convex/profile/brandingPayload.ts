@@ -88,6 +88,37 @@ export interface BrandingProjectCard {
   coverUrl: string | null;
 }
 
+export type BrandingCtaType = "link" | "email" | "calendly" | "download";
+
+export interface BrandingCta {
+  label: string;
+  url: string;
+  type: BrandingCtaType;
+}
+
+export interface BrandingAvailability {
+  open: boolean;
+  note: string;
+}
+
+/**
+ * Per-section visibility toggles consumed by buildBrandingPayload to
+ * override the default "show whenever data exists" behaviour. When a
+ * toggle is `false` we force `has.X = false` so the hydrator hides
+ * the section even if data is present. Mirrors AutoToggles +
+ * publicBioShow/publicSkillsShow which historically only affected
+ * the legacy block builder.
+ */
+export interface BrandingToggles {
+  showExperience: boolean;
+  showEducation: boolean;
+  showCertifications: boolean;
+  showProjects: boolean;
+  showLanguages: boolean;
+  showBio: boolean;
+  showSkills: boolean;
+}
+
 export interface BrandingPayload {
   identity: {
     name: string;
@@ -111,6 +142,16 @@ export interface BrandingPayload {
   certifications: BrandingCertification[];
   languages: BrandingLanguage[];
   projects: BrandingProjectCard[];
+  /** Hero-area "available for hire" status. Optional — when `open` is
+   *  false the hydrator skips the badge entirely. */
+  availability?: BrandingAvailability;
+  /** Hero primary call-to-action. When `label` + `url` are both
+   *  present the hydrator injects a button just below the hero. */
+  cta?: BrandingCta;
+  /** User-defined order of section keys. Hydrator reorders matching
+   *  `[data-cp-section]` siblings. Sections not in the list keep
+   *  their template-default position. */
+  sectionOrder?: string[];
   /**
    * Section presence map — UI hydrator uses this to decide which
    * sections to show vs. hide. Authoritative; hydrator should not
@@ -132,10 +173,19 @@ export function buildBrandingPayload({
   profile,
   cv,
   portfolio,
+  toggles,
+  availability,
+  cta,
+  sectionOrder,
 }: {
   profile: ProfileInput;
   cv: Doc<"cvs"> | null;
   portfolio: PortfolioInput[];
+  /** Optional — when omitted every section defaults to visible. */
+  toggles?: Partial<BrandingToggles>;
+  availability?: BrandingAvailability;
+  cta?: BrandingCta;
+  sectionOrder?: string[];
 }): BrandingPayload {
   const cvSummary = cv?.personalInfo?.summary ?? "";
   const bio = profile.bio || "";
@@ -224,6 +274,28 @@ export function buildBrandingPayload({
       profile.portfolioUrl.trim(),
   );
 
+  // Toggles default to "show when data exists" (omitted toggle = true).
+  const t: BrandingToggles = {
+    showExperience: toggles?.showExperience ?? true,
+    showEducation: toggles?.showEducation ?? true,
+    showCertifications: toggles?.showCertifications ?? true,
+    showProjects: toggles?.showProjects ?? true,
+    showLanguages: toggles?.showLanguages ?? true,
+    showBio: toggles?.showBio ?? true,
+    showSkills: toggles?.showSkills ?? true,
+  };
+
+  // Sanitised availability + cta — drop entries that are missing the
+  // pieces needed to render. Saves the hydrator from re-checking.
+  const availabilityOut: BrandingAvailability | undefined =
+    availability && availability.open
+      ? { open: true, note: availability.note ?? "" }
+      : undefined;
+  const ctaOut: BrandingCta | undefined =
+    cta && cta.label.trim() && cta.url.trim()
+      ? { label: cta.label.trim(), url: cta.url.trim(), type: cta.type }
+      : undefined;
+
   return {
     identity: {
       name: profile.fullName || "",
@@ -247,14 +319,18 @@ export function buildBrandingPayload({
     certifications,
     languages,
     projects: projectCards,
+    availability: availabilityOut,
+    cta: ctaOut,
+    sectionOrder:
+      sectionOrder && sectionOrder.length > 0 ? sectionOrder : undefined,
     has: {
-      about: Boolean(bio.trim() || cvSummary.trim()),
-      skills: skillsMerged.length > 0,
-      experience: experience.length > 0,
-      education: education.length > 0,
-      certifications: certifications.length > 0,
-      languages: languages.length > 0,
-      projects: projectCards.length > 0,
+      about: t.showBio && Boolean(bio.trim() || cvSummary.trim()),
+      skills: t.showSkills && skillsMerged.length > 0,
+      experience: t.showExperience && experience.length > 0,
+      education: t.showEducation && education.length > 0,
+      certifications: t.showCertifications && certifications.length > 0,
+      languages: t.showLanguages && languages.length > 0,
+      projects: t.showProjects && projectCards.length > 0,
       contact: hasContact,
     },
   };

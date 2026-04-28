@@ -44,6 +44,9 @@ import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
 import { SaveActions } from "../sections/SaveActions";
 import { ModeWarning } from "../sections/ModeWarning";
+import { AvailabilityCard } from "../sections/AvailabilityCard";
+import { CtaCard } from "../sections/CtaCard";
+import { SectionLayoutCard } from "../sections/SectionLayoutCard";
 import {
   ExportCard,
   type ExportProfileSnapshot,
@@ -226,6 +229,15 @@ export function PersonalBrandingView() {
           <div id="pb-section-hero-toggles" className="rounded-xl transition-shadow">
             <HeroTogglesCard bind={form.bind} />
           </div>
+          <div id="pb-section-availability" className="rounded-xl transition-shadow">
+            <AvailabilityCard bind={form.bind} />
+          </div>
+          <div id="pb-section-cta" className="rounded-xl transition-shadow">
+            <CtaCard bind={form.bind} />
+          </div>
+          <div id="pb-section-layout" className="rounded-xl transition-shadow">
+            <SectionLayoutCard bind={form.bind} />
+          </div>
           <div id="pb-section-contact" className="rounded-xl transition-shadow">
             <ContactCard bind={form.bind} />
           </div>
@@ -236,6 +248,8 @@ export function PersonalBrandingView() {
             saving={form.saving}
             canEnable={form.canEnable}
             submit={form.submit}
+            lastSavedAt={form.lastSavedAt}
+            autoSavePending={form.autoSavePending}
           />
         </TabsContent>
 
@@ -261,6 +275,8 @@ export function PersonalBrandingView() {
                 saving={form.saving}
                 canEnable={form.canEnable}
                 submit={form.submit}
+                lastSavedAt={form.lastSavedAt}
+                autoSavePending={form.autoSavePending}
               />
             </TabsContent>
 
@@ -271,6 +287,8 @@ export function PersonalBrandingView() {
                 saving={form.saving}
                 canEnable={form.canEnable}
                 submit={form.submit}
+                lastSavedAt={form.lastSavedAt}
+                autoSavePending={form.autoSavePending}
               />
             </TabsContent>
 
@@ -288,6 +306,8 @@ export function PersonalBrandingView() {
                 saving={form.saving}
                 canEnable={form.canEnable}
                 submit={form.submit}
+                lastSavedAt={form.lastSavedAt}
+                autoSavePending={form.autoSavePending}
               />
             </TabsContent>
           </Tabs>

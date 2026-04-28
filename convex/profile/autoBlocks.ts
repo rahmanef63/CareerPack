@@ -22,6 +22,7 @@ export interface AutoToggles {
   showCertifications: boolean;
   showProjects: boolean;
   showSocial: boolean;
+  showLanguages: boolean;
 }
 
 /** Slim profile shape — only the fields we read from `userProfiles`. */
@@ -317,4 +318,5 @@ export const DEFAULT_AUTO_TOGGLES: AutoToggles = {
   showCertifications: true,
   showProjects: true,
   showSocial: true,
+  showLanguages: true,
 };

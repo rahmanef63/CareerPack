@@ -317,6 +317,7 @@ export const getBySlug = query({
           stored.showCertifications ?? DEFAULT_AUTO_TOGGLES.showCertifications,
         showProjects: stored.showProjects ?? DEFAULT_AUTO_TOGGLES.showProjects,
         showSocial: stored.showSocial ?? DEFAULT_AUTO_TOGGLES.showSocial,
+        showLanguages: stored.showLanguages ?? DEFAULT_AUTO_TOGGLES.showLanguages,
       };
       blocks = buildAutoBlocks({
         profile: {
@@ -344,14 +345,17 @@ export const getBySlug = query({
       .order("desc")
       .first();
 
+    const ctaType = profile.publicCtaType ?? "link";
     const branding = buildBrandingPayload({
       profile: {
         fullName: profile.fullName,
         publicHeadline: profile.publicHeadline ?? "",
         targetRole: profile.publicTargetRoleShow ? profile.targetRole : "",
         location: profile.location ?? "",
-        bio: profile.publicBioShow ? (profile.bio ?? "") : "",
-        skills: profile.publicSkillsShow ? (profile.skills ?? []) : [],
+        // Bio/skills toggles flow through the toggle override below;
+        // we still pass the raw data so the payload-builder can decide.
+        bio: profile.bio ?? "",
+        skills: profile.skills ?? [],
         avatarUrl,
         contactEmail: profile.publicContactEmail ?? "",
         linkedinUrl: profile.publicLinkedinUrl ?? "",
@@ -359,6 +363,40 @@ export const getBySlug = query({
       },
       cv: cvDoc,
       portfolio,
+      toggles: {
+        showExperience:
+          profile.publicAutoToggles?.showExperience ??
+          DEFAULT_AUTO_TOGGLES.showExperience,
+        showEducation:
+          profile.publicAutoToggles?.showEducation ??
+          DEFAULT_AUTO_TOGGLES.showEducation,
+        showCertifications:
+          profile.publicAutoToggles?.showCertifications ??
+          DEFAULT_AUTO_TOGGLES.showCertifications,
+        showProjects:
+          profile.publicAutoToggles?.showProjects ??
+          DEFAULT_AUTO_TOGGLES.showProjects,
+        showLanguages:
+          profile.publicAutoToggles?.showLanguages ??
+          DEFAULT_AUTO_TOGGLES.showLanguages,
+        showBio: Boolean(profile.publicBioShow),
+        showSkills: Boolean(profile.publicSkillsShow),
+      },
+      availability: profile.publicAvailableForHire
+        ? {
+            open: true,
+            note: profile.publicAvailabilityNote ?? "",
+          }
+        : undefined,
+      cta:
+        profile.publicCtaLabel && profile.publicCtaUrl
+          ? {
+              label: profile.publicCtaLabel,
+              url: profile.publicCtaUrl,
+              type: ctaType,
+            }
+          : undefined,
+      sectionOrder: profile.publicSectionOrder ?? undefined,
     });
 
     return {
@@ -421,6 +459,12 @@ export const getMyPublicProfile = query({
       embedExport: Boolean(profile.publicEmbedExport),
       promptExport: Boolean(profile.publicPromptExport),
       blocks: profile.publicBlocks ?? [],
+      availableForHire: Boolean(profile.publicAvailableForHire),
+      availabilityNote: profile.publicAvailabilityNote ?? "",
+      ctaLabel: profile.publicCtaLabel ?? "",
+      ctaUrl: profile.publicCtaUrl ?? "",
+      ctaType: profile.publicCtaType ?? "link",
+      sectionOrder: profile.publicSectionOrder ?? [],
     };
   },
 });

@@ -21,6 +21,8 @@ import type { AutoToggles } from "../../../../../convex/profile/autoBlocks";
 
 export type Mode = "auto" | "custom";
 
+export type CtaType = "link" | "email" | "calendly" | "download";
+
 export interface FormState {
   // ---- identity ----------------------------------------------------
   enabled: boolean;
@@ -53,6 +55,15 @@ export interface FormState {
   htmlExport: boolean;
   embedExport: boolean;
   promptExport: boolean;
+
+  // ---- availability + CTA + section order -------------------------
+  availableForHire: boolean;
+  availabilityNote: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  ctaType: CtaType;
+  /** Empty = use template default order. */
+  sectionOrder: string[];
 }
 
 export type FieldKey = keyof FormState;
@@ -85,6 +96,9 @@ export interface SlugValidation {
 export interface SubmitOptions {
   /** When true, force enabled=true regardless of the local toggle. */
   activate?: boolean;
+  /** Skip success toast — used by the auto-save loop so the user
+   *  doesn't get spammed every 1.5s while typing. Errors still toast. */
+  silent?: boolean;
 }
 
 /**
