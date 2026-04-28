@@ -146,6 +146,7 @@ export function PersonalBrandingPage({
   profile,
   brand = true,
   showBranding = true,
+  enableFloatingNav = false,
 }: {
   profile: ProfileShape;
   brand?: boolean;
@@ -153,6 +154,11 @@ export function PersonalBrandingPage({
    *  fluff sections (no `__cp_data` injection). Used by Preview's
    *  "Tampilkan Template" tab. */
   showBranding?: boolean;
+  /** When true, the parent renders a viewport-fixed mobile nav at the
+   *  bottom of the screen, populated from the iframe's hidden
+   *  `.floating-nav`. Editor previews leave this off (the editor has
+   *  its own action bar) — the public page route turns it on. */
+  enableFloatingNav?: boolean;
 }) {
   const accentVar = profile.accent
     ? ({ "--branding-accent": profile.accent } as React.CSSProperties)
@@ -171,6 +177,7 @@ export function PersonalBrandingPage({
         templateUrl={templateUrl}
         displayName={profile.displayName}
         branding={showBranding ? profile.branding : undefined}
+        enableFloatingNav={enableFloatingNav}
       />
       {brand && <BrandFooter slug={profile.slug} displayName={profile.displayName} />}
     </div>
@@ -193,16 +200,24 @@ function normalizeTheme(t: PersonalBrandingTheme): TemplateTheme {
  *  template caches alongside the user-pickable ones. */
 const TEMPLATE_HTML_CACHE = new Map<string, string>();
 
+interface FloatingNavItem {
+  id: string;
+  label: string;
+  iconHtml: string;
+}
+
 function TemplateLayout({
   templateKey,
   templateUrl,
   displayName,
   branding,
+  enableFloatingNav = false,
 }: {
   templateKey: string;
   templateUrl: string;
   displayName: string;
   branding?: BrandingPayload;
+  enableFloatingNav?: boolean;
 }) {
   const url = templateUrl;
   const [html, setHtml] = useState<string | null>(
@@ -219,6 +234,12 @@ function TemplateLayout({
   // modal can't live inside the iframe (position:fixed pins to the
   // iframe viewport which scrolls with the parent).
   const [showMoreList, setShowMoreList] = useState<ShowMoreList | null>(null);
+  // Mobile floating-nav items extracted from the iframe's hidden
+  // .floating-nav. Populated via cp-floating-nav postMessage. Empty
+  // until the iframe finishes hydrating.
+  const [floatingNavItems, setFloatingNavItems] = useState<FloatingNavItem[]>(
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -259,7 +280,14 @@ function TemplateLayout({
   useEffect(() => {
     function onMessage(event: MessageEvent) {
       const data = event.data as
-        | { type?: string; h?: number; list?: string }
+        | {
+            type?: string;
+            h?: number;
+            list?: string;
+            items?: FloatingNavItem[];
+            id?: string;
+            y?: number;
+          }
         | null;
       if (!data || typeof data.type !== "string") return;
       // Only trust messages from our own iframe. With sandboxed
@@ -278,17 +306,42 @@ function TemplateLayout({
         if (VALID_SHOW_MORE_LISTS.has(listName)) {
           setShowMoreList(listName);
         }
+        return;
+      }
+      if (data.type === "cp-floating-nav" && Array.isArray(data.items)) {
+        setFloatingNavItems(data.items.slice(0, 6));
+        return;
+      }
+      if (data.type === "cp-anchor-y" && typeof data.y === "number") {
+        // Iframe responded with the y-coordinate of the requested
+        // anchor (relative to iframe document origin). Convert to
+        // parent-window scroll target = iframe top + y - top-bar
+        // offset, then smooth-scroll the actual viewport.
+        const iframeEl = iframeRef.current;
+        if (iframeEl) {
+          const rect = iframeEl.getBoundingClientRect();
+          const parentY = rect.top + window.scrollY + data.y - 16;
+          window.scrollTo({ top: parentY, behavior: "smooth" });
+        }
+        return;
       }
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  // Reset height when template/branding key changes — we'll get a fresh
-  // postMessage from the new iframe contents.
+  // Reset height + floating-nav when template/branding key changes —
+  // we'll get a fresh postMessage from the new iframe contents.
   useEffect(() => {
     setIframeHeight(null);
+    setFloatingNavItems([]);
   }, [templateKey, branding]);
+
+  function gotoSection(id: string) {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    win.postMessage({ type: "cp-goto", id }, "*");
+  }
 
   // Inject branding payload + hydrator so the iframe can replace mock
   // copy with the user's real data and hide empty sections. The
@@ -336,7 +389,68 @@ function TemplateLayout({
         listName={showMoreList}
         onClose={() => setShowMoreList(null)}
       />
+      {enableFloatingNav && floatingNavItems.length > 0 && (
+        <FloatingMobileNav items={floatingNavItems} onSelect={gotoSection} />
+      )}
     </div>
+  );
+}
+
+/**
+ * Viewport-fixed mobile bottom nav rendered OUTSIDE the iframe so its
+ * `position: fixed` actually pins to the user's viewport. Clicks
+ * postMessage `cp-goto` into the iframe, which echoes back the
+ * target's y-offset; the parent then smooth-scrolls itself.
+ *
+ * Hidden on `lg:` because desktop visitors get the templates' own
+ * sticky `.site-header` (which positions correctly at the natural
+ * top of the document — only the bottom-fixed mobile bar was
+ * misbehaving).
+ */
+function FloatingMobileNav({
+  items,
+  onSelect,
+}: {
+  items: ReadonlyArray<FloatingNavItem>;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <nav
+      aria-label="Navigasi cepat"
+      className="fixed inset-x-3 bottom-3 z-50 lg:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      <ul
+        className="grid gap-1 rounded-2xl border border-border bg-background/85 p-1.5 shadow-lg backdrop-blur"
+        style={{
+          gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`,
+        }}
+      >
+        {items.map((item) => (
+          <li key={item.id} className="min-w-0">
+            <button
+              type="button"
+              onClick={() => onSelect(item.id)}
+              className="flex w-full flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:bg-accent"
+            >
+              {item.iconHtml ? (
+                <span
+                  className="block h-5 w-5 [&_svg]:h-5 [&_svg]:w-5"
+                  // Iframe-extracted SVG markup. Templates' own SVGs
+                  // are static asset code — no user input — so it's
+                  // safe to render. A new template MUST be reviewed
+                  // before its bottom-nav SVG flows here.
+                  dangerouslySetInnerHTML={{ __html: item.iconHtml }}
+                />
+              ) : (
+                <span className="block h-5 w-5" aria-hidden />
+              )}
+              <span className="truncate leading-tight">{item.label}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 

@@ -1010,6 +1010,70 @@ const IFRAME_HELPERS_SOURCE = String.raw`
     }
   }, true);
 
+  // ---- Floating mobile nav extraction --------------------------
+  // The auto templates ship a .floating-nav (.bottom-tabs / .tabbar /
+  // .bottom-nav) styled with position:fixed. Inside a content-sized
+  // iframe, position:fixed pins to the iframe BOX (= full document
+  // height), not the viewport — so the "fixed bottom nav" ends up
+  // glued to the very end of the page instead of floating above the
+  // user's current scroll position. We hide it in-iframe and
+  // postMessage the items to the parent which renders an actual
+  // viewport-fixed nav outside the iframe.
+  try {
+    var fnav = document.querySelector('.floating-nav');
+    if (fnav) {
+      var items = [];
+      var anchors = fnav.querySelectorAll('a[href^="#"]');
+      for (var fi = 0; fi < anchors.length; fi++) {
+        var fa = anchors[fi];
+        var fhref = fa.getAttribute('href') || '';
+        if (fhref.length < 2) continue;
+        var label = (fa.getAttribute('aria-label') || fa.textContent || '').trim();
+        if (!label) continue;
+        // Strip leading whitespace + collapse — labels often have
+        // SVG sibling text. Truncate to keep the parent nav tight.
+        label = label.replace(/\s+/g, ' ').slice(0, 18);
+        var svgEl = fa.querySelector('svg');
+        var iconHtml = svgEl ? svgEl.outerHTML : '';
+        items.push({ id: fhref.slice(1), label: label, iconHtml: iconHtml });
+        if (items.length >= 6) break;
+      }
+      // Hide unconditionally — even on desktop the broken position
+      // is jarring and the templates' desktop nav already lives in
+      // .site-header.
+      fnav.style.cssText += ';display:none !important';
+      if (items.length > 0) {
+        try {
+          window.parent.postMessage(
+            { type: 'cp-floating-nav', items: items },
+            '*',
+          );
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+
+  // ---- cp-goto from parent → scroll-to ------------------------
+  // Parent's floating-nav buttons postMessage here when tapped. We
+  // resolve the element, measure its top in the iframe document
+  // coordinates, and bounce it back to the parent so the parent can
+  // scroll its own viewport (the iframe doesn't scroll internally
+  // because it's sized to content height).
+  window.addEventListener('message', function(ev) {
+    var data = ev && ev.data;
+    if (!data || data.type !== 'cp-goto' || typeof data.id !== 'string') return;
+    var el = document.getElementById(data.id);
+    if (!el) return;
+    var rect = el.getBoundingClientRect();
+    var y = rect.top + (window.scrollY || window.pageYOffset || 0);
+    try {
+      window.parent.postMessage(
+        { type: 'cp-anchor-y', id: data.id, y: y },
+        '*',
+      );
+    } catch (e) {}
+  });
+
   // ---- Auto-resize via postMessage (D1, D10) -------------------
   function postSize() {
     try {

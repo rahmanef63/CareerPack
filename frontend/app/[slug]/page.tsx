@@ -200,6 +200,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
             mode: profile.mode === "custom" ? "custom" : "auto",
             branding: profile.branding,
           }}
+          enableFloatingNav
         />
       </>
     );
