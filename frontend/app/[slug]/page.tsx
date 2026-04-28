@@ -138,10 +138,37 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+/**
+ * Build a Schema.org Person record so Google / LinkedIn unfurl the
+ * public page with rich snippets (name, jobTitle, sameAs links).
+ * Only emit if the user opted into indexing — otherwise we'd be
+ * leaking structured data Google will eagerly cache.
+ */
+function buildPersonJsonLd(profile: PublicProfile): string | null {
+  if (!profile.allowIndex) return null;
+  const sameAs = [profile.linkedinUrl, profile.portfolioUrl].filter(Boolean);
+  const skills = profile.skills.length > 0 ? profile.skills : undefined;
+  const ld: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: profile.displayName,
+    url: `https://careerpack.org/${profile.slug}`,
+  };
+  if (profile.headline) ld.description = profile.headline;
+  if (profile.targetRole) ld.jobTitle = profile.targetRole;
+  if (profile.avatarUrl) ld.image = profile.avatarUrl;
+  if (profile.contactEmail) ld.email = profile.contactEmail;
+  if (sameAs.length > 0) ld.sameAs = sameAs;
+  if (skills) ld.knowsAbout = skills;
+  // Avoid `</script>` collisions when stringified.
+  return JSON.stringify(ld).replace(/</g, "\\u003c");
+}
+
 export default async function PublicProfilePage({ params }: PageProps) {
   const { slug } = await params;
   const profile = await fetchPublicProfile(slug);
   if (!profile) notFound();
+  const personJsonLd = buildPersonJsonLd(profile);
   // When the user has authored blocks via the Personal Branding builder,
   // render through the theme dispatcher so visitors see their custom
   // page. Otherwise fall back to the legacy auto-rendered ProfileView
@@ -151,23 +178,42 @@ export default async function PublicProfilePage({ params }: PageProps) {
     Array.isArray(profile.blocks) && profile.blocks.length > 0;
   if (hasCustomBlocks) {
     return (
-      <PersonalBrandingPage
-        profile={{
-          slug: profile.slug,
-          displayName: profile.displayName,
-          headline: profile.headline,
-          targetRole: profile.targetRole,
-          avatarUrl: profile.avatarUrl,
-          blocks: profile.blocks as PBBlock[],
-          theme: (profile.theme ?? "linktree") as PBTheme,
-          headerBg: (profile.headerBg ?? null) as PBHeaderBg | null,
-          accent: profile.accent ?? null,
-          branding: profile.branding,
-        }}
-      />
+      <>
+        {personJsonLd && (
+          <script
+            type="application/ld+json"
+            // Server-rendered, sanitised by buildPersonJsonLd. Safe.
+            dangerouslySetInnerHTML={{ __html: personJsonLd }}
+          />
+        )}
+        <PersonalBrandingPage
+          profile={{
+            slug: profile.slug,
+            displayName: profile.displayName,
+            headline: profile.headline,
+            targetRole: profile.targetRole,
+            avatarUrl: profile.avatarUrl,
+            blocks: profile.blocks as PBBlock[],
+            theme: (profile.theme ?? "linktree") as PBTheme,
+            headerBg: (profile.headerBg ?? null) as PBHeaderBg | null,
+            accent: profile.accent ?? null,
+            branding: profile.branding,
+          }}
+        />
+      </>
     );
   }
-  return <ProfileView profile={profile} />;
+  return (
+    <>
+      {personJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: personJsonLd }}
+        />
+      )}
+      <ProfileView profile={profile} />
+    </>
+  );
 }
 
 function ProfileView({ profile }: { profile: PublicProfile }) {

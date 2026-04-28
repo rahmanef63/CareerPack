@@ -40,6 +40,7 @@ import { ThemeCard } from "../sections/ThemeCard";
 import { HeaderBgCard } from "../sections/HeaderBgCard";
 import { AutoConfigCard } from "../sections/AutoConfigCard";
 import { ManualBlocksCard } from "../sections/ManualBlocksCard";
+import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
 import { SaveActions } from "../sections/SaveActions";
 import { ModeWarning } from "../sections/ModeWarning";
@@ -160,6 +161,12 @@ export function PersonalBrandingView() {
 
       <StatusBanner status={liveStatus} url={livePublicUrl} />
 
+      <ShareCard
+        slugTrimmed={form.slugTrimmed}
+        displayName={profileSnapshot.fullName}
+        enabled={Boolean(form.serverState?.enabled)}
+      />
+
       <Tabs value={view} onValueChange={handleViewChange}>
         <TabsList variant="pills" className="flex-wrap">
           <TabsTrigger value="auto" className="gap-1.5">
@@ -190,21 +197,41 @@ export function PersonalBrandingView() {
           </TabsTrigger>
         </TabsList>
 
-        {/* ===== Otomatis ===== */}
+        {/* ===== Otomatis =====
+            id="pb-section-…" wrappers are landing targets for the
+            BrandingValidationCard's "klik untuk langsung ke field"
+            jump-links. Keep them stable — `brandingScore.ts`
+            references these anchors by name. */}
         <TabsContent value="auto" className="mt-4 space-y-4">
-          <ThemeCard bind={form.bind} />
-          <BrandingValidationCard branding={previewData?.branding} />
-          <HeaderBgCard bind={form.bind} />
-          <AutoConfigCard bind={form.bind} />
-          <IdentityCard
-            bind={form.bind}
-            validation={form.slugValidation}
-            slugTrimmed={form.slugTrimmed}
-            canEnable={form.canEnable}
-          />
-          <HeroTogglesCard bind={form.bind} />
-          <ContactCard bind={form.bind} />
-          <IndexingCard bind={form.bind} />
+          <div id="pb-section-theme" className="rounded-xl transition-shadow">
+            <ThemeCard bind={form.bind} />
+          </div>
+          <div id="pb-section-validation" className="rounded-xl transition-shadow">
+            <BrandingValidationCard branding={previewData?.branding} />
+          </div>
+          <div id="pb-section-header-bg" className="rounded-xl transition-shadow">
+            <HeaderBgCard bind={form.bind} />
+          </div>
+          <div id="pb-section-auto-config" className="rounded-xl transition-shadow">
+            <AutoConfigCard bind={form.bind} />
+          </div>
+          <div id="pb-section-identity" className="rounded-xl transition-shadow">
+            <IdentityCard
+              bind={form.bind}
+              validation={form.slugValidation}
+              slugTrimmed={form.slugTrimmed}
+              canEnable={form.canEnable}
+            />
+          </div>
+          <div id="pb-section-hero-toggles" className="rounded-xl transition-shadow">
+            <HeroTogglesCard bind={form.bind} />
+          </div>
+          <div id="pb-section-contact" className="rounded-xl transition-shadow">
+            <ContactCard bind={form.bind} />
+          </div>
+          <div id="pb-section-indexing" className="rounded-xl transition-shadow">
+            <IndexingCard bind={form.bind} />
+          </div>
           <SaveActions
             saving={form.saving}
             canEnable={form.canEnable}

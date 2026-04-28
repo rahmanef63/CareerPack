@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, AlertCircle, Info, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, AlertCircle, Info, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,7 +12,51 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Progress } from "@/shared/components/ui/progress";
 import { cn } from "@/shared/lib/utils";
 import type { BrandingPayload } from "../themes";
-import { scoreBranding } from "./brandingScore";
+import { scoreBranding, type ScoreRow } from "./brandingScore";
+
+/**
+ * Smooth-scroll for in-page anchors so the user lands on the field they
+ * need to fix instead of the top of the page (default browser jump
+ * jolts past the section header on long forms).
+ */
+function jumpToAnchor(href: string) {
+  if (!href.startsWith("#")) return false;
+  const el = document.getElementById(href.slice(1));
+  if (!el) return false;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Brief outline pulse so the user sees where they landed.
+  el.classList.add("ring-2", "ring-brand", "ring-offset-2");
+  window.setTimeout(() => {
+    el.classList.remove("ring-2", "ring-brand", "ring-offset-2");
+  }, 1600);
+  return true;
+}
+
+function ActionLink({ row }: { row: ScoreRow }) {
+  if (!row.actionHref || !row.actionLabel) return null;
+  const isAnchor = row.actionHref.startsWith("#");
+  if (isAnchor) {
+    return (
+      <button
+        type="button"
+        onClick={() => jumpToAnchor(row.actionHref!)}
+        className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
+      >
+        {row.actionLabel}
+        <ArrowRight className="h-3 w-3" />
+      </button>
+    );
+  }
+  return (
+    <Link
+      href={row.actionHref}
+      className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
+    >
+      {row.actionLabel}
+      <ArrowRight className="h-3 w-3" />
+    </Link>
+  );
+}
 
 export interface BrandingValidationCardProps {
   branding: BrandingPayload | undefined;
@@ -79,12 +124,44 @@ export function BrandingValidationCard({
         </div>
         <Progress value={score} className="mt-3 h-2" />
         {requiredMissing.length > 0 && (
-          <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-50/50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
-            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            <div>
-              <strong>{requiredMissing.length} field wajib</strong> belum
-              terpenuhi:{" "}
-              {requiredMissing.map((r) => r.label).join(", ")}.
+          <div className="mt-3 space-y-1.5 rounded-md border border-amber-500/40 bg-amber-50/50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <div>
+                <strong>{requiredMissing.length} field wajib</strong> belum
+                terpenuhi — klik untuk langsung ke field-nya.
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5 pl-5">
+              {requiredMissing.map((r) =>
+                r.actionHref ? (
+                  r.actionHref.startsWith("#") ? (
+                    <button
+                      key={r.key}
+                      type="button"
+                      onClick={() => jumpToAnchor(r.actionHref!)}
+                      className="rounded-full border border-amber-500/40 bg-background/60 px-2 py-0.5 font-medium hover:bg-background"
+                    >
+                      {r.label}
+                    </button>
+                  ) : (
+                    <Link
+                      key={r.key}
+                      href={r.actionHref}
+                      className="rounded-full border border-amber-500/40 bg-background/60 px-2 py-0.5 font-medium hover:bg-background"
+                    >
+                      {r.label}
+                    </Link>
+                  )
+                ) : (
+                  <span
+                    key={r.key}
+                    className="rounded-full border border-amber-500/40 bg-background/60 px-2 py-0.5"
+                  >
+                    {r.label}
+                  </span>
+                ),
+              )}
             </div>
           </div>
         )}
@@ -159,6 +236,7 @@ export function BrandingValidationCard({
                   <p className="text-[10px] text-muted-foreground/70">
                     Sumber: {r.source}
                   </p>
+                  {tone !== "ok" && <ActionLink row={r} />}
                 </div>
               </li>
             );

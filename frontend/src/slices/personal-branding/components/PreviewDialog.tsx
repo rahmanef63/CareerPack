@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "convex/react";
-import { Eye, FileImage } from "lucide-react";
+import { Eye, FileImage, Monitor, Smartphone, Tablet } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import {
   ResponsiveDialog,
@@ -33,6 +33,13 @@ export interface PreviewDialogProps {
 }
 
 type PreviewMode = "mine" | "template";
+type Viewport = "desktop" | "tablet" | "mobile";
+
+const VIEWPORT_WIDTH: Record<Viewport, number | null> = {
+  desktop: null, // full
+  tablet: 820, // ~iPad portrait
+  mobile: 390, // ~iPhone 14
+};
 
 /**
  * Live preview — two tabs:
@@ -57,6 +64,7 @@ export function PreviewDialog({
   const portfolio = useQuery(api.portfolio.queries.listPortfolio);
   const previewData = usePreviewBranding(state);
   const [mode, setMode] = useState<PreviewMode>("mine");
+  const [viewport, setViewport] = useState<Viewport>("desktop");
 
   const defaultCv = useMemo(() => {
     if (!cvs || cvs.length === 0) return null;
@@ -145,26 +153,58 @@ export function PreviewDialog({
         drawerClassName="max-h-[95vh]"
         aria-describedby={undefined}
       >
-        <ResponsiveDialogHeader className="flex flex-row items-center justify-between gap-4 p-4">
+        <ResponsiveDialogHeader className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
           <ResponsiveDialogTitle>Preview halaman publik</ResponsiveDialogTitle>
-          <Tabs
-            value={mode}
-            onValueChange={(v) => setMode(v as PreviewMode)}
-            className="ml-auto"
-          >
-            <TabsList variant="pills">
-              <TabsTrigger value="mine" className="gap-1.5 text-xs">
-                <Eye className="h-3.5 w-3.5" />
-                <span>Data Saya</span>
-              </TabsTrigger>
-              <TabsTrigger value="template" className="gap-1.5 text-xs">
-                <FileImage className="h-3.5 w-3.5" />
-                <span>Template</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex flex-wrap items-center gap-2">
+            <Tabs
+              value={viewport}
+              onValueChange={(v) => setViewport(v as Viewport)}
+            >
+              <TabsList variant="pills">
+                <TabsTrigger
+                  value="desktop"
+                  className="gap-1.5 text-xs"
+                  aria-label="Tampilan desktop"
+                >
+                  <Monitor className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Desktop</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="tablet"
+                  className="gap-1.5 text-xs"
+                  aria-label="Tampilan tablet"
+                >
+                  <Tablet className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Tablet</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mobile"
+                  className="gap-1.5 text-xs"
+                  aria-label="Tampilan mobile"
+                >
+                  <Smartphone className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Mobile</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Tabs
+              value={mode}
+              onValueChange={(v) => setMode(v as PreviewMode)}
+            >
+              <TabsList variant="pills">
+                <TabsTrigger value="mine" className="gap-1.5 text-xs">
+                  <Eye className="h-3.5 w-3.5" />
+                  <span>Data Saya</span>
+                </TabsTrigger>
+                <TabsTrigger value="template" className="gap-1.5 text-xs">
+                  <FileImage className="h-3.5 w-3.5" />
+                  <span>Template</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </ResponsiveDialogHeader>
-        <div className="border-t border-border bg-background">
+        <div className="bg-muted/20">
           {mode === "template" && (
             <p className="border-b border-border bg-amber-50/40 px-4 py-2 text-[11px] text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
               💡 Mode <strong>Template</strong> — menampilkan konten contoh
@@ -172,11 +212,22 @@ export function PreviewDialog({
               desain sebelum mengisi data.
             </p>
           )}
-          <PersonalBrandingPage
-            profile={previewProfile}
-            brand={false}
-            showBranding={mode === "mine"}
-          />
+          <div className="flex justify-center py-4 sm:py-6">
+            <div
+              className="w-full overflow-hidden rounded-xl border border-border bg-background shadow-sm transition-[max-width] duration-200"
+              style={{
+                maxWidth: VIEWPORT_WIDTH[viewport]
+                  ? `${VIEWPORT_WIDTH[viewport]}px`
+                  : "100%",
+              }}
+            >
+              <PersonalBrandingPage
+                profile={previewProfile}
+                brand={false}
+                showBranding={mode === "mine"}
+              />
+            </div>
+          </div>
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>

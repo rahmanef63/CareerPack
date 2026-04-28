@@ -14,6 +14,13 @@ export interface ScoreRow {
   weight: number;
   /** Coach-style suggestion when not optimal. */
   hint?: string;
+  /** Where the user should go to fix this row. Either an in-page
+   *  anchor (e.g. `#pb-section-identity`) when the field lives on the
+   *  Personal Branding form, or a dashboard route (e.g.
+   *  `/dashboard/cv`) when the source data lives elsewhere. */
+  actionHref?: string;
+  /** Friendly call-to-action label paired with `actionHref`. */
+  actionLabel?: string;
 }
 
 export interface BrandingScore {
@@ -26,6 +33,37 @@ export interface BrandingScore {
   /** Required-tier rows that did not earn full weight. */
   requiredMissing: ReadonlyArray<ScoreRow>;
 }
+
+/**
+ * Where each row's data lives. In-page anchors point at an `id` on
+ * the relevant section card in PersonalBrandingView (added by
+ * `pb-section-<key>` ids). External routes deep-link to the slice
+ * that owns the source data (Settings → ProfileSection, CV editor,
+ * Portfolio).
+ */
+const ACTION_BY_KEY: Record<
+  string,
+  { href: string; label: string } | undefined
+> = {
+  name: { href: "/dashboard/settings", label: "Buka Profil" },
+  headline: { href: "#pb-section-identity", label: "Isi headline" },
+  "target-role": { href: "/dashboard/settings", label: "Atur target role" },
+  avatar: { href: "/dashboard/settings", label: "Upload foto" },
+  bio: { href: "/dashboard/settings", label: "Tulis bio" },
+  summary: { href: "/dashboard/cv", label: "Edit summary CV" },
+  location: { href: "/dashboard/settings", label: "Set lokasi" },
+  skills: { href: "/dashboard/cv", label: "Tambah skill" },
+  experience: { href: "/dashboard/cv", label: "Tambah pengalaman" },
+  achievements: { href: "/dashboard/cv", label: "Edit achievements" },
+  projects: { href: "/dashboard/portfolio", label: "Tambah proyek" },
+  "project-cover": { href: "/dashboard/portfolio", label: "Upload cover" },
+  education: { href: "/dashboard/cv", label: "Tambah pendidikan" },
+  certifications: { href: "/dashboard/cv", label: "Tambah sertifikasi" },
+  languages: { href: "/dashboard/cv", label: "Tambah bahasa" },
+  "contact-email": { href: "#pb-section-contact", label: "Isi email" },
+  "contact-linkedin": { href: "#pb-section-contact", label: "Isi LinkedIn" },
+  "contact-portfolio": { href: "#pb-section-contact", label: "Isi Portfolio" },
+};
 
 /**
  * Pure function — same input → same score. Extracted from
@@ -353,6 +391,13 @@ export function scoreBranding(branding: BrandingPayload): BrandingScore {
     },
   ];
 
+  for (const r of rows) {
+    const a = ACTION_BY_KEY[r.key];
+    if (a) {
+      r.actionHref = a.href;
+      r.actionLabel = a.label;
+    }
+  }
   const earned = rows.reduce((s, r) => s + r.earned, 0);
   const weight = rows.reduce((s, r) => s + r.weight, 0);
   const score = Math.round((earned / weight) * 100);
