@@ -22,6 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   ChevronDown,
   Code2,
+  Columns3,
   Eye,
   EyeOff,
   Film,
@@ -48,6 +49,7 @@ const ICONS: Record<BlockType, typeof Heading> = {
   embed: Film,
   divider: Minus,
   html: Code2,
+  container: Columns3,
 };
 
 const TYPE_LABELS: Record<BlockType, string> = {
@@ -59,6 +61,7 @@ const TYPE_LABELS: Record<BlockType, string> = {
   embed: "Embed",
   divider: "Pemisah",
   html: "HTML",
+  container: "Container",
 };
 
 interface Props {
@@ -304,5 +307,18 @@ function summary(b: Block): string {
         ((p.content as string) ?? "").replace(/<[^>]+>/g, "").slice(0, 80) ||
         "HTML kosong"
       );
+    case "container": {
+      const layout = (p.layout as string) ?? "row";
+      const children = (p.children as Array<unknown>) ?? [];
+      const layoutLabel =
+        layout === "stack" ? "Stack"
+          : layout === "row" ? "Baris"
+          : layout === "grid-2" ? "Grid 2"
+          : layout === "grid-3" ? "Grid 3"
+          : layout === "grid-4" ? "Grid 4"
+          : layout === "carousel" ? "Carousel"
+          : layout;
+      return `${layoutLabel} · ${children.length} blok`;
+    }
   }
 }

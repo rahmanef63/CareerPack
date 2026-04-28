@@ -11,6 +11,7 @@ import {
   Minus,
   Code2,
   Plus,
+  Columns3,
 } from "lucide-react";
 import {
   Popover,
@@ -28,6 +29,7 @@ interface Item {
 }
 
 export const BLOCK_LIBRARY: ReadonlyArray<Item> = [
+  { type: "container", label: "Container (Kolom)", icon: Columns3, description: "Bungkus blok dalam baris / grid / carousel — responsif" },
   { type: "heading", label: "Judul", icon: Heading, description: "Penanda bagian besar" },
   { type: "paragraph", label: "Paragraf", icon: Type, description: "Teks bebas (dukung **bold** _italic_ [link](url))" },
   { type: "link", label: "Tautan / Tombol", icon: LinkIcon, description: "Tombol besar ke URL — Linktree-style" },

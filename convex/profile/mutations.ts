@@ -268,6 +268,7 @@ export const updateMyPublicProfile = mutation({
           type: v.string(),
           hidden: v.optional(v.boolean()),
           payload: v.any(),
+          style: v.optional(v.any()),
         }),
       ),
     ),

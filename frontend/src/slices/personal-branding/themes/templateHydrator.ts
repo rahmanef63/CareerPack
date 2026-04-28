@@ -150,10 +150,60 @@ const HYDRATOR_SOURCE = String.raw`
     return null;
   }
 
+  function applyBlockChrome(node, block) {
+    if (!node || !block) return;
+    // data-cp-block-id lets future click-to-edit features postMessage
+    // back to the parent with the clicked block's id without us needing
+    // to bind explicit click handlers here.
+    if (block.id) node.setAttribute('data-cp-block-id', String(block.id));
+    var s = block.style || {};
+    if (s.bgVariant && s.bgVariant !== 'none') {
+      node.classList.add('cp-blk-wrap-bg-' + s.bgVariant);
+    }
+    if (s.padding && s.padding !== 'none') {
+      node.classList.add('cp-blk-wrap-pad-' + s.padding);
+    }
+    if (s.textAlign) {
+      node.classList.add('cp-blk-wrap-text-' + s.textAlign);
+    }
+  }
+
   function renderBlock(block) {
     if (!block || block.hidden) return null;
     var p = block.payload || {};
     var t = block.type;
+    if (t === 'container') {
+      var layout = p.layout || 'row';
+      var gap = p.gap || 'normal';
+      var align = p.align || 'stretch';
+      var mobileLayout = p.mobileLayout || 'auto';
+      var c = document.createElement('div');
+      c.className = [
+        'cp-blk-container',
+        'cp-blk-container-' + String(layout),
+        'cp-blk-container-gap-' + String(gap),
+        'cp-blk-container-align-' + String(align)
+      ].join(' ');
+      if (mobileLayout && mobileLayout !== 'auto') {
+        c.classList.add('cp-blk-container-mobile-' + String(mobileLayout));
+      }
+      var kids = Array.isArray(p.children) ? p.children : [];
+      for (var ci = 0; ci < kids.length; ci++) {
+        var kid = kids[ci];
+        if (!kid || kid.hidden) continue;
+        // Containers can't nest (sanitiser rejects depth>0 containers)
+        // but defensively skip anyway in case of stale data.
+        if (kid.type === 'container') continue;
+        var kidNode = renderBlock(kid);
+        if (kidNode) {
+          applyBlockChrome(kidNode, kid);
+          c.appendChild(kidNode);
+        }
+      }
+      if (c.children.length === 0) return null;
+      applyBlockChrome(c, block);
+      return c;
+    }
     if (t === 'heading') {
       var size = p.size === 'md' ? 'md' : 'lg';
       var h = document.createElement(size === 'lg' ? 'h2' : 'h3');
@@ -297,6 +347,17 @@ const HYDRATOR_SOURCE = String.raw`
     return null;
   }
 
+  // Wrapper around renderBlock that also stamps data-cp-block-id +
+  // optional style-chrome classes on the produced element. Containers
+  // call applyBlockChrome themselves earlier so we skip them here.
+  function renderBlockWithChrome(block) {
+    var node = renderBlock(block);
+    if (node && block && block.type !== 'container') {
+      applyBlockChrome(node, block);
+    }
+    return node;
+  }
+
   function renderManualBlocks(blocks) {
     var mount = document.querySelector('[data-cp-blocks-mount]');
     if (!mount) return;
@@ -316,7 +377,7 @@ const HYDRATOR_SOURCE = String.raw`
     while (mount.firstChild) mount.removeChild(mount.firstChild);
     void empty;
     for (var ri = 0; ri < visible.length; ri++) {
-      var node = renderBlock(visible[ri]);
+      var node = renderBlockWithChrome(visible[ri]);
       if (node) mount.appendChild(node);
     }
   }

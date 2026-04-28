@@ -175,6 +175,10 @@ export const profileTables = {
           type: v.string(),
           hidden: v.optional(v.boolean()),
           payload: v.any(),
+          /** Optional chrome applied uniformly to every block type
+           *  (bgVariant / padding / textAlign). Loose `v.any()`
+           *  validation — the server-side sanitiser whitelists. */
+          style: v.optional(v.any()),
         }),
       ),
     ),
