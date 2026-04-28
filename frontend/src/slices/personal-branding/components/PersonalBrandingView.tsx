@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import {
+  Briefcase,
   Code2,
   Download,
   Eye,
+  Globe,
   Globe2,
   Layers,
+  Mail,
+  MousePointerClick,
   Palette,
   Settings as SettingsIcon,
+  ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
+  User,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -37,7 +44,6 @@ import { HeroTogglesCard } from "../sections/HeroTogglesCard";
 import { ContactCard } from "../sections/ContactCard";
 import { IndexingCard } from "../sections/IndexingCard";
 import { ThemeCard } from "../sections/ThemeCard";
-import { HeaderBgCard } from "../sections/HeaderBgCard";
 import { AutoConfigCard } from "../sections/AutoConfigCard";
 import { ManualBlocksCard } from "../sections/ManualBlocksCard";
 import { ShareCard } from "../sections/ShareCard";
@@ -47,6 +53,7 @@ import { ModeWarning } from "../sections/ModeWarning";
 import { AvailabilityCard } from "../sections/AvailabilityCard";
 import { CtaCard } from "../sections/CtaCard";
 import { SectionLayoutCard } from "../sections/SectionLayoutCard";
+import { PBSection } from "../sections/PBSection";
 import {
   ExportCard,
   type ExportProfileSnapshot,
@@ -81,6 +88,35 @@ export function PersonalBrandingView() {
   const [view, setView] = useState<TopView>(
     () => (form.state.mode === "custom" ? "custom" : "auto"),
   );
+  // Single-open accordion state for the Otomatis tab — mirrors CV
+  // editor's pattern. Defaults to "identity" so first-time users see
+  // the slug input first (most-likely thing they want to set).
+  const [activeSection, setActiveSection] = useState<string | null>("identity");
+  function toggleSection(id: string) {
+    setActiveSection((prev) => (prev === id ? null : id));
+  }
+
+  // Listen for jump-link events from BrandingValidationCard so a click
+  // on "Isi headline" opens the matching accordion section before the
+  // smooth-scroll lands on the field.
+  useEffect(() => {
+    function onJump(e: Event) {
+      const detail = (e as CustomEvent<{ sectionKey?: string }>).detail;
+      if (!detail?.sectionKey) return;
+      // Map anchor key → accordion sectionId (some ids are abbreviated
+      // for nicer URLs; e.g. "hero-toggles" → "hero").
+      const map: Record<string, string> = {
+        "hero-toggles": "hero",
+      };
+      const target = map[detail.sectionKey] ?? detail.sectionKey;
+      // Force-open the target so the field is visible.
+      setActiveSection(target);
+      // Switch to Otomatis tab if the user is on a different one.
+      setView((prev) => (prev === "auto" || prev === "custom" ? prev : "auto"));
+    }
+    window.addEventListener("pb-jump", onJump);
+    return () => window.removeEventListener("pb-jump", onJump);
+  }, []);
 
   // Profile snapshot — used by ExportCard to fill the AI-prompt body
   // with the user's actual data. Both branches always run (rules of
@@ -201,48 +237,165 @@ export function PersonalBrandingView() {
         </TabsList>
 
         {/* ===== Otomatis =====
-            id="pb-section-…" wrappers are landing targets for the
-            BrandingValidationCard's "klik untuk langsung ke field"
-            jump-links. Keep them stable — `brandingScore.ts`
-            references these anchors by name. */}
+            CV-format accordion — single-open like the CV editor.
+            Anchor IDs (id="pb-section-…") on each section are
+            landing targets for BrandingValidationCard's jump-links.
+            Tapping a jump-link auto-opens the corresponding section. */}
         <TabsContent value="auto" className="mt-4 space-y-4">
-          <div id="pb-section-theme" className="rounded-xl transition-shadow">
-            <ThemeCard bind={form.bind} />
-          </div>
-          <div id="pb-section-validation" className="rounded-xl transition-shadow">
+          <div
+            id="pb-section-validation"
+            className="rounded-xl transition-shadow"
+          >
             <BrandingValidationCard branding={previewData?.branding} />
           </div>
-          <div id="pb-section-header-bg" className="rounded-xl transition-shadow">
-            <HeaderBgCard bind={form.bind} />
-          </div>
-          <div id="pb-section-auto-config" className="rounded-xl transition-shadow">
-            <AutoConfigCard bind={form.bind} />
-          </div>
-          <div id="pb-section-identity" className="rounded-xl transition-shadow">
-            <IdentityCard
-              bind={form.bind}
-              validation={form.slugValidation}
-              slugTrimmed={form.slugTrimmed}
-              canEnable={form.canEnable}
-            />
-          </div>
-          <div id="pb-section-hero-toggles" className="rounded-xl transition-shadow">
-            <HeroTogglesCard bind={form.bind} />
-          </div>
-          <div id="pb-section-availability" className="rounded-xl transition-shadow">
-            <AvailabilityCard bind={form.bind} />
-          </div>
-          <div id="pb-section-cta" className="rounded-xl transition-shadow">
-            <CtaCard bind={form.bind} />
-          </div>
-          <div id="pb-section-layout" className="rounded-xl transition-shadow">
-            <SectionLayoutCard bind={form.bind} />
-          </div>
-          <div id="pb-section-contact" className="rounded-xl transition-shadow">
-            <ContactCard bind={form.bind} />
-          </div>
-          <div id="pb-section-indexing" className="rounded-xl transition-shadow">
-            <IndexingCard bind={form.bind} />
+          <div className="space-y-3">
+            <div
+              id="pb-section-identity"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="identity"
+                title="Identitas & URL"
+                description="Slug halaman publik, headline, dan saklar publish."
+                icon={<Globe className="h-4 w-4" />}
+                tone="brand"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <IdentityCard
+                  bind={form.bind}
+                  validation={form.slugValidation}
+                  slugTrimmed={form.slugTrimmed}
+                  canEnable={form.canEnable}
+                  noCard
+                />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-theme"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="theme"
+                title="Pilih tema"
+                description="Stack, Bento, atau Editorial — atur layout halaman publik."
+                icon={<Palette className="h-4 w-4" />}
+                tone="indigo"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <ThemeCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-hero-toggles"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="hero"
+                title="Tampilkan di hero"
+                description="Saklar opt-in untuk tiap kolom (avatar, bio, skills, dll)."
+                icon={<User className="h-4 w-4" />}
+                tone="brand"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <HeroTogglesCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-availability"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="availability"
+                title="Status: Tersedia untuk direkrut"
+                description="Badge hijau di hero — recruiter skim ini pertama-tama."
+                icon={<Briefcase className="h-4 w-4" />}
+                tone="emerald"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <AvailabilityCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div id="pb-section-cta" className="rounded-xl transition-shadow">
+              <PBSection
+                sectionId="cta"
+                title="Tombol utama (CTA)"
+                description="Aksi paling penting yang Anda mau pengunjung lakukan."
+                icon={<MousePointerClick className="h-4 w-4" />}
+                tone="indigo"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <CtaCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-auto-config"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="auto-config"
+                title="Section dari CV"
+                description="Pengalaman, pendidikan, sertifikasi — diambil otomatis dari CV."
+                icon={<SlidersHorizontal className="h-4 w-4" />}
+                tone="brand"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <AutoConfigCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-layout"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="layout"
+                title="Urutan & visibility section"
+                description="Atur urutan section dan toggle visibility di halaman publik."
+                icon={<Layers className="h-4 w-4" />}
+                tone="amber"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <SectionLayoutCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-contact"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="contact"
+                title="Kontak publik"
+                description="Email, LinkedIn, Portfolio URL."
+                icon={<Mail className="h-4 w-4" />}
+                tone="brand"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <ContactCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
+              id="pb-section-indexing"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="indexing"
+                title="Privasi & SEO"
+                description="Kontrol indexing mesin pencari. Default mati."
+                icon={<ShieldCheck className="h-4 w-4" />}
+                tone="rose"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <IndexingCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
           </div>
           <SaveActions
             saving={form.saving}
@@ -282,7 +435,6 @@ export function PersonalBrandingView() {
 
             <TabsContent value="design" className="mt-4 space-y-4">
               <ThemeCard bind={form.bind} />
-              <HeaderBgCard bind={form.bind} />
               <SaveActions
                 saving={form.saving}
                 canEnable={form.canEnable}

@@ -67,6 +67,7 @@ export interface HeroTogglesCardProps extends SectionOverrides {
   /** Override the toggle spec list — useful for opensource derivatives
    *  that want to hide a toggle or rename copy. */
   toggles?: ReadonlyArray<ToggleSpec>;
+  noCard?: boolean;
 }
 
 export function HeroTogglesCard({
@@ -75,42 +76,47 @@ export function HeroTogglesCard({
   title = "Tampilkan di hero",
   description = "Saklar opt-in untuk tiap kolom. Hanya yang dicentang yang dibagikan publik.",
   className,
+  noCard = false,
 }: HeroTogglesCardProps) {
+  const fields = (
+    <div className="space-y-2">
+      {toggles.map((t) => {
+        const Icon = t.icon;
+        const field = bind(t.key);
+        return (
+          <div
+            key={t.key}
+            className="flex items-start justify-between gap-3 rounded-lg border border-border p-3"
+          >
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand-muted-foreground">
+                <Icon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-medium">{t.label}</p>
+                <p className="text-xs text-muted-foreground">{t.description}</p>
+              </div>
+            </div>
+            <Switch
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              aria-label={`Tampilkan ${t.label}`}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (noCard) return fields;
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {toggles.map((t) => {
-          const Icon = t.icon;
-          const field = bind(t.key);
-          return (
-            <div
-              key={t.key}
-              className="flex items-start justify-between gap-3 rounded-lg border border-border p-3"
-            >
-              <div className="flex items-start gap-3 min-w-0">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 space-y-0.5">
-                  <p className="text-sm font-medium">{t.label}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.description}
-                  </p>
-                </div>
-              </div>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                aria-label={`Tampilkan ${t.label}`}
-              />
-            </div>
-          );
-        })}
-      </CardContent>
+      <CardContent>{fields}</CardContent>
     </Card>
   );
 }

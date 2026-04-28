@@ -15,20 +15,33 @@ import type { BrandingPayload } from "../themes";
 import { scoreBranding, type ScoreRow } from "./brandingScore";
 
 /**
- * Smooth-scroll for in-page anchors so the user lands on the field they
- * need to fix instead of the top of the page (default browser jump
- * jolts past the section header on long forms).
+ * Smooth-scroll for in-page anchors so the user lands on the field
+ * they need to fix instead of the top of the page. Also dispatches
+ * a `pb-jump` CustomEvent so the parent view can open the matching
+ * accordion section before scrolling — otherwise the anchor target
+ * sits inside a collapsed accordion and the user can't see it.
  */
 function jumpToAnchor(href: string) {
   if (!href.startsWith("#")) return false;
-  const el = document.getElementById(href.slice(1));
-  if (!el) return false;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-  // Brief outline pulse so the user sees where they landed.
-  el.classList.add("ring-2", "ring-brand", "ring-offset-2");
+  const id = href.slice(1);
+  // Strip the "pb-section-" prefix so the parent accordion can match
+  // its short section ids ("identity", "contact", etc.).
+  const sectionKey = id.startsWith("pb-section-")
+    ? id.slice("pb-section-".length)
+    : id;
+  window.dispatchEvent(
+    new CustomEvent("pb-jump", { detail: { sectionKey } }),
+  );
+  // Slight delay lets the accordion expand before we scroll/measure.
   window.setTimeout(() => {
-    el.classList.remove("ring-2", "ring-brand", "ring-offset-2");
-  }, 1600);
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("ring-2", "ring-brand", "ring-offset-2");
+    window.setTimeout(() => {
+      el.classList.remove("ring-2", "ring-brand", "ring-offset-2");
+    }, 1600);
+  }, 80);
   return true;
 }
 

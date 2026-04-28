@@ -38,6 +38,10 @@ export interface IdentityCardProps extends SectionOverrides {
   slugMax?: number;
   /** Override max-length on headline. */
   headlineMax?: number;
+  /** When true, render fields only — no outer Card / CardHeader. Used
+   *  inside PBSection accordion where the accordion bar already shows
+   *  the title. */
+  noCard?: boolean;
 }
 
 /**
@@ -55,10 +59,92 @@ export function IdentityCard({
   slugHint = SLUG_HINT_DEFAULT,
   slugMax = FIELD_LIMITS.slugMax,
   headlineMax = FIELD_LIMITS.headlineMax,
+  noCard = false,
 }: IdentityCardProps) {
   const enabled = bind("enabled");
   const slug = bind("slug");
   const headline = bind("headline");
+  const fields = (
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-medium">Aktifkan halaman publik</p>
+          <p className="text-xs text-muted-foreground">
+            Saat mati, URL Anda akan merespons 404 seolah tidak pernah ada.
+          </p>
+        </div>
+        <Switch
+          checked={enabled.value}
+          onCheckedChange={enabled.onChange}
+          disabled={!canEnable && !enabled.value}
+          aria-label="Aktifkan profil publik"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="pb-slug">Slug URL</Label>
+        <div className="flex flex-wrap items-center gap-1.5 sm:flex-nowrap sm:gap-2">
+          <span className="text-xs text-muted-foreground sm:text-sm">careerpack.org/</span>
+          <Input
+            id="pb-slug"
+            value={slug.value}
+            onChange={(e) => slug.onChange(e.target.value.toLowerCase())}
+            placeholder="budi-santoso"
+            maxLength={slugMax}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="url"
+            aria-invalid={!validation.ok}
+            className={cn("min-w-0 flex-1", !validation.ok && "border-destructive/60")}
+          />
+        </div>
+        {!validation.ok ? (
+          <p className="flex items-center gap-1 text-xs text-destructive">
+            <AlertCircle className="h-3 w-3" />
+            {validation.message}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{slugHint}</p>
+        )}
+        {enabled.value && slugTrimmed && validation.ok && (
+          <Button
+            asChild
+            variant="link"
+            size="sm"
+            className="h-auto px-0 text-xs"
+          >
+            <Link
+              href={`/${slugTrimmed}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="mr-1 h-3 w-3" />
+              Buka /{slugTrimmed}
+            </Link>
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="pb-headline">Headline / tagline</Label>
+        <Textarea
+          id="pb-headline"
+          value={headline.value}
+          onChange={(e) => headline.onChange(e.target.value)}
+          placeholder="Contoh: Frontend Engineer fokus di React + a11y"
+          rows={2}
+          maxLength={headlineMax}
+        />
+        <p className="text-xs text-muted-foreground">
+          {headline.value.length}/{headlineMax} karakter
+        </p>
+      </div>
+    </div>
+  );
+
+  if (noCard) return fields;
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -68,82 +154,7 @@ export function IdentityCard({
         </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-muted/30 p-4">
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Aktifkan halaman publik</p>
-            <p className="text-xs text-muted-foreground">
-              Saat mati, URL Anda akan merespons 404 seolah tidak pernah ada.
-            </p>
-          </div>
-          <Switch
-            checked={enabled.value}
-            onCheckedChange={enabled.onChange}
-            disabled={!canEnable && !enabled.value}
-            aria-label="Aktifkan profil publik"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="pb-slug">Slug URL</Label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">careerpack.org/</span>
-            <Input
-              id="pb-slug"
-              value={slug.value}
-              onChange={(e) => slug.onChange(e.target.value.toLowerCase())}
-              placeholder="budi-santoso"
-              maxLength={slugMax}
-              autoCapitalize="off"
-              autoCorrect="off"
-              spellCheck={false}
-              inputMode="url"
-              aria-invalid={!validation.ok}
-              className={cn(!validation.ok && "border-destructive/60")}
-            />
-          </div>
-          {!validation.ok ? (
-            <p className="flex items-center gap-1 text-xs text-destructive">
-              <AlertCircle className="h-3 w-3" />
-              {validation.message}
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">{slugHint}</p>
-          )}
-          {enabled.value && slugTrimmed && validation.ok && (
-            <Button
-              asChild
-              variant="link"
-              size="sm"
-              className="h-auto px-0 text-xs"
-            >
-              <Link
-                href={`/${slugTrimmed}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink className="mr-1 h-3 w-3" />
-                Buka /{slugTrimmed}
-              </Link>
-            </Button>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="pb-headline">Headline / tagline</Label>
-          <Textarea
-            id="pb-headline"
-            value={headline.value}
-            onChange={(e) => headline.onChange(e.target.value)}
-            placeholder="Contoh: Frontend Engineer fokus di React + a11y"
-            rows={2}
-            maxLength={headlineMax}
-          />
-          <p className="text-xs text-muted-foreground">
-            {headline.value.length}/{headlineMax} karakter
-          </p>
-        </div>
-      </CardContent>
+      <CardContent>{fields}</CardContent>
     </Card>
   );
 }

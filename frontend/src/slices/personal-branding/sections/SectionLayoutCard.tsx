@@ -15,6 +15,7 @@ import type { Bind } from "../form/types";
 
 export interface SectionLayoutCardProps {
   bind: Bind;
+  noCard?: boolean;
 }
 
 /**
@@ -28,7 +29,7 @@ export interface SectionLayoutCardProps {
  * through `bioShow / skillsShow`. `contact` is always shown when at
  * least one channel is filled (no toggle).
  */
-export function SectionLayoutCard({ bind }: SectionLayoutCardProps) {
+export function SectionLayoutCard({ bind, noCard = false }: SectionLayoutCardProps) {
   const order = bind("sectionOrder");
   const autoToggles = bind("autoToggles");
   const bioShow = bind("bioShow");
@@ -127,10 +128,99 @@ export function SectionLayoutCard({ bind }: SectionLayoutCardProps) {
   const labelMap = new Map(DEFAULT_SECTION_ORDER.map((s) => [s.key, s.label]));
   const isCustomOrder = order.value.length > 0;
 
+  const fields = (
+    <ol className="space-y-1.5">
+      {resolved.map((key, idx) => {
+        const label = labelMap.get(key) ?? key;
+        const visible = isVisible(key);
+        const isContact = key === "contact";
+        return (
+          <li
+            key={key}
+            className="flex items-center gap-1 rounded-md border border-border bg-muted/20 p-2 sm:gap-2"
+          >
+            <span className="w-5 shrink-0 text-center text-xs text-muted-foreground">
+              {idx + 1}
+            </span>
+            <span
+              className={`min-w-0 flex-1 truncate text-sm font-medium ${visible ? "text-foreground" : "text-muted-foreground line-through"}`}
+            >
+              {label}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => toggleVisible(key)}
+              disabled={isContact}
+              aria-label={
+                isContact
+                  ? "Section kontak otomatis hidden saat tidak ada data"
+                  : visible
+                    ? `Sembunyikan section ${label}`
+                    : `Tampilkan section ${label}`
+              }
+              className="h-7 w-7 shrink-0"
+            >
+              {visible ? (
+                <Eye className="h-3.5 w-3.5" />
+              ) : (
+                <EyeOff className="h-3.5 w-3.5 opacity-60" />
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => move(idx, -1)}
+              disabled={idx === 0}
+              aria-label={`Pindahkan ${label} ke atas`}
+              className="h-7 w-7 shrink-0"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => move(idx, 1)}
+              disabled={idx === resolved.length - 1}
+              aria-label={`Pindahkan ${label} ke bawah`}
+              className="h-7 w-7 shrink-0"
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+            </Button>
+          </li>
+        );
+      })}
+    </ol>
+  );
+
+  if (noCard) {
+    return (
+      <div className="space-y-3">
+        {isCustomOrder && (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={reset}
+              className="text-xs"
+            >
+              Reset urutan
+            </Button>
+          </div>
+        )}
+        {fields}
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
             <CardTitle as="h3" className="flex items-center gap-2 text-base">
               <Layers className="h-4 w-4 text-brand" />
@@ -154,73 +244,7 @@ export function SectionLayoutCard({ bind }: SectionLayoutCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <ol className="space-y-1.5">
-          {resolved.map((key, idx) => {
-            const label = labelMap.get(key) ?? key;
-            const visible = isVisible(key);
-            const isContact = key === "contact";
-            return (
-              <li
-                key={key}
-                className="flex items-center gap-2 rounded-md border border-border bg-muted/20 p-2"
-              >
-                <span className="w-5 shrink-0 text-center text-xs text-muted-foreground">
-                  {idx + 1}
-                </span>
-                <span
-                  className={`flex-1 text-sm font-medium ${visible ? "text-foreground" : "text-muted-foreground line-through"}`}
-                >
-                  {label}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => toggleVisible(key)}
-                  disabled={isContact}
-                  aria-label={
-                    isContact
-                      ? "Section kontak otomatis hidden saat tidak ada data"
-                      : visible
-                        ? `Sembunyikan section ${label}`
-                        : `Tampilkan section ${label}`
-                  }
-                  className="h-7 w-7"
-                >
-                  {visible ? (
-                    <Eye className="h-3.5 w-3.5" />
-                  ) : (
-                    <EyeOff className="h-3.5 w-3.5 opacity-60" />
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => move(idx, -1)}
-                  disabled={idx === 0}
-                  aria-label={`Pindahkan ${label} ke atas`}
-                  className="h-7 w-7"
-                >
-                  <ArrowUp className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => move(idx, 1)}
-                  disabled={idx === resolved.length - 1}
-                  aria-label={`Pindahkan ${label} ke bawah`}
-                  className="h-7 w-7"
-                >
-                  <ArrowDown className="h-3.5 w-3.5" />
-                </Button>
-              </li>
-            );
-          })}
-        </ol>
-      </CardContent>
+      <CardContent>{fields}</CardContent>
     </Card>
   );
 }
