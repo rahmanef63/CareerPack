@@ -125,6 +125,42 @@ export const profileTables = {
       }),
     ),
     publicAccent: v.optional(v.string()),
+    /**
+     * Manual-mode "Style" customization — sits on top of the chosen
+     * template (publicTheme) and the iframe hydrator turns it into
+     * CSS custom properties on `documentElement` so the live page
+     * picks up the user's primary color, font family, border radius
+     * and spacing density. Optional — undefined falls back to the
+     * template's baked defaults.
+     */
+    publicStyle: v.optional(
+      v.object({
+        primary: v.optional(v.string()),
+        font: v.optional(
+          v.union(
+            v.literal("sans"),
+            v.literal("serif"),
+            v.literal("mono"),
+          ),
+        ),
+        radius: v.optional(
+          v.union(
+            v.literal("none"),
+            v.literal("sm"),
+            v.literal("md"),
+            v.literal("lg"),
+            v.literal("full"),
+          ),
+        ),
+        density: v.optional(
+          v.union(
+            v.literal("compact"),
+            v.literal("normal"),
+            v.literal("spacious"),
+          ),
+        ),
+      }),
+    ),
     /* Share & Export — opt-in flags surfacing the embeddable HTML
      * snippet, iframe embed, and AI-friendly prompt in the builder.
      * Each is independent so the user can keep e.g. the prompt off

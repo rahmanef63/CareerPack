@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import {
   Blocks,
   Briefcase,
+  Brush,
   Code2,
   Download,
   Eye,
@@ -44,6 +45,7 @@ import { HeroTogglesCard } from "../sections/HeroTogglesCard";
 import { ContactCard } from "../sections/ContactCard";
 import { IndexingCard } from "../sections/IndexingCard";
 import { ThemeCard } from "../sections/ThemeCard";
+import { StyleCard } from "../sections/StyleCard";
 import { ManualBlocksCard } from "../sections/ManualBlocksCard";
 import { BlockPresetsCard } from "../builder/BlockPresetsCard";
 import { PBSectionNav } from "./PBSectionNav";
@@ -321,6 +323,22 @@ export function PersonalBrandingView() {
               </PBSection>
             </div>
             <div
+              id="pb-section-style"
+              className="rounded-xl transition-shadow"
+            >
+              <PBSection
+                sectionId="style"
+                title="Style — warna, font, radius"
+                description="Custom layer di atas template: ganti warna utama, font family, lekukan sudut, dan kerapatan spasi."
+                icon={<Brush className="h-4 w-4" />}
+                tone="indigo"
+                activeId={activeSection}
+                onToggle={toggleSection}
+              >
+                <StyleCard bind={form.bind} noCard />
+              </PBSection>
+            </div>
+            <div
               id="pb-section-hero-toggles"
               className="rounded-xl transition-shadow"
             >
@@ -492,6 +510,7 @@ export function PersonalBrandingView() {
 
             <TabsContent value="design" className="mt-4 space-y-4">
               <ThemeCard bind={form.bind} />
+              <StyleCard bind={form.bind} />
               <SaveActions
                 saving={form.saving}
                 canEnable={form.canEnable}

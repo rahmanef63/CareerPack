@@ -397,6 +397,7 @@ export const getBySlug = query({
             }
           : undefined,
       sectionOrder: profile.publicSectionOrder ?? undefined,
+      style: profile.publicStyle ?? undefined,
     });
 
     return {
@@ -465,6 +466,7 @@ export const getMyPublicProfile = query({
       ctaUrl: profile.publicCtaUrl ?? "",
       ctaType: profile.publicCtaType ?? "link",
       sectionOrder: profile.publicSectionOrder ?? [],
+      style: profile.publicStyle ?? null,
     };
   },
 });

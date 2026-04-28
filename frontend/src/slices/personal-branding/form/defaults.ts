@@ -41,6 +41,7 @@ export const DEFAULT_FORM_STATE: FormState = {
   ctaUrl: "",
   ctaType: "link",
   sectionOrder: [],
+  style: {},
 };
 
 /** Canonical section order — used by SectionLayoutCard as the

@@ -28,8 +28,12 @@ import type {
   FieldKey,
   FormState,
   Mode,
+  PublicStyle,
   SetField,
   SlugValidation,
+  StyleDensity,
+  StyleFont,
+  StyleRadius,
   SubmitOptions,
 } from "./types";
 
@@ -66,6 +70,52 @@ interface ServerData {
   ctaUrl?: string;
   ctaType?: string | null;
   sectionOrder?: string[] | null;
+  style?: {
+    primary?: string;
+    font?: string;
+    radius?: string;
+    density?: string;
+  } | null;
+}
+
+const STYLE_FONTS: ReadonlyArray<StyleFont> = ["sans", "serif", "mono"];
+const STYLE_RADII: ReadonlyArray<StyleRadius> = [
+  "none",
+  "sm",
+  "md",
+  "lg",
+  "full",
+];
+const STYLE_DENSITIES: ReadonlyArray<StyleDensity> = [
+  "compact",
+  "normal",
+  "spacious",
+];
+
+function sanitizeServerStyle(
+  raw: ServerData["style"],
+): PublicStyle {
+  if (!raw) return {};
+  const out: PublicStyle = {};
+  if (
+    typeof raw.primary === "string" &&
+    /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(raw.primary)
+  ) {
+    out.primary = raw.primary.toLowerCase();
+  }
+  if (raw.font && (STYLE_FONTS as readonly string[]).includes(raw.font)) {
+    out.font = raw.font as StyleFont;
+  }
+  if (raw.radius && (STYLE_RADII as readonly string[]).includes(raw.radius)) {
+    out.radius = raw.radius as StyleRadius;
+  }
+  if (
+    raw.density &&
+    (STYLE_DENSITIES as readonly string[]).includes(raw.density)
+  ) {
+    out.density = raw.density as StyleDensity;
+  }
+  return out;
 }
 
 function seedFromServer(data: ServerData): FormState {
@@ -114,6 +164,7 @@ function seedFromServer(data: ServerData): FormState {
     ctaUrl: data.ctaUrl ?? "",
     ctaType: (isCtaType(data.ctaType) ? data.ctaType : "link") as CtaType,
     sectionOrder: Array.isArray(data.sectionOrder) ? data.sectionOrder : [],
+    style: sanitizeServerStyle(data.style),
   };
 }
 
@@ -313,6 +364,7 @@ export function usePBForm(): PBForm {
             ctaUrl: state.ctaUrl,
             ctaType: state.ctaType,
             sectionOrder: state.sectionOrder,
+            style: state.style,
           });
         }
         if (opts.activate) {

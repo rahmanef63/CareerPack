@@ -102,6 +102,20 @@ export interface BrandingAvailability {
 }
 
 /**
+ * User-controlled "Style" customization. The hydrator turns each
+ * field into a CSS custom property on `documentElement` plus a
+ * universal-selector override layer so even templates that don't
+ * reference the variables yet pick up the user's primary color and
+ * border-radius choice.
+ */
+export interface BrandingStyle {
+  primary?: string;
+  font?: "sans" | "serif" | "mono";
+  radius?: "none" | "sm" | "md" | "lg" | "full";
+  density?: "compact" | "normal" | "spacious";
+}
+
+/**
  * Per-section visibility toggles consumed by buildBrandingPayload to
  * override the default "show whenever data exists" behaviour. When a
  * toggle is `false` we force `has.X = false` so the hydrator hides
@@ -148,6 +162,8 @@ export interface BrandingPayload {
   /** Hero primary call-to-action. When `label` + `url` are both
    *  present the hydrator injects a button just below the hero. */
   cta?: BrandingCta;
+  /** Optional manual-mode style customization. */
+  style?: BrandingStyle;
   /** User-defined order of section keys. Hydrator reorders matching
    *  `[data-cp-section]` siblings. Sections not in the list keep
    *  their template-default position. */
@@ -177,6 +193,7 @@ export function buildBrandingPayload({
   availability,
   cta,
   sectionOrder,
+  style,
 }: {
   profile: ProfileInput;
   cv: Doc<"cvs"> | null;
@@ -186,6 +203,7 @@ export function buildBrandingPayload({
   availability?: BrandingAvailability;
   cta?: BrandingCta;
   sectionOrder?: string[];
+  style?: BrandingStyle;
 }): BrandingPayload {
   const cvSummary = cv?.personalInfo?.summary ?? "";
   const bio = profile.bio || "";
@@ -321,6 +339,7 @@ export function buildBrandingPayload({
     projects: projectCards,
     availability: availabilityOut,
     cta: ctaOut,
+    style,
     sectionOrder:
       sectionOrder && sectionOrder.length > 0 ? sectionOrder : undefined,
     has: {

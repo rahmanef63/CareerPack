@@ -229,6 +229,34 @@ export const updateMyPublicProfile = mutation({
       }),
     ),
     accent: v.optional(v.string()),
+    style: v.optional(
+      v.object({
+        primary: v.optional(v.string()),
+        font: v.optional(
+          v.union(
+            v.literal("sans"),
+            v.literal("serif"),
+            v.literal("mono"),
+          ),
+        ),
+        radius: v.optional(
+          v.union(
+            v.literal("none"),
+            v.literal("sm"),
+            v.literal("md"),
+            v.literal("lg"),
+            v.literal("full"),
+          ),
+        ),
+        density: v.optional(
+          v.union(
+            v.literal("compact"),
+            v.literal("normal"),
+            v.literal("spacious"),
+          ),
+        ),
+      }),
+    ),
     /* Share & Export opt-ins (see profile/schema.ts). */
     htmlExport: v.optional(v.boolean()),
     embedExport: v.optional(v.boolean()),
@@ -310,6 +338,19 @@ export const updateMyPublicProfile = mutation({
         if (!cleaned) throw new Error("Aksen warna harus format hex #rrggbb");
         patch.publicAccent = cleaned;
       }
+    }
+    if (args.style !== undefined) {
+      // Whitelist + sanitize — primary color must be hex, the rest are
+      // already constrained by the validator literals.
+      const HEX_RE = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/;
+      const cleaned: Record<string, string> = {};
+      if (args.style.primary && HEX_RE.test(args.style.primary)) {
+        cleaned.primary = args.style.primary.toLowerCase();
+      }
+      if (args.style.font) cleaned.font = args.style.font;
+      if (args.style.radius) cleaned.radius = args.style.radius;
+      if (args.style.density) cleaned.density = args.style.density;
+      patch.publicStyle = Object.keys(cleaned).length > 0 ? cleaned : undefined;
     }
     if (args.htmlExport !== undefined) patch.publicHtmlExport = args.htmlExport;
     if (args.embedExport !== undefined) patch.publicEmbedExport = args.embedExport;

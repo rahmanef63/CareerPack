@@ -23,6 +23,23 @@ export type Mode = "auto" | "custom";
 
 export type CtaType = "link" | "email" | "calendly" | "download";
 
+export type StyleFont = "sans" | "serif" | "mono";
+export type StyleRadius = "none" | "sm" | "md" | "lg" | "full";
+export type StyleDensity = "compact" | "normal" | "spacious";
+
+/**
+ * Manual-mode "Style" customization. All fields optional — undefined
+ * means inherit from the chosen template's defaults. The hydrator
+ * turns each field into a CSS custom property + universal-selector
+ * override so even legacy templates pick up primary color + radius.
+ */
+export interface PublicStyle {
+  primary?: string;
+  font?: StyleFont;
+  radius?: StyleRadius;
+  density?: StyleDensity;
+}
+
 export interface FormState {
   // ---- identity ----------------------------------------------------
   enabled: boolean;
@@ -64,6 +81,9 @@ export interface FormState {
   ctaType: CtaType;
   /** Empty = use template default order. */
   sectionOrder: string[];
+
+  // ---- manual-mode style customization ----------------------------
+  style: PublicStyle;
 }
 
 export type FieldKey = keyof FormState;
