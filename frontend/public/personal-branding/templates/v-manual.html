@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Manual Canvas — CareerPack</title>
+<style>
+  :root {
+    --cp-primary: #6366f1;
+    --cp-primary-fg: #ffffff;
+    --cp-radius: 10px;
+    --cp-density: 1;
+    --cp-bg: #ffffff;
+    --cp-fg: #0f172a;
+    --cp-muted: #64748b;
+    --cp-border: #e2e8f0;
+    --cp-card: #f8fafc;
+    --cp-card-hover: #f1f5f9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --cp-bg: #09090b;
+      --cp-fg: #fafafa;
+      --cp-muted: #a1a1aa;
+      --cp-border: #27272a;
+      --cp-card: #18181b;
+      --cp-card-hover: #1f1f23;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--cp-font, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+    background: var(--cp-bg);
+    color: var(--cp-fg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: inherit; }
+
+  /* ── Topbar ────────────────────────────────────────────── */
+  .cp-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--cp-bg) 82%, transparent);
+    border-bottom: 1px solid var(--cp-border);
+  }
+  .cp-topbar-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+  }
+  .cp-topbar-id { min-width: 0; }
+  .cp-topbar-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cp-topbar-headline {
+    font-size: 11px;
+    color: var(--cp-muted);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cp-topbar-cta {
+    background: var(--cp-primary);
+    color: var(--cp-primary-fg);
+    padding: 8px 14px;
+    border-radius: var(--cp-radius);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .cp-topbar-cta:hover { opacity: 0.92; transform: translateY(-1px); }
+
+  /* ── Hero ─────────────────────────────────────────────── */
+  .cp-hero {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: calc(56px * var(--cp-density)) 20px calc(20px * var(--cp-density));
+    text-align: center;
+  }
+  .cp-avatar-wrap {
+    display: inline-block;
+    position: relative;
+    margin-bottom: 18px;
+  }
+  .cp-avatar-wrap::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--cp-primary) 35%, transparent), transparent 70%);
+    z-index: -1;
+    filter: blur(8px);
+  }
+  .cp-avatar {
+    width: 104px;
+    height: 104px;
+    border-radius: 999px;
+    object-fit: cover;
+    display: block;
+    border: 3px solid var(--cp-bg);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  }
+  .cp-name {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin: 0 0 10px;
+  }
+  .cp-headline {
+    color: var(--cp-muted);
+    font-size: 16px;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .cp-availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, #10b981 15%, var(--cp-bg));
+    color: #047857;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  @media (prefers-color-scheme: dark) {
+    .cp-availability {
+      background: color-mix(in srgb, #10b981 22%, var(--cp-bg));
+      color: #6ee7b7;
+    }
+  }
+  .cp-availability::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #10b981;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #10b981 30%, transparent);
+  }
+
+  /* ── Canvas (block slot) ──────────────────────────────── */
+  .cp-canvas {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px calc(60px * var(--cp-density));
+    display: flex;
+    flex-direction: column;
+    gap: calc(14px * var(--cp-density));
+  }
+  .cp-empty {
+    border: 2px dashed var(--cp-border);
+    border-radius: calc(var(--cp-radius) + 6px);
+    padding: 44px 24px;
+    text-align: center;
+    background: color-mix(in srgb, var(--cp-card) 50%, transparent);
+  }
+  .cp-empty-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 12px;
+    border-radius: var(--cp-radius);
+    background: color-mix(in srgb, var(--cp-primary) 12%, transparent);
+    color: var(--cp-primary);
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+  }
+  .cp-empty-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 6px;
+    color: var(--cp-fg);
+  }
+  .cp-empty-desc {
+    font-size: 13px;
+    color: var(--cp-muted);
+    margin: 0;
+  }
+
+  /* ── Block: heading ───────────────────────────────────── */
+  .cp-blk-heading-lg {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: calc(8px * var(--cp-density)) 0 4px;
+    line-height: 1.2;
+  }
+  .cp-blk-heading-md {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: calc(6px * var(--cp-density)) 0 2px;
+    line-height: 1.3;
+  }
+
+  /* ── Block: paragraph ─────────────────────────────────── */
+  .cp-blk-paragraph {
+    margin: 0;
+    font-size: 15px;
+    color: var(--cp-fg);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Block: divider ───────────────────────────────────── */
+  .cp-blk-divider-line {
+    border: 0;
+    border-top: 1px solid var(--cp-border);
+    margin: calc(8px * var(--cp-density)) 0;
+  }
+  .cp-blk-divider-dot {
+    text-align: center;
+    color: var(--cp-muted);
+    letter-spacing: 0.6em;
+    font-size: 12px;
+    margin: calc(8px * var(--cp-density)) 0;
+  }
+
+  /* ── Block: link button ───────────────────────────────── */
+  .cp-blk-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--cp-card);
+    border: 1px solid var(--cp-border);
+    border-radius: var(--cp-radius);
+    text-decoration: none;
+    color: var(--cp-fg);
+    font-weight: 500;
+    font-size: 14px;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+  .cp-blk-link:hover {
+    background: var(--cp-card-hover);
+    border-color: color-mix(in srgb, var(--cp-primary) 50%, var(--cp-border));
+    transform: translateY(-1px);
+  }
+  .cp-blk-link-emoji {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .cp-blk-link-body { flex: 1; min-width: 0; }
+  .cp-blk-link-label {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cp-blk-link-desc {
+    font-size: 12px;
+    color: var(--cp-muted);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cp-blk-link-arrow {
+    color: var(--cp-muted);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .cp-blk-link.cp-blk-link-primary {
+    background: var(--cp-primary);
+    color: var(--cp-primary-fg);
+    border-color: transparent;
+  }
+  .cp-blk-link-primary .cp-blk-link-desc,
+  .cp-blk-link-primary .cp-blk-link-arrow {
+    color: color-mix(in srgb, var(--cp-primary-fg) 80%, transparent);
+  }
+  .cp-blk-link-primary:hover {
+    background: color-mix(in srgb, var(--cp-primary) 90%, #000);
+    border-color: transparent;
+  }
+  .cp-blk-link.cp-blk-link-ghost {
+    background: transparent;
+    border-style: dashed;
+  }
+
+  /* ── Block: socials ───────────────────────────────────── */
+  .cp-blk-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .cp-blk-social {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    background: var(--cp-card);
+    border: 1px solid var(--cp-border);
+    border-radius: var(--cp-radius);
+    text-decoration: none;
+    color: var(--cp-fg);
+    font-size: 13px;
+    font-weight: 500;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .cp-blk-social:hover {
+    background: var(--cp-card-hover);
+    border-color: color-mix(in srgb, var(--cp-primary) 50%, var(--cp-border));
+  }
+  .cp-blk-social-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── Block: image ─────────────────────────────────────── */
+  .cp-blk-image {
+    margin: 0;
+  }
+  .cp-blk-image img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--cp-radius);
+    border: 1px solid var(--cp-border);
+  }
+  .cp-blk-image figcaption {
+    font-size: 12px;
+    color: var(--cp-muted);
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  /* ── Block: embed ─────────────────────────────────────── */
+  .cp-blk-embed {
+    margin: 0;
+  }
+  .cp-blk-embed-frame {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    border-radius: var(--cp-radius);
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--cp-border);
+  }
+  .cp-blk-embed-frame.cp-blk-embed-spotify,
+  .cp-blk-embed-frame.cp-blk-embed-soundcloud {
+    padding-bottom: 0;
+    height: 152px;
+  }
+  .cp-blk-embed-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .cp-blk-embed-frame.cp-blk-embed-spotify iframe,
+  .cp-blk-embed-frame.cp-blk-embed-soundcloud iframe {
+    position: relative;
+    inset: auto;
+  }
+  .cp-blk-embed figcaption {
+    font-size: 12px;
+    color: var(--cp-muted);
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  /* ── Block: html ──────────────────────────────────────── */
+  .cp-blk-html {
+    word-break: break-word;
+    font-size: 15px;
+    color: var(--cp-fg);
+  }
+  .cp-blk-html img { max-width: 100%; height: auto; border-radius: var(--cp-radius); }
+  .cp-blk-html a { color: var(--cp-primary); text-decoration: underline; text-underline-offset: 2px; }
+
+  /* ── Footer ───────────────────────────────────────────── */
+  .cp-foot {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 20px 56px;
+    text-align: center;
+    color: var(--cp-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--cp-border);
+  }
+  .cp-foot-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--cp-card);
+    border: 1px solid var(--cp-border);
+  }
+
+  @media (max-width: 480px) {
+    .cp-name { font-size: 28px; }
+    .cp-headline { font-size: 14px; }
+    .cp-hero { padding-top: calc(40px * var(--cp-density)); }
+  }
+</style>
+</head>
+<body data-cp-template="manual">
+
+<header class="cp-topbar">
+  <div class="cp-topbar-inner">
+    <div class="cp-topbar-id">
+      <div class="cp-topbar-name" data-cp="name">Nama Anda</div>
+      <div class="cp-topbar-headline" data-cp="headline">Headline singkat</div>
+    </div>
+  </div>
+</header>
+
+<section class="cp-hero" data-cp-hero>
+  <div class="cp-avatar-wrap" data-cp-avatar-wrap>
+    <img class="cp-avatar" data-cp="avatar" data-cp-mode="src" src="" alt="" />
+  </div>
+  <h1 class="cp-name" data-cp="name">Nama Anda</h1>
+  <p class="cp-headline" data-cp="headline">Tulis headline singkat tentang diri Anda</p>
+</section>
+
+<main class="cp-canvas" data-cp-blocks-mount>
+  <div class="cp-empty" data-cp-blocks-empty>
+    <div class="cp-empty-icon">+</div>
+    <p class="cp-empty-title">Canvas masih kosong</p>
+    <p class="cp-empty-desc">Tambah block via tab <strong>Konten</strong> atau pakai <strong>Preset</strong> untuk akselerasi.</p>
+  </div>
+</main>
+
+<footer class="cp-foot">
+  <span class="cp-foot-tag">Dibuat dengan CareerPack</span>
+</footer>
+
+</body>
+</html>

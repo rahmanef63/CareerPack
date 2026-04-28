@@ -398,6 +398,10 @@ export const getBySlug = query({
           : undefined,
       sectionOrder: profile.publicSectionOrder ?? undefined,
       style: profile.publicStyle ?? undefined,
+      // Manual-mode blocks fed to the canvas template. Auto-mode pages
+      // ignore this field entirely — the v1/v2/v3 hydrators don't read
+      // it, and we'd be wasting payload bytes on every public visit.
+      blocks: mode === "custom" ? Array.from(blocks) : undefined,
     });
 
     return {

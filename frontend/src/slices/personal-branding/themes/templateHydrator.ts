@@ -111,6 +111,217 @@ const HYDRATOR_SOURCE = String.raw`
   }
   applyStyle(d.style);
 
+  // ---- Manual-mode block canvas -----------------------------------
+  // The manual template ships with a single [data-cp-blocks-mount]
+  // slot. We render the user's authored block list into it before
+  // the identity fills run so the rest of the hydrator sees a stable
+  // DOM. Auto-mode pages (v1/v2/v3) have no mount node, so this is a
+  // no-op there.
+  var SOCIAL_META = {
+    linkedin:  { label: 'LinkedIn',  color: '#0A66C2', initial: 'in' },
+    instagram: { label: 'Instagram', color: '#E4405F', initial: 'IG' },
+    twitter:   { label: 'X',         color: '#0F172A', initial: 'X'  },
+    github:    { label: 'GitHub',    color: '#181717', initial: 'GH' },
+    youtube:   { label: 'YouTube',   color: '#FF0000', initial: 'YT' },
+    tiktok:    { label: 'TikTok',    color: '#000000', initial: 'TT' },
+    dribbble:  { label: 'Dribbble',  color: '#EA4C89', initial: 'DR' },
+    behance:   { label: 'Behance',   color: '#1769FF', initial: 'BE' },
+    facebook:  { label: 'Facebook',  color: '#1877F2', initial: 'f'  },
+    whatsapp:  { label: 'WhatsApp',  color: '#25D366', initial: 'WA' },
+    email:     { label: 'Email',     color: '#0F172A', initial: '@'  },
+    website:   { label: 'Website',   color: '#6366F1', initial: '↗'  }
+  };
+
+  function buildEmbedUrl(provider, id) {
+    if (!provider || !id) return null;
+    if (provider === 'youtube') return 'https://www.youtube.com/embed/' + encodeURIComponent(String(id));
+    if (provider === 'vimeo')   return 'https://player.vimeo.com/video/' + encodeURIComponent(String(id));
+    if (provider === 'spotify') {
+      // id stored as "type/id" (e.g. "track/3n3Ppam7vgaVa1iaRUc9Lp")
+      var parts = String(id).split('/');
+      if (parts.length !== 2) return null;
+      return 'https://open.spotify.com/embed/' + encodeURIComponent(parts[0]) + '/' + encodeURIComponent(parts[1]);
+    }
+    if (provider === 'soundcloud') {
+      var u = String(id);
+      if (!/^https?:\/\//i.test(u)) return null;
+      return 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(u) + '&color=%236366f1&inverse=false&auto_play=false&show_user=true';
+    }
+    return null;
+  }
+
+  function renderBlock(block) {
+    if (!block || block.hidden) return null;
+    var p = block.payload || {};
+    var t = block.type;
+    if (t === 'heading') {
+      var size = p.size === 'md' ? 'md' : 'lg';
+      var h = document.createElement(size === 'lg' ? 'h2' : 'h3');
+      h.className = 'cp-blk-heading-' + size;
+      h.textContent = String(p.text || '');
+      return h;
+    }
+    if (t === 'paragraph') {
+      var par = document.createElement('p');
+      par.className = 'cp-blk-paragraph';
+      par.textContent = String(p.text || '');
+      return par;
+    }
+    if (t === 'divider') {
+      if (p.style === 'dot') {
+        var dot = document.createElement('div');
+        dot.className = 'cp-blk-divider-dot';
+        dot.textContent = '· · ·';
+        return dot;
+      }
+      var hr = document.createElement('hr');
+      hr.className = 'cp-blk-divider-line';
+      return hr;
+    }
+    if (t === 'link') {
+      var a = document.createElement('a');
+      var variant = p.variant === 'secondary' ? 'secondary' : p.variant === 'ghost' ? 'ghost' : 'primary';
+      a.className = 'cp-blk-link cp-blk-link-' + variant;
+      a.setAttribute('href', String(p.url || '#'));
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+      if (p.emoji) {
+        var em = document.createElement('span');
+        em.className = 'cp-blk-link-emoji';
+        em.textContent = String(p.emoji);
+        a.appendChild(em);
+      }
+      var body = document.createElement('div');
+      body.className = 'cp-blk-link-body';
+      var label = document.createElement('div');
+      label.className = 'cp-blk-link-label';
+      label.textContent = String(p.label || '');
+      body.appendChild(label);
+      if (p.description) {
+        var desc = document.createElement('div');
+        desc.className = 'cp-blk-link-desc';
+        desc.textContent = String(p.description);
+        body.appendChild(desc);
+      }
+      a.appendChild(body);
+      var arrow = document.createElement('span');
+      arrow.className = 'cp-blk-link-arrow';
+      arrow.textContent = '→';
+      a.appendChild(arrow);
+      return a;
+    }
+    if (t === 'social') {
+      var items = Array.isArray(p.items) ? p.items : [];
+      if (items.length === 0) return null;
+      var row = document.createElement('div');
+      row.className = 'cp-blk-socials';
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        if (!it || !it.platform || !it.url) continue;
+        var meta = SOCIAL_META[it.platform];
+        if (!meta) continue;
+        var link = document.createElement('a');
+        link.className = 'cp-blk-social';
+        link.setAttribute('href', String(it.url));
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+        var badge = document.createElement('span');
+        badge.className = 'cp-blk-social-icon';
+        badge.style.cssText =
+          'display:inline-flex;align-items:center;justify-content:center;' +
+          'width:18px;height:18px;border-radius:4px;font-size:10px;' +
+          'font-weight:700;color:#fff;background:' + meta.color + ';';
+        badge.textContent = meta.initial;
+        link.appendChild(badge);
+        var lbl = document.createElement('span');
+        lbl.textContent = meta.label;
+        link.appendChild(lbl);
+        row.appendChild(link);
+      }
+      return row.children.length > 0 ? row : null;
+    }
+    if (t === 'image') {
+      var fig = document.createElement('figure');
+      fig.className = 'cp-blk-image';
+      var img = document.createElement('img');
+      img.setAttribute('src', String(p.url || ''));
+      img.setAttribute('alt', String(p.alt || ''));
+      img.setAttribute('loading', 'lazy');
+      if (p.link) {
+        var wrap = document.createElement('a');
+        wrap.setAttribute('href', String(p.link));
+        wrap.setAttribute('target', '_blank');
+        wrap.setAttribute('rel', 'noopener noreferrer');
+        wrap.appendChild(img);
+        fig.appendChild(wrap);
+      } else {
+        fig.appendChild(img);
+      }
+      if (p.caption) {
+        var cap = document.createElement('figcaption');
+        cap.textContent = String(p.caption);
+        fig.appendChild(cap);
+      }
+      return fig;
+    }
+    if (t === 'embed') {
+      var url = buildEmbedUrl(p.provider, p.id);
+      if (!url) return null;
+      var efig = document.createElement('figure');
+      efig.className = 'cp-blk-embed';
+      var frame = document.createElement('div');
+      frame.className = 'cp-blk-embed-frame cp-blk-embed-' + String(p.provider);
+      var ifr = document.createElement('iframe');
+      ifr.setAttribute('src', url);
+      ifr.setAttribute('loading', 'lazy');
+      ifr.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture');
+      ifr.setAttribute('allowfullscreen', '');
+      ifr.setAttribute('referrerpolicy', 'no-referrer');
+      ifr.setAttribute('title', 'Embedded ' + String(p.provider) + ' content');
+      frame.appendChild(ifr);
+      efig.appendChild(frame);
+      if (p.caption) {
+        var ecap = document.createElement('figcaption');
+        ecap.textContent = String(p.caption);
+        efig.appendChild(ecap);
+      }
+      return efig;
+    }
+    if (t === 'html') {
+      var div = document.createElement('div');
+      div.className = 'cp-blk-html';
+      // Server-side sanitised in convex/profile/blocks.ts (sanitizeHtml).
+      div.innerHTML = String(p.content || '');
+      return div;
+    }
+    return null;
+  }
+
+  function renderManualBlocks(blocks) {
+    var mount = document.querySelector('[data-cp-blocks-mount]');
+    if (!mount) return;
+    var empty = mount.querySelector('[data-cp-blocks-empty]');
+    var list = Array.isArray(blocks) ? blocks : [];
+    var visible = [];
+    for (var bi = 0; bi < list.length; bi++) {
+      if (list[bi] && !list[bi].hidden) visible.push(list[bi]);
+    }
+    if (visible.length === 0) {
+      // Keep the empty placeholder visible — surfaces the call-to-action
+      // ("tambah block / pakai preset") for new manual-mode users.
+      return;
+    }
+    // Clear ALL initial children including the empty placeholder so we
+    // start from a known-empty mount before appending rendered blocks.
+    while (mount.firstChild) mount.removeChild(mount.firstChild);
+    void empty;
+    for (var ri = 0; ri < visible.length; ri++) {
+      var node = renderBlock(visible[ri]);
+      if (node) mount.appendChild(node);
+    }
+  }
+  renderManualBlocks(d.blocks);
+
   function setText(el, val) {
     if (val === undefined || val === null) val = '';
     el.textContent = String(val);

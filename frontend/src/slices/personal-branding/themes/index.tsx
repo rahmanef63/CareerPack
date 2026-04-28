@@ -13,6 +13,13 @@ import {
   type PersonalBrandingTheme,
   type TemplateTheme,
 } from "../blocks/types";
+import type { Mode } from "../form/types";
+
+/** Static URL for the manual-mode canvas template. Lives outside
+ *  TEMPLATE_URLS because users never pick it directly — the renderer
+ *  switches to it whenever `profile.mode === "custom"`. */
+export const MANUAL_TEMPLATE_URL =
+  "/personal-branding/templates/v-manual.html";
 import {
   TEMPLATE_HYDRATOR_JS,
   TEMPLATE_IFRAME_HELPERS_JS,
@@ -82,6 +89,22 @@ export interface BrandingPayload {
     url: string;
     type: "link" | "email" | "calendly" | "download";
   };
+  /** User-style customization (color/font/radius/density). */
+  style?: {
+    primary?: string;
+    font?: "sans" | "serif" | "mono";
+    radius?: "none" | "sm" | "md" | "lg" | "full";
+    density?: "compact" | "normal" | "spacious";
+  };
+  /** Manual-mode block list — only present when profile.mode === "custom".
+   *  Loose shape mirrors `publicBlocks` schema (server-side sanitisation
+   *  guarantees safety; the iframe hydrator narrows by `type`). */
+  blocks?: Array<{
+    id: string;
+    type: string;
+    hidden?: boolean;
+    payload: unknown;
+  }>;
   sectionOrder?: string[];
   has: {
     about: boolean;
@@ -105,6 +128,9 @@ interface ProfileShape {
   theme: PersonalBrandingTheme;
   headerBg: HeaderBg | null;
   accent: string | null;
+  /** Render mode. When `"custom"` the renderer overrides `theme` and
+   *  fetches the manual canvas template. Default `"auto"`. */
+  mode?: Mode;
   /** Optional — when present, fed into the iframe so templates render
    *  with real data and hide empty sections. */
   branding?: BrandingPayload;
@@ -132,10 +158,17 @@ export function PersonalBrandingPage({
     ? ({ "--branding-accent": profile.accent } as React.CSSProperties)
     : undefined;
   const theme = normalizeTheme(profile.theme);
+  const mode: Mode = profile.mode ?? "auto";
+  // Manual mode forces the canvas template — the v1/v2/v3 templates
+  // are CV-driven hero pages and don't host user-arranged blocks.
+  const templateKey = mode === "custom" ? "template-manual" : theme;
+  const templateUrl =
+    mode === "custom" ? MANUAL_TEMPLATE_URL : TEMPLATE_URLS[theme];
   return (
     <div className="bg-background text-foreground" style={accentVar}>
       <TemplateLayout
-        theme={theme}
+        templateKey={templateKey}
+        templateUrl={templateUrl}
         displayName={profile.displayName}
         branding={showBranding ? profile.branding : undefined}
       />
@@ -154,22 +187,26 @@ function normalizeTheme(t: PersonalBrandingTheme): TemplateTheme {
 // Static HTML Template — iframe + skeleton fallback
 // ---------------------------------------------------------------------
 
-/** In-memory cache shared across re-mounts so switching themes doesn't
- *  re-fetch templates already seen this session. */
-const TEMPLATE_HTML_CACHE = new Map<TemplateTheme, string>();
+/** In-memory cache shared across re-mounts so switching templates
+ *  doesn't re-fetch ones already seen this session. Keyed by stable
+ *  template id (v1/v2/v3/manual) instead of TemplateTheme so manual
+ *  template caches alongside the user-pickable ones. */
+const TEMPLATE_HTML_CACHE = new Map<string, string>();
 
 function TemplateLayout({
-  theme,
+  templateKey,
+  templateUrl,
   displayName,
   branding,
 }: {
-  theme: TemplateTheme;
+  templateKey: string;
+  templateUrl: string;
   displayName: string;
   branding?: BrandingPayload;
 }) {
-  const url = TEMPLATE_URLS[theme];
+  const url = templateUrl;
   const [html, setHtml] = useState<string | null>(
-    () => TEMPLATE_HTML_CACHE.get(theme) ?? null,
+    () => TEMPLATE_HTML_CACHE.get(templateKey) ?? null,
   );
   const [error, setError] = useState<string | null>(null);
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
@@ -185,7 +222,7 @@ function TemplateLayout({
 
   useEffect(() => {
     let cancelled = false;
-    const cached = TEMPLATE_HTML_CACHE.get(theme);
+    const cached = TEMPLATE_HTML_CACHE.get(templateKey);
     if (cached) {
       setHtml(cached);
       setError(null);
@@ -200,7 +237,7 @@ function TemplateLayout({
       })
       .then((text) => {
         if (cancelled) return;
-        TEMPLATE_HTML_CACHE.set(theme, text);
+        TEMPLATE_HTML_CACHE.set(templateKey, text);
         setHtml(text);
       })
       .catch((e: unknown) => {
@@ -210,7 +247,7 @@ function TemplateLayout({
     return () => {
       cancelled = true;
     };
-  }, [theme, url]);
+  }, [templateKey, url]);
 
   // Listen for `cp-resize` + `cp-show-more` from the iframe.
   // - cp-resize: sizes the wrapper to content (D1/D10 fix — without
@@ -247,11 +284,11 @@ function TemplateLayout({
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  // Reset height when theme/branding key changes — we'll get a fresh
+  // Reset height when template/branding key changes — we'll get a fresh
   // postMessage from the new iframe contents.
   useEffect(() => {
     setIframeHeight(null);
-  }, [theme, branding]);
+  }, [templateKey, branding]);
 
   // Inject branding payload + hydrator so the iframe can replace mock
   // copy with the user's real data and hide empty sections. The
@@ -283,9 +320,9 @@ function TemplateLayout({
         // remounts the iframe (cheaper than postMessage for now).
         <iframe
           ref={iframeRef}
-          key={`${theme}:${branding?.identity.name ?? ""}`}
+          key={`${templateKey}:${branding?.identity.name ?? ""}`}
           srcDoc={hydratedHtml}
-          title={`Template ${theme} untuk ${displayName}`}
+          title={`Template ${templateKey} untuk ${displayName}`}
           loading="eager"
           sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
           className="block w-full border-0 bg-background"

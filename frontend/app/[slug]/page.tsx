@@ -197,6 +197,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
             theme: (profile.theme ?? "linktree") as PBTheme,
             headerBg: (profile.headerBg ?? null) as PBHeaderBg | null,
             accent: profile.accent ?? null,
+            mode: profile.mode === "custom" ? "custom" : "auto",
             branding: profile.branding,
           }}
         />

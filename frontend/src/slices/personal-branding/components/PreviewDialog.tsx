@@ -140,6 +140,7 @@ export function PreviewDialog({
       theme: state.theme,
       headerBg: state.headerBg,
       accent: null,
+      mode: state.mode,
       branding: previewData?.branding,
     }),
     [state, slugTrimmed, me, previewBlocks, previewData],

@@ -11,6 +11,18 @@
 
 import type { Doc } from "../_generated/dataModel";
 
+/** Loose block shape mirroring `publicBlocks` validator in
+ *  profile/schema.ts. The iframe hydrator branches on `type` and
+ *  defensively narrows `payload`, so emitting the loose shape here
+ *  keeps the boundary types simple — write-time sanitisation in
+ *  profile/blocks.ts is what guarantees safety. */
+export interface BrandingBlock {
+  id: string;
+  type: string;
+  hidden?: boolean;
+  payload: unknown;
+}
+
 interface ProfileInput {
   fullName: string;
   publicHeadline: string;
@@ -164,6 +176,10 @@ export interface BrandingPayload {
   cta?: BrandingCta;
   /** Optional manual-mode style customization. */
   style?: BrandingStyle;
+  /** Manual-mode block list. Only emitted when the page is rendered
+   *  via the manual template — auto-mode pages keep this undefined so
+   *  the legacy v1/v2/v3 templates ignore it. */
+  blocks?: BrandingBlock[];
   /** User-defined order of section keys. Hydrator reorders matching
    *  `[data-cp-section]` siblings. Sections not in the list keep
    *  their template-default position. */
@@ -194,6 +210,7 @@ export function buildBrandingPayload({
   cta,
   sectionOrder,
   style,
+  blocks,
 }: {
   profile: ProfileInput;
   cv: Doc<"cvs"> | null;
@@ -204,6 +221,7 @@ export function buildBrandingPayload({
   cta?: BrandingCta;
   sectionOrder?: string[];
   style?: BrandingStyle;
+  blocks?: BrandingBlock[];
 }): BrandingPayload {
   const cvSummary = cv?.personalInfo?.summary ?? "";
   const bio = profile.bio || "";
@@ -340,6 +358,7 @@ export function buildBrandingPayload({
     availability: availabilityOut,
     cta: ctaOut,
     style,
+    blocks: blocks && blocks.length > 0 ? blocks : undefined,
     sectionOrder:
       sectionOrder && sectionOrder.length > 0 ? sectionOrder : undefined,
     has: {

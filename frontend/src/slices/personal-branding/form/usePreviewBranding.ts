@@ -139,6 +139,12 @@ export function usePreviewBranding(state: FormState):
           : undefined,
       sectionOrder:
         state.sectionOrder.length > 0 ? state.sectionOrder : undefined,
+      style:
+        Object.keys(state.style ?? {}).length > 0 ? state.style : undefined,
+      blocks:
+        state.mode === "custom"
+          ? state.blocks.filter((b) => !b.hidden)
+          : undefined,
       has: {
         // Mirror the backend: respect user toggles in addition to data
         // presence so the preview matches what visitors will see.
