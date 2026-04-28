@@ -392,14 +392,23 @@ const HYDRATOR_SOURCE = String.raw`
   }
 
   // Per-list threshold defaults. Override per-list with
-  // data-cp-list-max="<N>" on the container.
+  // data-cp-list-max="<N>" on the container. Tuned tight — the
+  // public page should feel curated, not exhaustive. Users can dive
+  // into the dialog to see everything.
   var TRUNCATE_DEFAULTS = {
     projects: 3,
-    skills: 8,
-    experience: 3,
-    education: 99, // never truncate (usually 1-2 entries)
+    skills: 6,
+    experience: 2,
+    education: 4,
     certifications: 3,
-    languages: 99,
+    languages: 6,
+  };
+  // Sub-lists that live INSIDE a parent list-item (e.g. proj-tech in
+  // each project clone, exp-achievements in each experience clone).
+  // Never truncate these — they're inline detail, not a list-of-cards.
+  var SUBLIST_NAMES = {
+    'proj-tech': true,
+    'exp-achievements': true,
   };
   function thresholdFor(container, listName) {
     var attr = container.getAttribute('data-cp-list-max');
@@ -410,51 +419,69 @@ const HYDRATOR_SOURCE = String.raw`
     if (Object.prototype.hasOwnProperty.call(TRUNCATE_DEFAULTS, listName)) {
       return TRUNCATE_DEFAULTS[listName];
     }
-    return 3;
+    return 0; // unknown list → don't truncate
   }
-  function isNestedInTemplate(el) {
+  // Skip lists nested INSIDE another data-cp-list (proj-tech inside
+  // a project clone, exp-achievements inside an experience clone)
+  // OR inside a data-cp-template (the original hidden source node).
+  function isNestedInListOrTemplate(el) {
     var p = el.parentElement;
     while (p) {
-      if (p.hasAttribute && p.hasAttribute('data-cp-template')) return true;
+      if (p.hasAttribute) {
+        if (p.hasAttribute('data-cp-template')) return true;
+        if (p.hasAttribute('data-cp-list')) return true;
+      }
       p = p.parentElement;
     }
     return false;
   }
 
   // Pass 1 — data-cp-list containers (v1, v3, partial v2).
-  var listContainers = document.querySelectorAll('[data-cp-list]');
-  for (var li = 0; li < listContainers.length; li++) {
-    var c = listContainers[li];
-    if (isNestedInTemplate(c)) continue;
-    var name = c.getAttribute('data-cp-list') || '';
-    var max = thresholdFor(c, name);
-    var visibleCount = 0;
-    for (var ci = 0; ci < c.children.length; ci++) {
-      var ch = c.children[ci];
-      if (ch.hasAttribute && ch.hasAttribute('data-cp-template')) continue;
-      visibleCount += 1;
+  try {
+    var listContainers = document.querySelectorAll('[data-cp-list]');
+    for (var li = 0; li < listContainers.length; li++) {
+      var c = listContainers[li];
+      if (isNestedInListOrTemplate(c)) continue;
+      var name = c.getAttribute('data-cp-list') || '';
+      if (SUBLIST_NAMES[name]) continue;
+      var max = thresholdFor(c, name);
+      if (max <= 0) continue;
+      var visibleCount = 0;
+      for (var ci = 0; ci < c.children.length; ci++) {
+        var ch = c.children[ci];
+        if (ch.hasAttribute && ch.hasAttribute('data-cp-template')) continue;
+        visibleCount += 1;
+      }
+      var hiddenAfter = truncateList(c, name, max);
+      if (hiddenAfter > 0) appendShowMoreButton(c, name, visibleCount);
     }
-    var hiddenAfter = truncateList(c, name, max);
-    if (hiddenAfter > 0) appendShowMoreButton(c, name, visibleCount);
+  } catch (passErr) {
+    try { console.warn('[CareerPack hydrator] truncate pass1 failed', passErr); } catch (_) {}
   }
 
   // Pass 2 — v2's mount-id pattern (its own inline JS fills these
   // via innerHTML reads from cp.* directly, so they don't carry
   // data-cp-list markers).
-  var V2_MOUNTS = [
-    { id: 'skillsMount', name: 'skills' },
-    { id: 'experienceMount', name: 'experience' },
-    { id: 'casesMount', name: 'projects' },
-    { id: 'deckMount', name: 'projects' },
-  ];
-  for (var mi = 0; mi < V2_MOUNTS.length; mi++) {
-    var mount = document.getElementById(V2_MOUNTS[mi].id);
-    if (!mount) continue;
-    var mountName = V2_MOUNTS[mi].name;
-    var mountMax = thresholdFor(mount, mountName);
-    var totalKids = mount.children.length;
-    var hiddenMount = truncateList(mount, mountName, mountMax);
-    if (hiddenMount > 0) appendShowMoreButton(mount, mountName, totalKids);
+  try {
+    var V2_MOUNTS = [
+      { id: 'skillsMount', name: 'skills' },
+      { id: 'experienceMount', name: 'experience' },
+      { id: 'casesMount', name: 'projects' },
+      { id: 'deckMount', name: 'projects' },
+    ];
+    for (var mi = 0; mi < V2_MOUNTS.length; mi++) {
+      var mount = document.getElementById(V2_MOUNTS[mi].id);
+      if (!mount) continue;
+      var mountName = V2_MOUNTS[mi].name;
+      var mountMax = thresholdFor(mount, mountName);
+      if (mountMax <= 0) continue;
+      var totalKids = mount.children.length;
+      if (totalKids <= mountMax) continue;
+      var hiddenMount = truncateList(mount, mountName, mountMax);
+      if (hiddenMount > 0) appendShowMoreButton(mount, mountName, totalKids);
+    }
+  } catch (passErr2) {
+    try { console.warn('[CareerPack hydrator] truncate pass2 failed', passErr2); } catch (_) {}
   }
 })();
 `;
