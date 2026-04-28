@@ -18,11 +18,17 @@ export function defaultBlockPayload(type: BlockType): Record<string, unknown> {
     case "paragraph":
       return { text: "" };
     case "link":
-      return { label: "Label tombol", url: "https://", variant: "primary" };
+      return { label: "Label tombol", url: "https://example.com", variant: "primary" };
     case "social":
       return { items: [{ platform: "linkedin", url: "" }] };
     case "image":
-      return { url: "https://", alt: "" };
+      // Default to an Unsplash placeholder so the block renders
+      // immediately (server sanitiser rejects bare "https://" — would
+      // silently drop on save). User pastes own URL via Edit.
+      return {
+        url: "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=900&q=80",
+        alt: "Placeholder — ganti dengan gambar Anda",
+      };
     case "embed":
       return { url: "" };
     case "divider":

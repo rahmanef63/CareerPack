@@ -5,10 +5,13 @@
  * the server sanitiser preserves the block; the user then refines copy
  * via the Konten tab.
  *
- * Why placeholder URLs (https://example.com / placehold.co):
+ * Why placeholder URLs (https://example.com / Unsplash):
  *   sanitizeBlock drops links/images with empty or invalid urls — an
  *   empty preset would vanish on save. Real-looking placeholders keep
- *   the block alive long enough for the user to edit.
+ *   the block alive long enough for the user to edit. Unsplash is
+ *   used for image presets because placehold.co + similar redirect
+ *   services occasionally trigger "content blocked" interstitials in
+ *   user browsers / corporate proxies.
  */
 
 import {
@@ -39,7 +42,17 @@ export interface BlockPresetDef {
 }
 
 const PLACEHOLDER_URL = "https://example.com";
-const PLACEHOLDER_IMG = "https://placehold.co/800x600";
+
+/** Unsplash CDN photos used as image-block placeholders. Three
+ *  distinct shots so the gallery preset actually looks like a real
+ *  gallery (not three copies of the same image). Unsplash CDN is
+ *  embed-friendly (no hotlink protection, no referrer check). */
+const PLACEHOLDER_IMG_1 =
+  "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=900&q=80";
+const PLACEHOLDER_IMG_2 =
+  "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80";
+const PLACEHOLDER_IMG_3 =
+  "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=900&q=80";
 
 export const BLOCK_PRESETS: ReadonlyArray<BlockPresetDef> = [
   {
@@ -105,9 +118,9 @@ export const BLOCK_PRESETS: ReadonlyArray<BlockPresetDef> = [
     icon: ImageIcon,
     blocks: [
       { type: "heading", payload: { text: "Karya pilihan", size: "lg" } },
-      { type: "image", payload: { url: PLACEHOLDER_IMG, alt: "Project 1" } },
-      { type: "image", payload: { url: PLACEHOLDER_IMG, alt: "Project 2" } },
-      { type: "image", payload: { url: PLACEHOLDER_IMG, alt: "Project 3" } },
+      { type: "image", payload: { url: PLACEHOLDER_IMG_1, alt: "Project 1" } },
+      { type: "image", payload: { url: PLACEHOLDER_IMG_2, alt: "Project 2" } },
+      { type: "image", payload: { url: PLACEHOLDER_IMG_3, alt: "Project 3" } },
     ],
   },
   {
