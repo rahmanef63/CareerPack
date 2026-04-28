@@ -139,10 +139,34 @@ export function BrandingValidationCard({
         {score < 30 && (
           <div className="mt-3 flex items-start gap-2 rounded-md border border-brand/30 bg-brand-muted/40 px-3 py-2 text-xs text-foreground">
             <Rocket className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
-            <div>
-              <strong>Mulai di sini.</strong> Isi field wajib di bawah satu
-              per satu — pencet rekomendasi untuk loncat ke field-nya. Skor
-              naik tiap field yang Anda isi.
+            <div className="space-y-1.5">
+              <p>
+                <strong>Mulai di sini.</strong> 3 langkah sampai siap publish:
+              </p>
+              <ol className="ml-3 list-decimal space-y-0.5 text-[11px] text-muted-foreground">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => jumpToAnchor("#pb-section-identity")}
+                    className="font-medium text-brand hover:underline"
+                  >
+                    Set URL & Headline
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => jumpToAnchor("#pb-section-hero-toggles")}
+                    className="font-medium text-brand hover:underline"
+                  >
+                    Aktifkan tampilan hero
+                  </button>{" "}
+                  (avatar, bio, skills)
+                </li>
+                <li>
+                  Klik <strong>Publikasikan</strong> di bawah / pojok kanan
+                </li>
+              </ol>
             </div>
           </div>
         )}

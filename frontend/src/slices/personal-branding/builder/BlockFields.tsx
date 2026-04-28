@@ -1,20 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-  ResponsiveDialogDescription,
-} from "@/shared/components/ui/responsive-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { Switch } from "@/shared/components/ui/switch";
 import {
   ResponsiveSelect,
   ResponsiveSelectContent,
@@ -23,134 +13,41 @@ import {
 } from "@/shared/components/ui/responsive-select";
 import {
   type Block,
-  type BlockType,
   SOCIAL_PLATFORMS,
   parseEmbedUrl,
 } from "../blocks/types";
 
-interface Props {
-  open: boolean;
-  block: Block | null;
-  onClose: () => void;
-  onSave: (block: Block) => void;
-  onDelete: (id: string) => void;
+export interface BlockFieldsProps {
+  block: Block;
+  onChange: (next: Block) => void;
 }
 
 /**
- * Per-block editor dialog. The form shape switches on `block.type`.
- * Each branch is intentionally inline — block-type variety is small,
- * keeping the cases together makes the contract obvious.
+ * Per-type form rows for a single block. Used inline inside the
+ * sortable BlockList — clicking the chevron on a row expands this
+ * editor underneath. The block-type variety is small, so each branch
+ * is intentionally inline here.
+ *
+ * The branches are intentionally inline. Block-type variety is small
+ * and keeping every shape in one file makes the contract obvious.
  */
-export function BlockEditor({ open, block, onClose, onSave, onDelete }: Props) {
-  const [draft, setDraft] = useState<Block | null>(block);
-
-  useEffect(() => {
-    setDraft(block);
-  }, [block]);
-
-  if (!draft) return null;
+export function BlockFields({ block, onChange }: BlockFieldsProps) {
   const update = (key: string, value: unknown) => {
-    setDraft((d) =>
-      d
-        ? ({
-            ...d,
-            payload: { ...(d.payload as object), [key]: value },
-          } as Block)
-        : d,
-    );
+    onChange({
+      ...block,
+      payload: { ...(block.payload as object), [key]: value },
+    } as Block);
   };
 
-  return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <ResponsiveDialogContent size="2xl">
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>{titleFor(draft.type)}</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
-            Atur isi blok. Klik &ldquo;Simpan&rdquo; untuk menerapkan ke
-            halaman publik Anda.
-          </ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-
-        <div className="space-y-4 py-2">
-          <BlockFields draft={draft} update={update} />
-
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
-            <div>
-              <p className="text-sm font-medium">Sembunyikan blok ini</p>
-              <p className="text-xs text-muted-foreground">
-                Blok tetap tersimpan tapi tidak muncul di halaman publik.
-              </p>
-            </div>
-            <Switch
-              checked={Boolean(draft.hidden)}
-              onCheckedChange={(v) =>
-                setDraft((d) => (d ? { ...d, hidden: v } : d))
-              }
-              aria-label="Sembunyikan blok"
-            />
-          </div>
-        </div>
-
-        <ResponsiveDialogFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => {
-              onDelete(draft.id);
-              onClose();
-            }}
-            className="mr-auto gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-            Hapus
-          </Button>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Batal
-          </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              onSave(draft);
-              onClose();
-            }}
-          >
-            Simpan
-          </Button>
-        </ResponsiveDialogFooter>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
-  );
-}
-
-function titleFor(t: BlockType): string {
-  switch (t) {
-    case "heading": return "Edit Judul";
-    case "paragraph": return "Edit Paragraf";
-    case "link": return "Edit Tautan / Tombol";
-    case "social": return "Edit Baris Sosial";
-    case "image": return "Edit Gambar";
-    case "embed": return "Edit Embed";
-    case "divider": return "Edit Pemisah";
-    case "html": return "Edit HTML / Rich Text";
-  }
-}
-
-interface FieldsProps {
-  draft: Block;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  update: (key: any, value: any) => void;
-}
-
-function BlockFields({ draft, update }: FieldsProps) {
-  switch (draft.type) {
+  switch (block.type) {
     case "heading": {
-      const p = draft.payload as { text?: string; size?: string };
+      const p = block.payload as { text?: string; size?: string };
       return (
-        <>
+        <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="bf-heading-text">Teks judul</Label>
+            <Label htmlFor={`bf-heading-text-${block.id}`}>Teks judul</Label>
             <Input
-              id="bf-heading-text"
+              id={`bf-heading-text-${block.id}`}
               value={p.text ?? ""}
               maxLength={120}
               onChange={(e) => update("text", e.target.value)}
@@ -170,16 +67,16 @@ function BlockFields({ draft, update }: FieldsProps) {
               </ResponsiveSelectContent>
             </ResponsiveSelect>
           </div>
-        </>
+        </div>
       );
     }
     case "paragraph": {
-      const p = draft.payload as { text?: string };
+      const p = block.payload as { text?: string };
       return (
         <div className="space-y-1">
-          <Label htmlFor="bf-p-text">Teks</Label>
+          <Label htmlFor={`bf-p-text-${block.id}`}>Teks</Label>
           <Textarea
-            id="bf-p-text"
+            id={`bf-p-text-${block.id}`}
             value={p.text ?? ""}
             maxLength={2000}
             rows={6}
@@ -194,7 +91,7 @@ function BlockFields({ draft, update }: FieldsProps) {
       );
     }
     case "link": {
-      const p = draft.payload as {
+      const p = block.payload as {
         label?: string;
         url?: string;
         description?: string;
@@ -202,12 +99,12 @@ function BlockFields({ draft, update }: FieldsProps) {
         variant?: string;
       };
       return (
-        <>
+        <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-[1fr_5rem]">
             <div className="space-y-1">
-              <Label htmlFor="bf-link-label">Label</Label>
+              <Label htmlFor={`bf-link-label-${block.id}`}>Label</Label>
               <Input
-                id="bf-link-label"
+                id={`bf-link-label-${block.id}`}
                 value={p.label ?? ""}
                 maxLength={80}
                 onChange={(e) => update("label", e.target.value)}
@@ -215,9 +112,9 @@ function BlockFields({ draft, update }: FieldsProps) {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="bf-link-emoji">Emoji</Label>
+              <Label htmlFor={`bf-link-emoji-${block.id}`}>Emoji</Label>
               <Input
-                id="bf-link-emoji"
+                id={`bf-link-emoji-${block.id}`}
                 value={p.emoji ?? ""}
                 maxLength={4}
                 onChange={(e) => update("emoji", e.target.value)}
@@ -226,9 +123,9 @@ function BlockFields({ draft, update }: FieldsProps) {
             </div>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bf-link-url">URL</Label>
+            <Label htmlFor={`bf-link-url-${block.id}`}>URL</Label>
             <Input
-              id="bf-link-url"
+              id={`bf-link-url-${block.id}`}
               type="url"
               value={p.url ?? ""}
               onChange={(e) => update("url", e.target.value)}
@@ -237,9 +134,11 @@ function BlockFields({ draft, update }: FieldsProps) {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bf-link-desc">Deskripsi (opsional)</Label>
+            <Label htmlFor={`bf-link-desc-${block.id}`}>
+              Deskripsi (opsional)
+            </Label>
             <Input
-              id="bf-link-desc"
+              id={`bf-link-desc-${block.id}`}
               value={p.description ?? ""}
               maxLength={160}
               onChange={(e) => update("description", e.target.value)}
@@ -254,17 +153,23 @@ function BlockFields({ draft, update }: FieldsProps) {
             >
               <ResponsiveSelectTrigger />
               <ResponsiveSelectContent drawerTitle="Variasi tombol">
-                <ResponsiveSelectItem value="primary">Primary (gradient)</ResponsiveSelectItem>
-                <ResponsiveSelectItem value="secondary">Secondary (outline)</ResponsiveSelectItem>
-                <ResponsiveSelectItem value="ghost">Ghost (dashed)</ResponsiveSelectItem>
+                <ResponsiveSelectItem value="primary">
+                  Primary (gradient)
+                </ResponsiveSelectItem>
+                <ResponsiveSelectItem value="secondary">
+                  Secondary (outline)
+                </ResponsiveSelectItem>
+                <ResponsiveSelectItem value="ghost">
+                  Ghost (dashed)
+                </ResponsiveSelectItem>
               </ResponsiveSelectContent>
             </ResponsiveSelect>
           </div>
-        </>
+        </div>
       );
     }
     case "social": {
-      const p = draft.payload as {
+      const p = block.payload as {
         items?: Array<{ platform: string; url: string }>;
       };
       const items = p.items ?? [];
@@ -322,10 +227,7 @@ function BlockFields({ draft, update }: FieldsProps) {
             variant="outline"
             size="sm"
             onClick={() => {
-              update("items", [
-                ...items,
-                { platform: "linkedin", url: "" },
-              ]);
+              update("items", [...items, { platform: "linkedin", url: "" }]);
             }}
           >
             + Tambah platform
@@ -334,18 +236,18 @@ function BlockFields({ draft, update }: FieldsProps) {
       );
     }
     case "image": {
-      const p = draft.payload as {
+      const p = block.payload as {
         url?: string;
         alt?: string;
         caption?: string;
         link?: string;
       };
       return (
-        <>
+        <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="bf-img-url">URL gambar</Label>
+            <Label htmlFor={`bf-img-url-${block.id}`}>URL gambar</Label>
             <Input
-              id="bf-img-url"
+              id={`bf-img-url-${block.id}`}
               type="url"
               value={p.url ?? ""}
               onChange={(e) => update("url", e.target.value)}
@@ -358,9 +260,9 @@ function BlockFields({ draft, update }: FieldsProps) {
             </p>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bf-img-alt">Alt text</Label>
+            <Label htmlFor={`bf-img-alt-${block.id}`}>Alt text</Label>
             <Input
-              id="bf-img-alt"
+              id={`bf-img-alt-${block.id}`}
               value={p.alt ?? ""}
               maxLength={200}
               onChange={(e) => update("alt", e.target.value)}
@@ -368,18 +270,22 @@ function BlockFields({ draft, update }: FieldsProps) {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bf-img-caption">Caption (opsional)</Label>
+            <Label htmlFor={`bf-img-caption-${block.id}`}>
+              Caption (opsional)
+            </Label>
             <Input
-              id="bf-img-caption"
+              id={`bf-img-caption-${block.id}`}
               value={p.caption ?? ""}
               maxLength={200}
               onChange={(e) => update("caption", e.target.value)}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bf-img-link">Tautkan ke URL (opsional)</Label>
+            <Label htmlFor={`bf-img-link-${block.id}`}>
+              Tautkan ke URL (opsional)
+            </Label>
             <Input
-              id="bf-img-link"
+              id={`bf-img-link-${block.id}`}
               type="url"
               value={p.link ?? ""}
               onChange={(e) => update("link", e.target.value)}
@@ -387,11 +293,11 @@ function BlockFields({ draft, update }: FieldsProps) {
               inputMode="url"
             />
           </div>
-        </>
+        </div>
       );
     }
     case "embed": {
-      const p = draft.payload as {
+      const p = block.payload as {
         url?: string;
         provider?: string;
         id?: string;
@@ -399,11 +305,11 @@ function BlockFields({ draft, update }: FieldsProps) {
       };
       const preview = p.url ? parseEmbedUrl(p.url) : null;
       return (
-        <>
+        <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="bf-embed-url">URL</Label>
+            <Label htmlFor={`bf-embed-url-${block.id}`}>URL</Label>
             <Input
-              id="bf-embed-url"
+              id={`bf-embed-url-${block.id}`}
               type="url"
               value={p.url ?? ""}
               onChange={(e) => update("url", e.target.value)}
@@ -426,19 +332,21 @@ function BlockFields({ draft, update }: FieldsProps) {
             )}
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bf-embed-caption">Caption (opsional)</Label>
+            <Label htmlFor={`bf-embed-caption-${block.id}`}>
+              Caption (opsional)
+            </Label>
             <Input
-              id="bf-embed-caption"
+              id={`bf-embed-caption-${block.id}`}
               value={p.caption ?? ""}
               maxLength={200}
               onChange={(e) => update("caption", e.target.value)}
             />
           </div>
-        </>
+        </div>
       );
     }
     case "divider": {
-      const p = draft.payload as { style?: string };
+      const p = block.payload as { style?: string };
       return (
         <div className="space-y-1">
           <Label>Gaya</Label>
@@ -456,12 +364,12 @@ function BlockFields({ draft, update }: FieldsProps) {
       );
     }
     case "html": {
-      const p = draft.payload as { content?: string };
+      const p = block.payload as { content?: string };
       return (
         <div className="space-y-1">
-          <Label htmlFor="bf-html-content">HTML</Label>
+          <Label htmlFor={`bf-html-content-${block.id}`}>HTML</Label>
           <Textarea
-            id="bf-html-content"
+            id={`bf-html-content-${block.id}`}
             value={p.content ?? ""}
             maxLength={5000}
             rows={10}

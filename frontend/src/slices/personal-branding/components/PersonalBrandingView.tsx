@@ -48,6 +48,7 @@ import { ManualBlocksCard } from "../sections/ManualBlocksCard";
 import { BlockPresetsCard } from "../builder/BlockPresetsCard";
 import { PBSectionNav } from "./PBSectionNav";
 import { MiniPreviewFrame } from "./MiniPreviewFrame";
+import { MobileActionBar } from "./MobileActionBar";
 import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
 import { SaveActions } from "../sections/SaveActions";
@@ -177,7 +178,7 @@ export function PersonalBrandingView() {
         title="Personal Branding"
         description="Pengganti Linktree / Bento — punya halaman publik dalam 1 menit, tanpa coding."
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="hidden flex-wrap gap-2 lg:flex">
             <Button
               type="button"
               variant="outline"
@@ -546,6 +547,13 @@ export function PersonalBrandingView() {
         onOpenChange={setPreviewOpen}
         state={form.state}
         slugTrimmed={form.slugTrimmed}
+      />
+
+      <MobileActionBar
+        saving={form.saving}
+        canEnable={form.canEnable}
+        onPreview={() => setPreviewOpen(true)}
+        onPublish={form.submit}
       />
     </PageContainer>
   );
