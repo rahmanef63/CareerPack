@@ -397,7 +397,12 @@ export const getBySlug = query({
             }
           : undefined,
       sectionOrder: profile.publicSectionOrder ?? undefined,
-      style: profile.publicStyle ?? undefined,
+      // Style customization (color/font/radius/density) is a manual-
+      // only feature — auto users commit to the chosen template's
+      // baked-in design language so the result stays cohesive.
+      // publicStyle may still exist in the DB from a prior manual
+      // session; we just don't surface it when mode === "auto".
+      style: mode === "custom" ? (profile.publicStyle ?? undefined) : undefined,
       // Manual-mode blocks fed to the canvas template. Auto-mode pages
       // ignore this field entirely — the v1/v2/v3 hydrators don't read
       // it, and we'd be wasting payload bytes on every public visit.

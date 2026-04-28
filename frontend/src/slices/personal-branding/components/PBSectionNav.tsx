@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Brush,
   Briefcase,
   Globe,
   Layers,
@@ -17,7 +16,6 @@ import { cn } from "@/shared/lib/utils";
 const SECTIONS = [
   { id: "identity", label: "Identitas", icon: Globe },
   { id: "theme", label: "Tema", icon: Palette },
-  { id: "style", label: "Style", icon: Brush },
   { id: "hero", label: "Hero", icon: User },
   { id: "availability", label: "Status", icon: Briefcase },
   { id: "cta", label: "CTA", icon: MousePointerClick },

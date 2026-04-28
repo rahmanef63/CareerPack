@@ -5,7 +5,6 @@ import { useQuery } from "convex/react";
 import {
   Blocks,
   Briefcase,
-  Brush,
   Code2,
   Download,
   Eye,
@@ -45,7 +44,6 @@ import { HeroTogglesCard } from "../sections/HeroTogglesCard";
 import { ContactCard } from "../sections/ContactCard";
 import { IndexingCard } from "../sections/IndexingCard";
 import { ThemeCard } from "../sections/ThemeCard";
-import { StyleCard } from "../sections/StyleCard";
 import { ManualDesignCard } from "../sections/ManualDesignCard";
 import { ManualBlocksCard } from "../sections/ManualBlocksCard";
 import { BlockPresetsCard } from "../builder/BlockPresetsCard";
@@ -313,30 +311,14 @@ export function PersonalBrandingView() {
             >
               <PBSection
                 sectionId="theme"
-                title="Pilih tema"
-                description="Stack, Bento, atau Editorial — atur layout halaman publik."
+                title="Pilih template"
+                description="Purple Glass · Editorial Cream · Premium Dark. Setiap template sudah punya warna + font + layout yang kohesif — pilih yang paling cocok dan template yang urus sisanya."
                 icon={<Palette className="h-4 w-4" />}
                 tone="indigo"
                 activeId={activeSection}
                 onToggle={toggleSection}
               >
                 <ThemeCard bind={form.bind} noCard />
-              </PBSection>
-            </div>
-            <div
-              id="pb-section-style"
-              className="rounded-xl transition-shadow"
-            >
-              <PBSection
-                sectionId="style"
-                title="Style — warna, font, radius"
-                description="Custom layer di atas template: ganti warna utama, font family, lekukan sudut, dan kerapatan spasi."
-                icon={<Brush className="h-4 w-4" />}
-                tone="indigo"
-                activeId={activeSection}
-                onToggle={toggleSection}
-              >
-                <StyleCard bind={form.bind} noCard />
               </PBSection>
             </div>
             <div

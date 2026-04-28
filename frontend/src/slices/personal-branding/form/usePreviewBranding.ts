@@ -139,8 +139,12 @@ export function usePreviewBranding(state: FormState):
           : undefined,
       sectionOrder:
         state.sectionOrder.length > 0 ? state.sectionOrder : undefined,
+      // Style customization is manual-only — auto previews fall back
+      // to each template's curated design.
       style:
-        Object.keys(state.style ?? {}).length > 0 ? state.style : undefined,
+        state.mode === "custom" && Object.keys(state.style ?? {}).length > 0
+          ? state.style
+          : undefined,
       blocks:
         state.mode === "custom"
           ? state.blocks.filter((b) => !b.hidden)
