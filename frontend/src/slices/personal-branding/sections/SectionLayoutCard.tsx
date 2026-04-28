@@ -224,11 +224,11 @@ export function SectionLayoutCard({ bind, noCard = false }: SectionLayoutCardPro
           <div className="space-y-1">
             <CardTitle as="h3" className="flex items-center gap-2 text-base">
               <Layers className="h-4 w-4 text-brand" />
-              Urutan & visibility section
+              Section halaman publik
             </CardTitle>
             <CardDescription>
-              Tombol panah mengatur urutan section di halaman publik.
-              Mata buka/tutup mengontrol apakah section ditampilkan.
+              Atur urutan + show/hide tiap section. Pengalaman, Pendidikan,
+              Sertifikasi, dll diambil otomatis dari CV — toggle di sini.
             </CardDescription>
           </div>
           {isCustomOrder && (

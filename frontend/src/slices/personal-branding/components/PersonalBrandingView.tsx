@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import {
+  Blocks,
   Briefcase,
   Code2,
   Download,
@@ -15,7 +16,6 @@ import {
   Palette,
   Settings as SettingsIcon,
   ShieldCheck,
-  SlidersHorizontal,
   Sparkles,
   User,
   Wrench,
@@ -44,8 +44,8 @@ import { HeroTogglesCard } from "../sections/HeroTogglesCard";
 import { ContactCard } from "../sections/ContactCard";
 import { IndexingCard } from "../sections/IndexingCard";
 import { ThemeCard } from "../sections/ThemeCard";
-import { AutoConfigCard } from "../sections/AutoConfigCard";
 import { ManualBlocksCard } from "../sections/ManualBlocksCard";
+import { BlockPresetsCard } from "../builder/BlockPresetsCard";
 import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
 import { SaveActions } from "../sections/SaveActions";
@@ -333,29 +333,13 @@ export function PersonalBrandingView() {
               </PBSection>
             </div>
             <div
-              id="pb-section-auto-config"
-              className="rounded-xl transition-shadow"
-            >
-              <PBSection
-                sectionId="auto-config"
-                title="Section dari CV"
-                description="Pengalaman, pendidikan, sertifikasi — diambil otomatis dari CV."
-                icon={<SlidersHorizontal className="h-4 w-4" />}
-                tone="brand"
-                activeId={activeSection}
-                onToggle={toggleSection}
-              >
-                <AutoConfigCard bind={form.bind} noCard />
-              </PBSection>
-            </div>
-            <div
               id="pb-section-layout"
               className="rounded-xl transition-shadow"
             >
               <PBSection
                 sectionId="layout"
-                title="Urutan & visibility section"
-                description="Atur urutan section dan toggle visibility di halaman publik."
+                title="Section halaman publik"
+                description="Urutan + show/hide tiap section. Pengalaman / Pendidikan / Sertifikasi diambil otomatis dari CV."
                 icon={<Layers className="h-4 w-4" />}
                 tone="amber"
                 activeId={activeSection}
@@ -409,8 +393,11 @@ export function PersonalBrandingView() {
         {/* ===== Manual ===== */}
         <TabsContent value="custom" className="mt-4 space-y-4">
           <ModeWarning />
-          <Tabs defaultValue="content">
-            <TabsList variant="pills">
+          <Tabs defaultValue="presets">
+            <TabsList variant="pills" className="flex-wrap">
+              <TabsTrigger value="presets" className="gap-1.5">
+                <Blocks className="h-4 w-4" /> Preset Blok
+              </TabsTrigger>
               <TabsTrigger value="content" className="gap-1.5">
                 <Layers className="h-4 w-4" /> Konten
               </TabsTrigger>
@@ -421,6 +408,17 @@ export function PersonalBrandingView() {
                 <SettingsIcon className="h-4 w-4" /> Pengaturan
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="presets" className="mt-4 space-y-4">
+              <BlockPresetsCard bind={form.bind} />
+              <SaveActions
+                saving={form.saving}
+                canEnable={form.canEnable}
+                submit={form.submit}
+                lastSavedAt={form.lastSavedAt}
+                autoSavePending={form.autoSavePending}
+              />
+            </TabsContent>
 
             <TabsContent value="content" className="mt-4 space-y-4">
               <ManualBlocksCard bind={form.bind} />

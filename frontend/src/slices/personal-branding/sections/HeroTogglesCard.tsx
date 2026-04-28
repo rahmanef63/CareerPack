@@ -6,6 +6,7 @@ import {
   Tag,
   Wrench,
   FolderKanban,
+  Share2,
 } from "lucide-react";
 import {
   Card,
@@ -78,6 +79,9 @@ export function HeroTogglesCard({
   className,
   noCard = false,
 }: HeroTogglesCardProps) {
+  const autoToggles = bind("autoToggles");
+  const socialOn = Boolean(autoToggles.value.showSocial);
+
   const fields = (
     <div className="space-y-2">
       {toggles.map((t) => {
@@ -105,6 +109,27 @@ export function HeroTogglesCard({
           </div>
         );
       })}
+      <div className="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand-muted-foreground">
+            <Share2 className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 space-y-0.5">
+            <p className="text-sm font-medium">Tombol sosial</p>
+            <p className="text-xs text-muted-foreground">
+              Baris ikon LinkedIn / Portfolio / Email di hero — diambil dari
+              kontak publik.
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={socialOn}
+          onCheckedChange={(v) =>
+            autoToggles.onChange({ ...autoToggles.value, showSocial: Boolean(v) })
+          }
+          aria-label="Tampilkan tombol sosial"
+        />
+      </div>
     </div>
   );
 
