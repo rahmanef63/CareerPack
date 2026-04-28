@@ -181,6 +181,11 @@ export function usePBForm(): PBForm {
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [autoSavePending, setAutoSavePending] = useState(false);
   const seededRef = useRef(false);
+  // Snapshot of the last-submitted FormState (excluding `enabled`).
+  // Drives the autosave loop — pinned at hydration time so the
+  // initial seed does NOT count as a "change" that fires autosave.
+  // Hoisted here so the seed effect can pin it pre-emptively.
+  const lastSubmittedRef = useRef<string>("");
   // Reset the seed guard on auth-mode flip — otherwise loading the page
   // unauth (or in demo) seeds the empty/demo branch, then signing in
   // would never re-seed from the real `data` payload because the ref
@@ -199,21 +204,33 @@ export function usePBForm(): PBForm {
     if (mode !== lastAuthModeRef.current) {
       seededRef.current = false;
       lastAuthModeRef.current = mode;
+      // Reset the autosave snapshot too — otherwise re-seeding for a
+      // different user would compare against the previous user's
+      // baseline and fire a spurious save.
+      lastSubmittedRef.current = "";
     }
     if (seededRef.current) return;
     if (isDemo) {
       seededRef.current = true;
-      setState(
-        seedFromServer({
-          ...demoPB.state,
-          blocks: [],
-        } as ServerData),
-      );
+      const seeded = seedFromServer({
+        ...demoPB.state,
+        blocks: [],
+      } as ServerData);
+      // Pin the autosave baseline to the seeded snapshot so the very
+      // first useEffect run after hydration sees "no change" and does
+      // NOT fire an autosave (otherwise we'd hit the backend with a
+      // value that was just read from it — and worse, that value may
+      // contain new client defaults the legacy server hasn't shipped
+      // yet, triggering ArgumentValidationError races during deploys).
+      lastSubmittedRef.current = JSON.stringify({ ...seeded, enabled: undefined });
+      setState(seeded);
       return;
     }
     if (!data) return;
     seededRef.current = true;
-    setState(seedFromServer(data as ServerData));
+    const seeded = seedFromServer(data as ServerData);
+    lastSubmittedRef.current = JSON.stringify({ ...seeded, enabled: undefined });
+    setState(seeded);
   }, [data, isDemo, isAuthenticated, demoPB.state]);
 
   const set: SetField = useCallback((key, value) => {
@@ -332,7 +349,6 @@ export function usePBForm(): PBForm {
   // don't actually mutate any field don't fire a save.
   const submitRef = useRef(submit);
   submitRef.current = submit;
-  const lastSubmittedRef = useRef<string>("");
   useEffect(() => {
     if (isDemo) return;
     if (!seededRef.current) return;
