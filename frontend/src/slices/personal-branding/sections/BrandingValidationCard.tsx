@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, AlertCircle, Info, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, AlertCircle, Info, Rocket, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -136,6 +136,16 @@ export function BrandingValidationCard({
           </div>
         </div>
         <Progress value={score} className="mt-3 h-2" />
+        {score < 30 && (
+          <div className="mt-3 flex items-start gap-2 rounded-md border border-brand/30 bg-brand-muted/40 px-3 py-2 text-xs text-foreground">
+            <Rocket className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
+            <div>
+              <strong>Mulai di sini.</strong> Isi field wajib di bawah satu
+              per satu — pencet rekomendasi untuk loncat ke field-nya. Skor
+              naik tiap field yang Anda isi.
+            </div>
+          </div>
+        )}
         {requiredMissing.length > 0 && (
           <div className="mt-3 space-y-1.5 rounded-md border border-amber-500/40 bg-amber-50/50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
             <div className="flex items-start gap-2">

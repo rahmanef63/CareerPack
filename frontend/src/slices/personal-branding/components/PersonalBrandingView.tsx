@@ -46,6 +46,8 @@ import { IndexingCard } from "../sections/IndexingCard";
 import { ThemeCard } from "../sections/ThemeCard";
 import { ManualBlocksCard } from "../sections/ManualBlocksCard";
 import { BlockPresetsCard } from "../builder/BlockPresetsCard";
+import { PBSectionNav } from "./PBSectionNav";
+import { MiniPreviewFrame } from "./MiniPreviewFrame";
 import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
 import { SaveActions } from "../sections/SaveActions";
@@ -240,37 +242,58 @@ export function PersonalBrandingView() {
             CV-format accordion — single-open like the CV editor.
             Anchor IDs (id="pb-section-…") on each section are
             landing targets for BrandingValidationCard's jump-links.
-            Tapping a jump-link auto-opens the corresponding section. */}
-        <TabsContent value="auto" className="mt-4 space-y-4">
-          <div
-            id="pb-section-validation"
-            className="rounded-xl transition-shadow"
-          >
-            <BrandingValidationCard branding={previewData?.branding} />
-          </div>
-          <div className="space-y-3">
-            <div
-              id="pb-section-identity"
-              className="rounded-xl transition-shadow"
-            >
-              <PBSection
-                sectionId="identity"
-                title="Identitas & URL"
-                description="Slug halaman publik, headline, dan saklar publish."
-                icon={<Globe className="h-4 w-4" />}
-                tone="brand"
-                activeId={activeSection}
-                onToggle={toggleSection}
+            Tapping a jump-link auto-opens the corresponding section.
+
+            Layout:
+              - Mobile / tablet: single column + sticky pill navigator
+                at top so users can hop between accordion sections
+                without scrolling the long stack manually.
+              - Desktop (lg+): split view — accordion on the left, live
+                MiniPreviewFrame pinned on the right so every keystroke
+                shows up in the rendered template instantly. */}
+        <TabsContent value="auto" className="mt-4">
+          <PBSectionNav
+            activeId={activeSection}
+            onSelect={(id) => setActiveSection(id)}
+          />
+          <div className="mt-3 lg:mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start lg:gap-6">
+            <div className="min-w-0 space-y-4">
+              <div
+                id="pb-section-validation"
+                className="rounded-xl transition-shadow"
               >
-                <IdentityCard
-                  bind={form.bind}
-                  validation={form.slugValidation}
-                  slugTrimmed={form.slugTrimmed}
-                  canEnable={form.canEnable}
-                  noCard
-                />
-              </PBSection>
-            </div>
+                <BrandingValidationCard branding={previewData?.branding} />
+              </div>
+              <div className="space-y-3">
+                <div
+                  id="pb-section-identity"
+                  className="rounded-xl transition-shadow"
+                >
+                  <PBSection
+                    sectionId="identity"
+                    title="Identitas & URL"
+                    description="Slug halaman publik, headline, dan saklar publish."
+                    icon={<Globe className="h-4 w-4" />}
+                    tone="brand"
+                    activeId={activeSection}
+                    onToggle={toggleSection}
+                    right={
+                      !form.slugTrimmed ? (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                          Set URL dulu
+                        </span>
+                      ) : null
+                    }
+                  >
+                    <IdentityCard
+                      bind={form.bind}
+                      validation={form.slugValidation}
+                      slugTrimmed={form.slugTrimmed}
+                      canEnable={form.canEnable}
+                      noCard
+                    />
+                  </PBSection>
+                </div>
             <div
               id="pb-section-theme"
               className="rounded-xl transition-shadow"
@@ -300,7 +323,16 @@ export function PersonalBrandingView() {
                 activeId={activeSection}
                 onToggle={toggleSection}
               >
-                <HeroTogglesCard bind={form.bind} noCard />
+                <HeroTogglesCard
+                  bind={form.bind}
+                  noCard
+                  profile={{
+                    fullName: profileSnapshot.fullName,
+                    bio: profileSnapshot.bio,
+                    targetRole: profileSnapshot.targetRole,
+                    skills: profileSnapshot.skills,
+                  }}
+                />
               </PBSection>
             </div>
             <div
@@ -380,14 +412,24 @@ export function PersonalBrandingView() {
                 <IndexingCard bind={form.bind} noCard />
               </PBSection>
             </div>
+              </div>
+              <SaveActions
+                saving={form.saving}
+                canEnable={form.canEnable}
+                submit={form.submit}
+                lastSavedAt={form.lastSavedAt}
+                autoSavePending={form.autoSavePending}
+              />
+            </div>
+            <aside className="hidden lg:block">
+              <div className="sticky top-6">
+                <MiniPreviewFrame
+                  state={form.state}
+                  slugTrimmed={form.slugTrimmed}
+                />
+              </div>
+            </aside>
           </div>
-          <SaveActions
-            saving={form.saving}
-            canEnable={form.canEnable}
-            submit={form.submit}
-            lastSavedAt={form.lastSavedAt}
-            autoSavePending={form.autoSavePending}
-          />
         </TabsContent>
 
         {/* ===== Manual ===== */}
