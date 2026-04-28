@@ -1212,11 +1212,28 @@ export function CVGenerator() {
             {/* Preview & Actions Sidebar */}
             <div className="min-w-0 lg:col-span-1">
               <div className="sticky top-24 space-y-4">
+                {/* Live A4 preview — scales the chosen template into
+                    the rail width via ResizeObserver. The full-screen
+                    "Lihat CV" modal below keeps offering the
+                    edge-to-edge view + swipe template selection. */}
+                <Card className="hidden border-border lg:block">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-brand" />
+                      Pratinjau Hidup
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3">
+                    <div className="rounded-lg border border-border bg-muted/20 overflow-hidden">
+                      <ScaledCVPreview cv={renderCV} photoUrl={photoUrl} />
+                    </div>
+                  </CardContent>
+                </Card>
                 <Card className="border-border">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <FileText className="w-5 h-5 text-brand" />
-                      Pratinjau CV
+                      Skor & Aksi
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

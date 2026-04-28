@@ -49,6 +49,7 @@ import { BlockPresetsCard } from "../builder/BlockPresetsCard";
 import { PBSectionNav } from "./PBSectionNav";
 import { MiniPreviewFrame } from "./MiniPreviewFrame";
 import { MobileActionBar } from "./MobileActionBar";
+import { PreviewSplitLayout } from "@/shared/components/layout/PreviewSplitLayout";
 import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
 import { SaveActions } from "../sections/SaveActions";
@@ -253,19 +254,27 @@ export function PersonalBrandingView() {
                 MiniPreviewFrame pinned on the right so every keystroke
                 shows up in the rendered template instantly. */}
         <TabsContent value="auto" className="mt-4">
-          <PBSectionNav
-            activeId={activeSection}
-            onSelect={(id) => setActiveSection(id)}
-          />
-          <div className="mt-3 lg:mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start lg:gap-6">
-            <div className="min-w-0 space-y-4">
-              <div
-                id="pb-section-validation"
-                className="rounded-xl transition-shadow"
-              >
-                <BrandingValidationCard branding={previewData?.branding} />
-              </div>
-              <div className="space-y-3">
+          <PreviewSplitLayout
+            mobileNav={
+              <PBSectionNav
+                activeId={activeSection}
+                onSelect={(id) => setActiveSection(id)}
+              />
+            }
+            preview={
+              <MiniPreviewFrame
+                state={form.state}
+                slugTrimmed={form.slugTrimmed}
+              />
+            }
+          >
+            <div
+              id="pb-section-validation"
+              className="rounded-xl transition-shadow"
+            >
+              <BrandingValidationCard branding={previewData?.branding} />
+            </div>
+            <div className="space-y-3">
                 <div
                   id="pb-section-identity"
                   className="rounded-xl transition-shadow"
@@ -413,29 +422,32 @@ export function PersonalBrandingView() {
                 <IndexingCard bind={form.bind} noCard />
               </PBSection>
             </div>
-              </div>
-              <SaveActions
-                saving={form.saving}
-                canEnable={form.canEnable}
-                submit={form.submit}
-                lastSavedAt={form.lastSavedAt}
-                autoSavePending={form.autoSavePending}
-              />
             </div>
-            <aside className="hidden lg:block">
-              <div className="sticky top-6">
-                <MiniPreviewFrame
-                  state={form.state}
-                  slugTrimmed={form.slugTrimmed}
-                />
-              </div>
-            </aside>
-          </div>
+            <SaveActions
+              saving={form.saving}
+              canEnable={form.canEnable}
+              submit={form.submit}
+              lastSavedAt={form.lastSavedAt}
+              autoSavePending={form.autoSavePending}
+            />
+          </PreviewSplitLayout>
         </TabsContent>
 
-        {/* ===== Manual ===== */}
+        {/* ===== Manual =====
+            Same split-pane treatment as Otomatis — the live preview
+            on the right reflects the current `mode === "custom"`
+            block list, so users see exactly what their drag-drop
+            edits will produce on the public page. */}
         <TabsContent value="custom" className="mt-4 space-y-4">
           <ModeWarning />
+          <PreviewSplitLayout
+            preview={
+              <MiniPreviewFrame
+                state={form.state}
+                slugTrimmed={form.slugTrimmed}
+              />
+            }
+          >
           <Tabs defaultValue="presets">
             <TabsList variant="pills">
               <TabsTrigger value="presets" className="gap-1.5">
@@ -508,6 +520,7 @@ export function PersonalBrandingView() {
               />
             </TabsContent>
           </Tabs>
+          </PreviewSplitLayout>
         </TabsContent>
 
         {/* ===== Impor ===== */}
