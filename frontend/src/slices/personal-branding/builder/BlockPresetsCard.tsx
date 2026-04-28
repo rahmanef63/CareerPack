@@ -29,6 +29,7 @@ export function BlockPresetsCard({ bind }: { bind: Bind }) {
   const blocks = bind("blocks");
 
   function insertPreset(preset: BlockPresetDef) {
+    const previous = blocks.value;
     const additions: Block[] = preset.blocks.map((b, idx) =>
       ({
         id: newId(idx),
@@ -37,9 +38,13 @@ export function BlockPresetsCard({ bind }: { bind: Bind }) {
         ...(b.hidden ? { hidden: true } : {}),
       } as unknown as Block),
     );
-    blocks.onChange([...blocks.value, ...additions]);
+    blocks.onChange([...previous, ...additions]);
     notify.success(`Preset "${preset.label}" ditambahkan`, {
       description: `${additions.length} blok di akhir halaman. Edit di tab Konten.`,
+      action: {
+        label: "Urungkan",
+        onClick: () => blocks.onChange(previous),
+      },
     });
   }
 

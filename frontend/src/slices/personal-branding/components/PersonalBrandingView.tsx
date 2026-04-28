@@ -207,13 +207,13 @@ export function PersonalBrandingView() {
       />
 
       <Tabs value={view} onValueChange={handleViewChange}>
-        <TabsList variant="pills" className="flex-wrap">
+        <TabsList variant="pills">
           <TabsTrigger value="auto" className="gap-1.5">
             <Zap className="h-4 w-4" />
             <span>Otomatis</span>
             <Badge
               variant="secondary"
-              className="ml-1 bg-emerald-100 text-[10px] text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              className="ml-1 hidden bg-emerald-100 text-[10px] text-emerald-700 sm:inline-flex dark:bg-emerald-950 dark:text-emerald-300"
             >
               Direkomendasikan
             </Badge>
@@ -394,18 +394,22 @@ export function PersonalBrandingView() {
         <TabsContent value="custom" className="mt-4 space-y-4">
           <ModeWarning />
           <Tabs defaultValue="presets">
-            <TabsList variant="pills" className="flex-wrap">
+            <TabsList variant="pills">
               <TabsTrigger value="presets" className="gap-1.5">
-                <Blocks className="h-4 w-4" /> Preset Blok
+                <Blocks className="h-4 w-4" />
+                <span>Preset</span>
               </TabsTrigger>
               <TabsTrigger value="content" className="gap-1.5">
-                <Layers className="h-4 w-4" /> Konten
+                <Layers className="h-4 w-4" />
+                <span>Konten</span>
               </TabsTrigger>
               <TabsTrigger value="design" className="gap-1.5">
-                <Palette className="h-4 w-4" /> Tampilan
+                <Palette className="h-4 w-4" />
+                <span>Tampilan</span>
               </TabsTrigger>
               <TabsTrigger value="settings" className="gap-1.5">
-                <SettingsIcon className="h-4 w-4" /> Pengaturan
+                <SettingsIcon className="h-4 w-4" />
+                <span>Pengaturan</span>
               </TabsTrigger>
             </TabsList>
 

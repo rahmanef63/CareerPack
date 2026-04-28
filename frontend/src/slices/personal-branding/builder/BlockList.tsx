@@ -70,23 +70,27 @@ export function BlockList({ blocks, onEdit, onMove, onToggleHidden }: Props) {
           <li
             key={b.id}
             className={cn(
-              "flex items-center gap-2 rounded-lg border border-border bg-card p-3",
+              "flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center",
               b.hidden && "opacity-55",
             )}
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand-muted-foreground">
-              <Icon className="h-4 w-4" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {TYPE_LABELS[b.type]}
-                {b.hidden && <span className="ml-2 text-[10px] text-amber-600 dark:text-amber-400">disembunyikan</span>}
-              </p>
-              <p className="truncate text-sm text-foreground">
-                {summary(b)}
-              </p>
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand-muted-foreground">
+                <Icon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  {TYPE_LABELS[b.type]}
+                  {b.hidden && (
+                    <span className="ml-2 text-[10px] text-amber-600 dark:text-amber-400">
+                      disembunyikan
+                    </span>
+                  )}
+                </p>
+                <p className="truncate text-sm text-foreground">{summary(b)}</p>
+              </div>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
               <Button
                 type="button"
                 variant="ghost"
@@ -94,6 +98,7 @@ export function BlockList({ blocks, onEdit, onMove, onToggleHidden }: Props) {
                 disabled={isFirst}
                 onClick={() => onMove(b.id, "up")}
                 aria-label="Naikkan"
+                className="h-8 w-8"
               >
                 <ChevronUp className="h-4 w-4" />
               </Button>
@@ -104,6 +109,7 @@ export function BlockList({ blocks, onEdit, onMove, onToggleHidden }: Props) {
                 disabled={isLast}
                 onClick={() => onMove(b.id, "down")}
                 aria-label="Turunkan"
+                className="h-8 w-8"
               >
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -113,6 +119,7 @@ export function BlockList({ blocks, onEdit, onMove, onToggleHidden }: Props) {
                 size="icon"
                 onClick={() => onToggleHidden(b.id)}
                 aria-label={b.hidden ? "Tampilkan" : "Sembunyikan"}
+                className="h-8 w-8"
               >
                 {b.hidden ? (
                   <EyeOff className="h-4 w-4" />
@@ -126,6 +133,7 @@ export function BlockList({ blocks, onEdit, onMove, onToggleHidden }: Props) {
                 size="icon"
                 onClick={() => onEdit(b.id)}
                 aria-label="Edit"
+                className="h-8 w-8"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
