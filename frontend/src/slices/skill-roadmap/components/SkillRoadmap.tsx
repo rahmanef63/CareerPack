@@ -266,6 +266,142 @@ function generateRoadmapNodes(categoryId: string): SimpleRoadmapNode[] {
   return roadmaps[categoryId] || roadmaps['frontend'];
 }
 
+// ---- Pure helpers (module-level so they don't recreate on render) ----
+
+function getResourceIcon(type: Resource['type']) {
+  switch (type) {
+    case 'video': return Video;
+    case 'article': return FileText;
+    case 'course': return BookOpen;
+    case 'book': return BookOpen;
+    case 'practice': return Target;
+    default: return ExternalLink;
+  }
+}
+
+function getDifficultyLabel(difficulty: string) {
+  switch (difficulty) {
+    case 'beginner': return 'Pemula';
+    case 'intermediate': return 'Menengah';
+    case 'advanced': return 'Lanjutan';
+    default: return difficulty;
+  }
+}
+
+// ---- Module-level component — extracted so React never remounts nodes ----
+// If defined inside SkillRoadmap, every parent re-render creates a new
+// function reference, making React treat it as a new component type and
+// unmount/remount every node (causes visual flash + hover state loss).
+
+interface RoadmapNodeProps {
+  node: SimpleRoadmapNode;
+  level?: number;
+  completedNodes: Set<string>;
+  onToggle: (nodeId: string, e: React.MouseEvent) => void;
+  onSelect: (node: SimpleRoadmapNode) => void;
+}
+
+function RoadmapNodeComponent({ node, level = 0, completedNodes, onToggle, onSelect }: RoadmapNodeProps) {
+  const isCompleted = completedNodes.has(node.id);
+  const hasChildren = node.children && node.children.length > 0;
+  const isLocked = node.prerequisites.length > 0 && !node.prerequisites.every(prereq => completedNodes.has(prereq));
+
+  return (
+    <div className={cn('relative', level > 0 && 'ml-8 mt-4')}>
+      {level > 0 && (
+        <div className="absolute -left-6 top-6 w-6 h-px bg-muted" />
+      )}
+
+      <div
+        className={cn(
+          'relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-300',
+          isCompleted
+            ? 'border-success bg-success/10'
+            : isLocked
+              ? 'border-border bg-muted/50 opacity-60'
+              : 'border-border bg-card hover:border-brand hover:shadow-md'
+        )}
+        onClick={() => !isLocked && onSelect(node)}
+      >
+        <button
+          onClick={(e) => !isLocked && onToggle(node.id, e)}
+          className={cn(
+            'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
+            isCompleted
+              ? 'bg-success text-brand-foreground'
+              : isLocked
+                ? 'bg-muted text-muted-foreground'
+                : 'bg-brand-muted text-brand hover:bg-brand/30'
+          )}
+        >
+          {isCompleted ? (
+            <CheckCircle2 className="w-6 h-6" />
+          ) : isLocked ? (
+            <Lock className="w-5 h-5" />
+          ) : (
+            <Circle className="w-6 h-6" />
+          )}
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h4 className={cn('font-semibold text-lg', isCompleted ? 'text-success' : 'text-foreground')}>
+                {node.title}
+              </h4>
+              <p className="text-muted-foreground text-sm mt-1">{node.description}</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 mt-3">
+            <Badge
+              variant="secondary"
+              className={cn(
+                'text-xs',
+                node.difficulty === 'beginner' && 'bg-success/20 text-success',
+                node.difficulty === 'intermediate' && 'bg-warning/20 text-warning',
+                node.difficulty === 'advanced' && 'bg-destructive/10 text-destructive',
+              )}
+            >
+              {getDifficultyLabel(node.difficulty)}
+            </Badge>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
+              {node.estimatedHours} jam
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <BookOpen className="w-3.5 h-3.5" />
+              {node.resources.length} sumber
+            </div>
+            {hasChildren && (
+              <Badge variant="outline" className="text-xs">
+                {node.children?.length} sub-topik
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {hasChildren && (
+        <div className="relative mt-4">
+          <div className="absolute left-5 top-0 bottom-0 w-px bg-muted" />
+          {node.children?.map((child) => (
+            <RoadmapNodeComponent
+              key={child.id}
+              node={child}
+              level={level + 1}
+              completedNodes={completedNodes}
+              onToggle={onToggle}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SkillRoadmap() {
   const [selectedCategory, setSelectedCategory] = useState('frontend');
   const [selectedNode, setSelectedNode] = useState<SimpleRoadmapNode | null>(null);
@@ -375,123 +511,6 @@ export function SkillRoadmap() {
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   };
 
-  const getResourceIcon = (type: Resource['type']) => {
-    switch (type) {
-      case 'video': return Video;
-      case 'article': return FileText;
-      case 'course': return BookOpen;
-      case 'book': return BookOpen;
-      case 'practice': return Target;
-      default: return ExternalLink;
-    }
-  };
-
-  const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'Pemula';
-      case 'intermediate': return 'Menengah';
-      case 'advanced': return 'Lanjutan';
-      default: return difficulty;
-    }
-  };
-
-  const RoadmapNodeComponent = ({ node, level = 0 }: { node: SimpleRoadmapNode; level?: number }) => {
-    const isCompleted = completedNodes.has(node.id);
-    const hasChildren = node.children && node.children.length > 0;
-    const isLocked = node.prerequisites.length > 0 && !node.prerequisites.every(prereq => completedNodes.has(prereq));
-
-    return (
-      <div className={cn('relative', level > 0 && 'ml-8 mt-4')}>
-        {level > 0 && (
-          <div className="absolute -left-6 top-6 w-6 h-px bg-muted" />
-        )}
-        
-        <div 
-          className={cn(
-            'relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-300',
-            isCompleted
-              ? 'border-success bg-success/10'
-              : isLocked
-                ? 'border-border bg-muted/50 opacity-60'
-                : 'border-border bg-card hover:border-brand hover:shadow-md'
-          )}
-          onClick={() => !isLocked && setSelectedNode(node)}
-        >
-          <button
-            onClick={(e) => !isLocked && toggleNodeCompletion(node.id, e)}
-            className={cn(
-              'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
-              isCompleted 
-                ? 'bg-success text-brand-foreground' 
-                : isLocked
-                  ? 'bg-muted text-muted-foreground'
-                  : 'bg-brand-muted text-brand hover:bg-brand/30'
-            )}
-          >
-            {isCompleted ? (
-              <CheckCircle2 className="w-6 h-6" />
-            ) : isLocked ? (
-              <Lock className="w-5 h-5" />
-            ) : (
-              <Circle className="w-6 h-6" />
-            )}
-          </button>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h4 className={cn(
-                  'font-semibold text-lg',
-                  isCompleted ? 'text-success' : 'text-foreground'
-                )}>
-                  {node.title}
-                </h4>
-                <p className="text-muted-foreground text-sm mt-1">{node.description}</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 mt-3">
-              <Badge 
-                variant="secondary" 
-                className={cn(
-                  'text-xs',
-                  node.difficulty === 'beginner' && 'bg-success/20 text-success',
-                  node.difficulty === 'intermediate' && 'bg-warning/20 text-warning',
-                  node.difficulty === 'advanced' && 'bg-destructive/10 text-destructive',
-                )}
-              >
-                {getDifficultyLabel(node.difficulty)}
-              </Badge>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="w-3.5 h-3.5" />
-                {node.estimatedHours} jam
-              </div>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <BookOpen className="w-3.5 h-3.5" />
-                {node.resources.length} sumber
-              </div>
-              {hasChildren && (
-                <Badge variant="outline" className="text-xs">
-                  {node.children?.length} sub-topik
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {hasChildren && (
-          <div className="relative mt-4">
-            <div className="absolute left-5 top-0 bottom-0 w-px bg-muted" />
-            {node.children?.map((child) => (
-              <RoadmapNodeComponent key={child.id} node={child} level={level + 1} />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const progress = calculateProgress(roadmapData);
   const activeCategories = indonesianRoadmapCategories.filter(c => c.isActive);
 
@@ -567,7 +586,13 @@ export function SkillRoadmap() {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {roadmapData.map((node) => (
-                  <RoadmapNodeComponent key={node.id} node={node} />
+                  <RoadmapNodeComponent
+                    key={node.id}
+                    node={node}
+                    completedNodes={completedNodes}
+                    onToggle={toggleNodeCompletion}
+                    onSelect={setSelectedNode}
+                  />
                 ))}
               </div>
             </CardContent>
