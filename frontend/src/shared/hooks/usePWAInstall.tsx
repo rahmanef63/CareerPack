@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { registerServiceWorker, type BeforeInstallPromptEvent } from "../lib/pwa";
+import { useCallback, useEffect, useReducer } from "react";
+import {
+  getPWAInstallState,
+  subscribePWAInstall,
+  registerServiceWorker,
+} from "../lib/pwa";
 
 interface UsePWAInstallReturn {
   /** True when the browser has fired `beforeinstallprompt` and not yet installed. */
@@ -13,51 +17,31 @@ interface UsePWAInstallReturn {
 }
 
 /**
- * Registers the service worker on mount and exposes an install-prompt
- * trigger. The browser fires `beforeinstallprompt` when it decides the
- * PWA criteria are met (manifest, HTTPS, user engagement, etc).
+ * Reads from the module-level PWA singleton — registers no additional
+ * `beforeinstallprompt` listeners. Safe to call from many components at once.
  */
 export function usePWAInstall(): UsePWAInstallReturn {
-  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  // Re-render whenever the singleton state changes
+  const [, tick] = useReducer((n: number) => n + 1, 0);
 
   useEffect(() => {
     registerServiceWorker();
-
-    const onBeforeInstall = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault();
-      setDeferred(e);
-    };
-    const onInstalled = () => {
-      setIsInstalled(true);
-      setDeferred(null);
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    window.addEventListener("appinstalled", onInstalled);
-
-    // Already installed (standalone display mode)
-    if (window.matchMedia?.("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
-    }
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
+    return subscribePWAInstall(tick);
   }, []);
 
+  const { deferred, installed } = getPWAInstallState();
+
   const install = useCallback(async () => {
-    if (!deferred) return "unavailable" as const;
-    await deferred.prompt();
-    const choice = await deferred.userChoice;
-    setDeferred(null);
+    const { deferred: d } = getPWAInstallState();
+    if (!d) return "unavailable" as const;
+    await d.prompt();
+    const choice = await d.userChoice;
     return choice.outcome;
-  }, [deferred]);
+  }, []);
 
   return {
-    canInstall: !!deferred && !isInstalled,
+    canInstall: !!deferred && !installed,
     install,
-    isInstalled,
+    isInstalled: installed,
   };
 }
