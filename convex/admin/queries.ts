@@ -441,6 +441,15 @@ export const listUsersWithProfiles = query({
   },
 });
 
+export const listAllTemplates = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const all = await ctx.db.query("roadmapTemplates").collect();
+    return all.sort((a, b) => a.order - b.order);
+  },
+});
+
 export const listAllRoadmaps = query({
   args: {},
   handler: async (ctx) => {

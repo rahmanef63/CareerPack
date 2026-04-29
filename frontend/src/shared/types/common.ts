@@ -29,7 +29,7 @@ export type DocumentSubcategory = 'identity' | 'education' | 'professional' | 'f
 export type InterviewCategory = 'behavioral' | 'technical' | 'situational' | 'company-specific';
 
 // Resource types
-export type ResourceType = 'video' | 'article' | 'course' | 'book' | 'practice';
+export type ResourceType = 'video' | 'article' | 'course' | 'book' | 'practice' | 'documentation' | 'other';
 
 // Chat roles
 export type ChatRole = 'user' | 'assistant' | 'system';

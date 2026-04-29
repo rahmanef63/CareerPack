@@ -328,3 +328,134 @@ export const adminRemoveSkill = mutation({
     });
   },
 });
+
+// ---- Roadmap Template admin CRUD ----
+
+const templateNodeValidator = v.object({
+  id: v.string(),
+  title: v.string(),
+  description: v.string(),
+  difficulty: v.string(),
+  estimatedHours: v.number(),
+  prerequisites: v.array(v.string()),
+  parentId: v.optional(v.string()),
+  category: v.optional(v.string()),
+  resources: v.array(v.object({
+    id: v.string(),
+    title: v.string(),
+    type: v.string(),
+    url: v.string(),
+    free: v.boolean(),
+  })),
+});
+
+export const adminUpsertTemplate = mutation({
+  args: {
+    id: v.optional(v.id("roadmapTemplates")),
+    title: v.string(),
+    slug: v.string(),
+    domain: v.string(),
+    icon: v.string(),
+    color: v.string(),
+    description: v.string(),
+    tags: v.array(v.string()),
+    nodes: v.array(templateNodeValidator),
+    isPublic: v.boolean(),
+    isSystem: v.boolean(),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const slug = args.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
+    if (!slug || slug.length > 80) throw new Error("Slug 1-80 karakter huruf kecil/angka/tanda hubung");
+    const title = args.title.trim();
+    if (!title || title.length > 120) throw new Error("Judul 1-120 karakter");
+    const VALID_DOMAINS = new Set(["tech", "business", "creative", "education", "health", "finance", "hr", "operations", "government", "social", "hospitality"]);
+    if (!VALID_DOMAINS.has(args.domain)) throw new Error("Domain tidak valid");
+    if (args.nodes.length > 200) throw new Error("Maksimal 200 node per template");
+
+    const payload = {
+      title,
+      slug,
+      domain: args.domain,
+      icon: args.icon.trim() || "BookOpen",
+      color: args.color.trim() || "bg-brand",
+      description: args.description.trim(),
+      tags: args.tags.map((t) => t.trim()).filter(Boolean).slice(0, 20),
+      nodes: args.nodes,
+      isPublic: args.isPublic,
+      isSystem: args.isSystem,
+      order: args.order,
+    };
+
+    if (args.id) {
+      const existing = await ctx.db.get(args.id);
+      if (!existing) throw new Error("Template tidak ditemukan");
+      await ctx.db.patch(args.id, payload);
+      return args.id;
+    }
+
+    // Check slug uniqueness
+    const dup = await ctx.db
+      .query("roadmapTemplates")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (dup) throw new Error(`Slug "${slug}" sudah dipakai`);
+
+    return ctx.db.insert("roadmapTemplates", payload);
+  },
+});
+
+export const adminDeleteTemplate = mutation({
+  args: { id: v.id("roadmapTemplates") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const tpl = await ctx.db.get(args.id);
+    if (!tpl) throw new Error("Template tidak ditemukan");
+    if (tpl.isSystem) throw new Error("Template sistem tidak bisa dihapus");
+    await ctx.db.delete(args.id);
+  },
+});
+
+export const adminToggleTemplatePublic = mutation({
+  args: { id: v.id("roadmapTemplates"), isPublic: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const tpl = await ctx.db.get(args.id);
+    if (!tpl) throw new Error("Template tidak ditemukan");
+    await ctx.db.patch(args.id, { isPublic: args.isPublic });
+  },
+});
+
+export const adminSeedDefaultTemplates = mutation({
+  args: { overwrite: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const { defaultRoadmapTemplates } = await import("../_seeds/roadmapTemplates");
+    let inserted = 0;
+    let skipped = 0;
+
+    for (const tpl of defaultRoadmapTemplates) {
+      const existing = await ctx.db
+        .query("roadmapTemplates")
+        .withIndex("by_slug", (q) => q.eq("slug", tpl.slug))
+        .first();
+
+      if (existing) {
+        if (args.overwrite) {
+          await ctx.db.patch(existing._id, { ...tpl, isSystem: true });
+          inserted++;
+        } else {
+          skipped++;
+        }
+        continue;
+      }
+
+      await ctx.db.insert("roadmapTemplates", { ...tpl, isSystem: true });
+      inserted++;
+    }
+
+    return { inserted, skipped };
+  },
+});

@@ -62,6 +62,7 @@ import type * as profile_mutations from "../profile/mutations.js";
 import type * as profile_queries from "../profile/queries.js";
 import type * as roadmap_mutations from "../roadmap/mutations.js";
 import type * as roadmap_queries from "../roadmap/queries.js";
+import type * as roadmap_templates from "../roadmap/templates.js";
 import type * as router from "../router.js";
 import type * as seed from "../seed.js";
 
@@ -126,6 +127,7 @@ declare const fullApi: ApiFromModules<{
   "profile/queries": typeof profile_queries;
   "roadmap/mutations": typeof roadmap_mutations;
   "roadmap/queries": typeof roadmap_queries;
+  "roadmap/templates": typeof roadmap_templates;
   router: typeof router;
   seed: typeof seed;
 }>;

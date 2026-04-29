@@ -43,6 +43,7 @@ function assertFiniteNonNeg(field: string, n: number, max: number): number {
 export const seedRoadmap = mutation({
   args: {
     careerPath: v.string(),
+    templateId: v.optional(v.id("roadmapTemplates")),
     skills: v.array(v.object({
       id: v.string(),
       name: v.string(),
@@ -121,7 +122,11 @@ export const seedRoadmap = mutation({
       });
       const done = merged.filter((s) => s.status === "completed").length;
       const progress = Math.round((done / merged.length) * 100);
-      await ctx.db.patch(existing._id, { skills: merged, progress });
+      await ctx.db.patch(existing._id, {
+        skills: merged,
+        progress,
+        ...(args.templateId !== undefined ? { templateId: args.templateId } : {}),
+      });
       return existing._id;
     }
 
@@ -132,6 +137,7 @@ export const seedRoadmap = mutation({
     return await ctx.db.insert("skillRoadmaps", {
       userId,
       careerPath,
+      templateId: args.templateId,
       skills: sanitized,
       progress: 0,
     });
