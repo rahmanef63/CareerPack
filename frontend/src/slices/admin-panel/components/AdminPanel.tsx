@@ -39,6 +39,7 @@ import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { StatCard } from '@/shared/components/stats/StatCard';
 import { formatFileSize as formatBytes } from "@/shared/lib/formatFileSize";
 import { UsersTable } from "./UsersTable";
+import { RoadmapPanel } from "./RoadmapPanel";
 import { AuditLogPanel } from "./AuditLogPanel";
 import { FeedbackPanel } from "./FeedbackPanel";
 import { ErrorLogsPanel } from "./ErrorLogsPanel";
@@ -296,6 +297,8 @@ export function AdminPanel() {
        *  Available to every role-admin (not just super-admin); the
        *  underlying query gates with `requireAdmin`. */}
       <UsersTable />
+
+      <RoadmapPanel />
 
       <AuditLogPanel />
       <FeedbackPanel />

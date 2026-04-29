@@ -440,3 +440,27 @@ export const listUsersWithProfiles = query({
     });
   },
 });
+
+export const listAllRoadmaps = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const roadmaps = await ctx.db.query("skillRoadmaps").order("desc").collect();
+    const users = await ctx.db.query("users").collect();
+    const emailMap = new Map(
+      users.map((u) => [String(u._id), (u as { email?: string }).email ?? ""]),
+    );
+
+    return roadmaps.map((r) => ({
+      _id: r._id,
+      userId: r.userId,
+      userEmail: emailMap.get(String(r.userId)) ?? "",
+      careerPath: r.careerPath,
+      skillsCount: r.skills.length,
+      progress: r.progress,
+      createdAt: r._creationTime,
+      skills: r.skills,
+    }));
+  },
+});

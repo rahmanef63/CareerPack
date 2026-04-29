@@ -204,3 +204,127 @@ export const bulkDeleteUsers = mutation({
     return { ok: true as const, deleted };
   },
 });
+
+// ---- Roadmap admin CRUD ----
+
+const LEVEL_WL = new Set(["beginner", "intermediate", "advanced"]);
+const STATUS_WL = new Set(["not-started", "in-progress", "completed"]);
+const RES_TYPE_WL = new Set([
+  "course", "book", "article", "video", "practice", "documentation", "other",
+]);
+
+function recalcProgress(skills: Array<{ status: string }>): number {
+  if (!skills.length) return 0;
+  const done = skills.filter((s) => s.status === "completed").length;
+  return Math.round((done / skills.length) * 100);
+}
+
+export const adminDeleteRoadmap = mutation({
+  args: { roadmapId: v.id("skillRoadmaps") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+    await ctx.db.delete(args.roadmapId);
+  },
+});
+
+export const adminUpdateCareerPath = mutation({
+  args: { roadmapId: v.id("skillRoadmaps"), careerPath: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const cp = args.careerPath.trim();
+    if (!cp || cp.length > 100) throw new Error("Career path 1-100 karakter");
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+    await ctx.db.patch(args.roadmapId, { careerPath: cp });
+  },
+});
+
+export const adminUpsertSkill = mutation({
+  args: {
+    roadmapId: v.id("skillRoadmaps"),
+    skill: v.object({
+      id: v.string(),
+      name: v.string(),
+      category: v.string(),
+      level: v.string(),
+      priority: v.number(),
+      estimatedHours: v.number(),
+      prerequisites: v.array(v.string()),
+      status: v.string(),
+      resources: v.array(v.object({
+        type: v.string(),
+        title: v.string(),
+        url: v.string(),
+        completed: v.boolean(),
+      })),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const { skill } = args;
+
+    const name = skill.name.trim();
+    if (!name || name.length > 200) throw new Error("Nama skill 1-200 karakter");
+    const category = skill.category.trim();
+    if (!category || category.length > 60) throw new Error("Kategori 1-60 karakter");
+    if (!LEVEL_WL.has(skill.level)) throw new Error("Level tidak valid");
+    if (!STATUS_WL.has(skill.status)) throw new Error("Status tidak valid");
+    if (!Number.isFinite(skill.estimatedHours) || skill.estimatedHours < 0) {
+      throw new Error("Estimasi jam harus >= 0");
+    }
+    if (skill.resources.length > 20) throw new Error("Resources maksimal 20");
+    for (const r of skill.resources) {
+      if (!RES_TYPE_WL.has(r.type)) throw new Error("Tipe resource tidak valid");
+    }
+
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+
+    const now = Date.now();
+    const normalized = { ...skill, name, category };
+    const existing = roadmap.skills.find((s) => s.id === skill.id);
+
+    let updatedSkills;
+    if (existing) {
+      updatedSkills = roadmap.skills.map((s) => {
+        if (s.id !== skill.id) return s;
+        return {
+          ...normalized,
+          completedAt:
+            skill.status === "completed"
+              ? (s.completedAt ?? now)
+              : undefined,
+        };
+      });
+    } else {
+      updatedSkills = [
+        ...roadmap.skills,
+        {
+          ...normalized,
+          completedAt: skill.status === "completed" ? now : undefined,
+        },
+      ];
+    }
+
+    await ctx.db.patch(args.roadmapId, {
+      skills: updatedSkills,
+      progress: recalcProgress(updatedSkills),
+    });
+  },
+});
+
+export const adminRemoveSkill = mutation({
+  args: { roadmapId: v.id("skillRoadmaps"), skillId: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+    const updated = roadmap.skills.filter((s) => s.id !== args.skillId);
+    await ctx.db.patch(args.roadmapId, {
+      skills: updated,
+      progress: recalcProgress(updated),
+    });
+  },
+});

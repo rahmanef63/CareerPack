@@ -24,6 +24,9 @@ const STALE_PATTERNS = [
   /cannot read prop(erties|erty) of undefined.*(reading\s+'(query|mutation|action)')/i,
   /no such function/i,
   /unknown function/i,
+  // Next.js chunk replaced after deploy — hash-named file returns 404
+  /chunkloaderror/i,
+  /loading chunk \d+ failed/i,
 ];
 
 export function isStaleBundleError(err: unknown): boolean {
