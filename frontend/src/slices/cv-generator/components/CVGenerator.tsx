@@ -56,6 +56,67 @@ import { ResponsiveCarousel } from '@/shared/components/ui/responsive-carousel';
 import { cn } from '@/shared/lib/utils';
 import { notify } from '@/shared/lib/notify';
 
+interface SectionCardProps {
+  title: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  sectionId: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  onAdd?: () => void;
+  addLabel?: string;
+}
+
+function SectionCard({ title, icon: Icon, children, sectionId: _sectionId, isOpen, onToggle, onAdd, addLabel }: SectionCardProps) {
+  const handleHeaderClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
+      return;
+    }
+    onToggle();
+  }, [onToggle]);
+
+  return (
+    <Card className="border-border overflow-hidden">
+      <CardHeader
+        className="bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+        onClick={handleHeaderClick}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-brand-muted flex items-center justify-center">
+              <Icon className="w-5 h-5 text-brand" />
+            </div>
+            <CardTitle className="text-lg">{title}</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            {onAdd && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAdd();
+                }}
+                className="text-brand hover:text-brand hover:bg-brand-muted"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                {addLabel}
+              </Button>
+            )}
+            {isOpen ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+          </div>
+        </div>
+      </CardHeader>
+      {isOpen && (
+        <CardContent className="pt-6">
+          {children}
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
 export function CVGenerator() {
   const { cvData: remoteCVData, saveCV, isLoading: isCVLoading, activeCVId } = useCV();
   const [cvData, setCvData] = useState<CVData>(initialCVData);
@@ -74,6 +135,9 @@ export function CVGenerator() {
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>('personal');
+  const toggleSection = useCallback((id: string) => {
+    setActiveSection((prev) => (prev === id ? null : id));
+  }, []);
   const cvPreviewRef = useRef<HTMLDivElement>(null);
 
   // Template swipe state — swipeDx tracks drag delta in px, reset on
@@ -515,73 +579,6 @@ export function CVGenerator() {
     void exportCVToPDF();
   };
 
-  const SectionCard = ({
-    title,
-    icon: Icon,
-    children,
-    sectionId,
-    onAdd,
-    addLabel
-  }: {
-    title: string;
-    icon: React.ElementType;
-    children: React.ReactNode;
-    sectionId: string;
-    onAdd?: () => void;
-    addLabel?: string;
-  }) => {
-    const isOpen = activeSection === sectionId;
-
-    const handleHeaderClick = useCallback((e: React.MouseEvent) => {
-      // Prevent toggling if clicking on interactive elements
-      const target = e.target as HTMLElement;
-      if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
-        return;
-      }
-      setActiveSection(isOpen ? null : sectionId);
-    }, [isOpen, sectionId]);
-
-    return (
-      <Card className="border-border overflow-hidden">
-        <CardHeader
-          className="bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
-          onClick={handleHeaderClick}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-brand-muted flex items-center justify-center">
-                <Icon className="w-5 h-5 text-brand" />
-              </div>
-              <CardTitle className="text-lg">{title}</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              {onAdd && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAdd();
-                  }}
-                  className="text-brand hover:text-brand hover:bg-brand-muted"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  {addLabel}
-                </Button>
-              )}
-              {isOpen ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
-            </div>
-          </div>
-        </CardHeader>
-        {isOpen && (
-          <CardContent className="pt-6">
-            {children}
-          </CardContent>
-        )}
-      </Card>
-    );
-  };
-
   return (
     <PageContainer size="lg">
       {/* Header — mobile-friendly, with compact format toggle inline
@@ -789,6 +786,8 @@ export function CVGenerator() {
                 title="Tampilan & Template"
                 icon={Sparkles}
                 sectionId="display"
+                isOpen={activeSection === 'display'}
+                onToggle={() => toggleSection('display')}
               >
                 <div className="space-y-5">
                   <div>
@@ -856,6 +855,8 @@ export function CVGenerator() {
                 title="Pengalaman Kerja"
                 icon={Briefcase}
                 sectionId="experience"
+                isOpen={activeSection === 'experience'}
+                onToggle={() => toggleSection('experience')}
                 onAdd={addExperience}
                 addLabel="Tambah Pekerjaan"
               >
@@ -944,6 +945,8 @@ export function CVGenerator() {
                 title="Pendidikan"
                 icon={GraduationCap}
                 sectionId="education"
+                isOpen={activeSection === 'education'}
+                onToggle={() => toggleSection('education')}
                 onAdd={addEducation}
                 addLabel="Tambah Pendidikan"
               >
@@ -1024,6 +1027,8 @@ export function CVGenerator() {
                 title="Skill"
                 icon={Sparkles}
                 sectionId="skills"
+                isOpen={activeSection === 'skills'}
+                onToggle={() => toggleSection('skills')}
                 onAdd={addSkill}
                 addLabel="Tambah Skill"
               >
@@ -1093,6 +1098,8 @@ export function CVGenerator() {
                 title="Sertifikasi"
                 icon={Award}
                 sectionId="certifications"
+                isOpen={activeSection === 'certifications'}
+                onToggle={() => toggleSection('certifications')}
                 onAdd={addCertification}
                 addLabel="Tambah Sertifikasi"
               >
@@ -1157,6 +1164,8 @@ export function CVGenerator() {
                 title="Proyek"
                 icon={Folder}
                 sectionId="projects"
+                isOpen={activeSection === 'projects'}
+                onToggle={() => toggleSection('projects')}
                 onAdd={addProject}
                 addLabel="Tambah Proyek"
               >

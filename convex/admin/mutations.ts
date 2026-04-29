@@ -2,6 +2,7 @@ import { mutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "../_shared/auth";
 import type { Id } from "../_generated/dataModel";
+import { defaultRoadmapTemplates } from "../_seeds/roadmapTemplates";
 
 /**
  * Cascade-delete every record owned by `userId`, then the user record
@@ -432,7 +433,6 @@ export const adminSeedDefaultTemplates = mutation({
   args: { overwrite: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const { defaultRoadmapTemplates } = await import("../_seeds/roadmapTemplates");
     let inserted = 0;
     let skipped = 0;
 

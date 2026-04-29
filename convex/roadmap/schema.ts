@@ -56,6 +56,8 @@ export const roadmapTables = {
     isPublic: v.boolean(),
     isSystem: v.boolean(),
     order: v.number(),
+    authorId: v.optional(v.id("users")),
+    authorName: v.optional(v.string()),
   })
     .index("by_slug", ["slug"])
     .index("by_domain", ["domain"])

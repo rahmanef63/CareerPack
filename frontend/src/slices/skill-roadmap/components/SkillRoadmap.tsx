@@ -58,6 +58,12 @@ const DOMAIN_LABELS: Record<string, string> = {
   hospitality: "Hospitality",
 };
 
+// ---- Fallback categories (shown when DB has no templates yet) ----
+const FALLBACK_CATEGORIES = [
+  { id: 'frontend', name: 'Frontend Dev', icon: 'Layout', color: 'bg-blue-500', description: 'HTML, CSS, JavaScript, React', domain: 'tech', nodeCount: 5, totalHours: 170, isSystem: true as const, authorName: null as string | null },
+  { id: 'backend', name: 'Backend Dev', icon: 'Server', color: 'bg-green-500', description: 'Node.js, Express, REST API', domain: 'tech', nodeCount: 4, totalHours: 110, isSystem: true as const, authorName: null as string | null },
+];
+
 // ---- Types ----
 
 interface SimpleRoadmapNode {
@@ -333,11 +339,16 @@ export function SkillRoadmap() {
     return generateFallbackNodes(selectedCategory);
   }, [dbTemplate, selectedCategory]);
 
-  // Seed on category change (incl. first visit if no roadmap)
+  // Seed on category change. Wait for DB template query to resolve (undefined = loading)
+  // before seeding so we never seed with stale fallback data then re-seed with real data.
   useEffect(() => {
     if (!hydrated.current) return;
+    if (dbTemplate === undefined) return; // still loading — avoid double-seed
     if (roadmap && roadmap.careerPath === selectedCategory) return;
-    const nodes = roadmapData;
+
+    const nodes = dbTemplate
+      ? buildTreeFromNodes(dbTemplate.nodes)
+      : generateFallbackNodes(selectedCategory);
     if (nodes.length === 0) return;
 
     function flattenNodes(list: SimpleRoadmapNode[]): SimpleRoadmapNode[] {
@@ -369,7 +380,7 @@ export function SkillRoadmap() {
     if (!roadmap || roadmap.careerPath !== selectedCategory) {
       setCompletedNodes(new Set());
     }
-  }, [selectedCategory, roadmap, roadmapData, dbTemplate, seedRoadmap]);
+  }, [selectedCategory, roadmap, dbTemplate, seedRoadmap]);
 
   const toggleNodeCompletion = (nodeId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -397,15 +408,29 @@ export function SkillRoadmap() {
       });
   };
 
+  // Map node ID → title for prerequisite display in the detail dialog
+  const nodeIdToTitle = useMemo(() => {
+    const map = new Map<string, string>();
+    function collect(nodes: SimpleRoadmapNode[]) {
+      for (const n of nodes) {
+        map.set(n.id, n.title);
+        if (n.children) collect(n.children);
+      }
+    }
+    collect(roadmapData);
+    return map;
+  }, [roadmapData]);
+
   function countNodes(nodes: SimpleRoadmapNode[]): number {
     return nodes.reduce((sum, n) => sum + 1 + countNodes(n.children ?? []), 0);
   }
   const totalNodes = countNodes(roadmapData);
   const progress = totalNodes > 0 ? Math.round((completedNodes.size / totalNodes) * 100) : 0;
 
-  // Category list from DB (or empty while loading)
+  // Category list from DB; fall back to hardcoded when DB is empty
   const allCategories = useMemo(() => {
-    if (!dbTemplates) return [];
+    if (dbTemplates === undefined) return []; // still loading
+    if (dbTemplates.length === 0) return FALLBACK_CATEGORIES;
     return dbTemplates.map((t) => ({
       id: t.slug,
       name: t.title,
@@ -415,6 +440,8 @@ export function SkillRoadmap() {
       domain: t.domain,
       nodeCount: t.nodeCount,
       totalHours: t.totalHours,
+      isSystem: t.isSystem,
+      authorName: t.authorName ?? null,
     }));
   }, [dbTemplates]);
 
@@ -541,6 +568,11 @@ export function SkillRoadmap() {
                   {cat.nodeCount > 0 && (
                     <span className="text-[10px] text-muted-foreground">{cat.nodeCount} topik</span>
                   )}
+                  {!cat.isSystem && cat.authorName && (
+                    <span className="text-[9px] bg-muted text-muted-foreground rounded px-1 py-0.5 leading-none truncate max-w-full">
+                      by {cat.authorName}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -570,7 +602,7 @@ export function SkillRoadmap() {
               <Progress value={progress} className="mt-4 h-2" />
             </CardHeader>
             <CardContent className="pt-6">
-              {dbTemplate === undefined && roadmap !== undefined ? (
+              {dbTemplate === undefined ? (
                 <div className="space-y-4">
                   {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
                 </div>
@@ -769,7 +801,7 @@ export function SkillRoadmap() {
                           variant="secondary"
                           className={cn(completedNodes.has(prereq) && 'bg-success/20 text-success')}
                         >
-                          {prereq}
+                          {nodeIdToTitle.get(prereq) ?? prereq}
                         </Badge>
                       ))}
                     </div>

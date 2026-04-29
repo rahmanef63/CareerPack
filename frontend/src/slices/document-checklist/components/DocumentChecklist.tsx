@@ -42,6 +42,80 @@ const categoryIcons: Record<string, React.ElementType> = {
   travel: Plane,
 };
 
+interface ChecklistItemCardProps {
+  item: ChecklistItem;
+  onToggle: (id: string) => void;
+  onSelect: (item: ChecklistItem) => void;
+}
+
+function ChecklistItemCard({ item, onToggle, onSelect }: ChecklistItemCardProps) {
+  const Icon = categoryIcons[item.subcategory] || FileText;
+
+  return (
+    <div
+      className={cn(
+        'group flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer',
+        item.completed
+          ? 'border-success/30 bg-success/10'
+          : item.required
+            ? 'border-border bg-card hover:border-brand'
+            : 'border-border bg-muted/50/50 hover:border-border'
+      )}
+      onClick={() => onSelect(item)}
+    >
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle(item.id);
+        }}
+        className={cn(
+          'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200',
+          item.completed
+            ? 'bg-success text-brand-foreground'
+            : 'bg-muted text-muted-foreground hover:bg-brand-muted hover:text-brand'
+        )}
+      >
+        {item.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+      </button>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h4 className={cn(
+              'font-medium',
+              item.completed ? 'text-success line-through' : 'text-foreground'
+            )}>
+              {item.title}
+            </h4>
+            <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {item.required && (
+              <Badge variant="secondary" className="bg-destructive/10 text-destructive text-xs">
+                Wajib
+              </Badge>
+            )}
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 mt-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Icon className="w-3.5 h-3.5" />
+            {indonesianCategoryLabels[item.subcategory]}
+          </div>
+          {item.dueDate && (
+            <div className="flex items-center gap-1.5 text-xs text-warning">
+              <Calendar className="w-3.5 h-3.5" />
+              Batas: {item.dueDate}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DocumentChecklist() {
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
@@ -190,74 +264,6 @@ export function DocumentChecklist() {
   const localProgress = getProgress('local');
   const internationalProgress = getProgress('international');
 
-  const ChecklistItemCard = ({ item }: { item: ChecklistItem }) => {
-    const Icon = categoryIcons[item.subcategory] || FileText;
-    
-    return (
-      <div 
-        className={cn(
-          'group flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer',
-          item.completed 
-            ? 'border-success/30 bg-success/10' 
-            : item.required 
-              ? 'border-border bg-card hover:border-brand'
-              : 'border-border bg-muted/50/50 hover:border-border'
-        )}
-        onClick={() => setSelectedItem(item)}
-      >
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleItem(item.id);
-          }}
-          className={cn(
-            'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200',
-            item.completed 
-              ? 'bg-success text-brand-foreground' 
-              : 'bg-muted text-muted-foreground hover:bg-brand-muted hover:text-brand'
-          )}
-        >
-          {item.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-        </button>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h4 className={cn(
-                'font-medium',
-                item.completed ? 'text-success line-through' : 'text-foreground'
-              )}>
-                {item.title}
-              </h4>
-              <p className="text-sm text-muted-foreground mt-0.5">{item.description}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {item.required && (
-                <Badge variant="secondary" className="bg-destructive/10 text-destructive text-xs">
-                  Wajib
-                </Badge>
-              )}
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 mt-3">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Icon className="w-3.5 h-3.5" />
-              {indonesianCategoryLabels[item.subcategory]}
-            </div>
-            {item.dueDate && (
-              <div className="flex items-center gap-1.5 text-xs text-warning">
-                <Calendar className="w-3.5 h-3.5" />
-                Batas: {item.dueDate}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <PageContainer size="lg">
       <ResponsivePageHeader
@@ -400,7 +406,7 @@ export function DocumentChecklist() {
                   <ScrollArea className="h-[70vh] max-h-[720px] pr-2">
                     <div className="space-y-3">
                       {getFilteredItems('local').map((item) => (
-                        <ChecklistItemCard key={item.id} item={item} />
+                        <ChecklistItemCard key={item.id} item={item} onToggle={toggleItem} onSelect={setSelectedItem} />
                       ))}
                     </div>
                   </ScrollArea>
@@ -554,7 +560,7 @@ export function DocumentChecklist() {
                   <ScrollArea className="h-[70vh] max-h-[720px] pr-2">
                     <div className="space-y-3">
                       {getFilteredItems('international').map((item) => (
-                        <ChecklistItemCard key={item.id} item={item} />
+                        <ChecklistItemCard key={item.id} item={item} onToggle={toggleItem} onSelect={setSelectedItem} />
                       ))}
                     </div>
                   </ScrollArea>
