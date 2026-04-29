@@ -31,18 +31,20 @@ const STALE_PATTERNS = [
 
 export function isStaleBundleError(err: unknown): boolean {
   if (!err) return false;
-  const msg =
-    err instanceof Error
-      ? `${err.message}\n${err.stack ?? ""}`
-      : typeof err === "string"
-        ? err
-        : (() => {
-            try {
-              return JSON.stringify(err);
-            } catch {
-              return "";
-            }
-          })();
+  let msg: string;
+  if (err instanceof Error) {
+    // Include name (e.g. "ChunkLoadError") — production bundles minify class
+    // names in the stack but preserve them in err.name.
+    msg = `${err.name}: ${err.message}\n${err.stack ?? ""}`;
+  } else if (typeof err === "string") {
+    msg = err;
+  } else {
+    try {
+      msg = JSON.stringify(err);
+    } catch {
+      msg = "";
+    }
+  }
   return STALE_PATTERNS.some((p) => p.test(msg));
 }
 

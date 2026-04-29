@@ -66,6 +66,15 @@ export function ExtensionErrorFilter() {
       }
       if (isStaleBundleError(reason)) {
         e.preventDefault();
+        try {
+          if (!sessionStorage.getItem("_car_chunk_reload")) {
+            sessionStorage.setItem("_car_chunk_reload", "1");
+            void forceFreshReload();
+            return;
+          }
+        } catch {
+          /* sessionStorage unavailable */
+        }
         triggerStaleNotice();
         return;
       }
@@ -76,6 +85,16 @@ export function ExtensionErrorFilter() {
     const onError = (e: ErrorEvent) => {
       if (isStaleBundleError(e.error ?? e.message)) {
         e.preventDefault();
+        // Auto-reload once silently; toast only if already reloaded once.
+        try {
+          if (!sessionStorage.getItem("_car_chunk_reload")) {
+            sessionStorage.setItem("_car_chunk_reload", "1");
+            void forceFreshReload();
+            return;
+          }
+        } catch {
+          /* sessionStorage unavailable */
+        }
         triggerStaleNotice();
         return;
       }

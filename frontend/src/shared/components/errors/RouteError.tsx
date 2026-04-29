@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { isStaleBundleError } from "@/shared/lib/staleBundle";
+import { isStaleBundleError, forceFreshReload } from "@/shared/lib/staleBundle";
 import { StaleBundleBanner } from "./StaleBundleBanner";
 
 interface RouteErrorProps {
@@ -33,6 +33,9 @@ interface RouteErrorProps {
  * recovery flow instead of the generic reset path. This protects
  * existing PWA installs after breaking deploys.
  */
+// Session key guards against reload loops: auto-reload fires at most once.
+const AUTO_RELOAD_KEY = "_car_chunk_reload";
+
 export function RouteError({
   error,
   reset,
@@ -41,12 +44,27 @@ export function RouteError({
   hideHomeLink = false,
   segment,
 }: RouteErrorProps) {
+  const isStale = isStaleBundleError(error);
+
   useEffect(() => {
     const tag = segment ? `[RouteError:${segment}]` : "[RouteError]";
     console.error(tag, error);
   }, [error, segment]);
 
-  if (isStaleBundleError(error)) {
+  // Auto-reload once on chunk errors — user shouldn't have to click anything.
+  useEffect(() => {
+    if (!isStale) return;
+    try {
+      if (!sessionStorage.getItem(AUTO_RELOAD_KEY)) {
+        sessionStorage.setItem(AUTO_RELOAD_KEY, "1");
+        void forceFreshReload();
+      }
+    } catch {
+      /* sessionStorage unavailable (private mode, etc.) — fall through to banner */
+    }
+  }, [isStale]);
+
+  if (isStale) {
     return <StaleBundleBanner originalMessage={error.message} />;
   }
 
