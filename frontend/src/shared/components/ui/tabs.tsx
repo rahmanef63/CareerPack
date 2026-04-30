@@ -46,10 +46,15 @@ const VARIANT_LIST_CLASS: Record<TabsListVariant, string> = {
   // Note: no `items-center` on any variant — children should stretch to
   // fill the list height so the full list area (h-11 mobile / h-9 desktop
   // per TabsList) becomes the touch target, not just the trigger content.
+  //
+  // All variants are `flex w-full justify-evenly` so triggers spread to
+  // fill the container when they fit. When the total trigger width
+  // exceeds the container (mobile, many triggers), `overflow-x-auto`
+  // turns it into a horizontal scroll row — `flex-shrink-0` on the
+  // trigger (in TabsTrigger below) keeps each trigger at its content
+  // width so text never gets squished.
   pills:
-    // Scroll-aware row; fits content, but if it overflows we scroll + hide
-    // native scrollbar for a clean mobile feel.
-    "inline-flex w-max min-w-full max-w-full gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
+    "flex w-full items-stretch justify-evenly gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   equal:
     // Grid fills container; each trigger = fr. Auto-cols-fr used when no
@@ -57,7 +62,7 @@ const VARIANT_LIST_CLASS: Record<TabsListVariant, string> = {
     "grid w-full gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
     "auto-cols-fr [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   segmented:
-    "inline-flex w-max min-w-full max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm " +
+    "flex w-full items-stretch justify-evenly gap-1 overflow-x-auto rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm " +
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
 }
 
@@ -88,7 +93,12 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all",
+      // `flex-shrink-0` keeps each trigger at its natural content width
+      // so when a `pills`/`segmented` row overflows the container, it
+      // scrolls horizontally instead of squishing the text. The `equal`
+      // variant overrides this via grid sizing — but flex-shrink is
+      // ignored on grid items, so it's safe as a default for all variants.
+      "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",

@@ -88,7 +88,7 @@ export function LibraryPicker({ open, onOpenChange, accept = "any", onPick }: Pr
           />
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto">
+        <div className="w-full">
           {files === undefined ? (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (

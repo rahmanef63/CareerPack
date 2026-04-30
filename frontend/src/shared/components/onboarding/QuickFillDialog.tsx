@@ -228,7 +228,7 @@ export function QuickFillDialog({
           />
         ) : (
           <Tabs value={step} onValueChange={(v) => setStep(v as Step)}>
-            <TabsList variant="pills" className="mt-2 flex-wrap">
+            <TabsList variant="pills" className="mt-2">
               <TabsTrigger value="prompt" className="gap-1.5">
                 <span className="font-semibold">1.</span> Salin Prompt
               </TabsTrigger>

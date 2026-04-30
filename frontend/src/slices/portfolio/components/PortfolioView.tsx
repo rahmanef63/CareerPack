@@ -259,7 +259,7 @@ export function PortfolioView() {
 
       {/* Filter tabs + grid */}
       <Tabs value={filter} onValueChange={(v) => setFilter(v as PortfolioFilter)}>
-        <TabsList variant="pills" className="flex-wrap">
+        <TabsList variant="pills">
           <TabsTrigger value="all" className="gap-2">
             Semua
             <Badge variant="secondary" className="h-5 rounded-full px-1.5">

@@ -336,7 +336,7 @@ export function AdminPanel() {
        *  vertical scroll. Server still gates each query with
        *  `requireAdmin`; client tabs are pure UX. */}
       <Tabs defaultValue="users" className="w-full">
-        <TabsList variant="pills" className="flex-wrap">
+        <TabsList variant="pills">
           <TabsTrigger value="users">
             <UsersIcon className="w-3.5 h-3.5" />
             Pengguna

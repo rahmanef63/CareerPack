@@ -11,7 +11,6 @@ import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Badge } from "@/shared/components/ui/badge";
 import { Switch } from "@/shared/components/ui/switch";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { FileUpload } from "@/shared/components/files/FileUpload";
 import {
@@ -147,17 +146,21 @@ export function PortfolioForm({
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-            <TabsList variant="pills" className="flex-wrap">
+        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-3">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="w-full">
+            <TabsList variant="pills">
               <TabsTrigger value="basic">Dasar</TabsTrigger>
               <TabsTrigger value="media">Media{values.media.length > 0 && ` · ${values.media.length}`}</TabsTrigger>
               <TabsTrigger value="links">Tautan{values.links.length > 0 && ` · ${values.links.length}`}</TabsTrigger>
               <TabsTrigger value="detail">Detail</TabsTrigger>
             </TabsList>
 
-            <ScrollArea className="max-h-[60vh] pr-3">
-              <TabsContent value="basic" className="space-y-3 pt-3">
+            {/* No inner ScrollArea — `ResponsiveDialogContent` itself
+                scrolls (max-h on desktop, drawer wraps in overflow-y-auto
+                on mobile). A nested ScrollArea here used to clip the
+                Dasar tab content inside drawer mode. */}
+            <div className="w-full">
+              <TabsContent value="basic" className="w-full space-y-3 pt-3">
                 <CoverPreview values={values} />
 
                 <div className="space-y-2">
@@ -301,14 +304,14 @@ export function PortfolioForm({
                 </div>
               </TabsContent>
 
-              <TabsContent value="media" className="space-y-3 pt-3">
+              <TabsContent value="media" className="w-full space-y-3 pt-3">
                 <MediaEditor
                   media={values.media}
                   onChange={(media) => setValues((v) => ({ ...v, media }))}
                 />
               </TabsContent>
 
-              <TabsContent value="links" className="space-y-3 pt-3">
+              <TabsContent value="links" className="w-full space-y-3 pt-3">
                 <LinksEditor
                   links={values.links}
                   onChange={(links) => setValues((v) => ({ ...v, links }))}
@@ -324,7 +327,7 @@ export function PortfolioForm({
                 </div>
               </TabsContent>
 
-              <TabsContent value="detail" className="space-y-3 pt-3">
+              <TabsContent value="detail" className="w-full space-y-3 pt-3">
                 <div className="grid grid-cols-2 gap-3">
                   <FieldInput
                     label="Peran"
@@ -371,7 +374,7 @@ export function PortfolioForm({
                   onChange={(collaborators) => setValues((v) => ({ ...v, collaborators }))}
                 />
               </TabsContent>
-            </ScrollArea>
+            </div>
           </Tabs>
 
           <ResponsiveDialogFooter>

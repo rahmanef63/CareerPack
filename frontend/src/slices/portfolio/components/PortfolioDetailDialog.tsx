@@ -25,7 +25,6 @@ import {
 } from "@/shared/components/ui/responsive-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { cn } from "@/shared/lib/utils";
 import { formatMonthYear } from "@/shared/lib/formatDate";
 
@@ -82,8 +81,8 @@ export function PortfolioDetailDialog({
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 
-        <ScrollArea className="max-h-[60vh] pr-3">
-          <div className="space-y-4">
+        <div className="w-full">
+          <div className="w-full space-y-4">
             {/* Gallery / cover */}
             {hasGallery ? (
               <div className="relative">
@@ -263,7 +262,7 @@ export function PortfolioDetailDialog({
               )}
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         <ResponsiveDialogFooter className="flex-row justify-between gap-2 sm:flex-row">
           <div className="flex gap-1">

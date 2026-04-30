@@ -144,7 +144,17 @@ export function ResponsiveDialogContent({
   if (mode === "dialog") {
     return (
       <DialogContent
-        className={cn(SIZE_CLASSES[size], className)}
+        // `max-h-[90vh] overflow-y-auto` makes the desktop dialog
+        // behave like the mobile drawer (which already wraps children
+        // in an overflow-y-auto div) — long forms inside ResponsiveDialog
+        // never need their own inner ScrollArea anymore. Width forced
+        // to `w-full` so child sections that want to fill it (form rows,
+        // tab strips) actually get the full content area.
+        className={cn(
+          "flex max-h-[90vh] w-full flex-col gap-4 overflow-y-auto",
+          SIZE_CLASSES[size],
+          className,
+        )}
         {...props}
       >
         {children}
@@ -162,7 +172,9 @@ export function ResponsiveDialogContent({
       >
         <X className="h-4 w-4" />
       </DrawerClose>
-      <div className="overflow-y-auto px-4 pb-4">{children}</div>
+      <div className="flex w-full flex-col gap-4 overflow-y-auto px-4 pb-4">
+        {children}
+      </div>
     </DrawerContent>
   );
 }

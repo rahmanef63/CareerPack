@@ -27,7 +27,7 @@ export function DatabaseView() {
       </header>
 
       <Tabs defaultValue="cv" className="space-y-4">
-        <TabsList className="flex w-full overflow-x-auto sm:w-auto">
+        <TabsList variant="pills">
           <TabsTrigger value="cv">CV</TabsTrigger>
           <TabsTrigger value="portfolio">Portofolio</TabsTrigger>
           <TabsTrigger value="goals">Goals</TabsTrigger>
