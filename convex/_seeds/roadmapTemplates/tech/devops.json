@@ -1,0 +1,339 @@
+{
+  "title": "DevOps Engineer",
+  "slug": "devops",
+  "domain": "tech",
+  "icon": "Cloud",
+  "color": "bg-purple-500",
+  "description": "Kuasai infrastruktur, otomasi, dan pipeline CI/CD untuk mengoperasikan sistem software secara andal.",
+  "tags": [
+    "docker",
+    "kubernetes",
+    "ci-cd",
+    "linux",
+    "cloud"
+  ],
+  "order": 4,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "dops-1",
+      "title": "Linux & Command Line",
+      "description": "Kuasai dasar-dasar Linux: filesystem, shell scripting, proses manajemen, dan networking.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "dops-r1",
+          "title": "Linux Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/linux-dasar",
+          "free": true
+        },
+        {
+          "id": "dops-r2",
+          "title": "Linux Tutorial - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/linux-untuk-pemula/",
+          "free": true
+        },
+        {
+          "id": "dops-r3",
+          "title": "Linux Command Line - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dops-r4",
+          "title": "Linux Administration - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/linux-administration",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "dops-2",
+      "title": "Git & Branching Strategy",
+      "description": "Kelola kode sumber dengan Git: branching strategy GitFlow dan kolaborasi tim.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "dops-r5",
+          "title": "Git Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/git-github",
+          "free": true
+        },
+        {
+          "id": "dops-r6",
+          "title": "Git Tutorial - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/git-untuk-pemula/",
+          "free": true
+        },
+        {
+          "id": "dops-r7",
+          "title": "Pro Git Book",
+          "type": "book",
+          "url": "https://git-scm.com/book/id/v2",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dops-3",
+      "title": "Docker & Containerisasi",
+      "description": "Buat dan manage container dengan Docker: Dockerfile, volumes, networks, dan Docker Compose.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "dops-1"
+      ],
+      "parentId": "dops-1",
+      "category": "Kontainer",
+      "resources": [
+        {
+          "id": "dops-r8",
+          "title": "Docker - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/docker",
+          "free": true
+        },
+        {
+          "id": "dops-r9",
+          "title": "Docker Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "dops-r10",
+          "title": "Docker Documentation",
+          "type": "documentation",
+          "url": "https://docs.docker.com/get-started/",
+          "free": true
+        },
+        {
+          "id": "dops-r11",
+          "title": "Docker - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dops-4",
+      "title": "CI/CD dengan GitHub Actions",
+      "description": "Otomasi build, test, dan deploy pipeline menggunakan GitHub Actions.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dops-2",
+        "dops-3"
+      ],
+      "category": "CI/CD",
+      "resources": [
+        {
+          "id": "dops-r12",
+          "title": "GitHub Actions - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "dops-r13",
+          "title": "GitHub Actions Documentation",
+          "type": "documentation",
+          "url": "https://docs.github.com/en/actions",
+          "free": true
+        },
+        {
+          "id": "dops-r14",
+          "title": "CI/CD - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/cicd",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dops-5",
+      "title": "Kubernetes Dasar",
+      "description": "Orkestrasi container dengan Kubernetes: Pods, Deployments, Services, dan ConfigMaps.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "dops-3"
+      ],
+      "parentId": "dops-3",
+      "category": "Orkestrasi",
+      "resources": [
+        {
+          "id": "dops-r15",
+          "title": "Kubernetes Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "dops-r16",
+          "title": "Kubernetes Documentation",
+          "type": "documentation",
+          "url": "https://kubernetes.io/docs/home/",
+          "free": true
+        },
+        {
+          "id": "dops-r17",
+          "title": "Kubernetes for Developers - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/kubernetes-developers",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "dops-6",
+      "title": "Infrastructure as Code (Terraform)",
+      "description": "Kelola infrastruktur cloud dengan deklarasi kode menggunakan Terraform.",
+      "difficulty": "advanced",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "dops-5"
+      ],
+      "category": "IaC",
+      "resources": [
+        {
+          "id": "dops-r18",
+          "title": "Terraform Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "dops-r19",
+          "title": "Terraform Documentation",
+          "type": "documentation",
+          "url": "https://developer.hashicorp.com/terraform/docs",
+          "free": true
+        },
+        {
+          "id": "dops-r20",
+          "title": "IaC - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/infrastructure-as-code",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "dops-7",
+      "title": "Monitoring & Observabilitas",
+      "description": "Setup Prometheus, Grafana, dan ELK Stack untuk monitoring dan log aggregation.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "dops-4"
+      ],
+      "category": "Monitoring",
+      "resources": [
+        {
+          "id": "dops-r21",
+          "title": "Prometheus & Grafana - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "dops-r22",
+          "title": "Prometheus Documentation",
+          "type": "documentation",
+          "url": "https://prometheus.io/docs/introduction/overview/",
+          "free": true
+        },
+        {
+          "id": "dops-r23",
+          "title": "ELK Stack - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dops-8",
+      "title": "Keamanan DevSecOps",
+      "description": "Integrasikan security scanning (SAST, dependency audit) ke dalam pipeline CI/CD.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dops-4"
+      ],
+      "category": "Keamanan",
+      "resources": [
+        {
+          "id": "dops-r24",
+          "title": "DevSecOps Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/devsecops-fundamentals",
+          "free": false
+        },
+        {
+          "id": "dops-r25",
+          "title": "OWASP DevSecOps Guidelines",
+          "type": "documentation",
+          "url": "https://owasp.org/www-project-devsecops-maturity-model/",
+          "free": true
+        },
+        {
+          "id": "dops-r26",
+          "title": "Snyk Documentation",
+          "type": "documentation",
+          "url": "https://docs.snyk.io/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dops-9",
+      "title": "Networking & Cloud Fundamentals",
+      "description": "Pahami konsep networking (DNS, TCP/IP, load balancer) dan layanan cloud dasar.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dops-1"
+      ],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "dops-r27",
+          "title": "Networking Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/cloud-networking",
+          "free": true
+        },
+        {
+          "id": "dops-r28",
+          "title": "Cloud Fundamentals - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dops-r29",
+          "title": "AWS Free Tier Documentation",
+          "type": "documentation",
+          "url": "https://aws.amazon.com/free/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

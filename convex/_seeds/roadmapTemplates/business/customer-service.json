@@ -1,0 +1,301 @@
+{
+  "title": "Customer Service",
+  "slug": "customer-service",
+  "domain": "business",
+  "icon": "Headphones",
+  "color": "bg-pink-400",
+  "description": "Berikan pengalaman pelanggan terbaik melalui komunikasi yang efektif dan penyelesaian masalah yang cepat.",
+  "tags": [
+    "customer-experience",
+    "communication",
+    "crm",
+    "helpdesk",
+    "service"
+  ],
+  "order": 18,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "cs-1",
+      "title": "Fondasi Customer Service",
+      "description": "Pahami prinsip pelayanan pelanggan, ekspektasi pelanggan modern, dan metrik kepuasan.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "cs-r1",
+          "title": "Customer Service Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/customer-service-dasar",
+          "free": false
+        },
+        {
+          "id": "cs-r2",
+          "title": "Customer Service Excellence - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/customer-service",
+          "free": false
+        },
+        {
+          "id": "cs-r3",
+          "title": "CS Fundamentals - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cs-r4",
+          "title": "HubSpot Customer Service Certification (gratis)",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/customer-service",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-2",
+      "title": "Komunikasi Efektif & Empati",
+      "description": "Kembangkan keterampilan mendengarkan aktif, komunikasi empati, dan de-escalation.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cs-1"
+      ],
+      "parentId": "cs-1",
+      "category": "Komunikasi",
+      "resources": [
+        {
+          "id": "cs-r5",
+          "title": "Effective Communication - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/effective-communication",
+          "free": false
+        },
+        {
+          "id": "cs-r6",
+          "title": "Komunikasi Empatik - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/komunikasi-empatik",
+          "free": false
+        },
+        {
+          "id": "cs-r7",
+          "title": "Active Listening - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-3",
+      "title": "Penanganan Keluhan & Eskalasi",
+      "description": "Tangani keluhan pelanggan secara profesional, lakukan root cause analysis, dan eskalasi yang tepat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cs-2"
+      ],
+      "parentId": "cs-2",
+      "category": "Operasi",
+      "resources": [
+        {
+          "id": "cs-r8",
+          "title": "Complaint Handling - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/complaint-handling",
+          "free": false
+        },
+        {
+          "id": "cs-r9",
+          "title": "Handling Difficult Customers - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/difficult-customer",
+          "free": false
+        },
+        {
+          "id": "cs-r10",
+          "title": "Eskalasi & Penyelesaian - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-4",
+      "title": "CRM & Helpdesk Tools",
+      "description": "Gunakan platform CS seperti Zendesk, Freshdesk, atau HubSpot Service Hub untuk manajemen tiket.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cs-1"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "cs-r11",
+          "title": "Zendesk Training",
+          "type": "course",
+          "url": "https://training.zendesk.com/",
+          "free": true
+        },
+        {
+          "id": "cs-r12",
+          "title": "Freshdesk Documentation",
+          "type": "documentation",
+          "url": "https://support.freshdesk.com/support/home",
+          "free": true
+        },
+        {
+          "id": "cs-r13",
+          "title": "HubSpot Service Hub",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/service-hub",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-5",
+      "title": "Omnichannel Customer Experience",
+      "description": "Kelola interaksi pelanggan di berbagai saluran: email, chat, telepon, sosial media, secara terintegrasi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cs-4"
+      ],
+      "parentId": "cs-4",
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "cs-r14",
+          "title": "Omnichannel Strategy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/omnichannel-strategy",
+          "free": false
+        },
+        {
+          "id": "cs-r15",
+          "title": "CX Omnichannel - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/omnichannel-cx",
+          "free": false
+        },
+        {
+          "id": "cs-r16",
+          "title": "Omnichannel Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-6",
+      "title": "Customer Retention & Loyalty",
+      "description": "Rancang program loyalitas dan strategi retensi untuk meningkatkan customer lifetime value.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cs-5"
+      ],
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "cs-r17",
+          "title": "Customer Retention - HubSpot",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/customer-retention",
+          "free": true
+        },
+        {
+          "id": "cs-r18",
+          "title": "Loyalty Program - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/loyalty-program",
+          "free": false
+        },
+        {
+          "id": "cs-r19",
+          "title": "Customer Loyalty - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-7",
+      "title": "Metrics CS: NPS, CSAT, FCR",
+      "description": "Ukur dan analisis Net Promoter Score, Customer Satisfaction, dan First Contact Resolution.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "cs-3"
+      ],
+      "category": "Analitik",
+      "resources": [
+        {
+          "id": "cs-r20",
+          "title": "CS Metrics Guide - HubSpot",
+          "type": "article",
+          "url": "https://blog.hubspot.com/service/customer-service-metrics",
+          "free": true
+        },
+        {
+          "id": "cs-r21",
+          "title": "NPS & CSAT - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/cs-metrics",
+          "free": false
+        },
+        {
+          "id": "cs-r22",
+          "title": "Mengukur Kepuasan Pelanggan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cs-8",
+      "title": "CS Leadership & Team Management",
+      "description": "Pimpin tim customer service: coaching, performance management, dan membangun budaya layanan prima.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cs-6",
+        "cs-7"
+      ],
+      "category": "Kepemimpinan",
+      "resources": [
+        {
+          "id": "cs-r23",
+          "title": "CS Leadership - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/customer-service-leadership",
+          "free": false
+        },
+        {
+          "id": "cs-r24",
+          "title": "Team Management - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/team-management-cs",
+          "free": false
+        },
+        {
+          "id": "cs-r25",
+          "title": "Leadership CS - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

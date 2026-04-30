@@ -1,0 +1,358 @@
+{
+  "title": "Renewable Energy & ESG",
+  "slug": "renewable-energy-esg",
+  "domain": "social",
+  "icon": "Globe",
+  "color": "bg-green-600",
+  "description": "Karier di transisi energi dan keberlanjutan: ESG reporting, carbon accounting, audit energi, solar PV, dan green jobs sesuai POJK 51/2017.",
+  "tags": [
+    "esg",
+    "green-jobs",
+    "carbon-accounting",
+    "solar",
+    "efisiensi-energi"
+  ],
+  "order": 85,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "re-1",
+      "title": "Pengantar Energi Terbarukan & Transisi Energi Indonesia",
+      "description": "Pahami peta transisi energi Indonesia, target NZE 2060, dan jenis energi terbarukan: surya, hidro, panas bumi, biomassa.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "re-r1",
+          "title": "Transisi Energi - Kementerian ESDM",
+          "type": "documentation",
+          "url": "https://www.esdm.go.id/id/media-center/news",
+          "free": true
+        },
+        {
+          "id": "re-r2",
+          "title": "Energy Transition Outlook - IRENA",
+          "type": "documentation",
+          "url": "https://www.irena.org/publications",
+          "free": true
+        },
+        {
+          "id": "re-r3",
+          "title": "Pengantar Energi Terbarukan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "re-r4",
+          "title": "Renewable Energy Foundations - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/renewable-energy-fundamentals",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "re-2",
+      "title": "ESG & Keberlanjutan Dasar",
+      "description": "Pelajari prinsip ESG, kerangka GRI, dan kenapa perusahaan Indonesia wajib lapor sustainability ke OJK.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "re-1"
+      ],
+      "parentId": "re-1",
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "re-r5",
+          "title": "Sustainability Foundations - IBM SkillsBuild",
+          "type": "course",
+          "url": "https://skillsbuild.org/adult-learners/explore-learning/sustainability",
+          "free": true
+        },
+        {
+          "id": "re-r6",
+          "title": "GRI Standards Overview",
+          "type": "documentation",
+          "url": "https://www.globalreporting.org/standards/",
+          "free": true
+        },
+        {
+          "id": "re-r7",
+          "title": "ESG Investing Specialization - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/specializations/esg-investing",
+          "free": false
+        },
+        {
+          "id": "re-r8",
+          "title": "ESG Indonesia - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "re-3",
+      "title": "Carbon Accounting & GHG Protocol",
+      "description": "Hitung jejak karbon perusahaan dengan GHG Protocol Scope 1, 2, dan 3; gunakan metode aktivitas-faktor emisi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "re-2"
+      ],
+      "parentId": "re-2",
+      "category": "Carbon",
+      "resources": [
+        {
+          "id": "re-r9",
+          "title": "GHG Protocol Standards",
+          "type": "documentation",
+          "url": "https://ghgprotocol.org/standards",
+          "free": true
+        },
+        {
+          "id": "re-r10",
+          "title": "Carbon Accounting - UN CC:e-Learn",
+          "type": "course",
+          "url": "https://unccelearn.org/",
+          "free": true
+        },
+        {
+          "id": "re-r11",
+          "title": "Sustainability Essentials - Microsoft Learn",
+          "type": "course",
+          "url": "https://learn.microsoft.com/training/paths/sustainability-essentials/",
+          "free": true
+        },
+        {
+          "id": "re-r12",
+          "title": "Akuntansi Karbon - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/akuntansi-karbon",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "re-4",
+      "title": "Efisiensi Energi & Audit Energi",
+      "description": "Lakukan audit energi gedung/industri, identifikasi peluang efisiensi, dan susun rekomendasi sesuai Permen ESDM.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "re-1"
+      ],
+      "category": "Efisiensi",
+      "resources": [
+        {
+          "id": "re-r13",
+          "title": "Audit Energi - Direktorat EBTKE Kementerian ESDM",
+          "type": "documentation",
+          "url": "https://ebtke.esdm.go.id/",
+          "free": true
+        },
+        {
+          "id": "re-r14",
+          "title": "Energy Efficiency - IRENA",
+          "type": "article",
+          "url": "https://www.irena.org/Energy-Transition/Technology/Energy-efficiency",
+          "free": true
+        },
+        {
+          "id": "re-r15",
+          "title": "Energy Auditing Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/energy-production-distribution-safety",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "re-5",
+      "title": "Solar PV & Smart Grid Basics",
+      "description": "Pelajari prinsip solar photovoltaic, perhitungan kapasitas, integrasi grid, dan basics smart grid Indonesia.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "re-1"
+      ],
+      "parentId": "re-1",
+      "category": "Solar",
+      "resources": [
+        {
+          "id": "re-r16",
+          "title": "Solar Energy Basics - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/solar-energy-basics",
+          "free": false
+        },
+        {
+          "id": "re-r17",
+          "title": "Smart Grid Indonesia - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "re-r18",
+          "title": "Solar PV Design - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/solar-pv",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "re-6",
+      "title": "Pelaporan ESG (GRI, SASB, POJK 51/2017)",
+      "description": "Susun laporan keberlanjutan sesuai POJK 51/2017, framework GRI, dan SASB; siapkan disclosure ke OJK.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "re-3"
+      ],
+      "parentId": "re-3",
+      "category": "Reporting",
+      "resources": [
+        {
+          "id": "re-r19",
+          "title": "POJK 51/2017 Keuangan Berkelanjutan - OJK",
+          "type": "documentation",
+          "url": "https://www.ojk.go.id/id/regulasi/Pages/POJK-tentang-Penerapan-Keuangan-Berkelanjutan.aspx",
+          "free": true
+        },
+        {
+          "id": "re-r20",
+          "title": "GRI Standards Implementation",
+          "type": "documentation",
+          "url": "https://www.globalreporting.org/standards/",
+          "free": true
+        },
+        {
+          "id": "re-r21",
+          "title": "SASB Standards - IFRS",
+          "type": "documentation",
+          "url": "https://sasb.ifrs.org/standards/",
+          "free": true
+        },
+        {
+          "id": "re-r22",
+          "title": "Pelaporan ESG Indonesia - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pelaporan-esg",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "re-7",
+      "title": "Data & Analytics untuk Sustainability",
+      "description": "Olah data emisi dan energi dengan Python/Power BI; bangun dashboard sustainability untuk stakeholder.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "re-3"
+      ],
+      "category": "Data",
+      "resources": [
+        {
+          "id": "re-r23",
+          "title": "Cloud for Sustainability - Microsoft Learn",
+          "type": "course",
+          "url": "https://learn.microsoft.com/training/paths/cloud-for-sustainability/",
+          "free": true
+        },
+        {
+          "id": "re-r24",
+          "title": "Power BI Sustainability Dashboard - Microsoft Learn",
+          "type": "course",
+          "url": "https://learn.microsoft.com/training/paths/sustainability-data-power-bi/",
+          "free": true
+        },
+        {
+          "id": "re-r25",
+          "title": "Data Analytics - Kaggle Learn",
+          "type": "course",
+          "url": "https://www.kaggle.com/learn/data-visualization",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "re-8",
+      "title": "Portfolio: Mini Carbon Tracker / Energy Audit Report",
+      "description": "Bangun proyek nyata: kalkulator jejak karbon untuk UMKM atau laporan audit energi gedung.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "re-4",
+        "re-7"
+      ],
+      "category": "Portfolio",
+      "resources": [
+        {
+          "id": "re-r26",
+          "title": "Carbon Footprint Calculator Examples - GitHub",
+          "type": "practice",
+          "url": "https://github.com/topics/carbon-footprint-calculator",
+          "free": true
+        },
+        {
+          "id": "re-r27",
+          "title": "GHG Inventory Tools - GHG Protocol",
+          "type": "documentation",
+          "url": "https://ghgprotocol.org/calculation-tools-and-guidance",
+          "free": true
+        },
+        {
+          "id": "re-r28",
+          "title": "Sustainability Project - IBM SkillsBuild",
+          "type": "course",
+          "url": "https://skillsbuild.org/adult-learners/explore-learning/sustainability",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "re-9",
+      "title": "Sertifikasi ESG / Sustainability",
+      "description": "Validasi kompetensi: IBM Sustainability credential, UN CC:e-Learn climate course, atau GRI Certified Training.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "re-6",
+        "re-8"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "re-r29",
+          "title": "IBM Sustainability Professional Credential",
+          "type": "course",
+          "url": "https://skillsbuild.org/adult-learners/explore-learning/sustainability",
+          "free": true
+        },
+        {
+          "id": "re-r30",
+          "title": "GRI Certified Sustainability Training",
+          "type": "course",
+          "url": "https://www.globalreporting.org/professional-development/",
+          "free": false
+        },
+        {
+          "id": "re-r31",
+          "title": "UN CC:e-Learn Climate Change",
+          "type": "course",
+          "url": "https://unccelearn.org/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

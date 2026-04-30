@@ -1,0 +1,300 @@
+{
+  "title": "Kreator Kursus Online",
+  "slug": "online-educator",
+  "domain": "education",
+  "icon": "Globe",
+  "color": "bg-cyan-600",
+  "description": "Buat dan monetisasi kursus online berkualitas tinggi di platform seperti Udemy, Dicoding, atau website sendiri.",
+  "tags": [
+    "online-course",
+    "instructional-design",
+    "video-production",
+    "marketing",
+    "lms"
+  ],
+  "order": 34,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "oe-1",
+      "title": "Validasi Ide & Niche Kursus",
+      "description": "Riset pasar, validasi kebutuhan, dan tentukan topik kursus yang punya demand tinggi.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Ideasi",
+      "resources": [
+        {
+          "id": "oe-r1",
+          "title": "Online Course Creation - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/online-course-creation",
+          "free": false
+        },
+        {
+          "id": "oe-r2",
+          "title": "Udemy Instructor Handbook",
+          "type": "documentation",
+          "url": "https://teach.udemy.com/",
+          "free": true
+        },
+        {
+          "id": "oe-r3",
+          "title": "Kreator Kursus - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "oe-r4",
+          "title": "Course Idea Validation Guide - Thinkific",
+          "type": "article",
+          "url": "https://www.thinkific.com/blog/validate-online-course-idea/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-2",
+      "title": "Instructional Design untuk Online Course",
+      "description": "Rancang struktur kursus dengan learning outcomes yang jelas, modul, dan learning path.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "oe-1"
+      ],
+      "parentId": "oe-1",
+      "category": "Perancangan",
+      "resources": [
+        {
+          "id": "oe-r5",
+          "title": "Course Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/course-design",
+          "free": false
+        },
+        {
+          "id": "oe-r6",
+          "title": "Instructional Design - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/instructional-design",
+          "free": false
+        },
+        {
+          "id": "oe-r7",
+          "title": "Course Outline Guide - Thinkific",
+          "type": "documentation",
+          "url": "https://www.thinkific.com/blog/course-outline/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-3",
+      "title": "Produksi Video Kursus",
+      "description": "Rekam dan edit video kursus berkualitas: setup studio sederhana, screen recording, dan editing.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "oe-1"
+      ],
+      "category": "Produksi",
+      "resources": [
+        {
+          "id": "oe-r8",
+          "title": "Video Production for Courses - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "oe-r9",
+          "title": "OBS Studio Documentation (gratis)",
+          "type": "documentation",
+          "url": "https://obsproject.com/wiki/",
+          "free": true
+        },
+        {
+          "id": "oe-r10",
+          "title": "Video Recording Guide - Udemy",
+          "type": "documentation",
+          "url": "https://teach.udemy.com/video-production-guide/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-4",
+      "title": "Platform Kursus Online (Udemy / Dicoding)",
+      "description": "Publish kursus di Udemy, Dicoding, Skill Academy, atau platform e-learning Indonesia.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "oe-3"
+      ],
+      "parentId": "oe-3",
+      "category": "Platform",
+      "resources": [
+        {
+          "id": "oe-r11",
+          "title": "Udemy Instructor Guidelines",
+          "type": "documentation",
+          "url": "https://teach.udemy.com/instructor-guide/",
+          "free": true
+        },
+        {
+          "id": "oe-r12",
+          "title": "Dicoding Instructor Program",
+          "type": "documentation",
+          "url": "https://dicoding.com/instructor",
+          "free": true
+        },
+        {
+          "id": "oe-r13",
+          "title": "Skill Academy Instructor Guide",
+          "type": "documentation",
+          "url": "https://skillacademy.id/instructor",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-5",
+      "title": "Marketing Kursus & Pertumbuhan Student",
+      "description": "Promosikan kursus menggunakan SEO, social media, email list, dan affiliate marketing.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "oe-4"
+      ],
+      "category": "Pemasaran",
+      "resources": [
+        {
+          "id": "oe-r14",
+          "title": "Course Marketing - Thinkific Blog",
+          "type": "article",
+          "url": "https://www.thinkific.com/blog/online-course-marketing/",
+          "free": true
+        },
+        {
+          "id": "oe-r15",
+          "title": "Course Marketing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/course-marketing",
+          "free": false
+        },
+        {
+          "id": "oe-r16",
+          "title": "Online Course Marketing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-6",
+      "title": "Website Kursus Sendiri (Teachable / Moodle)",
+      "description": "Bangun platform kursus own media dengan Teachable, Thinkific, atau Moodle yang self-hosted.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "oe-4"
+      ],
+      "category": "Platform",
+      "resources": [
+        {
+          "id": "oe-r17",
+          "title": "Teachable Documentation",
+          "type": "documentation",
+          "url": "https://support.teachable.com/hc/en-us",
+          "free": true
+        },
+        {
+          "id": "oe-r18",
+          "title": "Thinkific Guide",
+          "type": "documentation",
+          "url": "https://support.thinkific.com/hc/en-us",
+          "free": true
+        },
+        {
+          "id": "oe-r19",
+          "title": "LMS Setup - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-7",
+      "title": "Komunitas & Keterlibatan Pelajar",
+      "description": "Bangun komunitas pelajar aktif melalui forum diskusi, grup Telegram/Discord, dan live session.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "oe-5"
+      ],
+      "category": "Komunitas",
+      "resources": [
+        {
+          "id": "oe-r20",
+          "title": "Building Learning Community - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/learning-community",
+          "free": false
+        },
+        {
+          "id": "oe-r21",
+          "title": "Student Engagement Guide - Thinkific",
+          "type": "article",
+          "url": "https://www.thinkific.com/blog/student-engagement/",
+          "free": true
+        },
+        {
+          "id": "oe-r22",
+          "title": "Komunitas Belajar Online - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "oe-8",
+      "title": "Monetisasi & Scaling Kursus Online",
+      "description": "Optimalkan revenue melalui bundling, cohort, membership, dan skalakan bisnis kursus online.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "oe-6",
+        "oe-7"
+      ],
+      "category": "Bisnis",
+      "resources": [
+        {
+          "id": "oe-r23",
+          "title": "Course Monetization Guide - Thinkific",
+          "type": "article",
+          "url": "https://www.thinkific.com/blog/monetize-online-courses/",
+          "free": true
+        },
+        {
+          "id": "oe-r24",
+          "title": "Scaling Online Course Business - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/scaling-kursus-online",
+          "free": false
+        },
+        {
+          "id": "oe-r25",
+          "title": "Bisnis Kursus Online - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

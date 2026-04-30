@@ -1,0 +1,307 @@
+{
+  "title": "Digital Marketing",
+  "slug": "digital-marketing",
+  "domain": "business",
+  "icon": "TrendingUp",
+  "color": "bg-red-500",
+  "description": "Kuasai strategi pemasaran digital mulai dari SEO, iklan berbayar, media sosial, hingga analitik.",
+  "tags": [
+    "seo",
+    "google-ads",
+    "social-media",
+    "content-marketing",
+    "analytics"
+  ],
+  "order": 11,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "dm-1",
+      "title": "Fondasi Digital Marketing",
+      "description": "Pelajari ekosistem digital marketing, buyer persona, dan customer journey map.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "dm-r1",
+          "title": "Google Digital Garage - Fundamental Digital Marketing",
+          "type": "course",
+          "url": "https://learndigital.withgoogle.com/digitalgarage",
+          "free": true
+        },
+        {
+          "id": "dm-r2",
+          "title": "Digital Marketing Fundamental - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/digital-marketing-fundamentals",
+          "free": false
+        },
+        {
+          "id": "dm-r3",
+          "title": "Digital Marketing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dm-r4",
+          "title": "Dasar Digital Marketing - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/digital-marketing-dasar",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dm-2",
+      "title": "SEO (Search Engine Optimization)",
+      "description": "Optimalkan website untuk mesin pencari dengan on-page SEO, off-page SEO, dan technical SEO.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "dm-1"
+      ],
+      "parentId": "dm-1",
+      "category": "Organik",
+      "resources": [
+        {
+          "id": "dm-r5",
+          "title": "SEO Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dm-r6",
+          "title": "Google Search Central Documentation",
+          "type": "documentation",
+          "url": "https://developers.google.com/search/docs",
+          "free": true
+        },
+        {
+          "id": "dm-r7",
+          "title": "Moz Beginner's Guide to SEO",
+          "type": "documentation",
+          "url": "https://moz.com/beginners-guide-to-seo",
+          "free": true
+        },
+        {
+          "id": "dm-r8",
+          "title": "SEO Expert - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/seo-expert",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "dm-3",
+      "title": "Google Ads (SEM)",
+      "description": "Buat dan optimalkan campaign Google Search Ads, Display Ads, dan Shopping Ads.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dm-1"
+      ],
+      "category": "Berbayar",
+      "resources": [
+        {
+          "id": "dm-r9",
+          "title": "Google Skillshop - Ads Certification",
+          "type": "course",
+          "url": "https://skillshop.withgoogle.com/",
+          "free": true
+        },
+        {
+          "id": "dm-r10",
+          "title": "Google Ads - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/google-ads",
+          "free": false
+        },
+        {
+          "id": "dm-r11",
+          "title": "Google Ads - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dm-4",
+      "title": "Social Media Marketing",
+      "description": "Kelola dan kembangkan brand di Instagram, TikTok, LinkedIn, dan platform sosial lainnya.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dm-1"
+      ],
+      "category": "Sosial Media",
+      "resources": [
+        {
+          "id": "dm-r12",
+          "title": "Meta Blueprint (Facebook & Instagram)",
+          "type": "course",
+          "url": "https://www.facebook.com/business/learn",
+          "free": true
+        },
+        {
+          "id": "dm-r13",
+          "title": "Social Media Marketing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/social-media-marketing",
+          "free": false
+        },
+        {
+          "id": "dm-r14",
+          "title": "Instagram Marketing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dm-5",
+      "title": "Content Marketing & Copywriting",
+      "description": "Ciptakan konten yang menarik dan tulis copy yang mengkonversi untuk berbagai platform.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dm-4"
+      ],
+      "parentId": "dm-4",
+      "category": "Konten",
+      "resources": [
+        {
+          "id": "dm-r15",
+          "title": "Copywriting Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/copywriting-dasar",
+          "free": false
+        },
+        {
+          "id": "dm-r16",
+          "title": "Content Marketing Strategy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/content-marketing",
+          "free": false
+        },
+        {
+          "id": "dm-r17",
+          "title": "Dasar Copywriting - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dm-6",
+      "title": "Email Marketing",
+      "description": "Bangun dan kelola kampanye email marketing dengan segmentasi, automation, dan A/B test.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "dm-5"
+      ],
+      "category": "Konten",
+      "resources": [
+        {
+          "id": "dm-r18",
+          "title": "Mailchimp Documentation",
+          "type": "documentation",
+          "url": "https://mailchimp.com/developer/",
+          "free": true
+        },
+        {
+          "id": "dm-r19",
+          "title": "Email Marketing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/email-marketing",
+          "free": false
+        },
+        {
+          "id": "dm-r20",
+          "title": "Email Marketing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dm-7",
+      "title": "Google Analytics 4 & Data Marketing",
+      "description": "Analisis performa marketing dengan Google Analytics 4 dan buat keputusan berbasis data.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dm-2",
+        "dm-3"
+      ],
+      "category": "Analitik",
+      "resources": [
+        {
+          "id": "dm-r21",
+          "title": "Google Analytics Certification - Skillshop",
+          "type": "course",
+          "url": "https://skillshop.withgoogle.com/googleanalytics",
+          "free": true
+        },
+        {
+          "id": "dm-r22",
+          "title": "GA4 Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dm-r23",
+          "title": "Marketing Analytics - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/marketing-analytics",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "dm-8",
+      "title": "Meta Ads & TikTok Ads",
+      "description": "Jalankan iklan berbayar di Facebook, Instagram, dan TikTok dengan targeting yang tepat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dm-4"
+      ],
+      "category": "Berbayar",
+      "resources": [
+        {
+          "id": "dm-r24",
+          "title": "Meta Blueprint Certification",
+          "type": "course",
+          "url": "https://www.facebook.com/business/learn/certification",
+          "free": true
+        },
+        {
+          "id": "dm-r25",
+          "title": "TikTok Ads - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/tiktok-ads",
+          "free": false
+        },
+        {
+          "id": "dm-r26",
+          "title": "Facebook Ads - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+{
+  "title": "Analis Investasi",
+  "slug": "investment-analyst",
+  "domain": "finance",
+  "icon": "TrendingUp",
+  "color": "bg-yellow-700",
+  "description": "Lakukan riset dan analisis investasi saham, obligasi, dan aset lainnya untuk rekomendasi portofolio.",
+  "tags": [
+    "analisis-fundamental",
+    "analisis-teknikal",
+    "valuasi",
+    "CFA",
+    "pasar-modal"
+  ],
+  "order": 54,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "inv-1",
+      "title": "Dasar Pasar Modal Indonesia",
+      "description": "Pahami struktur pasar modal IDX, instrumen investasi, dan regulasi OJK.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "inv-r1",
+          "title": "Sekolah Pasar Modal BEI",
+          "type": "course",
+          "url": "https://www.idx.co.id/investor/sekolah-pasar-modal/",
+          "free": true
+        },
+        {
+          "id": "inv-r2",
+          "title": "OJK - Pasar Modal",
+          "type": "documentation",
+          "url": "https://www.ojk.go.id/id/kanal/pasar-modal/Pages/Produk-dan-Layanan.aspx",
+          "free": true
+        },
+        {
+          "id": "inv-r3",
+          "title": "Investasi Dasar - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "inv-r4",
+          "title": "Pasar Modal - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pasar-modal-dasar",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "inv-2",
+      "title": "Analisis Fundamental Saham",
+      "description": "Analisis laporan keuangan, rasio valuasi (P/E, P/BV), dan prospek bisnis emiten.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "inv-1"
+      ],
+      "parentId": "inv-1",
+      "category": "Analisis",
+      "resources": [
+        {
+          "id": "inv-r5",
+          "title": "Analisis Fundamental - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/analisis-fundamental-saham",
+          "free": false
+        },
+        {
+          "id": "inv-r6",
+          "title": "Security Analysis - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/security-analysis",
+          "free": false
+        },
+        {
+          "id": "inv-r7",
+          "title": "IDX Annual Reports",
+          "type": "documentation",
+          "url": "https://www.idx.co.id/perusahaan-tercatat/laporan-keuangan-dan-tahunan/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "inv-3",
+      "title": "Analisis Teknikal",
+      "description": "Baca chart, identifikasi support/resistance, dan gunakan indikator teknikal (MACD, RSI, Bollinger Band).",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "inv-1"
+      ],
+      "category": "Analisis",
+      "resources": [
+        {
+          "id": "inv-r8",
+          "title": "Analisis Teknikal - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/analisis-teknikal",
+          "free": false
+        },
+        {
+          "id": "inv-r9",
+          "title": "Technical Analysis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "inv-r10",
+          "title": "TradingView Documentation",
+          "type": "documentation",
+          "url": "https://www.tradingview.com/support/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "inv-4",
+      "title": "Valuasi Bisnis (DCF & Comparable)",
+      "description": "Lakukan valuasi perusahaan menggunakan DCF, EV/EBITDA, dan comparable company analysis.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "inv-2"
+      ],
+      "parentId": "inv-2",
+      "category": "Valuasi",
+      "resources": [
+        {
+          "id": "inv-r11",
+          "title": "Valuation - Damodaran NYU (gratis)",
+          "type": "course",
+          "url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html",
+          "free": true
+        },
+        {
+          "id": "inv-r12",
+          "title": "Valuasi Bisnis - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/valuasi-bisnis",
+          "free": false
+        },
+        {
+          "id": "inv-r13",
+          "title": "DCF Valuation - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/dcf-valuation",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "inv-5",
+      "title": "Fixed Income & Analisis Obligasi",
+      "description": "Analisis obligasi, yield curve, credit rating, dan strategi portofolio fixed income.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "inv-2"
+      ],
+      "category": "Instrumen",
+      "resources": [
+        {
+          "id": "inv-r14",
+          "title": "Fixed Income - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/fixed-income",
+          "free": false
+        },
+        {
+          "id": "inv-r15",
+          "title": "Obligasi - DJPPR",
+          "type": "documentation",
+          "url": "https://www.djppr.kemenkeu.go.id/sbn/",
+          "free": true
+        },
+        {
+          "id": "inv-r16",
+          "title": "Analisis Obligasi - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/analisis-obligasi",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "inv-6",
+      "title": "Manajemen Portofolio",
+      "description": "Bangun dan kelola portofolio yang terdiversifikasi dengan teori modern portfolio Markowitz.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "inv-4",
+        "inv-5"
+      ],
+      "category": "Portofolio",
+      "resources": [
+        {
+          "id": "inv-r17",
+          "title": "Portfolio Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/portfolio-management",
+          "free": false
+        },
+        {
+          "id": "inv-r18",
+          "title": "Manajemen Portofolio - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/manajemen-portofolio",
+          "free": false
+        },
+        {
+          "id": "inv-r19",
+          "title": "MPT Guide - Investopedia",
+          "type": "documentation",
+          "url": "https://www.investopedia.com/terms/m/modernportfoliotheory.asp",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "inv-7",
+      "title": "Reksa Dana & Manajemen Investasi",
+      "description": "Pahami cara kerja reksa dana, DPLK, dan produk wealth management untuk investor institusional.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "inv-5"
+      ],
+      "category": "Produk",
+      "resources": [
+        {
+          "id": "inv-r20",
+          "title": "Reksa Dana - OJK",
+          "type": "documentation",
+          "url": "https://sikapiuangmu.ojk.go.id/FrontEnd/CMS/Category/5",
+          "free": true
+        },
+        {
+          "id": "inv-r21",
+          "title": "Reksa Dana Lanjutan - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/reksa-dana-lanjutan",
+          "free": false
+        },
+        {
+          "id": "inv-r22",
+          "title": "Mutual Funds - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "inv-8",
+      "title": "Sertifikasi CFA / WPPE",
+      "description": "Persiapkan ujian CFA Level 1 atau WPPE OJK untuk karir analis investasi profesional.",
+      "difficulty": "advanced",
+      "estimatedHours": 60,
+      "prerequisites": [
+        "inv-6"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "inv-r23",
+          "title": "CFA Institute",
+          "type": "documentation",
+          "url": "https://www.cfainstitute.org/en/programs/cfa",
+          "free": false
+        },
+        {
+          "id": "inv-r24",
+          "title": "WPPE OJK - Portal",
+          "type": "documentation",
+          "url": "https://www.ojk.go.id/id/kanal/pasar-modal/ujian-wppe/",
+          "free": true
+        },
+        {
+          "id": "inv-r25",
+          "title": "CFA Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/cfa-preparation",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

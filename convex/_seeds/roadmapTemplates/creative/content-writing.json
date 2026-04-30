@@ -1,0 +1,299 @@
+{
+  "title": "Penulis Konten & Copywriter",
+  "slug": "content-writing",
+  "domain": "creative",
+  "icon": "FileText",
+  "color": "bg-yellow-600",
+  "description": "Tulis konten yang informatif dan copy yang mengkonversi untuk web, media sosial, dan iklan.",
+  "tags": [
+    "copywriting",
+    "seo-writing",
+    "content-strategy",
+    "blogging",
+    "storytelling"
+  ],
+  "order": 24,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "cw-1",
+      "title": "Dasar Penulisan & Tata Bahasa Indonesia",
+      "description": "Kuasai ejaan EYD, tata bahasa baku, dan gaya penulisan yang jelas dan menarik.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "cw-r1",
+          "title": "KBBI Daring - Kemdikbud",
+          "type": "documentation",
+          "url": "https://kbbi.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "cw-r2",
+          "title": "Penulisan Konten Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/penulisan-konten-dasar",
+          "free": false
+        },
+        {
+          "id": "cw-r3",
+          "title": "Menulis untuk Web - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cw-r4",
+          "title": "Pedoman EYD - Kemdikbud",
+          "type": "documentation",
+          "url": "https://badanbahasa.kemdikbud.go.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cw-2",
+      "title": "Copywriting Dasar",
+      "description": "Pelajari formula copywriting: AIDA, PAS, dan teknik headline yang menarik perhatian.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cw-1"
+      ],
+      "parentId": "cw-1",
+      "category": "Copywriting",
+      "resources": [
+        {
+          "id": "cw-r5",
+          "title": "Copywriting Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/copywriting-dasar",
+          "free": false
+        },
+        {
+          "id": "cw-r6",
+          "title": "Copywriting Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cw-r7",
+          "title": "Copywriting for Conversions - HubSpot",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/copywriting",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cw-3",
+      "title": "SEO Writing & Keyword Research",
+      "description": "Tulis artikel yang dioptimalkan untuk mesin pencari dengan keyword research dan on-page SEO.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cw-1"
+      ],
+      "category": "SEO",
+      "resources": [
+        {
+          "id": "cw-r8",
+          "title": "SEO Writing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cw-r9",
+          "title": "Google Search Central - SEO Writing",
+          "type": "documentation",
+          "url": "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+          "free": true
+        },
+        {
+          "id": "cw-r10",
+          "title": "SEO Content - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/seo-content-writing",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "cw-4",
+      "title": "Content Strategy & Planning",
+      "description": "Buat content calendar, audit konten, dan strategi konten yang aligned dengan tujuan bisnis.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cw-2",
+        "cw-3"
+      ],
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "cw-r11",
+          "title": "Content Marketing Strategy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/content-marketing",
+          "free": false
+        },
+        {
+          "id": "cw-r12",
+          "title": "Content Strategy - HubSpot Academy",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/content-strategy",
+          "free": true
+        },
+        {
+          "id": "cw-r13",
+          "title": "Content Planning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/content-strategy",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "cw-5",
+      "title": "Social Media Copywriting",
+      "description": "Tulis caption Instagram, tweet, dan post LinkedIn yang engaging dan meningkatkan interaksi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cw-2"
+      ],
+      "category": "Platform",
+      "resources": [
+        {
+          "id": "cw-r14",
+          "title": "Social Media Copy - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/social-media-copywriting",
+          "free": false
+        },
+        {
+          "id": "cw-r15",
+          "title": "Instagram Caption Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cw-r16",
+          "title": "LinkedIn Writing Guide",
+          "type": "article",
+          "url": "https://www.linkedin.com/pulse/how-write-great-linkedin-posts-increase-engagement/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cw-6",
+      "title": "Email Copywriting",
+      "description": "Tulis email marketing yang diopen dan mengkonversi: subject line, body, dan CTA yang kuat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cw-4"
+      ],
+      "category": "Platform",
+      "resources": [
+        {
+          "id": "cw-r17",
+          "title": "Email Copywriting - HubSpot Academy",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/email-marketing",
+          "free": true
+        },
+        {
+          "id": "cw-r18",
+          "title": "Email Writing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/email-copywriting",
+          "free": false
+        },
+        {
+          "id": "cw-r19",
+          "title": "Email Marketing Guide - Mailchimp",
+          "type": "documentation",
+          "url": "https://mailchimp.com/resources/email-marketing-field-guide/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cw-7",
+      "title": "Storytelling & Long-form Content",
+      "description": "Buat konten panjang berkualitas: artikel mendalam, white paper, dan e-book yang membangun otoritas.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cw-4"
+      ],
+      "category": "Konten",
+      "resources": [
+        {
+          "id": "cw-r20",
+          "title": "Storytelling for Business - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/the-power-of-storytelling",
+          "free": false
+        },
+        {
+          "id": "cw-r21",
+          "title": "Long-form Writing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/long-form-writing",
+          "free": false
+        },
+        {
+          "id": "cw-r22",
+          "title": "Storytelling Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cw-8",
+      "title": "AI Tools untuk Penulis Konten",
+      "description": "Manfaatkan AI writing tools secara etis untuk riset, ideasi, dan meningkatkan produktivitas penulisan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "cw-3"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "cw-r23",
+          "title": "AI Writing Tools Guide - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/ai-writing-tools/",
+          "free": true
+        },
+        {
+          "id": "cw-r24",
+          "title": "ChatGPT untuk Penulis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cw-r25",
+          "title": "AI Content Ethics - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/ai-content-ethics",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "title": "Trainer Korporat",
+  "slug": "corporate-trainer",
+  "domain": "education",
+  "icon": "Users",
+  "color": "bg-blue-600",
+  "description": "Rancang dan fasilitasi program pelatihan korporat yang mengubah perilaku dan meningkatkan kinerja.",
+  "tags": [
+    "instructional-design",
+    "facilitation",
+    "e-learning",
+    "ADDIE",
+    "coaching"
+  ],
+  "order": 33,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "tr-1",
+      "title": "Fondasi Training & Development",
+      "description": "Pahami peran L&D dalam organisasi, siklus pelatihan, dan kerangka ADDIE.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "tr-r1",
+          "title": "Training & Development - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/training-development",
+          "free": false
+        },
+        {
+          "id": "tr-r2",
+          "title": "L&D Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/learning-development",
+          "free": false
+        },
+        {
+          "id": "tr-r3",
+          "title": "Corporate Trainer - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "tr-r4",
+          "title": "ATD (Association for Talent Development)",
+          "type": "documentation",
+          "url": "https://www.td.org/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "tr-2",
+      "title": "Training Needs Analysis (TNA)",
+      "description": "Identifikasi gap kompetensi dan kebutuhan pelatihan melalui TNA yang sistematis.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "tr-1"
+      ],
+      "parentId": "tr-1",
+      "category": "Perancangan",
+      "resources": [
+        {
+          "id": "tr-r5",
+          "title": "Training Needs Analysis - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/training-needs-analysis",
+          "free": false
+        },
+        {
+          "id": "tr-r6",
+          "title": "TNA Guide - ATD",
+          "type": "documentation",
+          "url": "https://www.td.org/talent-development-glossary-terms/what-is-needs-assessment",
+          "free": true
+        },
+        {
+          "id": "tr-r7",
+          "title": "Training Analysis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tr-3",
+      "title": "Instructional Design & Kurikulum Pelatihan",
+      "description": "Rancang program pelatihan dengan learning objectives yang terukur dan konten yang engaging.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "tr-2"
+      ],
+      "parentId": "tr-2",
+      "category": "Perancangan",
+      "resources": [
+        {
+          "id": "tr-r8",
+          "title": "Instructional Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/instructional-design",
+          "free": false
+        },
+        {
+          "id": "tr-r9",
+          "title": "ID Fundamentals - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/instructional-design",
+          "free": false
+        },
+        {
+          "id": "tr-r10",
+          "title": "Curriculum Design - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tr-4",
+      "title": "Fasilitasi & Public Speaking",
+      "description": "Fasilitasi pelatihan tatap muka yang dinamis dengan teknik engagement dan manajemen kelas dewasa.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "tr-1"
+      ],
+      "category": "Delivery",
+      "resources": [
+        {
+          "id": "tr-r11",
+          "title": "Facilitation Skills - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/facilitation-skills",
+          "free": false
+        },
+        {
+          "id": "tr-r12",
+          "title": "Public Speaking - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/public-speaking",
+          "free": false
+        },
+        {
+          "id": "tr-r13",
+          "title": "Training Delivery - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tr-5",
+      "title": "E-learning Development (Articulate / Moodle)",
+      "description": "Buat modul e-learning interaktif menggunakan Articulate Storyline atau Rise dan deploy ke Moodle/LMS.",
+      "difficulty": "advanced",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "tr-3"
+      ],
+      "parentId": "tr-3",
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "tr-r14",
+          "title": "Articulate Storyline Tutorial",
+          "type": "documentation",
+          "url": "https://articulate.com/support/article/storyline-360-user-guide",
+          "free": true
+        },
+        {
+          "id": "tr-r15",
+          "title": "Moodle LMS Documentation",
+          "type": "documentation",
+          "url": "https://docs.moodle.org/",
+          "free": true
+        },
+        {
+          "id": "tr-r16",
+          "title": "E-learning Development - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/elearning-development",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "tr-6",
+      "title": "Kirkpatrick Evaluation Model",
+      "description": "Evaluasi efektivitas pelatihan menggunakan 4 level Kirkpatrick: reaksi, pembelajaran, perilaku, hasil.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "tr-4"
+      ],
+      "category": "Evaluasi",
+      "resources": [
+        {
+          "id": "tr-r17",
+          "title": "Kirkpatrick Model Guide - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/kirkpatrick-evaluation",
+          "free": false
+        },
+        {
+          "id": "tr-r18",
+          "title": "Training Evaluation - ATD",
+          "type": "documentation",
+          "url": "https://www.td.org/talent-development-glossary-terms/what-is-training-evaluation",
+          "free": true
+        },
+        {
+          "id": "tr-r19",
+          "title": "Evaluasi Pelatihan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tr-7",
+      "title": "Coaching & Mentoring",
+      "description": "Terapkan teknik coaching berbasis GROW model dan mentoring untuk pengembangan individu.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "tr-4"
+      ],
+      "category": "Pengembangan",
+      "resources": [
+        {
+          "id": "tr-r20",
+          "title": "Coaching Skills - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/coaching-skills",
+          "free": false
+        },
+        {
+          "id": "tr-r21",
+          "title": "Coaching & Mentoring - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/coaching-mentoring",
+          "free": false
+        },
+        {
+          "id": "tr-r22",
+          "title": "GROW Model Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tr-8",
+      "title": "Sertifikasi Trainer (Certified Professional Trainer)",
+      "description": "Ambil sertifikasi trainer profesional seperti BNSP Trainer atau Certified Trainer internasional.",
+      "difficulty": "advanced",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "tr-6",
+        "tr-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "tr-r23",
+          "title": "BNSP Trainer Certification",
+          "type": "documentation",
+          "url": "https://bnsp.go.id/sertifikasi-kompetensi/",
+          "free": false
+        },
+        {
+          "id": "tr-r24",
+          "title": "ATD CPTD Certification",
+          "type": "documentation",
+          "url": "https://www.td.org/certification/cptd",
+          "free": false
+        },
+        {
+          "id": "tr-r25",
+          "title": "Sertifikasi Trainer - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sertifikasi-trainer",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

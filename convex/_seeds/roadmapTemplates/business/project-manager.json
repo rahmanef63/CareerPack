@@ -1,0 +1,299 @@
+{
+  "title": "Project Manager",
+  "slug": "project-manager",
+  "domain": "business",
+  "icon": "Briefcase",
+  "color": "bg-slate-600",
+  "description": "Kelola proyek dari inisiasi hingga penutupan dengan metodologi Waterfall, Agile, atau hybrid.",
+  "tags": [
+    "pmp",
+    "agile",
+    "scrum",
+    "risk-management",
+    "stakeholder"
+  ],
+  "order": 13,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "pjm-1",
+      "title": "Fondasi Manajemen Proyek",
+      "description": "Pelajari PMBOK, project lifecycle, dan perbedaan Waterfall vs Agile.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "pjm-r1",
+          "title": "Project Management Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/project-management-dasar",
+          "free": false
+        },
+        {
+          "id": "pjm-r2",
+          "title": "Google Project Management Certificate - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/google-certificates/project-management",
+          "free": false
+        },
+        {
+          "id": "pjm-r3",
+          "title": "Project Management - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pjm-r4",
+          "title": "PMBOK Guide - PMI",
+          "type": "book",
+          "url": "https://pmi.org/pmbok-guide-standards/foundational/pmbok",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pjm-2",
+      "title": "Perencanaan Proyek (Scope, Time, Cost)",
+      "description": "Buat WBS, Gantt chart, dan estimasi biaya untuk perencanaan proyek yang solid.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pjm-1"
+      ],
+      "parentId": "pjm-1",
+      "category": "Perencanaan",
+      "resources": [
+        {
+          "id": "pjm-r5",
+          "title": "Project Planning - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/project-planning",
+          "free": false
+        },
+        {
+          "id": "pjm-r6",
+          "title": "Gantt Chart Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pjm-r7",
+          "title": "WBS Guide - PMI",
+          "type": "documentation",
+          "url": "https://pmi.org/learning/library/applying-work-breakdown-structure-project-lifecycle-6979",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pjm-3",
+      "title": "Manajemen Risiko",
+      "description": "Identifikasi, analisis, dan mitigasi risiko proyek menggunakan risk register.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pjm-2"
+      ],
+      "category": "Eksekusi",
+      "resources": [
+        {
+          "id": "pjm-r8",
+          "title": "Risk Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/risk-management-project",
+          "free": false
+        },
+        {
+          "id": "pjm-r9",
+          "title": "Risk Register Guide - PMI",
+          "type": "documentation",
+          "url": "https://pmi.org/learning/library/risk-register-7945",
+          "free": true
+        },
+        {
+          "id": "pjm-r10",
+          "title": "Manajemen Risiko Proyek - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/risk-management",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pjm-4",
+      "title": "Agile & Scrum untuk Project Manager",
+      "description": "Jalankan proyek dengan framework Scrum: sprint, backlog, dan ceremony Agile.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pjm-1"
+      ],
+      "category": "Metodologi",
+      "resources": [
+        {
+          "id": "pjm-r11",
+          "title": "Agile Project Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/agile-project-management",
+          "free": false
+        },
+        {
+          "id": "pjm-r12",
+          "title": "Scrum Guide Indonesia",
+          "type": "documentation",
+          "url": "https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-Indonesian.pdf",
+          "free": true
+        },
+        {
+          "id": "pjm-r13",
+          "title": "Agile PM - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/agile-project-management",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pjm-5",
+      "title": "Stakeholder Management & Komunikasi",
+      "description": "Kelola ekspektasi stakeholder dan buat komunikasi proyek yang efektif.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pjm-3"
+      ],
+      "category": "Kepemimpinan",
+      "resources": [
+        {
+          "id": "pjm-r14",
+          "title": "Stakeholder Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/stakeholder-management",
+          "free": false
+        },
+        {
+          "id": "pjm-r15",
+          "title": "Project Communication - PMI",
+          "type": "documentation",
+          "url": "https://pmi.org/learning/library/communication-skills-project-manager-7626",
+          "free": true
+        },
+        {
+          "id": "pjm-r16",
+          "title": "Komunikasi Proyek - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pjm-6",
+      "title": "Tools Manajemen Proyek (Jira, Asana, Trello)",
+      "description": "Gunakan tools PM digital untuk tracking task, timeline, dan progress tim.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "pjm-1"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "pjm-r17",
+          "title": "Jira Documentation - Atlassian",
+          "type": "documentation",
+          "url": "https://support.atlassian.com/jira-software-cloud/",
+          "free": true
+        },
+        {
+          "id": "pjm-r18",
+          "title": "Asana Academy",
+          "type": "course",
+          "url": "https://academy.asana.com/",
+          "free": true
+        },
+        {
+          "id": "pjm-r19",
+          "title": "Project Tools - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/project-management-tools",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pjm-7",
+      "title": "Monitoring, Evaluasi & Penutupan Proyek",
+      "description": "Pantau KPI proyek, lakukan project review, dan tutup proyek dengan proper documentation.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pjm-5"
+      ],
+      "category": "Eksekusi",
+      "resources": [
+        {
+          "id": "pjm-r20",
+          "title": "Project Monitoring - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/project-execution",
+          "free": false
+        },
+        {
+          "id": "pjm-r21",
+          "title": "Project Closure Guide - PMI",
+          "type": "documentation",
+          "url": "https://pmi.org/learning/library/project-closure-guide-7942",
+          "free": true
+        },
+        {
+          "id": "pjm-r22",
+          "title": "Monitoring Proyek - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pjm-8",
+      "title": "Sertifikasi PMP / CAPM",
+      "description": "Persiapkan ujian sertifikasi PMP atau CAPM dari PMI sebagai standar profesional PM.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "pjm-5",
+        "pjm-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "pjm-r23",
+          "title": "PMP Exam Prep - PMI",
+          "type": "course",
+          "url": "https://pmi.org/certifications/project-management-pmp/earn-the-pmp/pmp-exam-preparation",
+          "free": false
+        },
+        {
+          "id": "pjm-r24",
+          "title": "CAPM Certification - PMI",
+          "type": "documentation",
+          "url": "https://pmi.org/certifications/certified-associate-capm",
+          "free": false
+        },
+        {
+          "id": "pjm-r25",
+          "title": "PMP Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pmp-preparation",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

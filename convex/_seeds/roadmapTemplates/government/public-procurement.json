@@ -1,0 +1,299 @@
+{
+  "title": "Pengadaan Pemerintah",
+  "slug": "public-procurement",
+  "domain": "government",
+  "icon": "ShoppingCart",
+  "color": "bg-slate-700",
+  "description": "Kuasai proses pengadaan barang dan jasa pemerintah sesuai Perpres 16/2018 dan LKPP.",
+  "tags": [
+    "LPSE",
+    "SIRUP",
+    "tender",
+    "LKPP",
+    "e-procurement"
+  ],
+  "order": 72,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "peng-1",
+      "title": "Dasar Pengadaan Barang & Jasa Pemerintah",
+      "description": "Pahami Perpres 16/2018, prinsip pengadaan, dan para pihak dalam pengadaan pemerintah.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "peng-r1",
+          "title": "LKPP - Portal Pengadaan",
+          "type": "documentation",
+          "url": "https://www.lkpp.go.id/",
+          "free": true
+        },
+        {
+          "id": "peng-r2",
+          "title": "Perpres 16/2018 - Jdih.go.id",
+          "type": "documentation",
+          "url": "https://jdih.lkpp.go.id/regulation/perpres-16-2018",
+          "free": true
+        },
+        {
+          "id": "peng-r3",
+          "title": "LPSE Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peng-r4",
+          "title": "Pengadaan Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pengadaan-dasar",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "peng-2",
+      "title": "Perencanaan Pengadaan & RUP",
+      "description": "Susun Rencana Umum Pengadaan (RUP) dan input ke SIRUP LKPP sesuai jadwal.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "peng-1"
+      ],
+      "parentId": "peng-1",
+      "category": "Perencanaan",
+      "resources": [
+        {
+          "id": "peng-r5",
+          "title": "SIRUP LKPP - Portal",
+          "type": "documentation",
+          "url": "https://sirup.lkpp.go.id/sirup/",
+          "free": true
+        },
+        {
+          "id": "peng-r6",
+          "title": "Tutorial SIRUP - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peng-r7",
+          "title": "Perencanaan Pengadaan - LKPP",
+          "type": "course",
+          "url": "https://elearning.lkpp.go.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peng-3",
+      "title": "E-Tendering & SPSE",
+      "description": "Laksanakan proses tender elektronik melalui SPSE (LPSE) dari pengumuman hingga penetapan pemenang.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "peng-2"
+      ],
+      "parentId": "peng-2",
+      "category": "Pelaksanaan",
+      "resources": [
+        {
+          "id": "peng-r8",
+          "title": "SPSE Manual - LKPP",
+          "type": "documentation",
+          "url": "https://lpse.lkpp.go.id/eproc4/panduan",
+          "free": true
+        },
+        {
+          "id": "peng-r9",
+          "title": "e-Tendering Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peng-r10",
+          "title": "SPSE Pokja - LKPP E-Learning",
+          "type": "course",
+          "url": "https://elearning.lkpp.go.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peng-4",
+      "title": "Pengadaan Langsung & Penunjukan Langsung",
+      "description": "Laksanakan pengadaan langsung dan penunjukan langsung sesuai threshold dan ketentuan yang berlaku.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "peng-2"
+      ],
+      "category": "Metode",
+      "resources": [
+        {
+          "id": "peng-r11",
+          "title": "Panduan PL & PL - LKPP",
+          "type": "documentation",
+          "url": "https://www.lkpp.go.id/panduan/pengadaan-langsung",
+          "free": true
+        },
+        {
+          "id": "peng-r12",
+          "title": "Pengadaan Langsung - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peng-r13",
+          "title": "Metode Pengadaan - LKPP E-Learning",
+          "type": "course",
+          "url": "https://elearning.lkpp.go.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peng-5",
+      "title": "Kontrak Pengadaan & Addendum",
+      "description": "Susun kontrak pengadaan, kelola addendum, dan pastikan pelaksanaan kontrak sesuai ketentuan.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "peng-3"
+      ],
+      "category": "Kontrak",
+      "resources": [
+        {
+          "id": "peng-r14",
+          "title": "Model Kontrak - LKPP",
+          "type": "documentation",
+          "url": "https://www.lkpp.go.id/model-kontrak/",
+          "free": true
+        },
+        {
+          "id": "peng-r15",
+          "title": "Manajemen Kontrak - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/manajemen-kontrak-pengadaan",
+          "free": false
+        },
+        {
+          "id": "peng-r16",
+          "title": "Kontrak Pengadaan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peng-6",
+      "title": "Sertifikasi Pengadaan Tingkat Dasar (L1)",
+      "description": "Ikuti ujian sertifikasi kompetensi pengadaan Level 1 (Dasar) dari LKPP untuk menjadi pejabat pengadaan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "peng-4"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "peng-r17",
+          "title": "Sertifikasi LKPP L1 - Portal",
+          "type": "documentation",
+          "url": "https://inaproc.lkpp.go.id/e-sertifikasi/",
+          "free": true
+        },
+        {
+          "id": "peng-r18",
+          "title": "Tryout Sertifikasi LKPP - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peng-r19",
+          "title": "Ujian Pengadaan - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sertifikasi-pengadaan",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "peng-7",
+      "title": "Audit Pengadaan & Pengendalian Internal",
+      "description": "Pahami audit pengadaan oleh BPK/BPKP dan implementasikan pengendalian internal yang baik.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "peng-5"
+      ],
+      "category": "Audit",
+      "resources": [
+        {
+          "id": "peng-r20",
+          "title": "Audit BPK - Portal Informasi",
+          "type": "documentation",
+          "url": "https://www.bpk.go.id/",
+          "free": true
+        },
+        {
+          "id": "peng-r21",
+          "title": "SPIP - BPKP",
+          "type": "documentation",
+          "url": "https://www.bpkp.go.id/spip/",
+          "free": true
+        },
+        {
+          "id": "peng-r22",
+          "title": "Audit Pengadaan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peng-8",
+      "title": "E-Katalog & E-Purchasing",
+      "description": "Lakukan belanja menggunakan e-Katalog LKPP dan sistem e-Purchasing untuk efisiensi pengadaan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "peng-3"
+      ],
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "peng-r23",
+          "title": "E-Katalog LKPP",
+          "type": "documentation",
+          "url": "https://e-katalog.lkpp.go.id/",
+          "free": true
+        },
+        {
+          "id": "peng-r24",
+          "title": "Tutorial e-Katalog - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peng-r25",
+          "title": "E-Purchasing Guide - LKPP",
+          "type": "documentation",
+          "url": "https://elearning.lkpp.go.id/epurchasing/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

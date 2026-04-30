@@ -1,0 +1,301 @@
+{
+  "title": "Admin Payroll & HRIS",
+  "slug": "payroll-admin",
+  "domain": "hr",
+  "icon": "DollarSign",
+  "color": "bg-violet-600",
+  "description": "Kelola penggajian karyawan, administrasi BPJS, dan sistem informasi SDM secara akurat dan tepat waktu.",
+  "tags": [
+    "payroll",
+    "BPJS",
+    "PPh-21",
+    "HRIS",
+    "absensi"
+  ],
+  "order": 63,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "pay-1",
+      "title": "Dasar Administrasi Penggajian",
+      "description": "Pahami komponen gaji, struktur penggajian, dan regulasi upah minimum regional di Indonesia.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "pay-r1",
+          "title": "Payroll Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/payroll-dasar",
+          "free": false
+        },
+        {
+          "id": "pay-r2",
+          "title": "Penggajian Indonesia - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pay-r3",
+          "title": "UMR/UMP Portal - Kemnaker",
+          "type": "documentation",
+          "url": "https://kemnaker.go.id/upah-minimum/",
+          "free": true
+        },
+        {
+          "id": "pay-r4",
+          "title": "Payroll Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/payroll-management",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pay-2",
+      "title": "PPh Pasal 21 & Kewajiban Pajak Karyawan",
+      "description": "Hitung PPh 21 menggunakan tarif progresif, TER, dan laporkan melalui eSPT/DJP Online.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pay-1"
+      ],
+      "parentId": "pay-1",
+      "category": "Perpajakan",
+      "resources": [
+        {
+          "id": "pay-r5",
+          "title": "PPh 21 Tutorial - DJP Online",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/pph-pasal-21",
+          "free": true
+        },
+        {
+          "id": "pay-r6",
+          "title": "PPh 21 - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pph-21-karyawan",
+          "free": false
+        },
+        {
+          "id": "pay-r7",
+          "title": "Pajak Karyawan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pay-3",
+      "title": "BPJS Ketenagakerjaan & Kesehatan",
+      "description": "Daftarkan dan administrasikan BPJS Kesehatan dan Ketenagakerjaan karyawan sesuai regulasi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pay-1"
+      ],
+      "category": "BPJS",
+      "resources": [
+        {
+          "id": "pay-r8",
+          "title": "BPJS Ketenagakerjaan Portal",
+          "type": "documentation",
+          "url": "https://www.bpjsketenagakerjaan.go.id/",
+          "free": true
+        },
+        {
+          "id": "pay-r9",
+          "title": "BPJS Kesehatan Portal",
+          "type": "documentation",
+          "url": "https://bpjs-kesehatan.go.id/bpjs/",
+          "free": true
+        },
+        {
+          "id": "pay-r10",
+          "title": "BPJS Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pay-4",
+      "title": "Sistem Absensi & Manajemen Cuti",
+      "description": "Kelola absensi karyawan dan administrasi cuti: cuti tahunan, cuti melahirkan, dan cuti sakit.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "pay-1"
+      ],
+      "category": "Administrasi",
+      "resources": [
+        {
+          "id": "pay-r11",
+          "title": "Talenta Attendance Management",
+          "type": "documentation",
+          "url": "https://talenta.co/absensi/",
+          "free": false
+        },
+        {
+          "id": "pay-r12",
+          "title": "Manajemen Cuti - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pay-r13",
+          "title": "Cuti Karyawan - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/manajemen-cuti",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pay-5",
+      "title": "Software Payroll (Talenta / Gadjian)",
+      "description": "Operasikan software payroll Indonesia: Talenta, Gadjian, atau Krishand Payroll untuk penggajian otomatis.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pay-2",
+        "pay-3"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "pay-r14",
+          "title": "Talenta Payroll Documentation",
+          "type": "documentation",
+          "url": "https://talenta.co/penggajian/",
+          "free": false
+        },
+        {
+          "id": "pay-r15",
+          "title": "Gadjian Tutorial",
+          "type": "documentation",
+          "url": "https://gadjian.com/cara-pakai/",
+          "free": false
+        },
+        {
+          "id": "pay-r16",
+          "title": "Payroll Software - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pay-6",
+      "title": "Tunjangan Hari Raya (THR) & Bonus",
+      "description": "Hitung dan proses THR sesuai PP 36/2021, kebijakan bonus, dan insentif karyawan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "pay-3"
+      ],
+      "category": "Kompensasi",
+      "resources": [
+        {
+          "id": "pay-r17",
+          "title": "Panduan THR - Kemnaker",
+          "type": "documentation",
+          "url": "https://kemnaker.go.id/thr/",
+          "free": true
+        },
+        {
+          "id": "pay-r18",
+          "title": "THR Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pay-r19",
+          "title": "Kompensasi & Benefit - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/kompensasi-benefit",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pay-7",
+      "title": "Laporan HR & Analitik Payroll",
+      "description": "Buat laporan penggajian, rekonsiliasi, dan analisis biaya tenaga kerja untuk manajemen.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pay-5"
+      ],
+      "parentId": "pay-5",
+      "category": "Pelaporan",
+      "resources": [
+        {
+          "id": "pay-r20",
+          "title": "HR Reporting - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/hr-reporting",
+          "free": false
+        },
+        {
+          "id": "pay-r21",
+          "title": "Payroll Analytics - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pay-r22",
+          "title": "Excel untuk HR - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/excel-untuk-hr/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pay-8",
+      "title": "Kepatuhan Ketenagakerjaan & Audit Payroll",
+      "description": "Pastikan kepatuhan regulasi ketenagakerjaan dan lakukan audit payroll berkala.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pay-6",
+        "pay-7"
+      ],
+      "category": "Kepatuhan",
+      "resources": [
+        {
+          "id": "pay-r23",
+          "title": "Labor Compliance - Kemnaker",
+          "type": "documentation",
+          "url": "https://kemnaker.go.id/kepatuhan/",
+          "free": true
+        },
+        {
+          "id": "pay-r24",
+          "title": "Payroll Audit - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/payroll-audit",
+          "free": false
+        },
+        {
+          "id": "pay-r25",
+          "title": "HR Compliance - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

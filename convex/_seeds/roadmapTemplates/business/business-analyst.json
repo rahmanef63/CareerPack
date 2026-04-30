@@ -1,0 +1,301 @@
+{
+  "title": "Business Analyst",
+  "slug": "business-analyst",
+  "domain": "business",
+  "icon": "BarChart3",
+  "color": "bg-amber-500",
+  "description": "Jembatani kebutuhan bisnis dan teknologi dengan analisis proses, data, dan solusi berbasis kebutuhan.",
+  "tags": [
+    "requirements",
+    "process-mapping",
+    "sql",
+    "stakeholder",
+    "bpmn"
+  ],
+  "order": 14,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "ba-1",
+      "title": "Fondasi Business Analysis",
+      "description": "Pahami peran BA, BABOK, dan kerangka kerja analisis bisnis dalam organisasi.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ba-r1",
+          "title": "Business Analysis Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/business-analysis-dasar",
+          "free": false
+        },
+        {
+          "id": "ba-r2",
+          "title": "BABOK Guide v3 - IIBA",
+          "type": "documentation",
+          "url": "https://iiba.org/standards-and-resources/babok/",
+          "free": false
+        },
+        {
+          "id": "ba-r3",
+          "title": "Business Analyst - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ba-r4",
+          "title": "BA Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/business-analysis-fundamentals",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ba-2",
+      "title": "Analisis Kebutuhan (Requirements Engineering)",
+      "description": "Elicit, dokumentasikan, dan validasi kebutuhan bisnis dan sistem dari stakeholder.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ba-1"
+      ],
+      "parentId": "ba-1",
+      "category": "Analisis",
+      "resources": [
+        {
+          "id": "ba-r5",
+          "title": "Requirements Engineering - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/requirements-engineering-secure",
+          "free": false
+        },
+        {
+          "id": "ba-r6",
+          "title": "Requirements Analysis - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/requirements-analysis",
+          "free": false
+        },
+        {
+          "id": "ba-r7",
+          "title": "User Story Mapping - Atlassian",
+          "type": "documentation",
+          "url": "https://www.atlassian.com/agile/project-management/user-stories",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ba-3",
+      "title": "Pemodelan Proses Bisnis (BPMN)",
+      "description": "Buat diagram BPMN untuk mendokumentasikan dan menganalisis alur proses bisnis.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ba-2"
+      ],
+      "category": "Modeling",
+      "resources": [
+        {
+          "id": "ba-r8",
+          "title": "BPMN Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ba-r9",
+          "title": "Bizagi BPMN Tutorial (gratis)",
+          "type": "course",
+          "url": "https://bizagi.com/en/resources/bpmn-tutorial",
+          "free": true
+        },
+        {
+          "id": "ba-r10",
+          "title": "Process Modeling - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/process-modeling",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ba-4",
+      "title": "SQL untuk Business Analyst",
+      "description": "Ekstrak dan analisis data dari database menggunakan SQL untuk mendukung pengambilan keputusan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ba-1"
+      ],
+      "category": "Data",
+      "resources": [
+        {
+          "id": "ba-r11",
+          "title": "SQL untuk BA - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ba-r12",
+          "title": "SQL Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/sql-dasar",
+          "free": true
+        },
+        {
+          "id": "ba-r13",
+          "title": "Advanced SQL - Kaggle",
+          "type": "course",
+          "url": "https://kaggle.com/learn/advanced-sql",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ba-5",
+      "title": "Data Visualization (Power BI / Tableau)",
+      "description": "Buat dashboard dan laporan visual dengan Power BI atau Tableau untuk presentasi insight bisnis.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ba-4"
+      ],
+      "parentId": "ba-4",
+      "category": "Data",
+      "resources": [
+        {
+          "id": "ba-r14",
+          "title": "Power BI Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ba-r15",
+          "title": "Microsoft Power BI Training (gratis)",
+          "type": "course",
+          "url": "https://learn.microsoft.com/en-us/training/powerplatform/power-bi",
+          "free": true
+        },
+        {
+          "id": "ba-r16",
+          "title": "Tableau Training - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/tableau-dasar",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ba-6",
+      "title": "UAT & Validasi Solusi",
+      "description": "Rencanakan dan eksekusi User Acceptance Testing untuk memvalidasi bahwa solusi memenuhi kebutuhan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ba-3"
+      ],
+      "category": "Validasi",
+      "resources": [
+        {
+          "id": "ba-r17",
+          "title": "UAT Guide - Guru99",
+          "type": "article",
+          "url": "https://guru99.com/user-acceptance-testing-uat.html",
+          "free": true
+        },
+        {
+          "id": "ba-r18",
+          "title": "Solution Validation - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/uat-validation",
+          "free": false
+        },
+        {
+          "id": "ba-r19",
+          "title": "Testing & Validation - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ba-7",
+      "title": "Agile BA dalam Tim Scrum",
+      "description": "Jalankan peran BA dalam tim Agile: product backlog refinement, sprint planning support, dan acceptance criteria.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ba-2",
+        "ba-6"
+      ],
+      "category": "Agile",
+      "resources": [
+        {
+          "id": "ba-r20",
+          "title": "Agile BA - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/agile-business-analysis",
+          "free": false
+        },
+        {
+          "id": "ba-r21",
+          "title": "BA dalam Scrum - Atlassian",
+          "type": "documentation",
+          "url": "https://www.atlassian.com/agile/product-management/requirements",
+          "free": true
+        },
+        {
+          "id": "ba-r22",
+          "title": "Agile BA - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/agile-business-analyst",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ba-8",
+      "title": "Sertifikasi CBAP / ECBA",
+      "description": "Persiapkan sertifikasi IIBA ECBA (entry) atau CBAP (advanced) untuk pengakuan profesional BA.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "ba-5",
+        "ba-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "ba-r23",
+          "title": "ECBA Certification - IIBA",
+          "type": "documentation",
+          "url": "https://iiba.org/certification/ecba/",
+          "free": false
+        },
+        {
+          "id": "ba-r24",
+          "title": "CBAP Certification - IIBA",
+          "type": "documentation",
+          "url": "https://iiba.org/certification/cbap/",
+          "free": false
+        },
+        {
+          "id": "ba-r25",
+          "title": "BA Certification Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/ba-certification",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

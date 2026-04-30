@@ -1,0 +1,300 @@
+{
+  "title": "Akuntansi & Keuangan",
+  "slug": "accounting",
+  "domain": "finance",
+  "icon": "Calculator",
+  "color": "bg-emerald-600",
+  "description": "Kuasai akuntansi keuangan, perpajakan, dan pelaporan keuangan sesuai standar PSAK dan SAK.",
+  "tags": [
+    "akuntansi",
+    "laporan-keuangan",
+    "perpajakan",
+    "PSAK",
+    "SAP"
+  ],
+  "order": 51,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "akun-1",
+      "title": "Dasar Akuntansi & Siklus Akuntansi",
+      "description": "Pelajari persamaan akuntansi, jurnal, buku besar, dan siklus akuntansi lengkap.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "akun-r1",
+          "title": "Akuntansi Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/akuntansi-dasar",
+          "free": false
+        },
+        {
+          "id": "akun-r2",
+          "title": "Akuntansi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "akun-r3",
+          "title": "Financial Accounting - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/financial-accounting",
+          "free": false
+        },
+        {
+          "id": "akun-r4",
+          "title": "Ruangguru - Akuntansi SMA",
+          "type": "course",
+          "url": "https://ruangguru.com/guru-les-privat/akuntansi",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "akun-2",
+      "title": "Laporan Keuangan (PSAK)",
+      "description": "Susun laporan keuangan sesuai PSAK: laporan laba rugi, neraca, arus kas, dan perubahan ekuitas.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "akun-1"
+      ],
+      "parentId": "akun-1",
+      "category": "Pelaporan",
+      "resources": [
+        {
+          "id": "akun-r5",
+          "title": "PSAK - IAI Indonesia",
+          "type": "documentation",
+          "url": "https://www.iaiglobal.or.id/v03/standar-akuntansi-keuangan/sak",
+          "free": false
+        },
+        {
+          "id": "akun-r6",
+          "title": "Laporan Keuangan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "akun-r7",
+          "title": "Financial Reporting - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/laporan-keuangan-psak",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "akun-3",
+      "title": "Perpajakan Dasar & eSPT",
+      "description": "Pelajari jenis-jenis pajak, PPh, PPN, dan cara pengisian SPT menggunakan eSPT/DJP Online.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "akun-1"
+      ],
+      "category": "Perpajakan",
+      "resources": [
+        {
+          "id": "akun-r8",
+          "title": "DJP Online - Panduan",
+          "type": "documentation",
+          "url": "https://pajak.go.id/",
+          "free": true
+        },
+        {
+          "id": "akun-r9",
+          "title": "Perpajakan Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perpajakan-dasar",
+          "free": false
+        },
+        {
+          "id": "akun-r10",
+          "title": "Pajak Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "akun-4",
+      "title": "Akuntansi Biaya & Manajemen",
+      "description": "Analisis biaya produksi, harga pokok penjualan, dan akuntansi untuk pengambilan keputusan manajerial.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "akun-2"
+      ],
+      "parentId": "akun-2",
+      "category": "Manajemen",
+      "resources": [
+        {
+          "id": "akun-r11",
+          "title": "Managerial Accounting - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/managerial-accounting",
+          "free": false
+        },
+        {
+          "id": "akun-r12",
+          "title": "Akuntansi Biaya - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "akun-r13",
+          "title": "Cost Accounting - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/akuntansi-biaya",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "akun-5",
+      "title": "Software Akuntansi (Accurate / SAP)",
+      "description": "Gunakan software akuntansi Accurate Online atau modul SAP FI/CO untuk pembukuan digital.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "akun-2"
+      ],
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "akun-r14",
+          "title": "Accurate Online Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "akun-r15",
+          "title": "Accurate Software Documentation",
+          "type": "documentation",
+          "url": "https://accurate.id/support/",
+          "free": true
+        },
+        {
+          "id": "akun-r16",
+          "title": "SAP FICO Training - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sap-fico",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "akun-6",
+      "title": "Audit Dasar & Internal Audit",
+      "description": "Pelajari prinsip audit, prosedur audit, dan praktik internal audit berdasarkan standar IIA.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "akun-2"
+      ],
+      "category": "Audit",
+      "resources": [
+        {
+          "id": "akun-r17",
+          "title": "Auditing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/auditing",
+          "free": false
+        },
+        {
+          "id": "akun-r18",
+          "title": "Internal Audit - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/internal-audit",
+          "free": false
+        },
+        {
+          "id": "akun-r19",
+          "title": "IIA Standards",
+          "type": "documentation",
+          "url": "https://www.theiia.org/en/standards/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "akun-7",
+      "title": "Analisis Laporan Keuangan",
+      "description": "Analisis rasio keuangan, valuasi bisnis, dan interpretasi laporan keuangan untuk keputusan bisnis.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "akun-4"
+      ],
+      "category": "Analisis",
+      "resources": [
+        {
+          "id": "akun-r20",
+          "title": "Financial Analysis - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/financial-analysis",
+          "free": false
+        },
+        {
+          "id": "akun-r21",
+          "title": "Analisis Laporan Keuangan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "akun-r22",
+          "title": "Financial Analysis - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/analisis-laporan-keuangan",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "akun-8",
+      "title": "Sertifikasi CA / CPA Indonesia",
+      "description": "Persiapkan ujian sertifikasi Chartered Accountant (CA) dari IAI atau CPA Indonesia.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "akun-6",
+        "akun-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "akun-r23",
+          "title": "CA IAI Indonesia",
+          "type": "documentation",
+          "url": "https://www.iaiglobal.or.id/v03/sertifikasi/ca",
+          "free": false
+        },
+        {
+          "id": "akun-r24",
+          "title": "CPA Indonesia - IAPI",
+          "type": "documentation",
+          "url": "https://iapi.or.id/ujian-cpa/",
+          "free": false
+        },
+        {
+          "id": "akun-r25",
+          "title": "CA Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/ca-preparation",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

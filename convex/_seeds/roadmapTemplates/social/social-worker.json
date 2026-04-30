@@ -1,0 +1,300 @@
+{
+  "title": "Pekerja Sosial",
+  "slug": "social-worker",
+  "domain": "social",
+  "icon": "HeartHandshake",
+  "color": "bg-rose-400",
+  "description": "Bantu individu, keluarga, dan komunitas rentan melalui intervensi sosial yang profesional dan berbasis bukti.",
+  "tags": [
+    "kesejahteraan-sosial",
+    "konseling",
+    "pemberdayaan",
+    "PMKS",
+    "TKSK"
+  ],
+  "order": 81,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "peksos-1",
+      "title": "Fondasi Pekerjaan Sosial",
+      "description": "Pahami nilai, etika, dan perspektif teoritis pekerjaan sosial profesional di Indonesia.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "peksos-r1",
+          "title": "Kemensos - Standar Pekerjaan Sosial",
+          "type": "documentation",
+          "url": "https://kemensos.go.id/pekerjaan-sosial/",
+          "free": true
+        },
+        {
+          "id": "peksos-r2",
+          "title": "Social Work Foundations - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/social-work",
+          "free": false
+        },
+        {
+          "id": "peksos-r3",
+          "title": "Pekerjaan Sosial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peksos-r4",
+          "title": "Etika Pekerjaan Sosial - IPSPI",
+          "type": "documentation",
+          "url": "https://ipspi.org/etika/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peksos-2",
+      "title": "Assessment & Diagnosis Sosial",
+      "description": "Lakukan penilaian kebutuhan klien, pemetaan masalah, dan diagnosis sosial yang komprehensif.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "peksos-1"
+      ],
+      "parentId": "peksos-1",
+      "category": "Praktik",
+      "resources": [
+        {
+          "id": "peksos-r5",
+          "title": "Social Work Assessment - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/social-work-assessment",
+          "free": false
+        },
+        {
+          "id": "peksos-r6",
+          "title": "Assessment Sosial - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/assessment-sosial",
+          "free": false
+        },
+        {
+          "id": "peksos-r7",
+          "title": "Diagnosis Sosial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peksos-3",
+      "title": "Intervensi Individu & Keluarga",
+      "description": "Terapkan intervensi casework: konseling, problem-solving, dan penguatan fungsi keluarga.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "peksos-2"
+      ],
+      "parentId": "peksos-2",
+      "category": "Intervensi",
+      "resources": [
+        {
+          "id": "peksos-r8",
+          "title": "Casework - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peksos-r9",
+          "title": "Family Intervention - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/family-intervention",
+          "free": false
+        },
+        {
+          "id": "peksos-r10",
+          "title": "Pedoman Intervensi - Kemensos",
+          "type": "documentation",
+          "url": "https://kemensos.go.id/pedoman-intervensi/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peksos-4",
+      "title": "Intervensi Komunitas & Pemberdayaan",
+      "description": "Fasilitasi pengembangan komunitas, pemberdayaan masyarakat, dan community organizing.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "peksos-2"
+      ],
+      "category": "Komunitas",
+      "resources": [
+        {
+          "id": "peksos-r11",
+          "title": "Community Development - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/community-development",
+          "free": false
+        },
+        {
+          "id": "peksos-r12",
+          "title": "Pemberdayaan Masyarakat - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peksos-r13",
+          "title": "Community Organizing Guide - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/community-organizing",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "peksos-5",
+      "title": "Program Perlindungan Sosial Indonesia",
+      "description": "Pahami dan implementasikan program PKH, BPNT, KIP, dan BST di lapangan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "peksos-1"
+      ],
+      "category": "Program",
+      "resources": [
+        {
+          "id": "peksos-r14",
+          "title": "PKH - Kemensos",
+          "type": "documentation",
+          "url": "https://pkh.kemensos.go.id/",
+          "free": true
+        },
+        {
+          "id": "peksos-r15",
+          "title": "DTKS - Data Terpadu Kemiskinan",
+          "type": "documentation",
+          "url": "https://dtks.kemensos.go.id/",
+          "free": true
+        },
+        {
+          "id": "peksos-r16",
+          "title": "Perlindungan Sosial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peksos-6",
+      "title": "Pekerjaan Sosial dengan Anak & Remaja",
+      "description": "Tangani kasus anak rentan: ANAK, anak jalanan, kekerasan anak, dan sistem perlindungan anak.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "peksos-3"
+      ],
+      "category": "Spesialisasi",
+      "resources": [
+        {
+          "id": "peksos-r17",
+          "title": "KPAI - Perlindungan Anak",
+          "type": "documentation",
+          "url": "https://www.kpai.go.id/",
+          "free": true
+        },
+        {
+          "id": "peksos-r18",
+          "title": "Child Protection - UNICEF",
+          "type": "documentation",
+          "url": "https://www.unicef.org/indonesia/child-protection",
+          "free": true
+        },
+        {
+          "id": "peksos-r19",
+          "title": "Peksos Anak - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "peksos-7",
+      "title": "Dokumentasi & Pelaporan Kasus",
+      "description": "Dokumentasikan kasus secara profesional: catatan kasus, laporan kemajuan, dan terminasi layanan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "peksos-3"
+      ],
+      "category": "Administrasi",
+      "resources": [
+        {
+          "id": "peksos-r20",
+          "title": "Case Documentation Guide - NASW",
+          "type": "documentation",
+          "url": "https://www.socialworkers.org/Practice/Documentation",
+          "free": true
+        },
+        {
+          "id": "peksos-r21",
+          "title": "Dokumentasi Kasus - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "peksos-r22",
+          "title": "Case Recording - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/case-recording",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "peksos-8",
+      "title": "Sertifikasi Pekerja Sosial (CPKS)",
+      "description": "Ikuti uji kompetensi dan peroleh Sertifikat Pekerja Sosial (CPKS) dari BNSP/Kemensos.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "peksos-5",
+        "peksos-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "peksos-r23",
+          "title": "Sertifikasi Peksos - IPSPI",
+          "type": "documentation",
+          "url": "https://ipspi.org/sertifikasi/",
+          "free": false
+        },
+        {
+          "id": "peksos-r24",
+          "title": "BNSP Pekerjaan Sosial",
+          "type": "documentation",
+          "url": "https://bnsp.go.id/sertifikasi-pekerjaan-sosial/",
+          "free": false
+        },
+        {
+          "id": "peksos-r25",
+          "title": "CPKS Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

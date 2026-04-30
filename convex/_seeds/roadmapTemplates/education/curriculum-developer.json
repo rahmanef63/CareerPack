@@ -1,0 +1,300 @@
+{
+  "title": "Pengembang Kurikulum",
+  "slug": "curriculum-developer",
+  "domain": "education",
+  "icon": "FileText",
+  "color": "bg-emerald-600",
+  "description": "Rancang kurikulum yang efektif dan berbasis kompetensi untuk institusi pendidikan atau pelatihan.",
+  "tags": [
+    "kurikulum",
+    "instructional-design",
+    "asesmen",
+    "standar-kompetensi",
+    "KKNI"
+  ],
+  "order": 35,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "cd-1",
+      "title": "Fondasi Pengembangan Kurikulum",
+      "description": "Pahami teori kurikulum, model Tyler, Taba, dan kerangka KKNI Indonesia.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "cd-r1",
+          "title": "Pengembangan Kurikulum - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cd-r2",
+          "title": "Curriculum Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/curriculum-design",
+          "free": false
+        },
+        {
+          "id": "cd-r3",
+          "title": "KKNI Indonesia - BNSP",
+          "type": "documentation",
+          "url": "https://bnsp.go.id/kkni/",
+          "free": true
+        },
+        {
+          "id": "cd-r4",
+          "title": "Curriculum Development - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/curriculum-development",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "cd-2",
+      "title": "Analisis Kebutuhan & Standar Kompetensi",
+      "description": "Lakukan analisis kebutuhan industri dan mapping ke standar kompetensi nasional (SKKNI).",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cd-1"
+      ],
+      "parentId": "cd-1",
+      "category": "Analisis",
+      "resources": [
+        {
+          "id": "cd-r5",
+          "title": "SKKNI Database - Kemenaker",
+          "type": "documentation",
+          "url": "https://skkni.kemnaker.go.id/",
+          "free": true
+        },
+        {
+          "id": "cd-r6",
+          "title": "Needs Assessment - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/needs-assessment",
+          "free": false
+        },
+        {
+          "id": "cd-r7",
+          "title": "Analisis Kebutuhan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cd-3",
+      "title": "Perancangan Capaian Pembelajaran",
+      "description": "Rumuskan Capaian Pembelajaran dan learning outcomes menggunakan taksonomi Bloom yang tepat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cd-2"
+      ],
+      "parentId": "cd-2",
+      "category": "Perancangan",
+      "resources": [
+        {
+          "id": "cd-r8",
+          "title": "Bloom's Taxonomy Guide",
+          "type": "documentation",
+          "url": "https://www.bloomstaxonomy.net/",
+          "free": true
+        },
+        {
+          "id": "cd-r9",
+          "title": "Learning Outcomes Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/learning-outcomes",
+          "free": false
+        },
+        {
+          "id": "cd-r10",
+          "title": "Capaian Pembelajaran - Kemendikbud",
+          "type": "documentation",
+          "url": "https://kurikulum.kemdikbud.go.id/capaian-pembelajaran",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cd-4",
+      "title": "Struktur & Urutan Materi Pembelajaran",
+      "description": "Susun materi pembelajaran secara logis, spiral, dan berurutan sesuai perkembangan kognitif peserta.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "cd-3"
+      ],
+      "category": "Perancangan",
+      "resources": [
+        {
+          "id": "cd-r11",
+          "title": "Curriculum Sequencing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cd-r12",
+          "title": "Content Sequencing Guide - ATD",
+          "type": "documentation",
+          "url": "https://www.td.org/insights/curriculum-design",
+          "free": true
+        },
+        {
+          "id": "cd-r13",
+          "title": "Perancangan Materi - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perancangan-materi",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "cd-5",
+      "title": "Pengembangan Asesmen & Evaluasi",
+      "description": "Rancang instrumen penilaian yang valid, reliabel, dan aligned dengan capaian pembelajaran.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cd-3"
+      ],
+      "category": "Asesmen",
+      "resources": [
+        {
+          "id": "cd-r14",
+          "title": "Assessment Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/assessment-design",
+          "free": false
+        },
+        {
+          "id": "cd-r15",
+          "title": "Panduan Asesmen Kemendikbud",
+          "type": "documentation",
+          "url": "https://kurikulum.kemdikbud.go.id/asesmen",
+          "free": true
+        },
+        {
+          "id": "cd-r16",
+          "title": "Evaluasi Kurikulum - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "cd-6",
+      "title": "Implementasi & Monitoring Kurikulum",
+      "description": "Kawal implementasi kurikulum: piloting, monitoring, dan perbaikan berkelanjutan berbasis data.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cd-5"
+      ],
+      "category": "Implementasi",
+      "resources": [
+        {
+          "id": "cd-r17",
+          "title": "Curriculum Implementation Guide - UNESCO",
+          "type": "documentation",
+          "url": "https://unesdoc.unesco.org/ark:/48223/pf0000258932",
+          "free": true
+        },
+        {
+          "id": "cd-r18",
+          "title": "Monitoring Kurikulum - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cd-r19",
+          "title": "Curriculum Evaluation - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/curriculum-evaluation",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "cd-7",
+      "title": "Digital Curriculum & Blended Learning",
+      "description": "Adaptasi kurikulum untuk pembelajaran blended: integrasi teknologi dan e-learning ke dalam kurikulum.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cd-5"
+      ],
+      "category": "Inovasi",
+      "resources": [
+        {
+          "id": "cd-r20",
+          "title": "Blended Learning Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/blended-learning",
+          "free": false
+        },
+        {
+          "id": "cd-r21",
+          "title": "Digital Curriculum - Kemendikbud",
+          "type": "documentation",
+          "url": "https://guru.kemdikbud.go.id/pelatihan-mandiri",
+          "free": true
+        },
+        {
+          "id": "cd-r22",
+          "title": "Blended Learning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/blended-learning-design",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "cd-8",
+      "title": "Akreditasi & Standarisasi Program",
+      "description": "Persiapkan dokumen akreditasi (BAN-PT, LSP) dan pastikan kurikulum memenuhi standar nasional.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "cd-6",
+        "cd-7"
+      ],
+      "category": "Standarisasi",
+      "resources": [
+        {
+          "id": "cd-r23",
+          "title": "BAN-PT Akreditasi Portal",
+          "type": "documentation",
+          "url": "https://ban-pt.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "cd-r24",
+          "title": "Akreditasi Institusi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "cd-r25",
+          "title": "LSP Certification Guide - BNSP",
+          "type": "documentation",
+          "url": "https://bnsp.go.id/lsp/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

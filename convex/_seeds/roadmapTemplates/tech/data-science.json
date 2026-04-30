@@ -1,0 +1,347 @@
+{
+  "title": "Data Science & ML",
+  "slug": "data-science",
+  "domain": "tech",
+  "icon": "BarChart3",
+  "color": "bg-orange-500",
+  "description": "Pelajari analisis data, machine learning, dan visualisasi untuk mengambil keputusan berbasis data.",
+  "tags": [
+    "python",
+    "pandas",
+    "machine-learning",
+    "statistics",
+    "visualization"
+  ],
+  "order": 5,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "ds-1",
+      "title": "Python untuk Data Science",
+      "description": "Kuasai Python dasar dan library NumPy, Pandas untuk manipulasi data.",
+      "difficulty": "beginner",
+      "estimatedHours": 30,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ds-r1",
+          "title": "Python Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/python-dasar",
+          "free": true
+        },
+        {
+          "id": "ds-r2",
+          "title": "Python Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "ds-r3",
+          "title": "Python Data Science - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ds-r4",
+          "title": "Python Data Science - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/python-data-science",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ds-2",
+      "title": "Statistika & Matematika Dasar",
+      "description": "Pelajari statistika deskriptif, probabilitas, distribusi, dan uji hipotesis.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ds-r5",
+          "title": "Statistika Dasar - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ds-r6",
+          "title": "Mathematics for Machine Learning - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/mathematics-machine-learning",
+          "free": false
+        },
+        {
+          "id": "ds-r7",
+          "title": "Statistika - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/guru-les-privat/statistik",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ds-3",
+      "title": "Eksplorasi & Visualisasi Data (EDA)",
+      "description": "Gunakan Matplotlib, Seaborn, dan Plotly untuk EDA dan visualisasi data yang informatif.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ds-1",
+        "ds-2"
+      ],
+      "category": "Analisis",
+      "resources": [
+        {
+          "id": "ds-r8",
+          "title": "Data Visualization Python - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ds-r9",
+          "title": "Matplotlib Documentation",
+          "type": "documentation",
+          "url": "https://matplotlib.org/stable/users/getting_started/",
+          "free": true
+        },
+        {
+          "id": "ds-r10",
+          "title": "Seaborn Tutorial",
+          "type": "documentation",
+          "url": "https://seaborn.pydata.org/tutorial.html",
+          "free": true
+        },
+        {
+          "id": "ds-r11",
+          "title": "Plotly Documentation",
+          "type": "documentation",
+          "url": "https://plotly.com/python/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ds-4",
+      "title": "SQL untuk Data Analyst",
+      "description": "Ekstrak dan transformasi data dari database relasional menggunakan SQL lanjutan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ds-1"
+      ],
+      "category": "Data Engineering",
+      "resources": [
+        {
+          "id": "ds-r12",
+          "title": "SQL untuk Data Analyst - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ds-r13",
+          "title": "SQL Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/sql-dasar",
+          "free": true
+        },
+        {
+          "id": "ds-r14",
+          "title": "Kaggle SQL - gratis",
+          "type": "course",
+          "url": "https://kaggle.com/learn/intro-to-sql",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ds-5",
+      "title": "Machine Learning Dasar (Scikit-learn)",
+      "description": "Implementasi algoritma ML klasik: regresi, klasifikasi, clustering, dan evaluasi model.",
+      "difficulty": "intermediate",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "ds-2",
+        "ds-3"
+      ],
+      "category": "Machine Learning",
+      "resources": [
+        {
+          "id": "ds-r15",
+          "title": "Machine Learning Pemula - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/machine-learning-pemula",
+          "free": true
+        },
+        {
+          "id": "ds-r16",
+          "title": "Machine Learning - Coursera (Andrew Ng)",
+          "type": "course",
+          "url": "https://coursera.org/learn/machine-learning",
+          "free": false
+        },
+        {
+          "id": "ds-r17",
+          "title": "Scikit-learn Documentation",
+          "type": "documentation",
+          "url": "https://scikit-learn.org/stable/getting_started.html",
+          "free": true
+        },
+        {
+          "id": "ds-r18",
+          "title": "Kaggle Learn - ML",
+          "type": "course",
+          "url": "https://kaggle.com/learn/intro-to-machine-learning",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ds-6",
+      "title": "Feature Engineering & Preprocessing",
+      "description": "Transformasi data mentah menjadi fitur yang siap digunakan oleh model ML.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ds-5"
+      ],
+      "parentId": "ds-5",
+      "category": "Machine Learning",
+      "resources": [
+        {
+          "id": "ds-r19",
+          "title": "Feature Engineering - Kaggle",
+          "type": "course",
+          "url": "https://kaggle.com/learn/feature-engineering",
+          "free": true
+        },
+        {
+          "id": "ds-r20",
+          "title": "ML Feature Engineering - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/machine-learning-terapan",
+          "free": true
+        },
+        {
+          "id": "ds-r21",
+          "title": "Preprocessing Data - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/preprocessing-data-python/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ds-7",
+      "title": "Deep Learning (TensorFlow/PyTorch)",
+      "description": "Bangun neural network untuk image classification, NLP, dan time series prediction.",
+      "difficulty": "advanced",
+      "estimatedHours": 50,
+      "prerequisites": [
+        "ds-5"
+      ],
+      "parentId": "ds-5",
+      "category": "Machine Learning",
+      "resources": [
+        {
+          "id": "ds-r22",
+          "title": "Machine Learning Terapan - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/machine-learning-terapan",
+          "free": true
+        },
+        {
+          "id": "ds-r23",
+          "title": "Deep Learning - Coursera (deeplearning.ai)",
+          "type": "course",
+          "url": "https://coursera.org/specializations/deep-learning",
+          "free": false
+        },
+        {
+          "id": "ds-r24",
+          "title": "TensorFlow Documentation",
+          "type": "documentation",
+          "url": "https://www.tensorflow.org/learn",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ds-8",
+      "title": "Natural Language Processing",
+      "description": "Olah teks bahasa Indonesia menggunakan NLTK, spaCy, dan model transformer (IndoBERT).",
+      "difficulty": "advanced",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "ds-7"
+      ],
+      "category": "Machine Learning",
+      "resources": [
+        {
+          "id": "ds-r25",
+          "title": "NLP dengan Python - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/nlp-python",
+          "free": true
+        },
+        {
+          "id": "ds-r26",
+          "title": "Hugging Face Documentation",
+          "type": "documentation",
+          "url": "https://huggingface.co/docs/transformers/index",
+          "free": true
+        },
+        {
+          "id": "ds-r27",
+          "title": "NLP Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ds-9",
+      "title": "MLOps & Deployment Model",
+      "description": "Deploy model ML ke production menggunakan FastAPI, Docker, dan monitoring drift.",
+      "difficulty": "advanced",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "ds-7"
+      ],
+      "category": "Deployment",
+      "resources": [
+        {
+          "id": "ds-r28",
+          "title": "MLOps Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/mlops-fundamentals",
+          "free": false
+        },
+        {
+          "id": "ds-r29",
+          "title": "FastAPI Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "ds-r30",
+          "title": "MLflow Documentation",
+          "type": "documentation",
+          "url": "https://mlflow.org/docs/latest/index.html",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

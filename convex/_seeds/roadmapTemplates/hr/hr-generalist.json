@@ -1,0 +1,300 @@
+{
+  "title": "Human Resources",
+  "slug": "hr-generalist",
+  "domain": "hr",
+  "icon": "Users",
+  "color": "bg-indigo-500",
+  "description": "Kelola siklus lengkap SDM dari rekrutmen, pengembangan, kompensasi, hingga hubungan industrial.",
+  "tags": [
+    "rekrutmen",
+    "kompensasi",
+    "employee-relations",
+    "HRIS",
+    "K3"
+  ],
+  "order": 61,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "hr-1",
+      "title": "Fondasi Manajemen SDM",
+      "description": "Pahami peran HR, fungsi-fungsi MSDM, dan regulasi ketenagakerjaan Indonesia (UU Ketenagakerjaan).",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "hr-r1",
+          "title": "HRM Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/hrm-dasar",
+          "free": false
+        },
+        {
+          "id": "hr-r2",
+          "title": "Human Resources - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/human-resources",
+          "free": false
+        },
+        {
+          "id": "hr-r3",
+          "title": "UU Ketenagakerjaan No 13/2003",
+          "type": "documentation",
+          "url": "https://kemnaker.go.id/uu-ketenagakerjaan/",
+          "free": true
+        },
+        {
+          "id": "hr-r4",
+          "title": "HR Management - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-2",
+      "title": "Rekrutmen & Seleksi",
+      "description": "Kelola proses rekrutmen end-to-end: job analysis, sourcing, screening, assessment, dan onboarding.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "hr-1"
+      ],
+      "parentId": "hr-1",
+      "category": "Rekrutmen",
+      "resources": [
+        {
+          "id": "hr-r5",
+          "title": "Recruitment & Selection - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/rekrutmen-seleksi",
+          "free": false
+        },
+        {
+          "id": "hr-r6",
+          "title": "Talent Acquisition - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/talent-acquisition",
+          "free": false
+        },
+        {
+          "id": "hr-r7",
+          "title": "Rekrutmen Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-3",
+      "title": "Kompensasi & Benefit",
+      "description": "Rancang struktur kompensasi, grade jabatan, dan benefit (BPJS, THR) sesuai regulasi Indonesia.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "hr-1"
+      ],
+      "category": "Kompensasi",
+      "resources": [
+        {
+          "id": "hr-r8",
+          "title": "Compensation & Benefits - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/kompensasi-benefit",
+          "free": false
+        },
+        {
+          "id": "hr-r9",
+          "title": "BPJS Ketenagakerjaan Portal",
+          "type": "documentation",
+          "url": "https://www.bpjsketenagakerjaan.go.id/",
+          "free": true
+        },
+        {
+          "id": "hr-r10",
+          "title": "Kompensasi HR - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-4",
+      "title": "Pelatihan & Pengembangan Karyawan",
+      "description": "Rancang program L&D: TNA, program pelatihan, e-learning, dan evaluasi pengembangan talenta.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "hr-2"
+      ],
+      "category": "Pengembangan",
+      "resources": [
+        {
+          "id": "hr-r11",
+          "title": "Training & Development - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/training-development",
+          "free": false
+        },
+        {
+          "id": "hr-r12",
+          "title": "L&D Strategy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/learning-development",
+          "free": false
+        },
+        {
+          "id": "hr-r13",
+          "title": "Pengembangan Karyawan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-5",
+      "title": "Penilaian Kinerja (KPI & OKR)",
+      "description": "Implementasikan sistem penilaian kinerja berbasis KPI, OKR, atau 360-degree feedback.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "hr-4"
+      ],
+      "parentId": "hr-4",
+      "category": "Kinerja",
+      "resources": [
+        {
+          "id": "hr-r14",
+          "title": "Performance Management - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/performance-management",
+          "free": false
+        },
+        {
+          "id": "hr-r15",
+          "title": "OKR Guide - Google re:Work",
+          "type": "documentation",
+          "url": "https://rework.withgoogle.com/guides/set-goals-with-okrs/",
+          "free": true
+        },
+        {
+          "id": "hr-r16",
+          "title": "KPI HR - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-6",
+      "title": "Hubungan Industrial & Penyelesaian Perselisihan",
+      "description": "Kelola hubungan industrial: PKB, SP, mediasi, dan penyelesaian perselisihan sesuai regulasi.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "hr-3"
+      ],
+      "category": "Hubungan Industrial",
+      "resources": [
+        {
+          "id": "hr-r17",
+          "title": "Hubungan Industrial - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/hubungan-industrial",
+          "free": false
+        },
+        {
+          "id": "hr-r18",
+          "title": "Kemnaker - HI Portal",
+          "type": "documentation",
+          "url": "https://kemnaker.go.id/hubungan-industrial/",
+          "free": true
+        },
+        {
+          "id": "hr-r19",
+          "title": "Labor Relations - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-7",
+      "title": "HRIS & HR Technology",
+      "description": "Gunakan sistem HRIS (SAP HCM, Workday, Talenta) untuk otomasi proses HR.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "hr-3"
+      ],
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "hr-r20",
+          "title": "Talenta HR System",
+          "type": "documentation",
+          "url": "https://talenta.co/",
+          "free": false
+        },
+        {
+          "id": "hr-r21",
+          "title": "HRIS Implementation - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/hris-implementation",
+          "free": false
+        },
+        {
+          "id": "hr-r22",
+          "title": "HR Technology - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hr-8",
+      "title": "Sertifikasi CHRP / CHRO",
+      "description": "Persiapkan sertifikasi Chartered Human Resources Practitioner atau program BNSP HR.",
+      "difficulty": "advanced",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "hr-6",
+        "hr-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "hr-r23",
+          "title": "BNSP HR Sertifikasi",
+          "type": "documentation",
+          "url": "https://bnsp.go.id/sertifikasi-sdm/",
+          "free": false
+        },
+        {
+          "id": "hr-r24",
+          "title": "SHRM Certification",
+          "type": "documentation",
+          "url": "https://www.shrm.org/certification",
+          "free": false
+        },
+        {
+          "id": "hr-r25",
+          "title": "HR Certification - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/hr-certification",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

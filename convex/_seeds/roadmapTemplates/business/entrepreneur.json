@@ -1,0 +1,300 @@
+{
+  "title": "Wirausaha / Entrepreneur",
+  "slug": "entrepreneur",
+  "domain": "business",
+  "icon": "Megaphone",
+  "color": "bg-yellow-500",
+  "description": "Bangun bisnis dari nol: validasi ide, model bisnis, fundraising, dan skalakan usaha Anda.",
+  "tags": [
+    "startup",
+    "business-model",
+    "marketing",
+    "fundraising",
+    "mvp"
+  ],
+  "order": 16,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "en-1",
+      "title": "Mindset & Fondasi Wirausaha",
+      "description": "Bangun pola pikir entrepreneur: resiliensi, risk tolerance, dan growth mindset.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Mindset",
+      "resources": [
+        {
+          "id": "en-r1",
+          "title": "Entrepreneurship Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/entrepreneurship",
+          "free": false
+        },
+        {
+          "id": "en-r2",
+          "title": "Wirausaha Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/wirausaha-dasar",
+          "free": false
+        },
+        {
+          "id": "en-r3",
+          "title": "Entrepreneurship - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "en-r4",
+          "title": "Zero to One - Peter Thiel (buku)",
+          "type": "book",
+          "url": "https://zerotoonebook.com/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "en-2",
+      "title": "Validasi Ide & Problem-Solution Fit",
+      "description": "Validasi ide bisnis sebelum investasi besar menggunakan customer discovery dan MVP.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "en-1"
+      ],
+      "parentId": "en-1",
+      "category": "Ideasi",
+      "resources": [
+        {
+          "id": "en-r5",
+          "title": "Lean Startup Methodology - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/lean-startup",
+          "free": false
+        },
+        {
+          "id": "en-r6",
+          "title": "Customer Discovery - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/customer-discovery",
+          "free": false
+        },
+        {
+          "id": "en-r7",
+          "title": "The Lean Startup (buku ringkasan)",
+          "type": "article",
+          "url": "https://leanstartup.com/the-lean-startup/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "en-3",
+      "title": "Business Model Canvas",
+      "description": "Buat Business Model Canvas (BMC) untuk merancang dan memvisualisasikan model bisnis.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "en-2"
+      ],
+      "category": "Perencanaan",
+      "resources": [
+        {
+          "id": "en-r8",
+          "title": "Business Model Canvas - Strategyzer",
+          "type": "documentation",
+          "url": "https://strategyzer.com/canvas/business-model-canvas",
+          "free": true
+        },
+        {
+          "id": "en-r9",
+          "title": "BMC Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "en-r10",
+          "title": "Business Model - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/business-model-canvas",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "en-4",
+      "title": "Keuangan Bisnis Dasar",
+      "description": "Pahami laporan keuangan dasar, cash flow management, dan break-even analysis untuk bisnis.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "en-3"
+      ],
+      "category": "Keuangan",
+      "resources": [
+        {
+          "id": "en-r11",
+          "title": "Financial Accounting - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/financial-accounting",
+          "free": false
+        },
+        {
+          "id": "en-r12",
+          "title": "Keuangan Bisnis - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/keuangan-bisnis-dasar",
+          "free": false
+        },
+        {
+          "id": "en-r13",
+          "title": "Cash Flow Management - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "en-5",
+      "title": "Marketing & Brand Building",
+      "description": "Bangun brand dan strategi pemasaran digital untuk menjangkau target pasar secara efektif.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "en-3"
+      ],
+      "category": "Pemasaran",
+      "resources": [
+        {
+          "id": "en-r14",
+          "title": "Digital Marketing - Google Digital Garage",
+          "type": "course",
+          "url": "https://learndigital.withgoogle.com/digitalgarage",
+          "free": true
+        },
+        {
+          "id": "en-r15",
+          "title": "Brand Building - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/brand-building",
+          "free": false
+        },
+        {
+          "id": "en-r16",
+          "title": "Marketing untuk Startup - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "en-6",
+      "title": "Legalitas & Perizinan Usaha di Indonesia",
+      "description": "Pahami proses pendirian PT/CV, OSS RBA, izin usaha, dan kewajiban pajak untuk usaha baru.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "en-4"
+      ],
+      "category": "Legal",
+      "resources": [
+        {
+          "id": "en-r17",
+          "title": "OSS RBA - BKPM",
+          "type": "documentation",
+          "url": "https://oss.go.id/informasi/panduan",
+          "free": true
+        },
+        {
+          "id": "en-r18",
+          "title": "Legalitas Usaha - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/legalitas-usaha",
+          "free": false
+        },
+        {
+          "id": "en-r19",
+          "title": "Pajak UKM - DJP Online",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/usaha-kecil-menengah",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "en-7",
+      "title": "Fundraising & Investasi",
+      "description": "Pelajari cara mendapatkan pendanaan: bootstrapping, angel investor, VC, dan pitching deck.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "en-4",
+        "en-5"
+      ],
+      "category": "Pendanaan",
+      "resources": [
+        {
+          "id": "en-r20",
+          "title": "Fundraising for Startups - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/startup-funding",
+          "free": false
+        },
+        {
+          "id": "en-r21",
+          "title": "Investor Pitch Guide - YCombinator",
+          "type": "documentation",
+          "url": "https://www.ycombinator.com/library/4T-how-to-design-a-better-pitch-deck",
+          "free": true
+        },
+        {
+          "id": "en-r22",
+          "title": "Fundraising Indonesia - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "en-8",
+      "title": "Skalabilitas & Growth Hacking",
+      "description": "Skalakan bisnis dari traction ke growth: product-market fit, growth loops, dan tim scaling.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "en-6",
+        "en-7"
+      ],
+      "category": "Growth",
+      "resources": [
+        {
+          "id": "en-r23",
+          "title": "Growth Hacking - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/growth-hacking",
+          "free": false
+        },
+        {
+          "id": "en-r24",
+          "title": "Scaling Startup - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/scaling-startup",
+          "free": false
+        },
+        {
+          "id": "en-r25",
+          "title": "Growth Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

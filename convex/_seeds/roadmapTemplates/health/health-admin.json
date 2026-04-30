@@ -1,0 +1,299 @@
+{
+  "title": "Administrasi Rumah Sakit",
+  "slug": "health-admin",
+  "domain": "health",
+  "icon": "Building2",
+  "color": "bg-sky-500",
+  "description": "Kelola administrasi dan operasional fasilitas kesehatan secara efisien dan sesuai regulasi.",
+  "tags": [
+    "administrasi-rs",
+    "SIMRS",
+    "BPJS",
+    "akreditasi",
+    "manajemen-faskes"
+  ],
+  "order": 43,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "admrs-1",
+      "title": "Fondasi Manajemen Rumah Sakit",
+      "description": "Pahami sistem pelayanan kesehatan Indonesia, struktur organisasi RS, dan regulasi perumahsakitan.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "admrs-r1",
+          "title": "Manajemen RS - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "admrs-r2",
+          "title": "Hospital Administration - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/hospital-administration",
+          "free": false
+        },
+        {
+          "id": "admrs-r3",
+          "title": "UU Rumah Sakit No 44/2009",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/uu-rumah-sakit/",
+          "free": true
+        },
+        {
+          "id": "admrs-r4",
+          "title": "Adminkes - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/administrasi-kesehatan",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "admrs-2",
+      "title": "Sistem Informasi RS (SIMRS)",
+      "description": "Operasikan SIMRS untuk registrasi pasien, billing, rekam medis elektronik, dan laporan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "admrs-1"
+      ],
+      "parentId": "admrs-1",
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "admrs-r5",
+          "title": "SIMRS Guide - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/simrs/",
+          "free": true
+        },
+        {
+          "id": "admrs-r6",
+          "title": "SIMRS Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "admrs-r7",
+          "title": "Healthcare IT - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/healthcare-it",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "admrs-3",
+      "title": "Pelayanan BPJS & JKN di Faskes",
+      "description": "Proses klaim BPJS, verifikasi berkas, coding INA-CBG, dan administrasi JKN.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "admrs-1"
+      ],
+      "category": "BPJS",
+      "resources": [
+        {
+          "id": "admrs-r8",
+          "title": "Panduan BPJS Faskes - BPJS Kesehatan",
+          "type": "documentation",
+          "url": "https://bpjs-kesehatan.go.id/bpjs/",
+          "free": true
+        },
+        {
+          "id": "admrs-r9",
+          "title": "INA-CBG Coding Guide - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/ina-cbg/",
+          "free": true
+        },
+        {
+          "id": "admrs-r10",
+          "title": "BPJS RS Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "admrs-4",
+      "title": "Rekam Medis & Kodifikasi ICD",
+      "description": "Kelola rekam medis sesuai standar, lakukan kodifikasi diagnosis ICD-10, dan prosedur ICD-9-CM.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "admrs-2"
+      ],
+      "parentId": "admrs-2",
+      "category": "Rekam Medis",
+      "resources": [
+        {
+          "id": "admrs-r11",
+          "title": "ICD-10 WHO Documentation",
+          "type": "documentation",
+          "url": "https://icd.who.int/browse10/2019/en",
+          "free": true
+        },
+        {
+          "id": "admrs-r12",
+          "title": "Rekam Medis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "admrs-r13",
+          "title": "Medical Coding - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/medical-coding",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "admrs-5",
+      "title": "Akreditasi RS (SNARS)",
+      "description": "Persiapkan dan implementasikan standar akreditasi SNARS dari KARS untuk peningkatan mutu RS.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "admrs-3"
+      ],
+      "category": "Mutu",
+      "resources": [
+        {
+          "id": "admrs-r14",
+          "title": "SNARS - KARS Indonesia",
+          "type": "documentation",
+          "url": "https://www.kars.or.id/",
+          "free": false
+        },
+        {
+          "id": "admrs-r15",
+          "title": "Akreditasi RS Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "admrs-r16",
+          "title": "Healthcare Quality - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/healthcare-quality",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "admrs-6",
+      "title": "Manajemen SDM Kesehatan",
+      "description": "Kelola SDM di fasilitas kesehatan: rekrutmen tenaga medis, penilaian kinerja, dan pengembangan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "admrs-4"
+      ],
+      "category": "SDM",
+      "resources": [
+        {
+          "id": "admrs-r17",
+          "title": "Healthcare HR Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/healthcare-human-resources",
+          "free": false
+        },
+        {
+          "id": "admrs-r18",
+          "title": "SDM Kesehatan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "admrs-r19",
+          "title": "HR Faskes - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sdm-faskes",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "admrs-7",
+      "title": "Keuangan & Anggaran RS",
+      "description": "Kelola anggaran, biaya operasional, dan laporan keuangan fasilitas kesehatan.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "admrs-5"
+      ],
+      "category": "Keuangan",
+      "resources": [
+        {
+          "id": "admrs-r20",
+          "title": "Healthcare Finance - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/healthcare-finance",
+          "free": false
+        },
+        {
+          "id": "admrs-r21",
+          "title": "Keuangan RS - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "admrs-r22",
+          "title": "Anggaran RS - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/keuangan-rs",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "admrs-8",
+      "title": "Patient Safety & Manajemen Risiko Klinis",
+      "description": "Implementasikan program patient safety: pelaporan insiden, analisis akar masalah, dan pencegahan KTD.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "admrs-5"
+      ],
+      "category": "Keselamatan",
+      "resources": [
+        {
+          "id": "admrs-r23",
+          "title": "Patient Safety - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/patient-safety/",
+          "free": true
+        },
+        {
+          "id": "admrs-r24",
+          "title": "Patient Safety - WHO",
+          "type": "documentation",
+          "url": "https://www.who.int/patientsafety/en/",
+          "free": true
+        },
+        {
+          "id": "admrs-r25",
+          "title": "Keselamatan Pasien - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

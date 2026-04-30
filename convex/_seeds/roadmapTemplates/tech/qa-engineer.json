@@ -1,0 +1,306 @@
+{
+  "title": "QA Engineer",
+  "slug": "qa-engineer",
+  "domain": "tech",
+  "icon": "FlaskConical",
+  "color": "bg-teal-500",
+  "description": "Pastikan kualitas software dengan manual testing, automation testing, dan strategi QA yang komprehensif.",
+  "tags": [
+    "testing",
+    "selenium",
+    "playwright",
+    "api-testing",
+    "agile"
+  ],
+  "order": 8,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "qa-1",
+      "title": "Dasar Quality Assurance",
+      "description": "Pelajari konsep SDLC, STLC, jenis-jenis testing, dan peran QA dalam tim Agile.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "qa-r1",
+          "title": "Software Testing Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/software-testing-dasar",
+          "free": true
+        },
+        {
+          "id": "qa-r2",
+          "title": "QA Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "qa-r3",
+          "title": "ISTQB Foundation Syllabus",
+          "type": "documentation",
+          "url": "https://istqb.org/certification-path/foundation-level/",
+          "free": true
+        },
+        {
+          "id": "qa-r4",
+          "title": "QA Engineering - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/qa-engineering",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "qa-2",
+      "title": "Manual Testing & Test Case Design",
+      "description": "Buat test plan, test case, dan lakukan manual testing dengan teknik boundary value analysis.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "qa-1"
+      ],
+      "parentId": "qa-1",
+      "category": "Manual Testing",
+      "resources": [
+        {
+          "id": "qa-r5",
+          "title": "Manual Testing - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/manual-testing/",
+          "free": true
+        },
+        {
+          "id": "qa-r6",
+          "title": "Test Case Writing - Guru99",
+          "type": "article",
+          "url": "https://guru99.com/test-case.html",
+          "free": true
+        },
+        {
+          "id": "qa-r7",
+          "title": "Software Testing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/software-testing",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "qa-3",
+      "title": "Bug Tracking & Jira",
+      "description": "Dokumentasikan, track, dan prioritaskan bug menggunakan Jira dengan teknik bug reporting yang baik.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "qa-2"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "qa-r8",
+          "title": "Jira Software Documentation - Atlassian",
+          "type": "documentation",
+          "url": "https://support.atlassian.com/jira-software-cloud/docs/what-is-jira-software/",
+          "free": true
+        },
+        {
+          "id": "qa-r9",
+          "title": "Bug Reporting - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/cara-membuat-bug-report/",
+          "free": true
+        },
+        {
+          "id": "qa-r10",
+          "title": "Agile & Jira - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/agile-jira",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "qa-4",
+      "title": "API Testing dengan Postman",
+      "description": "Test REST API menggunakan Postman: collections, environment variables, dan automation dengan Newman.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "qa-2"
+      ],
+      "category": "API Testing",
+      "resources": [
+        {
+          "id": "qa-r11",
+          "title": "Postman Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "qa-r12",
+          "title": "Postman Learning Center",
+          "type": "documentation",
+          "url": "https://learning.postman.com/docs/getting-started/introduction/",
+          "free": true
+        },
+        {
+          "id": "qa-r13",
+          "title": "API Testing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "qa-5",
+      "title": "Web UI Automation (Playwright)",
+      "description": "Otomasi pengujian UI browser dengan Playwright: locators, assertions, dan parallel testing.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "qa-3",
+        "qa-4"
+      ],
+      "category": "Automation",
+      "resources": [
+        {
+          "id": "qa-r14",
+          "title": "Playwright Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "qa-r15",
+          "title": "Playwright Documentation",
+          "type": "documentation",
+          "url": "https://playwright.dev/docs/intro",
+          "free": true
+        },
+        {
+          "id": "qa-r16",
+          "title": "Test Automation - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/test-automation",
+          "free": true
+        },
+        {
+          "id": "qa-r17",
+          "title": "Playwright Guide - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/playwright-testing/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "qa-6",
+      "title": "Performance Testing (k6)",
+      "description": "Uji performa dan load aplikasi menggunakan k6 atau Apache JMeter untuk menemukan bottleneck.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "qa-5"
+      ],
+      "category": "Performance",
+      "resources": [
+        {
+          "id": "qa-r18",
+          "title": "k6 Documentation",
+          "type": "documentation",
+          "url": "https://k6.io/docs/",
+          "free": true
+        },
+        {
+          "id": "qa-r19",
+          "title": "JMeter Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "qa-r20",
+          "title": "Performance Testing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/performance-testing",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "qa-7",
+      "title": "CI/CD Integration untuk Testing",
+      "description": "Integrasikan automation test suite ke pipeline CI/CD dengan GitHub Actions.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "qa-5"
+      ],
+      "category": "Automation",
+      "resources": [
+        {
+          "id": "qa-r21",
+          "title": "Testing di GitHub Actions - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "qa-r22",
+          "title": "GitHub Actions Testing Documentation",
+          "type": "documentation",
+          "url": "https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing",
+          "free": true
+        },
+        {
+          "id": "qa-r23",
+          "title": "CI/CD Testing - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/ci-cd-testing/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "qa-8",
+      "title": "Sertifikasi ISTQB Foundation",
+      "description": "Persiapkan dan ambil sertifikasi ISTQB Foundation Level sebagai pengakuan profesional QA.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "qa-4"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "qa-r24",
+          "title": "ISTQB Syllabus & Study Materials",
+          "type": "documentation",
+          "url": "https://istqb.org/certifications/certified-tester-foundation-level/",
+          "free": true
+        },
+        {
+          "id": "qa-r25",
+          "title": "ISTQB Foundation Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/istqb-foundation",
+          "free": false
+        },
+        {
+          "id": "qa-r26",
+          "title": "ISTQB Sample Exams",
+          "type": "practice",
+          "url": "https://astqb.org/certifications/foundation-level-certification/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

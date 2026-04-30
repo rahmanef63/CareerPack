@@ -1,0 +1,299 @@
+{
+  "title": "ASN / PNS",
+  "slug": "asn",
+  "domain": "government",
+  "icon": "Landmark",
+  "color": "bg-blue-700",
+  "description": "Persiapkan diri menjadi Aparatur Sipil Negara (PNS/PPPK) melalui jalur CPNS dan pengembangan karir.",
+  "tags": [
+    "CPNS",
+    "PPPK",
+    "SKD",
+    "SKB",
+    "pelayanan-publik"
+  ],
+  "order": 71,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "asn-1",
+      "title": "Sistem Kepegawaian Negara (ASN)",
+      "description": "Pahami UU ASN, jenis ASN (PNS & PPPK), hak/kewajiban, dan sistem pengelolaan ASN.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "asn-r1",
+          "title": "Portal BKN - Informasi ASN",
+          "type": "documentation",
+          "url": "https://bkn.go.id/",
+          "free": true
+        },
+        {
+          "id": "asn-r2",
+          "title": "UU ASN No 5/2014 & No 20/2023",
+          "type": "documentation",
+          "url": "https://peraturan.go.id/id/uu-no-5-tahun-2014",
+          "free": true
+        },
+        {
+          "id": "asn-r3",
+          "title": "ASN Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "asn-r4",
+          "title": "Persiapan ASN - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/persiapan-asn",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "asn-2",
+      "title": "Seleksi CPNS: SKD (TWK, TIU, TKP)",
+      "description": "Persiapkan Seleksi Kompetensi Dasar: Tes Wawasan Kebangsaan, Tes Intelegensi Umum, dan TKP.",
+      "difficulty": "intermediate",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "asn-1"
+      ],
+      "parentId": "asn-1",
+      "category": "Seleksi",
+      "resources": [
+        {
+          "id": "asn-r5",
+          "title": "SSCASN - Portal CPNS/PPPK",
+          "type": "documentation",
+          "url": "https://sscasn.bkn.go.id/",
+          "free": true
+        },
+        {
+          "id": "asn-r6",
+          "title": "Tryout SKD CPNS - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "asn-r7",
+          "title": "Bimbel CPNS - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/guru-les-privat/cpns",
+          "free": false
+        },
+        {
+          "id": "asn-r8",
+          "title": "Soal CPNS Online - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/cpns-skd",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "asn-3",
+      "title": "Seleksi CPNS: SKB (Bidang)",
+      "description": "Persiapkan Seleksi Kompetensi Bidang sesuai formasi yang dilamar: teknis, manajerial, dan sosial kultural.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "asn-2"
+      ],
+      "parentId": "asn-2",
+      "category": "Seleksi",
+      "resources": [
+        {
+          "id": "asn-r9",
+          "title": "Panduan SKB - BKN",
+          "type": "documentation",
+          "url": "https://bkn.go.id/skb/",
+          "free": true
+        },
+        {
+          "id": "asn-r10",
+          "title": "Tryout SKB - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "asn-r11",
+          "title": "Materi SKB Bidang - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/cpns-skb",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "asn-4",
+      "title": "Masa Percobaan CPNS (PRAJABATAN)",
+      "description": "Ikuti pelatihan prajabatan CPNS: orientasi nilai ASN, anti korupsi, dan kompetensi jabatan.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "asn-3"
+      ],
+      "category": "Pengangkatan",
+      "resources": [
+        {
+          "id": "asn-r12",
+          "title": "Prajabatan CPNS - LAN RI",
+          "type": "documentation",
+          "url": "https://lan.go.id/prajabatan/",
+          "free": true
+        },
+        {
+          "id": "asn-r13",
+          "title": "Pelatihan Dasar CPNS - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "asn-r14",
+          "title": "e-PUPNS - BKN",
+          "type": "documentation",
+          "url": "https://www.bkn.go.id/e-pupns",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "asn-5",
+      "title": "Kenaikan Pangkat & Jabatan Fungsional",
+      "description": "Proses kenaikan pangkat reguler, pilihan, dan pengajuan jabatan fungsional sesuai angka kredit.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "asn-4"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "asn-r15",
+          "title": "Sistem Informasi ASN - BKN",
+          "type": "documentation",
+          "url": "https://www.bkn.go.id/siasn",
+          "free": true
+        },
+        {
+          "id": "asn-r16",
+          "title": "Jabatan Fungsional - BKN",
+          "type": "documentation",
+          "url": "https://www.bkn.go.id/jabatan-fungsional/",
+          "free": true
+        },
+        {
+          "id": "asn-r17",
+          "title": "Kenaikan Pangkat ASN - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "asn-6",
+      "title": "Manajemen Kinerja ASN (SKP)",
+      "description": "Susun Sasaran Kinerja Pegawai (SKP) yang SMART dan kelola penilaian kinerja tahunan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "asn-4"
+      ],
+      "category": "Kinerja",
+      "resources": [
+        {
+          "id": "asn-r18",
+          "title": "e-SKP BKN",
+          "type": "documentation",
+          "url": "https://kinerja.bkn.go.id/",
+          "free": true
+        },
+        {
+          "id": "asn-r19",
+          "title": "Panduan SKP - BKN",
+          "type": "documentation",
+          "url": "https://bkn.go.id/panduan-skp/",
+          "free": true
+        },
+        {
+          "id": "asn-r20",
+          "title": "Kinerja ASN - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "asn-7",
+      "title": "Pengembangan Kompetensi ASN",
+      "description": "Ikuti program diklat, MOOC LAN, dan pengembangan kompetensi 20 JP per tahun wajib ASN.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "asn-5"
+      ],
+      "category": "Pengembangan",
+      "resources": [
+        {
+          "id": "asn-r21",
+          "title": "ASN Unggul - LAN RI MOOC",
+          "type": "course",
+          "url": "https://asnpintar.lan.go.id/",
+          "free": true
+        },
+        {
+          "id": "asn-r22",
+          "title": "e-Learning BKN",
+          "type": "course",
+          "url": "https://e-learning.bkn.go.id/",
+          "free": true
+        },
+        {
+          "id": "asn-r23",
+          "title": "Pengembangan ASN - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "asn-8",
+      "title": "Pelayanan Publik & Reformasi Birokrasi",
+      "description": "Pahami standar pelayanan publik, inovasi layanan, dan kontribusi pada reformasi birokrasi.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "asn-6"
+      ],
+      "category": "Reformasi",
+      "resources": [
+        {
+          "id": "asn-r24",
+          "title": "Portal Pelayanan Publik - OMBUDSMAN",
+          "type": "documentation",
+          "url": "https://ombudsman.go.id/",
+          "free": true
+        },
+        {
+          "id": "asn-r25",
+          "title": "Reformasi Birokrasi - KemenPAN RB",
+          "type": "documentation",
+          "url": "https://menpan.go.id/reformasi-birokrasi/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

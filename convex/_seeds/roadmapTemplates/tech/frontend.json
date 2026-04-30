@@ -1,0 +1,476 @@
+{
+  "title": "Frontend Developer",
+  "slug": "frontend",
+  "domain": "tech",
+  "icon": "Layout",
+  "color": "bg-blue-500",
+  "description": "Pelajari cara membangun antarmuka web modern menggunakan HTML, CSS, JavaScript, dan framework populer.",
+  "tags": [
+    "html",
+    "css",
+    "javascript",
+    "react",
+    "typescript"
+  ],
+  "order": 1,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "fe-1",
+      "title": "Dasar HTML & CSS",
+      "description": "Pelajari struktur dokumen HTML5 dan styling dasar dengan CSS3 termasuk Flexbox dan Grid.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [],
+      "category": "Fondasi Web",
+      "resources": [
+        {
+          "id": "fe-r1",
+          "title": "Belajar Dasar Pemrograman Web - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/basic-web",
+          "free": true
+        },
+        {
+          "id": "fe-r2",
+          "title": "HTML & CSS Full Course - Web Programming UNPAS",
+          "type": "video",
+          "url": "https://youtube.com/@sandhikagalihws",
+          "free": true
+        },
+        {
+          "id": "fe-r3",
+          "title": "MDN Web Docs - HTML",
+          "type": "documentation",
+          "url": "https://developer.mozilla.org/id/docs/Web/HTML",
+          "free": true
+        },
+        {
+          "id": "fe-r4",
+          "title": "Kelas HTML & CSS - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/html-css-dasar",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "fe-2",
+      "title": "JavaScript Dasar",
+      "description": "Kuasai dasar-dasar JavaScript: variabel, fungsi, array, objek, dan manipulasi DOM.",
+      "difficulty": "beginner",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "fe-1"
+      ],
+      "parentId": "fe-1",
+      "category": "Fondasi Web",
+      "resources": [
+        {
+          "id": "fe-r5",
+          "title": "Belajar Dasar Pemrograman JavaScript - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/javascript-dasar",
+          "free": true
+        },
+        {
+          "id": "fe-r6",
+          "title": "JavaScript Tutorial Pemula - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r7",
+          "title": "JavaScript untuk Pemula - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/javascript-untuk-pemula/",
+          "free": true
+        },
+        {
+          "id": "fe-r8",
+          "title": "Eloquent JavaScript",
+          "type": "book",
+          "url": "https://eloquentjavascript.net/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-3",
+      "title": "JavaScript ES6+",
+      "description": "Pelajari fitur modern JavaScript: arrow functions, destructuring, promises, async/await, dan modules.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fe-2"
+      ],
+      "parentId": "fe-2",
+      "category": "Fondasi Web",
+      "resources": [
+        {
+          "id": "fe-r9",
+          "title": "Belajar JavaScript Lanjutan - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/javascript-intermediate",
+          "free": true
+        },
+        {
+          "id": "fe-r10",
+          "title": "ES6+ JavaScript - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r11",
+          "title": "Modern JavaScript - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "fe-r12",
+          "title": "JavaScript.info",
+          "type": "documentation",
+          "url": "https://javascript.info/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-4",
+      "title": "Git & Version Control",
+      "description": "Kelola kode sumber dengan Git dan GitHub: branching, merging, dan pull requests.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Tooling",
+      "resources": [
+        {
+          "id": "fe-r13",
+          "title": "Belajar Dasar Git dengan GitHub - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/git-github",
+          "free": true
+        },
+        {
+          "id": "fe-r14",
+          "title": "Git Tutorial - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/git-untuk-pemula/",
+          "free": true
+        },
+        {
+          "id": "fe-r15",
+          "title": "Git & GitHub - Web Programming UNPAS",
+          "type": "video",
+          "url": "https://youtube.com/@sandhikagalihws",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-5",
+      "title": "React Dasar",
+      "description": "Pelajari konsep dasar React: komponen, props, state, dan lifecycle hooks.",
+      "difficulty": "intermediate",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "fe-3"
+      ],
+      "category": "Framework",
+      "resources": [
+        {
+          "id": "fe-r16",
+          "title": "Belajar Membuat Aplikasi Web dengan React - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/react-web",
+          "free": true
+        },
+        {
+          "id": "fe-r17",
+          "title": "React JS Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r18",
+          "title": "Dokumentasi Resmi React",
+          "type": "documentation",
+          "url": "https://react.dev",
+          "free": true
+        },
+        {
+          "id": "fe-r19",
+          "title": "React - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-6",
+      "title": "TypeScript untuk Frontend",
+      "description": "Tambahkan type safety ke project React dengan TypeScript untuk kode yang lebih robust.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "fe-5"
+      ],
+      "category": "Framework",
+      "resources": [
+        {
+          "id": "fe-r20",
+          "title": "Belajar TypeScript - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/typescript",
+          "free": true
+        },
+        {
+          "id": "fe-r21",
+          "title": "TypeScript Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r22",
+          "title": "TypeScript Handbook",
+          "type": "documentation",
+          "url": "https://typescriptlang.org/docs/handbook/intro.html",
+          "free": true
+        },
+        {
+          "id": "fe-r23",
+          "title": "TypeScript untuk React - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/typescript-react/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-7",
+      "title": "Tailwind CSS",
+      "description": "Gunakan utility-first CSS framework Tailwind CSS untuk styling cepat dan konsisten.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "fe-1"
+      ],
+      "category": "Styling",
+      "resources": [
+        {
+          "id": "fe-r24",
+          "title": "Tailwind CSS Tutorial - Web Programming UNPAS",
+          "type": "video",
+          "url": "https://youtube.com/@sandhikagalihws",
+          "free": true
+        },
+        {
+          "id": "fe-r25",
+          "title": "Dokumentasi Tailwind CSS",
+          "type": "documentation",
+          "url": "https://tailwindcss.com/docs",
+          "free": true
+        },
+        {
+          "id": "fe-r26",
+          "title": "Tailwind CSS - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-8",
+      "title": "State Management (Zustand / Redux)",
+      "description": "Kelola state aplikasi yang kompleks menggunakan Zustand atau Redux Toolkit.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fe-5"
+      ],
+      "parentId": "fe-5",
+      "category": "Framework",
+      "resources": [
+        {
+          "id": "fe-r27",
+          "title": "Redux Toolkit Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r28",
+          "title": "Dokumentasi Redux Toolkit",
+          "type": "documentation",
+          "url": "https://redux-toolkit.js.org/introduction/getting-started",
+          "free": true
+        },
+        {
+          "id": "fe-r29",
+          "title": "Zustand Documentation",
+          "type": "documentation",
+          "url": "https://zustand-demo.pmnd.rs/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-9",
+      "title": "Next.js & SSR",
+      "description": "Bangun aplikasi web production-ready dengan Next.js menggunakan Server-Side Rendering dan App Router.",
+      "difficulty": "advanced",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "fe-6"
+      ],
+      "category": "Framework",
+      "resources": [
+        {
+          "id": "fe-r30",
+          "title": "Next.js Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r31",
+          "title": "Dokumentasi Next.js",
+          "type": "documentation",
+          "url": "https://nextjs.org/docs",
+          "free": true
+        },
+        {
+          "id": "fe-r32",
+          "title": "Next.js Full Course - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        },
+        {
+          "id": "fe-r33",
+          "title": "Next.js Mastery - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/nextjs",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "fe-10",
+      "title": "Testing Frontend (Vitest)",
+      "description": "Tulis unit test dan integration test untuk komponen React menggunakan Vitest dan Testing Library.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fe-5"
+      ],
+      "category": "Kualitas Kode",
+      "resources": [
+        {
+          "id": "fe-r34",
+          "title": "Vitest Documentation",
+          "type": "documentation",
+          "url": "https://vitest.dev/guide/",
+          "free": true
+        },
+        {
+          "id": "fe-r35",
+          "title": "Testing Library Docs",
+          "type": "documentation",
+          "url": "https://testing-library.com/docs/react-testing-library/intro/",
+          "free": true
+        },
+        {
+          "id": "fe-r36",
+          "title": "Testing React - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-11",
+      "title": "Web Performance & Optimasi",
+      "description": "Pelajari teknik optimasi web: lazy loading, code splitting, Core Web Vitals, dan Lighthouse.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fe-9"
+      ],
+      "category": "Kualitas Kode",
+      "resources": [
+        {
+          "id": "fe-r37",
+          "title": "Frontend Performance - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/web-performance",
+          "free": true
+        },
+        {
+          "id": "fe-r38",
+          "title": "Core Web Vitals - web.dev",
+          "type": "documentation",
+          "url": "https://web.dev/vitals/",
+          "free": true
+        },
+        {
+          "id": "fe-r39",
+          "title": "Core Web Vitals - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/core-web-vitals/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fe-12",
+      "title": "Integrasi REST API",
+      "description": "Hubungkan frontend dengan backend API menggunakan fetch, Axios, dan React Query.",
+      "difficulty": "intermediate",
+      "estimatedHours": 18,
+      "prerequisites": [
+        "fe-3"
+      ],
+      "category": "Integrasi",
+      "resources": [
+        {
+          "id": "fe-r40",
+          "title": "Belajar Fundamental Aplikasi Web - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/web-fundamentals",
+          "free": true
+        },
+        {
+          "id": "fe-r41",
+          "title": "React Query Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fe-r42",
+          "title": "Axios Documentation",
+          "type": "documentation",
+          "url": "https://axios-http.com/docs/intro",
+          "free": true
+        },
+        {
+          "id": "fe-r43",
+          "title": "REST API di React - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

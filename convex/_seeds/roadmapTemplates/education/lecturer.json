@@ -1,0 +1,300 @@
+{
+  "title": "Dosen & Akademisi",
+  "slug": "lecturer",
+  "domain": "education",
+  "icon": "BookOpen",
+  "color": "bg-teal-600",
+  "description": "Kembangkan karir akademik sebagai dosen: pengajaran, penelitian, pengabdian masyarakat, dan publikasi.",
+  "tags": [
+    "penelitian",
+    "publikasi",
+    "pengajaran",
+    "SINTA",
+    "jabatan-fungsional"
+  ],
+  "order": 32,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "dos-1",
+      "title": "Fondasi Pendidikan Tinggi & Tridharma PT",
+      "description": "Pahami sistem pendidikan tinggi Indonesia, Tridharma, dan tugas pokok dosen.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "dos-r1",
+          "title": "DIKTI - Kemendikbud Ristek",
+          "type": "documentation",
+          "url": "https://dikti.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "dos-r2",
+          "title": "Panduan Dosen Indonesia - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dos-r3",
+          "title": "Higher Education Teaching - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/higher-ed-teaching",
+          "free": false
+        },
+        {
+          "id": "dos-r4",
+          "title": "SINTA - Science and Technology Index",
+          "type": "documentation",
+          "url": "https://sinta.kemdikbud.go.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dos-2",
+      "title": "Metodologi Penelitian",
+      "description": "Kuasai metode penelitian kuantitatif, kualitatif, dan mixed methods untuk karya ilmiah.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "dos-1"
+      ],
+      "parentId": "dos-1",
+      "category": "Penelitian",
+      "resources": [
+        {
+          "id": "dos-r5",
+          "title": "Metodologi Penelitian - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dos-r6",
+          "title": "Research Methods - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/research-methods",
+          "free": false
+        },
+        {
+          "id": "dos-r7",
+          "title": "SPSS & Penelitian Kuantitatif - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/metodologi-penelitian",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "dos-3",
+      "title": "Penulisan Karya Ilmiah & Jurnal",
+      "description": "Tulis artikel ilmiah dengan struktur IMRaD yang baik dan submit ke jurnal terindeks Sinta/Scopus.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "dos-2"
+      ],
+      "parentId": "dos-2",
+      "category": "Publikasi",
+      "resources": [
+        {
+          "id": "dos-r8",
+          "title": "SINTA Journal Directory",
+          "type": "documentation",
+          "url": "https://sinta.kemdikbud.go.id/journals",
+          "free": true
+        },
+        {
+          "id": "dos-r9",
+          "title": "Academic Writing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/academic-writing",
+          "free": false
+        },
+        {
+          "id": "dos-r10",
+          "title": "Penulisan Jurnal - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dos-4",
+      "title": "Strategi Pengajaran di Perguruan Tinggi",
+      "description": "Desain course yang efektif: RPS, metode student-centered learning, dan penilaian autentik.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dos-1"
+      ],
+      "category": "Pengajaran",
+      "resources": [
+        {
+          "id": "dos-r11",
+          "title": "PEKERTI & AA - Dikti",
+          "type": "documentation",
+          "url": "https://dikti.kemdikbud.go.id/pekerti/",
+          "free": true
+        },
+        {
+          "id": "dos-r12",
+          "title": "Course Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/course-design",
+          "free": false
+        },
+        {
+          "id": "dos-r13",
+          "title": "Strategi Mengajar Dosen - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dos-5",
+      "title": "Jabatan Fungsional & DIKTI Portal",
+      "description": "Proses kenaikan jabatan fungsional dosen: AA, Lektor, Lektor Kepala, dan Guru Besar.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "dos-3"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "dos-r14",
+          "title": "Portal DIKTI - Jabatan Fungsional",
+          "type": "documentation",
+          "url": "https://sister.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "dos-r15",
+          "title": "Panduan Jabatan Fungsional Dosen",
+          "type": "documentation",
+          "url": "https://dikti.kemdikbud.go.id/jabatan-fungsional/",
+          "free": true
+        },
+        {
+          "id": "dos-r16",
+          "title": "Karir Dosen - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dos-6",
+      "title": "Hibah Penelitian & PKM",
+      "description": "Ajukan proposal hibah penelitian (DIKTI, BRIN) dan Program Kreativitas Mahasiswa.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "dos-3",
+        "dos-4"
+      ],
+      "category": "Penelitian",
+      "resources": [
+        {
+          "id": "dos-r17",
+          "title": "SIMLITABMAS - Kemendikbud",
+          "type": "documentation",
+          "url": "https://simlitabmas.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "dos-r18",
+          "title": "Panduan Hibah DIKTI",
+          "type": "documentation",
+          "url": "https://dikti.kemdikbud.go.id/panduan-hibah/",
+          "free": true
+        },
+        {
+          "id": "dos-r19",
+          "title": "PKM Guide - BRIN",
+          "type": "documentation",
+          "url": "https://brin.go.id/hibah-penelitian/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dos-7",
+      "title": "Pengabdian Masyarakat",
+      "description": "Rancang dan eksekusi program pengabdian masyarakat yang berdampak nyata.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "dos-5"
+      ],
+      "category": "Pengabdian",
+      "resources": [
+        {
+          "id": "dos-r20",
+          "title": "PKM Pengabdian - Kemendikbud",
+          "type": "documentation",
+          "url": "https://dikti.kemdikbud.go.id/pengabdian-masyarakat/",
+          "free": true
+        },
+        {
+          "id": "dos-r21",
+          "title": "Community Engagement Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "dos-r22",
+          "title": "Proposal PKM Tutorial",
+          "type": "article",
+          "url": "https://petanikode.com/proposal-pkm/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "dos-8",
+      "title": "Scopus & Publikasi Internasional",
+      "description": "Targetkan jurnal terindeks Scopus dan Web of Science untuk meningkatkan reputasi akademik.",
+      "difficulty": "advanced",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "dos-6"
+      ],
+      "category": "Publikasi",
+      "resources": [
+        {
+          "id": "dos-r23",
+          "title": "Scopus Author Search",
+          "type": "documentation",
+          "url": "https://www.scopus.com/authid/",
+          "free": false
+        },
+        {
+          "id": "dos-r24",
+          "title": "Publishing in Journals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/scholarly-publishing",
+          "free": false
+        },
+        {
+          "id": "dos-r25",
+          "title": "Menulis untuk Jurnal Internasional - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,390 @@
+{
+  "title": "Backend Developer",
+  "slug": "backend",
+  "domain": "tech",
+  "icon": "Server",
+  "color": "bg-green-500",
+  "description": "Bangun server-side aplikasi yang scalable menggunakan Node.js, database, dan REST API.",
+  "tags": [
+    "nodejs",
+    "express",
+    "postgresql",
+    "api",
+    "docker"
+  ],
+  "order": 2,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "be-1",
+      "title": "Dasar Pemrograman & Node.js",
+      "description": "Pelajari runtime Node.js, npm ecosystem, dan konsep server-side JavaScript.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "be-r1",
+          "title": "Belajar Back-End Pemula dengan JavaScript - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/nodejs-beginner",
+          "free": true
+        },
+        {
+          "id": "be-r2",
+          "title": "Node.js Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r3",
+          "title": "Node.js Documentation",
+          "type": "documentation",
+          "url": "https://nodejs.org/en/docs/",
+          "free": true
+        },
+        {
+          "id": "be-r4",
+          "title": "Node.js untuk Pemula - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/nodejs-untuk-pemula/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "be-2",
+      "title": "Express.js & REST API",
+      "description": "Buat REST API dengan Express.js: routing, middleware, error handling.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "be-1"
+      ],
+      "parentId": "be-1",
+      "category": "Framework",
+      "resources": [
+        {
+          "id": "be-r5",
+          "title": "Belajar Membuat Aplikasi Back-End - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/nodejs-backend",
+          "free": true
+        },
+        {
+          "id": "be-r6",
+          "title": "Express.js Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r7",
+          "title": "Express.js Documentation",
+          "type": "documentation",
+          "url": "https://expressjs.com/en/starter/installing.html",
+          "free": true
+        },
+        {
+          "id": "be-r8",
+          "title": "REST API Tutorial - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "be-3",
+      "title": "Database SQL (PostgreSQL)",
+      "description": "Pelajari relational database dengan PostgreSQL: query, join, indexing, dan transaksi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "be-1"
+      ],
+      "category": "Database",
+      "resources": [
+        {
+          "id": "be-r9",
+          "title": "PostgreSQL Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r10",
+          "title": "Belajar SQL - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "be-r11",
+          "title": "PostgreSQL Documentation",
+          "type": "documentation",
+          "url": "https://www.postgresql.org/docs/current/",
+          "free": true
+        },
+        {
+          "id": "be-r12",
+          "title": "SQL Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sql-dasar",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "be-4",
+      "title": "ORM dengan Prisma",
+      "description": "Gunakan Prisma ORM untuk berinteraksi dengan database secara type-safe dan produktif.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "be-3"
+      ],
+      "parentId": "be-3",
+      "category": "Database",
+      "resources": [
+        {
+          "id": "be-r13",
+          "title": "Prisma Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r14",
+          "title": "Prisma Documentation",
+          "type": "documentation",
+          "url": "https://www.prisma.io/docs/getting-started",
+          "free": true
+        },
+        {
+          "id": "be-r15",
+          "title": "ORM di Node.js - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "be-5",
+      "title": "Autentikasi & Keamanan API",
+      "description": "Implementasikan JWT, OAuth2, bcrypt, dan best practices keamanan API.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "be-2"
+      ],
+      "parentId": "be-2",
+      "category": "Keamanan",
+      "resources": [
+        {
+          "id": "be-r16",
+          "title": "JWT Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r17",
+          "title": "OWASP API Security Top 10",
+          "type": "documentation",
+          "url": "https://owasp.org/www-project-api-security/",
+          "free": true
+        },
+        {
+          "id": "be-r18",
+          "title": "Node.js Security - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/nodejs-security/",
+          "free": true
+        },
+        {
+          "id": "be-r19",
+          "title": "API Security - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/api-security",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "be-6",
+      "title": "Docker & Containerisasi",
+      "description": "Kemas aplikasi backend ke dalam Docker container untuk deployment yang konsisten.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "be-2"
+      ],
+      "category": "DevOps",
+      "resources": [
+        {
+          "id": "be-r20",
+          "title": "Belajar Dasar Container dengan Docker - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/docker",
+          "free": true
+        },
+        {
+          "id": "be-r21",
+          "title": "Docker Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r22",
+          "title": "Docker Documentation",
+          "type": "documentation",
+          "url": "https://docs.docker.com/get-started/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "be-7",
+      "title": "Message Queue & Cache (Redis)",
+      "description": "Tangani proses asynchronous dan caching menggunakan Redis.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "be-5"
+      ],
+      "category": "Arsitektur",
+      "resources": [
+        {
+          "id": "be-r23",
+          "title": "Redis Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r24",
+          "title": "Redis Documentation",
+          "type": "documentation",
+          "url": "https://redis.io/docs/",
+          "free": true
+        },
+        {
+          "id": "be-r25",
+          "title": "BullMQ Documentation",
+          "type": "documentation",
+          "url": "https://docs.bullmq.io/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "be-8",
+      "title": "Testing Backend",
+      "description": "Tulis unit test dan integration test untuk API menggunakan Vitest dan Supertest.",
+      "difficulty": "intermediate",
+      "estimatedHours": 18,
+      "prerequisites": [
+        "be-2"
+      ],
+      "category": "Kualitas",
+      "resources": [
+        {
+          "id": "be-r26",
+          "title": "Testing Node.js - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r27",
+          "title": "Vitest Documentation",
+          "type": "documentation",
+          "url": "https://vitest.dev/guide/",
+          "free": true
+        },
+        {
+          "id": "be-r28",
+          "title": "Supertest Documentation",
+          "type": "documentation",
+          "url": "https://github.com/ladjs/supertest",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "be-9",
+      "title": "Microservices & Arsitektur",
+      "description": "Rancang sistem backend dengan arsitektur microservices dan API gateway.",
+      "difficulty": "advanced",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "be-6",
+        "be-7"
+      ],
+      "category": "Arsitektur",
+      "resources": [
+        {
+          "id": "be-r29",
+          "title": "Microservices - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r30",
+          "title": "Microservices - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/microservices",
+          "free": true
+        },
+        {
+          "id": "be-r31",
+          "title": "Microservices Patterns - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/microservices-patterns",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "be-10",
+      "title": "Monitoring & Logging",
+      "description": "Implementasikan structured logging dengan Winston dan metrics dengan Prometheus.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "be-6"
+      ],
+      "category": "DevOps",
+      "resources": [
+        {
+          "id": "be-r32",
+          "title": "Node.js Monitoring - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "be-r33",
+          "title": "Prometheus Documentation",
+          "type": "documentation",
+          "url": "https://prometheus.io/docs/introduction/overview/",
+          "free": true
+        },
+        {
+          "id": "be-r34",
+          "title": "Winston Logger GitHub",
+          "type": "documentation",
+          "url": "https://github.com/winstonjs/winston",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

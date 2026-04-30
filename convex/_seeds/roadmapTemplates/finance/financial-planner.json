@@ -1,0 +1,300 @@
+{
+  "title": "Perencana Keuangan",
+  "slug": "financial-planner",
+  "domain": "finance",
+  "icon": "PiggyBank",
+  "color": "bg-green-700",
+  "description": "Bantu individu dan keluarga mencapai tujuan keuangan melalui perencanaan keuangan yang komprehensif.",
+  "tags": [
+    "perencanaan-keuangan",
+    "investasi",
+    "asuransi",
+    "CFP",
+    "wealth-management"
+  ],
+  "order": 52,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "fp-1",
+      "title": "Fondasi Perencanaan Keuangan",
+      "description": "Pahami konsep dasar keuangan pribadi: budgeting, cash flow, dan pilar perencanaan keuangan.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "fp-r1",
+          "title": "Perencanaan Keuangan Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perencanaan-keuangan",
+          "free": false
+        },
+        {
+          "id": "fp-r2",
+          "title": "Personal Finance - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "fp-r3",
+          "title": "Personal Finance - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/personal-finance",
+          "free": false
+        },
+        {
+          "id": "fp-r4",
+          "title": "OJK - Edukasi Keuangan",
+          "type": "documentation",
+          "url": "https://www.ojk.go.id/id/berita-dan-kegiatan/info-terkini/Pages/Edukasi-Keuangan.aspx",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fp-2",
+      "title": "Dana Darurat & Manajemen Utang",
+      "description": "Bangun dana darurat yang memadai dan strategi pelunasan utang yang efektif.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "fp-1"
+      ],
+      "parentId": "fp-1",
+      "category": "Dasar",
+      "resources": [
+        {
+          "id": "fp-r5",
+          "title": "Dana Darurat Guide - OJK",
+          "type": "documentation",
+          "url": "https://sikapiuangmu.ojk.go.id/",
+          "free": true
+        },
+        {
+          "id": "fp-r6",
+          "title": "Debt Management - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/manajemen-utang",
+          "free": false
+        },
+        {
+          "id": "fp-r7",
+          "title": "Manajemen Keuangan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fp-3",
+      "title": "Asuransi & Manajemen Risiko",
+      "description": "Identifikasi risiko dan rekomendasikan produk asuransi jiwa, kesehatan, dan properti yang tepat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "fp-1"
+      ],
+      "category": "Proteksi",
+      "resources": [
+        {
+          "id": "fp-r8",
+          "title": "Edukasi Asuransi - OJK",
+          "type": "documentation",
+          "url": "https://sikapiuangmu.ojk.go.id/FrontEnd/CMS/Category/19",
+          "free": true
+        },
+        {
+          "id": "fp-r9",
+          "title": "Insurance Planning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perencanaan-asuransi",
+          "free": false
+        },
+        {
+          "id": "fp-r10",
+          "title": "Asuransi Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fp-4",
+      "title": "Investasi: Reksa Dana & Obligasi",
+      "description": "Pahami produk investasi reksa dana, obligasi, dan SBN untuk pembentukan portofolio yang seimbang.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fp-2"
+      ],
+      "category": "Investasi",
+      "resources": [
+        {
+          "id": "fp-r11",
+          "title": "Reksa Dana - OJK",
+          "type": "documentation",
+          "url": "https://sikapiuangmu.ojk.go.id/FrontEnd/CMS/Category/5",
+          "free": true
+        },
+        {
+          "id": "fp-r12",
+          "title": "Investasi Reksa Dana - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/reksa-dana",
+          "free": false
+        },
+        {
+          "id": "fp-r13",
+          "title": "SBN Indonesia - DJPPR",
+          "type": "documentation",
+          "url": "https://www.djppr.kemenkeu.go.id/sbn/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fp-5",
+      "title": "Investasi Saham & Analisis Fundamental",
+      "description": "Investasi di pasar saham Indonesia (IDX) dengan analisis fundamental dan value investing.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "fp-4"
+      ],
+      "parentId": "fp-4",
+      "category": "Investasi",
+      "resources": [
+        {
+          "id": "fp-r14",
+          "title": "BEI Sekolah Pasar Modal",
+          "type": "course",
+          "url": "https://www.idx.co.id/investor/sekolah-pasar-modal/",
+          "free": true
+        },
+        {
+          "id": "fp-r15",
+          "title": "Saham - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "fp-r16",
+          "title": "Analisis Saham - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/analisis-saham",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "fp-6",
+      "title": "Perencanaan Pensiun",
+      "description": "Hitung kebutuhan pensiun, optimalkan BPJS TK, dan bangun portofolio pensiun yang memadai.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "fp-4"
+      ],
+      "category": "Tujuan Keuangan",
+      "resources": [
+        {
+          "id": "fp-r17",
+          "title": "BPJS Ketenagakerjaan Portal",
+          "type": "documentation",
+          "url": "https://www.bpjsketenagakerjaan.go.id/",
+          "free": true
+        },
+        {
+          "id": "fp-r18",
+          "title": "Retirement Planning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perencanaan-pensiun",
+          "free": false
+        },
+        {
+          "id": "fp-r19",
+          "title": "Pensiun Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fp-7",
+      "title": "Perencanaan Pajak Pribadi",
+      "description": "Optimalkan pajak pribadi secara legal: pengurangan, kredit pajak, dan e-filing SPT Tahunan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "fp-1"
+      ],
+      "category": "Pajak",
+      "resources": [
+        {
+          "id": "fp-r20",
+          "title": "DJP Online - eFiling",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/efiling",
+          "free": true
+        },
+        {
+          "id": "fp-r21",
+          "title": "Pajak Pribadi - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pajak-pribadi",
+          "free": false
+        },
+        {
+          "id": "fp-r22",
+          "title": "Tax Planning - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fp-8",
+      "title": "Sertifikasi CFP (Certified Financial Planner)",
+      "description": "Persiapkan ujian sertifikasi CFP dari FPSB Indonesia untuk karir perencana keuangan profesional.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "fp-5",
+        "fp-7"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "fp-r23",
+          "title": "FPSB Indonesia - CFP Certification",
+          "type": "documentation",
+          "url": "https://fpsb.or.id/sertifikasi/cfp/",
+          "free": false
+        },
+        {
+          "id": "fp-r24",
+          "title": "CFP Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/cfp-preparation",
+          "free": false
+        },
+        {
+          "id": "fp-r25",
+          "title": "CFP Study Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

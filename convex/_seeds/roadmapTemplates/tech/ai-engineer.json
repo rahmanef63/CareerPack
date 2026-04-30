@@ -1,0 +1,365 @@
+{
+  "title": "AI Engineer",
+  "slug": "ai-engineer",
+  "domain": "tech",
+  "icon": "Sparkles",
+  "color": "bg-violet-600",
+  "description": "Bangun aplikasi berbasis AI: machine learning, deep learning, LLM, RAG, AI agent, sampai MLOps untuk deployment ke production.",
+  "tags": [
+    "ai",
+    "llm",
+    "python",
+    "rag",
+    "mlops"
+  ],
+  "order": 83,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "ai-1",
+      "title": "Python untuk AI",
+      "description": "Kuasai Python, NumPy, pandas, dan visualisasi data sebagai fondasi semua pekerjaan AI.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ai-r1",
+          "title": "Belajar Dasar Pemrograman Python - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/python-pemula",
+          "free": true
+        },
+        {
+          "id": "ai-r2",
+          "title": "Python Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "ai-r3",
+          "title": "Kaggle Learn: Python",
+          "type": "course",
+          "url": "https://www.kaggle.com/learn/python",
+          "free": true
+        },
+        {
+          "id": "ai-r4",
+          "title": "Python for Everybody - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/specializations/python",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ai-2",
+      "title": "Statistika & Data Wrangling",
+      "description": "Pelajari probabilitas, distribusi, EDA, dan transformasi data dengan pandas serta NumPy untuk model AI.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ai-1"
+      ],
+      "parentId": "ai-1",
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ai-r5",
+          "title": "Pandas - Kaggle Learn",
+          "type": "course",
+          "url": "https://www.kaggle.com/learn/pandas",
+          "free": true
+        },
+        {
+          "id": "ai-r6",
+          "title": "Statistika Dasar untuk Data Science - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/statistika-data-science",
+          "free": false
+        },
+        {
+          "id": "ai-r7",
+          "title": "Khan Academy Statistics & Probability",
+          "type": "article",
+          "url": "https://www.khanacademy.org/math/statistics-probability",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ai-3",
+      "title": "Machine Learning Dasar",
+      "description": "Pelajari supervised dan unsupervised learning, scikit-learn, evaluasi model, dan workflow ML end-to-end.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "ai-2"
+      ],
+      "parentId": "ai-2",
+      "category": "Praktik",
+      "resources": [
+        {
+          "id": "ai-r8",
+          "title": "Belajar Machine Learning untuk Pemula - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/machine-learning-pemula",
+          "free": true
+        },
+        {
+          "id": "ai-r9",
+          "title": "Intro to Machine Learning - Kaggle Learn",
+          "type": "course",
+          "url": "https://www.kaggle.com/learn/intro-to-machine-learning",
+          "free": true
+        },
+        {
+          "id": "ai-r10",
+          "title": "Machine Learning - Andrew Ng (deeplearning.ai)",
+          "type": "course",
+          "url": "https://coursera.org/specializations/machine-learning-introduction",
+          "free": false
+        },
+        {
+          "id": "ai-r11",
+          "title": "scikit-learn User Guide",
+          "type": "documentation",
+          "url": "https://scikit-learn.org/stable/user_guide.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ai-4",
+      "title": "Deep Learning Fundamentals",
+      "description": "Bangun neural network, backpropagation, CNN, dan RNN dengan PyTorch atau TensorFlow.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "ai-3"
+      ],
+      "parentId": "ai-3",
+      "category": "Praktik",
+      "resources": [
+        {
+          "id": "ai-r12",
+          "title": "Deep Learning Specialization - deeplearning.ai",
+          "type": "course",
+          "url": "https://coursera.org/specializations/deep-learning",
+          "free": false
+        },
+        {
+          "id": "ai-r13",
+          "title": "PyTorch Tutorials",
+          "type": "documentation",
+          "url": "https://pytorch.org/tutorials/",
+          "free": true
+        },
+        {
+          "id": "ai-r14",
+          "title": "AI Foundations - IBM SkillsBuild",
+          "type": "course",
+          "url": "https://skillsbuild.org/students/course-catalog/artificial-intelligence",
+          "free": true
+        },
+        {
+          "id": "ai-r15",
+          "title": "Deep Learning Dasar - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/deep-learning",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ai-5",
+      "title": "LLM & Prompt Engineering",
+      "description": "Gunakan API LLM (OpenAI, Anthropic, Gemini), pelajari pola prompt, dan rancang sistem berbasis instruksi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ai-4"
+      ],
+      "category": "LLM",
+      "resources": [
+        {
+          "id": "ai-r16",
+          "title": "ChatGPT Prompt Engineering for Developers - DeepLearning.AI",
+          "type": "course",
+          "url": "https://learn.deeplearning.ai/chatgpt-prompt-eng",
+          "free": true
+        },
+        {
+          "id": "ai-r17",
+          "title": "Google AI Essentials - Skillshop",
+          "type": "course",
+          "url": "https://skillshop.withgoogle.com/",
+          "free": true
+        },
+        {
+          "id": "ai-r18",
+          "title": "Prompt Engineering Guide",
+          "type": "documentation",
+          "url": "https://www.promptingguide.ai/",
+          "free": true
+        },
+        {
+          "id": "ai-r19",
+          "title": "DTS Komdigi: AI Essentials",
+          "type": "course",
+          "url": "https://digitalent.komdigi.go.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ai-6",
+      "title": "Retrieval-Augmented Generation (RAG)",
+      "description": "Bangun sistem RAG: embedding, vector store, retriever, dan grounding LLM ke knowledge base internal.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ai-5"
+      ],
+      "parentId": "ai-5",
+      "category": "LLM",
+      "resources": [
+        {
+          "id": "ai-r20",
+          "title": "RAG Cookbook - Hugging Face",
+          "type": "documentation",
+          "url": "https://huggingface.co/learn/cookbook/rag",
+          "free": true
+        },
+        {
+          "id": "ai-r21",
+          "title": "LangChain RAG Tutorial",
+          "type": "documentation",
+          "url": "https://python.langchain.com/docs/tutorials/rag/",
+          "free": true
+        },
+        {
+          "id": "ai-r22",
+          "title": "Vector Databases - Pinecone Learn",
+          "type": "article",
+          "url": "https://www.pinecone.io/learn/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ai-7",
+      "title": "AI Agent & Tool Use",
+      "description": "Bangun agent yang memanggil tool, memutus, dan multi-step reasoning dengan LangChain atau LangGraph.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ai-6"
+      ],
+      "parentId": "ai-6",
+      "category": "LLM",
+      "resources": [
+        {
+          "id": "ai-r23",
+          "title": "Functions, Tools and Agents - DeepLearning.AI",
+          "type": "course",
+          "url": "https://learn.deeplearning.ai/courses/functions-tools-agents-langchain",
+          "free": true
+        },
+        {
+          "id": "ai-r24",
+          "title": "AI Agents Course - Hugging Face",
+          "type": "course",
+          "url": "https://huggingface.co/learn/agents-course",
+          "free": true
+        },
+        {
+          "id": "ai-r25",
+          "title": "Building AI Agents - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/ai-agents",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ai-8",
+      "title": "MLOps & Deployment",
+      "description": "Operasikan model ke production: versioning, CI/CD, monitoring drift, dan deployment via API container.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ai-4"
+      ],
+      "category": "MLOps",
+      "resources": [
+        {
+          "id": "ai-r26",
+          "title": "MLOps Specialization - DeepLearning.AI",
+          "type": "course",
+          "url": "https://coursera.org/specializations/machine-learning-engineering-for-production-mlops",
+          "free": false
+        },
+        {
+          "id": "ai-r27",
+          "title": "Introduction to MLOps - Microsoft Learn",
+          "type": "course",
+          "url": "https://learn.microsoft.com/training/paths/introduction-machine-learn-operations/",
+          "free": true
+        },
+        {
+          "id": "ai-r28",
+          "title": "FastAPI Documentation",
+          "type": "documentation",
+          "url": "https://fastapi.tiangolo.com/",
+          "free": true
+        },
+        {
+          "id": "ai-r29",
+          "title": "Deployment ML - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ai-9",
+      "title": "Sertifikasi AI",
+      "description": "Validasi kompetensi dengan sertifikat: IBM SkillsBuild AI, Microsoft AI-900, atau program DTS Komdigi.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ai-7",
+        "ai-8"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "ai-r30",
+          "title": "IBM SkillsBuild: AI Foundations",
+          "type": "course",
+          "url": "https://skillsbuild.org/students/course-catalog/artificial-intelligence",
+          "free": true
+        },
+        {
+          "id": "ai-r31",
+          "title": "Microsoft AI-900 Certification",
+          "type": "documentation",
+          "url": "https://learn.microsoft.com/credentials/certifications/azure-ai-fundamentals/",
+          "free": false
+        },
+        {
+          "id": "ai-r32",
+          "title": "DTS Komdigi: AI Engineer Track",
+          "type": "course",
+          "url": "https://digitalent.komdigi.go.id/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

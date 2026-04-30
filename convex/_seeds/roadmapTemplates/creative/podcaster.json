@@ -1,0 +1,300 @@
+{
+  "title": "Podcaster & Audio Creator",
+  "slug": "podcaster",
+  "domain": "creative",
+  "icon": "Mic",
+  "color": "bg-violet-400",
+  "description": "Buat, produksi, dan distribusikan podcast profesional yang membangun audiens setia.",
+  "tags": [
+    "podcast",
+    "audio",
+    "editing",
+    "storytelling",
+    "distribution"
+  ],
+  "order": 26,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "pod-1",
+      "title": "Fondasi Podcasting",
+      "description": "Pahami format podcast, niche selection, dan peralatan dasar yang dibutuhkan untuk mulai.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "pod-r1",
+          "title": "Podcasting Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/podcasting-dasar",
+          "free": false
+        },
+        {
+          "id": "pod-r2",
+          "title": "Podcast Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pod-r3",
+          "title": "How to Start a Podcast - Buzzsprout",
+          "type": "documentation",
+          "url": "https://www.buzzsprout.com/blog/how-to-start-a-podcast",
+          "free": true
+        },
+        {
+          "id": "pod-r4",
+          "title": "Podcasting Indonesia Guide - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/cara-membuat-podcast/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pod-2",
+      "title": "Teknik Rekaman Audio",
+      "description": "Setup peralatan rekaman, teknik mic placement, dan akustik ruangan untuk audio yang jernih.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "pod-1"
+      ],
+      "parentId": "pod-1",
+      "category": "Produksi",
+      "resources": [
+        {
+          "id": "pod-r5",
+          "title": "Audio Recording Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pod-r6",
+          "title": "Podcast Equipment Guide - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/podcast-equipment",
+          "free": false
+        },
+        {
+          "id": "pod-r7",
+          "title": "Acoustic Treatment Guide",
+          "type": "article",
+          "url": "https://www.soundonsound.com/techniques/home-recording-acoustics",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pod-3",
+      "title": "Audio Editing (Audacity / Adobe Audition)",
+      "description": "Edit podcast: noise reduction, EQ, compression, dan remove filler words menggunakan Audacity.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pod-2"
+      ],
+      "parentId": "pod-2",
+      "category": "Produksi",
+      "resources": [
+        {
+          "id": "pod-r8",
+          "title": "Audacity Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pod-r9",
+          "title": "Audacity Manual (gratis)",
+          "type": "documentation",
+          "url": "https://manual.audacityteam.org/",
+          "free": true
+        },
+        {
+          "id": "pod-r10",
+          "title": "Adobe Audition Podcast Editing",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/audition/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pod-4",
+      "title": "Scripting & Storytelling Audio",
+      "description": "Buat outline, script, dan storytelling yang engaging khusus untuk medium audio.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pod-1"
+      ],
+      "category": "Konten",
+      "resources": [
+        {
+          "id": "pod-r11",
+          "title": "Podcast Scripting Guide - Buzzsprout",
+          "type": "article",
+          "url": "https://www.buzzsprout.com/blog/podcast-script",
+          "free": true
+        },
+        {
+          "id": "pod-r12",
+          "title": "Audio Storytelling - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/audio-storytelling",
+          "free": false
+        },
+        {
+          "id": "pod-r13",
+          "title": "Script Writing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/podcast-scripting",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pod-5",
+      "title": "Distribusi ke Spotify, Apple Podcast, dll.",
+      "description": "Distribusikan podcast ke semua platform menggunakan hosting seperti Anchor atau Buzzsprout.",
+      "difficulty": "beginner",
+      "estimatedHours": 5,
+      "prerequisites": [
+        "pod-3"
+      ],
+      "category": "Distribusi",
+      "resources": [
+        {
+          "id": "pod-r14",
+          "title": "Spotify for Podcasters Guide",
+          "type": "documentation",
+          "url": "https://podcasters.spotify.com/",
+          "free": true
+        },
+        {
+          "id": "pod-r15",
+          "title": "Buzzsprout Distribution Guide",
+          "type": "documentation",
+          "url": "https://www.buzzsprout.com/blog/podcast-distribution",
+          "free": true
+        },
+        {
+          "id": "pod-r16",
+          "title": "Anchor/Spotify Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pod-6",
+      "title": "Pertumbuhan Audiens & Monetisasi",
+      "description": "Tumbuhkan listener, bangun komunitas, dan monetisasi podcast melalui sponsor, membership, dan merchandise.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pod-4",
+        "pod-5"
+      ],
+      "category": "Bisnis",
+      "resources": [
+        {
+          "id": "pod-r17",
+          "title": "Podcast Growth Strategy - Buzzsprout",
+          "type": "article",
+          "url": "https://www.buzzsprout.com/blog/grow-podcast-audience",
+          "free": true
+        },
+        {
+          "id": "pod-r18",
+          "title": "Podcast Monetization - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/podcast-monetization",
+          "free": false
+        },
+        {
+          "id": "pod-r19",
+          "title": "Podcast Marketing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pod-7",
+      "title": "Interview & Wawancara",
+      "description": "Teknik wawancara tamu yang efektif: riset, pertanyaan mendalam, dan dinamika percakapan yang natural.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "pod-4"
+      ],
+      "category": "Konten",
+      "resources": [
+        {
+          "id": "pod-r20",
+          "title": "Interview Techniques Guide - NiemanLab",
+          "type": "article",
+          "url": "https://www.nieman.harvard.edu/stories/interview-techniques/",
+          "free": true
+        },
+        {
+          "id": "pod-r21",
+          "title": "Podcast Interview Tips - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/podcast-interview",
+          "free": false
+        },
+        {
+          "id": "pod-r22",
+          "title": "Teknik Wawancara - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pod-8",
+      "title": "Branding & Artwork Podcast",
+      "description": "Desain cover art, intro/outro music, dan identitas visual podcast yang memorable.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "pod-5"
+      ],
+      "category": "Branding",
+      "resources": [
+        {
+          "id": "pod-r23",
+          "title": "Podcast Cover Art Guide - Canva",
+          "type": "documentation",
+          "url": "https://www.canva.com/learn/podcast-cover-art/",
+          "free": true
+        },
+        {
+          "id": "pod-r24",
+          "title": "Podcast Branding - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/podcast-branding",
+          "free": false
+        },
+        {
+          "id": "pod-r25",
+          "title": "Podcast Artwork Tips - Buzzsprout",
+          "type": "article",
+          "url": "https://www.buzzsprout.com/blog/podcast-artwork",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,391 @@
+{
+  "title": "Full-Stack Developer",
+  "slug": "fullstack",
+  "domain": "tech",
+  "icon": "Code",
+  "color": "bg-violet-500",
+  "description": "Kuasai pengembangan frontend dan backend sekaligus untuk membangun aplikasi web secara end-to-end.",
+  "tags": [
+    "react",
+    "nodejs",
+    "database",
+    "api",
+    "deployment"
+  ],
+  "order": 3,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "fs-1",
+      "title": "HTML, CSS & JavaScript Dasar",
+      "description": "Fondasi wajib: struktur HTML5, styling CSS3, dan logika JavaScript modern.",
+      "difficulty": "beginner",
+      "estimatedHours": 40,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "fs-r1",
+          "title": "Belajar Dasar Pemrograman Web - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/basic-web",
+          "free": true
+        },
+        {
+          "id": "fs-r2",
+          "title": "HTML CSS JS - Web Programming UNPAS",
+          "type": "video",
+          "url": "https://youtube.com/@sandhikagalihws",
+          "free": true
+        },
+        {
+          "id": "fs-r3",
+          "title": "JavaScript.info",
+          "type": "documentation",
+          "url": "https://javascript.info/",
+          "free": true
+        },
+        {
+          "id": "fs-r4",
+          "title": "Kursus Web Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/web-dasar",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "fs-2",
+      "title": "React & TypeScript",
+      "description": "Bangun UI interaktif dengan React 18 dan type safety TypeScript.",
+      "difficulty": "intermediate",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "fs-1"
+      ],
+      "parentId": "fs-1",
+      "category": "Frontend",
+      "resources": [
+        {
+          "id": "fs-r5",
+          "title": "React Web - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/react-web",
+          "free": true
+        },
+        {
+          "id": "fs-r6",
+          "title": "React + TypeScript - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r7",
+          "title": "Dokumentasi Resmi React",
+          "type": "documentation",
+          "url": "https://react.dev",
+          "free": true
+        },
+        {
+          "id": "fs-r8",
+          "title": "TypeScript Handbook",
+          "type": "documentation",
+          "url": "https://typescriptlang.org/docs/handbook/intro.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-3",
+      "title": "Node.js & Express REST API",
+      "description": "Buat REST API backend dengan Node.js dan Express beserta autentikasi JWT.",
+      "difficulty": "intermediate",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "fs-1"
+      ],
+      "parentId": "fs-1",
+      "category": "Backend",
+      "resources": [
+        {
+          "id": "fs-r9",
+          "title": "Back-End Pemula - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/nodejs-beginner",
+          "free": true
+        },
+        {
+          "id": "fs-r10",
+          "title": "Node.js + Express - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r11",
+          "title": "Express Documentation",
+          "type": "documentation",
+          "url": "https://expressjs.com/",
+          "free": true
+        },
+        {
+          "id": "fs-r12",
+          "title": "Sekolah Koding - Node.js",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-4",
+      "title": "Database PostgreSQL + Prisma",
+      "description": "Desain dan kelola database relasional menggunakan PostgreSQL dengan ORM Prisma.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "fs-3"
+      ],
+      "parentId": "fs-3",
+      "category": "Backend",
+      "resources": [
+        {
+          "id": "fs-r13",
+          "title": "PostgreSQL Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r14",
+          "title": "Prisma Documentation",
+          "type": "documentation",
+          "url": "https://www.prisma.io/docs/getting-started",
+          "free": true
+        },
+        {
+          "id": "fs-r15",
+          "title": "Database Design - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-5",
+      "title": "Integrasi Frontend-Backend",
+      "description": "Hubungkan React frontend dengan REST API backend menggunakan React Query dan Axios.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fs-2",
+        "fs-3"
+      ],
+      "category": "Integrasi",
+      "resources": [
+        {
+          "id": "fs-r16",
+          "title": "React Query Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r17",
+          "title": "Full Stack Project - Web Programming UNPAS",
+          "type": "video",
+          "url": "https://youtube.com/@sandhikagalihws",
+          "free": true
+        },
+        {
+          "id": "fs-r18",
+          "title": "Axios Documentation",
+          "type": "documentation",
+          "url": "https://axios-http.com/docs/intro",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-6",
+      "title": "Autentikasi & Otorisasi",
+      "description": "Implementasikan sistem login lengkap dengan JWT, refresh token, dan role-based access control.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fs-5"
+      ],
+      "category": "Keamanan",
+      "resources": [
+        {
+          "id": "fs-r19",
+          "title": "JWT Auth - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r20",
+          "title": "Auth Best Practices - OWASP",
+          "type": "documentation",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html",
+          "free": true
+        },
+        {
+          "id": "fs-r21",
+          "title": "Full Stack Auth - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-7",
+      "title": "Docker & Deployment",
+      "description": "Kontainerisasi dan deploy aplikasi full-stack menggunakan Docker Compose ke VPS.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fs-4"
+      ],
+      "category": "Deployment",
+      "resources": [
+        {
+          "id": "fs-r22",
+          "title": "Docker - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/docker",
+          "free": true
+        },
+        {
+          "id": "fs-r23",
+          "title": "Docker Compose - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r24",
+          "title": "Deploy VPS - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/deploy-nodejs-vps/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-8",
+      "title": "Next.js Full-Stack",
+      "description": "Manfaatkan Next.js App Router untuk membangun full-stack app dengan Server Actions dan API routes.",
+      "difficulty": "advanced",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "fs-2",
+        "fs-4"
+      ],
+      "category": "Frontend",
+      "resources": [
+        {
+          "id": "fs-r25",
+          "title": "Next.js Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r26",
+          "title": "Dokumentasi Next.js",
+          "type": "documentation",
+          "url": "https://nextjs.org/docs",
+          "free": true
+        },
+        {
+          "id": "fs-r27",
+          "title": "Next.js Full Stack - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        },
+        {
+          "id": "fs-r28",
+          "title": "Next.js - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/nextjs-fullstack",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "fs-9",
+      "title": "Testing (Unit & E2E)",
+      "description": "Tulis unit tests dengan Vitest dan end-to-end tests dengan Playwright.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "fs-5"
+      ],
+      "category": "Kualitas",
+      "resources": [
+        {
+          "id": "fs-r29",
+          "title": "Testing Full Stack - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r30",
+          "title": "Playwright Documentation",
+          "type": "documentation",
+          "url": "https://playwright.dev/docs/intro",
+          "free": true
+        },
+        {
+          "id": "fs-r31",
+          "title": "Vitest Documentation",
+          "type": "documentation",
+          "url": "https://vitest.dev/guide/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "fs-10",
+      "title": "CI/CD Pipeline",
+      "description": "Otomasi proses testing dan deployment menggunakan GitHub Actions.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "fs-7"
+      ],
+      "category": "Deployment",
+      "resources": [
+        {
+          "id": "fs-r32",
+          "title": "GitHub Actions - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "fs-r33",
+          "title": "GitHub Actions Documentation",
+          "type": "documentation",
+          "url": "https://docs.github.com/en/actions",
+          "free": true
+        },
+        {
+          "id": "fs-r34",
+          "title": "CI/CD - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/cicd",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

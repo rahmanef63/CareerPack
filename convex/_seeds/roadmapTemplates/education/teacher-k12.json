@@ -1,0 +1,299 @@
+{
+  "title": "Guru Sekolah (SD-SMA)",
+  "slug": "teacher-k12",
+  "domain": "education",
+  "icon": "GraduationCap",
+  "color": "bg-green-600",
+  "description": "Kembangkan kompetensi pedagogik dan profesional sebagai guru di sekolah formal Indonesia.",
+  "tags": [
+    "pedagogi",
+    "kurikulum-merdeka",
+    "ppp",
+    "asesmen",
+    "pppk"
+  ],
+  "order": 31,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "guru-1",
+      "title": "Fondasi Pedagogik & Ilmu Pendidikan",
+      "description": "Pelajari teori belajar, psikologi perkembangan anak, dan prinsip-prinsip pembelajaran efektif.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "guru-r1",
+          "title": "Platform Merdeka Mengajar - Kemendikbud",
+          "type": "course",
+          "url": "https://guru.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "guru-r2",
+          "title": "Pedagogik - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/",
+          "free": false
+        },
+        {
+          "id": "guru-r3",
+          "title": "Psikologi Pendidikan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "guru-r4",
+          "title": "Foundations of Teaching - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/foundations-of-teaching",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "guru-2",
+      "title": "Kurikulum Merdeka",
+      "description": "Pahami dan implementasikan Kurikulum Merdeka: Capaian Pembelajaran, Profil Pelajar Pancasila, dan P5.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "guru-1"
+      ],
+      "parentId": "guru-1",
+      "category": "Kurikulum",
+      "resources": [
+        {
+          "id": "guru-r5",
+          "title": "Merdeka Mengajar App - Kemendikbud",
+          "type": "course",
+          "url": "https://guru.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "guru-r6",
+          "title": "Panduan Kurikulum Merdeka - Kemdikbud",
+          "type": "documentation",
+          "url": "https://kurikulum.kemdikbud.go.id/",
+          "free": true
+        },
+        {
+          "id": "guru-r7",
+          "title": "Kurikulum Merdeka - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "guru-3",
+      "title": "Perencanaan Pembelajaran (RPP/Modul Ajar)",
+      "description": "Buat Rencana Pelaksanaan Pembelajaran (RPP) atau Modul Ajar yang efektif dan terstruktur.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "guru-2"
+      ],
+      "parentId": "guru-2",
+      "category": "Perencanaan",
+      "resources": [
+        {
+          "id": "guru-r8",
+          "title": "Panduan Modul Ajar - Merdeka Mengajar",
+          "type": "documentation",
+          "url": "https://guru.kemdikbud.go.id/pelatihan-mandiri",
+          "free": true
+        },
+        {
+          "id": "guru-r9",
+          "title": "RPP Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "guru-r10",
+          "title": "Perencanaan Pembelajaran - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/guru-les-privat/pedagogik",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "guru-4",
+      "title": "Strategi & Metode Mengajar",
+      "description": "Kuasai berbagai metode pembelajaran aktif: inquiry, PBL, cooperative learning, dan diferensiasi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "guru-3"
+      ],
+      "category": "Pedagogi",
+      "resources": [
+        {
+          "id": "guru-r11",
+          "title": "Active Learning - Merdeka Mengajar",
+          "type": "course",
+          "url": "https://guru.kemdikbud.go.id/pelatihan-mandiri",
+          "free": true
+        },
+        {
+          "id": "guru-r12",
+          "title": "Project-Based Learning Guide - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/project-based-learning",
+          "free": false
+        },
+        {
+          "id": "guru-r13",
+          "title": "Metode Mengajar - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "guru-5",
+      "title": "Asesmen & Evaluasi Pembelajaran",
+      "description": "Rancang asesmen diagnostik, formatif, dan sumatif yang valid dan reliabel sesuai Kurikulum Merdeka.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "guru-4"
+      ],
+      "category": "Asesmen",
+      "resources": [
+        {
+          "id": "guru-r14",
+          "title": "Panduan Asesmen - Kemdikbud",
+          "type": "documentation",
+          "url": "https://kurikulum.kemdikbud.go.id/asesmen",
+          "free": true
+        },
+        {
+          "id": "guru-r15",
+          "title": "Asesmen Kurikulum Merdeka - Merdeka Mengajar",
+          "type": "course",
+          "url": "https://guru.kemdikbud.go.id/pelatihan-mandiri",
+          "free": true
+        },
+        {
+          "id": "guru-r16",
+          "title": "Assessment for Learning - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/assessment-for-learning",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "guru-6",
+      "title": "Teknologi Pendidikan & E-learning",
+      "description": "Gunakan LMS (Google Classroom, Canva for Education) dan teknologi untuk pembelajaran digital.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "guru-3"
+      ],
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "guru-r17",
+          "title": "Google Classroom Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "guru-r18",
+          "title": "Teknologi Pembelajaran - Merdeka Mengajar",
+          "type": "course",
+          "url": "https://guru.kemdikbud.go.id/pelatihan-mandiri",
+          "free": true
+        },
+        {
+          "id": "guru-r19",
+          "title": "E-learning for Teachers - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/elearning",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "guru-7",
+      "title": "Persiapan Seleksi PPPK Guru",
+      "description": "Persiapkan ujian seleksi PPPK Guru: materi pedagogik, bidang studi, dan wawancara.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "guru-5"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "guru-r20",
+          "title": "Portal PPPK - BKN",
+          "type": "documentation",
+          "url": "https://sscasn.bkn.go.id/",
+          "free": true
+        },
+        {
+          "id": "guru-r21",
+          "title": "PPPK Guru 2024 - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/guru-les-privat/pppk",
+          "free": false
+        },
+        {
+          "id": "guru-r22",
+          "title": "Tryout PPPK Guru - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "guru-8",
+      "title": "Pengembangan Keprofesian Berkelanjutan (PKB)",
+      "description": "Ikuti PKB: webinar, workshop, komunitas belajar, dan PTK (Penelitian Tindakan Kelas).",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "guru-6"
+      ],
+      "category": "Pengembangan Diri",
+      "resources": [
+        {
+          "id": "guru-r23",
+          "title": "PKB - Merdeka Mengajar",
+          "type": "course",
+          "url": "https://guru.kemdikbud.go.id/pelatihan-mandiri",
+          "free": true
+        },
+        {
+          "id": "guru-r24",
+          "title": "Komunitas Belajar - Merdeka Mengajar",
+          "type": "other",
+          "url": "https://guru.kemdikbud.go.id/komunitas",
+          "free": true
+        },
+        {
+          "id": "guru-r25",
+          "title": "PTK Guide - Kemdikbud",
+          "type": "documentation",
+          "url": "https://kemdikbud.go.id/main/penelitian-tindakan-kelas",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

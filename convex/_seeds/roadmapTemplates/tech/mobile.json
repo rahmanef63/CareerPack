@@ -1,0 +1,346 @@
+{
+  "title": "Mobile Developer",
+  "slug": "mobile",
+  "domain": "tech",
+  "icon": "Smartphone",
+  "color": "bg-cyan-500",
+  "description": "Bangun aplikasi mobile Android dan iOS menggunakan React Native atau Flutter.",
+  "tags": [
+    "react-native",
+    "flutter",
+    "android",
+    "ios",
+    "mobile"
+  ],
+  "order": 6,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "mob-1",
+      "title": "Dasar JavaScript & ES6+",
+      "description": "Fondasi JavaScript modern yang dibutuhkan sebelum belajar React Native.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "mob-r1",
+          "title": "JavaScript Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/javascript-dasar",
+          "free": true
+        },
+        {
+          "id": "mob-r2",
+          "title": "JavaScript Modern - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r3",
+          "title": "JavaScript.info",
+          "type": "documentation",
+          "url": "https://javascript.info/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-2",
+      "title": "React Native Dasar",
+      "description": "Pelajari komponen dasar React Native: View, Text, Image, StyleSheet, dan navigasi dasar.",
+      "difficulty": "beginner",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "mob-1"
+      ],
+      "parentId": "mob-1",
+      "category": "React Native",
+      "resources": [
+        {
+          "id": "mob-r4",
+          "title": "React Native - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/react-native",
+          "free": true
+        },
+        {
+          "id": "mob-r5",
+          "title": "React Native Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r6",
+          "title": "React Native Documentation",
+          "type": "documentation",
+          "url": "https://reactnative.dev/docs/getting-started",
+          "free": true
+        },
+        {
+          "id": "mob-r7",
+          "title": "React Native - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-3",
+      "title": "React Navigation",
+      "description": "Implementasikan navigasi antar screen menggunakan React Navigation (Stack, Tab, Drawer).",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "mob-2"
+      ],
+      "parentId": "mob-2",
+      "category": "React Native",
+      "resources": [
+        {
+          "id": "mob-r8",
+          "title": "React Navigation Documentation",
+          "type": "documentation",
+          "url": "https://reactnavigation.org/docs/getting-started",
+          "free": true
+        },
+        {
+          "id": "mob-r9",
+          "title": "React Navigation Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r10",
+          "title": "Mobile Navigation - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-4",
+      "title": "State Management Mobile",
+      "description": "Kelola state di React Native dengan Zustand, Redux Toolkit, atau React Context.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "mob-3"
+      ],
+      "category": "React Native",
+      "resources": [
+        {
+          "id": "mob-r11",
+          "title": "State Management React Native - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r12",
+          "title": "Redux Toolkit Documentation",
+          "type": "documentation",
+          "url": "https://redux-toolkit.js.org/introduction/getting-started",
+          "free": true
+        },
+        {
+          "id": "mob-r13",
+          "title": "Zustand Documentation",
+          "type": "documentation",
+          "url": "https://zustand-demo.pmnd.rs/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-5",
+      "title": "Flutter Dasar",
+      "description": "Alternatif: pelajari Flutter dengan Dart untuk membangun aplikasi cross-platform.",
+      "difficulty": "intermediate",
+      "estimatedHours": 35,
+      "prerequisites": [],
+      "category": "Flutter",
+      "resources": [
+        {
+          "id": "mob-r14",
+          "title": "Flutter - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/flutter",
+          "free": true
+        },
+        {
+          "id": "mob-r15",
+          "title": "Flutter Tutorial - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r16",
+          "title": "Flutter Documentation",
+          "type": "documentation",
+          "url": "https://flutter.dev/docs",
+          "free": true
+        },
+        {
+          "id": "mob-r17",
+          "title": "Flutter - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-6",
+      "title": "Integrasi REST API Mobile",
+      "description": "Hubungkan aplikasi mobile ke backend REST API menggunakan Axios atau dio (Flutter).",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "mob-3"
+      ],
+      "category": "Integrasi",
+      "resources": [
+        {
+          "id": "mob-r18",
+          "title": "API Integration React Native - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r19",
+          "title": "Dio Package Documentation",
+          "type": "documentation",
+          "url": "https://pub.dev/packages/dio",
+          "free": true
+        },
+        {
+          "id": "mob-r20",
+          "title": "REST API di Flutter - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-7",
+      "title": "Penyimpanan Lokal & Offline",
+      "description": "Implementasikan AsyncStorage, SQLite, dan offline-first strategy untuk UX yang lebih baik.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "mob-4"
+      ],
+      "category": "Data",
+      "resources": [
+        {
+          "id": "mob-r21",
+          "title": "AsyncStorage Documentation",
+          "type": "documentation",
+          "url": "https://react-native-async-storage.github.io/async-storage/docs/usage/",
+          "free": true
+        },
+        {
+          "id": "mob-r22",
+          "title": "SQLite di Flutter - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r23",
+          "title": "Offline Strategy - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/react-native-offline/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-8",
+      "title": "Push Notification & Firebase",
+      "description": "Integrasikan Firebase Cloud Messaging untuk push notifications dan Firebase Analytics.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "mob-6"
+      ],
+      "category": "Integrasi",
+      "resources": [
+        {
+          "id": "mob-r24",
+          "title": "Firebase dengan React Native - Sekolah Koding",
+          "type": "video",
+          "url": "https://youtube.com/@sekolahkoding",
+          "free": true
+        },
+        {
+          "id": "mob-r25",
+          "title": "React Native Firebase Documentation",
+          "type": "documentation",
+          "url": "https://rnfirebase.io/",
+          "free": true
+        },
+        {
+          "id": "mob-r26",
+          "title": "FCM Documentation - Google",
+          "type": "documentation",
+          "url": "https://firebase.google.com/docs/cloud-messaging",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "mob-9",
+      "title": "Publish ke Play Store & App Store",
+      "description": "Proses signing, build release, dan submit aplikasi ke Google Play Store dan Apple App Store.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "mob-7",
+        "mob-8"
+      ],
+      "category": "Deployment",
+      "resources": [
+        {
+          "id": "mob-r27",
+          "title": "Publish React Native - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "mob-r28",
+          "title": "Google Play Console Help",
+          "type": "documentation",
+          "url": "https://support.google.com/googleplay/android-developer/",
+          "free": true
+        },
+        {
+          "id": "mob-r29",
+          "title": "App Store Connect Documentation",
+          "type": "documentation",
+          "url": "https://developer.apple.com/app-store-connect/",
+          "free": true
+        },
+        {
+          "id": "mob-r30",
+          "title": "Deployment Mobile - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/mobile-deployment",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,308 @@
+{
+  "title": "Cybersecurity",
+  "slug": "cybersecurity",
+  "domain": "tech",
+  "icon": "Landmark",
+  "color": "bg-red-600",
+  "description": "Pelajari keamanan siber, ethical hacking, dan pertahanan sistem untuk melindungi aset digital.",
+  "tags": [
+    "networking",
+    "penetration-testing",
+    "soc",
+    "cryptography",
+    "security"
+  ],
+  "order": 7,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "sec-1",
+      "title": "Dasar Jaringan Komputer",
+      "description": "Pahami protokol TCP/IP, OSI model, DNS, HTTP/HTTPS, dan topologi jaringan.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "sec-r1",
+          "title": "Networking Dasar - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/network-dasar",
+          "free": true
+        },
+        {
+          "id": "sec-r2",
+          "title": "Jaringan Komputer - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "sec-r3",
+          "title": "Professor Messer Network+ Free Course",
+          "type": "video",
+          "url": "https://professormesser.com/network-plus/n10-008/n10-008-video/n10-008-training-course/",
+          "free": true
+        },
+        {
+          "id": "sec-r4",
+          "title": "CompTIA Network+ Guide",
+          "type": "documentation",
+          "url": "https://comptia.org/certifications/network",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sec-2",
+      "title": "Linux untuk Keamanan",
+      "description": "Kuasai Linux command line, permission system, dan tools keamanan berbasis Linux.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sec-1"
+      ],
+      "parentId": "sec-1",
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "sec-r5",
+          "title": "Linux untuk Cybersecurity - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/linux-security",
+          "free": true
+        },
+        {
+          "id": "sec-r6",
+          "title": "Kali Linux Tutorial - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/kali-linux-untuk-pemula/",
+          "free": true
+        },
+        {
+          "id": "sec-r7",
+          "title": "TryHackMe - Linux Fundamentals",
+          "type": "practice",
+          "url": "https://tryhackme.com/module/linux-fundamentals",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sec-3",
+      "title": "Kriptografi Dasar",
+      "description": "Pelajari symmetric/asymmetric encryption, hashing, PKI, dan TLS/SSL.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sec-1"
+      ],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "sec-r8",
+          "title": "Kriptografi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "sec-r9",
+          "title": "Cryptography I - Coursera (Stanford)",
+          "type": "course",
+          "url": "https://coursera.org/learn/crypto",
+          "free": false
+        },
+        {
+          "id": "sec-r10",
+          "title": "OWASP Cryptographic Storage",
+          "type": "documentation",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sec-4",
+      "title": "Web Application Security (OWASP Top 10)",
+      "description": "Kenali dan eksploitasi kerentanan web: SQL Injection, XSS, CSRF, dan IDOR.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "sec-2",
+        "sec-3"
+      ],
+      "category": "Offensive Security",
+      "resources": [
+        {
+          "id": "sec-r11",
+          "title": "OWASP Top 10 Documentation",
+          "type": "documentation",
+          "url": "https://owasp.org/www-project-top-ten/",
+          "free": true
+        },
+        {
+          "id": "sec-r12",
+          "title": "PortSwigger Web Security Academy",
+          "type": "practice",
+          "url": "https://portswigger.net/web-security",
+          "free": true
+        },
+        {
+          "id": "sec-r13",
+          "title": "Web Security - Programmer Zaman Now",
+          "type": "video",
+          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "free": true
+        },
+        {
+          "id": "sec-r14",
+          "title": "Web Hacking - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/web-security",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sec-5",
+      "title": "Penetration Testing Dasar",
+      "description": "Lakukan penetration testing terstruktur menggunakan metodologi PTES dan tools Kali Linux.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "sec-4"
+      ],
+      "parentId": "sec-4",
+      "category": "Offensive Security",
+      "resources": [
+        {
+          "id": "sec-r15",
+          "title": "TryHackMe - Pentesting Path",
+          "type": "practice",
+          "url": "https://tryhackme.com/path/outline/pentesting",
+          "free": false
+        },
+        {
+          "id": "sec-r16",
+          "title": "Hack The Box",
+          "type": "practice",
+          "url": "https://hackthebox.com/",
+          "free": true
+        },
+        {
+          "id": "sec-r17",
+          "title": "CEH - EC-Council",
+          "type": "course",
+          "url": "https://eccouncil.org/train-certify/certified-ethical-hacker-ceh/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sec-6",
+      "title": "SOC & Incident Response",
+      "description": "Operasikan Security Operations Center: log analysis, threat hunting, dan incident response.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "sec-3"
+      ],
+      "category": "Defensive Security",
+      "resources": [
+        {
+          "id": "sec-r18",
+          "title": "TryHackMe SOC Level 1",
+          "type": "practice",
+          "url": "https://tryhackme.com/path/outline/soclevel1",
+          "free": false
+        },
+        {
+          "id": "sec-r19",
+          "title": "Incident Response - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/incident-response",
+          "free": false
+        },
+        {
+          "id": "sec-r20",
+          "title": "SANS Incident Handling",
+          "type": "documentation",
+          "url": "https://sans.org/reading-room/whitepapers/incident/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sec-7",
+      "title": "Cloud Security",
+      "description": "Amankan infrastruktur cloud: IAM, security groups, compliance, dan cloud-native threats.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "sec-6"
+      ],
+      "category": "Defensive Security",
+      "resources": [
+        {
+          "id": "sec-r21",
+          "title": "AWS Security Fundamentals (gratis)",
+          "type": "course",
+          "url": "https://aws.amazon.com/training/digital/aws-security-fundamentals/",
+          "free": true
+        },
+        {
+          "id": "sec-r22",
+          "title": "Cloud Security Alliance",
+          "type": "documentation",
+          "url": "https://cloudsecurityalliance.org/research/guidance/",
+          "free": true
+        },
+        {
+          "id": "sec-r23",
+          "title": "Google Cloud Security - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/google-cloud-security",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sec-8",
+      "title": "Sertifikasi CompTIA Security+",
+      "description": "Persiapkan diri untuk sertifikasi CompTIA Security+ sebagai standar industri keamanan siber.",
+      "difficulty": "intermediate",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "sec-4",
+        "sec-6"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "sec-r24",
+          "title": "Security+ - Professor Messer (gratis)",
+          "type": "video",
+          "url": "https://professormesser.com/security-plus/sy0-701/sy0-701-video/sy0-701-comptia-security-plus-course/",
+          "free": true
+        },
+        {
+          "id": "sec-r25",
+          "title": "Security+ Practice Tests",
+          "type": "practice",
+          "url": "https://comptia.org/certifications/security",
+          "free": false
+        },
+        {
+          "id": "sec-r26",
+          "title": "Security+ - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/comptia-security-plus",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

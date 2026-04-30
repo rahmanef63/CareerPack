@@ -1,0 +1,299 @@
+{
+  "title": "Apoteker",
+  "slug": "pharmacist",
+  "domain": "health",
+  "icon": "FlaskConical",
+  "color": "bg-green-400",
+  "description": "Kembangkan kompetensi sebagai apoteker profesional di apotek, rumah sakit, atau industri farmasi.",
+  "tags": [
+    "farmasi",
+    "obat",
+    "UKAI",
+    "STRA",
+    "klinis"
+  ],
+  "order": 42,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "apt-1",
+      "title": "Kimia Farmasi & Farmakognosi",
+      "description": "Pelajari struktur kimia obat, sifat fisikokimia, dan bahan alam sebagai sumber obat.",
+      "difficulty": "beginner",
+      "estimatedHours": 30,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "apt-r1",
+          "title": "Kimia Farmasi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r2",
+          "title": "Pharmaceutical Chemistry - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/pharmaceutical-chemistry",
+          "free": false
+        },
+        {
+          "id": "apt-r3",
+          "title": "Farmakognosi Dasar - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/",
+          "free": false
+        },
+        {
+          "id": "apt-r4",
+          "title": "MIMS Indonesia",
+          "type": "documentation",
+          "url": "https://mims.com/indonesia",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-2",
+      "title": "Farmakokinetik & Farmakodinamik",
+      "description": "Pahami absorpsi, distribusi, metabolisme, ekskresi obat, dan mekanisme kerja obat di tubuh.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "apt-1"
+      ],
+      "parentId": "apt-1",
+      "category": "Klinis",
+      "resources": [
+        {
+          "id": "apt-r5",
+          "title": "Farmakokinetik - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r6",
+          "title": "Pharmacokinetics - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/pharmacokinetics",
+          "free": false
+        },
+        {
+          "id": "apt-r7",
+          "title": "Clinical Pharmacology Guide",
+          "type": "documentation",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK470164/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-3",
+      "title": "Farmasi Klinis & Pharmaceutical Care",
+      "description": "Berikan pelayanan kefarmasian klinis: visite, konseling pasien, dan monitoring terapi obat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "apt-2"
+      ],
+      "parentId": "apt-2",
+      "category": "Klinis",
+      "resources": [
+        {
+          "id": "apt-r8",
+          "title": "Farmasi Klinis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r9",
+          "title": "Clinical Pharmacy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/clinical-pharmacy",
+          "free": false
+        },
+        {
+          "id": "apt-r10",
+          "title": "Pedoman Farmasi Klinis - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/pharmacyclassification/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-4",
+      "title": "Manajemen Apotek & Pengelolaan Obat",
+      "description": "Kelola apotek: perencanaan, pengadaan, penyimpanan, dan distribusi obat yang tepat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "apt-1"
+      ],
+      "category": "Manajemen",
+      "resources": [
+        {
+          "id": "apt-r11",
+          "title": "Manajemen Apotek - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r12",
+          "title": "Pharmacy Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/pharmacy-management",
+          "free": false
+        },
+        {
+          "id": "apt-r13",
+          "title": "Pedoman Pengelolaan Obat - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/pedoman-obat/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-5",
+      "title": "Regulasi Farmasi & BPOM",
+      "description": "Pahami regulasi industri farmasi Indonesia: BPOM, perizinan produk, dan standar GMP.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "apt-4"
+      ],
+      "category": "Regulasi",
+      "resources": [
+        {
+          "id": "apt-r14",
+          "title": "BPOM Portal Informasi",
+          "type": "documentation",
+          "url": "https://www.pom.go.id/",
+          "free": true
+        },
+        {
+          "id": "apt-r15",
+          "title": "Regulasi Farmasi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r16",
+          "title": "GMP Pharmaceutical Guide - WHO",
+          "type": "documentation",
+          "url": "https://www.who.int/medicines/areas/quality_safety/quality_assurance/gmp/en/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-6",
+      "title": "Uji Kompetensi Apoteker (UKAI) & STRA",
+      "description": "Persiapkan ujian kompetensi apoteker dan proses pengurusan Surat Tanda Registrasi Apoteker.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "apt-3"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "apt-r17",
+          "title": "UKAI IAI - Portal",
+          "type": "documentation",
+          "url": "https://www.iai.id/ukai/",
+          "free": true
+        },
+        {
+          "id": "apt-r18",
+          "title": "Soal Latihan UKAI - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r19",
+          "title": "STRA Online - KTKI",
+          "type": "documentation",
+          "url": "https://ktki.kemkes.go.id/registrasi/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-7",
+      "title": "Industri Farmasi & Quality Control",
+      "description": "Bekerja di industri farmasi: QC, QA, produksi, dan regulatory affairs.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "apt-5"
+      ],
+      "category": "Industri",
+      "resources": [
+        {
+          "id": "apt-r20",
+          "title": "Pharmaceutical Industry - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/pharmaceutical-industry",
+          "free": false
+        },
+        {
+          "id": "apt-r21",
+          "title": "QC Farmasi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "apt-r22",
+          "title": "GMP Guide - BPOM",
+          "type": "documentation",
+          "url": "https://www.pom.go.id/new/index.php/view/regulasi",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "apt-8",
+      "title": "Pelayanan Kefarmasian BPJS",
+      "description": "Pahami sistem pelayanan obat dalam JKN/BPJS: formularium nasional dan e-klaim.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "apt-4"
+      ],
+      "category": "Regulasi",
+      "resources": [
+        {
+          "id": "apt-r23",
+          "title": "BPJS Kesehatan - Panduan Farmasi",
+          "type": "documentation",
+          "url": "https://bpjs-kesehatan.go.id/bpjs/",
+          "free": true
+        },
+        {
+          "id": "apt-r24",
+          "title": "Formularium Nasional - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/formularium-nasional/",
+          "free": true
+        },
+        {
+          "id": "apt-r25",
+          "title": "Pelayanan Obat JKN - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

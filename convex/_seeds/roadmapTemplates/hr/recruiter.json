@@ -1,0 +1,300 @@
+{
+  "title": "Rekruter & Talent Acquisition",
+  "slug": "recruiter",
+  "domain": "hr",
+  "icon": "UserCog",
+  "color": "bg-indigo-400",
+  "description": "Kuasai strategi pencarian dan penilaian kandidat untuk mengisi posisi kunci di organisasi.",
+  "tags": [
+    "sourcing",
+    "linkedin-recruiter",
+    "assessment",
+    "employer-branding",
+    "ATS"
+  ],
+  "order": 62,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "rek-1",
+      "title": "Dasar Rekrutmen & Talent Acquisition",
+      "description": "Pahami siklus rekrutmen, perbedaan rekrutmen dan TA, serta tren terkini talent market Indonesia.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "rek-r1",
+          "title": "Recruitment Fundamentals - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/recruitment-fundamentals",
+          "free": false
+        },
+        {
+          "id": "rek-r2",
+          "title": "Talent Acquisition - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/talent-acquisition",
+          "free": false
+        },
+        {
+          "id": "rek-r3",
+          "title": "Rekruter Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "rek-r4",
+          "title": "LinkedIn Recruiter Guide",
+          "type": "documentation",
+          "url": "https://business.linkedin.com/talent-solutions/recruiter",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "rek-2",
+      "title": "Job Analysis & Workforce Planning",
+      "description": "Buat job description yang akurat, lakukan job grading, dan rencanakan kebutuhan tenaga kerja.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "rek-1"
+      ],
+      "parentId": "rek-1",
+      "category": "Perencanaan",
+      "resources": [
+        {
+          "id": "rek-r5",
+          "title": "Job Analysis Guide - SHRM",
+          "type": "documentation",
+          "url": "https://www.shrm.org/hr-topics/talent-acquisition/Pages/job-analysis.aspx",
+          "free": true
+        },
+        {
+          "id": "rek-r6",
+          "title": "Workforce Planning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/workforce-planning",
+          "free": false
+        },
+        {
+          "id": "rek-r7",
+          "title": "Job Description Writing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "rek-3",
+      "title": "Sourcing & Boolean Search",
+      "description": "Temukan kandidat pasif menggunakan LinkedIn Boolean search, X-Ray search, dan talent mapping.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "rek-1"
+      ],
+      "category": "Sourcing",
+      "resources": [
+        {
+          "id": "rek-r8",
+          "title": "LinkedIn Recruiter Tutorial",
+          "type": "documentation",
+          "url": "https://linkedin.com/business/talent/blog/talent-acquisition/",
+          "free": true
+        },
+        {
+          "id": "rek-r9",
+          "title": "Boolean Search Guide - AIRS",
+          "type": "documentation",
+          "url": "https://www.airsdirectory.com/boolean-search/",
+          "free": true
+        },
+        {
+          "id": "rek-r10",
+          "title": "Sourcing Kandidat - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/talent-sourcing",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "rek-4",
+      "title": "Wawancara & Penilaian Kandidat",
+      "description": "Kuasai teknik behavioral interview (STAR), structured interview, dan penilaian kompetensi kandidat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "rek-2"
+      ],
+      "parentId": "rek-2",
+      "category": "Seleksi",
+      "resources": [
+        {
+          "id": "rek-r11",
+          "title": "Interviewing Skills - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/teknik-wawancara",
+          "free": false
+        },
+        {
+          "id": "rek-r12",
+          "title": "Behavioral Interviewing Guide - SHRM",
+          "type": "documentation",
+          "url": "https://www.shrm.org/resourcesandtools/tools-and-samples/interview-questions/pages/behavioralinterviewquestions.aspx",
+          "free": true
+        },
+        {
+          "id": "rek-r13",
+          "title": "Wawancara Kerja - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "rek-5",
+      "title": "ATS & Recruitment Technology",
+      "description": "Kelola pipeline rekrutmen menggunakan ATS modern (Kalibrr, Workable) untuk efisiensi proses.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "rek-1"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "rek-r14",
+          "title": "Kalibrr Platform Indonesia",
+          "type": "documentation",
+          "url": "https://employer.kalibrr.com/",
+          "free": true
+        },
+        {
+          "id": "rek-r15",
+          "title": "ATS Best Practices - Workable",
+          "type": "documentation",
+          "url": "https://resources.workable.com/tutorial/ats-guide/",
+          "free": true
+        },
+        {
+          "id": "rek-r16",
+          "title": "Recruitment Tech - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/recruitment-technology",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "rek-6",
+      "title": "Employer Branding",
+      "description": "Bangun employer branding yang kuat di LinkedIn, Glassdoor, dan media sosial untuk menarik top talent.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "rek-3"
+      ],
+      "category": "Branding",
+      "resources": [
+        {
+          "id": "rek-r17",
+          "title": "Employer Branding - LinkedIn",
+          "type": "documentation",
+          "url": "https://business.linkedin.com/talent-solutions/blog/employer-brand",
+          "free": true
+        },
+        {
+          "id": "rek-r18",
+          "title": "Employer Branding - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/employer-branding",
+          "free": false
+        },
+        {
+          "id": "rek-r19",
+          "title": "EVP Development - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "rek-7",
+      "title": "Metrics Rekrutmen & Analitik TA",
+      "description": "Ukur performa rekrutmen: time-to-fill, cost-per-hire, quality-of-hire, dan offer acceptance rate.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "rek-5"
+      ],
+      "category": "Analitik",
+      "resources": [
+        {
+          "id": "rek-r20",
+          "title": "Recruitment Metrics - SHRM",
+          "type": "documentation",
+          "url": "https://www.shrm.org/hr-topics/talent-acquisition/pages/recruitment-metrics.aspx",
+          "free": true
+        },
+        {
+          "id": "rek-r21",
+          "title": "HR Analytics - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/hr-analytics",
+          "free": false
+        },
+        {
+          "id": "rek-r22",
+          "title": "TA Metrics - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "rek-8",
+      "title": "Onboarding & Retensi Talenta",
+      "description": "Rancang program onboarding yang engaging dan strategi retensi untuk menurunkan turnover.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "rek-4",
+        "rek-6"
+      ],
+      "category": "Retensi",
+      "resources": [
+        {
+          "id": "rek-r23",
+          "title": "Onboarding Best Practices - SHRM",
+          "type": "documentation",
+          "url": "https://www.shrm.org/hr-topics/talent-acquisition/Pages/onboarding.aspx",
+          "free": true
+        },
+        {
+          "id": "rek-r24",
+          "title": "Employee Retention - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/employee-retention",
+          "free": false
+        },
+        {
+          "id": "rek-r25",
+          "title": "Onboarding & Retensi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

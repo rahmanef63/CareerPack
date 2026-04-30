@@ -1,0 +1,300 @@
+{
+  "title": "Product Manager",
+  "slug": "product-manager",
+  "domain": "business",
+  "icon": "Kanban",
+  "color": "bg-indigo-500",
+  "description": "Pelajari cara mendefinisikan, membangun, dan meluncurkan produk digital yang dicintai pengguna.",
+  "tags": [
+    "product-strategy",
+    "agile",
+    "user-research",
+    "roadmap",
+    "metrics"
+  ],
+  "order": 12,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "pm-1",
+      "title": "Fondasi Product Management",
+      "description": "Pahami peran PM, product lifecycle, dan perbedaan antara PM, PO, dan project manager.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "pm-r1",
+          "title": "Product Management Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/product-management-dasar",
+          "free": false
+        },
+        {
+          "id": "pm-r2",
+          "title": "PM Fundamentals - Dicoding",
+          "type": "course",
+          "url": "https://dicoding.com/academies/product-management",
+          "free": true
+        },
+        {
+          "id": "pm-r3",
+          "title": "Product Manager - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "pm-r4",
+          "title": "Inspired - Marty Cagan (buku)",
+          "type": "book",
+          "url": "https://svpg.com/inspired-how-to-create-products-customers-love/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pm-2",
+      "title": "User Research & Discovery",
+      "description": "Lakukan user interview, survei, dan analisis data untuk menemukan masalah yang layak dipecahkan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pm-1"
+      ],
+      "parentId": "pm-1",
+      "category": "Riset",
+      "resources": [
+        {
+          "id": "pm-r5",
+          "title": "User Research - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/user-research",
+          "free": false
+        },
+        {
+          "id": "pm-r6",
+          "title": "Google UX Design Certificate - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/google-certificates/ux-design",
+          "free": false
+        },
+        {
+          "id": "pm-r7",
+          "title": "User Interviews - Nielsen Norman Group",
+          "type": "documentation",
+          "url": "https://nngroup.com/articles/user-interviews/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pm-3",
+      "title": "Product Strategy & Vision",
+      "description": "Definisikan visi produk, target pasar, dan strategi kompetitif menggunakan Jobs-to-be-Done.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pm-2"
+      ],
+      "parentId": "pm-2",
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "pm-r8",
+          "title": "Product Strategy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/product-strategy",
+          "free": false
+        },
+        {
+          "id": "pm-r9",
+          "title": "Jobs-to-be-Done - HBR",
+          "type": "article",
+          "url": "https://hbr.org/2016/09/know-your-customers-jobs-to-be-done",
+          "free": true
+        },
+        {
+          "id": "pm-r10",
+          "title": "Product Vision - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/product-vision",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pm-4",
+      "title": "Agile & Scrum untuk PM",
+      "description": "Kelola development sprint dengan Agile/Scrum: sprint planning, backlog grooming, dan retrospective.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pm-1"
+      ],
+      "category": "Proses",
+      "resources": [
+        {
+          "id": "pm-r11",
+          "title": "Agile & Scrum - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/agile-scrum",
+          "free": false
+        },
+        {
+          "id": "pm-r12",
+          "title": "Scrum Guide (versi Indonesia)",
+          "type": "documentation",
+          "url": "https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-Indonesian.pdf",
+          "free": true
+        },
+        {
+          "id": "pm-r13",
+          "title": "Agile PM Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pm-5",
+      "title": "Product Roadmap & Prioritisasi",
+      "description": "Buat product roadmap strategis dan prioritaskan fitur menggunakan RICE, ICE, dan MoSCoW.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pm-3",
+        "pm-4"
+      ],
+      "category": "Eksekusi",
+      "resources": [
+        {
+          "id": "pm-r14",
+          "title": "Product Roadmap Guide - Productboard",
+          "type": "article",
+          "url": "https://productboard.com/blog/product-roadmap-guide/",
+          "free": true
+        },
+        {
+          "id": "pm-r15",
+          "title": "Prioritization Frameworks - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/product-prioritization",
+          "free": false
+        },
+        {
+          "id": "pm-r16",
+          "title": "Roadmap Planning - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "pm-6",
+      "title": "Metrics & Product Analytics",
+      "description": "Tentukan dan pantau KPIs produk: aktivasi, retensi, NPS, dan North Star Metric.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pm-5"
+      ],
+      "category": "Analitik",
+      "resources": [
+        {
+          "id": "pm-r17",
+          "title": "Product Metrics - Mixpanel Blog",
+          "type": "article",
+          "url": "https://mixpanel.com/blog/product-metrics/",
+          "free": true
+        },
+        {
+          "id": "pm-r18",
+          "title": "Metrics Guide - Amplitude",
+          "type": "documentation",
+          "url": "https://amplitude.com/blog/product-metrics",
+          "free": true
+        },
+        {
+          "id": "pm-r19",
+          "title": "Product Metrics - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/product-metrics",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pm-7",
+      "title": "Menulis PRD & User Stories",
+      "description": "Tulis Product Requirements Document (PRD) dan user stories yang jelas untuk tim engineering.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "pm-4"
+      ],
+      "category": "Eksekusi",
+      "resources": [
+        {
+          "id": "pm-r20",
+          "title": "How to Write a PRD - ProductPlan",
+          "type": "article",
+          "url": "https://productplan.com/glossary/product-requirements-document/",
+          "free": true
+        },
+        {
+          "id": "pm-r21",
+          "title": "User Story Guide - Atlassian",
+          "type": "documentation",
+          "url": "https://www.atlassian.com/agile/project-management/user-stories",
+          "free": true
+        },
+        {
+          "id": "pm-r22",
+          "title": "PRD Writing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/menulis-prd",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "pm-8",
+      "title": "Go-to-Market & Product Launch",
+      "description": "Rencanakan dan eksekusi peluncuran produk baru termasuk komunikasi dan post-launch tracking.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "pm-6"
+      ],
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "pm-r23",
+          "title": "Go-to-Market Strategy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/go-to-market",
+          "free": false
+        },
+        {
+          "id": "pm-r24",
+          "title": "Product Launch - Product Hunt Blog",
+          "type": "article",
+          "url": "https://blog.producthunt.com/how-to-launch-on-product-hunt-7c1843e06399",
+          "free": true
+        },
+        {
+          "id": "pm-r25",
+          "title": "Launch Strategy - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/product-launch",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

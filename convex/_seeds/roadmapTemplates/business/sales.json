@@ -1,0 +1,299 @@
+{
+  "title": "Sales & Business Development",
+  "slug": "sales",
+  "domain": "business",
+  "icon": "Handshake",
+  "color": "bg-orange-400",
+  "description": "Kuasai teknik penjualan, negosiasi, dan pengembangan bisnis untuk mendorong pertumbuhan perusahaan.",
+  "tags": [
+    "sales",
+    "negotiation",
+    "crm",
+    "b2b",
+    "business-development"
+  ],
+  "order": 15,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "sl-1",
+      "title": "Fondasi Sales & Selling Skills",
+      "description": "Pahami siklus penjualan, psikologi pembeli, dan dasar-dasar komunikasi persuasif.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "sl-r1",
+          "title": "Dasar Sales - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/dasar-sales",
+          "free": false
+        },
+        {
+          "id": "sl-r2",
+          "title": "Sales Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/sales-fundamentals",
+          "free": false
+        },
+        {
+          "id": "sl-r3",
+          "title": "Sales Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "sl-r4",
+          "title": "The Challenger Sale (buku)",
+          "type": "book",
+          "url": "https://www.challengerinc.com/the-challenger-sale/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sl-2",
+      "title": "Prospecting & Lead Generation",
+      "description": "Temukan dan kualifikasi calon pelanggan menggunakan cold outreach, LinkedIn, dan referral.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "sl-1"
+      ],
+      "parentId": "sl-1",
+      "category": "Pipeline",
+      "resources": [
+        {
+          "id": "sl-r5",
+          "title": "Lead Generation - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/lead-generation",
+          "free": false
+        },
+        {
+          "id": "sl-r6",
+          "title": "LinkedIn Sales Navigator Guide",
+          "type": "documentation",
+          "url": "https://business.linkedin.com/sales-solutions/sales-navigator",
+          "free": false
+        },
+        {
+          "id": "sl-r7",
+          "title": "Prospecting Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sl-3",
+      "title": "Negosiasi & Closing",
+      "description": "Kuasai teknik negosiasi win-win dan berbagai metode closing yang efektif.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sl-2"
+      ],
+      "parentId": "sl-2",
+      "category": "Teknik",
+      "resources": [
+        {
+          "id": "sl-r8",
+          "title": "Negotiation Skills - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/negotiation",
+          "free": false
+        },
+        {
+          "id": "sl-r9",
+          "title": "Negosiasi Bisnis - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/negosiasi-bisnis",
+          "free": false
+        },
+        {
+          "id": "sl-r10",
+          "title": "Sales Closing - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sl-4",
+      "title": "CRM & Pipeline Management",
+      "description": "Gunakan CRM (HubSpot, Salesforce) untuk mengelola pipeline penjualan dan aktivitas tim sales.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "sl-2"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "sl-r11",
+          "title": "HubSpot CRM Academy (gratis)",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/crm",
+          "free": true
+        },
+        {
+          "id": "sl-r12",
+          "title": "Salesforce Trailhead (gratis)",
+          "type": "course",
+          "url": "https://trailhead.salesforce.com/",
+          "free": true
+        },
+        {
+          "id": "sl-r13",
+          "title": "CRM untuk Sales - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/crm-sales",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sl-5",
+      "title": "B2B Sales & Account Management",
+      "description": "Kelola akun enterprise: upsell, cross-sell, dan membangun hubungan jangka panjang.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sl-4"
+      ],
+      "category": "B2B",
+      "resources": [
+        {
+          "id": "sl-r14",
+          "title": "B2B Sales Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/b2b-sales",
+          "free": false
+        },
+        {
+          "id": "sl-r15",
+          "title": "Account Management - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/account-management",
+          "free": false
+        },
+        {
+          "id": "sl-r16",
+          "title": "B2B Sales Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sl-6",
+      "title": "Business Development Strategy",
+      "description": "Identifikasi peluang pasar baru, partnerships, dan strategi ekspansi bisnis.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sl-5"
+      ],
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "sl-r17",
+          "title": "Business Development - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/business-development",
+          "free": false
+        },
+        {
+          "id": "sl-r18",
+          "title": "BD Strategy - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/business-development",
+          "free": false
+        },
+        {
+          "id": "sl-r19",
+          "title": "Market Expansion Guide - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/business-development/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sl-7",
+      "title": "Sales Analytics & Reporting",
+      "description": "Analisis data penjualan, buat laporan performa, dan forecast sales dengan akurat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "sl-4"
+      ],
+      "category": "Analitik",
+      "resources": [
+        {
+          "id": "sl-r20",
+          "title": "Sales Analytics - HubSpot Academy",
+          "type": "course",
+          "url": "https://academy.hubspot.com/courses/sales-reporting",
+          "free": true
+        },
+        {
+          "id": "sl-r21",
+          "title": "Sales Forecasting - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/sales-analytics",
+          "free": false
+        },
+        {
+          "id": "sl-r22",
+          "title": "Analytics untuk Sales - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sales-analytics",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sl-8",
+      "title": "Presentasi & Public Speaking",
+      "description": "Bawakan presentasi penjualan yang meyakinkan dengan storytelling dan kemampuan public speaking.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "sl-3"
+      ],
+      "category": "Komunikasi",
+      "resources": [
+        {
+          "id": "sl-r23",
+          "title": "Public Speaking - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/public-speaking",
+          "free": false
+        },
+        {
+          "id": "sl-r24",
+          "title": "Presentation Skills - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/presentation-skills",
+          "free": false
+        },
+        {
+          "id": "sl-r25",
+          "title": "Tips Presentasi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

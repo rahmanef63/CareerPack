@@ -1,0 +1,301 @@
+{
+  "title": "Desainer Grafis",
+  "slug": "graphic-design",
+  "domain": "creative",
+  "icon": "Image",
+  "color": "bg-fuchsia-500",
+  "description": "Ciptakan visual yang memukau untuk brand, marketing, dan media dengan prinsip desain yang kuat.",
+  "tags": [
+    "photoshop",
+    "illustrator",
+    "typography",
+    "branding",
+    "layout"
+  ],
+  "order": 22,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "gd-1",
+      "title": "Prinsip Dasar Desain Grafis",
+      "description": "Pelajari elemen desain: tipografi, warna, layout, komposisi, dan prinsip visual hierarchy.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "gd-r1",
+          "title": "Graphic Design Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/graphic-design-dasar",
+          "free": false
+        },
+        {
+          "id": "gd-r2",
+          "title": "Graphic Design - Coursera (CalArts)",
+          "type": "course",
+          "url": "https://coursera.org/specializations/graphic-design",
+          "free": false
+        },
+        {
+          "id": "gd-r3",
+          "title": "Desain Grafis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gd-r4",
+          "title": "Canva Design School (gratis)",
+          "type": "course",
+          "url": "https://www.canva.com/learn/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-2",
+      "title": "Adobe Photoshop",
+      "description": "Kuasai Photoshop untuk editing foto, compositing, dan manipulasi gambar profesional.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "gd-1"
+      ],
+      "parentId": "gd-1",
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "gd-r5",
+          "title": "Photoshop Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gd-r6",
+          "title": "Adobe Photoshop - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/adobe-photoshop",
+          "free": false
+        },
+        {
+          "id": "gd-r7",
+          "title": "Adobe Photoshop Learn & Support",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/photoshop/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-3",
+      "title": "Adobe Illustrator",
+      "description": "Buat ilustrasi vektor, logo, dan artwork scalable menggunakan Adobe Illustrator.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "gd-1"
+      ],
+      "category": "Tools",
+      "resources": [
+        {
+          "id": "gd-r8",
+          "title": "Illustrator Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gd-r9",
+          "title": "Adobe Illustrator - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/adobe-illustrator",
+          "free": false
+        },
+        {
+          "id": "gd-r10",
+          "title": "Illustrator Learn & Support",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/illustrator/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-4",
+      "title": "Tipografi & Layout",
+      "description": "Pahami prinsip tipografi, pemilihan font, dan layout untuk cetak maupun digital.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "gd-1"
+      ],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "gd-r11",
+          "title": "Typography Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/typography",
+          "free": false
+        },
+        {
+          "id": "gd-r12",
+          "title": "Tipografi untuk Desainer - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gd-r13",
+          "title": "Google Fonts",
+          "type": "documentation",
+          "url": "https://fonts.google.com/knowledge",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-5",
+      "title": "Desain Branding & Identitas Visual",
+      "description": "Buat brand identity lengkap: logo, color palette, brand guidelines, dan visual language.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "gd-3",
+        "gd-4"
+      ],
+      "category": "Branding",
+      "resources": [
+        {
+          "id": "gd-r14",
+          "title": "Brand Identity Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/brand-identity",
+          "free": false
+        },
+        {
+          "id": "gd-r15",
+          "title": "Branding Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/branding-desain",
+          "free": false
+        },
+        {
+          "id": "gd-r16",
+          "title": "Logo Design - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-6",
+      "title": "Desain untuk Media Sosial",
+      "description": "Buat konten visual untuk Instagram, TikTok, dan platform lain dengan ukuran dan estetika yang tepat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "gd-2",
+        "gd-4"
+      ],
+      "category": "Aplikasi",
+      "resources": [
+        {
+          "id": "gd-r17",
+          "title": "Social Media Design - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/social-media-design",
+          "free": false
+        },
+        {
+          "id": "gd-r18",
+          "title": "Canva for Social Media",
+          "type": "course",
+          "url": "https://www.canva.com/learn/social-media-graphics/",
+          "free": true
+        },
+        {
+          "id": "gd-r19",
+          "title": "Desain Konten Sosmed - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-7",
+      "title": "Motion Graphics (After Effects Dasar)",
+      "description": "Buat animasi grafis dasar untuk video marketing dan konten digital menggunakan After Effects.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "gd-2"
+      ],
+      "category": "Animasi",
+      "resources": [
+        {
+          "id": "gd-r20",
+          "title": "After Effects Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gd-r21",
+          "title": "Motion Graphics - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/motion-graphics",
+          "free": false
+        },
+        {
+          "id": "gd-r22",
+          "title": "Adobe After Effects Learn",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/after-effects/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gd-8",
+      "title": "Portfolio Desain & Freelancing",
+      "description": "Buat portfolio desain yang kuat dan mulai karir freelance di platform Sribu, Behance, atau 99designs.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "gd-5",
+        "gd-6"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "gd-r23",
+          "title": "Design Portfolio Guide - Behance",
+          "type": "documentation",
+          "url": "https://www.behance.net/",
+          "free": true
+        },
+        {
+          "id": "gd-r24",
+          "title": "Freelance Designer - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/freelance-desainer",
+          "free": false
+        },
+        {
+          "id": "gd-r25",
+          "title": "Sribu.com - Platform Freelance Indonesia",
+          "type": "other",
+          "url": "https://www.sribu.com/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

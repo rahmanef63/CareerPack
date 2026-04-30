@@ -1,0 +1,300 @@
+{
+  "title": "Fotografer",
+  "slug": "photography",
+  "domain": "creative",
+  "icon": "Camera",
+  "color": "bg-stone-400",
+  "description": "Kuasai teknik fotografi dari dasar hingga komersial untuk karir sebagai fotografer profesional.",
+  "tags": [
+    "photography",
+    "lightroom",
+    "photoshop",
+    "composition",
+    "lighting"
+  ],
+  "order": 25,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "foto-1",
+      "title": "Teknik Fotografi Dasar",
+      "description": "Kuasai segitiga eksposur: aperture, shutter speed, dan ISO untuk foto yang well-exposed.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Teknik",
+      "resources": [
+        {
+          "id": "foto-r1",
+          "title": "Fotografi Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/fotografi-dasar",
+          "free": false
+        },
+        {
+          "id": "foto-r2",
+          "title": "Photography Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "foto-r3",
+          "title": "Photography Basics - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/photography",
+          "free": false
+        },
+        {
+          "id": "foto-r4",
+          "title": "Exposure Guide - Cambridge in Colour",
+          "type": "documentation",
+          "url": "https://www.cambridgeincolour.com/tutorials/camera-exposure.htm",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-2",
+      "title": "Komposisi & Visual Storytelling",
+      "description": "Terapkan rule of thirds, leading lines, framing, dan teknik komposisi untuk foto yang bercerita.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "foto-1"
+      ],
+      "parentId": "foto-1",
+      "category": "Seni",
+      "resources": [
+        {
+          "id": "foto-r5",
+          "title": "Komposisi Foto - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "foto-r6",
+          "title": "Photography Composition - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/komposisi-fotografi",
+          "free": false
+        },
+        {
+          "id": "foto-r7",
+          "title": "Composition Tips - Photography Life",
+          "type": "article",
+          "url": "https://photographylife.com/what-is-composition-in-photography",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-3",
+      "title": "Pencahayaan (Lighting)",
+      "description": "Kuasai natural light, artificial lighting, dan studio setup untuk berbagai jenis fotografi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "foto-1"
+      ],
+      "category": "Teknik",
+      "resources": [
+        {
+          "id": "foto-r8",
+          "title": "Lighting Photography - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "foto-r9",
+          "title": "Studio Lighting - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/studio-lighting",
+          "free": false
+        },
+        {
+          "id": "foto-r10",
+          "title": "Lighting Fundamentals Guide",
+          "type": "documentation",
+          "url": "https://www.cambridgeincolour.com/tutorials/studio-lighting.htm",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-4",
+      "title": "Adobe Lightroom: Editing & Workflow",
+      "description": "Edit dan proses foto secara massal dengan Lightroom: exposure, color, dan preset custom.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "foto-2"
+      ],
+      "category": "Editing",
+      "resources": [
+        {
+          "id": "foto-r11",
+          "title": "Lightroom Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "foto-r12",
+          "title": "Adobe Lightroom - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/lightroom",
+          "free": false
+        },
+        {
+          "id": "foto-r13",
+          "title": "Lightroom Learn & Support",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/lightroom-cc/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-5",
+      "title": "Fotografi Produk & Komersial",
+      "description": "Fotografer produk untuk e-commerce, katalog, dan iklan dengan teknik lighting dan styling produk.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "foto-3",
+        "foto-4"
+      ],
+      "category": "Spesialisasi",
+      "resources": [
+        {
+          "id": "foto-r14",
+          "title": "Product Photography - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/product-photography",
+          "free": false
+        },
+        {
+          "id": "foto-r15",
+          "title": "E-commerce Photography Guide",
+          "type": "article",
+          "url": "https://www.shopify.com/blog/12206313-the-ultimate-diy-guide-to-beautiful-product-photography",
+          "free": true
+        },
+        {
+          "id": "foto-r16",
+          "title": "Foto Produk - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-6",
+      "title": "Fotografi Portrait & Wedding",
+      "description": "Fotografer orang: portrait, pre-wedding, dan wedding photography dengan teknik posing dan editing.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "foto-3"
+      ],
+      "category": "Spesialisasi",
+      "resources": [
+        {
+          "id": "foto-r17",
+          "title": "Portrait Photography - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/portrait-photography",
+          "free": false
+        },
+        {
+          "id": "foto-r18",
+          "title": "Wedding Photography Guide",
+          "type": "article",
+          "url": "https://photographylife.com/wedding-photography-for-beginners",
+          "free": true
+        },
+        {
+          "id": "foto-r19",
+          "title": "Portrait Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-7",
+      "title": "Bisnis Fotografi & Freelancing",
+      "description": "Bangun bisnis fotografi: pricing, kontrak, pemasaran, dan mengelola klien secara profesional.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "foto-5",
+        "foto-6"
+      ],
+      "category": "Bisnis",
+      "resources": [
+        {
+          "id": "foto-r20",
+          "title": "Photography Business Guide - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/bisnis-fotografi",
+          "free": false
+        },
+        {
+          "id": "foto-r21",
+          "title": "Freelance Photographer Tips - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/freelance-fotografer/",
+          "free": true
+        },
+        {
+          "id": "foto-r22",
+          "title": "Fotografi Komersial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "foto-8",
+      "title": "Fotografi Sosial Media & Content Creator",
+      "description": "Buat konten foto untuk Instagram dan brand partnership sebagai photographer content creator.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "foto-4"
+      ],
+      "category": "Platform",
+      "resources": [
+        {
+          "id": "foto-r23",
+          "title": "Instagram Photography - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/instagram-photography",
+          "free": false
+        },
+        {
+          "id": "foto-r24",
+          "title": "Content Creator Photography - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "foto-r25",
+          "title": "Foto untuk Konten Sosmed Guide",
+          "type": "article",
+          "url": "https://petanikode.com/foto-konten-sosmed/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

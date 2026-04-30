@@ -1,0 +1,301 @@
+{
+  "title": "Manajer NGO / LSM",
+  "slug": "ngo-manager",
+  "domain": "social",
+  "icon": "Globe",
+  "color": "bg-teal-700",
+  "description": "Kelola organisasi non-profit atau LSM secara profesional: program, keuangan, donasi, dan dampak sosial.",
+  "tags": [
+    "nonprofit",
+    "fundraising",
+    "monitoring-evaluasi",
+    "grant-writing",
+    "dampak-sosial"
+  ],
+  "order": 82,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "ngo-1",
+      "title": "Fondasi Manajemen NGO & Sektor Sosial",
+      "description": "Pahami ekosistem NGO Indonesia, tata kelola LSM, dan regulasi ormas sesuai UU 17/2013.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ngo-r1",
+          "title": "Panduan LSM - Kemenkumham",
+          "type": "documentation",
+          "url": "https://ahu.go.id/organisasi-kemasyarakatan/",
+          "free": true
+        },
+        {
+          "id": "ngo-r2",
+          "title": "Nonprofit Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nonprofit-management",
+          "free": false
+        },
+        {
+          "id": "ngo-r3",
+          "title": "NGO Management - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ngo-r4",
+          "title": "CSO Governance Guide - Civicus",
+          "type": "documentation",
+          "url": "https://www.civicus.org/index.php/ngo-governance",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ngo-2",
+      "title": "Perencanaan Strategis NGO",
+      "description": "Buat rencana strategis organisasi: misi, visi, teori perubahan, dan rencana kerja tahunan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ngo-1"
+      ],
+      "parentId": "ngo-1",
+      "category": "Strategi",
+      "resources": [
+        {
+          "id": "ngo-r5",
+          "title": "Strategic Planning for Nonprofits - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nonprofit-strategic-planning",
+          "free": false
+        },
+        {
+          "id": "ngo-r6",
+          "title": "Theory of Change - UNDP",
+          "type": "documentation",
+          "url": "https://www.undp.org/publications/theory-of-change",
+          "free": true
+        },
+        {
+          "id": "ngo-r7",
+          "title": "Perencanaan NGO - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perencanaan-ngo",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ngo-3",
+      "title": "Manajemen Program & Proyek",
+      "description": "Kelola program NGO menggunakan pendekatan project management: log frame, timeline, dan deliverables.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ngo-2"
+      ],
+      "parentId": "ngo-2",
+      "category": "Program",
+      "resources": [
+        {
+          "id": "ngo-r8",
+          "title": "Program Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/ngo-program-management",
+          "free": false
+        },
+        {
+          "id": "ngo-r9",
+          "title": "Logical Framework - UN OCHA",
+          "type": "documentation",
+          "url": "https://www.unocha.org/ocha-and-humanitarian-action/logframe",
+          "free": true
+        },
+        {
+          "id": "ngo-r10",
+          "title": "Manajemen Program NGO - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ngo-4",
+      "title": "Fundraising & Grant Writing",
+      "description": "Susun proposal hibah, kelola donor relations, dan diversifikasi sumber pendanaan NGO.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ngo-2"
+      ],
+      "category": "Pendanaan",
+      "resources": [
+        {
+          "id": "ngo-r11",
+          "title": "Grant Writing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/grant-writing",
+          "free": false
+        },
+        {
+          "id": "ngo-r12",
+          "title": "Fundraising for Nonprofits - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/fundraising-ngo",
+          "free": false
+        },
+        {
+          "id": "ngo-r13",
+          "title": "Grant Proposal Guide - GrantSpace",
+          "type": "documentation",
+          "url": "https://grantspace.org/resources/knowledge-base/proposal-writing-basics/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ngo-5",
+      "title": "Monitoring, Evaluasi & Pembelajaran (MEL)",
+      "description": "Rancang sistem MEL: indikator, tools pengumpulan data, dan pelaporan dampak kepada donor.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ngo-3"
+      ],
+      "parentId": "ngo-3",
+      "category": "MEL",
+      "resources": [
+        {
+          "id": "ngo-r14",
+          "title": "Monitoring & Evaluation - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/monitoring-evaluation",
+          "free": false
+        },
+        {
+          "id": "ngo-r15",
+          "title": "MEL Framework - USAID",
+          "type": "documentation",
+          "url": "https://www.usaid.gov/activity-resources/monitoring-evaluation-learning",
+          "free": true
+        },
+        {
+          "id": "ngo-r16",
+          "title": "Evaluasi Program - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ngo-6",
+      "title": "Keuangan & Akuntabilitas NGO",
+      "description": "Kelola keuangan NGO: anggaran, laporan keuangan berbasis donor, dan audit untuk akuntabilitas.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ngo-4"
+      ],
+      "category": "Keuangan",
+      "resources": [
+        {
+          "id": "ngo-r17",
+          "title": "Nonprofit Financial Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nonprofit-financial-management",
+          "free": false
+        },
+        {
+          "id": "ngo-r18",
+          "title": "Keuangan LSM - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/keuangan-lsm",
+          "free": false
+        },
+        {
+          "id": "ngo-r19",
+          "title": "NGO Finance Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ngo-7",
+      "title": "Komunikasi & Advokasi",
+      "description": "Bangun narasi dampak, lakukan advokasi kebijakan, dan kelola komunikasi publik NGO.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ngo-5"
+      ],
+      "category": "Komunikasi",
+      "resources": [
+        {
+          "id": "ngo-r20",
+          "title": "Advocacy Communications - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/advocacy-communications",
+          "free": false
+        },
+        {
+          "id": "ngo-r21",
+          "title": "NGO Communications - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/komunikasi-ngo",
+          "free": false
+        },
+        {
+          "id": "ngo-r22",
+          "title": "Advokasi Kebijakan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ngo-8",
+      "title": "Kepemimpinan & Manajemen SDM NGO",
+      "description": "Pimpin tim relawan dan staf NGO: recruitment, volunteer management, dan organizational culture.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ngo-6",
+        "ngo-7"
+      ],
+      "category": "Kepemimpinan",
+      "resources": [
+        {
+          "id": "ngo-r23",
+          "title": "Nonprofit Leadership - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nonprofit-leadership",
+          "free": false
+        },
+        {
+          "id": "ngo-r24",
+          "title": "Volunteer Management - VolunteerMatch",
+          "type": "documentation",
+          "url": "https://www.volunteermatch.org/nonprofits/resources/",
+          "free": true
+        },
+        {
+          "id": "ngo-r25",
+          "title": "Leadership NGO - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

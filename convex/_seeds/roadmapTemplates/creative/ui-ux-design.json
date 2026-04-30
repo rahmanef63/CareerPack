@@ -1,0 +1,308 @@
+{
+  "title": "UI/UX Designer",
+  "slug": "ui-ux-design",
+  "domain": "creative",
+  "icon": "Palette",
+  "color": "bg-pink-500",
+  "description": "Rancang pengalaman digital yang intuitif dan estetis melalui riset pengguna, wireframe, dan prototipe.",
+  "tags": [
+    "figma",
+    "user-research",
+    "wireframe",
+    "prototyping",
+    "design-system"
+  ],
+  "order": 21,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "ux-1",
+      "title": "Fondasi UX Design",
+      "description": "Pelajari prinsip desain UX: usability, accessibility, dan human-centered design.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ux-r1",
+          "title": "Google UX Design Certificate - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/google-certificates/ux-design",
+          "free": false
+        },
+        {
+          "id": "ux-r2",
+          "title": "UX Design Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/ux-design-dasar",
+          "free": false
+        },
+        {
+          "id": "ux-r3",
+          "title": "UX Design - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ux-r4",
+          "title": "Nielsen Norman Group Articles",
+          "type": "documentation",
+          "url": "https://nngroup.com/articles/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ux-2",
+      "title": "User Research & Analisis",
+      "description": "Lakukan user interview, usability testing, dan analisis data untuk memahami kebutuhan pengguna.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ux-1"
+      ],
+      "parentId": "ux-1",
+      "category": "Riset",
+      "resources": [
+        {
+          "id": "ux-r5",
+          "title": "User Research Methods - NNGroup",
+          "type": "documentation",
+          "url": "https://nngroup.com/articles/which-ux-research-methods/",
+          "free": true
+        },
+        {
+          "id": "ux-r6",
+          "title": "User Research - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/user-research",
+          "free": false
+        },
+        {
+          "id": "ux-r7",
+          "title": "Usability Testing Guide - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ux-3",
+      "title": "Wireframing & Information Architecture",
+      "description": "Buat low-fidelity wireframe dan struktur informasi yang logis sebelum masuk ke desain visual.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ux-1"
+      ],
+      "category": "Desain",
+      "resources": [
+        {
+          "id": "ux-r8",
+          "title": "Wireframing di Figma - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ux-r9",
+          "title": "IA Guide - NNGroup",
+          "type": "documentation",
+          "url": "https://nngroup.com/articles/ia-vs-navigation/",
+          "free": true
+        },
+        {
+          "id": "ux-r10",
+          "title": "Wireframing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/wireframing",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ux-4",
+      "title": "Figma: UI Design & Prototyping",
+      "description": "Kuasai Figma untuk membuat high-fidelity UI design dan prototipe interaktif.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "ux-3"
+      ],
+      "parentId": "ux-3",
+      "category": "Desain",
+      "resources": [
+        {
+          "id": "ux-r11",
+          "title": "Figma Tutorial Lengkap - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ux-r12",
+          "title": "Figma for UX Design - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/figma-ux-design",
+          "free": false
+        },
+        {
+          "id": "ux-r13",
+          "title": "Figma Documentation",
+          "type": "documentation",
+          "url": "https://help.figma.com/hc/en-us",
+          "free": true
+        },
+        {
+          "id": "ux-r14",
+          "title": "Figma Crash Course - Web Programming UNPAS",
+          "type": "video",
+          "url": "https://youtube.com/@sandhikagalihws",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ux-5",
+      "title": "Design System & Component Library",
+      "description": "Bangun dan kelola design system yang konsisten dengan komponen reusable dan style guide.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ux-4"
+      ],
+      "parentId": "ux-4",
+      "category": "Desain",
+      "resources": [
+        {
+          "id": "ux-r15",
+          "title": "Design System Guide - Nielsen Norman",
+          "type": "documentation",
+          "url": "https://nngroup.com/articles/design-systems-101/",
+          "free": true
+        },
+        {
+          "id": "ux-r16",
+          "title": "Design System - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/design-system",
+          "free": false
+        },
+        {
+          "id": "ux-r17",
+          "title": "Atomic Design - Brad Frost",
+          "type": "documentation",
+          "url": "https://atomicdesign.bradfrost.com/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ux-6",
+      "title": "Aksesibilitas & Inclusive Design",
+      "description": "Desain produk yang inklusif dan memenuhi standar WCAG untuk semua pengguna.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ux-4"
+      ],
+      "category": "Kualitas",
+      "resources": [
+        {
+          "id": "ux-r18",
+          "title": "Web Accessibility - W3C WCAG",
+          "type": "documentation",
+          "url": "https://www.w3.org/WAI/standards-guidelines/wcag/",
+          "free": true
+        },
+        {
+          "id": "ux-r19",
+          "title": "Aksesibilitas Web - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ux-r20",
+          "title": "Inclusive Design - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/inclusive-design",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ux-7",
+      "title": "Portfolio UX & Case Study",
+      "description": "Buat portfolio UX yang menarik dengan case study lengkap: problem, proses, dan solusi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ux-2",
+        "ux-5"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "ux-r21",
+          "title": "UX Portfolio Guide - NNGroup",
+          "type": "documentation",
+          "url": "https://nngroup.com/articles/ux-portfolio-case-study/",
+          "free": true
+        },
+        {
+          "id": "ux-r22",
+          "title": "UX Portfolio - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/ux-portfolio",
+          "free": false
+        },
+        {
+          "id": "ux-r23",
+          "title": "Case Study UX - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ux-8",
+      "title": "Kolaborasi Designer-Developer",
+      "description": "Buat handoff yang efektif antara designer dan developer menggunakan Figma Dev Mode dan dokumentasi.",
+      "difficulty": "intermediate",
+      "estimatedHours": 10,
+      "prerequisites": [
+        "ux-5"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "ux-r24",
+          "title": "Design Handoff - Figma Blog",
+          "type": "article",
+          "url": "https://figma.com/blog/design-handoff/",
+          "free": true
+        },
+        {
+          "id": "ux-r25",
+          "title": "Dev Mode - Figma Documentation",
+          "type": "documentation",
+          "url": "https://help.figma.com/hc/en-us/articles/15023124644247",
+          "free": true
+        },
+        {
+          "id": "ux-r26",
+          "title": "Designer-Developer Collaboration - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/designer-developer",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

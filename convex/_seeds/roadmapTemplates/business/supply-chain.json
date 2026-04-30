@@ -1,0 +1,302 @@
+{
+  "title": "Supply Chain & Logistik",
+  "slug": "supply-chain",
+  "domain": "business",
+  "icon": "Truck",
+  "color": "bg-stone-500",
+  "description": "Kelola rantai pasokan dari pengadaan hingga distribusi untuk efisiensi operasional bisnis.",
+  "tags": [
+    "procurement",
+    "logistics",
+    "inventory",
+    "warehouse",
+    "scm"
+  ],
+  "order": 17,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "sc-1",
+      "title": "Fondasi Supply Chain Management",
+      "description": "Pahami konsep SCM, rantai nilai, dan pemain utama dalam ekosistem supply chain.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "sc-r1",
+          "title": "Supply Chain Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/supply-chain-management",
+          "free": false
+        },
+        {
+          "id": "sc-r2",
+          "title": "SCM Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/supply-chain-dasar",
+          "free": false
+        },
+        {
+          "id": "sc-r3",
+          "title": "Logistik & SCM - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "sc-r4",
+          "title": "APICS CSCP Study Guide",
+          "type": "documentation",
+          "url": "https://ascm.org/professional-development/certifications/cscp/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sc-2",
+      "title": "Manajemen Pengadaan (Procurement)",
+      "description": "Proses sourcing, vendor selection, negosiasi kontrak, dan manajemen pemasok.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sc-1"
+      ],
+      "parentId": "sc-1",
+      "category": "Pengadaan",
+      "resources": [
+        {
+          "id": "sc-r5",
+          "title": "Procurement Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/procurement-management",
+          "free": false
+        },
+        {
+          "id": "sc-r6",
+          "title": "Pengadaan Barang & Jasa - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pengadaan-barang-jasa",
+          "free": false
+        },
+        {
+          "id": "sc-r7",
+          "title": "Vendor Management - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sc-3",
+      "title": "Manajemen Inventori & Gudang",
+      "description": "Kelola stok dengan metode EOQ, FIFO/LIFO, dan sistem WMS untuk efisiensi gudang.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sc-1"
+      ],
+      "category": "Operasi",
+      "resources": [
+        {
+          "id": "sc-r8",
+          "title": "Inventory Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/inventory-management",
+          "free": false
+        },
+        {
+          "id": "sc-r9",
+          "title": "Warehouse Management - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/warehouse-management",
+          "free": false
+        },
+        {
+          "id": "sc-r10",
+          "title": "Manajemen Gudang - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sc-4",
+      "title": "Logistik & Transportasi",
+      "description": "Optimalkan jaringan distribusi, pemilihan moda transportasi, dan last-mile delivery.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sc-2"
+      ],
+      "category": "Distribusi",
+      "resources": [
+        {
+          "id": "sc-r11",
+          "title": "Logistics Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/logistics-management",
+          "free": false
+        },
+        {
+          "id": "sc-r12",
+          "title": "Logistik Indonesia - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/logistik-indonesia",
+          "free": false
+        },
+        {
+          "id": "sc-r13",
+          "title": "Transportasi & Distribusi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sc-5",
+      "title": "Perencanaan Permintaan (Demand Planning)",
+      "description": "Buat forecast permintaan yang akurat untuk optimasi produksi dan inventori.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "sc-3"
+      ],
+      "parentId": "sc-3",
+      "category": "Perencanaan",
+      "resources": [
+        {
+          "id": "sc-r14",
+          "title": "Demand Planning - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/demand-forecasting",
+          "free": false
+        },
+        {
+          "id": "sc-r15",
+          "title": "Forecasting Guide - ASCM",
+          "type": "documentation",
+          "url": "https://ascm.org/learning-development/articles/demand-management/",
+          "free": true
+        },
+        {
+          "id": "sc-r16",
+          "title": "Demand Planning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/demand-planning",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sc-6",
+      "title": "Teknologi SCM & ERP",
+      "description": "Gunakan sistem ERP (SAP, Oracle) dan platform digital untuk otomasi supply chain.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "sc-4",
+        "sc-5"
+      ],
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "sc-r17",
+          "title": "SAP SCM Training - SAP Learning Hub",
+          "type": "course",
+          "url": "https://learning.sap.com/courses/sap-scm",
+          "free": false
+        },
+        {
+          "id": "sc-r18",
+          "title": "ERP Introduction - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/erp-introduction",
+          "free": false
+        },
+        {
+          "id": "sc-r19",
+          "title": "SCM Technology - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "sc-7",
+      "title": "Sertifikasi CPIM / CLTD",
+      "description": "Persiapkan sertifikasi ASCM CPIM atau CLTD untuk pengakuan profesional supply chain.",
+      "difficulty": "advanced",
+      "estimatedHours": 40,
+      "prerequisites": [
+        "sc-5",
+        "sc-6"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "sc-r20",
+          "title": "CPIM Certification - ASCM",
+          "type": "documentation",
+          "url": "https://ascm.org/professional-development/certifications/cpim/",
+          "free": false
+        },
+        {
+          "id": "sc-r21",
+          "title": "CLTD Certification - ASCM",
+          "type": "documentation",
+          "url": "https://ascm.org/professional-development/certifications/cltd/",
+          "free": false
+        },
+        {
+          "id": "sc-r22",
+          "title": "SCM Certification Prep - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/scm-certification",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "sc-8",
+      "title": "Lean & Six Sigma di Supply Chain",
+      "description": "Terapkan prinsip Lean dan Six Sigma untuk mengeliminasi waste dan meningkatkan kualitas proses.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "sc-3",
+        "sc-6"
+      ],
+      "category": "Kualitas",
+      "resources": [
+        {
+          "id": "sc-r23",
+          "title": "Lean Six Sigma - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/six-sigma-fundamentals",
+          "free": false
+        },
+        {
+          "id": "sc-r24",
+          "title": "Lean Manufacturing - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/lean-manufacturing",
+          "free": false
+        },
+        {
+          "id": "sc-r25",
+          "title": "Lean SCM - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

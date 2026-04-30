@@ -1,0 +1,301 @@
+{
+  "title": "Editor Video & Konten",
+  "slug": "video-editing",
+  "domain": "creative",
+  "icon": "Video",
+  "color": "bg-rose-500",
+  "description": "Kuasai editing video profesional untuk YouTube, iklan, dan konten digital yang engaging.",
+  "tags": [
+    "premiere-pro",
+    "after-effects",
+    "youtube",
+    "color-grading",
+    "storytelling"
+  ],
+  "order": 23,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "ve-1",
+      "title": "Dasar Videografi & Sinematografi",
+      "description": "Pahami komposisi frame, pergerakan kamera, pencahayaan dasar, dan prinsip storytelling visual.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "ve-r1",
+          "title": "Videografi Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/videografi-dasar",
+          "free": false
+        },
+        {
+          "id": "ve-r2",
+          "title": "Videografi Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ve-r3",
+          "title": "Filmmaking Fundamentals - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/filmmaking-fundamentals",
+          "free": false
+        },
+        {
+          "id": "ve-r4",
+          "title": "Shot Types & Composition Guide",
+          "type": "article",
+          "url": "https://nofilmschool.com/shot-types",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ve-2",
+      "title": "Adobe Premiere Pro Dasar",
+      "description": "Kuasai timeline editing, cut, transitions, audio mixing, dan export di Adobe Premiere Pro.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "ve-1"
+      ],
+      "parentId": "ve-1",
+      "category": "Editing",
+      "resources": [
+        {
+          "id": "ve-r5",
+          "title": "Premiere Pro Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ve-r6",
+          "title": "Premiere Pro - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/premiere-pro",
+          "free": false
+        },
+        {
+          "id": "ve-r7",
+          "title": "Adobe Premiere Pro Learn",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/premiere-pro/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ve-3",
+      "title": "Color Grading & Color Correction",
+      "description": "Lakukan color correction dan color grading untuk mood dan estetika video yang profesional.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ve-2"
+      ],
+      "parentId": "ve-2",
+      "category": "Pasca Produksi",
+      "resources": [
+        {
+          "id": "ve-r8",
+          "title": "Color Grading Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ve-r9",
+          "title": "Color Grading - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/color-grading",
+          "free": false
+        },
+        {
+          "id": "ve-r10",
+          "title": "DaVinci Resolve Free Color Course",
+          "type": "course",
+          "url": "https://www.blackmagicdesign.com/products/davinciresolve/training",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ve-4",
+      "title": "Motion Graphics & Teks Animasi",
+      "description": "Tambahkan lower thirds, title cards, dan animasi teks menggunakan After Effects atau Premiere.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ve-2"
+      ],
+      "category": "Animasi",
+      "resources": [
+        {
+          "id": "ve-r11",
+          "title": "Motion Graphics Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ve-r12",
+          "title": "After Effects Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/after-effects-dasar",
+          "free": false
+        },
+        {
+          "id": "ve-r13",
+          "title": "Adobe After Effects Learn",
+          "type": "documentation",
+          "url": "https://helpx.adobe.com/after-effects/tutorials.html",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ve-5",
+      "title": "Audio Editing & Sound Design",
+      "description": "Perbaiki kualitas audio, tambahkan efek suara, dan mix audio untuk video yang profesional.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ve-2"
+      ],
+      "category": "Audio",
+      "resources": [
+        {
+          "id": "ve-r14",
+          "title": "Audio Editing Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "ve-r15",
+          "title": "Audacity Documentation (gratis)",
+          "type": "documentation",
+          "url": "https://support.audacityteam.org/",
+          "free": true
+        },
+        {
+          "id": "ve-r16",
+          "title": "Sound Design - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/sound-design",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "ve-6",
+      "title": "Konten YouTube & Strategi Channel",
+      "description": "Optimalkan video YouTube: thumbnail, SEO, strategi konten, dan monetisasi channel.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "ve-4",
+        "ve-5"
+      ],
+      "category": "Distribusi",
+      "resources": [
+        {
+          "id": "ve-r17",
+          "title": "YouTube Strategy - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/youtube-strategy",
+          "free": false
+        },
+        {
+          "id": "ve-r18",
+          "title": "YouTube Creator Academy",
+          "type": "course",
+          "url": "https://creatoracademy.youtube.com/",
+          "free": true
+        },
+        {
+          "id": "ve-r19",
+          "title": "YouTube SEO - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ve-7",
+      "title": "Short Form Content (TikTok & Reels)",
+      "description": "Produksi konten pendek vertikal untuk TikTok dan Instagram Reels yang viral dan engaging.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ve-3"
+      ],
+      "category": "Distribusi",
+      "resources": [
+        {
+          "id": "ve-r20",
+          "title": "TikTok Content Creation - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/tiktok-content",
+          "free": false
+        },
+        {
+          "id": "ve-r21",
+          "title": "Reels Creation Guide - Meta",
+          "type": "documentation",
+          "url": "https://www.facebook.com/business/learn/lessons/instagram-reels",
+          "free": true
+        },
+        {
+          "id": "ve-r22",
+          "title": "Short Form Video - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "ve-8",
+      "title": "Freelance & Karir Video Editor",
+      "description": "Bangun portfolio video, cari klien freelance, dan kembangkan karir sebagai video editor profesional.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "ve-6",
+        "ve-7"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "ve-r23",
+          "title": "Freelance Video Editor Guide - Petani Kode",
+          "type": "article",
+          "url": "https://petanikode.com/freelance-video-editor/",
+          "free": true
+        },
+        {
+          "id": "ve-r24",
+          "title": "Portfolio Video - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/portfolio-video-editor",
+          "free": false
+        },
+        {
+          "id": "ve-r25",
+          "title": "Sribu Freelance Platform",
+          "type": "other",
+          "url": "https://www.sribu.com/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

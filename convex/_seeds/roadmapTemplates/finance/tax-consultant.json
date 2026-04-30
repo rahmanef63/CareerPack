@@ -1,0 +1,300 @@
+{
+  "title": "Konsultan Pajak",
+  "slug": "tax-consultant",
+  "domain": "finance",
+  "icon": "FileText",
+  "color": "bg-amber-600",
+  "description": "Berikan layanan konsultasi dan kepatuhan perpajakan untuk individu dan korporasi di Indonesia.",
+  "tags": [
+    "pajak",
+    "PPh",
+    "PPN",
+    "eSPT",
+    "brevet-pajak"
+  ],
+  "order": 53,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "tax-1",
+      "title": "Dasar Hukum Perpajakan Indonesia",
+      "description": "Pelajari UU Perpajakan, KUP, dan sistem perpajakan Indonesia secara komprehensif.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "tax-r1",
+          "title": "DJP Online - Edukasi Pajak",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/perpajakan",
+          "free": true
+        },
+        {
+          "id": "tax-r2",
+          "title": "Perpajakan Dasar - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/perpajakan-dasar",
+          "free": false
+        },
+        {
+          "id": "tax-r3",
+          "title": "Hukum Pajak - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "tax-r4",
+          "title": "Tax Law Indonesia - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/tax-law-indonesia",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "tax-2",
+      "title": "PPh Orang Pribadi & Badan",
+      "description": "Hitung dan laporkan PPh Pasal 21, 22, 23, 25/29 untuk wajib pajak orang pribadi dan badan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "tax-1"
+      ],
+      "parentId": "tax-1",
+      "category": "PPh",
+      "resources": [
+        {
+          "id": "tax-r5",
+          "title": "PPh Badan - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/pph-badan",
+          "free": false
+        },
+        {
+          "id": "tax-r6",
+          "title": "PPh Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "tax-r7",
+          "title": "eFiling SPT Tahunan - DJP",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/efiling",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tax-3",
+      "title": "PPN & PPnBM",
+      "description": "Pahami mekanisme PPN, faktur pajak, PKP, dan prosedur restitusi PPN.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "tax-1"
+      ],
+      "category": "PPN",
+      "resources": [
+        {
+          "id": "tax-r8",
+          "title": "PPN Tutorial - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/ppn-ppnbm",
+          "free": false
+        },
+        {
+          "id": "tax-r9",
+          "title": "PPN - DJP Online",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/pajak-pertambahan-nilai",
+          "free": true
+        },
+        {
+          "id": "tax-r10",
+          "title": "Faktur Pajak Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tax-4",
+      "title": "eSPT & E-Filing",
+      "description": "Operasikan aplikasi eSPT dan e-filing DJP Online untuk pelaporan pajak digital.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "tax-2"
+      ],
+      "parentId": "tax-2",
+      "category": "Teknologi",
+      "resources": [
+        {
+          "id": "tax-r11",
+          "title": "DJP Online - Tutorial Lengkap",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/tutorial-djp-online",
+          "free": true
+        },
+        {
+          "id": "tax-r12",
+          "title": "eSPT Tutorial - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "tax-r13",
+          "title": "e-Faktur Tutorial - DJP",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/efaktur",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tax-5",
+      "title": "Transfer Pricing & Pajak Internasional",
+      "description": "Pahami aturan transfer pricing, tax treaty, dan perpajakan transaksi internasional.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "tax-3"
+      ],
+      "category": "Lanjutan",
+      "resources": [
+        {
+          "id": "tax-r14",
+          "title": "Transfer Pricing Indonesia - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/transfer-pricing",
+          "free": false
+        },
+        {
+          "id": "tax-r15",
+          "title": "OECD Transfer Pricing Guidelines",
+          "type": "documentation",
+          "url": "https://www.oecd.org/tax/transfer-pricing/",
+          "free": true
+        },
+        {
+          "id": "tax-r16",
+          "title": "Pajak Internasional - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tax-6",
+      "title": "Tax Planning & Penghematan Pajak Legal",
+      "description": "Susun strategi perencanaan pajak yang legal untuk meminimalkan beban pajak wajib pajak.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "tax-4"
+      ],
+      "category": "Konsultasi",
+      "resources": [
+        {
+          "id": "tax-r17",
+          "title": "Tax Planning - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/tax-planning",
+          "free": false
+        },
+        {
+          "id": "tax-r18",
+          "title": "Corporate Tax Planning - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/corporate-tax-planning",
+          "free": false
+        },
+        {
+          "id": "tax-r19",
+          "title": "Tax Planning Tips - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tax-7",
+      "title": "Pemeriksaan Pajak & Keberatan",
+      "description": "Tangani proses pemeriksaan pajak, keberatan, banding, dan sengketa perpajakan.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "tax-5"
+      ],
+      "category": "Sengketa",
+      "resources": [
+        {
+          "id": "tax-r20",
+          "title": "Pemeriksaan Pajak - DJP",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/pemeriksaan-pajak",
+          "free": true
+        },
+        {
+          "id": "tax-r21",
+          "title": "Keberatan & Banding - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/keberatan-pajak",
+          "free": false
+        },
+        {
+          "id": "tax-r22",
+          "title": "Sengketa Pajak - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "tax-8",
+      "title": "Brevet Pajak A & B (IKPI)",
+      "description": "Ikuti program brevet pajak A dan B dari IKPI sebagai syarat wajib konsultan pajak terdaftar.",
+      "difficulty": "intermediate",
+      "estimatedHours": 50,
+      "prerequisites": [
+        "tax-4",
+        "tax-6"
+      ],
+      "category": "Sertifikasi",
+      "resources": [
+        {
+          "id": "tax-r23",
+          "title": "Brevet Pajak - IKPI",
+          "type": "documentation",
+          "url": "https://www.ikpi.or.id/brevet-pajak/",
+          "free": false
+        },
+        {
+          "id": "tax-r24",
+          "title": "Konsultan Pajak Terdaftar - DJP",
+          "type": "documentation",
+          "url": "https://pajak.go.id/id/konsultan-pajak",
+          "free": true
+        },
+        {
+          "id": "tax-r25",
+          "title": "Brevet Pajak - Skill Academy",
+          "type": "course",
+          "url": "https://skillacademy.id/course/brevet-pajak-ab",
+          "free": false
+        }
+      ]
+    }
+  ]
+}
