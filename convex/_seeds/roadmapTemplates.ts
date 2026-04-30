@@ -26,9 +26,187 @@ export interface RoadmapTemplateData {
       free: boolean;
     }[];
   }[];
+  manifest?: {
+    version?: string;
+    license?: string;
+    language?: string;
+    outcomes?: string[];
+    prerequisites?: string[];
+    targetAudience?: string;
+  };
+  config?: {
+    xpPerHour?: number;
+    theme?: string;
+    questFlavor?: string;
+  };
 }
 
 export const defaultRoadmapTemplates: RoadmapTemplateData[] = [
+  // ── 0. AI CONTEXT ENGINEERING (default first skill) ────────────────────
+  {
+    title: "AI Context Engineering",
+    slug: "ai-context-engineering",
+    domain: "tech",
+    icon: "UserCog",
+    color: "bg-violet-500",
+    description: "Bangun base knowledge pribadi yang membuat AI Agent CareerPack memahami konteks karier kamu — dari profil sampai showcase publik.",
+    tags: ["ai", "context", "onboarding", "career", "fondasi"],
+    order: 0,
+    isPublic: true,
+    isSystem: true,
+    manifest: {
+      version: "1.0.0",
+      license: "CareerPack System Template",
+      language: "id",
+      outcomes: [
+        "Memahami konsep context engineering untuk AI agent karier",
+        "Mengisi profil pribadi sebagai dasar payload AI",
+        "Menyusun CV yang dapat dibaca AI dan recruiter",
+        "Mempublikasikan portfolio sebagai bukti kapabilitas",
+        "Menentukan goals jangka pendek dan panjang",
+        "Mengelola pipeline aplikasi pekerjaan secara terstruktur",
+        "Membangun jaringan kontak profesional aktif",
+        "Memiliki showcase publik yang dapat dibagikan",
+      ],
+      prerequisites: ["Akun CareerPack aktif", "Kemauan refleksi karier ~3-5 jam"],
+      targetAudience: "Pengguna baru CareerPack yang ingin AI Agent memberi saran karier yang relevan dan personal.",
+    },
+    config: {
+      xpPerHour: 10,
+      theme: "scholar",
+      questFlavor: "Bangun context base knowledge pribadi agar AI Agent CareerPack dapat menjadi mentor karier yang benar-benar mengenal kamu.",
+    },
+    nodes: [
+      {
+        id: "aice-1",
+        title: "Konsep Context Engineering",
+        description: "Pahami mengapa AI agent membutuhkan konteks personal yang lengkap untuk memberikan saran karier yang relevan, bukan jawaban generik.",
+        difficulty: "beginner",
+        estimatedHours: 1,
+        prerequisites: [],
+        category: "Fondasi",
+        resources: [
+          { id: "aice-1-r1", title: "Apa itu Context Engineering — Anthropic Blog", type: "article", url: "https://www.anthropic.com/news/contextual-retrieval", free: true },
+          { id: "aice-1-r2", title: "Prompt Engineering Guide — DAIR.AI", type: "documentation", url: "https://www.promptingguide.ai/", free: true },
+          { id: "aice-1-r3", title: "Context Window untuk Pemula", type: "article", url: "https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/long-context-tips", free: true },
+        ],
+      },
+      {
+        id: "aice-2",
+        title: "Payload Contract AI Agent",
+        description: "Pelajari struktur data apa saja yang dikirim CareerPack ke AI Agent: profil, CV, goals, aplikasi, kontak — sehingga kamu sadar bagian mana yang perlu kamu lengkapi.",
+        difficulty: "beginner",
+        estimatedHours: 1,
+        prerequisites: ["aice-1"],
+        parentId: "aice-1",
+        category: "Fondasi",
+        resources: [
+          { id: "aice-2-r1", title: "Dokumentasi AI Agent CareerPack", type: "documentation", url: "https://careerpack.id/docs/ai-agent", free: true },
+          { id: "aice-2-r2", title: "Halaman Pengaturan AI", type: "article", url: "https://careerpack.id/dashboard/ai-settings", free: true },
+        ],
+      },
+      {
+        id: "aice-3",
+        title: "Lengkapi Profil Pribadi",
+        description: "Isi data dasar di Settings: nama, lokasi, bidang minat, level karier saat ini, dan ringkasan singkat tentang dirimu. Ini menjadi anchor utama AI.",
+        difficulty: "beginner",
+        estimatedHours: 1,
+        prerequisites: ["aice-2"],
+        parentId: "aice-2",
+        category: "Profil",
+        resources: [
+          { id: "aice-3-r1", title: "Halaman Settings CareerPack", type: "article", url: "https://careerpack.id/dashboard/settings", free: true },
+          { id: "aice-3-r2", title: "Cara Menulis Bio Profesional Singkat", type: "article", url: "https://www.linkedin.com/business/talent/blog/talent-acquisition/how-to-write-a-good-linkedin-summary", free: true },
+        ],
+      },
+      {
+        id: "aice-4",
+        title: "Susun CV di CV Generator",
+        description: "Gunakan CV Generator untuk mengisi pengalaman, pendidikan, dan skill secara terstruktur. CV ini akan menjadi sumber konteks utama saat AI memberi saran lowongan.",
+        difficulty: "beginner",
+        estimatedHours: 3,
+        prerequisites: ["aice-3"],
+        parentId: "aice-3",
+        category: "Profil",
+        resources: [
+          { id: "aice-4-r1", title: "CV Generator CareerPack", type: "article", url: "https://careerpack.id/dashboard/cv-generator", free: true },
+          { id: "aice-4-r2", title: "Panduan Menulis CV ATS-Friendly", type: "article", url: "https://www.jobstreet.co.id/career-advice/article/cv-ats-friendly", free: true },
+          { id: "aice-4-r3", title: "Action Verbs untuk CV", type: "article", url: "https://www.themuse.com/advice/185-powerful-verbs-that-will-make-your-resume-awesome", free: true },
+        ],
+      },
+      {
+        id: "aice-5",
+        title: "Bangun Portfolio",
+        description: "Tambahkan minimal 3 proyek di Portfolio dengan deskripsi, peran, hasil, dan link bukti. AI menggunakan ini untuk menjawab pertanyaan 'pengalaman apa yang relevan?'.",
+        difficulty: "intermediate",
+        estimatedHours: 4,
+        prerequisites: ["aice-4"],
+        parentId: "aice-4",
+        category: "Bukti Kerja",
+        resources: [
+          { id: "aice-5-r1", title: "Portfolio CareerPack", type: "article", url: "https://careerpack.id/dashboard/portfolio", free: true },
+          { id: "aice-5-r2", title: "Cara Menulis Studi Kasus Proyek", type: "article", url: "https://uxdesign.cc/how-to-write-a-portfolio-case-study-7d8a8b8c1234", free: true },
+        ],
+      },
+      {
+        id: "aice-6",
+        title: "Tetapkan Goals Karier",
+        description: "Definisikan 1-3 goal jangka pendek (3 bulan) dan 1 goal jangka panjang (1-2 tahun) di modul Goals. Spesifik, terukur, dan punya deadline.",
+        difficulty: "intermediate",
+        estimatedHours: 2,
+        prerequisites: ["aice-3"],
+        parentId: "aice-3",
+        category: "Arah",
+        resources: [
+          { id: "aice-6-r1", title: "Career Goals CareerPack", type: "article", url: "https://careerpack.id/dashboard/career-dashboard", free: true },
+          { id: "aice-6-r2", title: "SMART Goals untuk Karier", type: "article", url: "https://www.indeed.com/career-advice/career-development/smart-goals", free: true },
+        ],
+      },
+      {
+        id: "aice-7",
+        title: "Pipeline Aplikasi Pekerjaan",
+        description: "Catat lamaran kerja yang sedang berjalan beserta status (applied, interview, offer, rejected). AI memakainya untuk konteks 'sedang ngapain sekarang?'.",
+        difficulty: "intermediate",
+        estimatedHours: 1,
+        prerequisites: ["aice-4"],
+        parentId: "aice-4",
+        category: "Aktivitas",
+        resources: [
+          { id: "aice-7-r1", title: "Modul Lamaran CareerPack", type: "article", url: "https://careerpack.id/dashboard/applications", free: true },
+          { id: "aice-7-r2", title: "Cara Tracking Job Application", type: "article", url: "https://www.themuse.com/advice/the-easiest-way-to-track-your-job-applications", free: true },
+        ],
+      },
+      {
+        id: "aice-8",
+        title: "Kelola Network Kontak",
+        description: "Tambahkan minimal 5 kontak profesional (mentor, recruiter, peer) dengan tag dan tanggal interaksi terakhir. AI dapat menyarankan siapa yang perlu kamu follow-up.",
+        difficulty: "intermediate",
+        estimatedHours: 1,
+        prerequisites: ["aice-3"],
+        parentId: "aice-3",
+        category: "Network",
+        resources: [
+          { id: "aice-8-r1", title: "Modul Kontak CareerPack", type: "article", url: "https://careerpack.id/dashboard/contacts", free: true },
+          { id: "aice-8-r2", title: "Networking untuk Introvert", type: "article", url: "https://hbr.org/2016/01/an-introverts-guide-to-networking", free: true },
+        ],
+      },
+      {
+        id: "aice-9",
+        title: "Showcase Publik",
+        description: "Aktifkan halaman showcase publik berisi ringkasan profil, portfolio terpilih, dan link kontak. Ini adalah artefak akhir yang dapat kamu bagikan kepada recruiter.",
+        difficulty: "advanced",
+        estimatedHours: 2,
+        prerequisites: ["aice-5", "aice-6", "aice-7", "aice-8"],
+        parentId: "aice-5",
+        category: "Output",
+        resources: [
+          { id: "aice-9-r1", title: "Showcase Publik CareerPack", type: "article", url: "https://careerpack.id/dashboard/portfolio", free: true },
+          { id: "aice-9-r2", title: "Personal Branding Online", type: "article", url: "https://www.forbes.com/sites/williamarruda/2023/01/15/the-personal-branding-roadmap/", free: true },
+        ],
+      },
+    ],
+  },
+
   // ── 1. FRONTEND DEVELOPER ──────────────────────────────────────────────
   {
     title: "Frontend Developer",
