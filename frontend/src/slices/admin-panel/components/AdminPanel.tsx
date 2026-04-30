@@ -12,6 +12,10 @@ import {
   MapPin,
   GraduationCap,
   Sparkles,
+  ListChecks,
+  ScrollText,
+  AlertTriangle,
+  MessageSquare,
 } from "lucide-react";
 import {
   BarChart,
@@ -32,6 +36,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Progress } from "@/shared/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
 import { api } from "../../../../../convex/_generated/api";
@@ -294,18 +299,56 @@ export function AdminPanel() {
         </>
       )}{/* end super-admin analytics block */}
 
-      {/* Pengguna — search/sort/filter/multi-select powered table.
-       *  Available to every role-admin (not just super-admin); the
-       *  underlying query gates with `requireAdmin`. */}
-      <UsersTable />
+      {/* Bottom panels — tabbed so the admin page stops being a 6-section
+       *  vertical scroll. Server still gates each query with
+       *  `requireAdmin`; client tabs are pure UX. */}
+      <Tabs defaultValue="users" className="w-full">
+        <TabsList variant="pills" className="flex-wrap">
+          <TabsTrigger value="users">
+            <UsersIcon className="w-3.5 h-3.5" />
+            Pengguna
+          </TabsTrigger>
+          <TabsTrigger value="templates">
+            <GraduationCap className="w-3.5 h-3.5" />
+            Template
+          </TabsTrigger>
+          <TabsTrigger value="roadmaps">
+            <ListChecks className="w-3.5 h-3.5" />
+            Roadmap Pengguna
+          </TabsTrigger>
+          <TabsTrigger value="audit">
+            <ScrollText className="w-3.5 h-3.5" />
+            Audit
+          </TabsTrigger>
+          <TabsTrigger value="feedback">
+            <MessageSquare className="w-3.5 h-3.5" />
+            Feedback
+          </TabsTrigger>
+          <TabsTrigger value="errors">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            Error
+          </TabsTrigger>
+        </TabsList>
 
-      <TemplatePanel />
-
-      <RoadmapPanel />
-
-      <AuditLogPanel />
-      <FeedbackPanel />
-      <ErrorLogsPanel />
+        <TabsContent value="users" className="mt-4">
+          <UsersTable />
+        </TabsContent>
+        <TabsContent value="templates" className="mt-4">
+          <TemplatePanel />
+        </TabsContent>
+        <TabsContent value="roadmaps" className="mt-4">
+          <RoadmapPanel />
+        </TabsContent>
+        <TabsContent value="audit" className="mt-4">
+          <AuditLogPanel />
+        </TabsContent>
+        <TabsContent value="feedback" className="mt-4">
+          <FeedbackPanel />
+        </TabsContent>
+        <TabsContent value="errors" className="mt-4">
+          <ErrorLogsPanel />
+        </TabsContent>
+      </Tabs>
     </PageContainer>
   );
 }

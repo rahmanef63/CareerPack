@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Database, ChevronDown, ChevronUp,
-  GraduationCap, Code, Loader2, Download, Upload,
+  GraduationCap, Loader2, Download, Upload, Search, ArrowUpDown,
+  ArrowDown, ArrowUp, X,
 } from "lucide-react";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -14,6 +15,10 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/shared/components/ui/table";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/shared/components/ui/sheet";
@@ -26,6 +31,7 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { cn } from "@/shared/lib/utils";
 import { notify } from "@/shared/lib/notify";
 import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
@@ -96,6 +102,8 @@ const RESOURCE_TYPES = ["video", "article", "course", "book", "practice", "docum
 function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
+
+type SortKey = "title" | "domain" | "nodes" | "order" | "isPublic";
 
 // ---- Export / import shape ----
 
@@ -505,6 +513,96 @@ export function TemplatePanel() {
   const [importOverwrite, setImportOverwrite] = useState(true);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const sheetImportRef = useRef<HTMLInputElement | null>(null);
+
+  // Search / filter / sort / selection state
+  const [search, setSearch] = useState("");
+  const [domainFilter, setDomainFilter] = useState<"all" | string>("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "private">("all");
+  const [originFilter, setOriginFilter] = useState<"all" | "system" | "user">("all");
+  const [sortKey, setSortKey] = useState<SortKey>("order");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [selectedIds, setSelectedIds] = useState<Set<Id<"roadmapTemplates">>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkActing, setBulkActing] = useState(false);
+
+  const filtered = useMemo(() => {
+    if (!templates) return [];
+    let rows: typeof templates = templates;
+    const q = search.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter((t) =>
+        t.title.toLowerCase().includes(q) ||
+        t.slug.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        t.tags.some((tag) => tag.toLowerCase().includes(q))
+      );
+    }
+    if (domainFilter !== "all") rows = rows.filter((t) => t.domain === domainFilter);
+    if (visibilityFilter === "public") rows = rows.filter((t) => t.isPublic);
+    else if (visibilityFilter === "private") rows = rows.filter((t) => !t.isPublic);
+    if (originFilter === "system") rows = rows.filter((t) => t.isSystem);
+    else if (originFilter === "user") rows = rows.filter((t) => !t.isSystem);
+
+    const sorted = [...rows].sort((a, b) => {
+      let av: string | number = 0;
+      let bv: string | number = 0;
+      switch (sortKey) {
+        case "title": av = a.title.toLowerCase(); bv = b.title.toLowerCase(); break;
+        case "domain": av = a.domain; bv = b.domain; break;
+        case "nodes": av = a.nodes.length; bv = b.nodes.length; break;
+        case "order": av = a.order; bv = b.order; break;
+        case "isPublic": av = a.isPublic ? 1 : 0; bv = b.isPublic ? 1 : 0; break;
+      }
+      const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  }, [templates, search, domainFilter, visibilityFilter, originFilter, sortKey, sortDir]);
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir("asc"); }
+  }
+
+  function toggleSelectOne(id: Id<"roadmapTemplates">) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const allSelectedInView =
+    filtered.length > 0 && filtered.every((t) => selectedIds.has(t._id));
+  const someSelectedInView =
+    !allSelectedInView && filtered.some((t) => selectedIds.has(t._id));
+
+  function toggleSelectAllInView() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allSelectedInView) {
+        for (const t of filtered) next.delete(t._id);
+      } else {
+        for (const t of filtered) next.add(t._id);
+      }
+      return next;
+    });
+  }
+
+  function clearSelection() { setSelectedIds(new Set()); }
+  function clearFilters() {
+    setSearch("");
+    setDomainFilter("all");
+    setVisibilityFilter("all");
+    setOriginFilter("all");
+  }
+  const hasActiveFilters =
+    search !== "" ||
+    domainFilter !== "all" ||
+    visibilityFilter !== "all" ||
+    originFilter !== "all";
 
   async function handleSave() {
     if (!draft) return;
@@ -669,6 +767,111 @@ export function TemplatePanel() {
     }
   }
 
+  /**
+   * Sheet-scoped import: replaces the current draft's basic info + nodes
+   * with the first template from a JSON file. Preserves `draft.id` so an
+   * existing template still updates instead of creating a duplicate slug.
+   */
+  async function handleSheetImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !draft) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const items = parseImportPayload(parsed);
+      if (items.length === 0) {
+        notify.error("File tidak berisi template");
+        return;
+      }
+      const t = items[0]!;
+      setDraft({
+        id: draft.id,
+        title: t.title,
+        slug: t.slug,
+        domain: t.domain,
+        icon: t.icon,
+        color: t.color,
+        description: t.description,
+        tags: t.tags.join(", "),
+        nodes: t.nodes.map((n) => ({
+          ...n,
+          parentId: n.parentId,
+          category: n.category,
+        })),
+        isPublic: t.isPublic,
+        isSystem: t.isSystem,
+        order: t.order,
+      });
+      const extra = items.length > 1 ? ` (${items.length - 1} entri lain dilewati — sheet ini hanya 1 template)` : "";
+      notify.success(`Diimpor ke draft: ${t.title}${extra}`);
+    } catch (err) {
+      notify.fromError(err, "Gagal membaca file JSON");
+    }
+  }
+
+  function handleBulkExport() {
+    if (!templates) return;
+    const sel = templates.filter((t) => selectedIds.has(t._id));
+    if (sel.length === 0) return;
+    const env: ExportEnvelope = {
+      format: EXPORT_FORMAT,
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      templates: sel.map((t) => toExport(t as unknown as LoadedTemplate)),
+    };
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadJson(`careerpack-templates-${stamp}-${sel.length}.json`, env);
+    notify.success(`Diekspor ${sel.length} template terpilih`);
+  }
+
+  async function handleBulkDelete() {
+    if (!templates) return;
+    const sel = templates.filter((t) => selectedIds.has(t._id) && !t.isSystem);
+    if (sel.length === 0) {
+      notify.error("Tidak ada template yang bisa dihapus (sistem dilindungi)");
+      setBulkDeleteOpen(false);
+      return;
+    }
+    setBulkActing(true);
+    let ok = 0;
+    let fail = 0;
+    for (const t of sel) {
+      try { await del({ id: t._id }); ok++; }
+      catch { fail++; }
+    }
+    setBulkActing(false);
+    setBulkDeleteOpen(false);
+    setSelectedIds(new Set());
+    notify.success(`${ok} dihapus${fail > 0 ? `, ${fail} gagal` : ""}`);
+  }
+
+  async function handleBulkVisibility(makePublic: boolean) {
+    if (!templates) return;
+    const sel = templates.filter(
+      (t) => selectedIds.has(t._id) && t.isPublic !== makePublic,
+    );
+    if (sel.length === 0) {
+      notify.error(
+        makePublic
+          ? "Semua yang dipilih sudah publik"
+          : "Semua yang dipilih sudah privat",
+      );
+      return;
+    }
+    setBulkActing(true);
+    let ok = 0;
+    let fail = 0;
+    for (const t of sel) {
+      try { await togglePublic({ id: t._id, isPublic: makePublic }); ok++; }
+      catch { fail++; }
+    }
+    setBulkActing(false);
+    notify.success(
+      `${ok} ${makePublic ? "ditampilkan" : "disembunyikan"}${fail > 0 ? `, ${fail} gagal` : ""}`,
+    );
+  }
+
   function openEdit(tpl: NonNullable<typeof templates>[number]) {
     setDraft({
       id: tpl._id,
@@ -734,23 +937,25 @@ export function TemplatePanel() {
                 Muat + Timpa
               </Button>
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
                 onClick={handleExportAll}
                 disabled={!templates || templates.length === 0}
                 title="Ekspor semua template ke JSON"
+                aria-label="Ekspor semua"
+                className="h-9 w-9"
               >
-                <Download className="w-4 h-4 mr-2" />
-                Ekspor JSON
+                <Download className="w-4 h-4" />
               </Button>
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
                 title="Impor template dari file JSON"
+                aria-label="Impor JSON"
+                className="h-9 w-9"
               >
-                <Upload className="w-4 h-4 mr-2" />
-                Impor JSON
+                <Upload className="w-4 h-4" />
               </Button>
               <input
                 ref={fileInputRef}
@@ -781,69 +986,266 @@ export function TemplatePanel() {
           )}
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="space-y-3">
+          {/* Toolbar: search + filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari judul / slug / tag…"
+                className="pl-8 h-9"
+              />
+            </div>
+            <Select value={domainFilter} onValueChange={(v) => setDomainFilter(v)}>
+              <SelectTrigger className="w-[140px] h-9">
+                <SelectValue placeholder="Domain" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Domain</SelectItem>
+                {DOMAIN_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={visibilityFilter}
+              onValueChange={(v) => setVisibilityFilter(v as typeof visibilityFilter)}
+            >
+              <SelectTrigger className="w-[130px] h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Visibilitas</SelectItem>
+                <SelectItem value="public">Publik</SelectItem>
+                <SelectItem value="private">Privat</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={originFilter}
+              onValueChange={(v) => setOriginFilter(v as typeof originFilter)}
+            >
+              <SelectTrigger className="w-[130px] h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Asal</SelectItem>
+                <SelectItem value="system">Sistem</SelectItem>
+                <SelectItem value="user">Pengguna</SelectItem>
+              </SelectContent>
+            </Select>
+            {hasActiveFilters && (
+              <Button size="sm" variant="ghost" onClick={clearFilters} className="h-9">
+                <X className="w-4 h-4 mr-1" /> Reset
+              </Button>
+            )}
+          </div>
+
+          {/* Selection bar — only when 1+ rows selected */}
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg border border-brand/40 bg-brand-muted/30">
+              <span className="text-sm font-medium">
+                {selectedIds.size} dipilih
+              </span>
+              <div className="flex flex-wrap gap-2 ml-auto">
+                <Button size="sm" variant="outline" onClick={handleBulkExport} disabled={bulkActing}>
+                  <Download className="w-3.5 h-3.5 mr-1.5" /> Ekspor
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleBulkVisibility(true)} disabled={bulkActing}>
+                  <Eye className="w-3.5 h-3.5 mr-1.5" /> Tampilkan
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleBulkVisibility(false)} disabled={bulkActing}>
+                  <EyeOff className="w-3.5 h-3.5 mr-1.5" /> Sembunyikan
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setBulkDeleteOpen(true)}
+                  disabled={bulkActing}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Hapus
+                </Button>
+                <Button size="sm" variant="ghost" onClick={clearSelection} disabled={bulkActing}>
+                  Bersihkan
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Table */}
           {templates === undefined ? (
             <p className="text-sm text-muted-foreground">Memuat…</p>
           ) : templates.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Belum ada template. Klik &quot;Muat Default&quot; untuk memuat 42 template bawaan, atau buat template baru.
+              Belum ada template. Klik &quot;Muat Default&quot; untuk memuat template bawaan, atau buat template baru.
+            </p>
+          ) : filtered.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              Tidak ada template yang cocok dengan filter saat ini.
             </p>
           ) : (
-            <div className="divide-y">
-              {templates.map((tpl) => (
-                <div key={tpl._id} className="flex items-center justify-between gap-3 py-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-8 h-8 rounded-lg ${tpl.color} flex items-center justify-center shrink-0`}>
-                      <Code className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-sm">{tpl.title}</span>
-                        <Badge variant="outline" className="text-[10px]">{tpl.domain}</Badge>
-                        {tpl.isSystem && <Badge variant="secondary" className="text-[10px]">sistem</Badge>}
-                        {!tpl.isPublic && <Badge variant="secondary" className="text-[10px] bg-muted">privat</Badge>}
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {tpl.slug} · {tpl.nodes.length} node
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => togglePublic({ id: tpl._id, isPublic: !tpl.isPublic })}
-                      className="p-1.5 rounded hover:bg-muted"
-                      title={tpl.isPublic ? "Sembunyikan dari pengguna" : "Tampilkan ke pengguna"}
-                    >
-                      {tpl.isPublic
-                        ? <Eye className="w-4 h-4 text-success" />
-                        : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                    </button>
-                    <button
-                      onClick={() => handleExportOne(tpl)}
-                      className="p-1.5 rounded hover:bg-muted"
-                      title="Ekspor template ini ke JSON"
-                    >
-                      <Download className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button
-                      onClick={() => openEdit(tpl)}
-                      className="p-1.5 rounded hover:bg-muted"
-                    >
-                      <Pencil className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    {!tpl.isSystem && (
-                      <button
-                        onClick={() => setDeleteTarget(tpl._id)}
-                        className="p-1.5 rounded hover:bg-muted"
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/40 hover:bg-muted/40">
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={
+                          allSelectedInView
+                            ? true
+                            : someSelectedInView
+                              ? "indeterminate"
+                              : false
+                        }
+                        onCheckedChange={toggleSelectAllInView}
+                        aria-label="Pilih semua di tampilan"
+                      />
+                    </TableHead>
+                    <SortHeader
+                      label="Template"
+                      activeKey={sortKey}
+                      thisKey="title"
+                      dir={sortDir}
+                      onClick={() => toggleSort("title")}
+                    />
+                    <SortHeader
+                      label="Domain"
+                      activeKey={sortKey}
+                      thisKey="domain"
+                      dir={sortDir}
+                      onClick={() => toggleSort("domain")}
+                      className="hidden md:table-cell w-[140px]"
+                    />
+                    <SortHeader
+                      label="Node"
+                      activeKey={sortKey}
+                      thisKey="nodes"
+                      dir={sortDir}
+                      onClick={() => toggleSort("nodes")}
+                      className="hidden sm:table-cell w-[80px] text-right"
+                      align="right"
+                    />
+                    <SortHeader
+                      label="Urutan"
+                      activeKey={sortKey}
+                      thisKey="order"
+                      dir={sortDir}
+                      onClick={() => toggleSort("order")}
+                      className="hidden lg:table-cell w-[80px] text-right"
+                      align="right"
+                    />
+                    <SortHeader
+                      label="Publik"
+                      activeKey={sortKey}
+                      thisKey="isPublic"
+                      dir={sortDir}
+                      onClick={() => toggleSort("isPublic")}
+                      className="hidden lg:table-cell w-[80px]"
+                    />
+                    <TableHead className="w-[140px] text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((tpl) => {
+                    const checked = selectedIds.has(tpl._id);
+                    return (
+                      <TableRow
+                        key={tpl._id}
+                        data-state={checked ? "selected" : undefined}
                       >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                        <TableCell>
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={() => toggleSelectOne(tpl._id)}
+                            aria-label={`Pilih ${tpl.title}`}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`w-8 h-8 rounded-lg ${tpl.color} flex items-center justify-center shrink-0`}>
+                              <GraduationCap className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-medium text-sm truncate">{tpl.title}</span>
+                                {tpl.isSystem && (
+                                  <Badge variant="secondary" className="text-[9px] h-4 px-1 leading-none">sistem</Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {tpl.slug} · {tpl.nodes.length} node
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <Badge variant="outline" className="text-[10px] uppercase">{tpl.domain}</Badge>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-right tabular-nums text-xs text-muted-foreground">
+                          {tpl.nodes.length}
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell text-right tabular-nums text-xs text-muted-foreground">
+                          {tpl.order}
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          {tpl.isPublic ? (
+                            <Eye className="w-4 h-4 text-success" />
+                          ) : (
+                            <EyeOff className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-0.5">
+                            <button
+                              onClick={() => togglePublic({ id: tpl._id, isPublic: !tpl.isPublic })}
+                              className="p-1.5 rounded hover:bg-muted"
+                              title={tpl.isPublic ? "Sembunyikan" : "Tampilkan"}
+                            >
+                              {tpl.isPublic
+                                ? <Eye className="w-4 h-4 text-success" />
+                                : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                            </button>
+                            <button
+                              onClick={() => handleExportOne(tpl)}
+                              className="p-1.5 rounded hover:bg-muted"
+                              title="Ekspor JSON"
+                            >
+                              <Download className="w-4 h-4 text-muted-foreground" />
+                            </button>
+                            <button
+                              onClick={() => openEdit(tpl)}
+                              className="p-1.5 rounded hover:bg-muted"
+                              title="Edit"
+                            >
+                              <Pencil className="w-4 h-4 text-muted-foreground" />
+                            </button>
+                            {!tpl.isSystem && (
+                              <button
+                                onClick={() => setDeleteTarget(tpl._id)}
+                                className="p-1.5 rounded hover:bg-muted"
+                                title="Hapus"
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
+          )}
+
+          {/* Result count */}
+          {templates && templates.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Menampilkan <strong>{filtered.length}</strong> dari {templates.length} template
+              {selectedIds.size > 0 && ` · ${selectedIds.size} dipilih`}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -855,15 +1257,35 @@ export function TemplatePanel() {
             <div className="flex items-center justify-between gap-2">
               <SheetTitle>{draft?.id ? "Edit Template" : "Buat Template Baru"}</SheetTitle>
               {draft && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleExportDraft}
-                  title="Ekspor draft ke JSON"
-                >
-                  <Download className="w-4 h-4 mr-1.5" />
-                  Ekspor
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={handleExportDraft}
+                    title="Ekspor draft ke JSON"
+                    aria-label="Ekspor draft"
+                    className="h-8 w-8"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => sheetImportRef.current?.click()}
+                    title="Impor JSON ke draft (timpa isi sekarang)"
+                    aria-label="Impor ke draft"
+                    className="h-8 w-8"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </Button>
+                  <input
+                    ref={sheetImportRef}
+                    type="file"
+                    accept="application/json,.json"
+                    className="hidden"
+                    onChange={handleSheetImport}
+                  />
+                </div>
               )}
             </div>
           </SheetHeader>
@@ -1068,6 +1490,36 @@ export function TemplatePanel() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Bulk delete confirm */}
+      <AlertDialog
+        open={bulkDeleteOpen}
+        onOpenChange={(o) => !o && !bulkActing && setBulkDeleteOpen(false)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus {selectedIds.size} template?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Template sistem akan dilewati otomatis. Roadmap pengguna yang
+              sudah di-seed tidak terpengaruh.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkActing}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleBulkDelete();
+              }}
+              disabled={bulkActing}
+              className="bg-destructive text-destructive-foreground"
+            >
+              {bulkActing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
@@ -1086,5 +1538,38 @@ export function TemplatePanel() {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+// ---- Sortable column header ----
+
+interface SortHeaderProps {
+  label: string;
+  activeKey: SortKey;
+  thisKey: SortKey;
+  dir: "asc" | "desc";
+  onClick: () => void;
+  className?: string;
+  align?: "left" | "right";
+}
+
+function SortHeader({ label, activeKey, thisKey, dir, onClick, className, align = "left" }: SortHeaderProps) {
+  const active = activeKey === thisKey;
+  const Icon = !active ? ArrowUpDown : dir === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <TableHead className={className}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "inline-flex items-center gap-1 hover:text-foreground transition-colors",
+          align === "right" && "ml-auto",
+          active && "text-foreground",
+        )}
+      >
+        {label}
+        <Icon className="w-3 h-3 opacity-60" />
+      </button>
+    </TableHead>
   );
 }
