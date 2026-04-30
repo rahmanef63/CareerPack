@@ -20,7 +20,7 @@ import { BudgetVariableForm } from "../BudgetVariableForm";
 import {
   dynamicSliderMax, SLIDER_BASE_MAX, SLIDER_STEP,
   type BudgetVar, type PeriodView,
-} from "./useFinancialPlan";
+} from "../../hooks/useFinancialPlan";
 
 interface Props {
   monthlyIncome: number;

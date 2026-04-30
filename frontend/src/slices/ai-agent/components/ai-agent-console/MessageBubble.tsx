@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
 import { cn } from "@/shared/lib/utils";
 import { ApproveActionCard } from "../ApproveActionCard";
-import type { Message } from "./types";
+import type { Message } from "../../types/console";
 
 export function MessageBubble({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";

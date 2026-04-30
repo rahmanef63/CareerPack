@@ -1,4 +1,4 @@
-import type { ApplicationStatus } from "../../types";
+import type { ApplicationStatus } from "../types";
 
 export const STATUS_META: Record<
   ApplicationStatus,

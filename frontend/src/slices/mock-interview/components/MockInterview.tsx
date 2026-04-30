@@ -3,7 +3,7 @@
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
-import { useMockSession } from "./mock-interview/useMockSession";
+import { useMockSession } from "../hooks/useMockSession";
 import { SessionCompleteCard } from "./mock-interview/SessionCompleteCard";
 import { PracticeSession } from "./mock-interview/PracticeSession";
 import { QuestionBank } from "./mock-interview/QuestionBank";

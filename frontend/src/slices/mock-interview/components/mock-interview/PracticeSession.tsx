@@ -11,7 +11,7 @@ import { Progress } from "@/shared/components/ui/progress";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/lib/utils";
 import { indonesianDifficultyLabels } from "@/shared/data/indonesianData";
-import { categoryLabels, getDifficultyColor } from "./constants";
+import { categoryLabels, getDifficultyColor } from "../../constants/categories";
 
 interface Props {
   sessionStartedAt: number | null;

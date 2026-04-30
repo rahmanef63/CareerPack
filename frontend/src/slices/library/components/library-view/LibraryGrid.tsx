@@ -5,7 +5,7 @@ import { FileText, Image as ImageIcon, Tag, Edit3, Trash2 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { bytesToHuman, type LibraryFile } from "./types";
+import { bytesToHuman, type LibraryFile } from "../../types/file";
 
 interface Props {
   files: LibraryFile[] | undefined;

@@ -4,7 +4,7 @@ import { Plus, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { cn } from "@/shared/lib/utils";
-import type { ChatSession } from "./types";
+import type { ChatSession } from "../../types/console";
 
 interface Props {
   sessions: ChatSession[];

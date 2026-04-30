@@ -3,7 +3,7 @@
 import { Copy, Download, Eye, EyeOff, GraduationCap, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
-import { DOMAIN_OPTIONS, type LoadedTemplate } from "./types";
+import { DOMAIN_OPTIONS, type LoadedTemplate } from "../../types/template";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 
 interface ColumnHandlers<T> {

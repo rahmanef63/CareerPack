@@ -17,11 +17,11 @@ import { Switch } from "@/shared/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { NodeEditor } from "./NodeEditor";
-import { genId } from "./lib";
+import { genId } from "../../lib/template";
 import {
   DOMAIN_OPTIONS, THEME_OPTIONS,
   type TemplateDraft,
-} from "./types";
+} from "../../types/template";
 
 interface TemplateEditorSheetProps {
   draft: TemplateDraft | null;

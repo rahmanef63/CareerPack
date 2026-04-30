@@ -1,4 +1,4 @@
-import type { RoadmapResource as Resource } from "../../types";
+import type { RoadmapResource as Resource } from "./index";
 
 export interface SimpleRoadmapNode {
   id: string;

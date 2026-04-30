@@ -16,7 +16,7 @@ import { DocChecklistInline } from './DocChecklistInline';
 import { useCVTranslate } from '../hooks/useCVTranslate';
 import { notify } from '@/shared/lib/notify';
 import { exportCVToPDF } from './cv-generator/exportPDF';
-import { useCVHandlers } from './cv-generator/useCVHandlers';
+import { useCVHandlers } from '../hooks/useCVHandlers';
 import { PersonalInfoSection } from './cv-generator/sections/PersonalInfoSection';
 import { DisplayPrefsSection } from './cv-generator/sections/DisplayPrefsSection';
 import { ExperienceSection } from './cv-generator/sections/ExperienceSection';

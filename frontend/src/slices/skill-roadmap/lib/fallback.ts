@@ -1,5 +1,5 @@
-import type { RoadmapResource as Resource } from "../../types";
-import type { SimpleRoadmapNode } from "./types";
+import type { RoadmapResource as Resource } from "../types";
+import type { SimpleRoadmapNode } from "../types/builder";
 
 const mkNode = (
   id: string, title: string, description: string,

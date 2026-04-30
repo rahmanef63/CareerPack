@@ -7,7 +7,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import type { LinkIssue } from "./types";
+import type { LinkIssue } from "../../types/template";
 
 interface LinkAuditDialogProps {
   issues: LinkIssue[] | null;

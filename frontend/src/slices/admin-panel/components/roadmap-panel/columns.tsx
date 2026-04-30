@@ -10,7 +10,7 @@ import {
 import { Progress } from "@/shared/components/ui/progress";
 import type { ColumnDef } from "@/shared/components/data-table";
 import { formatDate } from "@/shared/lib/formatDate";
-import type { RoadmapRow } from "./types";
+import type { RoadmapRow } from "../../types/roadmap";
 
 interface Handlers {
   onOpenSheet: (row: RoadmapRow) => void;

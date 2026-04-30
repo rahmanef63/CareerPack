@@ -19,7 +19,7 @@ import {
 
 import type { PortfolioFormValues, PortfolioItem } from "../types";
 import { DEFAULT_FORM } from "../constants";
-import { itemToValues } from "./portfolio-form/lib";
+import { itemToValues } from "../lib/itemToValues";
 import { BasicTab } from "./portfolio-form/BasicTab";
 import { MediaEditor } from "./portfolio-form/MediaEditor";
 import { LinksEditor } from "./portfolio-form/LinksEditor";

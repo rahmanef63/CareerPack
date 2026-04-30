@@ -13,8 +13,8 @@ import { cn } from "@/shared/lib/utils";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 import {
   LEVEL_COLOR, LEVEL_LABEL, STATUS_COLOR, STATUS_LABEL,
-} from "./constants";
-import type { RoadmapRow, SkillShape } from "./types";
+} from "../../constants/roadmap";
+import type { RoadmapRow, SkillShape } from "../../types/roadmap";
 
 interface Props {
   open: boolean;

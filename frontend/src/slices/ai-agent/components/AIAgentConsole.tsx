@@ -14,11 +14,11 @@ import { TypingDots } from "@/shared/components/interactions/MicroInteractions";
 import { cn } from "@/shared/lib/utils";
 import { runAgent } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
-import { newSession, type Message } from "./ai-agent-console/types";
+import { newSession, type Message } from "../types/console";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
 import { HistoryRail } from "./ai-agent-console/HistoryRail";
 import { Composer } from "./ai-agent-console/Composer";
-import { useSessionSync } from "./ai-agent-console/useSessionSync";
+import { useSessionSync } from "../hooks/useSessionSync";
 
 interface AIAgentConsoleProps {
   open: boolean;

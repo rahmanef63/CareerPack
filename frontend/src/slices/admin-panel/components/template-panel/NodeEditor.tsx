@@ -8,8 +8,8 @@ import { Label } from "@/shared/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/shared/components/ui/select";
-import { genId } from "./lib";
-import { DIFFICULTY_OPTIONS, RESOURCE_TYPES, type TemplateNode } from "./types";
+import { genId } from "../../lib/template";
+import { DIFFICULTY_OPTIONS, RESOURCE_TYPES, type TemplateNode } from "../../types/template";
 
 interface NodeEditorProps {
   node: TemplateNode;

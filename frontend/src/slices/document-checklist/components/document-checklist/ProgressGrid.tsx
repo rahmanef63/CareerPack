@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Progress } from "@/shared/components/ui/progress";
-import type { ChecklistProgress } from "./useChecklistData";
+import type { ChecklistProgress } from "../../hooks/useChecklistData";
 
 export function ProgressGrid({ progress }: { progress: ChecklistProgress }) {
   return (

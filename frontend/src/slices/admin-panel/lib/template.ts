@@ -3,7 +3,7 @@ import {
   type ManifestDraft, type ConfigDraft,
   type ExportTemplate, type LoadedTemplate,
   type LinkIssue, type AuditableTemplate,
-} from "./types";
+} from "../types/template";
 
 export function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);

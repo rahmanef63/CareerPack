@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
-import { api } from "../../../../../../convex/_generated/api";
-import type { BrowserCategory } from "../RoadmapBrowser";
-import type { SavedRoadmapCard } from "../SavedRoadmapsGrid";
-import { FALLBACK_CATEGORIES } from "./constants";
-import { generateFallbackNodes } from "./fallback";
-import { buildTreeFromNodes, countNodes, flattenNodes } from "./treeBuilder";
-import type { SimpleRoadmapNode } from "./types";
+import { api } from "../../../../../convex/_generated/api";
+import type { BrowserCategory } from "../components/RoadmapBrowser";
+import type { SavedRoadmapCard } from "../components/SavedRoadmapsGrid";
+import { FALLBACK_CATEGORIES } from "../constants/builder";
+import { generateFallbackNodes } from "../lib/fallback";
+import { buildTreeFromNodes, countNodes, flattenNodes } from "../lib/treeBuilder";
+import type { SimpleRoadmapNode } from "../types/builder";
 
 export function useSkillRoadmap() {
   // ── Core selection ─────────────────────────────────────────────────

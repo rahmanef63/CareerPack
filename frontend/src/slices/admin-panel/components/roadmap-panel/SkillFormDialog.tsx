@@ -15,8 +15,8 @@ import {
 import { Separator } from "@/shared/components/ui/separator";
 import {
   LEVELS, LEVEL_LABEL, RESOURCE_TYPES, STATUSES, STATUS_LABEL,
-} from "./constants";
-import type { SkillDraft } from "./types";
+} from "../../constants/roadmap";
+import type { SkillDraft } from "../../types/roadmap";
 
 interface Props {
   open: boolean;

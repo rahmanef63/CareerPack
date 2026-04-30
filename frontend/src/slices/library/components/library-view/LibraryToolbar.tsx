@@ -9,7 +9,7 @@ import {
   ResponsiveSelectTrigger,
 } from "@/shared/components/ui/responsive-select";
 import { cn } from "@/shared/lib/utils";
-import { KIND_OPTIONS, bytesToHuman, type KindFilter } from "./types";
+import { KIND_OPTIONS, bytesToHuman, type KindFilter } from "../../types/file";
 
 interface Props {
   stats: { total: number; totalBytes: number; used: number };

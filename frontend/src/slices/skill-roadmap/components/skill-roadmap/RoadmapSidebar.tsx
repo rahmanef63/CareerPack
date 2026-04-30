@@ -3,8 +3,8 @@
 import { Clock, ExternalLink, Lightbulb, Star, Trophy } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { getResourceIcon } from "./treeBuilder";
-import type { SimpleRoadmapNode } from "./types";
+import { getResourceIcon } from "../../lib/treeBuilder";
+import type { SimpleRoadmapNode } from "../../types/builder";
 
 interface Props {
   completedSize: number;

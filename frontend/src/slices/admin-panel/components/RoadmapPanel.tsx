@@ -16,12 +16,12 @@ import {
 } from "@/shared/components/ui/responsive-alert-dialog";
 import { DataTable } from "@/shared/components/data-table";
 import { buildRoadmapColumns } from "./roadmap-panel/columns";
-import { blankSkill, skillToForm } from "./roadmap-panel/lib";
+import { blankSkill, skillToForm } from "../lib/roadmap";
 import { RoadmapSkillsSheet } from "./roadmap-panel/RoadmapSkillsSheet";
 import { SkillFormDialog } from "./roadmap-panel/SkillFormDialog";
 import type {
   RoadmapRow, SkillDraft, SkillShape,
-} from "./roadmap-panel/types";
+} from "../types/roadmap";
 
 export function RoadmapPanel() {
   const roadmaps = useQuery(api.admin.queries.listAllRoadmaps);

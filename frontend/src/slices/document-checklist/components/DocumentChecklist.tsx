@@ -10,7 +10,7 @@ import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-hea
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import type { ChecklistItem } from "../types";
-import { useChecklistData } from "./document-checklist/useChecklistData";
+import { useChecklistData } from "../hooks/useChecklistData";
 import { CategorySection } from "./document-checklist/CategorySection";
 import { ItemDetailDialog } from "./document-checklist/ItemDetailDialog";
 

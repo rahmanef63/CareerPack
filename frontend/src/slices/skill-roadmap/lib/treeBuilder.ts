@@ -1,6 +1,6 @@
 import { BookOpen, ExternalLink, FileText, Target, Video } from "lucide-react";
-import type { RoadmapResource as Resource } from "../../types";
-import type { SimpleRoadmapNode, TemplateNode } from "./types";
+import type { RoadmapResource as Resource } from "../types";
+import type { SimpleRoadmapNode, TemplateNode } from "../types/builder";
 
 /**
  * Walk the flat DB template node array (with `parentId`) and rebuild

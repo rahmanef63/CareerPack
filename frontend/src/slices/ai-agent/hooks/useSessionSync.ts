@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { api } from "../../../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 import type { AgentAction } from "@/shared/types/agent";
 import {
   type ChatSession, type Message, MIGRATION_DONE_KEY, STORAGE_KEY,
   loadSessions, newSession,
-} from "./types";
+} from "../types/console";
 
 /** Hydration + cross-device sync for chat sessions. */
 export function useSessionSync() {

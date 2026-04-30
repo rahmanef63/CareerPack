@@ -5,8 +5,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
-import type { SimpleRoadmapNode } from "./types";
-import { getDifficultyLabel } from "./treeBuilder";
+import type { SimpleRoadmapNode } from "../../types/builder";
+import { getDifficultyLabel } from "../../lib/treeBuilder";
 
 interface RoadmapNodeProps {
   node: SimpleRoadmapNode;

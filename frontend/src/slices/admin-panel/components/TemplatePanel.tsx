@@ -15,14 +15,14 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { DataTable } from "@/shared/components/data-table";
-import { EMPTY_DRAFT } from "./template-panel/types";
+import { EMPTY_DRAFT } from "../types/template";
 import { TemplateEditorSheet } from "./template-panel/TemplateEditorSheet";
 import { LinkAuditDialog } from "./template-panel/LinkAuditDialog";
 import { ImportConfirmDialog } from "./template-panel/ImportConfirmDialog";
 import {
   buildTemplateColumns, buildTemplateFilters,
 } from "./template-panel/columns";
-import { useTemplatePanel } from "./template-panel/useTemplatePanel";
+import { useTemplatePanel } from "../hooks/useTemplatePanel";
 
 export function TemplatePanel() {
   const p = useTemplatePanel();

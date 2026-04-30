@@ -28,7 +28,7 @@ import {
 } from "@/shared/components/ui/responsive-alert-dialog";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 
-import type { LibraryFile, KindFilter } from "./library-view/types";
+import type { LibraryFile, KindFilter } from "../types/file";
 import { LibraryToolbar } from "./library-view/LibraryToolbar";
 import { LibraryGrid } from "./library-view/LibraryGrid";
 import { EditMetadataDialog } from "./library-view/EditMetadataDialog";

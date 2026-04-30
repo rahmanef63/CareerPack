@@ -11,8 +11,8 @@ import {
   ResponsiveDialogTitle as DialogTitle,
 } from "@/shared/components/ui/responsive-dialog";
 import { cn } from "@/shared/lib/utils";
-import { getDifficultyLabel, getResourceIcon } from "./treeBuilder";
-import type { SimpleRoadmapNode } from "./types";
+import { getDifficultyLabel, getResourceIcon } from "../../lib/treeBuilder";
+import type { SimpleRoadmapNode } from "../../types/builder";
 
 interface Props {
   selectedNode: SimpleRoadmapNode | null;

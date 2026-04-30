@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
 import { indonesianDocumentChecklist } from "@/shared/data/indonesianData";
-import { api } from "../../../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoChecklistOverlay } from "@/shared/hooks/useDemoOverlay";
-import type { ChecklistItem } from "../../types";
+import type { ChecklistItem } from "../types";
 
 export function useChecklistData() {
   const { state: authState } = useAuth();

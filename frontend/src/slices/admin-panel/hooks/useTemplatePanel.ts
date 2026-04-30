@@ -3,18 +3,18 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
-import { api } from "../../../../../../convex/_generated/api";
-import type { Id } from "../../../../../../convex/_generated/dataModel";
+import { api } from "../../../../../convex/_generated/api";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 import {
   EXPORT_FORMAT, EXPORT_VERSION,
   type AuditableTemplate, type ExportEnvelope, type ExportTemplate,
   type LinkIssue, type LoadedTemplate, type TemplateDraft,
-} from "./types";
+} from "../types/template";
 import {
   auditLinks, configFromDoc, configToPayload, downloadJson,
   issuesToCsv, manifestFromDoc, manifestToPayload,
   parseImportPayload, toExport,
-} from "./lib";
+} from "../lib/template";
 
 export function useTemplatePanel() {
   const templates = useQuery(api.admin.queries.listAllTemplates);

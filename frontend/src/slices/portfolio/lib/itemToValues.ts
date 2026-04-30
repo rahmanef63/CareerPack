@@ -1,5 +1,5 @@
-import type { PortfolioFormValues, PortfolioItem } from "../../types";
-import { DEFAULT_FORM } from "../../constants";
+import type { PortfolioFormValues, PortfolioItem } from "../types";
+import { DEFAULT_FORM } from "../constants";
 
 export function itemToValues(item: PortfolioItem): PortfolioFormValues {
   return {

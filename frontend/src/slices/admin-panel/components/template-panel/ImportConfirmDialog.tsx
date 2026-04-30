@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
-import type { ExportTemplate } from "./types";
+import type { ExportTemplate } from "../../types/template";
 
 interface ImportConfirmDialogProps {
   importDraft: ExportTemplate[] | null;

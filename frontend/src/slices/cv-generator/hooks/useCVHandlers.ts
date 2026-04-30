@@ -4,8 +4,8 @@ import { useCallback, type Dispatch, type SetStateAction } from "react";
 import { notify } from "@/shared/lib/notify";
 import type {
   CVData, Certification, Education, Experience, Project, Skill,
-} from "../../types";
-import type { CVFormat } from "../../constants";
+} from "../types";
+import type { CVFormat } from "../constants";
 
 export function useCVHandlers(
   setCvData: Dispatch<SetStateAction<CVData>>,

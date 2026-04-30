@@ -9,7 +9,7 @@ import type { ChecklistItem } from "../../types";
 import { ChecklistItemCard } from "./ChecklistItemCard";
 import { CategoryFilter } from "./CategoryFilter";
 import { ProgressGrid } from "./ProgressGrid";
-import type { ChecklistProgress } from "./useChecklistData";
+import type { ChecklistProgress } from "../../hooks/useChecklistData";
 
 interface Props {
   category: "local" | "international";

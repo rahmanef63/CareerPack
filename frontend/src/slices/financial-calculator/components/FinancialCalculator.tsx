@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
-import { useFinancialPlan } from "./financial-calculator/useFinancialPlan";
+import { useFinancialPlan } from "../hooks/useFinancialPlan";
 import { BudgetTab } from "./financial-calculator/BudgetTab";
 import { SalaryTab } from "./financial-calculator/SalaryTab";
 import { CityCompareTab } from "./financial-calculator/CityCompareTab";

@@ -25,7 +25,7 @@ import { useApplications } from "../hooks/useApplications";
 import type { Application, ApplicationStatus } from "../types";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { DataTable } from "@/shared/components/data-table";
-import { STATUS_META } from "./career-dashboard/constants";
+import { STATUS_META } from "../constants/status";
 import { StatCard } from "./career-dashboard/StatCard";
 import { AddApplicationDialog } from "./career-dashboard/AddApplicationDialog";
 import {

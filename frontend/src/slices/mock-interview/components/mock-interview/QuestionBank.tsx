@@ -6,7 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
 import { indonesianDifficultyLabels } from "@/shared/data/indonesianData";
-import { categoryLabels, getDifficultyColor } from "./constants";
+import { categoryLabels, getDifficultyColor } from "../../constants/categories";
 
 interface Props {
   filteredQuestions: ReadonlyArray<{

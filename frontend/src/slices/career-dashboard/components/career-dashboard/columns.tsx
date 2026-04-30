@@ -16,7 +16,7 @@ import {
 } from "@/shared/components/ui/responsive-dropdown-menu";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import type { Application, ApplicationStatus } from "../../types";
-import { STATUS_META } from "./constants";
+import { STATUS_META } from "../../constants/status";
 
 interface BuildArgs {
   onStatusChange: (a: Application, s: ApplicationStatus) => void;

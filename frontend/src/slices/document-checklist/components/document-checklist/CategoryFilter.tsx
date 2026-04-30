@@ -6,7 +6,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
 import { indonesianCategoryLabels } from "@/shared/data/indonesianData";
 import type { ChecklistItem } from "../../types";
-import { categoryIcons } from "./icons";
+import { categoryIcons } from "../../constants/icons";
 
 interface Props {
   filterCategory: string | null;
