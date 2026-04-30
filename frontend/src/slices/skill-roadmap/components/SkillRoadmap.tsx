@@ -35,6 +35,7 @@ import type { RoadmapResource as Resource } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { RoadmapBrowser, type BrowserCategory } from './RoadmapBrowser';
 import { GamificationPanel } from './GamificationPanel';
+import { SavedRoadmapsGrid, type SavedRoadmapCard } from './SavedRoadmapsGrid';
 import { useRoadmapGamification } from '../hooks/useRoadmapGamification';
 
 // ---- Icon registry (expanded for all 42+ template categories) ----
@@ -324,89 +325,107 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, activeQuestId, 
 // ---- Main component ----
 
 export function SkillRoadmap() {
-  const [selectedCategory, setSelectedCategory] = useState('frontend');
+  // ── Core selection ─────────────────────────────────────────────────
+  // `activeSlug` is null until the roadmap query resolves, so we never
+  // fire a `getTemplateBySlug` query on a stale default — that was the
+  // root cause of the brief frontend-tree flash on page load.
+  const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<SimpleRoadmapNode | null>(null);
-  // Default tab follows the user's data — first-timers (no roadmap row
-  // yet) land on the catalog so they see what's available; returning
-  // users land on their own progress.
-  const [activeTab, setActiveTab] = useState<"my" | "browse">("my");
-  const [tabAutoSet, setTabAutoSet] = useState(false);
+  // `activeTab` defaults to null too — set once after data resolves so
+  // first-timers don't see the "my" tab flash before being snapped to
+  // "browse".
+  const [activeTab, setActiveTab] = useState<"my" | "browse" | null>(null);
   const [completedNodes, setCompletedNodes] = useState<Set<string>>(new Set());
   const [domainFilter, setDomainFilter] = useState<string>('all');
+  // `selectedBrowseSlug` is decoupled from `activeSlug` — the browse
+  // grid highlights the user's last pick without forcing the active
+  // skill to change every time they look at the catalog.
+  const [selectedBrowseSlug, setSelectedBrowseSlug] = useState<string | null>(null);
 
   const roadmap = useQuery(api.roadmap.queries.getUserRoadmap);
   const dbTemplates = useQuery(api.roadmap.templates.listPublicTemplates);
   const usageCounts = useQuery(api.roadmap.templates.getTemplateUsageCounts);
+  const savedTemplates = useQuery(api.roadmap.saved.listSavedTemplates);
+  // Skip the dbTemplate query until we know which slug to load — avoids
+  // a stale-slug roundtrip before hydration. Once we have a slug it's
+  // reactive in the normal way.
   const dbTemplate = useQuery(
     api.roadmap.templates.getTemplateBySlug,
-    { slug: selectedCategory },
+    activeSlug ? { slug: activeSlug } : "skip",
   );
   const seedRoadmap = useMutation(api.roadmap.mutations.seedRoadmap);
   const updateSkillProgress = useMutation(api.roadmap.mutations.updateSkillProgress);
+  const removeSavedTemplate = useMutation(api.roadmap.saved.removeSavedTemplate);
 
-  const hydrated = useRef(false);
+  // Track which roadmap _id we've hydrated completedNodes from — only
+  // re-snap the local set when the underlying doc identity changes
+  // (i.e. the user re-seeded onto a different slug).
   const hydratedRoadmapId = useRef<string | null>(null);
-  const didDefaultFromDb = useRef(false);
+  // In-flight seed slug — suppresses re-fire of the seed effect while
+  // a seed is mid-flight (Convex roadmap update arrives async).
+  const seedingSlug = useRef<string | null>(null);
 
+  // ── Hydrate activeSlug + completedNodes once roadmap doc resolves ──
   useEffect(() => {
-    if (roadmap === undefined) return;
-    hydrated.current = true;
+    if (roadmap === undefined) return; // still loading
+    if (activeSlug !== null) return;   // user already picked one
+
+    if (roadmap?.careerPath) {
+      setActiveSlug(roadmap.careerPath);
+      return;
+    }
+    // No roadmap doc yet — leave activeSlug null. The user will pick
+    // from "Cari Skills" or the saved grid; the seed effect handles it.
+  }, [roadmap, activeSlug]);
+
+  // ── Pull completedNodes from the active roadmap doc ────────────────
+  useEffect(() => {
     if (!roadmap) return;
     const idStr = String(roadmap._id);
     if (hydratedRoadmapId.current === idStr) return;
     hydratedRoadmapId.current = idStr;
-    setSelectedCategory(roadmap.careerPath);
     const done = new Set(
       roadmap.skills.filter((s) => s.status === "completed").map((s) => s.id),
     );
     setCompletedNodes(done);
   }, [roadmap]);
 
-  // Pick the first DB template as the initial category when the user
-  // has no roadmap yet — avoids landing on the hardcoded 'frontend' slug
-  // that may not exist in the seeded DB (slugs are 'frontend-dev' etc.).
-  useEffect(() => {
-    if (didDefaultFromDb.current) return;
-    if (dbTemplates === undefined) return; // still loading
-    if (roadmap === undefined) return; // wait for roadmap to resolve too
-    if (roadmap?.careerPath) {
-      didDefaultFromDb.current = true; // hydration covers this case
-      return;
-    }
-    if (dbTemplates.length === 0) return; // empty DB → keep fallback default
-    didDefaultFromDb.current = true;
-    const exists = dbTemplates.some((t) => t.slug === selectedCategory);
-    if (!exists) setSelectedCategory(dbTemplates[0].slug);
-  }, [dbTemplates, roadmap, selectedCategory]);
-
-  // roadmapData: prefer DB template, fall back to hardcoded
+  // ── roadmapData: build from DB template; only fall back when the
+  //    template explicitly returned `null` (= slug not in DB). While
+  //    `dbTemplate` is `undefined` (loading) we return [] so the tree
+  //    never flashes stale data from a previous slug.
   const roadmapData = useMemo<SimpleRoadmapNode[]>(() => {
+    if (!activeSlug) return [];
+    if (dbTemplate === undefined) return []; // loading
     if (dbTemplate) return buildTreeFromNodes(dbTemplate.nodes);
-    return generateFallbackNodes(selectedCategory);
-  }, [dbTemplate, selectedCategory]);
+    return generateFallbackNodes(activeSlug);
+  }, [activeSlug, dbTemplate]);
 
-  // First-time default: if the query has resolved and the user has no
-  // roadmap row, snap to the Browse tab so they see the catalog first.
-  // Only runs once — after the user toggles tabs we never override.
+  // ── First-time default: snap to Browse tab when the user has no
+  //    saved skills yet. Runs once after both queries resolve.
   useEffect(() => {
-    if (tabAutoSet) return;
+    if (activeTab !== null) return;
     if (roadmap === undefined) return;
-    if (!roadmap || roadmap.skills.length === 0) {
-      setActiveTab("browse");
-    }
-    setTabAutoSet(true);
-  }, [roadmap, tabAutoSet]);
+    if (savedTemplates === undefined) return;
 
-  // Seed on category change. Wait for DB template query to resolve (undefined = loading)
-  // before seeding so we never seed with stale fallback data then re-seed with real data.
+    const hasContent = (roadmap?.skills.length ?? 0) > 0 || savedTemplates.length > 0;
+    setActiveTab(hasContent ? "my" : "browse");
+  }, [activeTab, roadmap, savedTemplates]);
+
+  // ── Seed on activeSlug change. Three guards prevent spurious seeds:
+  //    (1) wait for dbTemplate to resolve, (2) skip when the server
+  //    already has this slug as the active roadmap, (3) suppress
+  //    duplicate seeds for the same slug while one is in flight.
   useEffect(() => {
-    if (!hydrated.current) return;
-    if (dbTemplate === undefined) return; // still loading — avoid double-seed
-    if (roadmap && roadmap.careerPath === selectedCategory) return;
+    if (!activeSlug) return;
+    if (dbTemplate === undefined) return;
+    if (roadmap === undefined) return;
+    if (roadmap && roadmap.careerPath === activeSlug) return;
+    if (seedingSlug.current === activeSlug) return;
 
     const nodes = dbTemplate
       ? buildTreeFromNodes(dbTemplate.nodes)
-      : generateFallbackNodes(selectedCategory);
+      : generateFallbackNodes(activeSlug);
     if (nodes.length === 0) return;
 
     function flattenNodes(list: SimpleRoadmapNode[]): SimpleRoadmapNode[] {
@@ -414,13 +433,15 @@ export function SkillRoadmap() {
     }
     const flat = flattenNodes(nodes);
 
+    seedingSlug.current = activeSlug;
+    setCompletedNodes(new Set());
     seedRoadmap({
-      careerPath: selectedCategory,
+      careerPath: activeSlug,
       templateId: dbTemplate?._id,
       skills: flat.map((n, index) => ({
         id: n.id,
         name: n.title,
-        category: selectedCategory,
+        category: activeSlug,
         level: n.difficulty,
         priority: index,
         estimatedHours: n.estimatedHours,
@@ -431,14 +452,14 @@ export function SkillRoadmap() {
           url: r.url || "#",
         })),
       })),
-    }).catch((err: unknown) => {
-      notify.fromError(err, "Gagal menyimpan roadmap");
-    });
-
-    if (!roadmap || roadmap.careerPath !== selectedCategory) {
-      setCompletedNodes(new Set());
-    }
-  }, [selectedCategory, roadmap, dbTemplate, seedRoadmap]);
+    })
+      .catch((err: unknown) => {
+        notify.fromError(err, "Gagal menyimpan roadmap");
+      })
+      .finally(() => {
+        if (seedingSlug.current === activeSlug) seedingSlug.current = null;
+      });
+  }, [activeSlug, roadmap, dbTemplate, seedRoadmap]);
 
   const toggleNodeCompletion = (nodeId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -552,8 +573,83 @@ export function SkillRoadmap() {
     [browserCategories],
   );
 
-  const activeCategory = browserCategories.find((c) => c.id === selectedCategory);
+  // activeCategory: prefer the catalog match (has icon/color/etc), then
+  // fall back to the saved-list match so the tree header still renders
+  // accurate metadata for slugs that exist in saved but not browse
+  // (e.g. unpublished private templates).
+  const activeCategory = useMemo(() => {
+    if (!activeSlug) return null;
+    const fromBrowse = browserCategories.find((c) => c.id === activeSlug);
+    if (fromBrowse) return fromBrowse;
+    const fromSaved = savedTemplates?.find((s) => s.slug === activeSlug);
+    if (!fromSaved) return null;
+    return {
+      id: fromSaved.slug,
+      name: fromSaved.title,
+      icon: fromSaved.icon,
+      color: fromSaved.color,
+      description: fromSaved.description,
+      domain: fromSaved.domain,
+      nodeCount: fromSaved.nodeCount,
+      totalHours: fromSaved.totalHours,
+      isSystem: fromSaved.isSystem,
+      authorName: fromSaved.authorName,
+      tags: fromSaved.tags,
+      nodeTags: fromSaved.nodeTags,
+      difficultyMix: fromSaved.difficultyMix,
+      popularity: 0,
+      creationTime: fromSaved._creationTime,
+    } satisfies BrowserCategory;
+  }, [activeSlug, browserCategories, savedTemplates]);
+
   const templatesLoading = dbTemplates === undefined;
+  const savedLoading = savedTemplates === undefined;
+
+  const savedCards: SavedRoadmapCard[] = useMemo(
+    () =>
+      (savedTemplates ?? []).map((t) => ({
+        slug: t.slug,
+        name: t.title,
+        icon: t.icon,
+        color: t.color,
+        description: t.description,
+        domain: t.domain,
+        nodeCount: t.nodeCount,
+        totalHours: t.totalHours,
+        isSystem: t.isSystem,
+        authorName: t.authorName,
+      })),
+    [savedTemplates],
+  );
+
+  // Per-saved-slug progress chip on the saved card. Only the active
+  // slug has live progress (single roadmap doc); others show no chip.
+  const progressBySlug = useMemo<Record<string, number>>(() => {
+    if (!activeSlug || !roadmap) return {};
+    if (roadmap.careerPath !== activeSlug) return {};
+    return { [activeSlug]: roadmap.progress };
+  }, [activeSlug, roadmap]);
+
+  const handleActivateSaved = (slug: string) => {
+    setActiveSlug(slug);
+  };
+
+  const handleRemoveSaved = (slug: string) => {
+    removeSavedTemplate({ slug })
+      .then(() => notify.info("Skill dihapus dari Skill Saya"))
+      .catch((err: unknown) => notify.fromError(err, "Gagal menghapus"));
+    if (activeSlug === slug) {
+      // Pick another saved slug if one exists, else clear
+      const remaining = savedCards.filter((c) => c.slug !== slug);
+      setActiveSlug(remaining[0]?.slug ?? null);
+    }
+  };
+
+  const handleBrowseSelect = (slug: string) => {
+    setSelectedBrowseSlug(slug);
+    setActiveSlug(slug);
+    setActiveTab("my");
+  };
 
   // Gamification stats — XP/Level/Streak/Achievements derived from the
   // current roadmap doc (single per user). Re-runs only when skills or
@@ -575,7 +671,7 @@ export function SkillRoadmap() {
       />
 
       <Tabs
-        value={activeTab}
+        value={activeTab ?? "my"}
         onValueChange={(v) => setActiveTab(v as "my" | "browse")}
         className="space-y-4"
       >
@@ -602,11 +698,8 @@ export function SkillRoadmap() {
           <RoadmapBrowser
             categories={browserCategories}
             loading={templatesLoading}
-            selectedId={selectedCategory}
-            onSelect={(id) => {
-              setSelectedCategory(id);
-              setActiveTab("my");
-            }}
+            selectedId={selectedBrowseSlug ?? activeSlug ?? ""}
+            onSelect={handleBrowseSelect}
             domainFilter={domainFilter}
             onDomainFilterChange={setDomainFilter}
             domainOptions={domains}
@@ -616,11 +709,53 @@ export function SkillRoadmap() {
         </TabsContent>
 
         <TabsContent value="my" className="mt-4 space-y-6">
+          {/* Saved skills grid — same card visual as Cari Skills, plus
+              an "active" highlight + remove button. Clicking activates
+              that skill and (if needed) re-seeds the active roadmap. */}
+          <Card className="border-border">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-brand" />
+                  Skill Tersimpan
+                  {savedCards.length > 0 && (
+                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                      {savedCards.length}
+                    </Badge>
+                  )}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setActiveTab("browse")}
+                  className="h-7 text-xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5 mr-1" />
+                  Tambah dari Cari Skills
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <SavedRoadmapsGrid
+                saved={savedCards}
+                loading={savedLoading}
+                activeSlug={activeSlug ?? ""}
+                onActivate={handleActivateSaved}
+                onRemove={handleRemoveSaved}
+                onBrowse={() => setActiveTab("browse")}
+                iconMap={iconMap}
+                domainLabels={DOMAIN_LABELS}
+                progressBySlug={progressBySlug}
+              />
+            </CardContent>
+          </Card>
+
           {/* Gamification HUD — RPG-style level/XP/streak/achievements */}
-          {roadmap && (
+          {roadmap && activeSlug && (
             <GamificationPanel stats={gamification} domainLabel={activeCategory?.domain} />
           )}
 
+          {activeSlug ? (
           <div className="grid lg:grid-cols-3 gap-8">
         {/* Roadmap tree */}
         <div className="lg:col-span-2">
@@ -629,7 +764,7 @@ export function SkillRoadmap() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl">
-                    {activeCategory?.name ?? selectedCategory}
+                    {activeCategory?.name ?? activeSlug}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
                     {activeCategory?.description ?? 'Selesaikan setiap topik untuk membuka level berikutnya'}
@@ -758,6 +893,15 @@ export function SkillRoadmap() {
           </Card>
         </div>
           </div>
+          ) : (
+            // No active skill — invite the user to pick one. Avoids
+            // showing an empty tree shell that looks like a broken page.
+            !savedLoading && savedCards.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                Pilih skill di atas atau buka Cari Skills untuk memulai.
+              </p>
+            )
+          )}
         </TabsContent>
       </Tabs>
 

@@ -100,6 +100,21 @@ export const seedRoadmap = mutation({
       };
     });
 
+    // Auto-bookmark the slug into roadmapSaved so the "Skill Saya" tab
+    // grid shows it. Single source of truth: any seeded roadmap is by
+    // definition picked. Unsaving is a separate explicit action.
+    const savedDoc = await ctx.db
+      .query("roadmapSaved")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!savedDoc) {
+      await ctx.db.insert("roadmapSaved", { userId, slugs: [careerPath] });
+    } else if (!savedDoc.slugs.includes(careerPath)) {
+      await ctx.db.patch(savedDoc._id, {
+        slugs: [...savedDoc.slugs, careerPath],
+      });
+    }
+
     const existing = await ctx.db
       .query("skillRoadmaps")
       .withIndex("by_user", (q) => q.eq("userId", userId))

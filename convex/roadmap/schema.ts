@@ -106,4 +106,17 @@ export const roadmapTables = {
     .index("by_domain", ["domain"])
     .index("by_order", ["order"])
     .index("by_author", ["authorId"]),
+
+  /**
+   * Saved/bookmarked template slugs — one row per user. Lets the
+   * "Skill Saya" tab show a card grid of skills the user has picked
+   * from "Cari Skills" without forcing the single-active-roadmap
+   * model into a multi-doc rewrite. The active progress still lives
+   * in `skillRoadmaps`; switching active is a re-seed (existing
+   * behaviour). The bookmark persists.
+   */
+  roadmapSaved: defineTable({
+    userId: v.id("users"),
+    slugs: v.array(v.string()),
+  }).index("by_user", ["userId"]),
 };
