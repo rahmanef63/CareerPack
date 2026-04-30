@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Database, ChevronDown, ChevronUp,
-  GraduationCap, Code, Loader2,
+  GraduationCap, Code, Loader2, Download, Upload,
 } from "lucide-react";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -95,6 +95,202 @@ const RESOURCE_TYPES = ["video", "article", "course", "book", "practice", "docum
 
 function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+// ---- Export / import shape ----
+
+const EXPORT_FORMAT = "careerpack-roadmap-templates";
+const EXPORT_VERSION = 1;
+
+interface ExportTemplate {
+  title: string;
+  slug: string;
+  domain: string;
+  icon: string;
+  color: string;
+  description: string;
+  tags: string[];
+  nodes: Array<{
+    id: string;
+    title: string;
+    description: string;
+    difficulty: string;
+    estimatedHours: number;
+    prerequisites: string[];
+    parentId?: string;
+    category?: string;
+    tags?: string[];
+    resources: Array<{
+      id: string;
+      title: string;
+      type: string;
+      url: string;
+      free: boolean;
+    }>;
+  }>;
+  isPublic: boolean;
+  isSystem: boolean;
+  order: number;
+  manifest?: Record<string, unknown>;
+  config?: Record<string, unknown>;
+}
+
+interface ExportEnvelope {
+  format: typeof EXPORT_FORMAT;
+  version: number;
+  exportedAt: string;
+  templates: ExportTemplate[];
+}
+
+type LoadedTemplate = {
+  _id: Id<"roadmapTemplates">;
+  title: string;
+  slug: string;
+  domain: string;
+  icon: string;
+  color: string;
+  description: string;
+  tags: string[];
+  nodes: ExportTemplate["nodes"];
+  isPublic: boolean;
+  isSystem: boolean;
+  order: number;
+  manifest?: ExportTemplate["manifest"];
+  config?: ExportTemplate["config"];
+};
+
+function toExport(tpl: LoadedTemplate): ExportTemplate {
+  return {
+    title: tpl.title,
+    slug: tpl.slug,
+    domain: tpl.domain,
+    icon: tpl.icon,
+    color: tpl.color,
+    description: tpl.description,
+    tags: tpl.tags,
+    nodes: tpl.nodes.map((n) => ({
+      id: n.id,
+      title: n.title,
+      description: n.description,
+      difficulty: n.difficulty,
+      estimatedHours: n.estimatedHours,
+      prerequisites: n.prerequisites,
+      ...(n.parentId !== undefined ? { parentId: n.parentId } : {}),
+      ...(n.category !== undefined ? { category: n.category } : {}),
+      ...(n.tags !== undefined ? { tags: n.tags } : {}),
+      resources: n.resources.map((r) => ({ ...r })),
+    })),
+    isPublic: tpl.isPublic,
+    isSystem: tpl.isSystem,
+    order: tpl.order,
+    ...(tpl.manifest ? { manifest: tpl.manifest } : {}),
+    ...(tpl.config ? { config: tpl.config } : {}),
+  };
+}
+
+function downloadJson(filename: string, data: unknown) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
+ * Coerce a parsed JSON payload into an array of importable templates.
+ * Accepts: an export envelope, a raw array, or a single object.
+ * Throws with an Indonesian message when shape is invalid.
+ */
+function parseImportPayload(raw: unknown): ExportTemplate[] {
+  let arr: unknown[];
+  if (Array.isArray(raw)) {
+    arr = raw;
+  } else if (raw && typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    if (Array.isArray(obj.templates)) {
+      arr = obj.templates;
+    } else if (typeof obj.slug === "string" && Array.isArray(obj.nodes)) {
+      arr = [obj];
+    } else {
+      throw new Error("Format JSON tidak dikenali (butuh array, envelope, atau objek tunggal).");
+    }
+  } else {
+    throw new Error("File JSON kosong atau tidak valid.");
+  }
+
+  const out: ExportTemplate[] = [];
+  arr.forEach((item, idx) => {
+    if (!item || typeof item !== "object") {
+      throw new Error(`Entry #${idx + 1}: bukan objek.`);
+    }
+    const t = item as Record<string, unknown>;
+    const must = (k: string, type: string) => {
+      if (typeof t[k] !== type) throw new Error(`Entry #${idx + 1} (${String(t.slug ?? "?")}): "${k}" wajib ${type}.`);
+    };
+    must("title", "string");
+    must("slug", "string");
+    must("domain", "string");
+    must("icon", "string");
+    must("color", "string");
+    must("description", "string");
+    if (!Array.isArray(t.tags)) throw new Error(`Entry #${idx + 1}: "tags" harus array.`);
+    if (!Array.isArray(t.nodes)) throw new Error(`Entry #${idx + 1}: "nodes" harus array.`);
+
+    out.push({
+      title: String(t.title),
+      slug: String(t.slug),
+      domain: String(t.domain),
+      icon: String(t.icon),
+      color: String(t.color),
+      description: String(t.description),
+      tags: (t.tags as unknown[]).map((x) => String(x)),
+      nodes: (t.nodes as unknown[]).map((n, ni) => {
+        if (!n || typeof n !== "object") throw new Error(`Entry #${idx + 1} node #${ni + 1}: bukan objek.`);
+        const node = n as Record<string, unknown>;
+        return {
+          id: String(node.id ?? ""),
+          title: String(node.title ?? ""),
+          description: String(node.description ?? ""),
+          difficulty: String(node.difficulty ?? "beginner"),
+          estimatedHours: Number(node.estimatedHours ?? 0),
+          prerequisites: Array.isArray(node.prerequisites)
+            ? (node.prerequisites as unknown[]).map((x) => String(x))
+            : [],
+          ...(typeof node.parentId === "string" ? { parentId: node.parentId } : {}),
+          ...(typeof node.category === "string" ? { category: node.category } : {}),
+          ...(Array.isArray(node.tags)
+            ? { tags: (node.tags as unknown[]).map((x) => String(x)) }
+            : {}),
+          resources: Array.isArray(node.resources)
+            ? (node.resources as Array<Record<string, unknown>>).map((r) => ({
+                id: String(r.id ?? ""),
+                title: String(r.title ?? ""),
+                type: String(r.type ?? "other"),
+                url: String(r.url ?? ""),
+                free: Boolean(r.free ?? true),
+              }))
+            : [],
+        };
+      }),
+      isPublic: Boolean(t.isPublic ?? true),
+      isSystem: Boolean(t.isSystem ?? false),
+      order: Number(t.order ?? 0),
+      ...(t.manifest && typeof t.manifest === "object"
+        ? { manifest: t.manifest as Record<string, unknown> }
+        : {}),
+      ...(t.config && typeof t.config === "object"
+        ? { config: t.config as Record<string, unknown> }
+        : {}),
+    });
+  });
+
+  return out;
 }
 
 // ---- Node editor sub-component ----
@@ -299,11 +495,16 @@ export function TemplatePanel() {
   const del = useMutation(api.admin.mutations.adminDeleteTemplate);
   const togglePublic = useMutation(api.admin.mutations.adminToggleTemplatePublic);
   const seedDefaults = useMutation(api.admin.mutations.adminSeedDefaultTemplates);
+  const bulkUpsert = useMutation(api.admin.mutations.adminBulkUpsertTemplates);
 
   const [draft, setDraft] = useState<TemplateDraft | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Id<"roadmapTemplates"> | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importDraft, setImportDraft] = useState<ExportTemplate[] | null>(null);
+  const [importOverwrite, setImportOverwrite] = useState(true);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   async function handleSave() {
     if (!draft) return;
@@ -357,6 +558,114 @@ export function TemplatePanel() {
       notify.fromError(err, "Gagal memuat template default");
     } finally {
       setSeeding(false);
+    }
+  }
+
+  function handleExportAll() {
+    if (!templates || templates.length === 0) {
+      notify.error("Tidak ada template untuk diekspor");
+      return;
+    }
+    const envelope: ExportEnvelope = {
+      format: EXPORT_FORMAT,
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      templates: templates.map((t) => toExport(t as unknown as LoadedTemplate)),
+    };
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadJson(`careerpack-templates-${stamp}.json`, envelope);
+    notify.success(`Diekspor ${templates.length} template`);
+  }
+
+  function handleExportOne(tpl: NonNullable<typeof templates>[number]) {
+    const envelope: ExportEnvelope = {
+      format: EXPORT_FORMAT,
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      templates: [toExport(tpl as unknown as LoadedTemplate)],
+    };
+    downloadJson(`template-${tpl.slug}.json`, envelope);
+    notify.success(`Diekspor: ${tpl.title}`);
+  }
+
+  function handleExportDraft() {
+    if (!draft) return;
+    const tpl: ExportTemplate = {
+      title: draft.title,
+      slug: draft.slug,
+      domain: draft.domain,
+      icon: draft.icon,
+      color: draft.color,
+      description: draft.description,
+      tags: draft.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      nodes: draft.nodes.map((n) => ({
+        id: n.id,
+        title: n.title,
+        description: n.description,
+        difficulty: n.difficulty,
+        estimatedHours: typeof n.estimatedHours === "number" ? n.estimatedHours : 0,
+        prerequisites: n.prerequisites,
+        ...(n.parentId !== undefined ? { parentId: n.parentId } : {}),
+        ...(n.category !== undefined ? { category: n.category } : {}),
+        resources: n.resources.map((r) => ({ ...r })),
+      })),
+      isPublic: draft.isPublic,
+      isSystem: draft.isSystem,
+      order: typeof draft.order === "number" ? draft.order : 0,
+    };
+    const envelope: ExportEnvelope = {
+      format: EXPORT_FORMAT,
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      templates: [tpl],
+    };
+    downloadJson(`template-${draft.slug || "draft"}.json`, envelope);
+    notify.success("Draft diekspor");
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const items = parseImportPayload(parsed);
+      if (items.length === 0) {
+        notify.error("File tidak berisi template");
+        return;
+      }
+      setImportDraft(items);
+      setImportOverwrite(true);
+    } catch (err) {
+      notify.fromError(err, "Gagal membaca file JSON");
+    }
+  }
+
+  async function handleConfirmImport() {
+    if (!importDraft) return;
+    setImporting(true);
+    try {
+      const result = await bulkUpsert({
+        templates: importDraft as Parameters<typeof bulkUpsert>[0]["templates"],
+        overwrite: importOverwrite,
+      });
+      const parts = [
+        `${result.inserted} ditambah`,
+        `${result.updated} diperbarui`,
+        `${result.skipped} dilewati`,
+      ];
+      if (result.failed > 0) parts.push(`${result.failed} gagal`);
+      notify.success(`Impor selesai: ${parts.join(", ")}`);
+      if (result.failed > 0 && result.errors.length > 0) {
+        const sample = result.errors.slice(0, 3).map((e) => `${e.slug}: ${e.message}`).join("\n");
+        notify.error("Beberapa template gagal diimpor", { description: sample });
+      }
+      setImportDraft(null);
+    } catch (err) {
+      notify.fromError(err, "Gagal mengimpor template");
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -426,6 +735,32 @@ export function TemplatePanel() {
               </Button>
               <Button
                 size="sm"
+                variant="outline"
+                onClick={handleExportAll}
+                disabled={!templates || templates.length === 0}
+                title="Ekspor semua template ke JSON"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Ekspor JSON
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                title="Impor template dari file JSON"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Impor JSON
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={handleImportFile}
+              />
+              <Button
+                size="sm"
                 onClick={() => setDraft({ ...EMPTY_DRAFT })}
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -485,6 +820,13 @@ export function TemplatePanel() {
                         : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                     </button>
                     <button
+                      onClick={() => handleExportOne(tpl)}
+                      className="p-1.5 rounded hover:bg-muted"
+                      title="Ekspor template ini ke JSON"
+                    >
+                      <Download className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                    <button
                       onClick={() => openEdit(tpl)}
                       className="p-1.5 rounded hover:bg-muted"
                     >
@@ -508,13 +850,26 @@ export function TemplatePanel() {
 
       {/* Template editor sheet */}
       <Sheet open={!!draft} onOpenChange={(o) => !o && setDraft(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col">
-          <SheetHeader className="px-6 pt-6 pb-4 border-b">
-            <SheetTitle>{draft?.id ? "Edit Template" : "Buat Template Baru"}</SheetTitle>
+        <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col h-full">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <SheetTitle>{draft?.id ? "Edit Template" : "Buat Template Baru"}</SheetTitle>
+              {draft && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportDraft}
+                  title="Ekspor draft ke JSON"
+                >
+                  <Download className="w-4 h-4 mr-1.5" />
+                  Ekspor
+                </Button>
+              )}
+            </div>
           </SheetHeader>
 
           {draft && (
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="px-6 py-4 space-y-5">
                 {/* Basic info */}
                 <div className="grid grid-cols-2 gap-4">
@@ -645,7 +1000,7 @@ export function TemplatePanel() {
             </ScrollArea>
           )}
 
-          <div className="px-6 py-4 border-t flex justify-end gap-2">
+          <div className="px-6 py-4 border-t flex justify-end gap-2 shrink-0">
             <Button variant="outline" onClick={() => setDraft(null)}>Batal</Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -654,6 +1009,64 @@ export function TemplatePanel() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Import confirm */}
+      <AlertDialog open={!!importDraft} onOpenChange={(o) => !o && !importing && setImportDraft(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Impor Template?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {importDraft && (
+                <>
+                  File berisi <strong>{importDraft.length}</strong> template.
+                  Slug yang sudah ada akan {importOverwrite ? "ditimpa" : "dilewati"}.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {importDraft && importDraft.length > 0 && (
+            <div className="max-h-48 overflow-y-auto rounded border bg-muted/30 px-3 py-2 text-xs space-y-1">
+              {importDraft.slice(0, 20).map((t) => (
+                <div key={t.slug} className="flex items-center justify-between gap-2">
+                  <span className="font-mono truncate">{t.slug}</span>
+                  <span className="text-muted-foreground truncate">{t.title}</span>
+                  <Badge variant="outline" className="text-[10px] shrink-0">{t.nodes.length} node</Badge>
+                </div>
+              ))}
+              {importDraft.length > 20 && (
+                <p className="text-muted-foreground italic">…dan {importDraft.length - 20} lainnya</p>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-2">
+            <Switch
+              id="import-overwrite"
+              checked={importOverwrite}
+              onCheckedChange={setImportOverwrite}
+              disabled={importing}
+            />
+            <Label htmlFor="import-overwrite" className="cursor-pointer">
+              Timpa template yang sudah ada (cocok untuk perbaiki link rusak)
+            </Label>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={importing}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleConfirmImport();
+              }}
+              disabled={importing}
+            >
+              {importing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Impor
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>

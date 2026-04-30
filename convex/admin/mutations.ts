@@ -3,7 +3,12 @@ import { v } from "convex/values";
 import { requireAdmin } from "../_shared/auth";
 import type { Id } from "../_generated/dataModel";
 import { defaultRoadmapTemplates } from "../_seeds/roadmapTemplates";
-import { templateNodeValidator, VALID_DOMAINS } from "../roadmap/schema";
+import {
+  templateNodeValidator,
+  templateManifestValidator,
+  templateConfigValidator,
+  VALID_DOMAINS,
+} from "../roadmap/schema";
 
 /**
  * Cascade-delete every record owned by `userId`, then the user record
@@ -410,6 +415,96 @@ export const adminToggleTemplatePublic = mutation({
     const tpl = await ctx.db.get(args.id);
     if (!tpl) throw new Error("Template tidak ditemukan");
     await ctx.db.patch(args.id, { isPublic: args.isPublic });
+  },
+});
+
+/**
+ * Bulk import templates from JSON. Mirrors `adminUpsertTemplate` validation
+ * but applies it per-row, collecting failures instead of aborting the whole
+ * batch. Looks up by `slug` (idempotent re-runs). When `overwrite=false`,
+ * existing slugs are skipped; when `overwrite=true`, full payload is patched.
+ *
+ * Caps batch at 200 rows + skips system templates unless explicitly imported
+ * (the import keeps whatever `isSystem` flag is in the JSON — admin's call).
+ */
+export const adminBulkUpsertTemplates = mutation({
+  args: {
+    templates: v.array(v.object({
+      title: v.string(),
+      slug: v.string(),
+      domain: v.string(),
+      icon: v.string(),
+      color: v.string(),
+      description: v.string(),
+      tags: v.array(v.string()),
+      nodes: v.array(templateNodeValidator),
+      isPublic: v.boolean(),
+      isSystem: v.boolean(),
+      order: v.number(),
+      manifest: v.optional(templateManifestValidator),
+      config: v.optional(templateConfigValidator),
+    })),
+    overwrite: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    if (args.templates.length > 200) throw new Error("Maksimal 200 template per impor");
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors: Array<{ slug: string; message: string }> = [];
+
+    for (const raw of args.templates) {
+      try {
+        const slug = raw.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
+        if (!slug || slug.length > 80) throw new Error("Slug 1-80 karakter huruf kecil/angka/tanda hubung");
+        const title = raw.title.trim();
+        if (!title || title.length > 120) throw new Error("Judul 1-120 karakter");
+        if (!VALID_DOMAINS.has(raw.domain)) throw new Error(`Domain "${raw.domain}" tidak valid`);
+        if (raw.nodes.length > 200) throw new Error("Maksimal 200 node per template");
+
+        const payload = {
+          title,
+          slug,
+          domain: raw.domain,
+          icon: raw.icon.trim() || "BookOpen",
+          color: raw.color.trim() || "bg-brand",
+          description: raw.description.trim(),
+          tags: raw.tags.map((t) => t.trim()).filter(Boolean).slice(0, 20),
+          nodes: raw.nodes,
+          isPublic: raw.isPublic,
+          isSystem: raw.isSystem,
+          order: raw.order,
+          ...(raw.manifest ? { manifest: raw.manifest } : {}),
+          ...(raw.config ? { config: raw.config } : {}),
+        };
+
+        const existing = await ctx.db
+          .query("roadmapTemplates")
+          .withIndex("by_slug", (q) => q.eq("slug", slug))
+          .first();
+
+        if (existing) {
+          if (args.overwrite) {
+            await ctx.db.patch(existing._id, payload);
+            updated++;
+          } else {
+            skipped++;
+          }
+        } else {
+          await ctx.db.insert("roadmapTemplates", payload);
+          inserted++;
+        }
+      } catch (err) {
+        errors.push({
+          slug: raw.slug || "(kosong)",
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    return { inserted, updated, skipped, failed: errors.length, errors };
   },
 });
 
