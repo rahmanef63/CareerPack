@@ -20,9 +20,11 @@ import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-hea
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import {
   ResponsiveDialog as Dialog,
   ResponsiveDialogContent as DialogContent,
+  ResponsiveDialogDescription as DialogDescription,
   ResponsiveDialogHeader as DialogHeader,
   ResponsiveDialogTitle as DialogTitle,
 } from '@/shared/components/ui/responsive-dialog';
@@ -324,6 +326,11 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, activeQuestId, 
 export function SkillRoadmap() {
   const [selectedCategory, setSelectedCategory] = useState('frontend');
   const [selectedNode, setSelectedNode] = useState<SimpleRoadmapNode | null>(null);
+  // Default tab follows the user's data — first-timers (no roadmap row
+  // yet) land on the catalog so they see what's available; returning
+  // users land on their own progress.
+  const [activeTab, setActiveTab] = useState<"my" | "browse">("my");
+  const [tabAutoSet, setTabAutoSet] = useState(false);
   const [completedNodes, setCompletedNodes] = useState<Set<string>>(new Set());
   const [domainFilter, setDomainFilter] = useState<string>('all');
 
@@ -377,6 +384,18 @@ export function SkillRoadmap() {
     if (dbTemplate) return buildTreeFromNodes(dbTemplate.nodes);
     return generateFallbackNodes(selectedCategory);
   }, [dbTemplate, selectedCategory]);
+
+  // First-time default: if the query has resolved and the user has no
+  // roadmap row, snap to the Browse tab so they see the catalog first.
+  // Only runs once — after the user toggles tabs we never override.
+  useEffect(() => {
+    if (tabAutoSet) return;
+    if (roadmap === undefined) return;
+    if (!roadmap || roadmap.skills.length === 0) {
+      setActiveTab("browse");
+    }
+    setTabAutoSet(true);
+  }, [roadmap, tabAutoSet]);
 
   // Seed on category change. Wait for DB template query to resolve (undefined = loading)
   // before seeding so we never seed with stale fallback data then re-seed with real data.
@@ -555,27 +574,54 @@ export function SkillRoadmap() {
         description="Jalur pembelajaran terstruktur untuk menguasai skill yang diminati"
       />
 
-      {/* Gamification HUD — RPG-style level/XP/streak/achievements */}
-      {roadmap && (
-        <div className="mb-6">
-          <GamificationPanel stats={gamification} domainLabel={activeCategory?.domain} />
-        </div>
-      )}
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as "my" | "browse")}
+        className="space-y-4"
+      >
+        <TabsList variant="equal" cols={2} className="max-w-md">
+          <TabsTrigger value="my">
+            <Trophy className="w-3.5 h-3.5" />
+            Skill Saya
+          </TabsTrigger>
+          <TabsTrigger value="browse">
+            <Sparkles className="w-3.5 h-3.5" />
+            Cari Skills
+            {browserCategories.length > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1">
+                {browserCategories.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Browser — search, sort, filter, grid/table toggle */}
-      <RoadmapBrowser
-        categories={browserCategories}
-        loading={templatesLoading}
-        selectedId={selectedCategory}
-        onSelect={setSelectedCategory}
-        domainFilter={domainFilter}
-        onDomainFilterChange={setDomainFilter}
-        domainOptions={domains}
-        domainLabels={DOMAIN_LABELS}
-        iconMap={iconMap}
-      />
+        {/* Browse — search, sort, filter, grid/table toggle. Selecting a
+            roadmap auto-jumps back to "Skill Saya" so the user sees the
+            tree they just picked. */}
+        <TabsContent value="browse" className="mt-4">
+          <RoadmapBrowser
+            categories={browserCategories}
+            loading={templatesLoading}
+            selectedId={selectedCategory}
+            onSelect={(id) => {
+              setSelectedCategory(id);
+              setActiveTab("my");
+            }}
+            domainFilter={domainFilter}
+            onDomainFilterChange={setDomainFilter}
+            domainOptions={domains}
+            domainLabels={DOMAIN_LABELS}
+            iconMap={iconMap}
+          />
+        </TabsContent>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+        <TabsContent value="my" className="mt-4 space-y-6">
+          {/* Gamification HUD — RPG-style level/XP/streak/achievements */}
+          {roadmap && (
+            <GamificationPanel stats={gamification} domainLabel={activeCategory?.domain} />
+          )}
+
+          <div className="grid lg:grid-cols-3 gap-8">
         {/* Roadmap tree */}
         <div className="lg:col-span-2">
           <Card className="border-border">
@@ -711,11 +757,13 @@ export function SkillRoadmap() {
             </CardContent>
           </Card>
         </div>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Node Detail Dialog */}
       <Dialog open={!!selectedNode} onOpenChange={() => setSelectedNode(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           {selectedNode && (
             <>
               <DialogHeader>
@@ -732,7 +780,9 @@ export function SkillRoadmap() {
                   </div>
                   <div>
                     <DialogTitle className="text-xl">{selectedNode.title}</DialogTitle>
-                    <p className="text-sm text-muted-foreground">{selectedNode.description}</p>
+                    <DialogDescription className="text-sm text-muted-foreground">
+                      {selectedNode.description || "Detail topik dan sumber belajar."}
+                    </DialogDescription>
                   </div>
                 </div>
               </DialogHeader>
