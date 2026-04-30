@@ -1,5 +1,11 @@
 import type { RoadmapResource as Resource } from "./index";
 
+/**
+ * Tree-renderable roadmap node — what the user-facing renderer walks
+ * recursively (`children` is the resolved subtree). Distinct from the
+ * canonical `TemplateNode` shape (flat with `parentId`) which lives in
+ * `@/shared/types/roadmap` and is shared with the admin editor.
+ */
 export interface SimpleRoadmapNode {
   id: string;
   title: string;
@@ -11,15 +17,4 @@ export interface SimpleRoadmapNode {
   children?: SimpleRoadmapNode[];
 }
 
-export type TemplateNode = {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  estimatedHours: number;
-  prerequisites: string[];
-  parentId?: string;
-  category?: string;
-  tags?: string[];
-  resources: Array<{ id: string; title: string; type: string; url: string; free: boolean }>;
-};
+export type { TemplateNode } from "@/shared/types";

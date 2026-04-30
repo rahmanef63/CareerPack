@@ -1,8 +1,7 @@
+export { ROADMAP_RESOURCE_TYPES as RESOURCE_TYPES } from "@/shared/types";
+
 export const LEVELS = ["beginner", "intermediate", "advanced"] as const;
 export const STATUSES = ["not-started", "in-progress", "completed"] as const;
-export const RESOURCE_TYPES = [
-  "course", "book", "article", "video", "practice", "documentation", "other",
-] as const;
 
 export const LEVEL_LABEL: Record<string, string> = {
   beginner: "Pemula",

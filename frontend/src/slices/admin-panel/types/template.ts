@@ -1,22 +1,17 @@
 import type { Id } from "../../../../../convex/_generated/dataModel";
+import type {
+  TemplateNode as TemplateNodeStrict, TemplateNodeResource,
+} from "@/shared/types";
+export { ROADMAP_RESOURCE_TYPES as RESOURCE_TYPES } from "@/shared/types";
 
-export interface TemplateNode {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: string;
+/**
+ * Form-draft variant of a roadmap template node. Differs from the
+ * canonical (loaded) `TemplateNode` only in `estimatedHours`, which
+ * accepts `""` while the user is editing the numeric input.
+ */
+export type TemplateNode = Omit<TemplateNodeStrict, "estimatedHours"> & {
   estimatedHours: number | "";
-  prerequisites: string[];
-  parentId?: string;
-  category?: string;
-  resources: Array<{
-    id: string;
-    title: string;
-    type: string;
-    url: string;
-    free: boolean;
-  }>;
-}
+};
 
 export interface ManifestDraft {
   version: string;
@@ -95,8 +90,6 @@ export const DIFFICULTY_OPTIONS = [
   { value: "advanced", label: "Lanjutan" },
 ];
 
-export const RESOURCE_TYPES = ["video", "article", "course", "book", "practice", "documentation", "other"];
-
 export const EXPORT_FORMAT = "careerpack-roadmap-templates";
 export const EXPORT_VERSION = 1;
 
@@ -108,24 +101,7 @@ export interface ExportTemplate {
   color: string;
   description: string;
   tags: string[];
-  nodes: Array<{
-    id: string;
-    title: string;
-    description: string;
-    difficulty: string;
-    estimatedHours: number;
-    prerequisites: string[];
-    parentId?: string;
-    category?: string;
-    tags?: string[];
-    resources: Array<{
-      id: string;
-      title: string;
-      type: string;
-      url: string;
-      free: boolean;
-    }>;
-  }>;
+  nodes: TemplateNodeStrict[];
   isPublic: boolean;
   isSystem: boolean;
   order: number;
@@ -149,7 +125,7 @@ export type LoadedTemplate = {
   color: string;
   description: string;
   tags: string[];
-  nodes: ExportTemplate["nodes"];
+  nodes: TemplateNodeStrict[];
   isPublic: boolean;
   isSystem: boolean;
   order: number;
@@ -178,3 +154,5 @@ export interface AuditableTemplate {
     resources: ReadonlyArray<{ title: string; url: string }>;
   }>;
 }
+
+export type { TemplateNodeResource };
