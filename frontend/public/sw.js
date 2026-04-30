@@ -1,14 +1,15 @@
-// CareerPack service worker — minimal, stale-while-revalidate for GET
-// requests. Versioned cache name so new releases evict old assets.
+// CareerPack service worker — stale-while-revalidate for static GETs,
+// network-first for navigations with `/offline` fallback. Versioned
+// cache name evicts old assets on each release.
 //
 // IMPORTANT: bump this string on EVERY release. The activate handler
-// purges any cache whose name doesn't match, so users on the previous
-// bundle automatically pull fresh assets after the SW updates. Keep
-// the suffix in lockstep with deploys; "-vN" or a date hash both work.
+// purges any cache whose name doesn't match. Keep the suffix in lockstep
+// with deploys; "-vN" or a date hash both work.
 
-const CACHE = "careerpack-v22-2026-04-26-pb-export-tabs";
+const CACHE = "careerpack-v23-2026-04-30-pwa-offline";
 const PRECACHE = [
   "/",
+  "/offline",
   "/manifest.webmanifest",
   "/icon.png",
   "/apple-touch-icon.png",
@@ -51,8 +52,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Never cache Next.js data, API, or auth-sensitive endpoints.
   const url = new URL(request.url);
+
+  // Never cache Next.js data, API, or auth-sensitive endpoints. They
+  // must always hit the network so realtime queries / auth tokens stay
+  // fresh.
   if (
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/_next/data/") ||
@@ -61,6 +65,30 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Navigation requests: network-first, falling back to a cached
+  // response, then the precached `/offline` page if neither works. This
+  // keeps the app installable + usable when offline without serving a
+  // stale dashboard to online users.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache successful navigations so the same URL works offline next time.
+          if (response && response.ok && response.type === "basic") {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(request).then((cached) => cached || caches.match("/offline"))
+        ),
+    );
+    return;
+  }
+
+  // Static assets: stale-while-revalidate. Serve from cache instantly,
+  // refresh in the background.
   event.respondWith(
     caches.match(request).then((cached) => {
       const networkFetch = fetch(request)

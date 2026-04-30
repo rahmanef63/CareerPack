@@ -213,9 +213,9 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, activeQuestId, 
   const isBoss = node.difficulty === 'advanced';
 
   return (
-    <div className={cn('relative', level > 0 && 'ml-8 mt-4')}>
+    <div className={cn('relative', level > 0 && 'ml-4 mt-4 sm:ml-8')}>
       {level > 0 && (
-        <div className="absolute -left-6 top-6 w-6 h-px bg-muted" />
+        <div className="absolute -left-3 top-6 h-px w-3 bg-muted sm:-left-6 sm:w-6" />
       )}
 
       {/* Active-quest pulse ring — only on the next-up node */}
@@ -675,7 +675,7 @@ export function SkillRoadmap() {
         onValueChange={(v) => setActiveTab(v as "my" | "browse")}
         className="space-y-4"
       >
-        <TabsList variant="equal" cols={2} className="max-w-md">
+        <TabsList variant="equal" cols={2} className="w-full sm:max-w-md">
           <TabsTrigger value="my">
             <Trophy className="w-3.5 h-3.5" />
             Skill Saya
@@ -756,7 +756,7 @@ export function SkillRoadmap() {
           )}
 
           {activeSlug ? (
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid gap-4 lg:grid-cols-3 lg:gap-8">
         {/* Roadmap tree */}
         <div className="lg:col-span-2">
           <Card className="border-border">
@@ -907,7 +907,7 @@ export function SkillRoadmap() {
 
       {/* Node Detail Dialog */}
       <Dialog open={!!selectedNode} onOpenChange={() => setSelectedNode(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent size="2xl">
           {selectedNode && (
             <>
               <DialogHeader>

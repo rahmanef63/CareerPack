@@ -167,7 +167,7 @@ export function RoadmapBrowser({
   }, [categories, domainFilter, search, activeTags, difficulty, sort]);
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="mb-8 w-full space-y-4">
       {/* Domain tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         {(loading ? [] : domainOptions).map((d) => (

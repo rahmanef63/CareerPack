@@ -9,6 +9,7 @@ import { AIConfigProvider } from "@/shared/hooks/useAIConfig"
 import { UIPrefsProvider } from "@/shared/hooks/useUIPrefs"
 import { ThemeColorSync } from "@/shared/components/pwa/ThemeColorSync"
 import { SWUpdatePrompt } from "@/shared/components/pwa/SWUpdatePrompt"
+import { RegisterSW } from "@/shared/components/pwa/RegisterSW"
 import { ExtensionErrorFilter } from "@/shared/providers/ExtensionErrorFilter"
 import { CommandPalette } from "@/shared/components/command-palette/CommandPalette"
 import { Toaster } from "@/shared/components/ui/sonner"
@@ -27,6 +28,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />
+                <RegisterSW />
                 <SWUpdatePrompt />
                 <Toaster />
               </TooltipProvider>

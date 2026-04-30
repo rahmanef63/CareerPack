@@ -27,7 +27,7 @@ export function MobileContainer({
   const [moreOpen, setMoreOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="flex min-h-svh flex-col bg-background text-foreground supports-[height:100dvh]:min-h-[100dvh]">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
