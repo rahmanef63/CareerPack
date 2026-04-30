@@ -22,6 +22,7 @@ import {
   ShieldAlert,
   Globe,
   Database,
+  Library,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,6 +39,7 @@ export type MoreAppId =
   | "portfolio"
   | "matcher"
   | "personal-branding"
+  | "library"
   | "database"
   | "help"
   | "admin-panel";
@@ -87,6 +89,7 @@ export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
   { id: "matcher", label: "Pencocok Lowongan", icon: Compass, href: "/dashboard/matcher", hue: "from-cyan-400 to-cyan-600", badge: "AI" },
   { id: "networking", label: "Jaringan", icon: Users, href: "/dashboard/networking", hue: "from-rose-400 to-rose-600" },
   { id: "portfolio", label: "Portofolio", icon: Folder, href: "/dashboard/portfolio", hue: "from-orange-400 to-orange-600" },
+  { id: "library", label: "Content Library", icon: Library, href: "/dashboard/library", hue: "from-lime-400 to-lime-600" },
   { id: "personal-branding", label: "Personal Branding", icon: Globe, href: "/dashboard/personal-branding", hue: "from-fuchsia-400 to-fuchsia-600" },
   { id: "database", label: "Database", icon: Database, href: "/dashboard/database", hue: "from-indigo-400 to-indigo-600" },
   { id: "notifications", label: "Notifikasi", icon: Bell, href: "/dashboard/notifications", hue: "from-yellow-400 to-yellow-600" },

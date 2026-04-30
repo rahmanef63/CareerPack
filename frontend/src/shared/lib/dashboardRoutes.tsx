@@ -78,6 +78,10 @@ const PERSONAL_BRANDING: View = dynamic(
   () => import("@/slices/personal-branding").then((m) => m.PersonalBrandingView),
   { loading: loadingFallback }
 );
+const LIBRARY: View = dynamic(
+  () => import("@/slices/library").then((m) => m.LibraryView),
+  { loading: loadingFallback }
+);
 const DATABASE: View = dynamic(
   () => import("@/slices/database").then((m) => m.DatabaseView),
   { loading: loadingFallback }
@@ -110,6 +114,7 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
   "admin-panel": ADMIN_PANEL,
   "personal-branding": PERSONAL_BRANDING,
   database: DATABASE,
+  library: LIBRARY,
 };
 
 export type DashboardSlug = keyof typeof DASHBOARD_VIEWS;

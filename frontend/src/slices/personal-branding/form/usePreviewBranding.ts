@@ -76,8 +76,18 @@ export function usePreviewBranding(state: FormState):
       technologies: p.technologies ?? [],
       link: p.link ?? "",
     }));
+    // Filter portfolio by per-item brandingShow:
+    //   undefined → follow global state.portfolioShow
+    //   true      → always shown (overrides global off)
+    //   false     → never shown (overrides global on)
+    const visiblePortfolio = (portfolio ?? []).filter((p) => {
+      const flag = (p as { brandingShow?: boolean }).brandingShow;
+      if (flag === true) return true;
+      if (flag === false) return false;
+      return state.portfolioShow;
+    });
     const projects: BrandingPayload["projects"] = [
-      ...(state.portfolioShow ? portfolio ?? [] : []).map((p) => ({
+      ...visiblePortfolio.map((p) => ({
         id: p._id as unknown as string,
         title: p.title,
         description: p.description,

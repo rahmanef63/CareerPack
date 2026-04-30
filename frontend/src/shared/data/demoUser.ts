@@ -269,7 +269,9 @@ export interface DemoPortfolioSeed {
   id: string;
   title: string;
   description: string;
-  category: "project" | "certification" | "publication";
+  /** Aligns with the expanded `PortfolioCategory` whitelist; demo data
+   *  uses the legacy three but seeds may broaden over time. */
+  category: string;
   link?: string;
   techStack: string[];
   /** Days from "now" — usually negative (in the past). */

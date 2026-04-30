@@ -10,6 +10,10 @@ export const filesTables = {
     uploadedBy: v.id("users"),
     tenantId: v.string(),
     createdAt: v.number(),
+    // Content Library metadata. Both optional — old rows have neither
+    // and the library page treats absent as untagged / no note.
+    tags: v.optional(v.array(v.string())),
+    note: v.optional(v.string()),
   })
     .index("by_tenant", ["tenantId"])
     .index("by_user", ["uploadedBy"])

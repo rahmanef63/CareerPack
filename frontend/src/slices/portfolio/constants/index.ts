@@ -1,9 +1,58 @@
-import type { PortfolioCategory, PortfolioFormValues } from "../types";
+import type {
+  PortfolioCategory,
+  PortfolioFormValues,
+  PortfolioLinkKind,
+} from "../types";
 
+/**
+ * Category labels — order drives tab order in the UI. Legacy three
+ * stay first; expanded set covers IT, design, writing, music, etc.
+ */
 export const CATEGORY_LABELS: Record<PortfolioCategory, string> = {
   project: "Proyek",
+  design: "Desain",
+  writing: "Tulisan",
   certification: "Sertifikasi",
   publication: "Publikasi",
+  speaking: "Public Speaking",
+  award: "Penghargaan",
+  openSource: "Open Source",
+  volunteer: "Volunteer",
+  music: "Musik",
+  photography: "Fotografi",
+  video: "Video",
+  research: "Riset",
+  teaching: "Pengajaran",
+  other: "Lainnya",
+};
+
+export const CATEGORY_EMOJI_DEFAULT: Record<PortfolioCategory, string> = {
+  project: "🚀",
+  design: "🎨",
+  writing: "✍️",
+  certification: "🏅",
+  publication: "📚",
+  speaking: "🎤",
+  award: "🏆",
+  openSource: "🌱",
+  volunteer: "🤝",
+  music: "🎵",
+  photography: "📸",
+  video: "🎬",
+  research: "🔬",
+  teaching: "🧑‍🏫",
+  other: "📁",
+};
+
+export const LINK_KIND_LABELS: Record<PortfolioLinkKind, string> = {
+  live: "Live",
+  repo: "Repo",
+  "case-study": "Studi Kasus",
+  slides: "Slide",
+  video: "Video",
+  article: "Artikel",
+  store: "Store",
+  other: "Lainnya",
 };
 
 export const COVER_GRADIENTS: ReadonlyArray<{ value: string; label: string }> =
@@ -21,6 +70,7 @@ export const COVER_GRADIENTS: ReadonlyArray<{ value: string; label: string }> =
 export const EMOJI_SUGGESTIONS: ReadonlyArray<string> = [
   "💻", "🚀", "🎨", "📱", "🤖", "🧠", "📊", "🛠️", "📚", "🎯",
   "🏆", "📝", "🔬", "🎬", "🎧", "🧬", "🌐", "⚡", "🎮", "📸",
+  "✍️", "🎤", "🌱", "🤝", "🎵", "🧑‍🏫", "🏅", "🏷️",
 ];
 
 export const DEFAULT_FORM: PortfolioFormValues = {
@@ -29,8 +79,17 @@ export const DEFAULT_FORM: PortfolioFormValues = {
   category: "project",
   coverEmoji: "🚀",
   coverGradient: "from-cyan-400 to-cyan-600",
+  media: [],
   link: "",
+  links: [],
   techStack: [],
   date: new Date().toISOString().slice(0, 10),
   featured: false,
+  role: "",
+  client: "",
+  duration: "",
+  outcomes: [],
+  collaborators: [],
+  skills: [],
+  brandingShow: undefined,
 };

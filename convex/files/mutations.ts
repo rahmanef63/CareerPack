@@ -84,6 +84,47 @@ export const saveFile = mutation({
   },
 });
 
+/**
+ * Library metadata patch — tags + note. The owner check uses the
+ * existing tenant gating; non-owners get the same "not found" error
+ * as elsewhere to avoid leaking existence.
+ */
+export const updateFileMetadata = mutation({
+  args: {
+    fileId: v.id("files"),
+    tags: v.optional(v.array(v.string())),
+    note: v.optional(v.string()),
+    fileName: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const file = await ctx.db.get(args.fileId);
+    if (!file || file.tenantId !== userId.toString()) {
+      throw new Error("File tidak ditemukan");
+    }
+    const patch: Record<string, unknown> = {};
+    if (args.tags !== undefined) {
+      const cleaned = Array.from(
+        new Set(
+          args.tags
+            .map((t) => t.trim().toLowerCase())
+            .filter((t) => t.length > 0 && t.length <= 30),
+        ),
+      ).slice(0, 20);
+      patch.tags = cleaned;
+    }
+    if (args.note !== undefined) {
+      const trimmed = args.note.trim();
+      patch.note = trimmed.length > 0 ? trimmed.slice(0, 500) : undefined;
+    }
+    if (args.fileName !== undefined) {
+      const trimmed = trimLen("Nama file", args.fileName, MAX_FILENAME_LEN);
+      patch.fileName = trimmed;
+    }
+    await ctx.db.patch(args.fileId, patch);
+  },
+});
+
 export const deleteFile = mutation({
   args: {
     fileId: v.optional(v.id("files")),

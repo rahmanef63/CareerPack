@@ -244,13 +244,22 @@ export const getBySlug = query({
       coverGradient: string | null;
       coverUrl: string | null;
     }> = [];
-    if (profile.publicPortfolioShow) {
+    {
       const items = await ctx.db
         .query("portfolioItems")
         .withIndex("by_user", (q) => q.eq("userId", profile.userId))
         .collect();
+      // Per-item brandingShow overrides the global publicPortfolioShow:
+      //   undefined → follow global toggle
+      //   true      → always show (curate even when global off)
+      //   false     → never show
+      const visible = items.filter((item) => {
+        if (item.brandingShow === true) return true;
+        if (item.brandingShow === false) return false;
+        return profile.publicPortfolioShow ?? false;
+      });
       portfolio = await Promise.all(
-        items.map(async (item) => ({
+        visible.map(async (item) => ({
           id: item._id,
           title: item.title,
           description: item.description,
@@ -294,8 +303,14 @@ export const getBySlug = query({
         .query("portfolioItems")
         .withIndex("by_user", (q) => q.eq("userId", profile.userId))
         .collect();
+      // Same per-item visibility rule as the explicit-portfolio path.
+      const visiblePortfolio = portfolioRows.filter((p) => {
+        if (p.brandingShow === true) return true;
+        if (p.brandingShow === false) return false;
+        return profile.publicPortfolioShow ?? false;
+      });
       const portfolioWithUrl: AutoPortfolioItem[] = await Promise.all(
-        portfolioRows.map(async (p) => ({
+        visiblePortfolio.map(async (p) => ({
           id: p._id,
           title: p.title,
           description: p.description,
