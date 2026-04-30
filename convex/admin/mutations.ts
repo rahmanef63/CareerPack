@@ -1,98 +1,18 @@
-import { mutation, type MutationCtx } from "../_generated/server";
+import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "../_shared/auth";
-import type { Id } from "../_generated/dataModel";
 import { defaultRoadmapTemplates } from "../_seeds/roadmapTemplates";
+import { cascadeDeleteUser } from "./lib/cascadeDelete";
+import { ensureNotLastAdmin, applyRoleChange } from "./lib/userOps";
 import {
-  templateNodeValidator,
-  templateManifestValidator,
-  templateConfigValidator,
-  VALID_DOMAINS,
-} from "../roadmap/schema";
+  normalizeSkillInput, recalcProgress, mergeSkill, skillInputValidator,
+} from "./lib/skillOps";
+import {
+  validateTemplateMeta, templateInputFields,
+} from "./lib/templateOps";
 
-/**
- * Cascade-delete every record owned by `userId`, then the user record
- * itself + auth artefacts. See docs/auth.md for the full delete contract.
- *
- * `roleAuditLogs` and `feedback` are intentionally NOT cascaded — both
- * survive user deletion so historical context stays reviewable.
- */
-export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
-  const owned = [
-    "userProfiles",
-    "jobApplications",
-    "cvs",
-    "skillRoadmaps",
-    "documentChecklists",
-    "mockInterviews",
-    "financialPlans",
-    "careerGoals",
-    "notifications",
-    "chatConversations",
-    "calendarEvents",
-    "portfolioItems",
-    "contacts",
-    "budgetVariables",
-    "aiSettings",
-    "atsScans",
-    "quickFillBatches",
-  ] as const;
-
-  for (const table of owned) {
-    const rows = await ctx.db
-      .query(table)
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
-    for (const r of rows) await ctx.db.delete(r._id);
-  }
-
-  const userFiles = await ctx.db
-    .query("files")
-    .withIndex("by_user", (q) => q.eq("uploadedBy", userId))
-    .collect();
-  for (const f of userFiles) {
-    try {
-      await ctx.storage.delete(f.storageId);
-    } catch {
-      /* blob may already be gone */
-    }
-    await ctx.db.delete(f._id);
-  }
-
-  const authSessions = await ctx.db
-    .query("authSessions")
-    .withIndex("userId", (q) => q.eq("userId", userId))
-    .collect();
-  for (const s of authSessions) {
-    const refreshTokens = await ctx.db
-      .query("authRefreshTokens")
-      .withIndex("sessionId", (q) => q.eq("sessionId", s._id))
-      .collect();
-    for (const r of refreshTokens) await ctx.db.delete(r._id);
-    await ctx.db.delete(s._id);
-  }
-
-  const authAccounts = await ctx.db
-    .query("authAccounts")
-    .withIndex("userIdAndProvider", (q) => q.eq("userId", userId))
-    .collect();
-  for (const a of authAccounts) {
-    const codes = await ctx.db
-      .query("authVerificationCodes")
-      .withIndex("accountId", (q) => q.eq("accountId", a._id))
-      .collect();
-    for (const c of codes) await ctx.db.delete(c._id);
-    await ctx.db.delete(a._id);
-  }
-
-  const resets = await ctx.db
-    .query("passwordResetTokens")
-    .filter((q) => q.eq(q.field("userId"), userId))
-    .collect();
-  for (const t of resets) await ctx.db.delete(t._id);
-
-  await ctx.db.delete(userId);
-}
+/** Re-exported so admin/cleanup.ts can keep its existing import. */
+export { cascadeDeleteUser };
 
 export const updateUserRole = mutation({
   args: {
@@ -105,59 +25,13 @@ export const updateUserRole = mutation({
   },
   handler: async (ctx, args) => {
     const callerId = await requireAdmin(ctx);
-
-    if (callerId === args.userId && args.role !== "admin") {
-      const adminProfiles = await ctx.db
-        .query("userProfiles")
-        .withIndex("by_role", (q) => q.eq("role", "admin"))
-        .collect();
-      const otherAdmins = adminProfiles.filter(
-        (p) => p.userId !== callerId,
+    if (args.role !== "admin") {
+      await ensureNotLastAdmin(
+        ctx, callerId, [args.userId],
+        "Tidak bisa menurunkan peran Anda sendiri: Anda satu-satunya admin. Tetapkan admin lain dulu.",
       );
-      if (otherAdmins.length === 0) {
-        throw new Error(
-          "Tidak bisa menurunkan peran Anda sendiri: Anda satu-satunya admin. Tetapkan admin lain dulu.",
-        );
-      }
     }
-
-    const targetUser = await ctx.db.get(args.userId);
-    if (!targetUser) throw new Error("Pengguna tidak ditemukan");
-
-    const profile = await ctx.db
-      .query("userProfiles")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .first();
-
-    const previousRole = (profile?.role ?? "user") as "admin" | "moderator" | "user";
-
-    if (profile) {
-      await ctx.db.patch(profile._id, { role: args.role });
-    } else {
-      const targetName =
-        (targetUser as { name?: string; email?: string }).name ??
-        (targetUser as { email?: string }).email ??
-        "Pengguna";
-
-      await ctx.db.insert("userProfiles", {
-        userId: args.userId,
-        fullName: targetName,
-        location: "",
-        targetRole: "",
-        experienceLevel: "",
-        role: args.role,
-      });
-    }
-
-    if (previousRole !== args.role) {
-      await ctx.db.insert("roleAuditLogs", {
-        actorUserId: callerId,
-        targetUserId: args.userId,
-        previousRole,
-        newRole: args.role,
-        timestamp: Date.now(),
-      });
-    }
+    await applyRoleChange(ctx, callerId, args.userId, args.role);
   },
 });
 
@@ -165,20 +39,10 @@ export const deleteUser = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const callerId = await requireAdmin(ctx);
-    if (callerId === args.userId) {
-      const adminProfiles = await ctx.db
-        .query("userProfiles")
-        .withIndex("by_role", (q) => q.eq("role", "admin"))
-        .collect();
-      const otherAdmins = adminProfiles.filter(
-        (p) => p.userId !== callerId,
-      );
-      if (otherAdmins.length === 0) {
-        throw new Error(
-          "Tidak bisa menghapus akun Anda sendiri: Anda satu-satunya admin.",
-        );
-      }
-    }
+    await ensureNotLastAdmin(
+      ctx, callerId, [args.userId],
+      "Tidak bisa menghapus akun Anda sendiri: Anda satu-satunya admin.",
+    );
     await cascadeDeleteUser(ctx, args.userId);
     return { ok: true as const };
   },
@@ -189,20 +53,10 @@ export const bulkDeleteUsers = mutation({
   handler: async (ctx, args) => {
     const callerId = await requireAdmin(ctx);
     const ids = args.userIds.slice(0, 100);
-    if (ids.includes(callerId)) {
-      const adminProfiles = await ctx.db
-        .query("userProfiles")
-        .withIndex("by_role", (q) => q.eq("role", "admin"))
-        .collect();
-      const otherAdmins = adminProfiles.filter(
-        (p) => p.userId !== callerId,
-      );
-      if (otherAdmins.length === 0) {
-        throw new Error(
-          "Pilihan termasuk akun Anda dan Anda satu-satunya admin. Hapus diri sendiri tidak diizinkan.",
-        );
-      }
-    }
+    await ensureNotLastAdmin(
+      ctx, callerId, ids,
+      "Pilihan termasuk akun Anda dan Anda satu-satunya admin. Hapus diri sendiri tidak diizinkan.",
+    );
     let deleted = 0;
     for (const id of ids) {
       await cascadeDeleteUser(ctx, id);
@@ -213,18 +67,6 @@ export const bulkDeleteUsers = mutation({
 });
 
 // ---- Roadmap admin CRUD ----
-
-const LEVEL_WL = new Set(["beginner", "intermediate", "advanced"]);
-const STATUS_WL = new Set(["not-started", "in-progress", "completed"]);
-const RES_TYPE_WL = new Set([
-  "course", "book", "article", "video", "practice", "documentation", "other",
-]);
-
-function recalcProgress(skills: Array<{ status: string }>): number {
-  if (!skills.length) return 0;
-  const done = skills.filter((s) => s.status === "completed").length;
-  return Math.round((done / skills.length) * 100);
-}
 
 export const adminDeleteRoadmap = mutation({
   args: { roadmapId: v.id("skillRoadmaps") },
@@ -251,70 +93,15 @@ export const adminUpdateCareerPath = mutation({
 export const adminUpsertSkill = mutation({
   args: {
     roadmapId: v.id("skillRoadmaps"),
-    skill: v.object({
-      id: v.string(),
-      name: v.string(),
-      category: v.string(),
-      level: v.string(),
-      priority: v.number(),
-      estimatedHours: v.number(),
-      prerequisites: v.array(v.string()),
-      status: v.string(),
-      resources: v.array(v.object({
-        type: v.string(),
-        title: v.string(),
-        url: v.string(),
-        completed: v.boolean(),
-      })),
-    }),
+    skill: skillInputValidator,
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const { skill } = args;
-
-    const name = skill.name.trim();
-    if (!name || name.length > 200) throw new Error("Nama skill 1-200 karakter");
-    const category = skill.category.trim();
-    if (!category || category.length > 60) throw new Error("Kategori 1-60 karakter");
-    if (!LEVEL_WL.has(skill.level)) throw new Error("Level tidak valid");
-    if (!STATUS_WL.has(skill.status)) throw new Error("Status tidak valid");
-    if (!Number.isFinite(skill.estimatedHours) || skill.estimatedHours < 0) {
-      throw new Error("Estimasi jam harus >= 0");
-    }
-    if (skill.resources.length > 20) throw new Error("Resources maksimal 20");
-    for (const r of skill.resources) {
-      if (!RES_TYPE_WL.has(r.type)) throw new Error("Tipe resource tidak valid");
-    }
-
+    const normalized = normalizeSkillInput(args.skill);
     const roadmap = await ctx.db.get(args.roadmapId);
     if (!roadmap) throw new Error("Roadmap tidak ditemukan");
 
-    const now = Date.now();
-    const normalized = { ...skill, name, category };
-    const existing = roadmap.skills.find((s) => s.id === skill.id);
-
-    let updatedSkills;
-    if (existing) {
-      updatedSkills = roadmap.skills.map((s) => {
-        if (s.id !== skill.id) return s;
-        return {
-          ...normalized,
-          completedAt:
-            skill.status === "completed"
-              ? (s.completedAt ?? now)
-              : undefined,
-        };
-      });
-    } else {
-      updatedSkills = [
-        ...roadmap.skills,
-        {
-          ...normalized,
-          completedAt: skill.status === "completed" ? now : undefined,
-        },
-      ];
-    }
-
+    const updatedSkills = mergeSkill(roadmap.skills, normalized, Date.now());
     await ctx.db.patch(args.roadmapId, {
       skills: updatedSkills,
       progress: recalcProgress(updatedSkills),
@@ -343,38 +130,15 @@ export const adminRemoveSkill = mutation({
 export const adminUpsertTemplate = mutation({
   args: {
     id: v.optional(v.id("roadmapTemplates")),
-    title: v.string(),
-    slug: v.string(),
-    domain: v.string(),
-    icon: v.string(),
-    color: v.string(),
-    description: v.string(),
-    tags: v.array(v.string()),
-    nodes: v.array(templateNodeValidator),
-    isPublic: v.boolean(),
-    isSystem: v.boolean(),
-    order: v.number(),
-    manifest: v.optional(templateManifestValidator),
-    config: v.optional(templateConfigValidator),
+    ...templateInputFields,
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-
-    const slug = args.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
-    if (!slug || slug.length > 80) throw new Error("Slug 1-80 karakter huruf kecil/angka/tanda hubung");
-    const title = args.title.trim();
-    if (!title || title.length > 120) throw new Error("Judul 1-120 karakter");
-    if (!VALID_DOMAINS.has(args.domain)) throw new Error("Domain tidak valid");
-    if (args.nodes.length > 200) throw new Error("Maksimal 200 node per template");
+    const meta = validateTemplateMeta(args);
 
     const payload = {
-      title,
-      slug,
+      ...meta,
       domain: args.domain,
-      icon: args.icon.trim() || "BookOpen",
-      color: args.color.trim() || "bg-brand",
-      description: args.description.trim(),
-      tags: args.tags.map((t) => t.trim()).filter(Boolean).slice(0, 20),
       nodes: args.nodes,
       isPublic: args.isPublic,
       isSystem: args.isSystem,
@@ -390,12 +154,11 @@ export const adminUpsertTemplate = mutation({
       return args.id;
     }
 
-    // Check slug uniqueness
     const dup = await ctx.db
       .query("roadmapTemplates")
-      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .withIndex("by_slug", (q) => q.eq("slug", meta.slug))
       .first();
-    if (dup) throw new Error(`Slug "${slug}" sudah dipakai`);
+    if (dup) throw new Error(`Slug "${meta.slug}" sudah dipakai`);
 
     return ctx.db.insert("roadmapTemplates", payload);
   },
@@ -427,27 +190,10 @@ export const adminToggleTemplatePublic = mutation({
  * but applies it per-row, collecting failures instead of aborting the whole
  * batch. Looks up by `slug` (idempotent re-runs). When `overwrite=false`,
  * existing slugs are skipped; when `overwrite=true`, full payload is patched.
- *
- * Caps batch at 200 rows + skips system templates unless explicitly imported
- * (the import keeps whatever `isSystem` flag is in the JSON — admin's call).
  */
 export const adminBulkUpsertTemplates = mutation({
   args: {
-    templates: v.array(v.object({
-      title: v.string(),
-      slug: v.string(),
-      domain: v.string(),
-      icon: v.string(),
-      color: v.string(),
-      description: v.string(),
-      tags: v.array(v.string()),
-      nodes: v.array(templateNodeValidator),
-      isPublic: v.boolean(),
-      isSystem: v.boolean(),
-      order: v.number(),
-      manifest: v.optional(templateManifestValidator),
-      config: v.optional(templateConfigValidator),
-    })),
+    templates: v.array(v.object(templateInputFields)),
     overwrite: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -461,21 +207,10 @@ export const adminBulkUpsertTemplates = mutation({
 
     for (const raw of args.templates) {
       try {
-        const slug = raw.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-");
-        if (!slug || slug.length > 80) throw new Error("Slug 1-80 karakter huruf kecil/angka/tanda hubung");
-        const title = raw.title.trim();
-        if (!title || title.length > 120) throw new Error("Judul 1-120 karakter");
-        if (!VALID_DOMAINS.has(raw.domain)) throw new Error(`Domain "${raw.domain}" tidak valid`);
-        if (raw.nodes.length > 200) throw new Error("Maksimal 200 node per template");
-
+        const meta = validateTemplateMeta(raw);
         const payload = {
-          title,
-          slug,
+          ...meta,
           domain: raw.domain,
-          icon: raw.icon.trim() || "BookOpen",
-          color: raw.color.trim() || "bg-brand",
-          description: raw.description.trim(),
-          tags: raw.tags.map((t) => t.trim()).filter(Boolean).slice(0, 20),
           nodes: raw.nodes,
           isPublic: raw.isPublic,
           isSystem: raw.isSystem,
@@ -486,7 +221,7 @@ export const adminBulkUpsertTemplates = mutation({
 
         const existing = await ctx.db
           .query("roadmapTemplates")
-          .withIndex("by_slug", (q) => q.eq("slug", slug))
+          .withIndex("by_slug", (q) => q.eq("slug", meta.slug))
           .first();
 
         if (existing) {
