@@ -2139,14 +2139,16 @@
         +   (p.description ? '<p>' + escHtml(p.description) + '</p>' : '')
         + '</div></article>';
     }
+    const casesMount = $('#casesMount');
+    const deckMount = $('#deckMount');
     if (cp && cp.has && cp.has.projects && cp.projects.length) {
-      $('#casesMount').innerHTML = cp.projects.map(caseHTMLFromCP).join('');
-      $('#deckMount').innerHTML = cp.projects.map(deckHTMLFromCP).join('');
+      if (casesMount) casesMount.innerHTML = cp.projects.map(caseHTMLFromCP).join('');
+      if (deckMount) deckMount.innerHTML = cp.projects.map(deckHTMLFromCP).join('');
     } else {
       const caseHTML = ([cat, t, p, img], i) =>
         `<article class="case project-card"><div class="case-img"><img loading="lazy" src="${img}" alt="Project ${i + 1} placeholder"/></div><div class="case-body"><p class="case-kicker">${cat}</p><h3>${t}</h3><div class="tags"><span class="tag">Metric 01</span><span class="tag">Metric 02</span></div><p>${p}</p><a class="text-link" href="#contact">View Project <span>→</span></a></div></article>`;
-      $('#casesMount').innerHTML = data.cases.map(caseHTML).join('');
-      $('#deckMount').innerHTML = data.cases.map(([cat, t, p, img], i) =>
+      if (casesMount) casesMount.innerHTML = data.cases.map(caseHTML).join('');
+      if (deckMount) deckMount.innerHTML = data.cases.map(([cat, t, p, img], i) =>
         `<article class="deck-card project-card"><img loading="lazy" src="${img}" alt="Project ${i + 1} placeholder"/><div class="deck-body"><p class="case-kicker">${cat}</p><h3>${t}</h3><div class="tags"><span class="tag">Metric 01</span><span class="tag">Metric 02</span></div><p>${p}</p></div></article>`
       ).join('');
     }

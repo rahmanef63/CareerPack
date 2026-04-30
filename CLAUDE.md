@@ -154,3 +154,5 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 - [docs/development.md](./docs/development.md) — env matrix, dev-loop options (self-hosted Docker vs Convex cloud)
 - [docs/db-backup.md](./docs/db-backup.md) — Convex volume backup plan (two-layer on-VPS recipe, TBD)
 - [docs/features/](./docs/features/) — per-slice deep dives (one file per slice)
+- [.claude/skills/slice-refactor/SKILL.md](./.claude/skills/slice-refactor/SKILL.md) — file-length thresholds, canonical slice layout (flat vs complex-slice variant), refactor protocol, DRY rules, iframe-template caveats
+- [.claude/skills/slice-new/SKILL.md](./.claude/skills/slice-new/SKILL.md) — scaffolding a fresh slice + dual SSOT registration
