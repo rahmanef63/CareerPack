@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Database, ChevronDown, ChevronUp,
-  GraduationCap, Loader2, Download, Upload,
+  GraduationCap, Loader2, Download, Upload, Copy, Link2,
 } from "lucide-react";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -26,6 +26,8 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { DataTable } from "@/shared/components/data-table";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { notify } from "@/shared/lib/notify";
@@ -52,6 +54,21 @@ interface TemplateNode {
   }>;
 }
 
+interface ManifestDraft {
+  version: string;
+  license: string;
+  language: string;
+  outcomes: string;        // comma-separated
+  prerequisites: string;   // comma-separated
+  targetAudience: string;
+}
+
+interface ConfigDraft {
+  xpPerHour: number | "";
+  theme: string;
+  questFlavor: string;
+}
+
 interface TemplateDraft {
   id?: Id<"roadmapTemplates">;
   title: string;
@@ -65,13 +82,34 @@ interface TemplateDraft {
   isPublic: boolean;
   isSystem: boolean;
   order: number | "";
+  manifest: ManifestDraft;
+  config: ConfigDraft;
 }
+
+const EMPTY_MANIFEST: ManifestDraft = {
+  version: "", license: "", language: "id",
+  outcomes: "", prerequisites: "", targetAudience: "",
+};
+
+const EMPTY_CONFIG: ConfigDraft = {
+  xpPerHour: "", theme: "", questFlavor: "",
+};
 
 const EMPTY_DRAFT: TemplateDraft = {
   title: "", slug: "", domain: "tech", icon: "BookOpen",
   color: "bg-blue-500", description: "", tags: "",
   nodes: [], isPublic: true, isSystem: false, order: "",
+  manifest: { ...EMPTY_MANIFEST },
+  config: { ...EMPTY_CONFIG },
 };
+
+const THEME_OPTIONS = [
+  { value: "__none__", label: "(default)" },
+  { value: "warrior", label: "Warrior — agresif, prajurit" },
+  { value: "scholar", label: "Scholar — analitis, akademisi" },
+  { value: "explorer", label: "Explorer — penjelajah, kreatif" },
+  { value: "artisan", label: "Artisan — pengrajin, detail-oriented" },
+];
 
 const DOMAIN_OPTIONS = [
   { value: "tech", label: "Teknologi" },
@@ -160,6 +198,153 @@ type LoadedTemplate = {
   manifest?: ExportTemplate["manifest"];
   config?: ExportTemplate["config"];
 };
+
+/**
+ * Manifest/config defensive parsers — accept the loose `Record<string,
+ * unknown>` shape we use in export JSON and project it onto the form
+ * draft. Missing fields fall back to empty strings; arrays become
+ * comma-joined strings for textarea editing.
+ */
+// ---- Link audit ----
+
+interface LinkIssue {
+  templateId: string;
+  templateSlug: string;
+  templateTitle: string;
+  nodeId: string;
+  nodeTitle: string;
+  resourceTitle: string;
+  url: string;
+  reason: string;
+}
+
+interface AuditableTemplate {
+  _id: string;
+  slug: string;
+  title: string;
+  nodes: ReadonlyArray<{
+    id: string;
+    title: string;
+    resources: ReadonlyArray<{ title: string; url: string }>;
+  }>;
+}
+
+/**
+ * Heuristic URL checker — runs entirely client-side, no network calls.
+ * Catches the common rot patterns the seed JSON accumulated:
+ * placehold.co stubs, missing protocols, plain http, malformed URLs,
+ * whitespace, in-node duplicates. Returns a flat report so the UI can
+ * render a table + CSV export.
+ */
+function auditLinks(templates: ReadonlyArray<AuditableTemplate>): LinkIssue[] {
+  const issues: LinkIssue[] = [];
+  for (const t of templates) {
+    for (const node of t.nodes) {
+      const seen = new Map<string, number>();
+      for (const r of node.resources) {
+        const url = r.url ?? "";
+        const reasons: string[] = [];
+        if (!url.trim()) {
+          reasons.push("URL kosong");
+        } else {
+          if (url !== url.trim()) reasons.push("ada spasi di awal/akhir");
+          const trimmed = url.trim();
+          if (/placehold\.co|placehold\.it|placeholder\.com/i.test(trimmed)) {
+            reasons.push("placeholder URL");
+          }
+          if (!/^https?:\/\//i.test(trimmed)) {
+            reasons.push("tanpa protokol http/https");
+          } else if (trimmed.startsWith("http://")) {
+            reasons.push("insecure (http, bukan https)");
+          }
+          try {
+            void new URL(trimmed);
+          } catch {
+            reasons.push("URL tidak valid");
+          }
+          const lower = trimmed.toLowerCase();
+          const prev = seen.get(lower);
+          seen.set(lower, (prev ?? 0) + 1);
+          if (prev !== undefined) reasons.push("duplikat di node ini");
+        }
+        if (reasons.length > 0) {
+          issues.push({
+            templateId: t._id,
+            templateSlug: t.slug,
+            templateTitle: t.title,
+            nodeId: node.id,
+            nodeTitle: node.title,
+            resourceTitle: r.title || "(tanpa judul)",
+            url,
+            reason: reasons.join("; "),
+          });
+        }
+      }
+    }
+  }
+  return issues;
+}
+
+function issuesToCsv(issues: LinkIssue[]): string {
+  const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
+  const header = ["template", "slug", "node", "resource", "url", "issue"].join(",");
+  const lines = issues.map((i) =>
+    [i.templateTitle, i.templateSlug, `${i.nodeId}: ${i.nodeTitle}`, i.resourceTitle, i.url, i.reason]
+      .map(esc)
+      .join(","),
+  );
+  return [header, ...lines].join("\n");
+}
+
+function manifestFromDoc(raw: unknown): ManifestDraft {
+  if (!raw || typeof raw !== "object") return { ...EMPTY_MANIFEST };
+  const m = raw as Record<string, unknown>;
+  const arr = (v: unknown): string =>
+    Array.isArray(v) ? v.map((x) => String(x)).filter(Boolean).join(", ") : "";
+  return {
+    version: typeof m.version === "string" ? m.version : "",
+    license: typeof m.license === "string" ? m.license : "",
+    language: typeof m.language === "string" ? m.language : "id",
+    outcomes: arr(m.outcomes),
+    prerequisites: arr(m.prerequisites),
+    targetAudience: typeof m.targetAudience === "string" ? m.targetAudience : "",
+  };
+}
+
+function configFromDoc(raw: unknown): ConfigDraft {
+  if (!raw || typeof raw !== "object") return { ...EMPTY_CONFIG };
+  const c = raw as Record<string, unknown>;
+  return {
+    xpPerHour: typeof c.xpPerHour === "number" ? c.xpPerHour : "",
+    theme: typeof c.theme === "string" ? c.theme : "",
+    questFlavor: typeof c.questFlavor === "string" ? c.questFlavor : "",
+  };
+}
+
+/**
+ * Inverse: drop empty fields entirely so the saved doc stays clean
+ * (Convex `v.optional` rejects `""` for numbers and we don't want to
+ * persist no-op manifests).
+ */
+function manifestToPayload(d: ManifestDraft) {
+  const csv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+  const out: Record<string, unknown> = {};
+  if (d.version.trim()) out.version = d.version.trim();
+  if (d.license.trim()) out.license = d.license.trim();
+  if (d.language.trim()) out.language = d.language.trim();
+  if (d.outcomes.trim()) out.outcomes = csv(d.outcomes);
+  if (d.prerequisites.trim()) out.prerequisites = csv(d.prerequisites);
+  if (d.targetAudience.trim()) out.targetAudience = d.targetAudience.trim();
+  return Object.keys(out).length ? out : undefined;
+}
+
+function configToPayload(d: ConfigDraft) {
+  const out: Record<string, unknown> = {};
+  if (typeof d.xpPerHour === "number" && Number.isFinite(d.xpPerHour)) out.xpPerHour = d.xpPerHour;
+  if (d.theme.trim() && d.theme !== "__none__") out.theme = d.theme.trim();
+  if (d.questFlavor.trim()) out.questFlavor = d.questFlavor.trim();
+  return Object.keys(out).length ? out : undefined;
+}
 
 function toExport(tpl: LoadedTemplate): ExportTemplate {
   return {
@@ -514,11 +699,14 @@ export function TemplatePanel() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkActing, setBulkActing] = useState(false);
+  const [auditIssues, setAuditIssues] = useState<LinkIssue[] | null>(null);
 
   async function handleSave() {
     if (!draft) return;
     setSaving(true);
     try {
+      const manifest = manifestToPayload(draft.manifest);
+      const config = configToPayload(draft.config);
       await upsert({
         id: draft.id,
         title: draft.title,
@@ -536,6 +724,8 @@ export function TemplatePanel() {
         isPublic: draft.isPublic,
         isSystem: draft.isSystem,
         order: typeof draft.order === "number" ? draft.order : 0,
+        ...(manifest ? { manifest } : {}),
+        ...(config ? { config } : {}),
       });
       notify.success(draft.id ? "Template diperbarui" : "Template dibuat");
       setDraft(null);
@@ -599,6 +789,8 @@ export function TemplatePanel() {
 
   function handleExportDraft() {
     if (!draft) return;
+    const manifest = manifestToPayload(draft.manifest);
+    const config = configToPayload(draft.config);
     const tpl: ExportTemplate = {
       title: draft.title,
       slug: draft.slug,
@@ -621,6 +813,8 @@ export function TemplatePanel() {
       isPublic: draft.isPublic,
       isSystem: draft.isSystem,
       order: typeof draft.order === "number" ? draft.order : 0,
+      ...(manifest ? { manifest } : {}),
+      ...(config ? { config } : {}),
     };
     const envelope: ExportEnvelope = {
       format: EXPORT_FORMAT,
@@ -713,12 +907,46 @@ export function TemplatePanel() {
         isPublic: t.isPublic,
         isSystem: t.isSystem,
         order: t.order,
+        manifest: manifestFromDoc(t.manifest),
+        config: configFromDoc(t.config),
       });
       const extra = items.length > 1 ? ` (${items.length - 1} entri lain dilewati — sheet ini hanya 1 template)` : "";
       notify.success(`Diimpor ke draft: ${t.title}${extra}`);
     } catch (err) {
       notify.fromError(err, "Gagal membaca file JSON");
     }
+  }
+
+  function handleRunAudit() {
+    if (!templates) return;
+    const issues = auditLinks(templates as unknown as ReadonlyArray<AuditableTemplate>);
+    setAuditIssues(issues);
+    if (issues.length === 0) notify.success("Tidak ada masalah link terdeteksi");
+    else notify.error(`${issues.length} masalah link ditemukan`);
+  }
+
+  function handleAuditCopy() {
+    if (!auditIssues) return;
+    const text = auditIssues
+      .map((i) => `${i.templateSlug} > ${i.nodeId} > ${i.url} — ${i.reason}`)
+      .join("\n");
+    void navigator.clipboard.writeText(text)
+      .then(() => notify.success("Disalin ke clipboard"))
+      .catch((err) => notify.fromError(err, "Gagal menyalin"));
+  }
+
+  function handleAuditCsv() {
+    if (!auditIssues || auditIssues.length === 0) return;
+    const csv = issuesToCsv(auditIssues);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `link-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function handleBulkExport() {
@@ -802,6 +1030,37 @@ export function TemplatePanel() {
       isPublic: tpl.isPublic,
       isSystem: tpl.isSystem,
       order: tpl.order,
+      manifest: manifestFromDoc(tpl.manifest),
+      config: configFromDoc(tpl.config),
+    });
+  }
+
+  /**
+   * Same as `openEdit` but starts a fresh insert keyed off the source.
+   * Slug gets a `-copy` suffix so it doesn't collide with the original;
+   * isSystem flips false so the duplicate is editable + deletable.
+   */
+  function openDuplicate(tpl: NonNullable<typeof templates>[number]) {
+    setDraft({
+      title: `${tpl.title} (Salinan)`,
+      slug: `${tpl.slug}-copy`,
+      domain: tpl.domain,
+      icon: tpl.icon,
+      color: tpl.color,
+      description: tpl.description,
+      tags: tpl.tags.join(", "),
+      nodes: tpl.nodes.map((n) => ({
+        ...n,
+        estimatedHours: n.estimatedHours,
+        parentId: n.parentId,
+        category: n.category,
+        resources: n.resources.map((r) => ({ ...r })),
+      })),
+      isPublic: false,    // duplicate goes private until admin reviews
+      isSystem: false,
+      order: tpl.order,
+      manifest: manifestFromDoc(tpl.manifest),
+      config: configFromDoc(tpl.config),
     });
   }
 
@@ -907,6 +1166,13 @@ export function TemplatePanel() {
             title="Ekspor JSON"
           >
             <Download className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); openDuplicate(t); }}
+            className="p-1.5 rounded hover:bg-muted"
+            title="Duplikat"
+          >
+            <Copy className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); openEdit(t); }}
@@ -1018,6 +1284,17 @@ export function TemplatePanel() {
                 onChange={handleImportFile}
               />
               <Button
+                size="icon"
+                variant="outline"
+                onClick={handleRunAudit}
+                disabled={!templates || templates.length === 0}
+                title="Audit link rusak / placeholder di semua template"
+                aria-label="Audit link"
+                className="h-9 w-9"
+              >
+                <Link2 className="w-4 h-4" />
+              </Button>
+              <Button
                 size="sm"
                 onClick={() => setDraft({ ...EMPTY_DRAFT })}
               >
@@ -1124,135 +1401,259 @@ export function TemplatePanel() {
           </SheetHeader>
 
           {draft && (
-            <ScrollArea className="flex-1 min-h-0">
-              <div className="px-6 py-4 space-y-5">
-                {/* Basic info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1 col-span-2">
-                    <Label>Judul *</Label>
-                    <Input
-                      value={draft.title}
-                      onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                      placeholder="Frontend Developer"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Slug * (unik, huruf kecil)</Label>
-                    <Input
-                      value={draft.slug}
-                      onChange={(e) => setDraft({ ...draft, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })}
-                      placeholder="frontend"
-                      className="font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Domain</Label>
-                    <Select value={draft.domain} onValueChange={(v) => setDraft({ ...draft, domain: v })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DOMAIN_OPTIONS.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Icon (lucide-react name)</Label>
-                    <Input
-                      value={draft.icon}
-                      onChange={(e) => setDraft({ ...draft, icon: e.target.value })}
-                      placeholder="BookOpen"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Warna (tailwind bg class)</Label>
-                    <Input
-                      value={draft.color}
-                      onChange={(e) => setDraft({ ...draft, color: e.target.value })}
-                      placeholder="bg-blue-500"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2">
-                    <Label>Deskripsi</Label>
-                    <Input
-                      value={draft.description}
-                      onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                      placeholder="Jalur karir pengembang frontend web"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2">
-                    <Label>Tags (pisah koma)</Label>
-                    <Input
-                      value={draft.tags}
-                      onChange={(e) => setDraft({ ...draft, tags: e.target.value })}
-                      placeholder="react, javascript, web"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Urutan tampil</Label>
-                    <Input
-                      type="number"
-                      value={draft.order}
-                      onChange={(e) => setDraft({ ...draft, order: e.target.value === "" ? "" : Number(e.target.value) })}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="tpl-public"
-                      checked={draft.isPublic}
-                      onCheckedChange={(v) => setDraft({ ...draft, isPublic: v })}
-                    />
-                    <Label htmlFor="tpl-public">Tampil ke pengguna</Label>
-                  </div>
-                </div>
-
-                {/* Nodes */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Node / Topik ({draft.nodes.length})</Label>
-                    <button
-                      type="button"
-                      onClick={() => setDraft({
-                        ...draft,
-                        nodes: [...draft.nodes, {
-                          id: genId(), title: "", description: "", difficulty: "beginner",
-                          estimatedHours: 10, prerequisites: [], resources: [],
-                        }],
-                      })}
-                      className="text-sm text-brand flex items-center gap-1 hover:underline"
-                    >
-                      <Plus className="w-4 h-4" /> Tambah Node
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {draft.nodes.map((node, idx) => (
-                      <NodeEditor
-                        key={node.id || idx}
-                        node={node}
-                        allNodes={draft.nodes}
-                        onChange={(updated) => {
-                          const nodes = [...draft.nodes];
-                          nodes[idx] = updated;
-                          setDraft({ ...draft, nodes });
-                        }}
-                        onRemove={() => setDraft({
-                          ...draft,
-                          nodes: draft.nodes.filter((_, i) => i !== idx),
-                        })}
-                      />
-                    ))}
-                    {draft.nodes.length === 0 && (
-                      <p className="text-sm text-muted-foreground">Belum ada node. Klik &quot;Tambah Node&quot;.</p>
+            <Tabs defaultValue="info" className="flex-1 min-h-0 flex flex-col">
+              <div className="px-6 pt-3 pb-2 border-b shrink-0">
+                <TabsList variant="equal" cols={4}>
+                  <TabsTrigger value="info">Info</TabsTrigger>
+                  <TabsTrigger value="nodes">
+                    Node{draft.nodes.length > 0 && (
+                      <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1">
+                        {draft.nodes.length}
+                      </Badge>
                     )}
-                  </div>
-                </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="manifest">Manifest</TabsTrigger>
+                  <TabsTrigger value="config">Konfigurasi</TabsTrigger>
+                </TabsList>
               </div>
-            </ScrollArea>
+
+              <ScrollArea className="flex-1 min-h-0">
+                <TabsContent value="info" className="px-6 py-4 mt-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1 col-span-2">
+                      <Label>Judul *</Label>
+                      <Input
+                        value={draft.title}
+                        onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                        placeholder="Frontend Developer"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Slug * (unik, huruf kecil)</Label>
+                      <Input
+                        value={draft.slug}
+                        onChange={(e) => setDraft({ ...draft, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })}
+                        placeholder="frontend"
+                        className="font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Domain</Label>
+                      <Select value={draft.domain} onValueChange={(v) => setDraft({ ...draft, domain: v })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DOMAIN_OPTIONS.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Icon (lucide-react name)</Label>
+                      <Input
+                        value={draft.icon}
+                        onChange={(e) => setDraft({ ...draft, icon: e.target.value })}
+                        placeholder="BookOpen"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Warna (tailwind bg class)</Label>
+                      <Input
+                        value={draft.color}
+                        onChange={(e) => setDraft({ ...draft, color: e.target.value })}
+                        placeholder="bg-blue-500"
+                      />
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <Label>Deskripsi</Label>
+                      <Input
+                        value={draft.description}
+                        onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                        placeholder="Jalur karir pengembang frontend web"
+                      />
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <Label>Tags (pisah koma)</Label>
+                      <Input
+                        value={draft.tags}
+                        onChange={(e) => setDraft({ ...draft, tags: e.target.value })}
+                        placeholder="react, javascript, web"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Urutan tampil</Label>
+                      <Input
+                        type="number"
+                        value={draft.order}
+                        onChange={(e) => setDraft({ ...draft, order: e.target.value === "" ? "" : Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 mt-5">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="tpl-public"
+                        checked={draft.isPublic}
+                        onCheckedChange={(v) => setDraft({ ...draft, isPublic: v })}
+                      />
+                      <Label htmlFor="tpl-public">Tampil ke pengguna</Label>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="nodes" className="px-6 py-4 mt-0">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Node / Topik ({draft.nodes.length})</Label>
+                      <button
+                        type="button"
+                        onClick={() => setDraft({
+                          ...draft,
+                          nodes: [...draft.nodes, {
+                            id: genId(), title: "", description: "", difficulty: "beginner",
+                            estimatedHours: 10, prerequisites: [], resources: [],
+                          }],
+                        })}
+                        className="text-sm text-brand flex items-center gap-1 hover:underline"
+                      >
+                        <Plus className="w-4 h-4" /> Tambah Node
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {draft.nodes.map((node, idx) => (
+                        <NodeEditor
+                          key={node.id || idx}
+                          node={node}
+                          allNodes={draft.nodes}
+                          onChange={(updated) => {
+                            const nodes = [...draft.nodes];
+                            nodes[idx] = updated;
+                            setDraft({ ...draft, nodes });
+                          }}
+                          onRemove={() => setDraft({
+                            ...draft,
+                            nodes: draft.nodes.filter((_, i) => i !== idx),
+                          })}
+                        />
+                      ))}
+                      {draft.nodes.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Belum ada node. Klik &quot;Tambah Node&quot;.</p>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="manifest" className="px-6 py-4 mt-0">
+                  <div className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Manifest = metadata deklaratif tentang roadmap. Tools eksternal (export, share, embed) dapat membaca info ini. Semua opsional — kosongkan untuk default.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>Versi</Label>
+                        <Input
+                          value={draft.manifest.version}
+                          onChange={(e) => setDraft({ ...draft, manifest: { ...draft.manifest, version: e.target.value } })}
+                          placeholder="1.0.0"
+                          className="font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Lisensi</Label>
+                        <Input
+                          value={draft.manifest.license}
+                          onChange={(e) => setDraft({ ...draft, manifest: { ...draft.manifest, license: e.target.value } })}
+                          placeholder="CC-BY-SA-4.0"
+                          className="font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Bahasa</Label>
+                        <Input
+                          value={draft.manifest.language}
+                          onChange={(e) => setDraft({ ...draft, manifest: { ...draft.manifest, language: e.target.value } })}
+                          placeholder="id"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Audiens Sasaran</Label>
+                        <Input
+                          value={draft.manifest.targetAudience}
+                          onChange={(e) => setDraft({ ...draft, manifest: { ...draft.manifest, targetAudience: e.target.value } })}
+                          placeholder="Pemula tech, fresh graduate"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Outcomes (pisah koma)</Label>
+                      <Textarea
+                        rows={2}
+                        value={draft.manifest.outcomes}
+                        onChange={(e) => setDraft({ ...draft, manifest: { ...draft.manifest, outcomes: e.target.value } })}
+                        placeholder="Membuat web responsif, Deploy aplikasi, Memahami state management"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Prasyarat (pisah koma)</Label>
+                      <Textarea
+                        rows={2}
+                        value={draft.manifest.prerequisites}
+                        onChange={(e) => setDraft({ ...draft, manifest: { ...draft.manifest, prerequisites: e.target.value } })}
+                        placeholder="Logika dasar, akses internet"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="config" className="px-6 py-4 mt-0">
+                  <div className="space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Konfigurasi mengontrol perilaku gamifikasi: tema kelas, XP per jam belajar, narasi quest. Semua opsional — biarkan kosong untuk pakai default.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>XP per Jam</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={draft.config.xpPerHour}
+                          onChange={(e) => setDraft({ ...draft, config: { ...draft.config, xpPerHour: e.target.value === "" ? "" : Number(e.target.value) } })}
+                          placeholder="10"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Tema Kelas</Label>
+                        <Select
+                          value={draft.config.theme || "__none__"}
+                          onValueChange={(v) => setDraft({ ...draft, config: { ...draft.config, theme: v === "__none__" ? "" : v } })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {THEME_OPTIONS.map((o) => (
+                              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Quest Flavor (narasi gaya RPG)</Label>
+                      <Textarea
+                        rows={3}
+                        value={draft.config.questFlavor}
+                        onChange={(e) => setDraft({ ...draft, config: { ...draft.config, questFlavor: e.target.value } })}
+                        placeholder="Selamat datang, petualang. Selesaikan setiap quest untuk menjadi master frontend…"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+              </ScrollArea>
+            </Tabs>
           )}
 
           <div className="px-6 py-4 border-t flex justify-end gap-2 shrink-0">
@@ -1319,6 +1720,74 @@ export function TemplatePanel() {
               {importing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Impor
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Link audit results */}
+      <AlertDialog
+        open={auditIssues !== null}
+        onOpenChange={(o) => !o && setAuditIssues(null)}
+      >
+        <AlertDialogContent className="max-w-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Link2 className="w-5 h-5" />
+              Hasil Audit Link
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {auditIssues && auditIssues.length === 0
+                ? "Tidak ada masalah link terdeteksi. Semua URL terlihat sehat."
+                : auditIssues
+                  ? `${auditIssues.length} masalah ditemukan. Salin atau ekspor CSV, perbaiki via fitur Ekspor JSON → edit → Impor JSON.`
+                  : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {auditIssues && auditIssues.length > 0 && (
+            <div className="max-h-96 overflow-auto rounded border bg-muted/20 text-xs">
+              <table className="w-full">
+                <thead className="bg-muted/60 sticky top-0">
+                  <tr className="text-left">
+                    <th className="px-2 py-1.5 font-medium">Template</th>
+                    <th className="px-2 py-1.5 font-medium">Node</th>
+                    <th className="px-2 py-1.5 font-medium">URL</th>
+                    <th className="px-2 py-1.5 font-medium">Masalah</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {auditIssues.slice(0, 200).map((i, idx) => (
+                    <tr key={`${i.templateId}-${i.nodeId}-${idx}`}>
+                      <td className="px-2 py-1.5 font-mono text-[11px]">{i.templateSlug}</td>
+                      <td className="px-2 py-1.5 font-mono text-[11px]">{i.nodeId}</td>
+                      <td className="px-2 py-1.5 font-mono text-[11px] max-w-[260px] truncate" title={i.url}>
+                        {i.url || <span className="italic text-muted-foreground">(kosong)</span>}
+                      </td>
+                      <td className="px-2 py-1.5 text-destructive">{i.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {auditIssues.length > 200 && (
+                <p className="px-3 py-2 text-muted-foreground italic">
+                  …{auditIssues.length - 200} masalah lain. Ekspor CSV untuk lihat semua.
+                </p>
+              )}
+            </div>
+          )}
+
+          <AlertDialogFooter>
+            {auditIssues && auditIssues.length > 0 && (
+              <>
+                <Button variant="outline" size="sm" onClick={handleAuditCopy}>
+                  <Copy className="w-3.5 h-3.5 mr-1.5" /> Salin
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleAuditCsv}>
+                  <Download className="w-3.5 h-3.5 mr-1.5" /> CSV
+                </Button>
+              </>
+            )}
+            <AlertDialogCancel>Tutup</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

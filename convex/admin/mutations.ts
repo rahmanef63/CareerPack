@@ -354,6 +354,8 @@ export const adminUpsertTemplate = mutation({
     isPublic: v.boolean(),
     isSystem: v.boolean(),
     order: v.number(),
+    manifest: v.optional(templateManifestValidator),
+    config: v.optional(templateConfigValidator),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -377,6 +379,8 @@ export const adminUpsertTemplate = mutation({
       isPublic: args.isPublic,
       isSystem: args.isSystem,
       order: args.order,
+      ...(args.manifest ? { manifest: args.manifest } : {}),
+      ...(args.config ? { config: args.config } : {}),
     };
 
     if (args.id) {
