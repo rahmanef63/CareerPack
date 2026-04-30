@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import {
@@ -36,19 +37,51 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Progress } from "@/shared/components/ui/progress";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
+import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
 import { api } from "../../../../../convex/_generated/api";
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { StatCard } from '@/shared/components/stats/StatCard';
 import { formatFileSize as formatBytes } from "@/shared/lib/formatFileSize";
-import { UsersTable } from "./UsersTable";
-import { RoadmapPanel } from "./RoadmapPanel";
-import { TemplatePanel } from "./TemplatePanel";
-import { AuditLogPanel } from "./AuditLogPanel";
-import { FeedbackPanel } from "./FeedbackPanel";
-import { ErrorLogsPanel } from "./ErrorLogsPanel";
+
+/**
+ * Tab panels are lazy-loaded so the initial admin bundle stays small —
+ * each tab fetches its own chunk only when the user activates it.
+ * `ssr: false` because every panel uses Convex `useQuery` which runs
+ * client-only.
+ */
+const PanelSkeleton = () => (
+  <div className="space-y-3 rounded-md border border-border p-4" aria-busy="true">
+    <Skeleton className="h-6 w-48" />
+    <Skeleton className="h-4 w-72" />
+    <div className="space-y-2 pt-2">
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+  </div>
+);
+const UsersTable = dynamic(() => import("./UsersTable").then((m) => m.UsersTable), {
+  ssr: false, loading: PanelSkeleton,
+});
+const RoadmapPanel = dynamic(() => import("./RoadmapPanel").then((m) => m.RoadmapPanel), {
+  ssr: false, loading: PanelSkeleton,
+});
+const TemplatePanel = dynamic(() => import("./TemplatePanel").then((m) => m.TemplatePanel), {
+  ssr: false, loading: PanelSkeleton,
+});
+const AuditLogPanel = dynamic(() => import("./AuditLogPanel").then((m) => m.AuditLogPanel), {
+  ssr: false, loading: PanelSkeleton,
+});
+const FeedbackPanel = dynamic(() => import("./FeedbackPanel").then((m) => m.FeedbackPanel), {
+  ssr: false, loading: PanelSkeleton,
+});
+const ErrorLogsPanel = dynamic(() => import("./ErrorLogsPanel").then((m) => m.ErrorLogsPanel), {
+  ssr: false, loading: PanelSkeleton,
+});
 
 export function AdminPanel() {
   const router = useRouter();
@@ -331,22 +364,22 @@ export function AdminPanel() {
         </TabsList>
 
         <TabsContent value="users" className="mt-4">
-          <UsersTable />
+          <ErrorBoundary title="Tabel pengguna gagal dimuat"><UsersTable /></ErrorBoundary>
         </TabsContent>
         <TabsContent value="templates" className="mt-4">
-          <TemplatePanel />
+          <ErrorBoundary title="Panel template gagal dimuat"><TemplatePanel /></ErrorBoundary>
         </TabsContent>
         <TabsContent value="roadmaps" className="mt-4">
-          <RoadmapPanel />
+          <ErrorBoundary title="Panel roadmap gagal dimuat"><RoadmapPanel /></ErrorBoundary>
         </TabsContent>
         <TabsContent value="audit" className="mt-4">
-          <AuditLogPanel />
+          <ErrorBoundary title="Audit log gagal dimuat"><AuditLogPanel /></ErrorBoundary>
         </TabsContent>
         <TabsContent value="feedback" className="mt-4">
-          <FeedbackPanel />
+          <ErrorBoundary title="Feedback gagal dimuat"><FeedbackPanel /></ErrorBoundary>
         </TabsContent>
         <TabsContent value="errors" className="mt-4">
-          <ErrorLogsPanel />
+          <ErrorBoundary title="Error log gagal dimuat"><ErrorLogsPanel /></ErrorBoundary>
         </TabsContent>
       </Tabs>
     </PageContainer>

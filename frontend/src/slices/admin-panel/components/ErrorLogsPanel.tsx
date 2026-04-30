@@ -19,6 +19,7 @@ import {
   ResponsiveSelectItem,
   ResponsiveSelectTrigger,
 } from "@/shared/components/ui/responsive-select";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { formatDateTime } from "@/shared/lib/formatDate";
 
 const SOURCE_OPTIONS = [
@@ -27,6 +28,8 @@ const SOURCE_OPTIONS = [
   { value: "convex", label: "Convex" },
   { value: "client", label: "Client" },
 ] as const;
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 /**
  * Read-only viewer for the `errorLogs` table. Currently only
@@ -40,10 +43,11 @@ const SOURCE_OPTIONS = [
 export function ErrorLogsPanel() {
   const [source, setSource] = useState<(typeof SOURCE_OPTIONS)[number]["value"]>("all");
   const [cursor, setCursor] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState<number>(30);
 
   const result = useQuery(api.admin.queries.viewErrorLogs, {
     cursor,
-    limit: 30,
+    limit: pageSize,
     source: source === "all" ? undefined : source,
   });
 
@@ -83,6 +87,27 @@ export function ErrorLogsPanel() {
               ))}
             </ResponsiveSelectContent>
           </ResponsiveSelect>
+          <ResponsiveSelect
+            value={String(pageSize)}
+            onValueChange={(v) => {
+              setPageSize(Number(v));
+              setCursor(null);
+            }}
+          >
+            <ResponsiveSelectTrigger
+              className="h-9 sm:w-[140px]"
+              aria-label="Baris per halaman"
+            >
+              {pageSize} / hal
+            </ResponsiveSelectTrigger>
+            <ResponsiveSelectContent drawerTitle="Baris per halaman">
+              {PAGE_SIZE_OPTIONS.map((n) => (
+                <ResponsiveSelectItem key={n} value={String(n)}>
+                  {n}
+                </ResponsiveSelectItem>
+              ))}
+            </ResponsiveSelectContent>
+          </ResponsiveSelect>
           <Button
             variant="ghost"
             size="sm"
@@ -95,7 +120,11 @@ export function ErrorLogsPanel() {
         </div>
 
         {isLoading && (
-          <p className="text-sm text-muted-foreground">Memuat log…</p>
+          <div className="space-y-2 rounded-md border border-border p-3" aria-busy="true" aria-live="polite">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
         )}
 
         {!isLoading && logs.length === 0 && (

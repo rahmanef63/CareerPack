@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Search, X } from "lucide-react";
+import {
+  AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown,
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  Search, X,
+} from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -58,10 +62,20 @@ export interface DataTableProps<T> {
    *  delete/export-selected logic itself. */
   bulkActions?: ReactNode;
   isLoading?: boolean;
+  /** Surfaces a banner above the table when set. Use for failed mutations
+   *  or query errors. Caller passes the friendly message; DataTable does
+   *  not interpret the Error itself. */
+  error?: string | null;
+  /** Skeleton row count while `isLoading` is true. Defaults to 5. */
+  skeletonRows?: number;
   emptyMessage?: ReactNode;
   /** Optional row click → opens detail dialog / navigates / etc. */
   onRowClick?: (row: T) => void;
   className?: string;
+  /** Initial page size. Defaults to 25. */
+  initialPageSize?: number;
+  /** Page-size dropdown options. Defaults to [10, 25, 50, 100]. */
+  pageSizeOptions?: ReadonlyArray<number>;
 }
 
 export function DataTable<T>({
@@ -76,9 +90,13 @@ export function DataTable<T>({
   toolbarActions,
   bulkActions,
   isLoading = false,
+  error = null,
+  skeletonRows = 5,
   emptyMessage = "Belum ada data.",
   onRowClick,
   className,
+  initialPageSize = 25,
+  pageSizeOptions = [10, 25, 50, 100],
 }: DataTableProps<T>) {
   const isMobile = useIsMobile();
   const {
@@ -90,11 +108,23 @@ export function DataTable<T>({
     sort,
     setSort,
     visibleRows,
+    paginatedRows,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    pageCount,
     isFiltered,
-  } = useTableState({ data, columns, filters, searchAccessor });
+  } = useTableState({ data, columns, filters, searchAccessor, initialPageSize });
 
   const selectionEnabled = Boolean(selectedIds && onSelectionChange);
-  const visibleIds = useMemo(() => visibleRows.map(rowKey), [visibleRows, rowKey]);
+  // Selection works on the *paginated* slice (the rows the user can see
+  // right now). Bulk actions across all pages remain possible via the
+  // existing union semantics — selection set is preserved across pages.
+  const visibleIds = useMemo(
+    () => paginatedRows.map(rowKey),
+    [paginatedRows, rowKey],
+  );
   const allVisibleSelected = useMemo(() => {
     if (!selectionEnabled || visibleIds.length === 0) return false;
     return visibleIds.every((id) => selectedIds!.has(id));
@@ -145,13 +175,15 @@ export function DataTable<T>({
         toolbarActions={toolbarActions}
       />
 
+      {error && <ErrorBanner message={error} />}
+
       {isLoading ? (
-        <LoadingRows />
+        <LoadingRows count={skeletonRows} />
       ) : visibleRows.length === 0 ? (
         <EmptyRow isFiltered={isFiltered} fallback={emptyMessage} />
       ) : isMobile ? (
         <MobileList
-          rows={visibleRows}
+          rows={paginatedRows}
           columns={columns}
           rowKey={rowKey}
           selectionEnabled={selectionEnabled}
@@ -211,7 +243,7 @@ export function DataTable<T>({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {visibleRows.map((row) => {
+              {paginatedRows.map((row) => {
                 const id = rowKey(row);
                 const selected = selectedIds?.has(id);
                 return (
@@ -252,11 +284,22 @@ export function DataTable<T>({
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">
-        {visibleRows.length} dari {data.length} baris
-        {isFiltered && " (terfilter)"}
-        {selectionCount > 0 && ` · ${selectionCount} terpilih`}
-      </p>
+      {!isLoading && visibleRows.length > 0 && (
+        <PaginationFooter
+          page={page}
+          pageSize={pageSize}
+          pageCount={pageCount}
+          totalRows={visibleRows.length}
+          rangeStart={page * pageSize + 1}
+          rangeEnd={Math.min((page + 1) * pageSize, visibleRows.length)}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={pageSizeOptions}
+          isFiltered={isFiltered}
+          dataLength={data.length}
+          selectionCount={selectionCount}
+        />
+      )}
     </div>
   );
 }
@@ -378,12 +421,143 @@ function SortIndicator({ state }: { state: SortState | null }) {
   );
 }
 
-function LoadingRows() {
+function LoadingRows({ count }: { count: number }) {
   return (
-    <div className="space-y-2 rounded-md border border-border p-3">
-      {[0, 1, 2, 3].map((i) => (
+    <div className="space-y-2 rounded-md border border-border p-3" aria-busy="true" aria-live="polite">
+      {Array.from({ length: count }, (_, i) => (
         <Skeleton key={i} className="h-10 w-full" />
       ))}
+    </div>
+  );
+}
+
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div
+      role="alert"
+      className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+    >
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      <p className="min-w-0 break-words">{message}</p>
+    </div>
+  );
+}
+
+interface PaginationFooterProps {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  totalRows: number;
+  rangeStart: number;
+  rangeEnd: number;
+  onPageChange: (p: number) => void;
+  onPageSizeChange: (n: number) => void;
+  pageSizeOptions: ReadonlyArray<number>;
+  isFiltered: boolean;
+  dataLength: number;
+  selectionCount: number;
+}
+
+function PaginationFooter({
+  page,
+  pageSize,
+  pageCount,
+  totalRows,
+  rangeStart,
+  rangeEnd,
+  onPageChange,
+  onPageSizeChange,
+  pageSizeOptions,
+  isFiltered,
+  dataLength,
+  selectionCount,
+}: PaginationFooterProps) {
+  const canPrev = page > 0;
+  const canNext = page < pageCount - 1;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2">
+        <span>
+          {totalRows === 0
+            ? "0 baris"
+            : `${rangeStart}–${rangeEnd} dari ${totalRows}`}
+          {isFiltered && totalRows !== dataLength && ` (terfilter dari ${dataLength})`}
+          {selectionCount > 0 && ` · ${selectionCount} terpilih`}
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <label className="mr-1 hidden sm:inline-block">
+          Per halaman:
+        </label>
+        <ResponsiveSelect
+          value={String(pageSize)}
+          onValueChange={(v) => onPageSizeChange(Number(v))}
+        >
+          <ResponsiveSelectTrigger
+            className="h-8 w-[78px]"
+            aria-label="Baris per halaman"
+          >
+            {pageSize}
+          </ResponsiveSelectTrigger>
+          <ResponsiveSelectContent drawerTitle="Baris per halaman">
+            {pageSizeOptions.map((n) => (
+              <ResponsiveSelectItem key={n} value={String(n)}>
+                {n}
+              </ResponsiveSelectItem>
+            ))}
+          </ResponsiveSelectContent>
+        </ResponsiveSelect>
+        <span className="mx-2 hidden sm:inline-block">
+          Hal {page + 1} / {pageCount}
+        </span>
+        <span className="mx-1 inline-block sm:hidden">
+          {page + 1}/{pageCount}
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onPageChange(0)}
+          disabled={!canPrev}
+          aria-label="Halaman pertama"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onPageChange(page - 1)}
+          disabled={!canPrev}
+          aria-label="Halaman sebelumnya"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onPageChange(page + 1)}
+          disabled={!canNext}
+          aria-label="Halaman berikutnya"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onPageChange(pageCount - 1)}
+          disabled={!canNext}
+          aria-label="Halaman terakhir"
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
