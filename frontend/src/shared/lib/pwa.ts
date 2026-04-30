@@ -16,46 +16,64 @@ declare global {
   }
 }
 
-// ---- Module-level singleton ----
-// One listener for the entire lifetime of the page. Multiple `usePWAInstall`
-// hook instances read from here; they never register their own listeners so
-// `e.preventDefault()` is called exactly once per browser event.
+/**
+ * Module-level singleton — one `beforeinstallprompt` listener for the
+ * whole page lifetime. Multiple `usePWAInstall` hook instances read from
+ * here via `useSyncExternalStore`; they never register their own listeners
+ * so `e.preventDefault()` is called exactly once per browser event.
+ */
 
-let _deferred: BeforeInstallPromptEvent | null = null;
-let _installed = false;
+export interface PWAInstallSnapshot {
+  deferred: BeforeInstallPromptEvent | null;
+  installed: boolean;
+}
+
+const SERVER_SNAPSHOT: PWAInstallSnapshot = Object.freeze({
+  deferred: null,
+  installed: false,
+});
+
+// Cached snapshot — same reference until state changes. Required by the
+// `useSyncExternalStore` contract: getSnapshot must return a stable value
+// when nothing changed, otherwise React tears.
+let _snapshot: PWAInstallSnapshot = { deferred: null, installed: false };
 const _subscribers = new Set<() => void>();
 
-function _notify() {
+function _setState(deferred: BeforeInstallPromptEvent | null, installed: boolean): void {
+  if (_snapshot.deferred === deferred && _snapshot.installed === installed) return;
+  _snapshot = { deferred, installed };
   _subscribers.forEach((fn) => fn());
 }
 
 if (typeof window !== "undefined") {
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
-    _deferred = e;
-    _installed = false;
-    _notify();
+    _setState(e, false);
   });
 
   window.addEventListener("appinstalled", () => {
-    _deferred = null;
-    _installed = true;
-    _notify();
+    _setState(null, true);
   });
 
-  // Already running in standalone mode (installed via OS)
+  // Already running in standalone mode (installed via OS).
   if (window.matchMedia?.("(display-mode: standalone)").matches) {
-    _installed = true;
+    _setState(null, true);
   }
 }
 
-export function getPWAInstallState() {
-  return { deferred: _deferred, installed: _installed };
+export function getPWAInstallSnapshot(): PWAInstallSnapshot {
+  return _snapshot;
+}
+
+export function getPWAInstallServerSnapshot(): PWAInstallSnapshot {
+  return SERVER_SNAPSHOT;
 }
 
 export function subscribePWAInstall(fn: () => void): () => void {
   _subscribers.add(fn);
-  return () => _subscribers.delete(fn);
+  return () => {
+    _subscribers.delete(fn);
+  };
 }
 
 export function registerServiceWorker(): void {

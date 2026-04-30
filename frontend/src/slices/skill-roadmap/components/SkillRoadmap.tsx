@@ -318,6 +318,7 @@ export function SkillRoadmap() {
 
   const hydrated = useRef(false);
   const hydratedRoadmapId = useRef<string | null>(null);
+  const didDefaultFromDb = useRef(false);
 
   useEffect(() => {
     if (roadmap === undefined) return;
@@ -332,6 +333,23 @@ export function SkillRoadmap() {
     );
     setCompletedNodes(done);
   }, [roadmap]);
+
+  // Pick the first DB template as the initial category when the user
+  // has no roadmap yet — avoids landing on the hardcoded 'frontend' slug
+  // that may not exist in the seeded DB (slugs are 'frontend-dev' etc.).
+  useEffect(() => {
+    if (didDefaultFromDb.current) return;
+    if (dbTemplates === undefined) return; // still loading
+    if (roadmap === undefined) return; // wait for roadmap to resolve too
+    if (roadmap?.careerPath) {
+      didDefaultFromDb.current = true; // hydration covers this case
+      return;
+    }
+    if (dbTemplates.length === 0) return; // empty DB → keep fallback default
+    didDefaultFromDb.current = true;
+    const exists = dbTemplates.some((t) => t.slug === selectedCategory);
+    if (!exists) setSelectedCategory(dbTemplates[0].slug);
+  }, [dbTemplates, roadmap, selectedCategory]);
 
   // roadmapData: prefer DB template, fall back to hardcoded
   const roadmapData = useMemo<SimpleRoadmapNode[]>(() => {

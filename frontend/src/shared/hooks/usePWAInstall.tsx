@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import {
-  getPWAInstallState,
+  getPWAInstallSnapshot,
+  getPWAInstallServerSnapshot,
   subscribePWAInstall,
   registerServiceWorker,
 } from "../lib/pwa";
@@ -17,22 +18,24 @@ interface UsePWAInstallReturn {
 }
 
 /**
- * Reads from the module-level PWA singleton — registers no additional
- * `beforeinstallprompt` listeners. Safe to call from many components at once.
+ * Reads from the module-level PWA singleton via `useSyncExternalStore` —
+ * registers no additional `beforeinstallprompt` listeners. Safe to call
+ * from many components at once; the snapshot stays referentially stable
+ * between events so React never tears.
  */
 export function usePWAInstall(): UsePWAInstallReturn {
-  // Re-render whenever the singleton state changes
-  const [, tick] = useReducer((n: number) => n + 1, 0);
+  const { deferred, installed } = useSyncExternalStore(
+    subscribePWAInstall,
+    getPWAInstallSnapshot,
+    getPWAInstallServerSnapshot,
+  );
 
   useEffect(() => {
     registerServiceWorker();
-    return subscribePWAInstall(tick);
   }, []);
 
-  const { deferred, installed } = getPWAInstallState();
-
   const install = useCallback(async () => {
-    const { deferred: d } = getPWAInstallState();
+    const { deferred: d } = getPWAInstallSnapshot();
     if (!d) return "unavailable" as const;
     await d.prompt();
     const choice = await d.userChoice;

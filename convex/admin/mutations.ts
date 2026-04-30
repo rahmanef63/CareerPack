@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { requireAdmin } from "../_shared/auth";
 import type { Id } from "../_generated/dataModel";
 import { defaultRoadmapTemplates } from "../_seeds/roadmapTemplates";
+import { templateNodeValidator, VALID_DOMAINS } from "../roadmap/schema";
 
 /**
  * Cascade-delete every record owned by `userId`, then the user record
@@ -331,24 +332,8 @@ export const adminRemoveSkill = mutation({
 });
 
 // ---- Roadmap Template admin CRUD ----
-
-const templateNodeValidator = v.object({
-  id: v.string(),
-  title: v.string(),
-  description: v.string(),
-  difficulty: v.string(),
-  estimatedHours: v.number(),
-  prerequisites: v.array(v.string()),
-  parentId: v.optional(v.string()),
-  category: v.optional(v.string()),
-  resources: v.array(v.object({
-    id: v.string(),
-    title: v.string(),
-    type: v.string(),
-    url: v.string(),
-    free: v.boolean(),
-  })),
-});
+// Validator + domain whitelist live in roadmap/schema.ts so the publish
+// mutation can reuse exactly the same shape (one source of truth).
 
 export const adminUpsertTemplate = mutation({
   args: {
@@ -372,7 +357,6 @@ export const adminUpsertTemplate = mutation({
     if (!slug || slug.length > 80) throw new Error("Slug 1-80 karakter huruf kecil/angka/tanda hubung");
     const title = args.title.trim();
     if (!title || title.length > 120) throw new Error("Judul 1-120 karakter");
-    const VALID_DOMAINS = new Set(["tech", "business", "creative", "education", "health", "finance", "hr", "operations", "government", "social", "hospitality"]);
     if (!VALID_DOMAINS.has(args.domain)) throw new Error("Domain tidak valid");
     if (args.nodes.length > 200) throw new Error("Maksimal 200 node per template");
 

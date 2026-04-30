@@ -1,7 +1,11 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
-const templateNodeValidator = v.object({
+/**
+ * Shared validator for a single template node — exported so admin and
+ * publish mutations can reuse the same shape (one source of truth).
+ */
+export const templateNodeValidator = v.object({
   id: v.string(),
   title: v.string(),
   description: v.string(),
@@ -18,6 +22,15 @@ const templateNodeValidator = v.object({
     free: v.boolean(),
   })),
 });
+
+/**
+ * Domain whitelist — keep aligned with TemplatePanel + SkillRoadmap UI.
+ * Frozen Set so callers can `.has()` cheaply without reallocating.
+ */
+export const VALID_DOMAINS: ReadonlySet<string> = new Set([
+  "tech", "business", "creative", "education", "health",
+  "finance", "hr", "operations", "government", "social", "hospitality",
+]);
 
 export const roadmapTables = {
   skillRoadmaps: defineTable({
@@ -61,5 +74,6 @@ export const roadmapTables = {
   })
     .index("by_slug", ["slug"])
     .index("by_domain", ["domain"])
-    .index("by_order", ["order"]),
+    .index("by_order", ["order"])
+    .index("by_author", ["authorId"]),
 };

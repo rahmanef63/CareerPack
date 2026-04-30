@@ -60,14 +60,13 @@ interface SectionCardProps {
   title: string;
   icon: React.ElementType;
   children: React.ReactNode;
-  sectionId: string;
   isOpen: boolean;
   onToggle: () => void;
   onAdd?: () => void;
   addLabel?: string;
 }
 
-function SectionCard({ title, icon: Icon, children, sectionId: _sectionId, isOpen, onToggle, onAdd, addLabel }: SectionCardProps) {
+function SectionCard({ title, icon: Icon, children, isOpen, onToggle, onAdd, addLabel }: SectionCardProps) {
   const handleHeaderClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
@@ -785,7 +784,6 @@ export function CVGenerator() {
               <SectionCard
                 title="Tampilan & Template"
                 icon={Sparkles}
-                sectionId="display"
                 isOpen={activeSection === 'display'}
                 onToggle={() => toggleSection('display')}
               >
@@ -854,7 +852,6 @@ export function CVGenerator() {
               <SectionCard
                 title="Pengalaman Kerja"
                 icon={Briefcase}
-                sectionId="experience"
                 isOpen={activeSection === 'experience'}
                 onToggle={() => toggleSection('experience')}
                 onAdd={addExperience}
@@ -944,7 +941,6 @@ export function CVGenerator() {
               <SectionCard
                 title="Pendidikan"
                 icon={GraduationCap}
-                sectionId="education"
                 isOpen={activeSection === 'education'}
                 onToggle={() => toggleSection('education')}
                 onAdd={addEducation}
@@ -1026,7 +1022,6 @@ export function CVGenerator() {
               <SectionCard
                 title="Skill"
                 icon={Sparkles}
-                sectionId="skills"
                 isOpen={activeSection === 'skills'}
                 onToggle={() => toggleSection('skills')}
                 onAdd={addSkill}
@@ -1097,7 +1092,6 @@ export function CVGenerator() {
               <SectionCard
                 title="Sertifikasi"
                 icon={Award}
-                sectionId="certifications"
                 isOpen={activeSection === 'certifications'}
                 onToggle={() => toggleSection('certifications')}
                 onAdd={addCertification}
@@ -1163,7 +1157,6 @@ export function CVGenerator() {
               <SectionCard
                 title="Proyek"
                 icon={Folder}
-                sectionId="projects"
                 isOpen={activeSection === 'projects'}
                 onToggle={() => toggleSection('projects')}
                 onAdd={addProject}

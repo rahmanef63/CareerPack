@@ -4,7 +4,11 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { isStaleBundleError, forceFreshReload } from "@/shared/lib/staleBundle";
+import {
+  isStaleBundleError,
+  forceFreshReload,
+  claimAutoReloadOnce,
+} from "@/shared/lib/staleBundle";
 import { StaleBundleBanner } from "./StaleBundleBanner";
 
 interface RouteErrorProps {
@@ -28,14 +32,12 @@ interface RouteErrorProps {
  * with each segment passing slightly different copy + segment tag.
  *
  * Special case: when the error matches the stale-bundle heuristic
- * (`api.foo.bar is not a function`, `Could not find function …`),
- * we hand off to StaleBundleBanner which offers a cache-purging
- * recovery flow instead of the generic reset path. This protects
- * existing PWA installs after breaking deploys.
+ * (`api.foo.bar is not a function`, `Could not find function …`,
+ * `ChunkLoadError`), we auto-reload once silently — the user shouldn't
+ * have to click anything for a deploy mismatch. If we already reloaded
+ * once this session, hand off to StaleBundleBanner so the user can
+ * trigger a manual recovery.
  */
-// Session key guards against reload loops: auto-reload fires at most once.
-const AUTO_RELOAD_KEY = "_car_chunk_reload";
-
 export function RouteError({
   error,
   reset,
@@ -51,16 +53,11 @@ export function RouteError({
     console.error(tag, error);
   }, [error, segment]);
 
-  // Auto-reload once on chunk errors — user shouldn't have to click anything.
+  // Auto-reload once on stale-bundle errors — user shouldn't have to click.
   useEffect(() => {
     if (!isStale) return;
-    try {
-      if (!sessionStorage.getItem(AUTO_RELOAD_KEY)) {
-        sessionStorage.setItem(AUTO_RELOAD_KEY, "1");
-        void forceFreshReload();
-      }
-    } catch {
-      /* sessionStorage unavailable (private mode, etc.) — fall through to banner */
+    if (claimAutoReloadOnce()) {
+      void forceFreshReload();
     }
   }, [isStale]);
 
