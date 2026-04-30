@@ -46,21 +46,41 @@ export const listPublicTemplates = query({
       .collect();
     return all
       .filter((t) => t.isPublic)
-      .map((t) => ({
-        _id: t._id,
-        title: t.title,
-        slug: t.slug,
-        domain: t.domain,
-        icon: t.icon,
-        color: t.color,
-        description: t.description,
-        tags: t.tags,
-        order: t.order,
-        isSystem: t.isSystem,
-        authorName: t.authorName ?? null,
-        nodeCount: t.nodes.length,
-        totalHours: t.nodes.reduce((s, n) => s + n.estimatedHours, 0),
-      }));
+      .map((t) => {
+        // Aggregate node tags into a flat unique set so the browser can
+        // surface granular keywords without reading the full nodes array.
+        const nodeTags = new Set<string>();
+        for (const n of t.nodes) {
+          for (const tag of n.tags ?? []) nodeTags.add(tag);
+        }
+        // Compute difficulty mix — useful for filter chips + table column.
+        const difficultyMix = { beginner: 0, intermediate: 0, advanced: 0 };
+        for (const n of t.nodes) {
+          if (n.difficulty === "beginner") difficultyMix.beginner++;
+          else if (n.difficulty === "intermediate") difficultyMix.intermediate++;
+          else if (n.difficulty === "advanced") difficultyMix.advanced++;
+        }
+        return {
+          _id: t._id,
+          _creationTime: t._creationTime,
+          title: t.title,
+          slug: t.slug,
+          domain: t.domain,
+          icon: t.icon,
+          color: t.color,
+          description: t.description,
+          tags: t.tags,
+          nodeTags: Array.from(nodeTags),
+          difficultyMix,
+          order: t.order,
+          isSystem: t.isSystem,
+          authorName: t.authorName ?? null,
+          nodeCount: t.nodes.length,
+          totalHours: t.nodes.reduce((s, n) => s + n.estimatedHours, 0),
+          manifest: t.manifest ?? null,
+          config: t.config ?? null,
+        };
+      });
   },
 });
 
@@ -164,6 +184,26 @@ export const listMyTemplates = query({
       .withIndex("by_author", (q) => q.eq("authorId", userId))
       .order("asc")
       .collect();
+  },
+});
+
+/**
+ * Aggregate user count per template. Returns a `{ [templateId]: count }`
+ * map for the browser's popularity sort. Full-table scan over
+ * `skillRoadmaps`; acceptable while `count(skillRoadmaps) ≪ 100k`. Move
+ * to a denormalised counter on `roadmapTemplates` if it grows past that.
+ */
+export const getTemplateUsageCounts = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("skillRoadmaps").collect();
+    const counts: Record<string, number> = {};
+    for (const r of all) {
+      if (!r.templateId) continue;
+      const id = String(r.templateId);
+      counts[id] = (counts[id] ?? 0) + 1;
+    }
+    return counts;
   },
 });
 

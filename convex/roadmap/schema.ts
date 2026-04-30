@@ -4,6 +4,9 @@ import { v } from "convex/values";
 /**
  * Shared validator for a single template node — exported so admin and
  * publish mutations can reuse the same shape (one source of truth).
+ *
+ * `tags` lets the UI group/search nodes by skill keyword (e.g. "react",
+ * "fundamentals", "ssr") on top of the broader `category` field.
  */
 export const templateNodeValidator = v.object({
   id: v.string(),
@@ -14,6 +17,7 @@ export const templateNodeValidator = v.object({
   prerequisites: v.array(v.string()),
   parentId: v.optional(v.string()),
   category: v.optional(v.string()),
+  tags: v.optional(v.array(v.string())),
   resources: v.array(v.object({
     id: v.string(),
     title: v.string(),
@@ -21,6 +25,30 @@ export const templateNodeValidator = v.object({
     url: v.string(),
     free: v.boolean(),
   })),
+});
+
+/**
+ * Manifest = declarative metadata about the roadmap. Mirrors the spirit
+ * of a package.json or PWA manifest so external tools (export, share,
+ * embed) can introspect the roadmap.
+ */
+export const templateManifestValidator = v.object({
+  version: v.optional(v.string()),
+  license: v.optional(v.string()),
+  language: v.optional(v.string()),
+  outcomes: v.optional(v.array(v.string())),
+  prerequisites: v.optional(v.array(v.string())),
+  targetAudience: v.optional(v.string()),
+});
+
+/**
+ * Config = behaviour knobs (gamification theme, XP weighting, etc.).
+ * All optional with sensible client-side defaults.
+ */
+export const templateConfigValidator = v.object({
+  xpPerHour: v.optional(v.number()),
+  theme: v.optional(v.string()),       // "warrior" | "scholar" | "explorer" | "artisan"
+  questFlavor: v.optional(v.string()), // human prose for quest-log style
 });
 
 /**
@@ -71,6 +99,8 @@ export const roadmapTables = {
     order: v.number(),
     authorId: v.optional(v.id("users")),
     authorName: v.optional(v.string()),
+    manifest: v.optional(templateManifestValidator),
+    config: v.optional(templateConfigValidator),
   })
     .index("by_slug", ["slug"])
     .index("by_domain", ["domain"])

@@ -8,15 +8,14 @@ import {
   Code, Server, Cloud, BarChart3, Palette, Smartphone,
   Clock, Target, Star, Play, TrendingUp, Calculator,
   Users, Kanban, Handshake, Headphones, Image,
-  Layout, Sparkles, Lightbulb, Search,
+  Layout, Sparkles, Lightbulb,
   GraduationCap, Heart, Building2, Truck, Landmark,
   Briefcase, DollarSign, PiggyBank, UserCog, Megaphone,
   Camera, Mic, Globe, Stethoscope, ShoppingCart,
-  ChefHat, HeartHandshake, Gavel, FlaskConical, X,
+  ChefHat, HeartHandshake, Gavel, FlaskConical, Swords,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
 import { ResponsivePageHeader } from '@/shared/components/ui/responsive-page-header';
 import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
@@ -32,6 +31,9 @@ import { notify } from "@/shared/lib/notify";
 import { api } from '../../../../../convex/_generated/api';
 import type { RoadmapResource as Resource } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
+import { RoadmapBrowser, type BrowserCategory } from './RoadmapBrowser';
+import { GamificationPanel } from './GamificationPanel';
+import { useRoadmapGamification } from '../hooks/useRoadmapGamification';
 
 // ---- Icon registry (expanded for all 42+ template categories) ----
 const iconMap: Record<string, React.ElementType> = {
@@ -41,7 +43,7 @@ const iconMap: Record<string, React.ElementType> = {
   Truck, Landmark, Briefcase, DollarSign, PiggyBank, UserCog,
   Megaphone, Camera, Mic, Globe, Stethoscope, ShoppingCart,
   ChefHat, HeartHandshake, Gavel, FlaskConical, BookOpen,
-  Target, Star, Trophy,
+  Target, Star, Trophy, Swords,
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -134,6 +136,8 @@ type TemplateNode = {
   estimatedHours: number;
   prerequisites: string[];
   parentId?: string;
+  category?: string;
+  tags?: string[];
   resources: Array<{ id: string; title: string; type: string; url: string; free: boolean }>;
 };
 
@@ -193,19 +197,27 @@ interface RoadmapNodeProps {
   node: SimpleRoadmapNode;
   level?: number;
   completedNodes: Set<string>;
+  activeQuestId?: string | null;
   onToggle: (nodeId: string, e: React.MouseEvent) => void;
   onSelect: (node: SimpleRoadmapNode) => void;
 }
 
-function RoadmapNodeComponent({ node, level = 0, completedNodes, onToggle, onSelect }: RoadmapNodeProps) {
+function RoadmapNodeComponent({ node, level = 0, completedNodes, activeQuestId, onToggle, onSelect }: RoadmapNodeProps) {
   const isCompleted = completedNodes.has(node.id);
   const hasChildren = node.children && node.children.length > 0;
   const isLocked = node.prerequisites.length > 0 && !node.prerequisites.every(prereq => completedNodes.has(prereq));
+  const isActive = node.id === activeQuestId;
+  const isBoss = node.difficulty === 'advanced';
 
   return (
     <div className={cn('relative', level > 0 && 'ml-8 mt-4')}>
       {level > 0 && (
         <div className="absolute -left-6 top-6 w-6 h-px bg-muted" />
+      )}
+
+      {/* Active-quest pulse ring — only on the next-up node */}
+      {isActive && (
+        <div className="absolute -inset-0.5 rounded-2xl ring-2 ring-brand/60 animate-pulse pointer-events-none" />
       )}
 
       <div
@@ -215,7 +227,9 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, onToggle, onSel
             ? 'border-success bg-success/10'
             : isLocked
               ? 'border-border bg-muted/50 opacity-60'
-              : 'border-border bg-card hover:border-brand hover:shadow-md'
+              : isActive
+                ? 'border-brand bg-brand-muted/40 shadow-lg'
+                : 'border-border bg-card hover:border-brand hover:shadow-md'
         )}
         onClick={() => !isLocked && onSelect(node)}
       >
@@ -251,6 +265,11 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, onToggle, onSel
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
+            {isActive && !isCompleted && !isLocked && (
+              <Badge className="text-[10px] bg-brand text-brand-foreground">
+                <Play className="w-3 h-3 mr-1" /> Quest Aktif
+              </Badge>
+            )}
             <Badge
               variant="secondary"
               className={cn(
@@ -260,7 +279,8 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, onToggle, onSel
                 node.difficulty === 'advanced' && 'bg-destructive/10 text-destructive',
               )}
             >
-              {getDifficultyLabel(node.difficulty)}
+              {isBoss && <Swords className="w-3 h-3 mr-1" />}
+              {isBoss ? 'BOSS · Lanjutan' : getDifficultyLabel(node.difficulty)}
             </Badge>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="w-3.5 h-3.5" />
@@ -288,6 +308,7 @@ function RoadmapNodeComponent({ node, level = 0, completedNodes, onToggle, onSel
               node={child}
               level={level + 1}
               completedNodes={completedNodes}
+              activeQuestId={activeQuestId}
               onToggle={onToggle}
               onSelect={onSelect}
             />
@@ -305,10 +326,10 @@ export function SkillRoadmap() {
   const [selectedNode, setSelectedNode] = useState<SimpleRoadmapNode | null>(null);
   const [completedNodes, setCompletedNodes] = useState<Set<string>>(new Set());
   const [domainFilter, setDomainFilter] = useState<string>('all');
-  const [search, setSearch] = useState('');
 
   const roadmap = useQuery(api.roadmap.queries.getUserRoadmap);
   const dbTemplates = useQuery(api.roadmap.templates.listPublicTemplates);
+  const usageCounts = useQuery(api.roadmap.templates.getTemplateUsageCounts);
   const dbTemplate = useQuery(
     api.roadmap.templates.getTemplateBySlug,
     { slug: selectedCategory },
@@ -426,6 +447,26 @@ export function SkillRoadmap() {
       });
   };
 
+  // Active quest = first uncompleted unlocked node (depth-first).
+  // Highlighted in the tree so the user always knows what's next.
+  const nextQuestId = useMemo<string | null>(() => {
+    function find(list: SimpleRoadmapNode[]): string | null {
+      for (const n of list) {
+        const locked =
+          n.prerequisites.length > 0 &&
+          !n.prerequisites.every((p) => completedNodes.has(p));
+        const done = completedNodes.has(n.id);
+        if (!done && !locked) return n.id;
+        if (n.children) {
+          const c = find(n.children);
+          if (c) return c;
+        }
+      }
+      return null;
+    }
+    return find(roadmapData);
+  }, [roadmapData, completedNodes]);
+
   // Map node ID → title for prerequisite display in the detail dialog
   const nodeIdToTitle = useMemo(() => {
     const map = new Map<string, string>();
@@ -445,10 +486,29 @@ export function SkillRoadmap() {
   const totalNodes = countNodes(roadmapData);
   const progress = totalNodes > 0 ? Math.round((completedNodes.size / totalNodes) * 100) : 0;
 
-  // Category list from DB; fall back to hardcoded when DB is empty
-  const allCategories = useMemo(() => {
-    if (dbTemplates === undefined) return []; // still loading
-    if (dbTemplates.length === 0) return FALLBACK_CATEGORIES;
+  // Build BrowserCategory[] feed for the new browser component
+  const browserCategories: BrowserCategory[] = useMemo(() => {
+    if (dbTemplates === undefined) return [];
+    if (dbTemplates.length === 0) {
+      // Hardcoded fallback when DB is empty — keeps the page usable
+      return FALLBACK_CATEGORIES.map((c) => ({
+        id: c.id,
+        name: c.name,
+        icon: c.icon,
+        color: c.color,
+        description: c.description,
+        domain: c.domain,
+        nodeCount: c.nodeCount,
+        totalHours: c.totalHours,
+        isSystem: c.isSystem,
+        authorName: c.authorName,
+        tags: [],
+        nodeTags: [],
+        difficultyMix: { beginner: 0, intermediate: 0, advanced: 0 },
+        popularity: 0,
+        creationTime: 0,
+      }));
+    }
     return dbTemplates.map((t) => ({
       id: t.slug,
       name: t.title,
@@ -460,27 +520,26 @@ export function SkillRoadmap() {
       totalHours: t.totalHours,
       isSystem: t.isSystem,
       authorName: t.authorName ?? null,
+      tags: t.tags ?? [],
+      nodeTags: t.nodeTags ?? [],
+      difficultyMix: t.difficultyMix ?? { beginner: 0, intermediate: 0, advanced: 0 },
+      popularity: usageCounts?.[String(t._id)] ?? 0,
+      creationTime: t._creationTime,
     }));
-  }, [dbTemplates]);
+  }, [dbTemplates, usageCounts]);
 
   const domains = useMemo(
-    () => ['all', ...Array.from(new Set(allCategories.map((c) => c.domain)))],
-    [allCategories],
+    () => ['all', ...Array.from(new Set(browserCategories.map((c) => c.domain)))],
+    [browserCategories],
   );
 
-  const filteredCategories = useMemo(() => {
-    let list = allCategories;
-    if (domainFilter !== 'all') list = list.filter((c) => c.domain === domainFilter);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      list = list.filter((c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
-    }
-    return list;
-  }, [allCategories, domainFilter, search]);
-
-  const activeCategory = allCategories.find((c) => c.id === selectedCategory);
-
+  const activeCategory = browserCategories.find((c) => c.id === selectedCategory);
   const templatesLoading = dbTemplates === undefined;
+
+  // Gamification stats — XP/Level/Streak/Achievements derived from the
+  // current roadmap doc (single per user). Re-runs only when skills or
+  // domain changes thanks to the hook's internal memo.
+  const gamification = useRoadmapGamification(roadmap, activeCategory?.domain ?? null);
 
   return (
     <PageContainer size="lg">
@@ -496,107 +555,25 @@ export function SkillRoadmap() {
         description="Jalur pembelajaran terstruktur untuk menguasai skill yang diminati"
       />
 
-      {/* Category browser */}
-      <div className="space-y-4 mb-8">
-        {/* Domain filter tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {(templatesLoading ? [] : domains).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDomainFilter(d)}
-              className={cn(
-                'flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
-                domainFilter === d
-                  ? 'bg-brand text-brand-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {d === 'all' ? 'Semua' : (DOMAIN_LABELS[d] ?? d)}
-            </button>
-          ))}
-          {templatesLoading && (
-            <div className="flex gap-2">
-              {[1,2,3,4].map(i => <Skeleton key={i} className="h-8 w-20 rounded-full" />)}
-            </div>
-          )}
+      {/* Gamification HUD — RPG-style level/XP/streak/achievements */}
+      {roadmap && (
+        <div className="mb-6">
+          <GamificationPanel stats={gamification} domainLabel={activeCategory?.domain} />
         </div>
+      )}
 
-        {/* Search */}
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Cari roadmap..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Category grid */}
-        {templatesLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-3">
-            {Array.from({ length: 14 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
-            ))}
-          </div>
-        ) : filteredCategories.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4">
-            {allCategories.length === 0
-              ? "Belum ada template. Admin dapat memuat template default dari panel admin."
-              : "Tidak ada roadmap yang cocok."}
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-3">
-            {filteredCategories.map((cat) => {
-              const Icon = iconMap[cat.icon] ?? Code;
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  title={cat.description}
-                  className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 text-left',
-                    isSelected
-                      ? 'border-brand bg-brand-muted'
-                      : 'border-border bg-card hover:border-brand hover:bg-muted/50'
-                  )}
-                >
-                  <div className={cn(
-                    'w-10 h-10 rounded-lg flex items-center justify-center',
-                    cat.color,
-                    isSelected && 'ring-4 ring-brand',
-                  )}>
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <span className={cn(
-                    'text-xs font-medium text-center leading-tight',
-                    isSelected ? 'text-brand' : 'text-foreground',
-                  )}>
-                    {cat.name}
-                  </span>
-                  {cat.nodeCount > 0 && (
-                    <span className="text-[10px] text-muted-foreground">{cat.nodeCount} topik</span>
-                  )}
-                  {!cat.isSystem && cat.authorName && (
-                    <span className="text-[9px] bg-muted text-muted-foreground rounded px-1 py-0.5 leading-none truncate max-w-full">
-                      by {cat.authorName}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* Browser — search, sort, filter, grid/table toggle */}
+      <RoadmapBrowser
+        categories={browserCategories}
+        loading={templatesLoading}
+        selectedId={selectedCategory}
+        onSelect={setSelectedCategory}
+        domainFilter={domainFilter}
+        onDomainFilterChange={setDomainFilter}
+        domainOptions={domains}
+        domainLabels={DOMAIN_LABELS}
+        iconMap={iconMap}
+      />
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Roadmap tree */}
@@ -631,6 +608,7 @@ export function SkillRoadmap() {
                       key={n.id}
                       node={n}
                       completedNodes={completedNodes}
+                      activeQuestId={nextQuestId}
                       onToggle={toggleNodeCompletion}
                       onSelect={setSelectedNode}
                     />
