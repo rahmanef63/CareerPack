@@ -1,6 +1,11 @@
 # Progress Tracker
 
-Last updated: 2026-04-20.
+Last updated: 2026-05-01.
+
+## Recent batches
+
+- [2026-05-01 — Slice refactor batch + seed URL cleanup](./progress/2026-05-01-slice-refactor-batch.md): 22 long files split, 10 slices reorganized to canonical layout, `TemplateNode` hoisted to `@/shared/types`, PB v2 iframe `#deckMount` null-guarded, 340 placeholder learning URLs replaced across 41 seed JSONs, refactor rules persisted to `.claude/skills/slice-refactor/`.
+- [2026-04-25 — Convex restructure](./progress/2026-04-25-convex-restructure.md): flat `convex/` files reshaped into 17 domain folders mirroring frontend slices.
 
 ## Current Stack
 
