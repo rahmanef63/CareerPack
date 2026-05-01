@@ -147,11 +147,18 @@ export const requestReset = mutation({
  */
 export const deliverResetEmail = internalAction({
   args: { to: v.string(), rawToken: v.string() },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const baseUrl = (process.env.APP_URL ?? "https://careerpack.local").replace(/\/$/, "");
     const link = `${baseUrl}/reset-password/${encodeURIComponent(args.rawToken)}`;
-    const { subject, html, text } = renderResetEmail(link);
-    const result = await sendEmail({ to: args.to, subject, html, text, tag: "password-reset" });
+    const { subject, html, text } = await renderResetEmail(link, args.to);
+    const result = await sendEmail(ctx, {
+      to: args.to,
+      subject,
+      html,
+      text,
+      tag: "password-reset",
+      alwaysSend: true, // security mail — bypass marketing unsubscribe list
+    });
     if (!result.ok) {
       console.error(`[password-reset] email delivery failed reason=${result.reason} to=${args.to}`);
     }

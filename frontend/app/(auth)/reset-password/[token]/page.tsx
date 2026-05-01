@@ -5,7 +5,7 @@ import { use, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { notify } from "@/shared/lib/notify";
-import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Inbox, Lock } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import { AuthShell } from "@/shared/containers/AuthShell";
 import { Button } from "@/shared/components/ui/button";
@@ -69,6 +69,13 @@ export default function ResetPasswordPage({ params }: PageProps) {
       description="Masukkan kata sandi baru untuk akun Anda."
     >
       <div className="space-y-4">
+        <Alert className="text-xs">
+          <Inbox className="h-3.5 w-3.5" />
+          <AlertDescription>
+            Tautan ini kedaluwarsa 30 menit setelah dikirim. Kalau kamu meminta
+            beberapa kali, hanya tautan terakhir yang valid.
+          </AlertDescription>
+        </Alert>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="password">Kata sandi baru</Label>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useMutation } from "convex/react";
-import { ArrowLeft, CheckCircle2, Mail } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Inbox, Mail } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
 import { AuthShell } from "@/shared/containers/AuthShell";
 import { Button } from "@/shared/components/ui/button";
@@ -39,13 +39,27 @@ export default function ForgotPasswordPage() {
     >
       <div className="space-y-4">
         {submitted ? (
-          <Alert className="bg-success/10 border-success/30">
-            <CheckCircle2 className="h-4 w-4 text-success" />
-            <AlertDescription className="text-success">
-              Jika email Anda terdaftar, kami sudah menyiapkan tautan reset
-              sandi. Cek inbox atau hubungi admin untuk mendapatkan tautan.
-            </AlertDescription>
-          </Alert>
+          <div className="space-y-3">
+            <Alert className="bg-success/10 border-success/30">
+              <CheckCircle2 className="h-4 w-4 text-success" />
+              <AlertDescription className="text-success">
+                Jika email Anda terdaftar, kami sudah mengirim tautan reset
+                sandi. Tautan berlaku 30 menit.
+              </AlertDescription>
+            </Alert>
+            <Alert>
+              <Inbox className="h-4 w-4" />
+              <AlertDescription className="space-y-1">
+                <strong className="block">Email belum masuk?</strong>
+                <span className="block text-sm text-muted-foreground">
+                  Cek folder <strong>Spam</strong> atau <strong>Promotions</strong>.
+                  Domain kami baru — sebagian provider belum mengenali. Tandai email
+                  dari <code>support@careerpack.org</code> sebagai &quot;Bukan Spam&quot;
+                  supaya pesan berikutnya masuk inbox.
+                </span>
+              </AlertDescription>
+            </Alert>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

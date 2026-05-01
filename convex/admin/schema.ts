@@ -14,6 +14,16 @@ export const observabilityTables = {
   // Email delivery events from the Resend webhook. One row per event;
   // `verified` flags whether the Svix signature checked out (false =
   // RESEND_WEBHOOK_SECRET unset or signature mismatch — treat as advisory).
+  // Recipients that opted out of non-transactional mail (welcome,
+  // digests, marketing). Password reset + security alerts ignore this
+  // list (sent with `alwaysSend: true`).
+  emailUnsubscribes: defineTable({
+    email: v.string(),
+    reason: v.optional(v.string()),
+    source: v.string(),
+    unsubscribedAt: v.number(),
+  }).index("by_email", ["email"]),
+
   emailEvents: defineTable({
     eventId: v.string(),
     type: v.string(),

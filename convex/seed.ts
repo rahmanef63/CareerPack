@@ -266,11 +266,18 @@ export const seedForCurrentUser = mutation({
  */
 export const deliverWelcomeEmail = internalAction({
   args: { to: v.string(), fullName: v.string() },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     const baseUrl = (process.env.APP_URL ?? "https://careerpack.local").replace(/\/$/, "");
     const dashboardUrl = `${baseUrl}/dashboard`;
-    const { subject, html, text } = renderWelcomeEmail(args.fullName, dashboardUrl);
-    const result = await sendEmail({ to: args.to, subject, html, text, tag: "welcome" });
+    const { subject, html, text } = await renderWelcomeEmail(args.fullName, dashboardUrl, args.to);
+    const result = await sendEmail(ctx, {
+      to: args.to,
+      subject,
+      html,
+      text,
+      tag: "welcome",
+      // Welcome respects unsubscribe — user opted out of marketing.
+    });
     if (!result.ok) {
       console.error(`[welcome] email delivery failed reason=${result.reason} to=${args.to}`);
     }

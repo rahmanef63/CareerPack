@@ -101,9 +101,9 @@ export function LoginPage() {
                 name: registerName
             });
             if (result.ok) {
-                notify.success(`Selamat datang, ${registerName.split(' ')[0] || 'rekan'}! 🎉`, {
-                    description: 'Akun berhasil dibuat — mengarahkan ke dashboard…',
-                    duration: 3500,
+                notify.success(`Selamat datang, ${registerName.split(' ')[0] || 'rekan'}!`, {
+                    description: 'Akun aktif. Email sambutan dikirim — kalau tidak masuk inbox, cek folder Spam.',
+                    duration: 5500,
                 });
                 router.push('/dashboard');
             } else {
