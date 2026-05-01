@@ -270,7 +270,7 @@ export const deliverWelcomeEmail = internalAction({
     const baseUrl = (process.env.APP_URL ?? "https://careerpack.local").replace(/\/$/, "");
     const dashboardUrl = `${baseUrl}/dashboard`;
     const { subject, html, text } = renderWelcomeEmail(args.fullName, dashboardUrl);
-    const result = await sendEmail({ to: args.to, subject, html, text });
+    const result = await sendEmail({ to: args.to, subject, html, text, tag: "welcome" });
     if (!result.ok) {
       console.error(`[welcome] email delivery failed reason=${result.reason} to=${args.to}`);
     }

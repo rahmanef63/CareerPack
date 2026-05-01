@@ -21,6 +21,12 @@ export interface SendEmailInput {
   subject: string;
   html: string;
   text?: string;
+  /**
+   * Stable per-template tag for reputation tracking and Postmaster Tools.
+   * E.g. "password-reset", "welcome". Resend tags also let us filter
+   * deliverability per template in their dashboard.
+   */
+  tag?: string;
 }
 
 export type SendResult =
@@ -30,6 +36,10 @@ export type SendResult =
 export async function sendEmail(input: SendEmailInput): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM ?? "CareerPack <noreply@careerpack.local>";
+  // Reply-To address (defaults to support inbox so users can actually
+  // reply to transactional mail — a strong "real human" signal for
+  // Gmail's bayesian filter, more so than perfect SPF/DKIM).
+  const replyTo = process.env.EMAIL_REPLY_TO ?? extractAddress(from);
 
   if (!apiKey) {
     console.log(
@@ -37,6 +47,12 @@ export async function sendEmail(input: SendEmailInput): Promise<SendResult> {
     );
     return { ok: true, provider: "console" };
   }
+
+  // Generic mailto-form List-Unsubscribe — RFC 2369. Doesn't require a
+  // public endpoint, doesn't break transactional semantics, and is one
+  // of Gmail's "trusted sender" signals (per its 2024 bulk-sender rules).
+  // Better than no header even on a low-volume new domain.
+  const listUnsubscribe = `<mailto:${replyTo}?subject=Unsubscribe>`;
 
   try {
     const res = await fetch(RESEND_API, {
@@ -50,7 +66,13 @@ export async function sendEmail(input: SendEmailInput): Promise<SendResult> {
         to: [input.to],
         subject: input.subject,
         html: input.html,
+        reply_to: replyTo,
         ...(input.text ? { text: input.text } : {}),
+        ...(input.tag ? { tags: [{ name: "category", value: input.tag }] } : {}),
+        headers: {
+          "List-Unsubscribe": listUnsubscribe,
+          "X-Entity-Ref-ID": `${input.tag ?? "tx"}-${Date.now().toString(36)}`,
+        },
       }),
     });
     if (!res.ok) {
@@ -67,27 +89,29 @@ export async function sendEmail(input: SendEmailInput): Promise<SendResult> {
   }
 }
 
+/** Pull `addr@host` out of `Display Name <addr@host>` form. */
+function extractAddress(from: string): string {
+  const m = from.match(/<([^>]+)>/);
+  return m ? m[1].trim() : from.trim();
+}
+
 export function renderWelcomeEmail(fullName: string, dashboardUrl: string): { subject: string; html: string; text: string } {
-  const subject = "Selamat datang di CareerPack 🎉";
+  // Plain transactional voice — no emoji in subject/body, single CTA,
+  // short prose. Trade marketing flourish for inbox placement on a new
+  // domain. Once domain reputation builds (~weeks), we can re-introduce
+  // richer formatting if engagement metrics support it.
+  const subject = "Akun CareerPack kamu sudah aktif";
   const safeUrl = escapeHtml(dashboardUrl);
-  const safeName = escapeHtml(fullName || "Sahabat CareerPack");
+  const safeName = escapeHtml(fullName || "");
+  const greeting = safeName ? `Halo ${safeName},` : "Halo,";
   const html = `<!doctype html><html lang="id"><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:24px auto;padding:0 16px;color:#111827;background:#ffffff">
-  <h2 style="margin:0 0 16px;font-size:22px">Halo ${safeName} 👋</h2>
-  <p style="margin:0 0 12px;line-height:1.55">Selamat datang di <strong>CareerPack</strong> — toolkit karir untuk job-seeker Indonesia. Akun kamu sudah aktif, dan starter data (CV draft, checklist dokumen, roadmap skill) sudah disiapkan otomatis.</p>
-  <p style="margin:16px 0 12px;line-height:1.55"><strong>Mulai dari mana?</strong></p>
-  <ul style="margin:0 0 16px;padding-left:20px;line-height:1.7">
-    <li>📝 <strong>CV Generator</strong> — edit CV draft yang sudah jadi, ekspor PDF.</li>
-    <li>🎯 <strong>Skill Roadmap</strong> — pilih jalur karir, ikuti modul terstruktur.</li>
-    <li>📊 <strong>Career Dashboard</strong> — track lamaran, jadwal interview.</li>
-    <li>🤖 <strong>AI Agent</strong> — tanya saran karir, latihan interview.</li>
-  </ul>
-  <p style="margin:24px 0">
-    <a href="${safeUrl}" style="display:inline-block;padding:12px 22px;background:#0ea5e9;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600">Buka Dashboard</a>
-  </p>
-  <p style="margin:0 0 12px;font-size:13px;color:#6b7280">Tips: lengkapi profil di tab <em>Personal Branding</em> supaya AI suggestion lebih akurat.</p>
-  <p style="margin:0;font-size:13px;color:#6b7280">Ada pertanyaan? Reply email ini, tim kami baca semuanya.</p>
+  <p style="margin:0 0 12px;line-height:1.6">${greeting}</p>
+  <p style="margin:0 0 12px;line-height:1.6">Akun CareerPack kamu sudah aktif. Kami juga menyiapkan starter data (CV draft, checklist dokumen, dan roadmap skill) supaya kamu tidak mulai dari halaman kosong.</p>
+  <p style="margin:0 0 12px;line-height:1.6">Buka dashboard di sini: <a href="${safeUrl}" style="color:#0ea5e9">${safeUrl}</a></p>
+  <p style="margin:0 0 12px;line-height:1.6">Kalau ada pertanyaan, balas email ini langsung — kami yang baca.</p>
+  <p style="margin:24px 0 0;line-height:1.6">Salam,<br/>Tim CareerPack</p>
 </body></html>`;
-  const text = `Halo ${fullName || "Sahabat CareerPack"},\n\nSelamat datang di CareerPack — toolkit karir untuk job-seeker Indonesia. Akun kamu sudah aktif.\n\nMulai dari mana?\n- CV Generator: edit CV draft, ekspor PDF\n- Skill Roadmap: pilih jalur karir, ikuti modul\n- Career Dashboard: track lamaran + interview\n- AI Agent: tanya saran karir\n\nBuka dashboard: ${dashboardUrl}\n\nAda pertanyaan? Reply email ini.`;
+  const text = `${greeting}\n\nAkun CareerPack kamu sudah aktif. Kami juga menyiapkan starter data (CV draft, checklist dokumen, dan roadmap skill) supaya kamu tidak mulai dari halaman kosong.\n\nBuka dashboard di sini: ${dashboardUrl}\n\nKalau ada pertanyaan, balas email ini langsung — kami yang baca.\n\nSalam,\nTim CareerPack`;
   return { subject, html, text };
 }
 
