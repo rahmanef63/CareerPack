@@ -46,6 +46,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = useMutation(api.profile.mutations.createOrUpdateProfile);
   const seedForCurrentUser = useMutation(api.seed.seedForCurrentUser);
 
+  /**
+   * Run `seedForCurrentUser` with bounded retry. After `signIn` resolves,
+   * the WebSocket auth context can take ~50–500ms to attach (the token
+   * is installed by `auth:store` running asynchronously). Without retry,
+   * the seed mutation fires too early and throws "Tidak terautentikasi" —
+   * which is swallowed, so neither starter data nor the welcome email
+   * fire on the user's first login. 6 attempts × 200ms ≈ 1.2s budget.
+   */
+  const seedWithAuthWait = async () => {
+    const ATTEMPTS = 6;
+    const DELAY_MS = 200;
+    for (let i = 0; i < ATTEMPTS; i++) {
+      try {
+        await seedForCurrentUser({});
+        return;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        if (!/Tidak terautentikasi/i.test(msg) || i === ATTEMPTS - 1) throw err;
+        await new Promise((r) => setTimeout(r, DELAY_MS));
+      }
+    }
+  };
+
   const state = useMemo<AuthState>(() => {
     const isLoading = authLoading || (isAuthenticated && userProfile === undefined);
 
@@ -96,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       try {
-        await seedForCurrentUser({});
+        await seedWithAuthWait();
       } catch (seedError) {
         console.warn("Seed dilewati:", seedError);
       }
@@ -122,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         flow: "signUp",
       });
       try {
-        await seedForCurrentUser({});
+        await seedWithAuthWait();
       } catch (seedError) {
         console.warn("Seed dilewati:", seedError);
       }
@@ -146,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signIn("anonymous", {});
       try {
-        await seedForCurrentUser({});
+        await seedWithAuthWait();
       } catch (seedError) {
         console.warn("Seed demo dilewati:", seedError);
       }
