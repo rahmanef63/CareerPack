@@ -24,9 +24,20 @@ export const matcherTables = {
      *  changes rarely so this is essentially a one-shot per listing. */
     extractedKeywords: v.optional(v.array(v.string())),
     extractedKeywordsAt: v.optional(v.number()),
+    /** Provenance: `seed` (built-in fixtures), `remoteok`, `user-paste`,
+     *  …. Lets us prune stale fetched rows without touching curated seed
+     *  rows, and tag UI badges per source. */
+    source: v.optional(v.string()),
+    /** Stable per-source ID for dedupe on re-fetch. Format prefix:
+     *  `<source>:<id>` e.g. `remoteok:123456`. NULL for legacy seed rows. */
+    externalId: v.optional(v.string()),
+    /** User who pasted this listing (only when source="user-paste"). */
+    addedBy: v.optional(v.id("users")),
   })
     .index("by_posted", ["postedAt"])
-    .index("by_workMode", ["workMode", "postedAt"]),
+    .index("by_workMode", ["workMode", "postedAt"])
+    .index("by_external", ["externalId"])
+    .index("by_source_posted", ["source", "postedAt"]),
 
   /** History of ATS scans. Captures the FULL result (score breakdown,
    *  matched + missing keywords, format issues, recommendations) so the

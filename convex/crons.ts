@@ -30,4 +30,12 @@ crons.hourly(
   internal.calendar.reminders.sweepReminders,
 );
 
+// Daily RemoteOK feed pull. Free public JSON endpoint. Dedup by
+// `externalId` so re-fetch is idempotent. Only ingests new rows.
+crons.daily(
+  "remoteok-feed-fetch",
+  { hourUTC: 16, minuteUTC: 0 }, // 23:00 WIB — outside Resend Asia peak
+  internal.matcher.external.fetchRemoteOK,
+);
+
 export default crons;

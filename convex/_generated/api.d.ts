@@ -45,6 +45,7 @@ import type * as goals_queries from "../goals/queries.js";
 import type * as http from "../http.js";
 import type * as matcher_actions from "../matcher/actions.js";
 import type * as matcher_atsScore from "../matcher/atsScore.js";
+import type * as matcher_external from "../matcher/external.js";
 import type * as matcher_mutations from "../matcher/mutations.js";
 import type * as matcher_queries from "../matcher/queries.js";
 import type * as matcher_seedJobs from "../matcher/seedJobs.js";
@@ -114,6 +115,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "matcher/actions": typeof matcher_actions;
   "matcher/atsScore": typeof matcher_atsScore;
+  "matcher/external": typeof matcher_external;
   "matcher/mutations": typeof matcher_mutations;
   "matcher/queries": typeof matcher_queries;
   "matcher/seedJobs": typeof matcher_seedJobs;

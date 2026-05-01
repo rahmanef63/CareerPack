@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Compass, Download, ExternalLink, Sparkles, ScanText } from "lucide-react";
+import { Compass, Download, ExternalLink, Plus, Sparkles, ScanText } from "lucide-react";
 import { notify } from "@/shared/lib/notify";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
@@ -27,6 +27,7 @@ import { useMatcher } from "../hooks/useMatcher";
 import { JobCard } from "./JobCard";
 import { ATSScannerForm } from "./ATSScannerForm";
 import { ATSHistoryList } from "./ATSHistoryList";
+import { AddJobDialog } from "./AddJobDialog";
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 
 type TopTab = "listings" | "ats" | "history";
@@ -36,6 +37,7 @@ export function MatcherView() {
   const [filter, setFilter] = useState<WorkModeFilter>("all");
   const { jobs, matches, isLoading, seedDemo } = useMatcher(filter);
   const [seeding, setSeeding] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [detail, setDetail] = useState<JobListing | null>(null);
   /** When user clicks "Cek ATS" on a JobCard, we jump to the ATS tab
    *  with the listing preselected. */
@@ -72,20 +74,33 @@ export function MatcherView() {
         description="AI mencocokkan profil + scan ATS untuk CV Anda."
         actions={
           topTab === "listings" ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleSeed}
-              disabled={seeding}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              <span>{seeding ? "Memuat…" : "Muat Contoh Lowongan"}</span>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setAddOpen(true)}
+                className="gap-2 bg-brand hover:bg-brand"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Tambah Lowongan</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSeed}
+                disabled={seeding}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>{seeding ? "Memuat…" : "Muat Contoh"}</span>
+              </Button>
+            </div>
           ) : null
         }
       />
+
+      <AddJobDialog open={addOpen} onOpenChange={setAddOpen} />
 
       <Tabs value={topTab} onValueChange={(v) => setTopTab(v as TopTab)}>
         <TabsList variant="pills">
