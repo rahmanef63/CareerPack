@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "rek-r1",
-          "title": "Recruitment Fundamentals - Skill Academy",
+          "title": "Recruitment Fundamentals - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/recruitment-fundamentals",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "rek-r6",
-          "title": "Workforce Planning - Skill Academy",
+          "title": "Workforce Planning - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/workforce-planning",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -117,9 +117,9 @@
         },
         {
           "id": "rek-r10",
-          "title": "Sourcing Kandidat - Skill Academy",
+          "title": "Sourcing Kandidat - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/talent-sourcing",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -138,9 +138,9 @@
       "resources": [
         {
           "id": "rek-r11",
-          "title": "Interviewing Skills - Skill Academy",
+          "title": "Interviewing Skills - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/teknik-wawancara",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -186,9 +186,9 @@
         },
         {
           "id": "rek-r16",
-          "title": "Recruitment Tech - Skill Academy",
+          "title": "Recruitment Tech - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/recruitment-technology",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -213,9 +213,9 @@
         },
         {
           "id": "rek-r18",
-          "title": "Employer Branding - Skill Academy",
+          "title": "Employer Branding - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/employer-branding",
+          "url": "https://academy.hubspot.com/courses/inbound-marketing",
           "free": false
         },
         {
@@ -247,9 +247,9 @@
         },
         {
           "id": "rek-r21",
-          "title": "HR Analytics - Skill Academy",
+          "title": "HR Analytics - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/hr-analytics",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -282,9 +282,9 @@
         },
         {
           "id": "rek-r24",
-          "title": "Employee Retention - Skill Academy",
+          "title": "Employee Retention - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/employee-retention",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {

@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "tr-r1",
-          "title": "Training & Development - Skill Academy",
+          "title": "Training & Development - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/training-development",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "tr-r5",
-          "title": "Training Needs Analysis - Skill Academy",
+          "title": "Training Needs Analysis - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/training-needs-analysis",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -111,9 +111,9 @@
         },
         {
           "id": "tr-r9",
-          "title": "ID Fundamentals - Skill Academy",
+          "title": "ID Fundamentals - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/instructional-design",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -138,9 +138,9 @@
       "resources": [
         {
           "id": "tr-r11",
-          "title": "Facilitation Skills - Skill Academy",
+          "title": "Facilitation Skills - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/facilitation-skills",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -187,9 +187,9 @@
         },
         {
           "id": "tr-r16",
-          "title": "E-learning Development - Skill Academy",
+          "title": "E-learning Development - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/elearning-development",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -207,9 +207,9 @@
       "resources": [
         {
           "id": "tr-r17",
-          "title": "Kirkpatrick Model Guide - Skill Academy",
+          "title": "Kirkpatrick Model Guide - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/kirkpatrick-evaluation",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -248,9 +248,9 @@
         },
         {
           "id": "tr-r21",
-          "title": "Coaching & Mentoring - Skill Academy",
+          "title": "Coaching & Mentoring - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/coaching-mentoring",
+          "url": "https://www.coursera.org/specializations/leadership-coaching",
           "free": false
         },
         {
@@ -290,9 +290,9 @@
         },
         {
           "id": "tr-r25",
-          "title": "Sertifikasi Trainer - Skill Academy",
+          "title": "Sertifikasi Trainer - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/sertifikasi-trainer",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

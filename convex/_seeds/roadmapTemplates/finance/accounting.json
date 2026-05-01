@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "akun-r1",
-          "title": "Akuntansi Dasar - Skill Academy",
+          "title": "Akuntansi Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/akuntansi-dasar",
+          "url": "https://www.coursera.org/specializations/accounting-fundamentals",
           "free": false
         },
         {
@@ -83,9 +83,9 @@
         },
         {
           "id": "akun-r7",
-          "title": "Financial Reporting - Skill Academy",
+          "title": "Financial Reporting - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/laporan-keuangan-psak",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -110,9 +110,9 @@
         },
         {
           "id": "akun-r9",
-          "title": "Perpajakan Dasar - Skill Academy",
+          "title": "Perpajakan Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/perpajakan-dasar",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -152,9 +152,9 @@
         },
         {
           "id": "akun-r13",
-          "title": "Cost Accounting - Skill Academy",
+          "title": "Cost Accounting - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/akuntansi-biaya",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -186,9 +186,9 @@
         },
         {
           "id": "akun-r16",
-          "title": "SAP FICO Training - Skill Academy",
+          "title": "SAP FICO Training - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/sap-fico",
+          "url": "https://www.coursera.org/specializations/sap-implementation",
           "free": false
         }
       ]
@@ -213,9 +213,9 @@
         },
         {
           "id": "akun-r18",
-          "title": "Internal Audit - Skill Academy",
+          "title": "Internal Audit - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/internal-audit",
+          "url": "https://www.coursera.org/specializations/accounting-fundamentals",
           "free": false
         },
         {
@@ -254,9 +254,9 @@
         },
         {
           "id": "akun-r22",
-          "title": "Financial Analysis - Skill Academy",
+          "title": "Financial Analysis - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/analisis-laporan-keuangan",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -289,9 +289,9 @@
         },
         {
           "id": "akun-r25",
-          "title": "CA Prep - Skill Academy",
+          "title": "CA Prep - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/ca-preparation",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

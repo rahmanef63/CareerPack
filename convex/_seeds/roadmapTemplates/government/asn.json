@@ -48,9 +48,9 @@
         },
         {
           "id": "asn-r4",
-          "title": "Persiapan ASN - Skill Academy",
+          "title": "Persiapan ASN - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/persiapan-asn",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -90,9 +90,9 @@
         },
         {
           "id": "asn-r8",
-          "title": "Soal CPNS Online - Skill Academy",
+          "title": "Soal CPNS Online - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/cpns-skd",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -125,9 +125,9 @@
         },
         {
           "id": "asn-r11",
-          "title": "Materi SKB Bidang - Skill Academy",
+          "title": "Materi SKB Bidang - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/cpns-skb",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

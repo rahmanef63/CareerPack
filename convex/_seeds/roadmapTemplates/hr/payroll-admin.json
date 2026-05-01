@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "pay-r1",
-          "title": "Payroll Dasar - Skill Academy",
+          "title": "Payroll Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/payroll-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "pay-r6",
-          "title": "PPh 21 - Skill Academy",
+          "title": "PPh 21 - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pph-21-karyawan",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -151,9 +151,9 @@
         },
         {
           "id": "pay-r13",
-          "title": "Cuti Karyawan - Skill Academy",
+          "title": "Cuti Karyawan - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/manajemen-cuti",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -220,9 +220,9 @@
         },
         {
           "id": "pay-r19",
-          "title": "Kompensasi & Benefit - Skill Academy",
+          "title": "Kompensasi & Benefit - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/kompensasi-benefit",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -241,9 +241,9 @@
       "resources": [
         {
           "id": "pay-r20",
-          "title": "HR Reporting - Skill Academy",
+          "title": "HR Reporting - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/hr-reporting",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -255,9 +255,9 @@
         },
         {
           "id": "pay-r22",
-          "title": "Excel untuk HR - Petani Kode",
+          "title": "Excel untuk HR - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/excel-untuk-hr/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]
@@ -283,9 +283,9 @@
         },
         {
           "id": "pay-r24",
-          "title": "Payroll Audit - Skill Academy",
+          "title": "Payroll Audit - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/payroll-audit",
+          "url": "https://www.coursera.org/specializations/accounting-fundamentals",
           "free": false
         },
         {

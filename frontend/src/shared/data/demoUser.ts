@@ -326,7 +326,7 @@ export const DEMO_PORTFOLIO: ReadonlyArray<DemoPortfolioSeed> = [
     title: "Frontend Web Developer Expert",
     description: "Sertifikasi penguasaan React + state management + testing.",
     category: "certification",
-    link: "https://www.dicoding.com/certificates/rizky-demo",
+    link: "https://www.freecodecamp.org/certification/rizky-demo/front-end-development-libraries",
     techStack: [],
     dateOffsetDays: -290,
     featured: false,

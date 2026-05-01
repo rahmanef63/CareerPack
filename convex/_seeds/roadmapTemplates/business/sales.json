@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "sl-r1",
-          "title": "Dasar Sales - Skill Academy",
+          "title": "Dasar Sales - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/dasar-sales",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "sl-r5",
-          "title": "Lead Generation - Skill Academy",
+          "title": "Lead Generation - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/lead-generation",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -111,9 +111,9 @@
         },
         {
           "id": "sl-r9",
-          "title": "Negosiasi Bisnis - Skill Academy",
+          "title": "Negosiasi Bisnis - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/negosiasi-bisnis",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -152,9 +152,9 @@
         },
         {
           "id": "sl-r13",
-          "title": "CRM untuk Sales - Skill Academy",
+          "title": "CRM untuk Sales - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/crm-sales",
+          "url": "https://academy.hubspot.com",
           "free": false
         }
       ]
@@ -179,9 +179,9 @@
         },
         {
           "id": "sl-r15",
-          "title": "Account Management - Skill Academy",
+          "title": "Account Management - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/account-management",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -213,16 +213,16 @@
         },
         {
           "id": "sl-r18",
-          "title": "BD Strategy - Skill Academy",
+          "title": "BD Strategy - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/business-development",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
           "id": "sl-r19",
-          "title": "Market Expansion Guide - Petani Kode",
+          "title": "Market Expansion Guide - HubSpot Academy",
           "type": "article",
-          "url": "https://petanikode.com/business-development/",
+          "url": "https://academy.hubspot.com",
           "free": true
         }
       ]
@@ -254,9 +254,9 @@
         },
         {
           "id": "sl-r22",
-          "title": "Analytics untuk Sales - Skill Academy",
+          "title": "Analytics untuk Sales - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/sales-analytics",
+          "url": "https://academy.hubspot.com",
           "free": false
         }
       ]
@@ -274,9 +274,9 @@
       "resources": [
         {
           "id": "sl-r23",
-          "title": "Public Speaking - Skill Academy",
+          "title": "Public Speaking - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/public-speaking",
+          "url": "https://www.coursera.org/learn/public-speaking",
           "free": false
         },
         {

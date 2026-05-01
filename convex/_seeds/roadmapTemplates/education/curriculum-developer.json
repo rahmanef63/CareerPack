@@ -48,9 +48,9 @@
         },
         {
           "id": "cd-r4",
-          "title": "Curriculum Development - Skill Academy",
+          "title": "Curriculum Development - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/curriculum-development",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         }
       ]
@@ -76,9 +76,9 @@
         },
         {
           "id": "cd-r6",
-          "title": "Needs Assessment - Skill Academy",
+          "title": "Needs Assessment - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/needs-assessment",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -152,9 +152,9 @@
         },
         {
           "id": "cd-r13",
-          "title": "Perancangan Materi - Skill Academy",
+          "title": "Perancangan Materi - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/perancangan-materi",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         }
       ]
@@ -254,9 +254,9 @@
         },
         {
           "id": "cd-r22",
-          "title": "Blended Learning - Skill Academy",
+          "title": "Blended Learning - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/blended-learning-design",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         }
       ]

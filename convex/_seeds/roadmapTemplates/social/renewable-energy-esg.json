@@ -132,9 +132,9 @@
         },
         {
           "id": "re-r12",
-          "title": "Akuntansi Karbon - Skill Academy",
+          "title": "Akuntansi Karbon - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/akuntansi-karbon",
+          "url": "https://www.coursera.org/specializations/accounting-fundamentals",
           "free": false
         }
       ]
@@ -201,9 +201,9 @@
         },
         {
           "id": "re-r18",
-          "title": "Solar PV Design - Skill Academy",
+          "title": "Solar PV Design - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/solar-pv",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -243,9 +243,9 @@
         },
         {
           "id": "re-r22",
-          "title": "Pelaporan ESG Indonesia - Skill Academy",
+          "title": "Pelaporan ESG Indonesia - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/pelaporan-esg",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

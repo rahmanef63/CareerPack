@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "fs-r1",
-          "title": "Belajar Dasar Pemrograman Web - Dicoding",
+          "title": "Belajar Dasar Pemrograman Web - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/basic-web",
+          "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design",
           "free": true
         },
         {
@@ -48,9 +48,9 @@
         },
         {
           "id": "fs-r4",
-          "title": "Kursus Web Dasar - Skill Academy",
+          "title": "Kursus Web Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/web-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -69,16 +69,16 @@
       "resources": [
         {
           "id": "fs-r5",
-          "title": "React Web - Dicoding",
+          "title": "React Web - Codecademy",
           "type": "course",
-          "url": "https://dicoding.com/academies/react-web",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         },
         {
           "id": "fs-r6",
-          "title": "React + TypeScript - Programmer Zaman Now",
+          "title": "React + TypeScript - Learn TypeScript",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://learntypescript.dev",
           "free": true
         },
         {
@@ -111,16 +111,16 @@
       "resources": [
         {
           "id": "fs-r9",
-          "title": "Back-End Pemula - Dicoding",
+          "title": "Back-End Pemula - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/nodejs-beginner",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         },
         {
           "id": "fs-r10",
-          "title": "Node.js + Express - Programmer Zaman Now",
+          "title": "Node.js + Express - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
@@ -132,9 +132,9 @@
         },
         {
           "id": "fs-r12",
-          "title": "Sekolah Koding - Node.js",
+          "title": "Sekolah Koding - Node.js - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         }
       ]
@@ -153,9 +153,9 @@
       "resources": [
         {
           "id": "fs-r13",
-          "title": "PostgreSQL Tutorial - Programmer Zaman Now",
+          "title": "PostgreSQL Tutorial - Simplilearn YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=vh_Nco0ZSUg",
           "free": true
         },
         {
@@ -188,9 +188,9 @@
       "resources": [
         {
           "id": "fs-r16",
-          "title": "React Query Tutorial - Programmer Zaman Now",
+          "title": "React Query Tutorial - Codecademy",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         },
         {
@@ -222,9 +222,9 @@
       "resources": [
         {
           "id": "fs-r19",
-          "title": "JWT Auth - Programmer Zaman Now",
+          "title": "JWT Auth - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -236,9 +236,9 @@
         },
         {
           "id": "fs-r21",
-          "title": "Full Stack Auth - Sekolah Koding",
+          "title": "Full Stack Auth - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]
@@ -256,23 +256,23 @@
       "resources": [
         {
           "id": "fs-r22",
-          "title": "Docker - Dicoding",
+          "title": "Docker - Docker Official",
           "type": "course",
-          "url": "https://dicoding.com/academies/docker",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
           "id": "fs-r23",
-          "title": "Docker Compose - Programmer Zaman Now",
+          "title": "Docker Compose - Docker Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
           "id": "fs-r24",
-          "title": "Deploy VPS - Petani Kode",
+          "title": "Deploy VPS - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/deploy-nodejs-vps/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]
@@ -291,9 +291,9 @@
       "resources": [
         {
           "id": "fs-r25",
-          "title": "Next.js Tutorial - Programmer Zaman Now",
+          "title": "Next.js Tutorial - Next.js Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://nextjs.org/learn",
           "free": true
         },
         {
@@ -305,16 +305,16 @@
         },
         {
           "id": "fs-r27",
-          "title": "Next.js Full Stack - Sekolah Koding",
+          "title": "Next.js Full Stack - Next.js Official",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://nextjs.org/learn",
           "free": true
         },
         {
           "id": "fs-r28",
-          "title": "Next.js - Skill Academy",
+          "title": "Next.js - Next.js Official",
           "type": "course",
-          "url": "https://skillacademy.id/course/nextjs-fullstack",
+          "url": "https://nextjs.org/learn",
           "free": false
         }
       ]
@@ -332,9 +332,9 @@
       "resources": [
         {
           "id": "fs-r29",
-          "title": "Testing Full Stack - Programmer Zaman Now",
+          "title": "Testing Full Stack - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": true
         },
         {
@@ -366,9 +366,9 @@
       "resources": [
         {
           "id": "fs-r32",
-          "title": "GitHub Actions - Programmer Zaman Now",
+          "title": "GitHub Actions - GitHub Skills",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
@@ -380,9 +380,9 @@
         },
         {
           "id": "fs-r34",
-          "title": "CI/CD - Dicoding",
+          "title": "CI/CD - Simplilearn",
           "type": "course",
-          "url": "https://dicoding.com/academies/cicd",
+          "url": "https://www.simplilearn.com/free-ci-cd-online-training-course-skillup",
           "free": true
         }
       ]

@@ -27,16 +27,16 @@
       "resources": [
         {
           "id": "mob-r1",
-          "title": "JavaScript Dasar - Dicoding",
+          "title": "JavaScript Dasar - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/javascript-dasar",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
           "id": "mob-r2",
-          "title": "JavaScript Modern - Programmer Zaman Now",
+          "title": "JavaScript Modern - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
@@ -62,16 +62,16 @@
       "resources": [
         {
           "id": "mob-r4",
-          "title": "React Native - Dicoding",
+          "title": "React Native - freeCodeCamp YouTube",
           "type": "course",
-          "url": "https://dicoding.com/academies/react-native",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         },
         {
           "id": "mob-r5",
-          "title": "React Native Tutorial - Programmer Zaman Now",
+          "title": "React Native Tutorial - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         },
         {
@@ -83,9 +83,9 @@
         },
         {
           "id": "mob-r7",
-          "title": "React Native - Sekolah Koding",
+          "title": "React Native - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         }
       ]
@@ -111,16 +111,16 @@
         },
         {
           "id": "mob-r9",
-          "title": "React Navigation Tutorial - Programmer Zaman Now",
+          "title": "React Navigation Tutorial - Codecademy",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         },
         {
           "id": "mob-r10",
-          "title": "Mobile Navigation - Sekolah Koding",
+          "title": "Mobile Navigation - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]
@@ -138,9 +138,9 @@
       "resources": [
         {
           "id": "mob-r11",
-          "title": "State Management React Native - Programmer Zaman Now",
+          "title": "State Management React Native - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         },
         {
@@ -170,16 +170,16 @@
       "resources": [
         {
           "id": "mob-r14",
-          "title": "Flutter - Dicoding",
+          "title": "Flutter - Flutter Official",
           "type": "course",
-          "url": "https://dicoding.com/academies/flutter",
+          "url": "https://docs.flutter.dev/get-started/learn-more",
           "free": true
         },
         {
           "id": "mob-r15",
-          "title": "Flutter Tutorial - Programmer Zaman Now",
+          "title": "Flutter Tutorial - Flutter Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://docs.flutter.dev/get-started/learn-more",
           "free": true
         },
         {
@@ -191,9 +191,9 @@
         },
         {
           "id": "mob-r17",
-          "title": "Flutter - Sekolah Koding",
+          "title": "Flutter - Flutter Official",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://docs.flutter.dev/get-started/learn-more",
           "free": true
         }
       ]
@@ -211,9 +211,9 @@
       "resources": [
         {
           "id": "mob-r18",
-          "title": "API Integration React Native - Programmer Zaman Now",
+          "title": "API Integration React Native - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         },
         {
@@ -225,9 +225,9 @@
         },
         {
           "id": "mob-r20",
-          "title": "REST API di Flutter - Sekolah Koding",
+          "title": "REST API di Flutter - Flutter Official",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://docs.flutter.dev/get-started/learn-more",
           "free": true
         }
       ]
@@ -252,16 +252,16 @@
         },
         {
           "id": "mob-r22",
-          "title": "SQLite di Flutter - Programmer Zaman Now",
+          "title": "SQLite di Flutter - Simplilearn YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=vh_Nco0ZSUg",
           "free": true
         },
         {
           "id": "mob-r23",
-          "title": "Offline Strategy - Petani Kode",
+          "title": "Offline Strategy - freeCodeCamp YouTube",
           "type": "article",
-          "url": "https://petanikode.com/react-native-offline/",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         }
       ]
@@ -279,9 +279,9 @@
       "resources": [
         {
           "id": "mob-r24",
-          "title": "Firebase dengan React Native - Sekolah Koding",
+          "title": "Firebase dengan React Native - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         },
         {
@@ -314,9 +314,9 @@
       "resources": [
         {
           "id": "mob-r27",
-          "title": "Publish React Native - Programmer Zaman Now",
+          "title": "Publish React Native - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=sm5Y7Vtuihg",
           "free": true
         },
         {
@@ -335,9 +335,9 @@
         },
         {
           "id": "mob-r30",
-          "title": "Deployment Mobile - Skill Academy",
+          "title": "Deployment Mobile - Flutter Official",
           "type": "course",
-          "url": "https://skillacademy.id/course/mobile-deployment",
+          "url": "https://docs.flutter.dev/deployment",
           "free": false
         }
       ]

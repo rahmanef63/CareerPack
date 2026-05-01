@@ -48,9 +48,9 @@
         },
         {
           "id": "peng-r4",
-          "title": "Pengadaan Dasar - Skill Academy",
+          "title": "Pengadaan Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pengadaan-dasar",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         }
       ]
@@ -179,9 +179,9 @@
         },
         {
           "id": "peng-r15",
-          "title": "Manajemen Kontrak - Skill Academy",
+          "title": "Manajemen Kontrak - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/manajemen-kontrak-pengadaan",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -220,9 +220,9 @@
         },
         {
           "id": "peng-r19",
-          "title": "Ujian Pengadaan - Skill Academy",
+          "title": "Ujian Pengadaan - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/sertifikasi-pengadaan",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         }
       ]

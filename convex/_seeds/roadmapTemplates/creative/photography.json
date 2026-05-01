@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "foto-r1",
-          "title": "Fotografi Dasar - Skill Academy",
+          "title": "Fotografi Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/fotografi-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "foto-r6",
-          "title": "Photography Composition - Skill Academy",
+          "title": "Photography Composition - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/komposisi-fotografi",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -110,9 +110,9 @@
         },
         {
           "id": "foto-r9",
-          "title": "Studio Lighting - Skill Academy",
+          "title": "Studio Lighting - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/studio-lighting",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -144,9 +144,9 @@
         },
         {
           "id": "foto-r12",
-          "title": "Adobe Lightroom - Skill Academy",
+          "title": "Adobe Lightroom - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/lightroom",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -172,9 +172,9 @@
       "resources": [
         {
           "id": "foto-r14",
-          "title": "Product Photography - Skill Academy",
+          "title": "Product Photography - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/product-photography",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -206,9 +206,9 @@
       "resources": [
         {
           "id": "foto-r17",
-          "title": "Portrait Photography - Skill Academy",
+          "title": "Portrait Photography - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/portrait-photography",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -241,16 +241,16 @@
       "resources": [
         {
           "id": "foto-r20",
-          "title": "Photography Business Guide - Skill Academy",
+          "title": "Photography Business Guide - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/bisnis-fotografi",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
           "id": "foto-r21",
-          "title": "Freelance Photographer Tips - Petani Kode",
+          "title": "Freelance Photographer Tips - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/freelance-fotografer/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -275,9 +275,9 @@
       "resources": [
         {
           "id": "foto-r23",
-          "title": "Instagram Photography - Skill Academy",
+          "title": "Instagram Photography - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/instagram-photography",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -289,9 +289,9 @@
         },
         {
           "id": "foto-r25",
-          "title": "Foto untuk Konten Sosmed Guide",
+          "title": "Foto untuk Konten Sosmed Guide - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/foto-konten-sosmed/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]

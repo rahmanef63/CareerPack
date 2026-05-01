@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "pjm-r1",
-          "title": "Project Management Dasar - Skill Academy",
+          "title": "Project Management Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/project-management-dasar",
+          "url": "https://www.coursera.org/professional-certificates/google-project-management",
           "free": false
         },
         {
@@ -117,9 +117,9 @@
         },
         {
           "id": "pjm-r10",
-          "title": "Manajemen Risiko Proyek - Skill Academy",
+          "title": "Manajemen Risiko Proyek - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/risk-management",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -151,9 +151,9 @@
         },
         {
           "id": "pjm-r13",
-          "title": "Agile PM - Skill Academy",
+          "title": "Agile PM - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/agile-project-management",
+          "url": "https://www.coursera.org/professional-certificates/google-project-management",
           "free": false
         }
       ]
@@ -219,9 +219,9 @@
         },
         {
           "id": "pjm-r19",
-          "title": "Project Tools - Skill Academy",
+          "title": "Project Tools - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/project-management-tools",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -288,9 +288,9 @@
         },
         {
           "id": "pjm-r25",
-          "title": "PMP Prep - Skill Academy",
+          "title": "PMP Prep - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pmp-preparation",
+          "url": "https://www.coursera.org/professional-certificates/google-project-management",
           "free": false
         }
       ]

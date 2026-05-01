@@ -27,16 +27,16 @@
       "resources": [
         {
           "id": "be-r1",
-          "title": "Belajar Back-End Pemula dengan JavaScript - Dicoding",
+          "title": "Belajar Back-End Pemula dengan JavaScript - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/nodejs-beginner",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         },
         {
           "id": "be-r2",
-          "title": "Node.js Tutorial - Programmer Zaman Now",
+          "title": "Node.js Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
@@ -48,9 +48,9 @@
         },
         {
           "id": "be-r4",
-          "title": "Node.js untuk Pemula - Petani Kode",
+          "title": "Node.js untuk Pemula - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/nodejs-untuk-pemula/",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         }
       ]
@@ -69,16 +69,16 @@
       "resources": [
         {
           "id": "be-r5",
-          "title": "Belajar Membuat Aplikasi Back-End - Dicoding",
+          "title": "Belajar Membuat Aplikasi Back-End - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/nodejs-backend",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         },
         {
           "id": "be-r6",
-          "title": "Express.js Tutorial - Programmer Zaman Now",
+          "title": "Express.js Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -90,9 +90,9 @@
         },
         {
           "id": "be-r8",
-          "title": "REST API Tutorial - Sekolah Koding",
+          "title": "REST API Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         }
       ]
@@ -110,9 +110,9 @@
       "resources": [
         {
           "id": "be-r9",
-          "title": "PostgreSQL Tutorial - Programmer Zaman Now",
+          "title": "PostgreSQL Tutorial - Simplilearn YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=vh_Nco0ZSUg",
           "free": true
         },
         {
@@ -131,9 +131,9 @@
         },
         {
           "id": "be-r12",
-          "title": "SQL Dasar - Skill Academy",
+          "title": "SQL Dasar - Simplilearn YouTube",
           "type": "course",
-          "url": "https://skillacademy.id/course/sql-dasar",
+          "url": "https://www.youtube.com/watch?v=vh_Nco0ZSUg",
           "free": false
         }
       ]
@@ -152,9 +152,9 @@
       "resources": [
         {
           "id": "be-r13",
-          "title": "Prisma Tutorial - Programmer Zaman Now",
+          "title": "Prisma Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -166,9 +166,9 @@
         },
         {
           "id": "be-r15",
-          "title": "ORM di Node.js - Sekolah Koding",
+          "title": "ORM di Node.js - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         }
       ]
@@ -187,9 +187,9 @@
       "resources": [
         {
           "id": "be-r16",
-          "title": "JWT Tutorial - Programmer Zaman Now",
+          "title": "JWT Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -201,16 +201,16 @@
         },
         {
           "id": "be-r18",
-          "title": "Node.js Security - Petani Kode",
+          "title": "Node.js Security - Cybrary",
           "type": "article",
-          "url": "https://petanikode.com/nodejs-security/",
+          "url": "https://www.cybrary.it/free-content",
           "free": true
         },
         {
           "id": "be-r19",
-          "title": "API Security - Skill Academy",
+          "title": "API Security - Cybrary",
           "type": "course",
-          "url": "https://skillacademy.id/course/api-security",
+          "url": "https://www.cybrary.it/free-content",
           "free": false
         }
       ]
@@ -228,16 +228,16 @@
       "resources": [
         {
           "id": "be-r20",
-          "title": "Belajar Dasar Container dengan Docker - Dicoding",
+          "title": "Belajar Dasar Container dengan Docker - Docker Official",
           "type": "course",
-          "url": "https://dicoding.com/academies/docker",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
           "id": "be-r21",
-          "title": "Docker Tutorial - Programmer Zaman Now",
+          "title": "Docker Tutorial - Docker Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
@@ -262,9 +262,9 @@
       "resources": [
         {
           "id": "be-r23",
-          "title": "Redis Tutorial - Programmer Zaman Now",
+          "title": "Redis Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -296,9 +296,9 @@
       "resources": [
         {
           "id": "be-r26",
-          "title": "Testing Node.js - Programmer Zaman Now",
+          "title": "Testing Node.js - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": true
         },
         {
@@ -331,16 +331,16 @@
       "resources": [
         {
           "id": "be-r29",
-          "title": "Microservices - Programmer Zaman Now",
+          "title": "Microservices - freeCodeCamp YouTube",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.youtube.com/watch?v=RqTEHSBrYFw",
           "free": true
         },
         {
           "id": "be-r30",
-          "title": "Microservices - Dicoding",
+          "title": "Microservices - freeCodeCamp YouTube",
           "type": "course",
-          "url": "https://dicoding.com/academies/microservices",
+          "url": "https://www.youtube.com/watch?v=RqTEHSBrYFw",
           "free": true
         },
         {
@@ -365,9 +365,9 @@
       "resources": [
         {
           "id": "be-r32",
-          "title": "Node.js Monitoring - Programmer Zaman Now",
+          "title": "Node.js Monitoring - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {

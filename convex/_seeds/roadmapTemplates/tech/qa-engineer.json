@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "qa-r1",
-          "title": "Software Testing Dasar - Dicoding",
+          "title": "Software Testing Dasar - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/software-testing-dasar",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": true
         },
         {
@@ -48,9 +48,9 @@
         },
         {
           "id": "qa-r4",
-          "title": "QA Engineering - Skill Academy",
+          "title": "QA Engineering - freeCodeCamp",
           "type": "course",
-          "url": "https://skillacademy.id/course/qa-engineering",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": false
         }
       ]
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "qa-r5",
-          "title": "Manual Testing - Petani Kode",
+          "title": "Manual Testing - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/manual-testing/",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": true
         },
         {
@@ -110,16 +110,16 @@
         },
         {
           "id": "qa-r9",
-          "title": "Bug Reporting - Petani Kode",
+          "title": "Bug Reporting - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/cara-membuat-bug-report/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
           "id": "qa-r10",
-          "title": "Agile & Jira - Skill Academy",
+          "title": "Agile & Jira - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/agile-jira",
+          "url": "https://www.coursera.org/professional-certificates/google-project-management",
           "free": false
         }
       ]
@@ -137,9 +137,9 @@
       "resources": [
         {
           "id": "qa-r11",
-          "title": "Postman Tutorial - Programmer Zaman Now",
+          "title": "Postman Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -172,9 +172,9 @@
       "resources": [
         {
           "id": "qa-r14",
-          "title": "Playwright Tutorial - Programmer Zaman Now",
+          "title": "Playwright Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -186,16 +186,16 @@
         },
         {
           "id": "qa-r16",
-          "title": "Test Automation - Dicoding",
+          "title": "Test Automation - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/test-automation",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": true
         },
         {
           "id": "qa-r17",
-          "title": "Playwright Guide - Petani Kode",
+          "title": "Playwright Guide - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/playwright-testing/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]
@@ -247,9 +247,9 @@
       "resources": [
         {
           "id": "qa-r21",
-          "title": "Testing di GitHub Actions - Programmer Zaman Now",
+          "title": "Testing di GitHub Actions - GitHub Skills",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
@@ -261,9 +261,9 @@
         },
         {
           "id": "qa-r23",
-          "title": "CI/CD Testing - Petani Kode",
+          "title": "CI/CD Testing - Simplilearn",
           "type": "article",
-          "url": "https://petanikode.com/ci-cd-testing/",
+          "url": "https://www.simplilearn.com/free-ci-cd-online-training-course-skillup",
           "free": true
         }
       ]
@@ -288,9 +288,9 @@
         },
         {
           "id": "qa-r25",
-          "title": "ISTQB Foundation Prep - Skill Academy",
+          "title": "ISTQB Foundation Prep - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/istqb-foundation",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {

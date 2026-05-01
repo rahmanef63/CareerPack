@@ -34,9 +34,9 @@
         },
         {
           "id": "cw-r2",
-          "title": "Penulisan Konten Dasar - Skill Academy",
+          "title": "Penulisan Konten Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/penulisan-konten-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "cw-r5",
-          "title": "Copywriting Dasar - Skill Academy",
+          "title": "Copywriting Dasar - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/copywriting-dasar",
+          "url": "https://academy.hubspot.com/courses/content-marketing",
           "free": false
         },
         {
@@ -117,9 +117,9 @@
         },
         {
           "id": "cw-r10",
-          "title": "SEO Content - Skill Academy",
+          "title": "SEO Content - Google Digital Garage",
           "type": "course",
-          "url": "https://skillacademy.id/course/seo-content-writing",
+          "url": "https://learndigital.withgoogle.com/digitalgarage/course/digital-marketing",
           "free": false
         }
       ]
@@ -152,9 +152,9 @@
         },
         {
           "id": "cw-r13",
-          "title": "Content Planning - Skill Academy",
+          "title": "Content Planning - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/content-strategy",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -172,9 +172,9 @@
       "resources": [
         {
           "id": "cw-r14",
-          "title": "Social Media Copy - Skill Academy",
+          "title": "Social Media Copy - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/social-media-copywriting",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -213,9 +213,9 @@
         },
         {
           "id": "cw-r18",
-          "title": "Email Writing - Skill Academy",
+          "title": "Email Writing - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/email-copywriting",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -247,9 +247,9 @@
         },
         {
           "id": "cw-r21",
-          "title": "Long-form Writing - Skill Academy",
+          "title": "Long-form Writing - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/long-form-writing",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -274,9 +274,9 @@
       "resources": [
         {
           "id": "cw-r23",
-          "title": "AI Writing Tools Guide - Petani Kode",
+          "title": "AI Writing Tools Guide - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/ai-writing-tools/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {

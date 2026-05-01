@@ -34,9 +34,9 @@
         },
         {
           "id": "dm-r2",
-          "title": "Digital Marketing Fundamental - Skill Academy",
+          "title": "Digital Marketing Fundamental - GitHub Skills",
           "type": "course",
-          "url": "https://skillacademy.id/course/digital-marketing-fundamentals",
+          "url": "https://skills.github.com",
           "free": false
         },
         {
@@ -48,9 +48,9 @@
         },
         {
           "id": "dm-r4",
-          "title": "Dasar Digital Marketing - Dicoding",
+          "title": "Dasar Digital Marketing - RevoU",
           "type": "course",
-          "url": "https://dicoding.com/academies/digital-marketing-dasar",
+          "url": "https://www.revou.co/mini-course-digital-marketing",
           "free": true
         }
       ]
@@ -90,9 +90,9 @@
         },
         {
           "id": "dm-r8",
-          "title": "SEO Expert - Skill Academy",
+          "title": "SEO Expert - Google Digital Garage",
           "type": "course",
-          "url": "https://skillacademy.id/course/seo-expert",
+          "url": "https://learndigital.withgoogle.com/digitalgarage/course/digital-marketing",
           "free": false
         }
       ]
@@ -117,9 +117,9 @@
         },
         {
           "id": "dm-r10",
-          "title": "Google Ads - Skill Academy",
+          "title": "Google Ads - RevoU",
           "type": "course",
-          "url": "https://skillacademy.id/course/google-ads",
+          "url": "https://www.revou.co/mini-course-digital-marketing",
           "free": false
         },
         {
@@ -151,9 +151,9 @@
         },
         {
           "id": "dm-r13",
-          "title": "Social Media Marketing - Skill Academy",
+          "title": "Social Media Marketing - RevoU",
           "type": "course",
-          "url": "https://skillacademy.id/course/social-media-marketing",
+          "url": "https://www.revou.co/mini-course-digital-marketing",
           "free": false
         },
         {
@@ -179,9 +179,9 @@
       "resources": [
         {
           "id": "dm-r15",
-          "title": "Copywriting Dasar - Skill Academy",
+          "title": "Copywriting Dasar - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/copywriting-dasar",
+          "url": "https://academy.hubspot.com/courses/content-marketing",
           "free": false
         },
         {
@@ -220,9 +220,9 @@
         },
         {
           "id": "dm-r19",
-          "title": "Email Marketing - Skill Academy",
+          "title": "Email Marketing - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/email-marketing",
+          "url": "https://academy.hubspot.com/courses/content-marketing",
           "free": false
         },
         {
@@ -262,9 +262,9 @@
         },
         {
           "id": "dm-r23",
-          "title": "Marketing Analytics - Skill Academy",
+          "title": "Marketing Analytics - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/marketing-analytics",
+          "url": "https://academy.hubspot.com/courses/inbound-marketing",
           "free": false
         }
       ]
@@ -289,9 +289,9 @@
         },
         {
           "id": "dm-r25",
-          "title": "TikTok Ads - Skill Academy",
+          "title": "TikTok Ads - RevoU",
           "type": "course",
-          "url": "https://skillacademy.id/course/tiktok-ads",
+          "url": "https://www.revou.co/mini-course-digital-marketing",
           "free": false
         },
         {

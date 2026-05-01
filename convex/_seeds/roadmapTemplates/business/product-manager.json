@@ -27,16 +27,16 @@
       "resources": [
         {
           "id": "pm-r1",
-          "title": "Product Management Dasar - Skill Academy",
+          "title": "Product Management Dasar - Pendo",
           "type": "course",
-          "url": "https://skillacademy.id/course/product-management-dasar",
+          "url": "https://www.pendo.io/product-management-basics-certification/",
           "free": false
         },
         {
           "id": "pm-r2",
-          "title": "PM Fundamentals - Dicoding",
+          "title": "PM Fundamentals - Pendo",
           "type": "course",
-          "url": "https://dicoding.com/academies/product-management",
+          "url": "https://www.pendo.io/product-management-basics-certification/",
           "free": true
         },
         {
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "pm-r5",
-          "title": "User Research - Skill Academy",
+          "title": "User Research - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/user-research",
+          "url": "https://www.coursera.org/learn/business-analysis-fundamentals",
           "free": false
         },
         {
@@ -118,9 +118,9 @@
         },
         {
           "id": "pm-r10",
-          "title": "Product Vision - Skill Academy",
+          "title": "Product Vision - Pendo",
           "type": "course",
-          "url": "https://skillacademy.id/course/product-vision",
+          "url": "https://www.pendo.io/product-management-basics-certification/",
           "free": false
         }
       ]
@@ -138,9 +138,9 @@
       "resources": [
         {
           "id": "pm-r11",
-          "title": "Agile & Scrum - Skill Academy",
+          "title": "Agile & Scrum - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/agile-scrum",
+          "url": "https://www.coursera.org/professional-certificates/google-project-management",
           "free": false
         },
         {
@@ -180,9 +180,9 @@
         },
         {
           "id": "pm-r15",
-          "title": "Prioritization Frameworks - Skill Academy",
+          "title": "Prioritization Frameworks - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/product-prioritization",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -221,9 +221,9 @@
         },
         {
           "id": "pm-r19",
-          "title": "Product Metrics - Skill Academy",
+          "title": "Product Metrics - Pendo",
           "type": "course",
-          "url": "https://skillacademy.id/course/product-metrics",
+          "url": "https://www.pendo.io/product-management-basics-certification/",
           "free": false
         }
       ]
@@ -255,9 +255,9 @@
         },
         {
           "id": "pm-r22",
-          "title": "PRD Writing - Skill Academy",
+          "title": "PRD Writing - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/menulis-prd",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -289,9 +289,9 @@
         },
         {
           "id": "pm-r25",
-          "title": "Launch Strategy - Skill Academy",
+          "title": "Launch Strategy - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/product-launch",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

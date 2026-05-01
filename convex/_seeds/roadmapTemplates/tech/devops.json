@@ -27,16 +27,16 @@
       "resources": [
         {
           "id": "dops-r1",
-          "title": "Linux Dasar - Dicoding",
+          "title": "Linux Dasar - edX",
           "type": "course",
-          "url": "https://dicoding.com/academies/linux-dasar",
+          "url": "https://www.edx.org/learn/linux",
           "free": true
         },
         {
           "id": "dops-r2",
-          "title": "Linux Tutorial - Petani Kode",
+          "title": "Linux Tutorial - edX",
           "type": "article",
-          "url": "https://petanikode.com/linux-untuk-pemula/",
+          "url": "https://www.edx.org/learn/linux",
           "free": true
         },
         {
@@ -66,16 +66,16 @@
       "resources": [
         {
           "id": "dops-r5",
-          "title": "Git Dasar - Dicoding",
+          "title": "Git Dasar - GitHub Skills",
           "type": "course",
-          "url": "https://dicoding.com/academies/git-github",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
           "id": "dops-r6",
-          "title": "Git Tutorial - Petani Kode",
+          "title": "Git Tutorial - GitHub Skills",
           "type": "article",
-          "url": "https://petanikode.com/git-untuk-pemula/",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
@@ -101,16 +101,16 @@
       "resources": [
         {
           "id": "dops-r8",
-          "title": "Docker - Dicoding",
+          "title": "Docker - Docker Official",
           "type": "course",
-          "url": "https://dicoding.com/academies/docker",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
           "id": "dops-r9",
-          "title": "Docker Tutorial - Programmer Zaman Now",
+          "title": "Docker Tutorial - Docker Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
@@ -122,9 +122,9 @@
         },
         {
           "id": "dops-r11",
-          "title": "Docker - Sekolah Koding",
+          "title": "Docker - Docker Official",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         }
       ]
@@ -143,9 +143,9 @@
       "resources": [
         {
           "id": "dops-r12",
-          "title": "GitHub Actions - Programmer Zaman Now",
+          "title": "GitHub Actions - GitHub Skills",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
@@ -157,9 +157,9 @@
         },
         {
           "id": "dops-r14",
-          "title": "CI/CD - Dicoding",
+          "title": "CI/CD - Simplilearn",
           "type": "course",
-          "url": "https://dicoding.com/academies/cicd",
+          "url": "https://www.simplilearn.com/free-ci-cd-online-training-course-skillup",
           "free": true
         }
       ]
@@ -178,9 +178,9 @@
       "resources": [
         {
           "id": "dops-r15",
-          "title": "Kubernetes Tutorial - Programmer Zaman Now",
+          "title": "Kubernetes Tutorial - Docker Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.docker.com/101-tutorial/",
           "free": true
         },
         {
@@ -212,9 +212,9 @@
       "resources": [
         {
           "id": "dops-r18",
-          "title": "Terraform Tutorial - Programmer Zaman Now",
+          "title": "Terraform Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -246,9 +246,9 @@
       "resources": [
         {
           "id": "dops-r21",
-          "title": "Prometheus & Grafana - Programmer Zaman Now",
+          "title": "Prometheus & Grafana - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -314,9 +314,9 @@
       "resources": [
         {
           "id": "dops-r27",
-          "title": "Networking Dasar - Dicoding",
+          "title": "Networking Dasar - Google Cloud Skills Boost",
           "type": "course",
-          "url": "https://dicoding.com/academies/cloud-networking",
+          "url": "https://www.cloudskillsboost.google",
           "free": true
         },
         {

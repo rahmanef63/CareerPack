@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "ve-r1",
-          "title": "Videografi Dasar - Skill Academy",
+          "title": "Videografi Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/videografi-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "ve-r6",
-          "title": "Premiere Pro - Skill Academy",
+          "title": "Premiere Pro - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/premiere-pro",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -111,9 +111,9 @@
         },
         {
           "id": "ve-r9",
-          "title": "Color Grading - Skill Academy",
+          "title": "Color Grading - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/color-grading",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -145,9 +145,9 @@
         },
         {
           "id": "ve-r12",
-          "title": "After Effects Dasar - Skill Academy",
+          "title": "After Effects Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/after-effects-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -186,9 +186,9 @@
         },
         {
           "id": "ve-r16",
-          "title": "Sound Design - Skill Academy",
+          "title": "Sound Design - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/sound-design",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -207,9 +207,9 @@
       "resources": [
         {
           "id": "ve-r17",
-          "title": "YouTube Strategy - Skill Academy",
+          "title": "YouTube Strategy - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/youtube-strategy",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -241,9 +241,9 @@
       "resources": [
         {
           "id": "ve-r20",
-          "title": "TikTok Content Creation - Skill Academy",
+          "title": "TikTok Content Creation - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/tiktok-content",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -276,16 +276,16 @@
       "resources": [
         {
           "id": "ve-r23",
-          "title": "Freelance Video Editor Guide - Petani Kode",
+          "title": "Freelance Video Editor Guide - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/freelance-video-editor/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
           "id": "ve-r24",
-          "title": "Portfolio Video - Skill Academy",
+          "title": "Portfolio Video - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/portfolio-video-editor",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {

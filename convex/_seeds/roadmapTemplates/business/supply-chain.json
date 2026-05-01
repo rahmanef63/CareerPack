@@ -34,9 +34,9 @@
         },
         {
           "id": "sc-r2",
-          "title": "SCM Dasar - Skill Academy",
+          "title": "SCM Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/supply-chain-dasar",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "sc-r6",
-          "title": "Pengadaan Barang & Jasa - Skill Academy",
+          "title": "Pengadaan Barang & Jasa - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pengadaan-barang-jasa",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         },
         {
@@ -110,9 +110,9 @@
         },
         {
           "id": "sc-r9",
-          "title": "Warehouse Management - Skill Academy",
+          "title": "Warehouse Management - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/warehouse-management",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         },
         {
@@ -144,9 +144,9 @@
         },
         {
           "id": "sc-r12",
-          "title": "Logistik Indonesia - Skill Academy",
+          "title": "Logistik Indonesia - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/logistik-indonesia",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         },
         {
@@ -186,9 +186,9 @@
         },
         {
           "id": "sc-r16",
-          "title": "Demand Planning - Skill Academy",
+          "title": "Demand Planning - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/demand-planning",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         }
       ]
@@ -256,9 +256,9 @@
         },
         {
           "id": "sc-r22",
-          "title": "SCM Certification Prep - Skill Academy",
+          "title": "SCM Certification Prep - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/scm-certification",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         }
       ]
@@ -284,9 +284,9 @@
         },
         {
           "id": "sc-r24",
-          "title": "Lean Manufacturing - Skill Academy",
+          "title": "Lean Manufacturing - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/lean-manufacturing",
+          "url": "https://www.coursera.org/specializations/supply-chain-management",
           "free": false
         },
         {

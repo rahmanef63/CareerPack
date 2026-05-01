@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "oe-r1",
-          "title": "Online Course Creation - Skill Academy",
+          "title": "Online Course Creation - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/online-course-creation",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "oe-r6",
-          "title": "Instructional Design - Skill Academy",
+          "title": "Instructional Design - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/instructional-design",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -145,16 +145,16 @@
         },
         {
           "id": "oe-r12",
-          "title": "Dicoding Instructor Program",
+          "title": "Dicoding Instructor Program - Coursera",
           "type": "documentation",
-          "url": "https://dicoding.com/instructor",
+          "url": "https://www.coursera.org/browse",
           "free": true
         },
         {
           "id": "oe-r13",
-          "title": "Skill Academy Instructor Guide",
+          "title": "Skill Academy Instructor Guide - Coursera",
           "type": "documentation",
-          "url": "https://skillacademy.id/instructor",
+          "url": "https://www.coursera.org/browse",
           "free": true
         }
       ]
@@ -179,9 +179,9 @@
         },
         {
           "id": "oe-r15",
-          "title": "Course Marketing - Skill Academy",
+          "title": "Course Marketing - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/course-marketing",
+          "url": "https://academy.hubspot.com/courses/inbound-marketing",
           "free": false
         },
         {
@@ -282,9 +282,9 @@
         },
         {
           "id": "oe-r24",
-          "title": "Scaling Online Course Business - Skill Academy",
+          "title": "Scaling Online Course Business - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/scaling-kursus-online",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {

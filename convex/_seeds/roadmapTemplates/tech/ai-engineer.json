@@ -27,16 +27,16 @@
       "resources": [
         {
           "id": "ai-r1",
-          "title": "Belajar Dasar Pemrograman Python - Dicoding",
+          "title": "Belajar Dasar Pemrograman Python - University of Helsinki MOOC",
           "type": "course",
-          "url": "https://dicoding.com/academies/python-pemula",
+          "url": "https://programming-26.mooc.fi",
           "free": true
         },
         {
           "id": "ai-r2",
-          "title": "Python Tutorial - Programmer Zaman Now",
+          "title": "Python Tutorial - University of Helsinki MOOC",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://programming-26.mooc.fi",
           "free": true
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "ai-r6",
-          "title": "Statistika Dasar untuk Data Science - Skill Academy",
+          "title": "Statistika Dasar untuk Data Science - University of Helsinki MOOC",
           "type": "course",
-          "url": "https://skillacademy.id/course/statistika-data-science",
+          "url": "https://programming-26.mooc.fi",
           "free": false
         },
         {
@@ -104,9 +104,9 @@
       "resources": [
         {
           "id": "ai-r8",
-          "title": "Belajar Machine Learning untuk Pemula - Dicoding",
+          "title": "Belajar Machine Learning untuk Pemula - Coursera (Andrew Ng)",
           "type": "course",
-          "url": "https://dicoding.com/academies/machine-learning-pemula",
+          "url": "https://www.coursera.org/learn/machine-learning",
           "free": true
         },
         {
@@ -167,9 +167,9 @@
         },
         {
           "id": "ai-r15",
-          "title": "Deep Learning Dasar - Petani Kode",
+          "title": "Deep Learning Dasar - Coursera (Andrew Ng)",
           "type": "article",
-          "url": "https://petanikode.com/deep-learning",
+          "url": "https://www.coursera.org/learn/machine-learning",
           "free": true
         }
       ]
@@ -278,9 +278,9 @@
         },
         {
           "id": "ai-r25",
-          "title": "Building AI Agents - Skill Academy",
+          "title": "Building AI Agents - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/ai-agents",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

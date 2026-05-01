@@ -34,9 +34,9 @@
         },
         {
           "id": "en-r2",
-          "title": "Wirausaha Dasar - Skill Academy",
+          "title": "Wirausaha Dasar - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/wirausaha-dasar",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "en-r6",
-          "title": "Customer Discovery - Skill Academy",
+          "title": "Customer Discovery - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/customer-discovery",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -117,9 +117,9 @@
         },
         {
           "id": "en-r10",
-          "title": "Business Model - Skill Academy",
+          "title": "Business Model - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/business-model-canvas",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -144,9 +144,9 @@
         },
         {
           "id": "en-r12",
-          "title": "Keuangan Bisnis - Skill Academy",
+          "title": "Keuangan Bisnis - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/keuangan-bisnis-dasar",
+          "url": "https://www.coursera.org/specializations/wharton-business-foundations",
           "free": false
         },
         {
@@ -178,9 +178,9 @@
         },
         {
           "id": "en-r15",
-          "title": "Brand Building - Skill Academy",
+          "title": "Brand Building - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/brand-building",
+          "url": "https://academy.hubspot.com/courses/inbound-marketing",
           "free": false
         },
         {
@@ -212,9 +212,9 @@
         },
         {
           "id": "en-r18",
-          "title": "Legalitas Usaha - Skill Academy",
+          "title": "Legalitas Usaha - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/legalitas-usaha",
+          "url": "https://www.coursera.org/learn/business-law",
           "free": false
         },
         {
@@ -282,9 +282,9 @@
         },
         {
           "id": "en-r24",
-          "title": "Scaling Startup - Skill Academy",
+          "title": "Scaling Startup - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/scaling-startup",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {

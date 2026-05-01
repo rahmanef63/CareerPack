@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "fe-r1",
-          "title": "Belajar Dasar Pemrograman Web - Dicoding",
+          "title": "Belajar Dasar Pemrograman Web - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/basic-web",
+          "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design",
           "free": true
         },
         {
@@ -48,9 +48,9 @@
         },
         {
           "id": "fe-r4",
-          "title": "Kelas HTML & CSS - Skill Academy",
+          "title": "Kelas HTML & CSS - freeCodeCamp",
           "type": "course",
-          "url": "https://skillacademy.id/course/html-css-dasar",
+          "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design",
           "free": false
         }
       ]
@@ -69,23 +69,23 @@
       "resources": [
         {
           "id": "fe-r5",
-          "title": "Belajar Dasar Pemrograman JavaScript - Dicoding",
+          "title": "Belajar Dasar Pemrograman JavaScript - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/javascript-dasar",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
           "id": "fe-r6",
-          "title": "JavaScript Tutorial Pemula - Programmer Zaman Now",
+          "title": "JavaScript Tutorial Pemula - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
           "id": "fe-r7",
-          "title": "JavaScript untuk Pemula - Petani Kode",
+          "title": "JavaScript untuk Pemula - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/javascript-untuk-pemula/",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
@@ -111,16 +111,16 @@
       "resources": [
         {
           "id": "fe-r9",
-          "title": "Belajar JavaScript Lanjutan - Dicoding",
+          "title": "Belajar JavaScript Lanjutan - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/javascript-intermediate",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures-v8",
           "free": true
         },
         {
           "id": "fe-r10",
-          "title": "ES6+ JavaScript - Programmer Zaman Now",
+          "title": "ES6+ JavaScript - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures",
           "free": true
         },
         {
@@ -150,16 +150,16 @@
       "resources": [
         {
           "id": "fe-r13",
-          "title": "Belajar Dasar Git dengan GitHub - Dicoding",
+          "title": "Belajar Dasar Git dengan GitHub - GitHub Skills",
           "type": "course",
-          "url": "https://dicoding.com/academies/git-github",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
           "id": "fe-r14",
-          "title": "Git Tutorial - Petani Kode",
+          "title": "Git Tutorial - GitHub Skills",
           "type": "article",
-          "url": "https://petanikode.com/git-untuk-pemula/",
+          "url": "https://skills.github.com",
           "free": true
         },
         {
@@ -184,16 +184,16 @@
       "resources": [
         {
           "id": "fe-r16",
-          "title": "Belajar Membuat Aplikasi Web dengan React - Dicoding",
+          "title": "Belajar Membuat Aplikasi Web dengan React - Codecademy",
           "type": "course",
-          "url": "https://dicoding.com/academies/react-web",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         },
         {
           "id": "fe-r17",
-          "title": "React JS Tutorial - Programmer Zaman Now",
+          "title": "React JS Tutorial - Codecademy",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         },
         {
@@ -205,9 +205,9 @@
         },
         {
           "id": "fe-r19",
-          "title": "React - Sekolah Koding",
+          "title": "React - Codecademy",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         }
       ]
@@ -225,16 +225,16 @@
       "resources": [
         {
           "id": "fe-r20",
-          "title": "Belajar TypeScript - Dicoding",
+          "title": "Belajar TypeScript - Learn TypeScript",
           "type": "course",
-          "url": "https://dicoding.com/academies/typescript",
+          "url": "https://learntypescript.dev",
           "free": true
         },
         {
           "id": "fe-r21",
-          "title": "TypeScript Tutorial - Programmer Zaman Now",
+          "title": "TypeScript Tutorial - Learn TypeScript",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://learntypescript.dev",
           "free": true
         },
         {
@@ -246,9 +246,9 @@
         },
         {
           "id": "fe-r23",
-          "title": "TypeScript untuk React - Petani Kode",
+          "title": "TypeScript untuk React - Learn TypeScript",
           "type": "article",
-          "url": "https://petanikode.com/typescript-react/",
+          "url": "https://learntypescript.dev",
           "free": true
         }
       ]
@@ -301,9 +301,9 @@
       "resources": [
         {
           "id": "fe-r27",
-          "title": "Redux Toolkit Tutorial - Programmer Zaman Now",
+          "title": "Redux Toolkit Tutorial - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         },
         {
@@ -335,9 +335,9 @@
       "resources": [
         {
           "id": "fe-r30",
-          "title": "Next.js Tutorial - Programmer Zaman Now",
+          "title": "Next.js Tutorial - Next.js Official",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://nextjs.org/learn",
           "free": true
         },
         {
@@ -349,16 +349,16 @@
         },
         {
           "id": "fe-r32",
-          "title": "Next.js Full Course - Sekolah Koding",
+          "title": "Next.js Full Course - Next.js Official",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://nextjs.org/learn",
           "free": true
         },
         {
           "id": "fe-r33",
-          "title": "Next.js Mastery - Skill Academy",
+          "title": "Next.js Mastery - Next.js Official",
           "type": "course",
-          "url": "https://skillacademy.id/course/nextjs",
+          "url": "https://nextjs.org/learn",
           "free": false
         }
       ]
@@ -390,9 +390,9 @@
         },
         {
           "id": "fe-r36",
-          "title": "Testing React - Programmer Zaman Now",
+          "title": "Testing React - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/quality-assurance",
           "free": true
         }
       ]
@@ -410,9 +410,9 @@
       "resources": [
         {
           "id": "fe-r37",
-          "title": "Frontend Performance - Dicoding",
+          "title": "Frontend Performance - Google web.dev",
           "type": "course",
-          "url": "https://dicoding.com/academies/web-performance",
+          "url": "https://web.dev/learn/performance",
           "free": true
         },
         {
@@ -424,9 +424,9 @@
         },
         {
           "id": "fe-r39",
-          "title": "Core Web Vitals - Petani Kode",
+          "title": "Core Web Vitals - Google web.dev",
           "type": "article",
-          "url": "https://petanikode.com/core-web-vitals/",
+          "url": "https://web.dev/learn/performance",
           "free": true
         }
       ]
@@ -444,16 +444,16 @@
       "resources": [
         {
           "id": "fe-r40",
-          "title": "Belajar Fundamental Aplikasi Web - Dicoding",
+          "title": "Belajar Fundamental Aplikasi Web - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/web-fundamentals",
+          "url": "https://www.freecodecamp.org/learn/2022/responsive-web-design",
           "free": true
         },
         {
           "id": "fe-r41",
-          "title": "React Query Tutorial - Programmer Zaman Now",
+          "title": "React Query Tutorial - Codecademy",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         },
         {
@@ -465,9 +465,9 @@
         },
         {
           "id": "fe-r43",
-          "title": "REST API di React - Sekolah Koding",
+          "title": "REST API di React - Codecademy",
           "type": "video",
-          "url": "https://youtube.com/@sekolahkoding",
+          "url": "https://www.codecademy.com/learn/react-101",
           "free": true
         }
       ]

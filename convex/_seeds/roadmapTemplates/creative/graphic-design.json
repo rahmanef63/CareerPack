@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "gd-r1",
-          "title": "Graphic Design Dasar - Skill Academy",
+          "title": "Graphic Design Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/graphic-design-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "gd-r6",
-          "title": "Adobe Photoshop - Skill Academy",
+          "title": "Adobe Photoshop - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/adobe-photoshop",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -110,9 +110,9 @@
         },
         {
           "id": "gd-r9",
-          "title": "Adobe Illustrator - Skill Academy",
+          "title": "Adobe Illustrator - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/adobe-illustrator",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -179,9 +179,9 @@
         },
         {
           "id": "gd-r15",
-          "title": "Branding Dasar - Skill Academy",
+          "title": "Branding Dasar - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/branding-desain",
+          "url": "https://academy.hubspot.com/courses/inbound-marketing",
           "free": false
         },
         {
@@ -207,9 +207,9 @@
       "resources": [
         {
           "id": "gd-r17",
-          "title": "Social Media Design - Skill Academy",
+          "title": "Social Media Design - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/social-media-design",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -248,9 +248,9 @@
         },
         {
           "id": "gd-r21",
-          "title": "Motion Graphics - Skill Academy",
+          "title": "Motion Graphics - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/motion-graphics",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -283,9 +283,9 @@
         },
         {
           "id": "gd-r24",
-          "title": "Freelance Designer - Skill Academy",
+          "title": "Freelance Designer - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/freelance-desainer",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {

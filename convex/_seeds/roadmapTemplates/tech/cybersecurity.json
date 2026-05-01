@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "sec-r1",
-          "title": "Networking Dasar - Dicoding",
+          "title": "Networking Dasar - Coursera",
           "type": "course",
-          "url": "https://dicoding.com/academies/network-dasar",
+          "url": "https://www.coursera.org/browse",
           "free": true
         },
         {
@@ -69,16 +69,16 @@
       "resources": [
         {
           "id": "sec-r5",
-          "title": "Linux untuk Cybersecurity - Dicoding",
+          "title": "Linux untuk Cybersecurity - edX",
           "type": "course",
-          "url": "https://dicoding.com/academies/linux-security",
+          "url": "https://www.edx.org/learn/linux",
           "free": true
         },
         {
           "id": "sec-r6",
-          "title": "Kali Linux Tutorial - Petani Kode",
+          "title": "Kali Linux Tutorial - edX",
           "type": "article",
-          "url": "https://petanikode.com/kali-linux-untuk-pemula/",
+          "url": "https://www.edx.org/learn/linux",
           "free": true
         },
         {
@@ -152,16 +152,16 @@
         },
         {
           "id": "sec-r13",
-          "title": "Web Security - Programmer Zaman Now",
+          "title": "Web Security - Cybrary",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.cybrary.it/free-content",
           "free": true
         },
         {
           "id": "sec-r14",
-          "title": "Web Hacking - Skill Academy",
+          "title": "Web Hacking - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/web-security",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -297,9 +297,9 @@
         },
         {
           "id": "sec-r26",
-          "title": "Security+ - Skill Academy",
+          "title": "Security+ - Cybrary",
           "type": "course",
-          "url": "https://skillacademy.id/course/comptia-security-plus",
+          "url": "https://www.cybrary.it/free-content",
           "free": false
         }
       ]

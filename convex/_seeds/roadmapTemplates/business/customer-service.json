@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "cs-r1",
-          "title": "Customer Service Dasar - Skill Academy",
+          "title": "Customer Service Dasar - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/customer-service-dasar",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "cs-r6",
-          "title": "Komunikasi Empatik - Skill Academy",
+          "title": "Komunikasi Empatik - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/komunikasi-empatik",
+          "url": "https://www.coursera.org/learn/public-speaking",
           "free": false
         },
         {
@@ -104,9 +104,9 @@
       "resources": [
         {
           "id": "cs-r8",
-          "title": "Complaint Handling - Skill Academy",
+          "title": "Complaint Handling - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/complaint-handling",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -180,9 +180,9 @@
         },
         {
           "id": "cs-r15",
-          "title": "CX Omnichannel - Skill Academy",
+          "title": "CX Omnichannel - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/omnichannel-cx",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -214,9 +214,9 @@
         },
         {
           "id": "cs-r18",
-          "title": "Loyalty Program - Skill Academy",
+          "title": "Loyalty Program - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/loyalty-program",
+          "url": "https://academy.hubspot.com",
           "free": false
         },
         {
@@ -248,9 +248,9 @@
         },
         {
           "id": "cs-r21",
-          "title": "NPS & CSAT - Skill Academy",
+          "title": "NPS & CSAT - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/cs-metrics",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -283,9 +283,9 @@
         },
         {
           "id": "cs-r24",
-          "title": "Team Management - Skill Academy",
+          "title": "Team Management - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/team-management-cs",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {

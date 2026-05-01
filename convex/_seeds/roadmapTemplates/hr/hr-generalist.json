@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "hr-r1",
-          "title": "HRM Dasar - Skill Academy",
+          "title": "HRM Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/hrm-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "hr-r5",
-          "title": "Recruitment & Selection - Skill Academy",
+          "title": "Recruitment & Selection - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/rekrutmen-seleksi",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -103,9 +103,9 @@
       "resources": [
         {
           "id": "hr-r8",
-          "title": "Compensation & Benefits - Skill Academy",
+          "title": "Compensation & Benefits - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/kompensasi-benefit",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -137,9 +137,9 @@
       "resources": [
         {
           "id": "hr-r11",
-          "title": "Training & Development - Skill Academy",
+          "title": "Training & Development - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/training-development",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         },
         {
@@ -172,9 +172,9 @@
       "resources": [
         {
           "id": "hr-r14",
-          "title": "Performance Management - Skill Academy",
+          "title": "Performance Management - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/performance-management",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -206,9 +206,9 @@
       "resources": [
         {
           "id": "hr-r17",
-          "title": "Hubungan Industrial - Skill Academy",
+          "title": "Hubungan Industrial - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/hubungan-industrial",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -247,9 +247,9 @@
         },
         {
           "id": "hr-r21",
-          "title": "HRIS Implementation - Skill Academy",
+          "title": "HRIS Implementation - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/hris-implementation",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -289,9 +289,9 @@
         },
         {
           "id": "hr-r25",
-          "title": "HR Certification - Skill Academy",
+          "title": "HR Certification - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/hr-certification",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

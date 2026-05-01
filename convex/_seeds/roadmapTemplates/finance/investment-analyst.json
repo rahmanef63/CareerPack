@@ -48,9 +48,9 @@
         },
         {
           "id": "inv-r4",
-          "title": "Pasar Modal - Skill Academy",
+          "title": "Pasar Modal - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pasar-modal-dasar",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         }
       ]
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "inv-r5",
-          "title": "Analisis Fundamental - Skill Academy",
+          "title": "Analisis Fundamental - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/analisis-fundamental-saham",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         },
         {
@@ -103,9 +103,9 @@
       "resources": [
         {
           "id": "inv-r8",
-          "title": "Analisis Teknikal - Skill Academy",
+          "title": "Analisis Teknikal - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/analisis-teknikal",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         },
         {
@@ -145,9 +145,9 @@
         },
         {
           "id": "inv-r12",
-          "title": "Valuasi Bisnis - Skill Academy",
+          "title": "Valuasi Bisnis - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/valuasi-bisnis",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         },
         {
@@ -186,9 +186,9 @@
         },
         {
           "id": "inv-r16",
-          "title": "Analisis Obligasi - Skill Academy",
+          "title": "Analisis Obligasi - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/analisis-obligasi",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         }
       ]
@@ -214,9 +214,9 @@
         },
         {
           "id": "inv-r18",
-          "title": "Manajemen Portofolio - Skill Academy",
+          "title": "Manajemen Portofolio - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/manajemen-portofolio",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         },
         {
@@ -248,9 +248,9 @@
         },
         {
           "id": "inv-r21",
-          "title": "Reksa Dana Lanjutan - Skill Academy",
+          "title": "Reksa Dana Lanjutan - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/reksa-dana-lanjutan",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         },
         {
@@ -289,9 +289,9 @@
         },
         {
           "id": "inv-r25",
-          "title": "CFA Prep - Skill Academy",
+          "title": "CFA Prep - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/cfa-preparation",
+          "url": "https://www.coursera.org/specializations/financial-management",
           "free": false
         }
       ]

@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "ba-r1",
-          "title": "Business Analysis Dasar - Skill Academy",
+          "title": "Business Analysis Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/business-analysis-dasar",
+          "url": "https://www.coursera.org/learn/business-analysis-fundamentals",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "ba-r6",
-          "title": "Requirements Analysis - Skill Academy",
+          "title": "Requirements Analysis - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/requirements-analysis",
+          "url": "https://www.coursera.org/learn/business-analysis-fundamentals",
           "free": false
         },
         {
@@ -117,9 +117,9 @@
         },
         {
           "id": "ba-r10",
-          "title": "Process Modeling - Skill Academy",
+          "title": "Process Modeling - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/process-modeling",
+          "url": "https://www.coursera.org/learn/business-analysis-fundamentals",
           "free": false
         }
       ]
@@ -144,9 +144,9 @@
         },
         {
           "id": "ba-r12",
-          "title": "SQL Dasar - Dicoding",
+          "title": "SQL Dasar - Simplilearn YouTube",
           "type": "course",
-          "url": "https://dicoding.com/academies/sql-dasar",
+          "url": "https://www.youtube.com/watch?v=vh_Nco0ZSUg",
           "free": true
         },
         {
@@ -186,9 +186,9 @@
         },
         {
           "id": "ba-r16",
-          "title": "Tableau Training - Skill Academy",
+          "title": "Tableau Training - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/tableau-dasar",
+          "url": "https://www.coursera.org/specializations/instructional-design-mastertrack",
           "free": false
         }
       ]
@@ -213,9 +213,9 @@
         },
         {
           "id": "ba-r18",
-          "title": "Solution Validation - Skill Academy",
+          "title": "Solution Validation - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/uat-validation",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -255,9 +255,9 @@
         },
         {
           "id": "ba-r22",
-          "title": "Agile BA - Skill Academy",
+          "title": "Agile BA - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/agile-business-analyst",
+          "url": "https://www.coursera.org/professional-certificates/google-project-management",
           "free": false
         }
       ]
@@ -290,9 +290,9 @@
         },
         {
           "id": "ba-r25",
-          "title": "BA Certification Prep - Skill Academy",
+          "title": "BA Certification Prep - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/ba-certification",
+          "url": "https://www.coursera.org/learn/business-analysis-fundamentals",
           "free": false
         }
       ]

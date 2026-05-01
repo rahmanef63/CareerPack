@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "ftc-r5",
-          "title": "Belajar Backend Pemula - Dicoding",
+          "title": "Belajar Backend Pemula - freeCodeCamp",
           "type": "course",
-          "url": "https://dicoding.com/academies/backend-pemula",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         },
         {
@@ -90,9 +90,9 @@
         },
         {
           "id": "ftc-r8",
-          "title": "REST API Backend - Programmer Zaman Now",
+          "title": "REST API Backend - freeCodeCamp",
           "type": "video",
-          "url": "https://youtube.com/@ProgrammerZamanNow",
+          "url": "https://www.freecodecamp.org/learn/back-end-development-and-apis",
           "free": true
         }
       ]
@@ -111,9 +111,9 @@
       "resources": [
         {
           "id": "ftc-r9",
-          "title": "SQL Dasar - Dicoding",
+          "title": "SQL Dasar - Simplilearn YouTube",
           "type": "course",
-          "url": "https://dicoding.com/academies/sql-dasar",
+          "url": "https://www.youtube.com/watch?v=vh_Nco0ZSUg",
           "free": true
         },
         {
@@ -166,9 +166,9 @@
         },
         {
           "id": "ftc-r15",
-          "title": "Compliance Banking - Skill Academy",
+          "title": "Compliance Banking - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/compliance-banking",
+          "url": "https://www.coursera.org/specializations/financial-technology",
           "free": false
         }
       ]
@@ -201,9 +201,9 @@
         },
         {
           "id": "ftc-r18",
-          "title": "Fraud Detection - Petani Kode",
+          "title": "Fraud Detection - Cybrary",
           "type": "article",
-          "url": "https://petanikode.com/fraud-detection",
+          "url": "https://www.cybrary.it/free-content",
           "free": true
         }
       ]
@@ -235,9 +235,9 @@
         },
         {
           "id": "ftc-r21",
-          "title": "Cloud untuk Fintech - Skill Academy",
+          "title": "Cloud untuk Fintech - Google Cloud Skills Boost",
           "type": "course",
-          "url": "https://skillacademy.id/course/cloud-banking",
+          "url": "https://www.cloudskillsboost.google",
           "free": false
         }
       ]
@@ -291,9 +291,9 @@
       "resources": [
         {
           "id": "ftc-r25",
-          "title": "Payment Gateway Tutorial - Dicoding",
+          "title": "Payment Gateway Tutorial - Stripe Docs",
           "type": "course",
-          "url": "https://dicoding.com/academies/payment-gateway",
+          "url": "https://stripe.com/docs/development",
           "free": true
         },
         {
@@ -305,9 +305,9 @@
         },
         {
           "id": "ftc-r27",
-          "title": "Fintech Project Showcase - Skill Academy",
+          "title": "Fintech Project Showcase - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/fintech-project",
+          "url": "https://www.coursera.org/specializations/financial-technology",
           "free": false
         }
       ]

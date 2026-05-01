@@ -48,9 +48,9 @@
         },
         {
           "id": "admrs-r4",
-          "title": "Adminkes - Skill Academy",
+          "title": "Adminkes - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/administrasi-kesehatan",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -220,9 +220,9 @@
         },
         {
           "id": "admrs-r19",
-          "title": "HR Faskes - Skill Academy",
+          "title": "HR Faskes - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/sdm-faskes",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -254,9 +254,9 @@
         },
         {
           "id": "admrs-r22",
-          "title": "Anggaran RS - Skill Academy",
+          "title": "Anggaran RS - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/keuangan-rs",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]

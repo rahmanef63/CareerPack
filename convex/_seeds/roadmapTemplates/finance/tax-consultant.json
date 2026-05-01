@@ -34,9 +34,9 @@
         },
         {
           "id": "tax-r2",
-          "title": "Perpajakan Dasar - Skill Academy",
+          "title": "Perpajakan Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/perpajakan-dasar",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -69,9 +69,9 @@
       "resources": [
         {
           "id": "tax-r5",
-          "title": "PPh Badan - Skill Academy",
+          "title": "PPh Badan - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pph-badan",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -103,9 +103,9 @@
       "resources": [
         {
           "id": "tax-r8",
-          "title": "PPN Tutorial - Skill Academy",
+          "title": "PPN Tutorial - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/ppn-ppnbm",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -172,9 +172,9 @@
       "resources": [
         {
           "id": "tax-r14",
-          "title": "Transfer Pricing Indonesia - Skill Academy",
+          "title": "Transfer Pricing Indonesia - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/transfer-pricing",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -206,9 +206,9 @@
       "resources": [
         {
           "id": "tax-r17",
-          "title": "Tax Planning - Skill Academy",
+          "title": "Tax Planning - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/tax-planning",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -247,9 +247,9 @@
         },
         {
           "id": "tax-r21",
-          "title": "Keberatan & Banding - Skill Academy",
+          "title": "Keberatan & Banding - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/keberatan-pajak",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -289,9 +289,9 @@
         },
         {
           "id": "tax-r25",
-          "title": "Brevet Pajak - Skill Academy",
+          "title": "Brevet Pajak - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/brevet-pajak-ab",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         }
       ]

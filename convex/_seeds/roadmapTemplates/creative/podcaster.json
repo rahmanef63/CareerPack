@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "pod-r1",
-          "title": "Podcasting Dasar - Skill Academy",
+          "title": "Podcasting Dasar - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/podcasting-dasar",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -48,9 +48,9 @@
         },
         {
           "id": "pod-r4",
-          "title": "Podcasting Indonesia Guide - Petani Kode",
+          "title": "Podcasting Indonesia Guide - freeCodeCamp",
           "type": "article",
-          "url": "https://petanikode.com/cara-membuat-podcast/",
+          "url": "https://www.freecodecamp.org/learn",
           "free": true
         }
       ]
@@ -76,9 +76,9 @@
         },
         {
           "id": "pod-r6",
-          "title": "Podcast Equipment Guide - Skill Academy",
+          "title": "Podcast Equipment Guide - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/podcast-equipment",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -152,9 +152,9 @@
         },
         {
           "id": "pod-r13",
-          "title": "Script Writing - Skill Academy",
+          "title": "Script Writing - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/podcast-scripting",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         }
       ]
@@ -214,9 +214,9 @@
         },
         {
           "id": "pod-r18",
-          "title": "Podcast Monetization - Skill Academy",
+          "title": "Podcast Monetization - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/podcast-monetization",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -248,9 +248,9 @@
         },
         {
           "id": "pod-r21",
-          "title": "Podcast Interview Tips - Skill Academy",
+          "title": "Podcast Interview Tips - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/podcast-interview",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -282,9 +282,9 @@
         },
         {
           "id": "pod-r24",
-          "title": "Podcast Branding - Skill Academy",
+          "title": "Podcast Branding - HubSpot Academy",
           "type": "course",
-          "url": "https://skillacademy.id/course/podcast-branding",
+          "url": "https://academy.hubspot.com/courses/inbound-marketing",
           "free": false
         },
         {

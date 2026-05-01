@@ -27,9 +27,9 @@
       "resources": [
         {
           "id": "fp-r1",
-          "title": "Perencanaan Keuangan Dasar - Skill Academy",
+          "title": "Perencanaan Keuangan Dasar - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/perencanaan-keuangan",
+          "url": "https://www.coursera.org/specializations/personal-finance",
           "free": false
         },
         {
@@ -76,9 +76,9 @@
         },
         {
           "id": "fp-r6",
-          "title": "Debt Management - Skill Academy",
+          "title": "Debt Management - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/manajemen-utang",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -110,9 +110,9 @@
         },
         {
           "id": "fp-r9",
-          "title": "Insurance Planning - Skill Academy",
+          "title": "Insurance Planning - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/perencanaan-asuransi",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -144,9 +144,9 @@
         },
         {
           "id": "fp-r12",
-          "title": "Investasi Reksa Dana - Skill Academy",
+          "title": "Investasi Reksa Dana - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/reksa-dana",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         },
         {
@@ -186,9 +186,9 @@
         },
         {
           "id": "fp-r16",
-          "title": "Analisis Saham - Skill Academy",
+          "title": "Analisis Saham - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/analisis-saham",
+          "url": "https://www.coursera.org/specializations/investment-management",
           "free": false
         }
       ]
@@ -213,9 +213,9 @@
         },
         {
           "id": "fp-r18",
-          "title": "Retirement Planning - Skill Academy",
+          "title": "Retirement Planning - Coursera Business",
           "type": "course",
-          "url": "https://skillacademy.id/course/perencanaan-pensiun",
+          "url": "https://www.coursera.org/browse/business",
           "free": false
         },
         {
@@ -247,9 +247,9 @@
         },
         {
           "id": "fp-r21",
-          "title": "Pajak Pribadi - Skill Academy",
+          "title": "Pajak Pribadi - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/pajak-pribadi",
+          "url": "https://www.coursera.org/learn/taxation",
           "free": false
         },
         {
@@ -282,9 +282,9 @@
         },
         {
           "id": "fp-r24",
-          "title": "CFP Prep - Skill Academy",
+          "title": "CFP Prep - Coursera",
           "type": "course",
-          "url": "https://skillacademy.id/course/cfp-preparation",
+          "url": "https://www.coursera.org/specializations/personal-finance",
           "free": false
         },
         {
