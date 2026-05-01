@@ -133,6 +133,31 @@ export const viewErrorLogs = query({
   },
 });
 
+export const listEmailEvents = query({
+  args: {
+    cursor: v.optional(v.union(v.string(), v.null())),
+    limit: v.optional(v.number()),
+    type: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const numItems = clampPageSize(args.limit);
+    const q = ctx.db.query("emailEvents").withIndex("by_time").order("desc");
+    const result = await q.paginate({
+      cursor: args.cursor ?? null,
+      numItems,
+    });
+    const filtered = args.type
+      ? result.page.filter((e: Doc<"emailEvents">) => e.type === args.type)
+      : result.page;
+    return {
+      page: filtered,
+      continueCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
+  },
+});
+
 export const listRoleAuditLogs = query({
   args: {
     limit: v.optional(v.number()),

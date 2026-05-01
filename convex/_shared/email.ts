@@ -67,6 +67,30 @@ export async function sendEmail(input: SendEmailInput): Promise<SendResult> {
   }
 }
 
+export function renderWelcomeEmail(fullName: string, dashboardUrl: string): { subject: string; html: string; text: string } {
+  const subject = "Selamat datang di CareerPack 🎉";
+  const safeUrl = escapeHtml(dashboardUrl);
+  const safeName = escapeHtml(fullName || "Sahabat CareerPack");
+  const html = `<!doctype html><html lang="id"><body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:24px auto;padding:0 16px;color:#111827;background:#ffffff">
+  <h2 style="margin:0 0 16px;font-size:22px">Halo ${safeName} 👋</h2>
+  <p style="margin:0 0 12px;line-height:1.55">Selamat datang di <strong>CareerPack</strong> — toolkit karir untuk job-seeker Indonesia. Akun kamu sudah aktif, dan starter data (CV draft, checklist dokumen, roadmap skill) sudah disiapkan otomatis.</p>
+  <p style="margin:16px 0 12px;line-height:1.55"><strong>Mulai dari mana?</strong></p>
+  <ul style="margin:0 0 16px;padding-left:20px;line-height:1.7">
+    <li>📝 <strong>CV Generator</strong> — edit CV draft yang sudah jadi, ekspor PDF.</li>
+    <li>🎯 <strong>Skill Roadmap</strong> — pilih jalur karir, ikuti modul terstruktur.</li>
+    <li>📊 <strong>Career Dashboard</strong> — track lamaran, jadwal interview.</li>
+    <li>🤖 <strong>AI Agent</strong> — tanya saran karir, latihan interview.</li>
+  </ul>
+  <p style="margin:24px 0">
+    <a href="${safeUrl}" style="display:inline-block;padding:12px 22px;background:#0ea5e9;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600">Buka Dashboard</a>
+  </p>
+  <p style="margin:0 0 12px;font-size:13px;color:#6b7280">Tips: lengkapi profil di tab <em>Personal Branding</em> supaya AI suggestion lebih akurat.</p>
+  <p style="margin:0;font-size:13px;color:#6b7280">Ada pertanyaan? Reply email ini, tim kami baca semuanya.</p>
+</body></html>`;
+  const text = `Halo ${fullName || "Sahabat CareerPack"},\n\nSelamat datang di CareerPack — toolkit karir untuk job-seeker Indonesia. Akun kamu sudah aktif.\n\nMulai dari mana?\n- CV Generator: edit CV draft, ekspor PDF\n- Skill Roadmap: pilih jalur karir, ikuti modul\n- Career Dashboard: track lamaran + interview\n- AI Agent: tanya saran karir\n\nBuka dashboard: ${dashboardUrl}\n\nAda pertanyaan? Reply email ini.`;
+  return { subject, html, text };
+}
+
 export function renderResetEmail(resetLink: string): { subject: string; html: string; text: string } {
   const subject = "Reset Kata Sandi CareerPack";
   const safe = escapeHtml(resetLink);

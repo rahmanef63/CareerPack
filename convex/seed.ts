@@ -1,5 +1,8 @@
-import { mutation } from "./_generated/server";
+import { mutation, internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { renderWelcomeEmail, sendEmail } from "./_shared/email";
 
 /**
  * Parse `ADMIN_BOOTSTRAP_EMAILS` — comma-separated list of emails that
@@ -50,6 +53,16 @@ export const seedForCurrentUser = mutation({
         interests: ["Web Development", "Product Design"],
         ...(shouldBeAdmin ? { role: "admin" as const } : {}),
       });
+
+      // First-time signup with a real email — fire welcome email out-of-band.
+      // Anonymous accounts have no email; skip those silently. Failures land
+      // in the backend log and never block the seed.
+      if (authEmail.length > 0) {
+        await ctx.scheduler.runAfter(0, internal.seed.deliverWelcomeEmail, {
+          to: authEmail,
+          fullName: "",
+        });
+      }
     } else if (shouldBeAdmin && existingProfile.role !== "admin") {
       // Existing user whose email was just added to the env list — promote
       // on next login. Does not demote anyone; role removal is manual via
@@ -246,4 +259,21 @@ export const seedForCurrentUser = mutation({
   },
 });
 
-
+/**
+ * Welcome email — scheduled by the first-signup branch in
+ * `seedForCurrentUser`. Resolves the dashboard URL from `APP_URL` env
+ * (set in production) and falls back to a sensible default for dev.
+ */
+export const deliverWelcomeEmail = internalAction({
+  args: { to: v.string(), fullName: v.string() },
+  handler: async (_ctx, args) => {
+    const baseUrl = (process.env.APP_URL ?? "https://careerpack.local").replace(/\/$/, "");
+    const dashboardUrl = `${baseUrl}/dashboard`;
+    const { subject, html, text } = renderWelcomeEmail(args.fullName, dashboardUrl);
+    const result = await sendEmail({ to: args.to, subject, html, text });
+    if (!result.ok) {
+      console.error(`[welcome] email delivery failed reason=${result.reason} to=${args.to}`);
+    }
+    return result;
+  },
+});

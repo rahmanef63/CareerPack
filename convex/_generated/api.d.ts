@@ -16,6 +16,7 @@ import type * as _shared_sanitize from "../_shared/sanitize.js";
 import type * as admin_cleanup from "../admin/cleanup.js";
 import type * as admin_mutations from "../admin/mutations.js";
 import type * as admin_queries from "../admin/queries.js";
+import type * as admin_webhooks from "../admin/webhooks.js";
 import type * as ai_actions from "../ai/actions.js";
 import type * as ai_mutations from "../ai/mutations.js";
 import type * as ai_queries from "../ai/queries.js";
@@ -83,6 +84,7 @@ declare const fullApi: ApiFromModules<{
   "admin/cleanup": typeof admin_cleanup;
   "admin/mutations": typeof admin_mutations;
   "admin/queries": typeof admin_queries;
+  "admin/webhooks": typeof admin_webhooks;
   "ai/actions": typeof ai_actions;
   "ai/mutations": typeof ai_mutations;
   "ai/queries": typeof ai_queries;
