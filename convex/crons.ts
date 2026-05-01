@@ -30,12 +30,15 @@ crons.hourly(
   internal.calendar.reminders.sweepReminders,
 );
 
-// Daily RemoteOK feed pull. Free public JSON endpoint. Dedup by
-// `externalId` so re-fetch is idempotent. Only ingests new rows.
+// Daily external job feed pull. WeWorkRemotely RSS (4 categories) +
+// RemoteOK JSON. Dedup by `externalId` so re-fetch is idempotent.
+// Soft-fails per source: one Cloudflare-blocked feed doesn't kill the
+// whole sweep. Convex queries on jobListings are reactive — the matcher
+// UI auto-rescores against fresh rows without page refresh.
 crons.daily(
-  "remoteok-feed-fetch",
-  { hourUTC: 16, minuteUTC: 0 }, // 23:00 WIB — outside Resend Asia peak
-  internal.matcher.external.fetchRemoteOK,
+  "external-jobs-fetch",
+  { hourUTC: 16, minuteUTC: 0 }, // 23:00 WIB
+  internal.matcher.external.fetchJobFeeds,
 );
 
 export default crons;

@@ -37,6 +37,12 @@ interface FetchResult {
  */
 
 const REMOTEOK_URL = "https://remoteok.com/api";
+const WWR_RSS_URLS = [
+  "https://weworkremotely.com/categories/remote-programming-jobs.rss",
+  "https://weworkremotely.com/categories/remote-design-jobs.rss",
+  "https://weworkremotely.com/categories/remote-customer-support-jobs.rss",
+  "https://weworkremotely.com/categories/remote-product-jobs.rss",
+];
 
 interface NormalizedJob {
   source: string;
@@ -61,48 +67,131 @@ interface NormalizedJob {
 // RemoteOK feed
 // ---------------------------------------------------------------------------
 
-export const fetchRemoteOK = internalAction({
+export const fetchJobFeeds = internalAction({
   args: {},
   handler: async (ctx): Promise<FetchResult> => {
-    let res: Response;
+    const all: NormalizedJob[] = [];
+
+    // RemoteOK — JSON. Cloudflare sometimes blocks VPS IP ranges; treat
+    // failure as soft-skip rather than abort the whole sweep.
     try {
-      res = await fetch(REMOTEOK_URL, {
-        headers: {
-          "User-Agent": "CareerPack-JobSync/1.0 (+https://careerpack.org)",
-          Accept: "application/json",
-        },
-      });
+      const list = await fetchRemoteOK();
+      all.push(...list);
     } catch (err) {
-      console.error(`[remoteok] fetch failed: ${err instanceof Error ? err.message : "?"}`);
-      return { fetched: 0, ingested: 0, error: "fetch_failed" };
-    }
-    if (!res.ok) {
-      console.error(`[remoteok] HTTP ${res.status}`);
-      return { fetched: 0, ingested: 0, error: `http_${res.status}` };
-    }
-    let raw: unknown;
-    try {
-      raw = await res.json();
-    } catch {
-      return { fetched: 0, ingested: 0, error: "json_parse" };
-    }
-    if (!Array.isArray(raw) || raw.length < 2) return { fetched: 0, ingested: 0 };
-
-    // First element is metadata; jobs start at index 1.
-    const items = raw.slice(1) as Array<Record<string, unknown>>;
-    const jobs: NormalizedJob[] = [];
-    for (const it of items) {
-      const norm = normalizeRemoteOK(it);
-      if (norm) jobs.push(norm);
+      console.warn(`[feeds] remoteok skipped: ${err instanceof Error ? err.message : "?"}`);
     }
 
-    if (jobs.length === 0) return { fetched: 0, ingested: 0 };
+    // WeWorkRemotely RSS — multiple categories.
+    for (const url of WWR_RSS_URLS) {
+      try {
+        const list = await fetchWWR(url);
+        all.push(...list);
+      } catch (err) {
+        console.warn(`[feeds] wwr ${url} skipped: ${err instanceof Error ? err.message : "?"}`);
+      }
+    }
 
-    const result = await ctx.runMutation(internal.matcher.external._ingestExternalJobs, { jobs });
-    console.log(`[remoteok] fetched=${jobs.length} ingested=${result.inserted} skipped=${result.skipped}`);
-    return { fetched: jobs.length, ingested: result.inserted, skipped: result.skipped };
+    if (all.length === 0) return { fetched: 0, ingested: 0, error: "no_sources_succeeded" };
+
+    const result = await ctx.runMutation(internal.matcher.external._ingestExternalJobs, { jobs: all });
+    console.log(`[feeds] fetched=${all.length} ingested=${result.inserted} skipped=${result.skipped}`);
+    return { fetched: all.length, ingested: result.inserted, skipped: result.skipped };
   },
 });
+
+async function fetchRemoteOK(): Promise<NormalizedJob[]> {
+  const res = await fetch(REMOTEOK_URL, {
+    headers: {
+      "User-Agent": "CareerPack-JobSync/1.0 (+https://careerpack.org)",
+      Accept: "application/json",
+    },
+  });
+  if (!res.ok) throw new Error(`http_${res.status}`);
+  const raw = (await res.json()) as unknown;
+  if (!Array.isArray(raw) || raw.length < 2) return [];
+  const items = raw.slice(1) as Array<Record<string, unknown>>;
+  return items.map(normalizeRemoteOK).filter((j): j is NormalizedJob => j !== null);
+}
+
+async function fetchWWR(url: string): Promise<NormalizedJob[]> {
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; CareerPack-JobSync/1.0; +https://careerpack.org)",
+      Accept: "application/rss+xml, text/xml",
+    },
+  });
+  if (!res.ok) throw new Error(`http_${res.status}`);
+  const xml = await res.text();
+  return parseWWRRss(xml);
+}
+
+function parseWWRRss(xml: string): NormalizedJob[] {
+  const out: NormalizedJob[] = [];
+  // RSS items — non-greedy match across whole `<item>...</item>` blocks.
+  const itemRe = /<item>([\s\S]*?)<\/item>/g;
+  let m: RegExpExecArray | null;
+  while ((m = itemRe.exec(xml)) !== null) {
+    const block = m[1];
+    const guid = extractTag(block, "guid") ?? extractTag(block, "link");
+    if (!guid) continue;
+    const titleRaw = extractTag(block, "title") ?? "";
+    const link = extractTag(block, "link") ?? "";
+    const descRaw = extractTag(block, "description") ?? "";
+    const pubDate = extractTag(block, "pubDate");
+    const region = extractTag(block, "region") ?? "";
+
+    // WWR title format: "Company Name: Job Position"
+    const colonIdx = titleRaw.indexOf(":");
+    const company = colonIdx > 0 ? titleRaw.slice(0, colonIdx).trim() : "WWR Listing";
+    const title = colonIdx > 0 ? titleRaw.slice(colonIdx + 1).trim() : titleRaw.trim();
+    if (!title || !company) continue;
+
+    const description = stripHtml(descRaw).slice(0, 4000);
+    const postedAt = pubDate ? Date.parse(pubDate) : Date.now();
+    const t = title.toLowerCase();
+    const seniority = /\b(senior|lead|principal|staff)\b/.test(t)
+      ? "senior"
+      : /\b(junior|entry|intern|graduate)\b/.test(t)
+        ? "junior"
+        : "mid-level";
+
+    // Heuristic skill extraction — common tech keywords in the description.
+    const techPatterns = [
+      "JavaScript", "TypeScript", "Python", "Ruby", "PHP", "Go", "Rust", "Java", "Kotlin", "Swift",
+      "React", "Vue", "Angular", "Svelte", "Next.js", "Node.js", "Django", "Rails", "Laravel",
+      "PostgreSQL", "MySQL", "MongoDB", "Redis", "GraphQL", "REST", "AWS", "GCP", "Azure",
+      "Docker", "Kubernetes", "Terraform", "Linux", "Git", "CI/CD", "Figma", "Sketch",
+    ];
+    const skills = techPatterns.filter((k) =>
+      new RegExp(`\\b${k.replace(/\./g, "\\.").replace(/\+/g, "\\+")}\\b`, "i").test(description),
+    );
+
+    out.push({
+      source: "wwr",
+      externalId: `wwr:${guid}`,
+      title,
+      company,
+      location: region || "Worldwide",
+      workMode: "remote",
+      employmentType: "full-time",
+      seniority,
+      description,
+      requiredSkills: skills.slice(0, 15),
+      postedAt: Number.isFinite(postedAt) ? postedAt : Date.now(),
+      applyUrl: link || undefined,
+    });
+  }
+  return out;
+}
+
+/** Extract first `<tag>...</tag>` content. Handles CDATA. Returns trimmed text. */
+function extractTag(block: string, tag: string): string | undefined {
+  const re = new RegExp(`<${tag}>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`, "i");
+  const m = block.match(re);
+  if (!m) return undefined;
+  const v = m[1].trim();
+  return v.length > 0 ? v : undefined;
+}
 
 function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
   const id = strField(raw, "id") ?? strField(raw, "slug");
