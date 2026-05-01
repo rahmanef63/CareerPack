@@ -2064,14 +2064,17 @@
       return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
 
     /* Skills — render real skill names as plain cards (no icon). */
-    if (cp && cp.has && cp.has.skills && cp.skills.length) {
-      $('#skillsMount').innerHTML = cp.skills.map(function(s){
-        return '<article class="service skill-card"><h3>' + escHtml(s) + '</h3></article>';
-      }).join('');
-    } else {
-      $('#skillsMount').innerHTML = data.skills.map(([t, p, icon]) =>
-        `<article class="service skill-card"><div class="service-icon"><svg viewBox="0 0 48 48"><path d="${icon}"/></svg></div><h3>${t}</h3><p>${p}</p><a class="text-link" href="#contact">Learn More <span>→</span></a></article>`
-      ).join('');
+    var skillsMount = $('#skillsMount');
+    if (skillsMount) {
+      if (cp && cp.has && cp.has.skills && cp.skills.length) {
+        skillsMount.innerHTML = cp.skills.map(function(s){
+          return '<article class="service skill-card"><h3>' + escHtml(s) + '</h3></article>';
+        }).join('');
+      } else {
+        skillsMount.innerHTML = data.skills.map(([t, p, icon]) =>
+          `<article class="service skill-card"><div class="service-icon"><svg viewBox="0 0 48 48"><path d="${icon}"/></svg></div><h3>${t}</h3><p>${p}</p><a class="text-link" href="#contact">Learn More <span>→</span></a></article>`
+        ).join('');
+      }
     }
 
     /* Experience — built from CV experience blocks. */
@@ -2100,7 +2103,8 @@
       // No experience yet — leave the section hidden via data-cp-section.
     }
 
-    $('#toolsMount').innerHTML = data.tools.map(([name, path]) =>
+    var toolsMount = $('#toolsMount');
+    if (toolsMount) toolsMount.innerHTML = data.tools.map(([name, path]) =>
       `<div class="tool-tile" title="${name}"><svg viewBox="0 0 24 24"><path d="${path}"/></svg><span>${name}</span></div>`
     ).join('');
 
@@ -2153,23 +2157,28 @@
       ).join('');
     }
 
-    $('#stepsMount').innerHTML = data.steps.map(([n, t, p]) =>
+    var stepsMount = $('#stepsMount');
+    if (stepsMount) stepsMount.innerHTML = data.steps.map(([n, t, p]) =>
       `<article class="step process-card"><div class="step-no">${n}</div><h3>${t}</h3><p>${p}</p></article>`
     ).join('');
 
-    $('#processRail').innerHTML = data.steps.map(([n, t, p]) =>
+    var processRail = $('#processRail');
+    if (processRail) processRail.innerHTML = data.steps.map(([n, t, p]) =>
       `<article class="process-panel process-card"><div class="step-no">${n}</div><h3>${t}</h3><p>${p}</p></article>`
     ).join('');
 
-    $('#wallMount').innerHTML = data.wall.map(([quote, name, role, img]) =>
+    var wallMount = $('#wallMount');
+    if (wallMount) wallMount.innerHTML = data.wall.map(([quote, name, role, img]) =>
       `<article class="quote-card"><blockquote>“${quote}”</blockquote><div class="person"><img loading="lazy" src="${img}" alt="${name} portrait"/><div><strong>${name}</strong><span>${role}</span></div></div></article>`
     ).join('');
 
-    $('#faqMount').innerHTML = data.faq.map(([q, a]) =>
+    var faqMount = $('#faqMount');
+    if (faqMount) faqMount.innerHTML = data.faq.map(([q, a]) =>
       `<details class="faq-item"><summary class="faq-q">${q}</summary><div class="faq-a">${a}</div></details>`
     ).join('');
 
-    $('#insightsMount').innerHTML = data.insights.map(([m, t, p, img], i) =>
+    var insightsMount = $('#insightsMount');
+    if (insightsMount) insightsMount.innerHTML = data.insights.map(([m, t, p, img], i) =>
       `<article class="insight"><img loading="lazy" src="${img}" alt="Insight ${i + 1} placeholder"/><div class="insight-body"><p class="meta">${m}</p><h3>${t}</h3><p>${p}</p></div></article>`
     ).join('');
 
