@@ -19,6 +19,8 @@ export interface AgendaItem {
   location: string;
   type: AgendaType;
   notes?: string;
+  /** Minutes before start to fire a reminder. Undefined = no reminder. */
+  reminderMinutes?: number;
 }
 
 type ConvexEvent = Doc<"calendarEvents">;
@@ -32,6 +34,7 @@ function fromConvex(doc: ConvexEvent): AgendaItem {
     location: doc.location,
     type: (doc.type as AgendaType) ?? "interview",
     notes: doc.notes,
+    reminderMinutes: doc.reminderMinutes,
   };
 }
 
@@ -42,6 +45,7 @@ export interface CreateAgendaInput {
   location: string;
   type: AgendaType;
   notes?: string;
+  reminderMinutes?: number;
 }
 
 export function useAgenda() {

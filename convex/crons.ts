@@ -21,4 +21,13 @@ crons.daily(
   internal.admin.cleanup.cleanupInactiveDemoUsers,
 );
 
+// Hourly calendar reminder sweep. Inserts a `notifications` row for each
+// event whose reminder window has opened. Idempotent — `reminderSentAt`
+// guards against double-firing if the cron retries.
+crons.hourly(
+  "calendar-reminder-sweep",
+  { minuteUTC: 5 },
+  internal.calendar.reminders.sweepReminders,
+);
+
 export default crons;

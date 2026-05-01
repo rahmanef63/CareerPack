@@ -1,8 +1,12 @@
-import { mutation } from "./_generated/server";
+import { mutation, internalAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import { renderResetEmail, sendEmail } from "./_shared/email";
 
 const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const PBKDF2_ITERATIONS = 100_000;
+const RESET_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RESET_RATE_MAX = 5;
 
 function hex(bytes: Uint8Array): string {
   return Array.from(bytes)
@@ -85,13 +89,25 @@ export const requestReset = mutation({
 
     if (!user) return { ok: true as const };
 
-    // Invalidate pending tokens for this user (keep DB small, prevent parallel reuse)
-    const existing = await ctx.db
+    const now = Date.now();
+
+    // Per-email rate limit. Mutations don't expose request IP, so we
+    // bucket by user._id (effectively per-email since email→user is 1:1).
+    // 5 requests/hour: enough for a real user retrying, low enough to
+    // blunt mass-spam against a single inbox. Silent on overflow to keep
+    // the anti-enumeration property — same response as a non-existent email.
+    const recent = await ctx.db
       .query("passwordResetTokens")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .filter((q) => q.gte(q.field("_creationTime"), now - RESET_RATE_WINDOW_MS))
       .collect();
-    const now = Date.now();
-    for (const t of existing) {
+    if (recent.length >= RESET_RATE_MAX) {
+      console.warn(`[password-reset] rate-limited userId=${user._id} (${recent.length}/${RESET_RATE_MAX} in last hour)`);
+      return { ok: true as const };
+    }
+
+    // Invalidate pending tokens for this user (keep DB small, prevent parallel reuse)
+    for (const t of recent) {
       if (!t.usedAt && t.expiresAt > now) {
         await ctx.db.patch(t._id, { usedAt: now });
       }
@@ -107,16 +123,39 @@ export const requestReset = mutation({
       expiresAt: now + TOKEN_TTL_MS,
     });
 
-    // V1 delivery: emit to backend log stream only (Convex dashboard /
-    // `convex logs`). NEVER write the raw token to a queryable table —
-    // earlier versions wrote to `errorLogs`, which any admin could read
-    // via `viewErrorLogs` and use to take over any account. V2 replaces
-    // this with an email action via Resend/SMTP.
-    console.log(
-      `[password-reset] issued for userId=${user._id} link=/reset-password/${rawToken}`,
-    );
+    // Hand off to an action — only actions can fetch() to Resend.
+    // Action picks env vars at runtime and falls back to console log
+    // when RESEND_API_KEY is unset.
+    await ctx.scheduler.runAfter(0, internal.passwordReset.deliverResetEmail, {
+      to: email,
+      rawToken,
+    });
 
     return { ok: true as const };
+  },
+});
+
+/**
+ * Deliver the reset email out-of-band. Scheduled by `requestReset` —
+ * never call this from the frontend directly. The mutation has already
+ * persisted the hashed token; this action just turns the raw token into
+ * a link and hands it to whichever email backend is configured.
+ *
+ * NEVER write the raw token to a queryable table — earlier versions
+ * wrote it to `errorLogs`, which any admin could read and use to take
+ * over any account.
+ */
+export const deliverResetEmail = internalAction({
+  args: { to: v.string(), rawToken: v.string() },
+  handler: async (_ctx, args) => {
+    const baseUrl = (process.env.APP_URL ?? "https://careerpack.local").replace(/\/$/, "");
+    const link = `${baseUrl}/reset-password/${encodeURIComponent(args.rawToken)}`;
+    const { subject, html, text } = renderResetEmail(link);
+    const result = await sendEmail({ to: args.to, subject, html, text });
+    if (!result.ok) {
+      console.error(`[password-reset] email delivery failed reason=${result.reason} to=${args.to}`);
+    }
+    return result;
   },
 });
 

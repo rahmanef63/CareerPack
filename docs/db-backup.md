@@ -1,6 +1,6 @@
-# Database Backup — Planned
+# Database Backup — Recipe Final
 
-**Status:** Belum diimplementasikan. Dokumen ini = decision record + recipe untuk eksekusi nanti.
+**Status:** Recipe finalized. Script tersedia di `backend/convex-self-hosted/backup.sh` — siap dideploy ke VPS host. Action items di bawah masih perlu dieksekusi manual (provider snapshot toggle + cron install + 1× recovery test) karena akses VPS bukan di repo.
 
 Convex self-hosted di Dokploy menyimpan **semua data user + uploaded files** di satu Docker named volume (`data` di prod, `convex_data` di dev parity). Tanpa backup, single Dokploy redeploy dengan volume rename / corruption / accidental delete = total data loss.
 
@@ -26,32 +26,49 @@ Path-path lain dipertimbangkan & ditunda — lihat *Alternatives Considered* di 
 
 ## Recipe — Local Cron Tar (Layer 2)
 
+Script siap pakai: [`backend/convex-self-hosted/backup.sh`](../backend/convex-self-hosted/backup.sh). Ini auto-detect volume name, snapshot read-only (zero downtime), dan prune arsip > retention. Idempotent — safe untuk re-run.
+
 Eksekusi via SSH ke Dokploy host:
 
 ```bash
-# 1. Verify volume name (Docker prefix biasanya = compose project name)
-docker volume ls | grep -i convex
+# 1. Copy script ke host
+scp backend/convex-self-hosted/backup.sh root@<host>:/opt/careerpack/backup.sh
+ssh root@<host> 'chmod +x /opt/careerpack/backup.sh'
 
-# 2. Bikin destination directory
-sudo mkdir -p /var/backups/careerpack
-sudo chmod 700 /var/backups/careerpack
+# 2. Smoke test sekali (dry verify volume detection)
+ssh root@<host> '/opt/careerpack/backup.sh'
+# Output yang diharapkan:
+#   [backup] OK volume=<detected> archive=/var/backups/careerpack/convex-<stamp>.tar.gz size=<n>M pruned=0 retention=14d
 
-# 3. Tambah cron (root crontab)
+# 3. Install cron (root crontab)
+ssh root@<host>
 sudo crontab -e
 ```
 
 Tambah line:
 
 ```cron
-0 3 * * * docker run --rm -v <VOLUME_NAME>:/source:ro -v /var/backups/careerpack:/dest alpine sh -c 'tar czf /dest/convex-$(date +\%Y\%m\%d-\%H\%M).tar.gz -C /source . && find /dest -name "convex-*.tar.gz" -mtime +14 -delete'
+0 3 * * * /opt/careerpack/backup.sh >> /var/log/careerpack-backup.log 2>&1
 ```
 
-Replace `<VOLUME_NAME>` dengan output step 1 (mis. `careerpack-db_data`).
+**Override env knobs** kalau auto-detect salah / lokasi non-default:
 
-**Yang dilakukan:**
-- 03:00 setiap hari, tar volume read-only (container tetap jalan, gak ada downtime)
-- Output `/var/backups/careerpack/convex-YYYYMMDD-HHMM.tar.gz`
-- Auto-delete archive lebih dari 14 hari (rolling window)
+```cron
+0 3 * * * VOLUME_NAME=careerpack-db_data BACKUP_DIR=/srv/backups RETENTION_DAYS=30 /opt/careerpack/backup.sh >> /var/log/careerpack-backup.log 2>&1
+```
+
+**Verify cron health (mingguan):**
+
+```bash
+# Jumlah arsip terbaru (>= 7 = sehat 1 minggu, mis. 14 jam-an)
+ls -1 /var/backups/careerpack/convex-*.tar.gz | wc -l
+
+# Arsip terakhir (harus < 25 jam lalu)
+ls -lh /var/backups/careerpack/convex-*.tar.gz | tail -1
+
+# Tail log
+tail -20 /var/log/careerpack-backup.log
+```
 
 ## Recipe — Provider Snapshot (Layer 1)
 
@@ -120,8 +137,9 @@ Backup ke external storage = tahan terhadap VPS provider outage / data center fa
 
 ## Action Items
 
-- [ ] Aktifkan Provider auto-snapshot (Layer 1) — 1 click di dashboard
-- [ ] Setup local cron tar (Layer 2) — SSH ke host, 5 menit
+- [x] Recipe finalized — script committed di `backend/convex-self-hosted/backup.sh`
+- [ ] Aktifkan Provider auto-snapshot (Layer 1) — 1 click di dashboard VPS
+- [ ] Deploy `backup.sh` + install cron — SSH ke host, 5 menit (langkah di atas)
 - [ ] Test recovery procedure sekali — restore ke staging volume + verify Convex jalan
 - [ ] Document path-to-restore di `docs/launch-runbook.md`
 - [ ] Schedule re-evaluation untuk off-VPS backup sebelum public launch

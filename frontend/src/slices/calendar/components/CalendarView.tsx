@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Calendar as CalendarIcon, Clock, MapPin, Plus, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Download, MapPin, Plus, Trash2 } from "lucide-react";
+import { downloadIcs, eventsToIcs } from "../lib/ics";
 import { id as localeID } from "react-day-picker/locale";
 import { Calendar } from "@/shared/components/ui/calendar";
 import { DatePicker } from "@/shared/components/ui/date-picker";
@@ -106,6 +107,7 @@ export function CalendarView() {
       time: string;
       location: string;
       type: AgendaType;
+      reminderMinutes?: number;
     }) => {
       try {
         await create(input);
@@ -138,14 +140,31 @@ export function CalendarView() {
         title="Kalender Karir"
         description="Wawancara, tenggat lamaran, dan follow-up Anda"
         actions={
-          <Button
-            size="sm"
-            className="bg-brand hover:bg-brand"
-            onClick={() => setAddOpen(true)}
-            aria-label="Tambah agenda baru"
-          >
-            <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (!agenda.length) {
+                  notify.info("Belum ada agenda untuk diekspor");
+                  return;
+                }
+                downloadIcs(`careerpack-agenda-${new Date().toISOString().slice(0, 10)}.ics`, eventsToIcs(agenda));
+              }}
+              disabled={isLoading || agenda.length === 0}
+              aria-label="Ekspor agenda ke file ICS"
+            >
+              <Download className="w-4 h-4 mr-1" /> Ekspor .ics
+            </Button>
+            <Button
+              size="sm"
+              className="bg-brand hover:bg-brand"
+              onClick={() => setAddOpen(true)}
+              aria-label="Tambah agenda baru"
+            >
+              <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
+            </Button>
+          </div>
         }
       />
 
@@ -312,8 +331,16 @@ interface AddAgendaDialogProps {
     time: string;
     location: string;
     type: AgendaType;
+    reminderMinutes?: number;
   }) => Promise<void>;
 }
+
+const REMINDER_OPTIONS: ReadonlyArray<{ value: string; label: string; minutes?: number }> = [
+  { value: "none", label: "Tanpa pengingat" },
+  { value: "15", label: "15 menit sebelum", minutes: 15 },
+  { value: "60", label: "1 jam sebelum", minutes: 60 },
+  { value: "1440", label: "1 hari sebelum", minutes: 1440 },
+];
 
 function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDialogProps) {
   const [title, setTitle] = useState("");
@@ -321,6 +348,7 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
   const [time, setTime] = useState("09:00");
   const [location, setLocation] = useState("");
   const [type, setType] = useState<AgendaType>("interview");
+  const [reminder, setReminder] = useState<string>("none");
 
   // Resync `date` whenever the dialog (re)opens with a new defaultDate.
   // Without this, picking a new calendar day → opening the dialog →
@@ -336,6 +364,7 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
     setTime("09:00");
     setLocation("");
     setType("interview");
+    setReminder("none");
   };
 
   const [submitting, setSubmitting] = useState(false);
@@ -344,12 +373,14 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
     if (!title.trim() || !date) return;
     setSubmitting(true);
     try {
+      const reminderMinutes = REMINDER_OPTIONS.find((o) => o.value === reminder)?.minutes;
       await onAdd({
         title: title.trim(),
         date,
         time,
         location: location.trim() || "—",
         type,
+        reminderMinutes,
       });
       reset();
       onOpenChange(false);
@@ -430,6 +461,19 @@ function AddAgendaDialog({ open, onOpenChange, defaultDate, onAdd }: AddAgendaDi
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="agenda-reminder">Pengingat</Label>
+            <ResponsiveSelect value={reminder} onValueChange={setReminder}>
+              <ResponsiveSelectTrigger id="agenda-reminder" />
+              <ResponsiveSelectContent drawerTitle="Pengingat">
+                {REMINDER_OPTIONS.map((opt) => (
+                  <ResponsiveSelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </ResponsiveSelectItem>
+                ))}
+              </ResponsiveSelectContent>
+            </ResponsiveSelect>
           </div>
           <ResponsiveDialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

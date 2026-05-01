@@ -1,6 +1,9 @@
 "use client";
 
-import { Download, Sparkles, Upload } from "lucide-react";
+import { useState } from "react";
+import { useAction, useMutation } from "convex/react";
+import { Loader2, Sparkles, Upload, Wand2 } from "lucide-react";
+import { api } from "../../../../../convex/_generated/api";
 import {
   Card,
   CardContent,
@@ -8,20 +11,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { QuickFillButton } from "@/shared/components/onboarding/QuickFillButton";
+import { notify } from "@/shared/lib/notify";
 
 /**
- * Import tab — guides the user through populating their Personal
- * Branding without manually filling every field.
+ * Import tab — three paths from "raw text I have" to "profile filled":
  *
- * Path A (live): AI quick-fill — paste raw resume / LinkedIn export
- * into Claude/ChatGPT/Gemini, get back JSON, paste back here.
- * Implemented via the global QuickFillButton with `scope="profile"`.
- *
- * Path B (placeholder): structured import (LinkedIn URL, Notion doc,
- * Resume PDF). Slot exists for the next round; we surface it now so
- * users know it's coming.
+ * 1. **AI Quick Fill (copy-paste prompt)** — most flexible. User runs
+ *    our prompt through Claude/ChatGPT/Gemini, pastes JSON back. Covers
+ *    every scope (profile + cv + portfolio + contacts + applications).
+ * 2. **Server-side AI parse** — fastest. User pastes raw resume / LinkedIn
+ *    text into a textarea here; we call our own AI proxy with the same
+ *    prompt and apply the result. Currently scope=profile only.
+ * 3. **Structured import (LinkedIn URL / Notion / PDF)** — needs OAuth /
+ *    PDF parsing, scoped out of the current batch. Documented in
+ *    docs/progress/ as a follow-up.
  */
 export function ImportCard() {
   return (
@@ -30,13 +36,12 @@ export function ImportCard() {
         <CardHeader>
           <CardTitle as="h3" className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-brand" />
-            Isi Cepat dengan AI
+            Isi Cepat dengan AI (copy–paste prompt)
           </CardTitle>
           <CardDescription>
-            Paling cepat. Tempel CV / profil LinkedIn ke AI (Claude /
-            ChatGPT / Gemini), dapat balasan JSON, tempel balik ke sini —
-            CareerPack langsung isi semua field profile + CV + portofolio
-            sekaligus. Personal Branding ikut update otomatis.
+            Paling fleksibel — cocok untuk import lengkap (profile + CV +
+            portofolio + kontak). Tempel CV / LinkedIn ke AI eksternal,
+            balasan JSON tempel kembali ke sini.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -53,32 +58,84 @@ export function ImportCard() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-1">
-              <CardTitle as="h3" className="flex items-center gap-2 text-base">
-                <Upload className="h-4 w-4 text-muted-foreground" />
-                Impor terstruktur
-              </CardTitle>
-              <CardDescription>
-                Paste URL LinkedIn, dokumen Notion, atau upload PDF
-                resume — kami akan parse otomatis tanpa lewat AI prompt.
-              </CardDescription>
-            </div>
-            <Badge variant="outline" className="shrink-0">
-              Segera hadir
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-xs text-muted-foreground">
-            <Download className="mx-auto mb-2 h-5 w-5 opacity-50" />
-            Untuk sementara pakai jalur AI di atas — hasil sama, hanya
-            butuh 1–2 menit lebih.
-          </div>
-        </CardContent>
-      </Card>
+      <ServerSideParseCard />
     </div>
+  );
+}
+
+function ServerSideParseCard() {
+  const [text, setText] = useState("");
+  const [running, setRunning] = useState(false);
+  const parse = useAction(api.ai.actions.parseImportText);
+  const apply = useMutation(api.onboarding.mutations.quickFill);
+
+  const onParse = async () => {
+    const trimmed = text.trim();
+    if (trimmed.length < 40) {
+      notify.error("Teks terlalu pendek — minimal 40 karakter.");
+      return;
+    }
+    setRunning(true);
+    try {
+      const payload = await parse({ text: trimmed });
+      const res = await apply({ payload, scope: "profile" });
+      const inserted = (res as { inserted?: number })?.inserted ?? 0;
+      notify.success("Profil berhasil diisi", {
+        description: inserted > 0 ? `${inserted} field dipopulasi dari teks Anda.` : "Cek tab Profile untuk hasilnya.",
+      });
+      setText("");
+    } catch (err) {
+      notify.fromError(err, "Gagal memparse teks");
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle as="h3" className="flex items-center gap-2 text-base">
+          <Wand2 className="h-4 w-4 text-brand" />
+          Parse Otomatis (server-side)
+        </CardTitle>
+        <CardDescription>
+          Tempel teks resume atau ringkasan LinkedIn — AI kami yang
+          ekstrak field profile-nya. Lebih cepat dari jalur copy-paste,
+          tapi saat ini hanya isi <strong>scope profile</strong>.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Textarea
+          rows={6}
+          placeholder="Tempel ringkasan LinkedIn / resume teks polos di sini…"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          disabled={running}
+          aria-label="Teks resume atau profil LinkedIn untuk diparse"
+        />
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {text.length} karakter · minimal 40
+          </p>
+          <Button
+            type="button"
+            onClick={onParse}
+            disabled={running || text.trim().length < 40}
+          >
+            {running ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Memparse…</span>
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                <span>Parse &amp; Apply</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

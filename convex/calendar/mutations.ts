@@ -11,6 +11,7 @@ export const createEvent = mutation({
     type: v.string(),
     notes: v.optional(v.string()),
     applicationId: v.optional(v.id("jobApplications")),
+    reminderMinutes: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await requireUser(ctx);
@@ -26,6 +27,7 @@ export const createEvent = mutation({
       type: args.type,
       notes: args.notes,
       applicationId: args.applicationId,
+      reminderMinutes: args.reminderMinutes,
     });
   },
 });
@@ -39,6 +41,7 @@ export const updateEvent = mutation({
     location: v.optional(v.string()),
     type: v.optional(v.string()),
     notes: v.optional(v.string()),
+    reminderMinutes: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await requireOwnedDoc(ctx, args.eventId, "Agenda");
@@ -50,6 +53,16 @@ export const updateEvent = mutation({
     if (args.location !== undefined) patch.location = args.location;
     if (args.type !== undefined) patch.type = args.type;
     if (args.notes !== undefined) patch.notes = args.notes;
+    if (args.reminderMinutes !== undefined) patch.reminderMinutes = args.reminderMinutes;
+
+    // Reschedule clears the idempotency flag so the cron can re-fire.
+    if (
+      args.date !== undefined ||
+      args.time !== undefined ||
+      args.reminderMinutes !== undefined
+    ) {
+      patch.reminderSentAt = undefined;
+    }
 
     await ctx.db.patch(args.eventId, patch);
   },
