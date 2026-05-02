@@ -7,23 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import type { JobListing } from "../types";
 import { CATEGORY_COLORS, CATEGORY_LABELS, WORK_MODE_LABELS } from "../types";
-
-function formatSalary(min?: number, max?: number, currency = "IDR"): string {
-  if (!min && !max) return "Gaji dinegosiasikan";
-  const fmt = (n: number) =>
-    n >= 1_000_000 ? `${(n / 1_000_000).toFixed(0)}jt` : `${n.toLocaleString()}`;
-  if (min && max) return `${currency} ${fmt(min)}–${fmt(max)}`;
-  return `${currency} ${fmt((min ?? max) as number)}`;
-}
-
-function timeAgo(ts: number): string {
-  const diff = Date.now() - ts;
-  const day = 24 * 60 * 60 * 1000;
-  if (diff < day) return "Hari ini";
-  if (diff < 2 * day) return "Kemarin";
-  if (diff < 7 * day) return `${Math.floor(diff / day)}h`;
-  return `${Math.floor(diff / (7 * day))}mg`;
-}
+import { formatSalary, timeAgo } from "../lib/format";
 
 interface JobCardProps {
   job: JobListing;

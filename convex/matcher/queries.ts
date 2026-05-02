@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { optionalUser, requireUser, requireOwnedDoc } from "../_shared/auth";
 import type { Doc } from "../_generated/dataModel";
 
-const MAX_LIST = 50;
+const MAX_LIST = 100;
 const MAX_SCAN_HISTORY = 50;
 
 type JobListing = Doc<"jobListings">;
@@ -42,22 +42,81 @@ function scoreJob(profile: UserProfile | null, job: JobListing): number {
 export const listJobs = query({
   args: {
     workMode: v.optional(v.string()),
+    category: v.optional(v.string()),
+    source: v.optional(v.string()),
+    /** When true, only returns user-paste rows where addedBy === current
+     *  user. Returns [] when unauthenticated (no error — used for the
+     *  "Lowongan Saya" tab which renders empty-state on logout). */
+    mineOnly: v.optional(v.boolean()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const limit = Math.min(args.limit ?? 20, MAX_LIST);
-    let cursor = ctx.db.query("jobListings").withIndex("by_posted").order("desc");
+
+    // "Mine only" — user's own pastes. Index by source then filter
+    // addedBy in memory (small set; addedBy isn't indexed and doesn't
+    // need to be at this volume).
+    if (args.mineOnly) {
+      const userId = await optionalUser(ctx);
+      if (!userId) return [];
+      const rows = await ctx.db
+        .query("jobListings")
+        .withIndex("by_source_posted", (q) => q.eq("source", "user-paste"))
+        .order("desc")
+        .take(MAX_LIST);
+      return applyClientFilters(
+        rows.filter((r) => r.addedBy === userId),
+        args,
+      ).slice(0, limit);
+    }
+
+    // Source-scoped (explore by feed origin). Uses by_source_posted.
+    if (args.source && args.source !== "all") {
+      const rows = await ctx.db
+        .query("jobListings")
+        .withIndex("by_source_posted", (q) =>
+          q.eq("source", args.source as string),
+        )
+        .order("desc")
+        .take(MAX_LIST);
+      return applyClientFilters(rows, args).slice(0, limit);
+    }
+
+    // workMode-scoped — uses dedicated index.
     if (args.workMode && args.workMode !== "all") {
-      cursor = ctx.db
+      const rows = await ctx.db
         .query("jobListings")
         .withIndex("by_workMode", (q) =>
           q.eq("workMode", args.workMode as string),
         )
-        .order("desc");
+        .order("desc")
+        .take(MAX_LIST);
+      return applyClientFilters(rows, args).slice(0, limit);
     }
-    return await cursor.take(limit);
+
+    // Default — by posted date desc.
+    const rows = await ctx.db
+      .query("jobListings")
+      .withIndex("by_posted")
+      .order("desc")
+      .take(MAX_LIST);
+    return applyClientFilters(rows, args).slice(0, limit);
   },
 });
+
+function applyClientFilters(
+  rows: JobListing[],
+  args: { category?: string; workMode?: string },
+): JobListing[] {
+  let out = rows;
+  if (args.category && args.category !== "all") {
+    out = out.filter((r) => r.category === args.category);
+  }
+  if (args.workMode && args.workMode !== "all") {
+    out = out.filter((r) => r.workMode === args.workMode);
+  }
+  return out;
+}
 
 export const getMatches = query({
   args: { limit: v.optional(v.number()) },

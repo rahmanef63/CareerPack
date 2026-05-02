@@ -9,6 +9,15 @@ export interface JobMatch {
 
 export type WorkModeFilter = "all" | "remote" | "hybrid" | "onsite";
 
+export type SeniorityFilter = "all" | "junior" | "mid-level" | "senior" | "lead";
+
+export type JobSortKey =
+  | "newest"
+  | "salary-desc"
+  | "company-asc";
+
+export type JobBrowserView = "list" | "grid";
+
 export const WORK_MODE_LABELS: Record<Exclude<WorkModeFilter, "all">, string> = {
   remote: "Remote",
   hybrid: "Hybrid",

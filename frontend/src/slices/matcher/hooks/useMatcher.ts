@@ -2,19 +2,30 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
-import type { WorkModeFilter } from "../types";
 
-export function useMatcher(workMode: WorkModeFilter) {
-  const jobs = useQuery(api.matcher.queries.listJobs, {
-    workMode: workMode === "all" ? undefined : workMode,
+/**
+ * Two parallel queries — "Saya" tab needs the current user's pastes
+ * only; "Explore" needs the full catalog. Splitting at the hook layer
+ * keeps cache keys stable and lets each tab show its own loading
+ * skeleton independently. Filtering (search, category, skills, sort)
+ * happens client-side inside `JobBrowser`.
+ */
+export function useMatcher() {
+  const myJobs = useQuery(api.matcher.queries.listJobs, {
+    mineOnly: true,
+    limit: 100,
   });
+  const exploreJobs = useQuery(api.matcher.queries.listJobs, { limit: 100 });
   const matches = useQuery(api.matcher.queries.getMatches, { limit: 6 });
   const seedDemo = useMutation(api.matcher.mutations.seedDemoJobs);
 
   return {
-    jobs: jobs ?? [],
+    myJobs: myJobs ?? [],
+    exploreJobs: exploreJobs ?? [],
     matches: matches ?? [],
-    isLoading: jobs === undefined || matches === undefined,
+    isLoadingMy: myJobs === undefined,
+    isLoadingExplore: exploreJobs === undefined,
+    isLoadingMatches: matches === undefined,
     seedDemo,
   };
 }

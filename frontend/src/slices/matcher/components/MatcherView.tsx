@@ -1,41 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { Compass, Download, ExternalLink, Plus, Sparkles, ScanText } from "lucide-react";
-import { notify } from "@/shared/lib/notify";
+import { Compass, Download, Plus, Sparkles, Trophy } from "lucide-react";
 
-import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
-import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
 import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
+import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
+import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@/shared/components/ui/responsive-dialog";
-import type { JobListing, WorkModeFilter } from "../types";
+import { notify } from "@/shared/lib/notify";
+import { PageContainer } from "@/shared/components/layout/PageContainer";
+
+import type { JobListing } from "../types";
 import { useMatcher } from "../hooks/useMatcher";
-import { JobCard } from "./JobCard";
-import { ATSScannerForm } from "./ATSScannerForm";
-import { ATSHistoryList } from "./ATSHistoryList";
 import { AddJobDialog } from "./AddJobDialog";
-import { PageContainer } from '@/shared/components/layout/PageContainer';
+import { ATSHistoryList } from "./ATSHistoryList";
+import { ATSScannerForm } from "./ATSScannerForm";
+import { JobBrowser } from "./JobBrowser";
+import { JobCard } from "./JobCard";
+import { JobDetailDialog } from "./JobDetailDialog";
 
 type TopTab = "listings" | "ats" | "history";
+type ListingsTab = "saya" | "explore";
 
 export function MatcherView() {
   const [topTab, setTopTab] = useState<TopTab>("listings");
-  const [filter, setFilter] = useState<WorkModeFilter>("all");
-  const { jobs, matches, isLoading, seedDemo } = useMatcher(filter);
+  const [listingsTab, setListingsTab] = useState<ListingsTab>("explore");
+  const {
+    myJobs,
+    exploreJobs,
+    matches,
+    isLoadingMy,
+    isLoadingExplore,
+    seedDemo,
+  } = useMatcher();
   const [seeding, setSeeding] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [detail, setDetail] = useState<JobListing | null>(null);
@@ -64,8 +66,6 @@ export function MatcherView() {
     setTopTab("ats");
     setDetail(null);
   };
-
-  const showEmpty = !isLoading && jobs.length === 0;
 
   return (
     <PageContainer size="lg" className="space-y-6">
@@ -134,45 +134,49 @@ export function MatcherView() {
             </ResponsiveCarousel>
           )}
 
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as WorkModeFilter)}>
-            <TabsList variant="pills">
-              <TabsTrigger value="all">Semua</TabsTrigger>
-              <TabsTrigger value="remote">Remote</TabsTrigger>
-              <TabsTrigger value="hybrid">Hybrid</TabsTrigger>
-              <TabsTrigger value="onsite">On-site</TabsTrigger>
+          <Tabs
+            value={listingsTab}
+            onValueChange={(v) => setListingsTab(v as ListingsTab)}
+          >
+            <TabsList variant="equal" cols={2}>
+              <TabsTrigger value="saya">
+                <Trophy className="h-3.5 w-3.5" />
+                Lowongan Saya
+                {myJobs.length > 0 && (
+                  <span className="ml-1 rounded-full bg-muted px-1.5 text-[10px] tabular-nums">
+                    {myJobs.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="explore">
+                <Compass className="h-3.5 w-3.5" />
+                Explore
+                {exploreJobs.length > 0 && (
+                  <span className="ml-1 rounded-full bg-muted px-1.5 text-[10px] tabular-nums">
+                    {exploreJobs.length}
+                  </span>
+                )}
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value={filter} className="mt-4">
-              {showEmpty ? (
-                <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
-                  <Compass className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-medium text-foreground">
-                    Belum ada lowongan
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Klik &ldquo;Muat Contoh Lowongan&rdquo; di atas untuk memuat katalog contoh.
-                  </p>
-                </div>
-              ) : isLoading ? (
-                <div className="grid gap-3 lg:grid-cols-2">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-44 animate-pulse rounded-xl border border-border bg-muted/30"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid gap-3 lg:grid-cols-2">
-                  {jobs.map((job) => (
-                    <JobCard
-                      key={job._id}
-                      job={job}
-                      onView={() => setDetail(job)}
-                    />
-                  ))}
-                </div>
-              )}
+            <TabsContent value="saya" className="mt-4">
+              <JobBrowser
+                jobs={myJobs}
+                loading={isLoadingMy}
+                onSelect={setDetail}
+                zeroDataHint="Belum ada lowongan yang kamu tambahkan. Klik “Tambah Lowongan” untuk paste deskripsi dari LinkedIn / JobStreet / sumber lain."
+                emptyHint="Tidak ada lowongan kamu yang cocok dengan filter saat ini."
+              />
+            </TabsContent>
+
+            <TabsContent value="explore" className="mt-4">
+              <JobBrowser
+                jobs={exploreJobs}
+                loading={isLoadingExplore}
+                onSelect={setDetail}
+                zeroDataHint="Belum ada lowongan. Klik “Muat Contoh” untuk memuat katalog contoh."
+                emptyHint="Tidak ada lowongan yang cocok dengan filter saat ini."
+              />
             </TabsContent>
           </Tabs>
         </TabsContent>
@@ -188,80 +192,11 @@ export function MatcherView() {
         </TabsContent>
       </Tabs>
 
-      {/* Detail dialog (listings tab) */}
-      <ResponsiveDialog
-        open={!!detail}
-        onOpenChange={(o) => !o && setDetail(null)}
-      >
-        <ResponsiveDialogContent size="2xl">
-          {detail && (
-            <>
-              <ResponsiveDialogHeader>
-                <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-muted text-2xl">
-                    {detail.companyLogo ?? "🏢"}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <ResponsiveDialogTitle>{detail.title}</ResponsiveDialogTitle>
-                    <ResponsiveDialogDescription>
-                      {detail.company} · {detail.location}
-                    </ResponsiveDialogDescription>
-                  </div>
-                </div>
-              </ResponsiveDialogHeader>
-              <div className="space-y-4 py-2 text-sm">
-                <p className="whitespace-pre-line text-muted-foreground">
-                  {detail.description}
-                </p>
-                {detail.requiredSkills.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Skill dibutuhkan
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {detail.requiredSkills.map((s) => (
-                        <Badge key={s} variant="secondary">
-                          {s}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <ResponsiveDialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setDetail(null)}
-                >
-                  Tutup
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => handleScanFromCard(detail)}
-                  className="gap-2"
-                >
-                  <ScanText className="h-4 w-4" />
-                  Cek ATS
-                </Button>
-                {detail.applyUrl && (
-                  <Button asChild className="gap-2">
-                    <a
-                      href={detail.applyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Lamar di {detail.company}
-                    </a>
-                  </Button>
-                )}
-              </ResponsiveDialogFooter>
-            </>
-          )}
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
+      <JobDetailDialog
+        job={detail}
+        onOpenChange={(open) => !open && setDetail(null)}
+        onScanATS={handleScanFromCard}
+      />
     </PageContainer>
   );
 }
