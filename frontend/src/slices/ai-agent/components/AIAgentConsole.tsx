@@ -177,6 +177,7 @@ export function AIAgentConsole({
       const availableSkills = ALL_SKILLS.map((s) => ({
         id: s.id,
         description: `${s.label}: ${s.description}`,
+        kind: s.kind,
         args: s.args
           ? Object.entries(s.args).map(([name, field]) => ({
               name,

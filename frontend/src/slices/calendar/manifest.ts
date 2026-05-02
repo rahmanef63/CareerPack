@@ -30,6 +30,13 @@ export const calendarManifest: SliceManifest = {
 
   skills: [
     {
+      id: "calendar.list-events",
+      label: "Lihat event di kalender",
+      description:
+        "Ambil daftar event/pengingat user dari kalender. Pakai DULU sebelum update/delete supaya dapat eventId. Juga pakai untuk menjawab 'apa agenda saya hari ini/besok'. Returns array of {eventId, title, date, time, location, type, notes}.",
+      kind: "query",
+    },
+    {
       id: "calendar.create-event",
       label: "Buat event di kalender",
       description:
@@ -73,6 +80,57 @@ export const calendarManifest: SliceManifest = {
           type: "string",
           label: "Catatan tambahan",
           required: false,
+        },
+      },
+    },
+    {
+      id: "calendar.update-event",
+      label: "Edit event kalender",
+      description:
+        "Ubah field event yang sudah ada. WAJIB punya eventId — kalau belum punya, panggil calendar.list-events dulu untuk dapat ID-nya. Hanya kirim field yang mau diubah; field yang tidak dikirim tetap.",
+      kind: "mutation",
+      cta: "Simpan perubahan",
+      args: {
+        eventId: {
+          type: "string",
+          label: "ID event (didapat dari list-events)",
+          required: true,
+          example: "k57j1abcd...",
+        },
+        title: { type: "string", label: "Judul baru", required: false },
+        date: {
+          type: "string",
+          label: "Tanggal baru (YYYY-MM-DD)",
+          required: false,
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+        },
+        time: {
+          type: "string",
+          label: "Jam baru (HH:MM)",
+          required: false,
+          pattern: "^\\d{2}:\\d{2}$",
+        },
+        type: {
+          type: "string",
+          label: "Tipe baru",
+          required: false,
+        },
+        location: { type: "string", label: "Lokasi baru", required: false },
+        notes: { type: "string", label: "Catatan baru", required: false },
+      },
+    },
+    {
+      id: "calendar.delete-event",
+      label: "Hapus event kalender",
+      description:
+        "Hapus event dari kalender berdasarkan eventId. WAJIB panggil calendar.list-events dulu kalau belum punya ID. Aksi destructive — selalu butuh persetujuan user di UI.",
+      kind: "mutation",
+      cta: "Hapus event",
+      args: {
+        eventId: {
+          type: "string",
+          label: "ID event yang mau dihapus",
+          required: true,
         },
       },
     },

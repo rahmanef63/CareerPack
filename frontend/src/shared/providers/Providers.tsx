@@ -21,6 +21,9 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip"
 // its import here = clean modular boundary at compile time.
 import { SettingsCapabilities } from "@/slices/settings"
 import { CalendarCapabilities } from "@/slices/calendar"
+import { CareerDashboardCapabilities } from "@/slices/career-dashboard"
+import { NetworkingCapabilities } from "@/slices/networking"
+import { DocumentChecklistCapabilities } from "@/slices/document-checklist"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -34,6 +37,9 @@ export function Providers({ children }: { children: ReactNode }) {
                 {children}
                 <SettingsCapabilities />
                 <CalendarCapabilities />
+                <CareerDashboardCapabilities />
+                <NetworkingCapabilities />
+                <DocumentChecklistCapabilities />
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />
