@@ -157,7 +157,7 @@ export function ResponsiveContextMenuContent({
     );
   }
   return (
-    <DrawerContent className={cn("max-h-[85vh]", drawerClassName)}>
+    <DrawerContent className={cn("max-h-[85dvh]", drawerClassName)}>
       <DrawerHeader className={drawerTitle ? "pb-1" : "sr-only"}>
         <DrawerTitle className={drawerTitle ? "" : "sr-only"}>
           {drawerTitle ?? "Menu"}

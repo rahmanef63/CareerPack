@@ -57,8 +57,8 @@ export function CVPreviewDialog({
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
       <DialogContent
         size="content"
-        className="max-h-[95vh] overflow-y-auto"
-        drawerClassName="max-h-[95vh]"
+        className="max-h-[95dvh] overflow-y-auto"
+        drawerClassName="max-h-[95dvh]"
       >
         <DialogHeader>
           <div className="flex flex-wrap items-center justify-between gap-2 pr-8">

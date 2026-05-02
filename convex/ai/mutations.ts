@@ -1,7 +1,7 @@
 import { mutation, internalMutation } from "../_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { requireUser } from "../_shared/auth";
+import { requireUser, requireAdmin } from "../_shared/auth";
 import { AI_PROVIDERS } from "../_shared/aiProviders";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
 
@@ -80,6 +80,113 @@ export const clearMyAISettings = mutation({
     const existing = await ctx.db
       .query("aiSettings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (existing) await ctx.db.delete(existing._id);
+  },
+});
+
+// ----- Global (admin-managed) AI settings -----
+
+export const setGlobalAISettings = mutation({
+  args: {
+    provider: v.string(),
+    model: v.string(),
+    apiKey: v.string(),
+    baseUrl: v.optional(v.string()),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const adminId = await requireAdmin(ctx);
+
+    const spec = AI_PROVIDERS[args.provider];
+    if (!spec) throw new Error(`Provider tidak dikenal: ${args.provider}`);
+
+    const model = args.model.trim();
+    if (!model) throw new Error("Model wajib diisi");
+
+    const rawKey = args.apiKey.trim();
+    const baseUrl = args.baseUrl?.trim() || undefined;
+    if (args.provider === "custom" && !baseUrl) {
+      throw new Error("Provider kustom butuh Base URL");
+    }
+
+    const existing = await ctx.db.query("globalAISettings").first();
+    const apiKey = rawKey || existing?.apiKey || "";
+    if (args.enabled && !apiKey) throw new Error("API key wajib saat global AI diaktifkan");
+
+    const patch = {
+      provider: args.provider,
+      model,
+      apiKey,
+      baseUrl,
+      enabled: args.enabled,
+      updatedBy: adminId,
+      updatedAt: Date.now(),
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, patch);
+      return existing._id;
+    }
+    return await ctx.db.insert("globalAISettings", patch);
+  },
+});
+
+export const clearGlobalAISettings = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const existing = await ctx.db.query("globalAISettings").first();
+    if (existing) await ctx.db.delete(existing._id);
+  },
+});
+
+// ----- Per-user model override (admin) -----
+
+export const setUserAIModelOverride = mutation({
+  args: { email: v.string(), model: v.string() },
+  handler: async (ctx, args) => {
+    const adminId = await requireAdmin(ctx);
+
+    const email = args.email.trim().toLowerCase();
+    if (!email) throw new Error("Email wajib");
+    const model = args.model.trim();
+    if (!model) throw new Error("Model wajib");
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), email))
+      .first();
+    if (!user) throw new Error(`User dengan email ${email} tidak ditemukan`);
+
+    const existing = await ctx.db
+      .query("aiUserModelOverrides")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+
+    const patch = {
+      userId: user._id,
+      model,
+      setBy: adminId,
+      updatedAt: Date.now(),
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, patch);
+    } else {
+      await ctx.db.insert("aiUserModelOverrides", patch);
+    }
+    return { userId: user._id, email };
+  },
+});
+
+export const clearUserAIModelOverride = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const existing = await ctx.db
+      .query("aiUserModelOverrides")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .first();
     if (existing) await ctx.db.delete(existing._id);
   },

@@ -152,7 +152,7 @@ export function ResponsiveCombobox<T extends string = string>({
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[85vh]">
+        <DrawerContent className="max-h-[85dvh]">
           <DrawerHeader>
             <DrawerTitle>{drawerTitle}</DrawerTitle>
           </DrawerHeader>

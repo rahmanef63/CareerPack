@@ -216,7 +216,7 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
                 </Button>
               </div>
 
-              <div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1">
+              <div className="max-h-[55dvh] space-y-4 overflow-y-auto pr-1">
                 {result.experiences.map((exp) => {
                   const changedBullets = exp.changes.filter((c) => c.changed);
                   if (changedBullets.length === 0) return null;

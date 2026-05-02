@@ -94,7 +94,7 @@ export function ResponsiveFilterBar({
             )}
           </Button>
         </DrawerTrigger>
-        <DrawerContent className={cn("max-h-[90vh]", drawerClassName)}>
+        <DrawerContent className={cn("max-h-[90dvh]", drawerClassName)}>
           <DrawerHeader>
             <DrawerTitle>{drawerTitle}</DrawerTitle>
           </DrawerHeader>

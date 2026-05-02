@@ -82,6 +82,9 @@ const FeedbackPanel = dynamic(() => import("./FeedbackPanel").then((m) => m.Feed
 const ErrorLogsPanel = dynamic(() => import("./ErrorLogsPanel").then((m) => m.ErrorLogsPanel), {
   ssr: false, loading: PanelSkeleton,
 });
+const AIConfigPanel = dynamic(() => import("./AIConfigPanel").then((m) => m.AIConfigPanel), {
+  ssr: false, loading: PanelSkeleton,
+});
 
 export function AdminPanel() {
   const router = useRouter();
@@ -361,6 +364,10 @@ export function AdminPanel() {
             <AlertTriangle className="w-3.5 h-3.5" />
             Error
           </TabsTrigger>
+          <TabsTrigger value="ai">
+            <Sparkles className="w-3.5 h-3.5" />
+            AI
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4">
@@ -380,6 +387,9 @@ export function AdminPanel() {
         </TabsContent>
         <TabsContent value="errors" className="mt-4">
           <ErrorBoundary title="Error log gagal dimuat"><ErrorLogsPanel /></ErrorBoundary>
+        </TabsContent>
+        <TabsContent value="ai" className="mt-4">
+          <ErrorBoundary title="Panel AI gagal dimuat"><AIConfigPanel /></ErrorBoundary>
         </TabsContent>
       </Tabs>
     </PageContainer>

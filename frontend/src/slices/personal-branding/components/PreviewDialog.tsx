@@ -150,8 +150,8 @@ export function PreviewDialog({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent
         size="content"
-        className="max-h-[95vh] overflow-y-auto p-0"
-        drawerClassName="max-h-[95vh]"
+        className="max-h-[95dvh] overflow-y-auto p-0"
+        drawerClassName="max-h-[95dvh]"
         aria-describedby={undefined}
       >
         <ResponsiveDialogHeader className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">

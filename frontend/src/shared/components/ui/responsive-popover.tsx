@@ -95,7 +95,7 @@ export function ResponsivePopoverContent({
     );
   }
   return (
-    <DrawerContent className={cn("max-h-[85vh]", drawerClassName)}>
+    <DrawerContent className={cn("max-h-[85dvh]", drawerClassName)}>
       <div className="flex items-center justify-center overflow-y-auto px-4 pb-6">
         {children}
       </div>

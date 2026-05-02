@@ -140,7 +140,7 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
                   <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Deskripsi
                   </h4>
-                  <div className="max-h-[50vh] space-y-3 overflow-y-auto rounded-lg border border-border bg-muted/30 p-4 leading-relaxed">
+                  <div className="max-h-[50dvh] space-y-3 overflow-y-auto rounded-lg border border-border bg-muted/30 p-4 leading-relaxed">
                     {formatJobDescription(job.description)}
                   </div>
                 </section>

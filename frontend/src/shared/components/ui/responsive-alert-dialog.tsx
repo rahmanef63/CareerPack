@@ -102,7 +102,7 @@ export function ResponsiveAlertDialogContent({
   }
   return (
     <DrawerContent
-      className={cn("max-h-[90vh]", drawerClassName)}
+      className={cn("max-h-[90dvh]", drawerClassName)}
       {...(props as React.ComponentProps<typeof DrawerContent>)}
     >
       <div className="overflow-y-auto px-4 pb-4">{children}</div>

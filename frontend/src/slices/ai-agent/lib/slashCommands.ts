@@ -22,6 +22,18 @@ export interface AgentReply {
 }
 
 /**
+ * Slash-command-only action parser. Returns just the action array (no
+ * synthesized text). Used by the live AI flow — natural-language reply
+ * comes from the backend chat action, but slash commands still inject
+ * structured actions client-side so users can approve them.
+ */
+export function extractSlashActions(userInput: string): AgentAction[] {
+  const trimmed = userInput.trim();
+  if (!trimmed.startsWith("/")) return [];
+  return runAgent(trimmed).actions;
+}
+
+/**
  * Heuristic agent — runs entirely client-side (mirrors generateFallbackResponse).
  * Returns an explanation plus typed actions the user can approve.
  */

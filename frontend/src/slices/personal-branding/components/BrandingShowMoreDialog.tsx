@@ -64,7 +64,7 @@ export function BrandingShowMoreDialog({ branding, listName, onClose }: Props) {
             {listName ? DESCRIPTIONS[listName] : ""}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="max-h-[70vh] overflow-y-auto pr-1">
+        <div className="max-h-[70dvh] overflow-y-auto pr-1">
           {branding && listName ? (
             <ListBody branding={branding} listName={listName} />
           ) : null}

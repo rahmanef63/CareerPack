@@ -25,15 +25,20 @@ export function Composer({
   return (
     <Popover open={showSlashPopover}>
       <PopoverAnchor asChild>
-        <form onSubmit={onSubmit} className="p-3 max-w-3xl mx-auto w-full">
+        <form
+          onSubmit={onSubmit}
+          className="p-3 max-w-3xl mx-auto w-full pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        >
           <div className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ketik / untuk perintah, atau tanya bebas…"
               disabled={thinking}
-              className="flex-1"
+              className="flex-1 text-base sm:text-sm"
               aria-label="Pesan ke Asisten AI"
+              enterKeyHint="send"
+              autoComplete="off"
             />
             <Button
               type="submit"

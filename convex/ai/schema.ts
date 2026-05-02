@@ -34,6 +34,31 @@ export const aiTables = {
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
 
+  // Singleton (one row max). Admin-managed system-wide default. When
+  // a user has no per-user `aiSettings`, the AI pipeline falls back
+  // here before falling back to env defaults. Lets admin configure
+  // OpenRouter once for everyone instead of per-user key paste.
+  globalAISettings: defineTable({
+    provider: v.string(),
+    model: v.string(),
+    apiKey: v.string(),
+    baseUrl: v.optional(v.string()),
+    enabled: v.boolean(),
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  }),
+
+  // Admin-set per-user MODEL override. Inherits provider + apiKey
+  // from `globalAISettings` — useful when admin wants user X on a
+  // premium model and user Y on a cheap one, but both routed through
+  // the same OpenRouter key. Singleton-per-user (one row per userId).
+  aiUserModelOverrides: defineTable({
+    userId: v.id("users"),
+    model: v.string(),
+    setBy: v.id("users"),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
   rateLimitEvents: defineTable({
     userId: v.id("users"),
     key: v.string(),

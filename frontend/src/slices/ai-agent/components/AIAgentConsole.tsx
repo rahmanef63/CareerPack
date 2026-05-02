@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAction } from "convex/react";
 import { Sparkles, MessageSquare } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
@@ -12,13 +13,14 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { TypingDots } from "@/shared/components/interactions/MicroInteractions";
 import { cn } from "@/shared/lib/utils";
-import { runAgent } from "../lib/slashCommands";
+import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
 import { newSession, type Message } from "../types/console";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
 import { HistoryRail } from "./ai-agent-console/HistoryRail";
 import { Composer } from "./ai-agent-console/Composer";
 import { useSessionSync } from "../hooks/useSessionSync";
+import { api } from "../../../../../convex/_generated/api";
 
 interface AIAgentConsoleProps {
   open: boolean;
@@ -37,6 +39,7 @@ export function AIAgentConsole({
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false);
+  const chatAction = useAction(api.ai.actions.chat);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +91,7 @@ export function AIAgentConsole({
   );
 
   const send = useCallback(
-    (rawText?: string) => {
+    async (rawText?: string) => {
       const text = (rawText ?? input).trim();
       if (!text || thinking || !activeSession) return;
 
@@ -98,6 +101,14 @@ export function AIAgentConsole({
         text,
         ts: Date.now(),
       };
+
+      // Snapshot history BEFORE optimistic update so we send the right
+      // payload to the backend (including the brand new user turn).
+      const history = activeSession.messages.map((m) => ({
+        role: m.role,
+        content: m.text,
+      }));
+      history.push({ role: "user", content: text });
 
       setSessions((prev) =>
         prev.map((s) =>
@@ -114,30 +125,44 @@ export function AIAgentConsole({
       setInput("");
       setThinking(true);
 
-      window.setTimeout(() => {
-        const reply = runAgent(text);
-        const assistantMsg: Message = {
-          id: `a-${Date.now()}`,
-          role: "assistant",
-          text: reply.text,
-          actions: reply.actions,
-          ts: Date.now(),
-        };
-        setSessions((prev) =>
-          prev.map((s) =>
-            s.id === activeSession.id
-              ? {
-                  ...s,
-                  messages: [...s.messages, assistantMsg],
-                  updatedAt: Date.now(),
-                }
-              : s,
-          ),
-        );
-        setThinking(false);
-      }, 620);
+      // Slash commands inject structured actions even when the AI
+      // reply is plain prose — kept client-side so action approval
+      // doesn't depend on AI obeying a JSON contract.
+      const slashActions = extractSlashActions(text);
+
+      let assistantText: string;
+      try {
+        assistantText = await chatAction({
+          messages: history,
+          view: currentView,
+        });
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        const fallback = runAgent(text);
+        assistantText = `⚠️ AI gateway error: ${reason}\n\n${fallback.text}`;
+      }
+
+      const assistantMsg: Message = {
+        id: `a-${Date.now()}`,
+        role: "assistant",
+        text: assistantText,
+        actions: slashActions,
+        ts: Date.now(),
+      };
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeSession.id
+            ? {
+                ...s,
+                messages: [...s.messages, assistantMsg],
+                updatedAt: Date.now(),
+              }
+            : s,
+        ),
+      );
+      setThinking(false);
     },
-    [activeSession, input, thinking, setSessions],
+    [activeSession, input, thinking, setSessions, chatAction, currentView],
   );
 
   const onSubmit = (e: React.FormEvent) => {
@@ -154,7 +179,7 @@ export function AIAgentConsole({
         className={cn(
           "p-0 flex flex-col bg-card",
           isMobile
-            ? "h-[85vh] rounded-t-3xl"
+            ? "h-[92dvh] max-h-[92dvh] rounded-t-3xl"
             : "w-full sm:max-w-2xl lg:max-w-3xl",
         )}
       >

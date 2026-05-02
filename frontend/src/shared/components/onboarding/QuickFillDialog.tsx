@@ -132,8 +132,8 @@ export function QuickFillDialog({
     <ResponsiveDialog open={open} onOpenChange={handleClose}>
       <ResponsiveDialogContent
         size="full"
-        className="flex max-h-[92vh] flex-col gap-3 overflow-hidden p-4 sm:p-6"
-        drawerClassName="max-h-[92vh]"
+        className="flex max-h-[92dvh] flex-col gap-3 overflow-hidden p-4 sm:p-6"
+        drawerClassName="max-h-[92dvh]"
         aria-describedby={undefined}
       >
         <ResponsiveDialogHeader className="shrink-0">
