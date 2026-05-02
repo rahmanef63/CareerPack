@@ -4,11 +4,45 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
+import {
+  isPullToRefreshLocked,
+  subscribePullToRefreshLock,
+} from "@/shared/lib/ptrLock";
 
 interface PullToRefreshProps {
   children: ReactNode;
   /** Override the refresh action — default is `window.location.reload()`. */
   onRefresh?: () => void | Promise<void>;
+}
+
+/**
+ * Auto-detect open overlays where PTR must NOT fire. Covers all our
+ * shadcn primitives + vaul drawer + AI agent Sheet without each one
+ * needing to opt in.
+ *
+ * - Radix Dialog/Sheet/AlertDialog: render content with
+ *   `role="dialog"` and `data-state="open"` while open.
+ * - vaul Drawer (used by ResponsiveDialog mobile mode): adds
+ *   `data-vaul-drawer-direction` to its content.
+ *
+ * Using `:is(...)` keeps the selector to one query call.
+ */
+function hasOpenOverlay(): boolean {
+  return Boolean(
+    document.querySelector(
+      '[role="dialog"][data-state="open"], [data-vaul-drawer-direction], [data-radix-dialog-overlay]',
+    ),
+  );
+}
+
+/** True if the touch originated inside any modal/drawer subtree —
+ *  even if the open-overlay detector misses (e.g. custom popups
+ *  using role="dialog" without data-state). */
+function isInsideOverlay(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(
+    target.closest('[role="dialog"], [data-vaul-drawer-direction]'),
+  );
 }
 
 /** How many pixels user drags before refresh activates. */
@@ -35,9 +69,30 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
   const active = useRef(false);
 
   useEffect(() => {
+    /** Reset the gesture if the lock store flips on mid-drag —
+     *  e.g. user opens a drawer programmatically while pulling. */
+    const onLockChange = () => {
+      if (isPullToRefreshLocked() && active.current) {
+        active.current = false;
+        setPullY(0);
+      }
+    };
+    const unsubLock = subscribePullToRefreshLock(onLockChange);
+
+    const shouldAbort = (target: EventTarget | null): boolean => {
+      if (isPullToRefreshLocked()) return true;
+      if (hasOpenOverlay()) return true;
+      if (isInsideOverlay(target)) return true;
+      return false;
+    };
+
     const onTouchStart = (e: TouchEvent) => {
       if (refreshing) return;
-      // Only initiate when at the very top.
+      if (shouldAbort(e.target)) {
+        active.current = false;
+        return;
+      }
+      // Only initiate when at the very top of the document.
       if (window.scrollY > 0 || document.documentElement.scrollTop > 0) {
         active.current = false;
         return;
@@ -53,6 +108,12 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
 
     const onTouchMove = (e: TouchEvent) => {
       if (!active.current || refreshing) return;
+      // Re-check abort each frame — modal might have opened after touchstart.
+      if (shouldAbort(e.target)) {
+        active.current = false;
+        setPullY(0);
+        return;
+      }
       const delta = e.touches[0].clientY - startY.current;
       if (delta <= 0) {
         // User scrolled up — abort.
@@ -100,6 +161,7 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
       document.removeEventListener("touchmove", onTouchMove);
       document.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("touchcancel", onTouchEnd);
+      unsubLock();
     };
   }, [pullY, refreshing, onRefresh]);
 

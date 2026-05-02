@@ -131,39 +131,111 @@ export interface ResponsiveDialogContentProps
   size?: ResponsiveDialogSize;
   /** class tambahan khusus mode mobile (drawer). */
   drawerClassName?: string;
+  /** Pinned at top of dialog/drawer body — does NOT scroll with the
+   *  body. Common use: search bar, filter pills, breadcrumb, tab strip.
+   *  Setting this switches the layout to flex-col with a separately
+   *  scrollable body region. Leave undefined for legacy single-scroll
+   *  layout (parent owns the overflow). */
+  stickyHeader?: React.ReactNode;
+  /** Pinned at bottom — does NOT scroll. Common use: action buttons
+   *  (Save/Cancel), summary bar. Same layout-switch semantics as
+   *  `stickyHeader`. */
+  stickyFooter?: React.ReactNode;
+  /** Class for the inner scrollable body region. Only applied when
+   *  layout is in sticky mode (either stickyHeader or stickyFooter
+   *  set). Use this to override default padding (`p-6` desktop,
+   *  `px-4 pb-4` mobile) or add `pt-0` when stickyHeader provides
+   *  its own breathing room. */
+  bodyClassName?: string;
 }
 
 export function ResponsiveDialogContent({
   size = "lg",
   className,
   drawerClassName,
+  stickyHeader,
+  stickyFooter,
+  bodyClassName,
   children,
   ...props
 }: ResponsiveDialogContentProps) {
   const mode = useResponsiveMode();
+  const useStickyLayout = Boolean(stickyHeader || stickyFooter);
+
   if (mode === "dialog") {
+    if (!useStickyLayout) {
+      // Legacy: parent IS the scrollable container. gap-4 between
+      // siblings, shadcn `p-6` from DialogContent default. Zero
+      // breaking change for callers that don't opt into sticky regions.
+      return (
+        <DialogContent
+          className={cn(
+            "flex max-h-[90dvh] w-full flex-col gap-4 overflow-y-auto",
+            SIZE_CLASSES[size],
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </DialogContent>
+      );
+    }
+    // Sticky layout: parent stays fixed-height, inner body scrolls.
+    // Override shadcn `p-6` to zero on parent so sticky regions span
+    // edge-to-edge — they re-add their own padding.
     return (
       <DialogContent
-        // `max-h-[90dvh] overflow-y-auto` makes the desktop dialog
-        // behave like the mobile drawer (which already wraps children
-        // in an overflow-y-auto div) — long forms inside ResponsiveDialog
-        // never need their own inner ScrollArea anymore. Width forced
-        // to `w-full` so child sections that want to fill it (form rows,
-        // tab strips) actually get the full content area.
         className={cn(
-          "flex max-h-[90dvh] w-full flex-col gap-4 overflow-y-auto",
+          "flex max-h-[90dvh] w-full flex-col gap-0 overflow-hidden p-0",
           SIZE_CLASSES[size],
           className,
         )}
         {...props}
       >
-        {children}
+        {stickyHeader && (
+          <div className="shrink-0 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 px-6 py-4">
+            {stickyHeader}
+          </div>
+        )}
+        <div
+          className={cn(
+            "flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-6",
+            bodyClassName,
+          )}
+        >
+          {children}
+        </div>
+        {stickyFooter && (
+          <div className="shrink-0 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 px-6 py-4">
+            {stickyFooter}
+          </div>
+        )}
       </DialogContent>
+    );
+  }
+
+  // Mobile (drawer mode).
+  if (!useStickyLayout) {
+    return (
+      <DrawerContent
+        className={cn("max-h-[92dvh]", drawerClassName)}
+        {...(props as React.ComponentProps<typeof DrawerContent>)}
+      >
+        <DrawerClose
+          aria-label="Tutup"
+          className="absolute right-2 top-2 z-10 inline-flex h-11 w-11 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          <X className="h-4 w-4" />
+        </DrawerClose>
+        <div className="flex w-full flex-col gap-4 overflow-y-auto px-4 pb-4">
+          {children}
+        </div>
+      </DrawerContent>
     );
   }
   return (
     <DrawerContent
-      className={cn("max-h-[92dvh]", drawerClassName)}
+      className={cn("flex max-h-[92dvh] flex-col", drawerClassName)}
       {...(props as React.ComponentProps<typeof DrawerContent>)}
     >
       <DrawerClose
@@ -172,9 +244,24 @@ export function ResponsiveDialogContent({
       >
         <X className="h-4 w-4" />
       </DrawerClose>
-      <div className="flex w-full flex-col gap-4 overflow-y-auto px-4 pb-4">
+      {stickyHeader && (
+        <div className="shrink-0 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 px-4 py-3 pr-12">
+          {stickyHeader}
+        </div>
+      )}
+      <div
+        className={cn(
+          "flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto px-4 py-4",
+          bodyClassName,
+        )}
+      >
         {children}
       </div>
+      {stickyFooter && (
+        <div className="shrink-0 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {stickyFooter}
+        </div>
+      )}
     </DrawerContent>
   );
 }
