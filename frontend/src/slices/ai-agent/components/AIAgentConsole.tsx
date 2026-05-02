@@ -16,6 +16,7 @@ import { cn } from "@/shared/lib/utils";
 import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
 import { newSession, type Message } from "../types/console";
+import type { AIProgress, StepStatus, StepType } from "../types/progress";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
 import { HistoryRail } from "./ai-agent-console/HistoryRail";
 import { Composer } from "./ai-agent-console/Composer";
@@ -131,15 +132,47 @@ export function AIAgentConsole({
       const slashActions = extractSlashActions(text);
 
       let assistantText: string;
+      let assistantProgress: AIProgress | undefined;
       try {
-        assistantText = await chatAction({
+        const result = await chatAction({
           messages: history,
           view: currentView,
         });
+        assistantText = result.text;
+        // Backend types steps with `string` for type/status (no Convex
+        // union validators on the return shape). Narrow at the boundary
+        // so renderers can rely on the AIProgress contract.
+        assistantProgress = {
+          steps: result.progress.steps.map((s) => ({
+            id: s.id,
+            type: s.type as StepType,
+            status: s.status as StepStatus,
+            label: s.label,
+            detail: s.detail,
+            durationMs: s.durationMs,
+            error: s.error,
+          })),
+          totalDurationMs: result.progress.totalDurationMs,
+          isComplete: result.progress.isComplete,
+        };
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
         const fallback = runAgent(text);
         assistantText = `⚠️ AI gateway error: ${reason}\n\n${fallback.text}`;
+        assistantProgress = {
+          steps: [
+            {
+              id: "client-fallback",
+              type: "inference",
+              status: "error",
+              label: "Generate respons",
+              durationMs: 0,
+              error: reason,
+            },
+          ],
+          totalDurationMs: 0,
+          isComplete: true,
+        };
       }
 
       const assistantMsg: Message = {
@@ -147,6 +180,7 @@ export function AIAgentConsole({
         role: "assistant",
         text: assistantText,
         actions: slashActions,
+        progress: assistantProgress,
         ts: Date.now(),
       };
       setSessions((prev) =>

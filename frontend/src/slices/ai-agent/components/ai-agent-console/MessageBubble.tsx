@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
 import { cn } from "@/shared/lib/utils";
 import { ApproveActionCard } from "../ApproveActionCard";
+import { AIProgressDisplay } from "./AIProgressDisplay";
 import type { Message } from "../../types/console";
 
 export function MessageBubble({ msg }: { msg: Message }) {
@@ -17,7 +18,19 @@ export function MessageBubble({ msg }: { msg: Message }) {
           </AvatarFallback>
         </Avatar>
       )}
-      <div className={cn("flex flex-col gap-2 min-w-0", isUser ? "items-end" : "items-start")}>
+      <div
+        className={cn(
+          "flex flex-col gap-2 min-w-0",
+          isUser ? "items-end" : "items-start max-w-[85%] flex-1",
+        )}
+      >
+        {!isUser && msg.progress && (
+          <AIProgressDisplay
+            progress={msg.progress}
+            defaultOpen={false}
+            variant="completed"
+          />
+        )}
         <div
           className={cn(
             "max-w-[85%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed break-words",

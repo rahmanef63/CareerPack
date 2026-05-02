@@ -1,10 +1,15 @@
 import type { AgentAction } from "@/shared/types/agent";
+import type { AIProgress } from "./progress";
 
 export interface Message {
   id: string;
   role: "user" | "assistant";
   text: string;
   actions?: AgentAction[];
+  /** Server-measured agent run timeline. Only assistant messages
+   *  carry it. Absent on legacy messages from before this field
+   *  existed — UI must treat as optional. */
+  progress?: AIProgress;
   ts: number;
 }
 
