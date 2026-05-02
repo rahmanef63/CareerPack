@@ -1,4 +1,4 @@
-import { query } from "../_generated/server";
+import { query, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser, requireUser } from "../_shared/auth";
 import {
@@ -173,6 +173,120 @@ export const getProfileCompleteness = query({
       done: items.filter((i) => i.done).map(({ id, label, points }) => ({ id, label, points })),
       missing: missing.map(({ id, label, points, hint, href }) => ({ id, label, points, hint, href })),
     };
+  },
+});
+
+/**
+ * Compact user-context snapshot for the AI agent. Aggregates across
+ * profile/cv/applications/roadmap/interview tables and returns a
+ * newline-separated fact list. Lines are emitted ONLY for fields that
+ * are populated — empty/missing data is omitted entirely so the AI
+ * never has a chance to invent ("Anda punya 0 lamaran" vs no line).
+ *
+ * Token budget: ~250 tokens worst case. Caps applied:
+ * - skills: top 10
+ * - bio: 200 chars
+ * - applications: status breakdown only
+ * - interviews: count + last topic
+ */
+export const _getCompactUserContext = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const lines: string[] = [];
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (profile?.fullName?.trim()) lines.push(`Nama: ${profile.fullName.trim()}`);
+    if (profile?.location?.trim() && profile.location.trim() !== "—") {
+      lines.push(`Lokasi: ${profile.location.trim()}`);
+    }
+    if (profile?.targetRole?.trim() && profile.targetRole.trim() !== "—") {
+      lines.push(`Target role: ${profile.targetRole.trim()}`);
+    }
+    if (profile?.experienceLevel?.trim()) {
+      lines.push(`Level pengalaman: ${profile.experienceLevel.trim()}`);
+    }
+    if (profile?.skills?.length) {
+      const top = profile.skills.slice(0, 10).filter(Boolean).join(", ");
+      if (top) lines.push(`Skill utama: ${top}`);
+    }
+    if (profile?.interests?.length) {
+      const top = profile.interests.slice(0, 5).filter(Boolean).join(", ");
+      if (top) lines.push(`Minat: ${top}`);
+    }
+    if (profile?.bio?.trim()) {
+      const bio = profile.bio.trim();
+      lines.push(`Bio: ${bio.length > 200 ? bio.slice(0, 200) + "…" : bio}`);
+    }
+    if (profile?.publicEnabled) {
+      lines.push(`Personal branding aktif (slug: ${profile.publicSlug ?? "?"})`);
+    }
+    if (profile?.publicAvailableForHire) {
+      lines.push(`Status: open for hire${profile.publicAvailabilityNote ? ` — ${profile.publicAvailabilityNote}` : ""}`);
+    }
+
+    const cvs = await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    if (cvs.length > 0) {
+      const latest = cvs.reduce((a, b) => (a._creationTime > b._creationTime ? a : b));
+      const expCount = latest.experience?.length ?? 0;
+      lines.push(
+        `CV: ${cvs.length} dokumen, terbaru "${latest.title}" (template ${latest.template}, ${expCount} pengalaman)`,
+      );
+      if (latest.personalInfo?.summary?.trim()) {
+        const sum = latest.personalInfo.summary.trim();
+        lines.push(`Ringkasan CV: ${sum.length > 160 ? sum.slice(0, 160) + "…" : sum}`);
+      }
+    }
+
+    const apps = await ctx.db
+      .query("jobApplications")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    if (apps.length > 0) {
+      const byStatus = new Map<string, number>();
+      for (const a of apps) byStatus.set(a.status, (byStatus.get(a.status) ?? 0) + 1);
+      const breakdown = Array.from(byStatus.entries())
+        .map(([s, c]) => `${c} ${s}`)
+        .join(", ");
+      lines.push(`Lamaran kerja: ${apps.length} total — ${breakdown}`);
+    }
+
+    const roadmaps = await ctx.db
+      .query("skillRoadmaps")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    if (roadmaps.length > 0) {
+      const active = roadmaps[0];
+      lines.push(
+        `Roadmap aktif: "${active.careerPath}" (${Math.round(active.progress ?? 0)}% selesai, ${active.skills?.length ?? 0} skill)`,
+      );
+    }
+
+    const interviews = await ctx.db
+      .query("mockInterviews")
+      .withIndex("by_user_started", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(20);
+    if (interviews.length > 0) {
+      const completed = interviews.filter((i) => i.completedAt).length;
+      const last = interviews[0];
+      const avgScore =
+        interviews.filter((i) => typeof i.overallScore === "number").reduce((a, b) => a + (b.overallScore ?? 0), 0) /
+        Math.max(1, interviews.filter((i) => typeof i.overallScore === "number").length);
+      lines.push(
+        `Mock interview: ${completed} selesai dari ${interviews.length} sesi, terakhir role "${last.role}"${
+          Number.isFinite(avgScore) && avgScore > 0 ? `, skor rata-rata ${avgScore.toFixed(1)}/10` : ""
+        }`,
+      );
+    }
+
+    return lines.join("\n");
   },
 });
 

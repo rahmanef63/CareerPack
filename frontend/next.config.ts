@@ -93,10 +93,19 @@ const TEMPLATE_HEADERS = [
   },
 ]
 
+// Stable build-id for this output. Embedded into the client bundle as
+// `process.env.NEXT_PUBLIC_BUILD_ID` (frozen at build time) and served
+// at runtime via `/api/build-id`. The UpdateChecker on the client polls
+// the runtime endpoint and compares to its frozen value; mismatch =
+// the user's tab is on an older deploy → toast prompts a refresh.
+const BUILD_ID = process.env.GITHUB_SHA?.slice(0, 12) || `b${Date.now().toString(36)}`;
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, ".."),
+  generateBuildId: async () => BUILD_ID,
+  env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },
   async headers() {
     return [
       {

@@ -6,6 +6,7 @@ import { MoreDrawer } from "@/shared/components/layout/MoreDrawer";
 import { MobileUserMenu } from "@/shared/components/layout/MobileUserMenu";
 import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
 import { BrandMark } from "@/shared/components/brand/Logo";
+import { PullToRefresh } from "@/shared/components/interactions/PullToRefresh";
 
 interface MobileContainerProps {
   onAITap: () => void;
@@ -27,30 +28,32 @@ export function MobileContainer({
   const [moreOpen, setMoreOpen] = useState(false);
 
   return (
-    <div className="flex min-h-svh flex-col bg-background text-foreground supports-[height:100dvh]:min-h-[100dvh]">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
-      >
-        Lewati ke konten utama
-      </a>
-      <MobileTopBar />
-      <main
-        id="main-content"
-        className="flex-1 px-4"
-        style={{
-          paddingBottom: "calc(var(--nav-height) + var(--safe-bottom) + 1rem)",
-        }}
-      >
-        {children}
-      </main>
-      <BottomNav
-        onAITap={onAITap}
-        aiActive={aiActive}
-        onMoreTap={() => setMoreOpen(true)}
-      />
-      <MoreDrawer open={moreOpen} onOpenChange={setMoreOpen} />
-    </div>
+    <PullToRefresh>
+      <div className="flex min-h-svh flex-col bg-background text-foreground supports-[height:100dvh]:min-h-[100dvh] overscroll-y-contain">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
+        >
+          Lewati ke konten utama
+        </a>
+        <MobileTopBar />
+        <main
+          id="main-content"
+          className="flex-1 px-4"
+          style={{
+            paddingBottom: "calc(var(--nav-height) + var(--safe-bottom) + 1rem)",
+          }}
+        >
+          {children}
+        </main>
+        <BottomNav
+          onAITap={onAITap}
+          aiActive={aiActive}
+          onMoreTap={() => setMoreOpen(true)}
+        />
+        <MoreDrawer open={moreOpen} onOpenChange={setMoreOpen} />
+      </div>
+    </PullToRefresh>
   );
 }
 
