@@ -573,12 +573,25 @@ function stripHtml(s: string): string {
   return s.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-/** Decode the HTML entity subset RSS feeds actually emit. Numeric refs
- *  first (so `&#38;` doesn't survive after `&amp;` is decoded), `&amp;`
- *  last so a literal `&amp;lt;` round-trips correctly to `&lt;` instead
- *  of cascade-decoding to `<`. */
+/** Decode the HTML entity subset RSS feeds actually emit. WWR delivers
+ *  DOUBLE-encoded payloads (`&amp;lt;img&amp;gt;` → real text `<img>`),
+ *  so we run the pass in a fixed-point loop capped at 3 iterations.
+ *  Numeric refs go first; `&amp;` is the very last replacement on each
+ *  pass so a literal `&amp;lt;` decodes to `&lt;` (preserved) on pass 1
+ *  and becomes `<` on pass 2 — instead of cascade-collapsing within a
+ *  single pass. */
 function decodeEntities(s: string): string {
   if (!s) return s;
+  let cur = s;
+  for (let i = 0; i < 3; i++) {
+    const next = decodeOnce(cur);
+    if (next === cur) break;
+    cur = next;
+  }
+  return cur;
+}
+
+function decodeOnce(s: string): string {
   return s
     .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => safeCodePoint(parseInt(h, 16)))
     .replace(/&#(\d+);/g, (_, n) => safeCodePoint(parseInt(n, 10)))
