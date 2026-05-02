@@ -16,8 +16,10 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
+import { ALL_SKILLS } from "@/shared/lib/sliceRegistry";
 import { newSession, type Message } from "../types/console";
 import type { AIProgress, StepStatus, StepType } from "../types/progress";
+import type { AgentAction } from "@/shared/types/agent";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
 import { HistoryRail } from "./ai-agent-console/HistoryRail";
 import { Composer } from "./ai-agent-console/Composer";
@@ -167,14 +169,43 @@ export function AIAgentConsole({
 
       const slashActions = extractSlashActions(text);
 
+      // Serialise manifest skills for the backend so it can build
+      // OpenAI tools and let the model emit tool_calls (Vercel AI SDK
+      // / OpenAI function-calling style). Drops `argsFromText` (a
+      // function — non-serialisable) and flattens the args record
+      // into an array.
+      const availableSkills = ALL_SKILLS.map((s) => ({
+        id: s.id,
+        description: `${s.label}: ${s.description}`,
+        args: s.args
+          ? Object.entries(s.args).map(([name, field]) => ({
+              name,
+              type: field.type,
+              required: field.required ?? false,
+              description:
+                field.label +
+                (field.example ? ` (contoh: ${field.example})` : ""),
+            }))
+          : [],
+      }));
+
       let assistantText: string;
       let assistantProgress: AIProgress | undefined;
+      let toolActions: AgentAction[] = [];
       try {
         const result = await chatAction({
           messages: history,
           view: currentView,
+          availableSkills,
         });
         assistantText = result.text;
+        toolActions = (result.toolCalls ?? []).map(
+          (tc) =>
+            ({
+              type: tc.skillId,
+              payload: tc.args,
+            }) as unknown as AgentAction,
+        );
         assistantProgress = {
           steps: result.progress.steps.map((s) => ({
             id: s.id,
@@ -212,7 +243,7 @@ export function AIAgentConsole({
         id: `a-${Date.now()}`,
         role: "assistant",
         text: assistantText,
-        actions: slashActions,
+        actions: [...slashActions, ...toolActions],
         progress: assistantProgress,
         ts: Date.now(),
       };
