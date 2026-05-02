@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { useDemoPortfolioOverlay } from "@/shared/hooks/useDemoOverlay";
 import type { PortfolioFormValues, PortfolioItemId } from "../types";
 
 function valuesToPayload(values: PortfolioFormValues) {
@@ -37,11 +36,10 @@ function valuesToPayload(values: PortfolioFormValues) {
 export function usePortfolio() {
   const { state } = useAuth();
   const isAuthenticated = state.isAuthenticated;
-  const isDemo = state.isDemo;
 
   const items = useQuery(
     api.portfolio.queries.listPortfolio,
-    isAuthenticated && !isDemo ? {} : "skip",
+    isAuthenticated ? {} : "skip",
   );
   const createMutation = useMutation(api.portfolio.mutations.createPortfolioItem);
   const updateMutation = useMutation(api.portfolio.mutations.updatePortfolioItem);
@@ -53,8 +51,6 @@ export function usePortfolio() {
   const toggleBrandingMutation = useMutation(
     api.portfolio.mutations.togglePortfolioBrandingShow,
   );
-
-  const demo = useDemoPortfolioOverlay();
 
   const create = useCallback(
     (values: PortfolioFormValues) => createMutation(valuesToPayload(values)),
@@ -87,15 +83,6 @@ export function usePortfolio() {
       toggleBrandingMutation({ itemId: id, show }),
     [toggleBrandingMutation],
   );
-
-  if (isDemo) {
-    return {
-      ...demo,
-      update: async () => undefined,
-      bulkRemove: async () => undefined,
-      toggleBranding: async () => undefined,
-    };
-  }
 
   return {
     items: items ?? [],

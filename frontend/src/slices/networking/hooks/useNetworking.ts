@@ -4,17 +4,15 @@ import { useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { useDemoContactsOverlay } from "@/shared/hooks/useDemoOverlay";
 import type { ContactFormValues, ContactId } from "../types";
 
 export function useNetworking() {
   const { state } = useAuth();
   const isAuthenticated = state.isAuthenticated;
-  const isDemo = state.isDemo;
 
   const contacts = useQuery(
     api.contacts.queries.listContacts,
-    isAuthenticated && !isDemo ? {} : "skip",
+    isAuthenticated ? {} : "skip",
   );
   const createMutation = useMutation(api.contacts.mutations.createContact);
   const updateMutation = useMutation(api.contacts.mutations.updateContact);
@@ -25,8 +23,6 @@ export function useNetworking() {
   const bumpInteractionMutation = useMutation(
     api.contacts.mutations.bumpContactInteraction,
   );
-
-  const demo = useDemoContactsOverlay();
 
   const create = useCallback(
     (values: ContactFormValues) =>
@@ -69,8 +65,6 @@ export function useNetworking() {
     (id: ContactId) => bumpInteractionMutation({ contactId: id }),
     [bumpInteractionMutation],
   );
-
-  if (isDemo) return demo;
 
   return {
     contacts: contacts ?? [],

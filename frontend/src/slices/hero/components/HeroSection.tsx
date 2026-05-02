@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import {
-  ArrowRight, Play, Sparkles, Target,
+  ArrowRight, Sparkles, Target,
   TrendingUp, Users, CheckCircle
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { BrandMark } from '@/shared/components/brand/Logo';
-import { useAuth } from '@/shared/hooks/useAuth';
-import { notify } from '@/shared/lib/notify';
-import { ROUTES } from '@/shared/lib/routes';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -19,29 +15,6 @@ interface HeroSectionProps {
 
 export function HeroSection({ onGetStarted }: HeroSectionProps) {
   const heroRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const { loginAsDemo } = useAuth();
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
-
-  const handleDemo = async () => {
-    if (isDemoLoading) return;
-    setIsDemoLoading(true);
-    try {
-      const result = await loginAsDemo();
-      if (result.ok) {
-        notify.success('Sesi demo dimulai 🎉', {
-          description: 'Data contoh sudah disiapkan. Selamat menjelajah.',
-        });
-        router.push(ROUTES.dashboard.home);
-      } else {
-        notify.error('Demo gagal dimulai', { description: result.error });
-      }
-    } catch (err) {
-      notify.fromError(err, 'Demo gagal dimulai');
-    } finally {
-      setIsDemoLoading(false);
-    }
-  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -118,23 +91,13 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
 
             <div className="animate-on-scroll opacity-0" style={{ animationDelay: '0.3s' }}>
               <div className="flex flex-wrap gap-4">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   onClick={onGetStarted}
                   className="bg-brand hover:bg-brand text-brand-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-cta hover:shadow-cta transition-all duration-300"
                 >
                   Mulai Gratis
                   <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handleDemo}
-                  disabled={isDemoLoading}
-                  className="border-border hover:bg-muted/50 px-8 py-6 text-lg font-semibold rounded-xl"
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  {isDemoLoading ? 'Memulai sesi demo…' : 'Lihat Demo'}
                 </Button>
               </div>
             </div>

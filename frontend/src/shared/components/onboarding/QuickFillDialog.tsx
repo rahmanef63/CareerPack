@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "convex/react";
-import { AlertCircle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import { notify } from "@/shared/lib/notify";
 
@@ -22,7 +22,6 @@ import type {
 import { buildPrompt } from "./lib/promptBuilder";
 import { parseQuickFillJSON } from "./lib/parser";
 import { buildPreview } from "./lib/preview";
-import { useAuth } from "@/shared/hooks/useAuth";
 import { PromptStep } from "./quick-fill/PromptStep";
 import { PasteStep } from "./quick-fill/PasteStep";
 import { ResultPanel } from "./quick-fill/ResultPanel";
@@ -48,8 +47,6 @@ export function QuickFillDialog({
   initialScope = "all",
 }: Props) {
   const quickFill = useMutation(api.onboarding.mutations.quickFill);
-  const { state: authState } = useAuth();
-  const isDemo = authState.isDemo;
 
   const [scope, setScope] = useState<QuickFillScope>(initialScope);
 
@@ -77,8 +74,7 @@ export function QuickFillDialog({
     parsed?.ok &&
       preview &&
       preview.totalCount > 0 &&
-      preview.fatalErrors.length === 0 &&
-      !isDemo,
+      preview.fatalErrors.length === 0,
   );
 
   const handleSubmit = async () => {
@@ -147,25 +143,6 @@ export function QuickFillDialog({
             di sini — kami sanitasi + import otomatis.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-
-        {isDemo && (
-          <div className="shrink-0 rounded-lg border-2 border-destructive bg-destructive/10 p-4 text-sm">
-            <p className="flex items-center gap-2 font-bold text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              Mode demo (Tamu) — Import diblokir
-            </p>
-            <p className="mt-1.5 leading-snug text-destructive/90">
-              Akun demo menyimpan data <strong>hanya di browser lokal</strong>.
-              Quick Fill menulis ke server, jadi hasil import <strong>tidak akan terlihat</strong>{" "}
-              di CV / Portfolio / dst — itu sebabnya CV Anda terus muncul sebagai
-              data demo bawaan.
-            </p>
-            <p className="mt-2 leading-snug text-destructive/90">
-              <strong>Solusi:</strong> Logout → klik &ldquo;Login&rdquo; → daftar pakai
-              email asli (gratis), lalu jalankan Isi Cepat dari akun tersebut.
-            </p>
-          </div>
-        )}
 
         <div className="-mx-4 flex-1 overflow-y-auto px-4 sm:-mx-6 sm:px-6">
           {serverResult ? (

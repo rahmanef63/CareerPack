@@ -73,31 +73,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isLoading = authLoading || (isAuthenticated && userProfile === undefined);
 
     let user: AuthUser | null = null;
-    // Anonymous Convex users have no email. That's the stable marker
-    // for demo / guest sessions — simpler than threading a flag
-    // through schema.
-    const isDemo = Boolean(
-      userProfile && !userProfile.email?.trim(),
-    );
 
     if (userProfile) {
       user = {
         id: userProfile._id,
         email: userProfile.email || "",
-        name: isDemo
-          ? "Tamu"
-          : userProfile.profile?.fullName || userProfile.email || "User",
+        name: userProfile.profile?.fullName || userProfile.email || "User",
         role: userProfile.profile?.role ?? "user",
         avatar: userProfile.avatarUrl ?? undefined,
         lastLogin: new Date().toISOString(),
         isActive: true,
-        isDemo,
         createdAt: userProfile._creationTime.toString(),
         updatedAt: userProfile._creationTime.toString(),
       };
     }
 
-    return { user, isAuthenticated, isLoading, isDemo };
+    return { user, isAuthenticated, isLoading };
   }, [isAuthenticated, authLoading, userProfile]);
 
   const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
@@ -157,30 +148,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  /**
-   * Demo / guest session — each click creates a brand-new Convex user
-   * via the Anonymous provider. No shared account across visitors
-   * (the old `demo@careerpack.id` pattern leaked data cross-user
-   * because Convex is realtime). Demo accounts get the same minimal
-   * starter seed real users do — no more rich Rizky persona that
-   * polluted the admin user list with dozens of duplicates.
-   */
-  const loginAsDemo = async (): Promise<AuthResult> => {
-    try {
-      await signIn("anonymous", {});
-      try {
-        await seedWithAuthWait();
-      } catch (seedError) {
-        console.warn("Seed demo dilewati:", seedError);
-      }
-      return { ok: true };
-    } catch (error) {
-      const msg = extractAuthError(error);
-      console.error("Demo sign-in gagal:", msg);
-      return { ok: false, error: msg };
-    }
-  };
-
   const logout = async () => {
     // Push the user back to the marketing landing immediately so the
     // dashboard route doesn't flash an unauth empty-state during the
@@ -209,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ state, login, register, loginAsDemo, logout, updateUser }}>
+    <AuthContext.Provider value={{ state, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

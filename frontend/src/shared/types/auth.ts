@@ -13,21 +13,12 @@ export interface AuthUser extends BaseEntity {
   avatar?: string;
   lastLogin: string;
   isActive: boolean;
-  /**
-   * True when this session was created via the Anonymous provider
-   * (demo / guest). Anonymous users have no email + no password —
-   * each browser gets a fresh isolated session, so demos can't
-   * share CV / application data with each other.
-   */
-  isDemo: boolean;
 }
 
 export interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  /** Convenience — same as `state.user?.isDemo ?? false`. */
-  isDemo: boolean;
 }
 
 export interface LoginCredentials {
@@ -41,13 +32,6 @@ export interface AuthContextValue {
   state: AuthState;
   login: (credentials: LoginCredentials) => Promise<AuthResult>;
   register: (credentials: LoginCredentials & { name: string }) => Promise<AuthResult>;
-  /**
-   * Start an isolated demo session via the Convex Anonymous provider.
-   * Each call creates a fresh `users` row with no email / password;
-   * the visitor gets their own sandbox that won't collide with other
-   * concurrent demo visitors. Seeds starter data on first success.
-   */
-  loginAsDemo: () => Promise<AuthResult>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<AuthUser>) => void;
 }

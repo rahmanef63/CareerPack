@@ -5,7 +5,6 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { notify } from "@/shared/lib/notify";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { useDemoPBOverlay } from "@/shared/hooks/useDemoOverlay";
 import {
   DEFAULT_AUTO_TOGGLES,
 } from "../../../../../convex/profile/autoBlocks";
@@ -217,15 +216,12 @@ export interface PBForm {
 export function usePBForm(): PBForm {
   const { state: authState } = useAuth();
   const isAuthenticated = authState.isAuthenticated;
-  const isDemo = authState.isDemo;
 
   const data = useQuery(
     api.profile.queries.getMyPublicProfile,
-    isAuthenticated && !isDemo ? {} : "skip",
+    isAuthenticated ? {} : "skip",
   );
   const update = useMutation(api.profile.mutations.updateMyPublicProfile);
-
-  const demoPB = useDemoPBOverlay();
 
   const [state, setState] = useState<FormState>(DEFAULT_FORM_STATE);
   const [saving, setSaving] = useState(false);
@@ -238,20 +234,15 @@ export function usePBForm(): PBForm {
   // Hoisted here so the seed effect can pin it pre-emptively.
   const lastSubmittedRef = useRef<string>("");
   // Reset the seed guard on auth-mode flip — otherwise loading the page
-  // unauth (or in demo) seeds the empty/demo branch, then signing in
-  // would never re-seed from the real `data` payload because the ref
-  // sticks at `true`.
-  const lastAuthModeRef = useRef<"demo" | "auth" | "none">("none");
+  // unauth seeds the empty branch, then signing in would never re-seed
+  // from the real `data` payload because the ref sticks at `true`.
+  const lastAuthModeRef = useRef<"auth" | "none">("none");
 
   // Hydrate once when server data arrives. Subsequent server-side
   // changes (e.g. cron, admin edit) intentionally don't overwrite
   // local edits — would feel like a phantom reset. User can refresh.
   useEffect(() => {
-    const mode: "demo" | "auth" | "none" = isDemo
-      ? "demo"
-      : isAuthenticated
-        ? "auth"
-        : "none";
+    const mode: "auth" | "none" = isAuthenticated ? "auth" : "none";
     if (mode !== lastAuthModeRef.current) {
       seededRef.current = false;
       lastAuthModeRef.current = mode;
@@ -261,28 +252,12 @@ export function usePBForm(): PBForm {
       lastSubmittedRef.current = "";
     }
     if (seededRef.current) return;
-    if (isDemo) {
-      seededRef.current = true;
-      const seeded = seedFromServer({
-        ...demoPB.state,
-        blocks: [],
-      } as ServerData);
-      // Pin the autosave baseline to the seeded snapshot so the very
-      // first useEffect run after hydration sees "no change" and does
-      // NOT fire an autosave (otherwise we'd hit the backend with a
-      // value that was just read from it — and worse, that value may
-      // contain new client defaults the legacy server hasn't shipped
-      // yet, triggering ArgumentValidationError races during deploys).
-      lastSubmittedRef.current = JSON.stringify({ ...seeded, enabled: undefined });
-      setState(seeded);
-      return;
-    }
     if (!data) return;
     seededRef.current = true;
     const seeded = seedFromServer(data as ServerData);
     lastSubmittedRef.current = JSON.stringify({ ...seeded, enabled: undefined });
     setState(seeded);
-  }, [data, isDemo, isAuthenticated, demoPB.state]);
+  }, [data, isAuthenticated]);
 
   const set: SetField = useCallback((key, value) => {
     setState((s) => ({ ...s, [key]: value }));
@@ -314,59 +289,35 @@ export function usePBForm(): PBForm {
       const finalEnabled = opts.activate ? true : state.enabled;
       setSaving(true);
       try {
-        if (isDemo) {
-          await demoPB.save({
-            enabled: finalEnabled,
-            slug: slugTrimmed,
-            headline: state.headline,
-            bioShow: state.bioShow,
-            skillsShow: state.skillsShow,
-            targetRoleShow: state.targetRoleShow,
-            contactEmail: state.contactEmail,
-            linkedinUrl: state.linkedinUrl,
-            portfolioUrl: state.portfolioUrl,
-            allowIndex: state.allowIndex,
-            avatarShow: state.avatarShow,
-            portfolioShow: state.portfolioShow,
-            mode: state.mode,
-            autoToggles: state.autoToggles,
-            theme: state.theme,
-            headerBg: state.headerBg ?? null,
-            htmlExport: state.htmlExport,
-            embedExport: state.embedExport,
-            promptExport: state.promptExport,
-          });
-        } else {
-          await update({
-            enabled: finalEnabled,
-            slug: slugTrimmed,
-            headline: state.headline,
-            bioShow: state.bioShow,
-            skillsShow: state.skillsShow,
-            targetRoleShow: state.targetRoleShow,
-            contactEmail: state.contactEmail,
-            linkedinUrl: state.linkedinUrl,
-            portfolioUrl: state.portfolioUrl,
-            allowIndex: state.allowIndex,
-            avatarShow: state.avatarShow,
-            portfolioShow: state.portfolioShow,
-            mode: state.mode,
-            autoToggles: state.autoToggles,
-            theme: state.theme,
-            headerBg: state.headerBg ?? undefined,
-            blocks: state.blocks,
-            htmlExport: state.htmlExport,
-            embedExport: state.embedExport,
-            promptExport: state.promptExport,
-            availableForHire: state.availableForHire,
-            availabilityNote: state.availabilityNote,
-            ctaLabel: state.ctaLabel,
-            ctaUrl: state.ctaUrl,
-            ctaType: state.ctaType,
-            sectionOrder: state.sectionOrder,
-            style: state.style,
-          });
-        }
+        await update({
+          enabled: finalEnabled,
+          slug: slugTrimmed,
+          headline: state.headline,
+          bioShow: state.bioShow,
+          skillsShow: state.skillsShow,
+          targetRoleShow: state.targetRoleShow,
+          contactEmail: state.contactEmail,
+          linkedinUrl: state.linkedinUrl,
+          portfolioUrl: state.portfolioUrl,
+          allowIndex: state.allowIndex,
+          avatarShow: state.avatarShow,
+          portfolioShow: state.portfolioShow,
+          mode: state.mode,
+          autoToggles: state.autoToggles,
+          theme: state.theme,
+          headerBg: state.headerBg ?? undefined,
+          blocks: state.blocks,
+          htmlExport: state.htmlExport,
+          embedExport: state.embedExport,
+          promptExport: state.promptExport,
+          availableForHire: state.availableForHire,
+          availabilityNote: state.availabilityNote,
+          ctaLabel: state.ctaLabel,
+          ctaUrl: state.ctaUrl,
+          ctaType: state.ctaType,
+          sectionOrder: state.sectionOrder,
+          style: state.style,
+        });
         if (opts.activate) {
           setState((s) => ({ ...s, enabled: true }));
         }
@@ -386,23 +337,22 @@ export function usePBForm(): PBForm {
         setSaving(false);
       }
     },
-    [state, saving, slugValidation, slugTrimmed, update, isDemo, demoPB],
+    [state, saving, slugValidation, slugTrimmed, update],
   );
 
   // ----------------------------------------------------------------
   // Auto-save loop
   // ----------------------------------------------------------------
   // Debounces 1500ms after the last edit, then silently calls submit.
-  // Skipped in demo mode (no backend) and when the slug isn't valid
-  // yet (would just throw and toast). The first effect run after
-  // hydration is also a no-op — `seededRef` is freshly true and the
-  // state hasn't drifted from the server yet. We snapshot the
-  // last-submitted state in `lastSubmittedRef` so re-renders that
-  // don't actually mutate any field don't fire a save.
+  // Skipped when the slug isn't valid yet (would just throw and
+  // toast). The first effect run after hydration is also a no-op —
+  // `seededRef` is freshly true and the state hasn't drifted from the
+  // server yet. We snapshot the last-submitted state in
+  // `lastSubmittedRef` so re-renders that don't actually mutate any
+  // field don't fire a save.
   const submitRef = useRef(submit);
   submitRef.current = submit;
   useEffect(() => {
-    if (isDemo) return;
     if (!seededRef.current) return;
     if (!canEnable) return;
     // Snapshot the form state we'd save — JSON for cheap deep-equal.
@@ -421,7 +371,7 @@ export function usePBForm(): PBForm {
       window.clearTimeout(t);
       setAutoSavePending(false);
     };
-  }, [state, isDemo, canEnable]);
+  }, [state, canEnable]);
 
   return {
     state,
@@ -432,9 +382,7 @@ export function usePBForm(): PBForm {
     slugValidation,
     canEnable,
     slugTrimmed,
-    serverState: isDemo
-      ? ({ ...demoPB.state, blocks: [] } as ServerData)
-      : ((data as ServerData | null) ?? null),
+    serverState: (data as ServerData | null) ?? null,
     lastSavedAt,
     autoSavePending,
   };

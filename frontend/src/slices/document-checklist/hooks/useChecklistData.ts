@@ -6,28 +6,23 @@ import { notify } from "@/shared/lib/notify";
 import { indonesianDocumentChecklist } from "@/shared/data/indonesianData";
 import { api } from "../../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { useDemoChecklistOverlay } from "@/shared/hooks/useDemoOverlay";
 import type { ChecklistItem } from "../types";
 
 export function useChecklistData() {
   const { state: authState } = useAuth();
   const isAuthenticated = authState.isAuthenticated;
-  const isDemo = authState.isDemo;
 
   const checklist = useQuery(
     api.documents.queries.getUserDocumentChecklist,
-    isAuthenticated && !isDemo ? {} : "skip",
+    isAuthenticated ? {} : "skip",
   );
   const seedChecklist = useMutation(api.documents.mutations.seedDocumentChecklist);
   const updateDocumentStatus = useMutation(api.documents.mutations.updateDocumentStatus);
-
-  const demoChecklist = useDemoChecklistOverlay();
 
   // Reset the guard if seed throws — otherwise a transient blip locks
   // the user out of seeding for the entire mount.
   const seedAttempted = useRef(false);
   useEffect(() => {
-    if (isDemo) return;
     if (checklist === undefined) return;
     if (checklist !== null) return;
     if (seedAttempted.current) return;
@@ -44,22 +39,9 @@ export function useChecklistData() {
     }).catch(() => {
       seedAttempted.current = false;
     });
-  }, [checklist, seedChecklist, isDemo]);
+  }, [checklist, seedChecklist]);
 
   const items = useMemo<ChecklistItem[]>(() => {
-    if (isDemo) {
-      return indonesianDocumentChecklist.map((tpl) => {
-        const sv = demoChecklist.progress[tpl.id];
-        return sv
-          ? {
-              ...tpl,
-              completed: !!sv.completed,
-              notes: sv.notes || undefined,
-              dueDate: sv.expiryDate,
-            }
-          : tpl;
-      });
-    }
     const serverById = new Map(
       (checklist?.documents ?? []).map((d) => [d.id, d]),
     );
@@ -74,13 +56,9 @@ export function useChecklistData() {
           }
         : tpl;
     });
-  }, [checklist, isDemo, demoChecklist.progress]);
+  }, [checklist]);
 
   const toggleItem = (itemId: string) => {
-    if (isDemo) {
-      demoChecklist.toggle(itemId);
-      return;
-    }
     const item = items.find((i) => i.id === itemId);
     if (!item) return;
     updateDocumentStatus({
@@ -92,14 +70,6 @@ export function useChecklistData() {
   };
 
   const updateItem = (itemId: string, updates: Partial<ChecklistItem>) => {
-    if (isDemo) {
-      demoChecklist.setEntry(itemId, {
-        completed: updates.completed,
-        notes: updates.notes,
-        expiryDate: updates.dueDate,
-      });
-      return;
-    }
     const item = items.find((i) => i.id === itemId);
     if (!item) return;
     updateDocumentStatus({

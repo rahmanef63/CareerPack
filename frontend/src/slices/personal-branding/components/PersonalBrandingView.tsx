@@ -13,7 +13,6 @@ import {
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { useDemoProfileOverlay } from "@/shared/hooks/useDemoOverlay";
 import { api } from "../../../../../convex/_generated/api";
 
 import { usePBForm } from "../form/usePBForm";
@@ -72,33 +71,21 @@ export function PersonalBrandingView() {
   }, []);
 
   // Profile snapshot — used by ExportCard to fill the AI-prompt body
-  // with the user's actual data. Both branches always run (rules of
-  // hooks); pick which result feeds ExportCard based on isDemo.
+  // with the user's actual data.
   const { state: authState } = useAuth();
-  const isDemo = authState.isDemo;
   const isAuthenticated = authState.isAuthenticated;
   const realProfileQuery = useQuery(
     api.profile.queries.getCurrentUser,
-    isAuthenticated && !isDemo ? {} : "skip",
+    isAuthenticated ? {} : "skip",
   );
-  const demoProfile = useDemoProfileOverlay();
-  const profileSnapshot: ExportProfileSnapshot = isDemo
-    ? {
-        fullName: demoProfile.profile.fullName,
-        bio: demoProfile.profile.bio,
-        location: demoProfile.profile.location,
-        targetRole: demoProfile.profile.targetRole,
-        experienceLevel: demoProfile.profile.experienceLevel,
-        skills: demoProfile.profile.skills,
-      }
-    : {
-        fullName: realProfileQuery?.profile?.fullName ?? "",
-        bio: realProfileQuery?.profile?.bio ?? "",
-        location: realProfileQuery?.profile?.location ?? "",
-        targetRole: realProfileQuery?.profile?.targetRole ?? "",
-        experienceLevel: realProfileQuery?.profile?.experienceLevel ?? "",
-        skills: realProfileQuery?.profile?.skills ?? [],
-      };
+  const profileSnapshot: ExportProfileSnapshot = {
+    fullName: realProfileQuery?.profile?.fullName ?? "",
+    bio: realProfileQuery?.profile?.bio ?? "",
+    location: realProfileQuery?.profile?.location ?? "",
+    targetRole: realProfileQuery?.profile?.targetRole ?? "",
+    experienceLevel: realProfileQuery?.profile?.experienceLevel ?? "",
+    skills: realProfileQuery?.profile?.skills ?? [],
+  };
 
   const liveStatus: "active" | "draft" | "empty" = (() => {
     const sv = form.serverState;
