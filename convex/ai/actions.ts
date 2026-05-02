@@ -217,6 +217,13 @@ export const chat = action({
         content: v.string(),
       }),
     ),
+    /**
+     * Optional — when provided, action loads canonical history from
+     * `chatConversations` by sessionId and merges with client messages.
+     * Resolves the race where local React state hadn't hydrated from
+     * server yet so prior turns were missing from the LLM payload.
+     */
+    sessionId: v.optional(v.string()),
     view: v.optional(v.string()),
     /**
      * Skill catalog from frontend manifest registry. Used to build
@@ -286,7 +293,32 @@ export const chat = action({
     };
 
     const view = args.view ? sanitizeAIInput(args.view, 40) : "";
-    const safeMessages = args.messages
+
+    // Server-side authoritative history. If sessionId provided, prefer
+    // stored DB messages over client args — client state may not have
+    // hydrated yet and would otherwise lose context.
+    let mergedMessages = args.messages;
+    if (args.sessionId) {
+      const authedUserId = await getAuthUserId(ctx);
+      if (authedUserId) {
+        const storedHistory = await ctx.runQuery(
+          internal.ai.queries._getChatHistoryForUser,
+          { userId: authedUserId, sessionId: args.sessionId },
+        );
+        if (storedHistory && storedHistory.length > 0) {
+          // Take stored as base; append the latest user msg from the
+          // client (the brand-new turn that hasn't been persisted yet).
+          const lastClientUser = [...args.messages]
+            .reverse()
+            .find((m) => m.role === "user");
+          mergedMessages = lastClientUser
+            ? [...storedHistory, lastClientUser]
+            : storedHistory;
+        }
+      }
+    }
+
+    const safeMessages = mergedMessages
       .slice(-20)
       .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => ({

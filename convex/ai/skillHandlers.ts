@@ -89,4 +89,18 @@ export const SKILL_HANDLERS: Record<string, SkillHandler> = {
       expiryDate: d.expiryDate ?? null,
     }));
   },
+
+  "cv.list": async (ctx) => {
+    const cvs = await ctx.runQuery(api.cv.queries.getUserCVs, {});
+    return cvs.slice(0, 20).map((c) => ({
+      cvId: c._id,
+      title: c.title,
+      template: c.template,
+      isDefault: Boolean(c.isDefault),
+      summary: c.personalInfo?.summary ?? "",
+      experienceCount: c.experience?.length ?? 0,
+      skillsCount: c.skills?.length ?? 0,
+      educationCount: c.education?.length ?? 0,
+    }));
+  },
 };

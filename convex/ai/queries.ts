@@ -206,3 +206,26 @@ export const getChatSession = query({
     return session;
   },
 });
+
+/**
+ * Internal companion to `getChatSession` — used by the chat action so
+ * it can read authoritative session history server-side. Without
+ * this, the action depended entirely on `args.messages` from the
+ * client; if the local React state hadn't hydrated from server (race
+ * on first render), the AI would see only the new turn and "forget"
+ * prior context. Auth-scoped: returns null if the session isn't
+ * owned by the caller.
+ */
+export const _getChatHistoryForUser = internalQuery({
+  args: { userId: v.id("users"), sessionId: v.string() },
+  handler: async (ctx, { userId, sessionId }) => {
+    const session = await ctx.db
+      .query("chatConversations")
+      .withIndex("by_user_session", (q) =>
+        q.eq("userId", userId).eq("sessionId", sessionId),
+      )
+      .first();
+    if (!session) return null;
+    return session.messages.map((m) => ({ role: m.role, content: m.content }));
+  },
+});

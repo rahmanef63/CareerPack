@@ -24,6 +24,7 @@ import { CalendarCapabilities } from "@/slices/calendar"
 import { CareerDashboardCapabilities } from "@/slices/career-dashboard"
 import { NetworkingCapabilities } from "@/slices/networking"
 import { DocumentChecklistCapabilities } from "@/slices/document-checklist"
+import { CVCapabilities } from "@/slices/cv-generator"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -40,6 +41,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 <CareerDashboardCapabilities />
                 <NetworkingCapabilities />
                 <DocumentChecklistCapabilities />
+                <CVCapabilities />
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />

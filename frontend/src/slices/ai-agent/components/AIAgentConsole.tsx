@@ -196,6 +196,7 @@ export function AIAgentConsole({
       try {
         const result = await chatAction({
           messages: history,
+          sessionId: activeSession.id,
           view: currentView,
           availableSkills,
         });

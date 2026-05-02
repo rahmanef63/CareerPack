@@ -168,6 +168,128 @@ export const bulkDeleteCVs = mutation({
   },
 });
 
+/**
+ * Granular helpers for AI agent CRUD. The full `updateCV` mutation
+ * requires a deeply nested object — too unwieldy for the model to
+ * synthesize correctly. These narrow handlers do read-modify-write
+ * server-side so the agent can pass flat args.
+ */
+
+export const resolveDefaultCV = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUser(ctx);
+    const cvs = await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    if (cvs.length === 0) return null;
+    return cvs.find((c) => c.isDefault)?._id ?? cvs[0]._id;
+  },
+});
+
+export const appendExperience = mutation({
+  args: {
+    cvId: v.optional(v.id("cvs")),
+    company: v.string(),
+    position: v.string(),
+    startDate: v.string(),
+    endDate: v.optional(v.string()),
+    current: v.optional(v.boolean()),
+    description: v.optional(v.string()),
+    achievements: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const cvId = args.cvId ?? (await resolveCVId(ctx, userId));
+    if (!cvId) throw new Error("Belum ada CV — buat CV dulu sebelum tambah pengalaman.");
+    await requireOwnedDoc(ctx, cvId, "CV");
+    const cv = await ctx.db.get(cvId);
+    if (!cv) throw new Error("CV tidak ditemukan");
+
+    const entry = {
+      id: `exp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      company: args.company,
+      position: args.position,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      current: args.current ?? !args.endDate,
+      description: args.description ?? "",
+      achievements: args.achievements ?? [],
+    };
+    await ctx.db.patch(cvId, {
+      experience: [...(cv.experience ?? []), entry],
+    });
+    return { cvId, entryId: entry.id };
+  },
+});
+
+export const appendSkills = mutation({
+  args: {
+    cvId: v.optional(v.id("cvs")),
+    skills: v.array(v.string()),
+    category: v.optional(v.string()),
+    proficiency: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const cvId = args.cvId ?? (await resolveCVId(ctx, userId));
+    if (!cvId) throw new Error("Belum ada CV — buat CV dulu sebelum tambah skill.");
+    await requireOwnedDoc(ctx, cvId, "CV");
+    const cv = await ctx.db.get(cvId);
+    if (!cv) throw new Error("CV tidak ditemukan");
+
+    const existing = new Set((cv.skills ?? []).map((s) => s.name.toLowerCase()));
+    const newOnes = args.skills
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && !existing.has(s.toLowerCase()))
+      .map((name, i) => ({
+        id: `skill-${Date.now()}-${i}`,
+        name,
+        category: args.category ?? "general",
+        proficiency: args.proficiency ?? 3,
+      }));
+    if (newOnes.length === 0) return { cvId, added: 0 };
+    await ctx.db.patch(cvId, {
+      skills: [...(cv.skills ?? []), ...newOnes],
+    });
+    return { cvId, added: newOnes.length };
+  },
+});
+
+export const setSummary = mutation({
+  args: {
+    cvId: v.optional(v.id("cvs")),
+    summary: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const cvId = args.cvId ?? (await resolveCVId(ctx, userId));
+    if (!cvId) throw new Error("Belum ada CV — buat CV dulu sebelum edit ringkasan.");
+    await requireOwnedDoc(ctx, cvId, "CV");
+    const cv = await ctx.db.get(cvId);
+    if (!cv) throw new Error("CV tidak ditemukan");
+    const personalInfo = {
+      ...cv.personalInfo,
+      summary: args.summary,
+    };
+    await ctx.db.patch(cvId, { personalInfo });
+    return { cvId };
+  },
+});
+
+async function resolveCVId(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+): Promise<Id<"cvs"> | null> {
+  const cvs = await ctx.db
+    .query("cvs")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  if (cvs.length === 0) return null;
+  return cvs.find((c) => c.isDefault)?._id ?? cvs[0]._id;
+}
+
 // Quota check used by cv/actions.ts translate(). Called from action via
 // internal.cv.mutations._checkTranslateQuota.
 export const _checkTranslateQuota = internalMutation({

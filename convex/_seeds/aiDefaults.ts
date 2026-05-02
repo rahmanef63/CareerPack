@@ -221,6 +221,52 @@ export const DEFAULT_AI_TOOLS: ReadonlyArray<AiToolSeed> = [
     payloadSchema: '{ "documentId": "string", "completed": "boolean" }',
   },
 
+  // cv-generator (granular CRUD via slice manifest)
+  {
+    type: "cv.list",
+    label: "Lihat daftar CV",
+    description: "Query — daftar CV user (judul, template, jumlah pengalaman/skill).",
+  },
+  {
+    type: "cv.create",
+    label: "Buat CV baru",
+    description: "Buat CV kosong dgn judul + template (modern|classic|minimal).",
+    payloadSchema: '{ "title": "string", "template": "modern|classic|minimal" }',
+  },
+  {
+    type: "cv.add-experience",
+    label: "Tambah pengalaman ke CV",
+    description: "Append 1 entri pengalaman; cvId opsional (default = CV utama).",
+    payloadSchema:
+      '{ "cvId?": "string", "company": "string", "position": "string", "startDate": "YYYY-MM", "endDate?": "YYYY-MM", "current?": "boolean", "description?": "string" }',
+  },
+  {
+    type: "cv.add-skills",
+    label: "Tambah skill ke CV",
+    description: "Append skill (case-insensitive dedupe).",
+    payloadSchema:
+      '{ "cvId?": "string", "skills": ["string"], "category?": "technical|soft|tools|general" }',
+  },
+  {
+    type: "cv.update-summary",
+    label: "Update ringkasan CV",
+    description: "Patch personalInfo.summary di CV.",
+    payloadSchema: '{ "cvId?": "string", "summary": "string" }',
+  },
+  {
+    type: "cv.delete",
+    label: "Hapus CV",
+    description: "Hapus 1 CV (cascade ATS scans). Destructive.",
+    payloadSchema: '{ "cvId": "string" }',
+  },
+  {
+    type: "cv.import-from-text",
+    label: "Isi Cepat dari teks",
+    description:
+      "Parser AI ubah teks resume jadi struktur lalu hydrate profile + cv + portfolio + goals + lamaran + kontak. Min 40 karakter.",
+    payloadSchema: '{ "text": "string" }',
+  },
+
   // settings / profile
   {
     type: "settings.update-phone",
