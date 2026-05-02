@@ -306,6 +306,35 @@ export const _ingestExternalJobs = internalMutation({
 });
 
 // ---------------------------------------------------------------------------
+// Pruner — drop fetched listings older than 60 days. Keeps `jobListings`
+// table from ballooning as the daily WWR sweep adds 200-400 rows/week.
+// User-paste rows are NEVER pruned (they're explicit user content).
+// Seed rows are NEVER pruned (curated demo content with no postedAt drift).
+// ---------------------------------------------------------------------------
+
+const PRUNE_TTL_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+const PRUNE_BATCH = 200;
+
+export const pruneOldJobs = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cutoff = Date.now() - PRUNE_TTL_MS;
+    const stale = await ctx.db
+      .query("jobListings")
+      .withIndex("by_posted", (q) => q.lt("postedAt", cutoff))
+      .take(PRUNE_BATCH);
+    let deleted = 0;
+    for (const row of stale) {
+      if (row.source === "user-paste" || row.source === "seed") continue;
+      await ctx.db.delete(row._id);
+      deleted++;
+    }
+    console.log(`[prune] scanned=${stale.length} deleted=${deleted}`);
+    return { scanned: stale.length, deleted };
+  },
+});
+
+// ---------------------------------------------------------------------------
 // User paste — AI-parse JD text into a structured listing
 // ---------------------------------------------------------------------------
 

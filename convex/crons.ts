@@ -41,4 +41,13 @@ crons.daily(
   internal.matcher.external.fetchJobFeeds,
 );
 
+// Daily pruner — drop fetched job listings older than 60 days. Caps at
+// 200 deletes per run; if the table ever has a huge backlog the cron
+// just chips away day by day. Skips `user-paste` and `seed` rows.
+crons.daily(
+  "prune-old-jobs",
+  { hourUTC: 18, minuteUTC: 0 }, // 01:00 WIB next day, after fetch settles
+  internal.matcher.external.pruneOldJobs,
+);
+
 export default crons;
