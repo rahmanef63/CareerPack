@@ -51,26 +51,93 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  /** Pinned at top — does NOT scroll with body. When set, layout
+   *  switches to flex-col with a separately-scrollable body region.
+   *  Common use: search bar, breadcrumb, tab strip on a config sheet. */
+  stickyHeader?: React.ReactNode;
+  /** Pinned at bottom — does NOT scroll. Common use: action buttons,
+   *  composer, summary bar. Same layout-switch semantics as stickyHeader. */
+  stickyFooter?: React.ReactNode;
+  /** Class for the inner scrollable body. Only applied when sticky
+   *  layout is active (either stickyHeader or stickyFooter set).
+   *  Use this to override default padding (`p-6`) or add tighter
+   *  spacing for chat/feed content. */
+  bodyClassName?: string;
+  /** Hide the default top-right close button. Useful when stickyHeader
+   *  provides its own close affordance or the sheet has a different
+   *  dismissal flow. Default: false (button shown). */
+  hideCloseButton?: boolean
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content
-      ref={ref}
-      className={cn(sheetVariants({ side }), className)}
-      {...props}
-    >
-      <SheetPrimitive.Close aria-label="Tutup" className="absolute right-2 top-2 inline-flex h-11 w-11 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary sm:right-4 sm:top-4 sm:h-9 sm:w-9">
-        <X className="h-4 w-4" />
-      </SheetPrimitive.Close>
-      {children}
-    </SheetPrimitive.Content>
-  </SheetPortal>
-))
+>(({ side = "right", className, children, stickyHeader, stickyFooter, bodyClassName, hideCloseButton, ...props }, ref) => {
+  const useStickyLayout = Boolean(stickyHeader || stickyFooter)
+  const closeButton = !hideCloseButton && (
+    <SheetPrimitive.Close aria-label="Tutup" className="absolute right-2 top-2 z-20 inline-flex h-11 w-11 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary sm:right-4 sm:top-4 sm:h-9 sm:w-9">
+      <X className="h-4 w-4" />
+    </SheetPrimitive.Close>
+  )
+
+  if (!useStickyLayout) {
+    return (
+      <SheetPortal>
+        <SheetOverlay />
+        <SheetPrimitive.Content
+          ref={ref}
+          className={cn(sheetVariants({ side }), className)}
+          {...props}
+        >
+          {closeButton}
+          {children}
+        </SheetPrimitive.Content>
+      </SheetPortal>
+    )
+  }
+
+  // Sticky layout: override default `p-6 gap-4` from sheetVariants
+  // so sticky regions span edge-to-edge. Body region inside owns the
+  // scroll + spacing.
+  return (
+    <SheetPortal>
+      <SheetOverlay />
+      <SheetPrimitive.Content
+        ref={ref}
+        className={cn(
+          sheetVariants({ side }),
+          "flex flex-col gap-0 overflow-hidden p-0",
+          className,
+        )}
+        {...props}
+      >
+        {closeButton}
+        {stickyHeader && (
+          <div className={cn(
+            "shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+            !hideCloseButton && (side === "right" || side === "top") ? "pr-12" : "",
+          )}>
+            {stickyHeader}
+          </div>
+        )}
+        <div
+          className={cn(
+            "flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto p-6",
+            bodyClassName,
+          )}
+        >
+          {children}
+        </div>
+        {stickyFooter && (
+          <div className="shrink-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[max(0px,env(safe-area-inset-bottom))]">
+            {stickyFooter}
+          </div>
+        )}
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  )
+})
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({

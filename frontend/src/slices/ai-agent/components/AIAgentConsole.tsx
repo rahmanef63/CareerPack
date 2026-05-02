@@ -8,10 +8,8 @@ import {
 } from "@/shared/components/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { TypingDots } from "@/shared/components/interactions/MicroInteractions";
 import { cn } from "@/shared/lib/utils";
 import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
@@ -20,6 +18,7 @@ import type { AIProgress, StepStatus, StepType } from "../types/progress";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
 import { HistoryRail } from "./ai-agent-console/HistoryRail";
 import { Composer } from "./ai-agent-console/Composer";
+import { ThinkingProgress } from "./ai-agent-console/ThinkingProgress";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { api } from "../../../../../convex/_generated/api";
 
@@ -263,18 +262,7 @@ export function AIAgentConsole({
                 {activeSession?.messages.map((m) => (
                   <MessageBubble key={m.id} msg={m} />
                 ))}
-                {thinking && (
-                  <div className="flex items-center gap-2">
-                    <Avatar className="w-7 h-7">
-                      <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground">
-                        <Sparkles className="w-3 h-3" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="px-3 py-2 rounded-2xl bg-muted">
-                      <TypingDots />
-                    </div>
-                  </div>
-                )}
+                {thinking && <ThinkingProgress />}
               </div>
             </ScrollArea>
 
