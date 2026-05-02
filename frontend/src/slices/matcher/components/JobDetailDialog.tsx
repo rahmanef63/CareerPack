@@ -10,11 +10,13 @@ import {
   ScanText,
   Tag,
   Wallet,
+  WandSparkles,
 } from "lucide-react";
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { CoverLetterDialog } from "./CoverLetterDialog";
+import { ResumeTailorDialog } from "./ResumeTailorDialog";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -48,6 +50,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialogProps) {
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [tailorOpen, setTailorOpen] = useState(false);
   return (
     <ResponsiveDialog open={!!job} onOpenChange={(o) => !o && onOpenChange(false)}>
       <ResponsiveDialogContent size="2xl">
@@ -167,6 +170,15 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
               <Button
                 type="button"
                 variant="outline"
+                onClick={() => setTailorOpen(true)}
+                className="gap-2"
+              >
+                <WandSparkles className="h-4 w-4" />
+                Tailor CV
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setCoverLetterOpen(true)}
                 className="gap-2"
               >
@@ -198,6 +210,11 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
         job={job}
         open={coverLetterOpen}
         onOpenChange={setCoverLetterOpen}
+      />
+      <ResumeTailorDialog
+        job={job}
+        open={tailorOpen}
+        onOpenChange={setTailorOpen}
       />
     </ResponsiveDialog>
   );

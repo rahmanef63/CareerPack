@@ -263,6 +263,176 @@ Hard rules:
   },
 });
 
+// ---------------------------------------------------------------------------
+// Resume Tailor — given a JD, rewrite the user's CV achievements bullets
+// to incorporate JD keywords without fabricating facts. Returns per-bullet
+// suggestions the UI can apply selectively. Does NOT mutate the CV — the
+// frontend calls cv.mutations.updateCV with the user's selected rewrites.
+// ---------------------------------------------------------------------------
+
+interface TailorBulletChange {
+  index: number;
+  before: string;
+  after: string;
+  changed: boolean;
+}
+
+interface TailorExperienceResult {
+  experienceId: string;
+  role: string;
+  company: string;
+  changes: TailorBulletChange[];
+}
+
+interface TailorResult {
+  jobMeta: string;
+  experiences: TailorExperienceResult[];
+}
+
+export const tailorCVForJob = action({
+  args: {
+    cvId: v.optional(v.id("cvs")),
+    jobListingId: v.optional(v.id("jobListings")),
+    rawJD: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<TailorResult> => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+    await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
+
+    const cv: Doc<"cvs"> | null = args.cvId
+      ? await ctx.runQuery(internal.cv.queries._getOwnedCV, { cvId: args.cvId, userId })
+      : await ctx.runQuery(internal.cv.queries._getLatestCV, { userId });
+    if (!cv) throw new ConvexError("CV tidak ditemukan.");
+
+    let jdText: string;
+    let jobMeta = "";
+    if (args.jobListingId) {
+      const job = await ctx.runQuery(internal.matcher.queries._getListing, {
+        listingId: args.jobListingId,
+      });
+      if (!job) throw new ConvexError("Lowongan tidak ditemukan.");
+      jobMeta = `${job.title} · ${job.company}`;
+      jdText = `${job.title} di ${job.company}\nSkills dibutuhkan: ${job.requiredSkills.join(", ")}\n\n${job.description}`;
+    } else if (args.rawJD && args.rawJD.trim().length >= 80) {
+      jdText = args.rawJD;
+    } else {
+      throw new ConvexError("Sertakan jobListingId atau rawJD minimal 80 karakter.");
+    }
+
+    const cleanJD = sanitizeAIInput(jdText, 6000);
+
+    // Build a compact per-experience payload.
+    const expPayload = cv.experience.slice(0, 6).map((e) => ({
+      id: e.id,
+      role: e.position,
+      company: e.company,
+      description: e.description,
+      achievements: e.achievements,
+    }));
+
+    if (expPayload.length === 0) {
+      throw new ConvexError("CV belum punya pengalaman kerja untuk di-tailor.");
+    }
+
+    const cfg = await resolveAI(ctx, "gpt-4.1-mini");
+
+    const systemPrompt = `You rewrite resume achievement bullets to maximise ATS keyword overlap with a target JD WITHOUT fabricating facts.
+
+Input: a JSON object with the JD text and the candidate's existing experience entries (each with role, company, description, and an array of achievement bullets).
+
+Output WAJIB: a single JSON object of shape:
+{
+  "experiences": [
+    {
+      "id": "<experience id from input>",
+      "rewritten": ["bullet 1 rewritten", "bullet 2 rewritten", ...]
+    }
+  ]
+}
+
+Hard rules:
+- Output the SAME number of bullets per experience as input. Same order.
+- Preserve all factual claims (numbers, employers, dates, technologies actually mentioned).
+- Inject JD keywords ONLY when the original bullet plausibly relates — never fabricate. If a bullet is unrelated to the JD, return it AS-IS.
+- Lead each bullet with a strong action verb (Built, Led, Shipped, Reduced, Improved …).
+- Add quantifiable impact ONLY if the original already implied it; never invent numbers.
+- Keep each bullet ≤ 30 words.
+- Match the language of the original (Indonesian or English).
+- NO preamble, NO markdown, NO code fences.`;
+
+    const userPayload = JSON.stringify({ jd: cleanJD, experiences: expPayload });
+
+    const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cfg.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: wrapUserInput("tailor_input", userPayload) },
+        ],
+        temperature: 0.3,
+        max_tokens: 1800,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error(`[cv.tailor] gateway ${response.status}`, detail.slice(0, 300));
+      throw new ConvexError(
+        response.status === 429
+          ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
+          : "Gagal menghubungi layanan AI. Coba lagi nanti.",
+      );
+    }
+
+    const data = await response.json();
+    const raw = data?.choices?.[0]?.message?.content ?? "{}";
+    let parsed: { experiences?: Array<{ id: string; rewritten: string[] }> };
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      throw new ConvexError("AI mengembalikan format JSON tidak valid. Coba lagi.");
+    }
+
+    const rewriteMap = new Map<string, string[]>();
+    for (const e of parsed.experiences ?? []) {
+      if (typeof e.id === "string" && Array.isArray(e.rewritten)) {
+        rewriteMap.set(
+          e.id,
+          e.rewritten.filter((s): s is string => typeof s === "string"),
+        );
+      }
+    }
+
+    // Pair each input bullet with its suggestion. Filter out experiences
+    // where the AI returned a different bullet count or unchanged text.
+    const results = expPayload.map((exp) => {
+      const rewritten = rewriteMap.get(exp.id) ?? [];
+      const aligned = rewritten.length === exp.achievements.length ? rewritten : exp.achievements;
+      const changes = aligned.map((after, i) => ({
+        index: i,
+        before: exp.achievements[i] ?? "",
+        after,
+        changed: (exp.achievements[i] ?? "").trim() !== after.trim(),
+      }));
+      return {
+        experienceId: exp.id,
+        role: exp.role,
+        company: exp.company,
+        changes,
+      };
+    });
+
+    return { jobMeta, experiences: results };
+  },
+});
+
 function buildCVSummary(cv: Doc<"cvs">): string {
   const parts: string[] = [];
   parts.push(`Name: ${cv.personalInfo.fullName}`);

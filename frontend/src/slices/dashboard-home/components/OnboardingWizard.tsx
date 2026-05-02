@@ -23,7 +23,7 @@ import {
   ResponsiveSelectItem,
   ResponsiveSelectTrigger,
 } from "@/shared/components/ui/responsive-select";
-import { QuickFillButton } from "@/shared/components/onboarding";
+import { LinkedInImportButton, QuickFillButton } from "@/shared/components/onboarding";
 import { cn } from "@/shared/lib/utils";
 import { notify } from "@/shared/lib/notify";
 
@@ -259,14 +259,21 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
                 Punya CV existing? Paste teks atau upload PDF — AI ekstrak otomatis ke
                 pengalaman, pendidikan, projects.
               </p>
-              <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5 text-center">
-                <Sparkles className="mx-auto mb-2 h-6 w-6 text-brand" />
-                <p className="mb-3 text-sm font-medium">Quick Fill — auto-import</p>
-                <QuickFillButton variant="default" size="sm" className="bg-brand hover:bg-brand" />
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Bisa di-skip dan dilakukan nanti dari menu Quick Fill.
-                </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+                  <Sparkles className="mx-auto mb-2 h-5 w-5 text-brand" />
+                  <p className="mb-3 text-xs font-medium">Quick Fill — paste teks</p>
+                  <QuickFillButton variant="default" size="sm" className="gap-1.5 bg-brand hover:bg-brand" />
+                </div>
+                <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
+                  <Sparkles className="mx-auto mb-2 h-5 w-5 text-brand" />
+                  <p className="mb-3 text-xs font-medium">LinkedIn — upload PDF</p>
+                  <LinkedInImportButton variant="outline" size="sm" className="gap-1.5" />
+                </div>
               </div>
+              <p className="text-center text-xs text-muted-foreground">
+                Bisa di-skip dan dilakukan nanti dari Settings.
+              </p>
             </div>
           )}
         </div>

@@ -5,7 +5,7 @@ import {
   Plus, Briefcase, TrendingUp, Target, MessageSquare,
 } from "lucide-react";
 import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
+  Card, CardDescription, CardHeader, CardTitle,
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { QuickFillButton } from "@/shared/components/onboarding";
@@ -32,6 +32,14 @@ import {
   APPLICATION_FILTERS,
   buildApplicationColumns,
 } from "./career-dashboard/columns";
+import { ApplicationKanban } from "./ApplicationKanban";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { LayoutGrid, Table2 } from "lucide-react";
 
 export function CareerDashboard() {
   const { applications, isLoading, create, updateStatus, remove } =
@@ -153,35 +161,57 @@ export function CareerDashboard() {
       </section>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Daftar Lamaran</CardTitle>
-          <CardDescription>
-            Cari, sortir, filter status, kelola lamaran Anda.
-          </CardDescription>
+        <CardHeader className="space-y-3">
+          <div>
+            <CardTitle>Daftar Lamaran</CardTitle>
+            <CardDescription>
+              Cari, sortir, filter status, atau drag-drop di kanban.
+            </CardDescription>
+          </div>
+          <Tabs defaultValue="kanban">
+            <TabsList variant="equal" cols={2}>
+              <TabsTrigger value="kanban" className="gap-2">
+                <LayoutGrid className="h-3.5 w-3.5" />
+                Kanban
+              </TabsTrigger>
+              <TabsTrigger value="table" className="gap-2">
+                <Table2 className="h-3.5 w-3.5" />
+                Tabel
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="kanban" className="pt-4">
+              <ApplicationKanban
+                applications={applications}
+                isLoading={isLoading}
+                onStatusChange={handleStatusChange}
+                onAdd={() => setAddOpen(true)}
+              />
+            </TabsContent>
+            <TabsContent value="table" className="pt-4">
+              <DataTable<Application>
+                data={applications}
+                columns={columns}
+                filters={APPLICATION_FILTERS}
+                rowKey={(a) => a.id}
+                searchAccessor={(a) => `${a.company} ${a.position} ${a.notes ?? ""}`}
+                searchPlaceholder="Cari perusahaan, posisi, catatan…"
+                isLoading={isLoading}
+                emptyMessage={
+                  <div className="space-y-3">
+                    <p>Belum ada lamaran. Tambah lamaran pertama Anda!</p>
+                    <Button
+                      onClick={() => setAddOpen(true)}
+                      size="sm"
+                      className="bg-brand hover:bg-brand"
+                    >
+                      <Plus className="mr-1 h-4 w-4" /> Tambah Lamaran
+                    </Button>
+                  </div>
+                }
+              />
+            </TabsContent>
+          </Tabs>
         </CardHeader>
-        <CardContent>
-          <DataTable<Application>
-            data={applications}
-            columns={columns}
-            filters={APPLICATION_FILTERS}
-            rowKey={(a) => a.id}
-            searchAccessor={(a) => `${a.company} ${a.position} ${a.notes ?? ""}`}
-            searchPlaceholder="Cari perusahaan, posisi, catatan…"
-            isLoading={isLoading}
-            emptyMessage={
-              <div className="space-y-3">
-                <p>Belum ada lamaran. Tambah lamaran pertama Anda!</p>
-                <Button
-                  onClick={() => setAddOpen(true)}
-                  size="sm"
-                  className="bg-brand hover:bg-brand"
-                >
-                  <Plus className="mr-1 h-4 w-4" /> Tambah Lamaran
-                </Button>
-              </div>
-            }
-          />
-        </CardContent>
       </Card>
 
       <AddApplicationDialog
