@@ -15,6 +15,11 @@ import { ExtensionErrorFilter } from "@/shared/providers/ExtensionErrorFilter"
 import { CommandPalette } from "@/shared/components/command-palette/CommandPalette"
 import { Toaster } from "@/shared/components/ui/sonner"
 import { TooltipProvider } from "@/shared/components/ui/tooltip"
+// Slice capability binders — each subscribes to the aiActionBus and
+// runs skills declared in the slice's manifest. Mount one per slice
+// that exposes mutation/compose skills. Removing a slice = removing
+// its import here = clean modular boundary at compile time.
+import { SettingsCapabilities } from "@/slices/settings"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -26,6 +31,7 @@ export function Providers({ children }: { children: ReactNode }) {
             <UIPrefsProvider>
               <TooltipProvider delayDuration={300}>
                 {children}
+                <SettingsCapabilities />
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />

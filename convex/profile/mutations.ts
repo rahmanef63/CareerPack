@@ -107,6 +107,73 @@ function assertEmail(raw: string): string {
   return value;
 }
 
+/**
+ * Partial profile patch — for surgical updates from the AI agent and
+ * other capability hooks that change one or two fields without
+ * needing the user to re-confirm the entire form. Validates each
+ * field independently and only writes fields that were passed.
+ *
+ * Fails (clearly) if no profile exists yet — the AI shouldn't be
+ * invoking these on first-run users; they go through the full
+ * onboarding flow first.
+ */
+export const patchProfile = mutation({
+  args: {
+    fullName: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
+    targetRole: v.optional(v.string()),
+    experienceLevel: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    skills: v.optional(v.array(v.string())),
+    interests: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const existing = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!existing) {
+      throw new Error("Profil belum ada — selesaikan onboarding dulu");
+    }
+
+    const patch: Record<string, unknown> = {};
+    if (args.fullName !== undefined) {
+      patch.fullName = assertShortText(args.fullName, 120, "Nama");
+    }
+    if (args.phone !== undefined) {
+      // Phone: digits / + / - / space / parens, 6-30 chars. Loose on
+      // purpose — Indonesian + international formats both allowed.
+      const v = args.phone.trim();
+      if (v.length > 0 && (v.length < 6 || v.length > 30 || !/^[+\d\s()-]+$/.test(v))) {
+        throw new Error("Nomor telepon tidak valid");
+      }
+      patch.phone = v.length === 0 ? undefined : v;
+    }
+    if (args.location !== undefined) patch.location = assertShortText(args.location, 120, "Lokasi");
+    if (args.targetRole !== undefined) patch.targetRole = assertShortText(args.targetRole, 120, "Target role");
+    if (args.experienceLevel !== undefined) patch.experienceLevel = assertShortText(args.experienceLevel, 40, "Level");
+    if (args.bio !== undefined) {
+      patch.bio = args.bio.trim().length === 0 ? undefined : assertShortText(args.bio, 600, "Bio");
+    }
+    if (args.skills !== undefined) {
+      if (args.skills.length > 50) throw new Error("Skill maksimal 50 entri");
+      patch.skills = args.skills.map((s) => assertShortText(s, 60, "Skill")).filter((s) => s.length > 0);
+    }
+    if (args.interests !== undefined) {
+      if (args.interests.length > 50) throw new Error("Minat maksimal 50 entri");
+      patch.interests = args.interests.map((s) => assertShortText(s, 60, "Minat")).filter((s) => s.length > 0);
+    }
+
+    if (Object.keys(patch).length === 0) {
+      throw new Error("Tidak ada field yang diubah");
+    }
+    await ctx.db.patch(existing._id, patch);
+    return existing._id;
+  },
+});
+
 export const createOrUpdateProfile = mutation({
   args: {
     fullName: v.string(),

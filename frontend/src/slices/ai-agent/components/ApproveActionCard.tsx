@@ -5,6 +5,7 @@ import { Check, X, Sparkles } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { notify } from "@/shared/lib/notify";
 import { publish } from "@/shared/lib/aiActionBus";
+import { SKILLS_BY_ID } from "@/shared/lib/sliceRegistry";
 import { ACTION_META, type AgentAction } from "../lib/agentActions";
 import { SuccessCheck } from "@/shared/components/interactions/MicroInteractions";
 
@@ -13,9 +14,36 @@ interface ApproveActionCardProps {
   onResolved?: (applied: boolean) => void;
 }
 
+interface ResolvedMeta {
+  label: string;
+  description: string;
+  cta: string;
+}
+
+/** Resolve display meta for an action. Manifest skills (registry)
+ *  win over the legacy ACTION_META map; both fall back to a generic
+ *  "Tindakan AI / Terapkan" label when neither matches. */
+function resolveMeta(action: AgentAction): ResolvedMeta {
+  const skill = SKILLS_BY_ID.get(action.type);
+  if (skill) {
+    return {
+      label: skill.label,
+      description: skill.description,
+      cta: skill.cta ?? "Terapkan",
+    };
+  }
+  const legacy = ACTION_META[action.type as keyof typeof ACTION_META];
+  if (legacy) return legacy;
+  return {
+    label: "Tindakan AI",
+    description: "Terapkan tindakan ini.",
+    cta: "Terapkan",
+  };
+}
+
 export function ApproveActionCard({ action, onResolved }: ApproveActionCardProps) {
   const [state, setState] = useState<"pending" | "applied" | "dismissed">("pending");
-  const meta = ACTION_META[action.type];
+  const meta = resolveMeta(action);
 
   const apply = () => {
     publish(action);
@@ -119,6 +147,24 @@ function ActionPreview({ action }: { action: AgentAction }) {
         </ul>
       );
     default:
-      return null;
+      // Manifest-skill envelope — payload is a key/value bag. Render
+      // each populated field on its own line. Truncate long strings
+      // so the approval card stays compact.
+      return <GenericPayloadPreview payload={(action as { payload: Record<string, unknown> }).payload} />;
   }
+}
+
+function GenericPayloadPreview({ payload }: { payload: Record<string, unknown> }) {
+  const entries = Object.entries(payload ?? {}).filter(([, v]) => v !== undefined && v !== null && v !== "");
+  if (entries.length === 0) return null;
+  return (
+    <div className="mt-1 text-xs text-foreground/80 bg-muted/40 rounded-md p-2 space-y-0.5">
+      {entries.map(([k, v]) => (
+        <p key={k} className="break-words">
+          <span className="font-medium">{k}:</span>{" "}
+          {String(v).length > 160 ? String(v).slice(0, 160) + "..." : String(v)}
+        </p>
+      ))}
+    </div>
+  );
 }

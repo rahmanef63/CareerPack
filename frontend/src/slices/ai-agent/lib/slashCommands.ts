@@ -1,6 +1,7 @@
 "use client";
 
 import type { AgentAction } from "./agentActions";
+import { SLASH_SKILLS, SKILLS_BY_SLASH } from "@/shared/lib/sliceRegistry";
 
 export interface SlashCommand {
   cmd: string;
@@ -8,12 +9,34 @@ export interface SlashCommand {
   example: string;
 }
 
-export const SLASH_COMMANDS: SlashCommand[] = [
+/** Hardcoded slash commands — legacy. Live alongside manifest-derived
+ *  slashes during the migration. New skills should land in the slice's
+ *  manifest, not here. */
+const LEGACY_SLASH: SlashCommand[] = [
   { cmd: "/cv", description: "Auto-isi CV dari deskripsi singkat", example: "/cv saya fresh grad TI ingin jadi backend dev" },
   { cmd: "/roadmap", description: "Buat roadmap karir multi-bulan", example: "/roadmap product manager" },
   { cmd: "/review", description: "Review CV dan beri skor", example: "/review" },
   { cmd: "/interview", description: "Mulai simulasi wawancara", example: "/interview frontend" },
   { cmd: "/match", description: "Rekomendasi 3 lowongan cocok", example: "/match" },
+];
+
+/** Slash commands derived from the slice manifests. Each manifest skill
+ *  with a `slashCommand` becomes an entry here automatically. */
+const MANIFEST_SLASH: SlashCommand[] = SLASH_SKILLS.map((s) => {
+  const argName = s.args ? Object.keys(s.args)[0] : null;
+  const arg = argName && s.args ? s.args[argName] : null;
+  return {
+    cmd: s.slashCommand!,
+    description: s.label,
+    example: arg?.example
+      ? `${s.slashCommand} ${arg.example}`
+      : s.slashCommand!,
+  };
+});
+
+export const SLASH_COMMANDS: SlashCommand[] = [
+  ...LEGACY_SLASH,
+  ...MANIFEST_SLASH,
 ];
 
 export interface AgentReply {
@@ -26,10 +49,32 @@ export interface AgentReply {
  * synthesized text). Used by the live AI flow — natural-language reply
  * comes from the backend chat action, but slash commands still inject
  * structured actions client-side so users can approve them.
+ *
+ * Resolution order:
+ * 1. Manifest skill match (e.g. `/phone 0812…` → settings.update-phone)
+ *    — generic, derived from slice manifests at registry load.
+ * 2. Legacy hardcoded handlers in `runAgent` (e.g. `/cv`, `/roadmap`).
+ *    Will shrink as slices get manifests.
  */
 export function extractSlashActions(userInput: string): AgentAction[] {
   const trimmed = userInput.trim();
   if (!trimmed.startsWith("/")) return [];
+
+  // Try manifest-driven skills first.
+  const cmdMatch = trimmed.match(/^(\/[a-z][a-z0-9_-]*)\s*(.*)$/i);
+  if (cmdMatch) {
+    const skill = SKILLS_BY_SLASH.get(cmdMatch[1].toLowerCase());
+    if (skill && skill.argsFromText) {
+      const payload = skill.argsFromText(cmdMatch[2]);
+      if (payload) {
+        // Cast: BusAction shape is compatible with AgentAction's
+        // string `type`; the discriminated union is for legacy paths.
+        return [{ type: skill.id, payload } as unknown as AgentAction];
+      }
+    }
+  }
+
+  // Fall back to the legacy hardcoded heuristic agent.
   return runAgent(trimmed).actions;
 }
 
