@@ -1,5 +1,6 @@
 import type { SliceManifest, SliceSkill } from "@/shared/types/sliceManifest";
 import { settingsManifest } from "@/slices/settings";
+import { calendarManifest } from "@/slices/calendar";
 
 /**
  * Central slice manifest registry.
@@ -23,6 +24,7 @@ import { settingsManifest } from "@/slices/settings";
  */
 export const SLICE_REGISTRY: ReadonlyArray<SliceManifest> = [
   settingsManifest,
+  calendarManifest,
   // future: cv-generator, skill-roadmap, mock-interview, matcher,
   // career-dashboard, networking, financial-calculator, … (one line
   // each as their manifests land).

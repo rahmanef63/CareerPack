@@ -20,6 +20,7 @@ import { TooltipProvider } from "@/shared/components/ui/tooltip"
 // that exposes mutation/compose skills. Removing a slice = removing
 // its import here = clean modular boundary at compile time.
 import { SettingsCapabilities } from "@/slices/settings"
+import { CalendarCapabilities } from "@/slices/calendar"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -32,6 +33,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <TooltipProvider delayDuration={300}>
                 {children}
                 <SettingsCapabilities />
+                <CalendarCapabilities />
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />
