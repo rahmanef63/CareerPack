@@ -2,14 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAction } from "convex/react";
-import { Sparkles, MessageSquare } from "lucide-react";
+import { Sparkles, MessageSquare, Plus } from "lucide-react";
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
 } from "@/shared/components/ui/sheet";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Badge } from "@/shared/components/ui/badge";
-import { Separator } from "@/shared/components/ui/separator";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
@@ -29,17 +32,32 @@ interface AIAgentConsoleProps {
   currentView: string;
 }
 
+interface QuickPrompt {
+  label: string;
+  text: string;
+}
+
+const QUICK_PROMPTS: ReadonlyArray<QuickPrompt> = [
+  { label: "Bantu isi CV", text: "/cv" },
+  { label: "Buatkan roadmap", text: "/roadmap" },
+  { label: "Review CV saya", text: "/review" },
+  { label: "Latihan wawancara", text: "/interview" },
+  { label: "Cari lowongan cocok", text: "/match" },
+];
+
 export function AIAgentConsole({
   open,
   onOpenChange,
   onNavigate,
   currentView,
 }: AIAgentConsoleProps) {
-  const { sessions, setSessions, activeId, setActiveId, deleteSession } = useSessionSync();
+  const { sessions, setSessions, activeId, setActiveId, deleteSession } =
+    useSessionSync();
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false);
   const chatAction = useAction(api.ai.actions.chat);
+  const isMobile = useIsMobile();
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +74,7 @@ export function AIAgentConsole({
     [sessions, activeId],
   );
 
+  // Auto-scroll to bottom on new message / thinking-state change.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -64,14 +83,35 @@ export function AIAgentConsole({
     });
   }, [activeSession?.messages.length, thinking]);
 
+  // Mobile keyboard: when virtual keyboard opens/closes, viewport
+  // height changes via visualViewport. Re-scroll to bottom so the
+  // composer + last message stay in view as the layout settles.
+  // Belt-and-suspenders fallback for browsers where dvh updates lag
+  // behind keyboard transitions (older iOS Safari).
+  useEffect(() => {
+    if (!isMobile || !open) return;
+    if (typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const el = scrollRef.current;
+      if (!el) return;
+      requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, [isMobile, open]);
+
   const showSlashPopover =
     input.startsWith("/") && !input.includes(" ") && !thinking;
 
   const contextHint = useMemo(() => {
-    if (currentView === "cv") return "Di CV sekarang — coba /review atau /cv";
+    if (currentView === "cv") return "Di CV — coba /review atau /cv";
     if (currentView === "roadmap") return "Di Roadmap — coba /roadmap";
-    if (currentView === "interview") return "Di Interview Prep — coba /interview";
-    return "Tersedia: /cv, /roadmap, /review, /interview, /match";
+    if (currentView === "interview") return "Di Interview — coba /interview";
+    return "Ketik / untuk perintah, atau tanya bebas";
   }, [currentView]);
 
   const startNewChat = useCallback(() => {
@@ -125,9 +165,6 @@ export function AIAgentConsole({
       setInput("");
       setThinking(true);
 
-      // Slash commands inject structured actions even when the AI
-      // reply is plain prose — kept client-side so action approval
-      // doesn't depend on AI obeying a JSON contract.
       const slashActions = extractSlashActions(text);
 
       let assistantText: string;
@@ -138,9 +175,6 @@ export function AIAgentConsole({
           view: currentView,
         });
         assistantText = result.text;
-        // Backend types steps with `string` for type/status (no Convex
-        // union validators on the return shape). Narrow at the boundary
-        // so renderers can rely on the AIProgress contract.
         assistantProgress = {
           steps: result.progress.steps.map((s) => ({
             id: s.id,
@@ -203,7 +237,9 @@ export function AIAgentConsole({
     send();
   };
 
-  const isMobile = useIsMobile();
+  // Show quick prompts only on a brand-new session (just welcome msg).
+  const showQuickPrompts =
+    activeSession?.messages.length === 1 && !thinking;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -212,7 +248,7 @@ export function AIAgentConsole({
         className={cn(
           "p-0 flex flex-col bg-card",
           isMobile
-            ? "h-[92dvh] max-h-[92dvh] rounded-t-3xl"
+            ? "h-[100dvh] max-h-[100dvh] rounded-t-3xl"
             : "w-full sm:max-w-2xl lg:max-w-3xl",
         )}
       >
@@ -223,7 +259,7 @@ export function AIAgentConsole({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-1 min-h-0 min-w-0">
           <HistoryRail
             sessions={sessions}
             activeId={activeId}
@@ -233,49 +269,93 @@ export function AIAgentConsole({
             onDelete={deleteSession}
           />
 
-          <div className="flex-1 flex flex-col min-w-0">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+          <div className="flex-1 flex flex-col min-w-0 min-h-0">
+            {/* Header — sticky at top of right column. */}
+            <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
               <button
                 type="button"
-                className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
+                className="md:hidden inline-flex h-9 w-9 -ml-1 items-center justify-center rounded-md hover:bg-accent"
                 onClick={() => setMobileHistoryOpen((v) => !v)}
                 aria-label="Toggle riwayat percakapan"
               >
                 <MessageSquare className="w-4 h-4" />
               </button>
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground flex items-center justify-center">
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground flex items-center justify-center shrink-0">
                 <Sparkles className="w-4 h-4" />
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">
                   {activeSession?.title || "Asisten AI"}
                 </p>
-                <p className="text-[11px] text-muted-foreground truncate">{contextHint}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {contextHint}
+                </p>
               </div>
-              <Badge variant="secondary" className="text-[10px] hidden sm:inline-flex">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={startNewChat}
+                aria-label="Percakapan baru"
+                className="h-9 w-9 shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+              <Badge
+                variant="secondary"
+                className="text-[10px] hidden lg:inline-flex"
+              >
                 Mode Demo
               </Badge>
             </div>
 
-            <ScrollArea className="flex-1 px-4" viewportRef={scrollRef}>
-              <div className="space-y-3 max-w-2xl mx-auto py-4">
+            {/* Scroll body — native overflow + min-h-0 makes flex-1
+                 actually compress so this region scrolls instead of
+                 the whole sheet inflating. overscroll-contain stops
+                 the page underneath from also scrolling on iOS rubber
+                 band. */}
+            <div
+              ref={scrollRef}
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+            >
+              <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
                 {activeSession?.messages.map((m) => (
                   <MessageBubble key={m.id} msg={m} />
                 ))}
+                {showQuickPrompts && (
+                  <div className="pl-9">
+                    <p className="text-[11px] text-muted-foreground mb-2">
+                      Mulai cepat
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_PROMPTS.map((p) => (
+                        <button
+                          key={p.text}
+                          type="button"
+                          onClick={() => send(p.text)}
+                          className="text-xs px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent text-foreground transition-colors"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {thinking && <ThinkingProgress />}
               </div>
-            </ScrollArea>
+            </div>
 
-            <Separator />
-
-            <Composer
-              input={input}
-              setInput={setInput}
-              thinking={thinking}
-              showSlashPopover={showSlashPopover}
-              onSubmit={onSubmit}
-              send={send}
-            />
+            {/* Composer — sticky bottom of right column. Border + bg
+                 separate from messages above. */}
+            <div className="shrink-0 border-t border-border bg-card">
+              <Composer
+                input={input}
+                setInput={setInput}
+                thinking={thinking}
+                showSlashPopover={showSlashPopover}
+                onSubmit={onSubmit}
+                send={send}
+              />
+            </div>
           </div>
         </div>
       </SheetContent>
