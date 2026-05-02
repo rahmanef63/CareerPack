@@ -7,7 +7,26 @@ import type { Id, Doc } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoAgendaOverlay } from "@/shared/hooks/useDemoOverlay";
 
-export type AgendaType = "interview" | "deadline" | "followup";
+export type AgendaType =
+  | "interview"
+  | "deadline"
+  | "followup"
+  | "reminder"
+  | "other";
+
+const KNOWN_AGENDA_TYPES = new Set<AgendaType>([
+  "interview",
+  "deadline",
+  "followup",
+  "reminder",
+  "other",
+]);
+
+function normaliseAgendaType(raw: unknown): AgendaType {
+  if (typeof raw !== "string") return "other";
+  const v = raw.toLowerCase().trim() as AgendaType;
+  return KNOWN_AGENDA_TYPES.has(v) ? v : "other";
+}
 
 export interface AgendaItem {
   id: string;
@@ -32,7 +51,7 @@ function fromConvex(doc: ConvexEvent): AgendaItem {
     date: doc.date,
     time: doc.time,
     location: doc.location,
-    type: (doc.type as AgendaType) ?? "interview",
+    type: normaliseAgendaType(doc.type),
     notes: doc.notes,
     reminderMinutes: doc.reminderMinutes,
   };

@@ -32,12 +32,11 @@ import { formatMonthShort, formatWeekdayLong } from "@/shared/lib/formatDate";
 import { cn } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useAgenda, type AgendaItem, type AgendaType } from "@/shared/hooks/useAgenda";
-import { AGENDA_TYPE_STYLES } from "@/shared/lib/agendaStyles";
+import { getAgendaStyle, AGENDA_TYPE_STYLES } from "@/shared/lib/agendaStyles";
 
 // Derived from the SSoT in shared/lib/agendaStyles.ts — adding a new
 // agenda type there auto-propagates to the TypeSelect below + every
 // badge consumer.
-const TYPE_STYLE = AGENDA_TYPE_STYLES;
 const TYPE_OPTIONS: ReadonlyArray<{ value: AgendaType; label: string }> = (
   Object.entries(AGENDA_TYPE_STYLES) as Array<
     [AgendaType, { label: string; cls: string }]
@@ -274,7 +273,11 @@ interface AgendaRowProps {
 }
 
 function AgendaRow({ item, compact, onDelete }: AgendaRowProps) {
-  const style = TYPE_STYLE[item.type];
+  // Use safe getter — `item.type` may be a server-side string we don't
+  // yet have a style for (e.g. an AI-created "reminder" before the
+  // client bundle was updated). Fallback prevents the whole calendar
+  // page from crashing on a single unknown row.
+  const style = getAgendaStyle(item.type);
   return (
     <li className="group flex items-start gap-3 p-3 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors">
       <div className="flex flex-col items-center justify-center min-w-[44px] text-center">

@@ -371,7 +371,12 @@ export interface DemoContactSeed {
 // Calendar / Agenda
 // ---------------------------------------------------------------------
 
-export type DemoAgendaType = "interview" | "deadline" | "followup";
+export type DemoAgendaType =
+  | "interview"
+  | "deadline"
+  | "followup"
+  | "reminder"
+  | "other";
 
 export interface DemoAgendaSeed {
   id: string;
