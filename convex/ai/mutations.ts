@@ -200,13 +200,31 @@ export const seedAISkills = mutation({
   handler: async (ctx) => {
     const adminId = await requireAdmin(ctx);
     let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
     const now = Date.now();
     for (const seed of DEFAULT_AI_SKILLS) {
       const existing = await ctx.db
         .query("aiSkills")
         .withIndex("by_key", (q) => q.eq("key", seed.key))
         .first();
-      if (existing) continue;
+      if (existing) {
+        // Refresh outdated default rows; never clobber admin edits.
+        if (!existing.isSeed) {
+          skipped++;
+          continue;
+        }
+        await ctx.db.patch(existing._id, {
+          label: seed.label,
+          slashCommand: seed.slashCommand,
+          description: seed.description,
+          systemPrompt: seed.systemPrompt,
+          updatedBy: adminId,
+          updatedAt: now,
+        });
+        updated++;
+        continue;
+      }
       await ctx.db.insert("aiSkills", {
         key: seed.key,
         label: seed.label,
@@ -220,7 +238,7 @@ export const seedAISkills = mutation({
       });
       inserted++;
     }
-    return { inserted, total: DEFAULT_AI_SKILLS.length };
+    return { inserted, updated, skipped, total: DEFAULT_AI_SKILLS.length };
   },
 });
 
@@ -305,13 +323,29 @@ export const seedAITools = mutation({
   handler: async (ctx) => {
     const adminId = await requireAdmin(ctx);
     let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
     const now = Date.now();
     for (const seed of DEFAULT_AI_TOOLS) {
       const existing = await ctx.db
         .query("aiTools")
         .withIndex("by_type", (q) => q.eq("type", seed.type))
         .first();
-      if (existing) continue;
+      if (existing) {
+        if (!existing.isSeed) {
+          skipped++;
+          continue;
+        }
+        await ctx.db.patch(existing._id, {
+          label: seed.label,
+          description: seed.description,
+          payloadSchema: seed.payloadSchema,
+          updatedBy: adminId,
+          updatedAt: now,
+        });
+        updated++;
+        continue;
+      }
       await ctx.db.insert("aiTools", {
         type: seed.type,
         label: seed.label,
@@ -324,7 +358,7 @@ export const seedAITools = mutation({
       });
       inserted++;
     }
-    return { inserted, total: DEFAULT_AI_TOOLS.length };
+    return { inserted, updated, skipped, total: DEFAULT_AI_TOOLS.length };
   },
 });
 
@@ -416,16 +450,10 @@ const MAX_ACTION_TYPE = 60;
 const MAX_SESSIONS_PER_USER = 50;
 
 const ROLE_WHITELIST = new Set(["user", "assistant", "system"]);
-const ACTION_TYPE_WHITELIST = new Set([
-  "cv.fillExperience",
-  "cv.improveSummary",
-  "cv.addSkills",
-  "cv.setFormat",
-  "roadmap.generate",
-  "interview.startSession",
-  "match.recommend",
-  "nav.go",
-]);
+// Action types are slice-manifest skill IDs — too dynamic to whitelist
+// here (backend can't import frontend manifests). Enforce a structural
+// pattern instead: `<namespace>.<action>`, kebab/camel allowed.
+const ACTION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-zA-Z0-9-]+)+$/;
 const ACTION_STATUS_WHITELIST = new Set([
   "pending",
   "approved",
@@ -487,7 +515,7 @@ export const upsertChatSession = mutation({
         }
         actions = m.actions.map((a) => {
           const type = trimLen("Action type", a.type, MAX_ACTION_TYPE);
-          if (!ACTION_TYPE_WHITELIST.has(type)) {
+          if (!ACTION_TYPE_PATTERN.test(type)) {
             throw new Error("Action type tidak valid");
           }
           const status = a.status;

@@ -66,7 +66,9 @@ export function AISkillsPanel() {
     setSeeding(true);
     try {
       const r = await seed({});
-      notify.success(`Seed selesai — ${r.inserted} baru / ${r.total} total`);
+      notify.success(
+        `Seed selesai — ${r.inserted} baru, ${r.updated} diperbarui, ${r.skipped} dilewati / ${r.total} total`,
+      );
     } catch (err) {
       notify.fromError(err, "Gagal seed default");
     } finally {

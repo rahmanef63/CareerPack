@@ -1,11 +1,14 @@
 /**
- * Default catalog for AI skills + tools. Seeded once on first admin
- * "Seed default" click. Non-destructive — existing rows with matching
- * `key`/`type` are skipped, so re-seed is safe.
+ * Default catalog for AI skills + tools. Seeded by admin "Seed
+ * default". Re-running the seed UPSERTS rows whose `isSeed: true` —
+ * outdated default entries get refreshed to match this file. Rows
+ * the admin manually added or edited (`isSeed: false`) are never
+ * touched.
  *
  * Skills mirror the slash commands users type in the AI Agent Console
- * (`/cv`, `/roadmap`, …). Tools mirror the `AgentAction.type`
- * whitelist enforced server-side at chat persistence.
+ * (`/cv`, `/roadmap`, …). Tools mirror the `AgentAction.type` set the
+ * agent can emit — kept in sync with slice manifests so the admin UI
+ * shows the full action surface.
  */
 
 export interface AiSkillSeed {
@@ -117,5 +120,130 @@ export const DEFAULT_AI_TOOLS: ReadonlyArray<AiToolSeed> = [
     label: "Pindah halaman",
     description: "Navigasi user ke slice lain (cv, roadmap, interview, calculator, dll).",
     payloadSchema: '{ "view": "cv | roadmap | interview | calculator | matcher | ..." }',
+  },
+
+  // Slice-manifest tools — kept in sync with the per-slice manifest
+  // skill IDs (calendar, applications, contacts, documents, settings).
+  // Adding a new manifest skill server-side? Mirror the entry here so
+  // admin can toggle it from the AI Tools panel.
+
+  // calendar
+  {
+    type: "calendar.list-events",
+    label: "Lihat event kalender",
+    description: "Query — ambil daftar event/pengingat user.",
+  },
+  {
+    type: "calendar.create-event",
+    label: "Buat event kalender",
+    description: "Tambah event/pengingat (interview, deadline, reminder).",
+    payloadSchema:
+      '{ "title": "string", "date": "YYYY-MM-DD", "time": "HH:MM", "type": "reminder|interview|deadline|other", "location": "string?", "notes": "string?" }',
+  },
+  {
+    type: "calendar.update-event",
+    label: "Edit event kalender",
+    description: "Patch field event berdasarkan eventId.",
+    payloadSchema:
+      '{ "eventId": "string", "title?": "string", "date?": "YYYY-MM-DD", "time?": "HH:MM", "type?": "string", "location?": "string", "notes?": "string" }',
+  },
+  {
+    type: "calendar.delete-event",
+    label: "Hapus event kalender",
+    description: "Hapus 1 event berdasarkan eventId. Destructive.",
+    payloadSchema: '{ "eventId": "string" }',
+  },
+
+  // career-dashboard / applications
+  {
+    type: "applications.list",
+    label: "Lihat lamaran",
+    description: "Query — daftar lamaran user (perusahaan, posisi, status).",
+  },
+  {
+    type: "applications.create",
+    label: "Tambah lamaran",
+    description: "Catat lamaran baru.",
+    payloadSchema:
+      '{ "company": "string", "position": "string", "location": "string", "source": "string", "salary?": "string", "notes?": "string" }',
+  },
+  {
+    type: "applications.update-status",
+    label: "Update status lamaran",
+    description: "Ganti status (applied|screening|interview|offer|rejected|accepted).",
+    payloadSchema:
+      '{ "applicationId": "string", "status": "applied|screening|interview|offer|rejected|accepted", "notes?": "string" }',
+  },
+  {
+    type: "applications.delete",
+    label: "Hapus lamaran",
+    description: "Hapus 1 lamaran berdasarkan applicationId. Destructive.",
+    payloadSchema: '{ "applicationId": "string" }',
+  },
+
+  // networking / contacts
+  {
+    type: "contacts.list",
+    label: "Lihat kontak",
+    description: "Query — daftar kontak profesional user.",
+  },
+  {
+    type: "contacts.create",
+    label: "Tambah kontak",
+    description: "Catat kontak baru (recruiter|mentor|peer|other).",
+    payloadSchema:
+      '{ "name": "string", "role": "recruiter|mentor|peer|other", "company?": "string", "position?": "string", "email?": "string", "phone?": "string", "linkedinUrl?": "string", "notes?": "string" }',
+  },
+  {
+    type: "contacts.update",
+    label: "Edit kontak",
+    description: "Patch field kontak berdasarkan contactId.",
+    payloadSchema:
+      '{ "contactId": "string", "name?": "string", "role?": "string", "company?": "string", "position?": "string", "email?": "string", "phone?": "string", "linkedinUrl?": "string", "notes?": "string" }',
+  },
+  {
+    type: "contacts.delete",
+    label: "Hapus kontak",
+    description: "Hapus 1 kontak berdasarkan contactId. Destructive.",
+    payloadSchema: '{ "contactId": "string" }',
+  },
+
+  // document-checklist
+  {
+    type: "documents.list",
+    label: "Lihat checklist dokumen",
+    description: "Query — daftar dokumen di checklist user.",
+  },
+  {
+    type: "documents.toggle",
+    label: "Tandai dokumen selesai/belum",
+    description: "Toggle status completed pada 1 dokumen di checklist.",
+    payloadSchema: '{ "documentId": "string", "completed": "boolean" }',
+  },
+
+  // settings / profile
+  {
+    type: "settings.update-phone",
+    label: "Update nomor telepon profil",
+    description: "Patch field phone di profil user.",
+    payloadSchema: '{ "phone": "string" }',
+  },
+  {
+    type: "settings.update-target-role",
+    label: "Update target role",
+    description: "Patch field targetRole (cita-cita karir).",
+    payloadSchema: '{ "targetRole": "string" }',
+  },
+  {
+    type: "settings.update-location",
+    label: "Update lokasi profil",
+    description: "Patch field location user.",
+    payloadSchema: '{ "location": "string" }',
+  },
+  {
+    type: "settings.update-bio",
+    label: "Update bio profil",
+    description: "Patch field bio (ringkasan profesional).",
+    payloadSchema: '{ "bio": "string" }',
   },
 ];

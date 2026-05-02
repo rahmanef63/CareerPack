@@ -71,7 +71,10 @@ export function useSessionSync() {
                 status: "pending" as const,
               })),
             })),
-          }).catch(() => null),
+          }).catch((e) => {
+            console.error("[chat-sync] migrate upsert failed", e);
+            return null;
+          }),
         ),
       ).finally(() => {
         if (typeof window !== "undefined") {
@@ -99,7 +102,10 @@ export function useSessionSync() {
           content: m.text,
           timestamp: m.ts,
         })),
-      }).catch(() => null);
+      }).catch((e) => {
+        console.error("[chat-sync] fresh session upsert failed", e);
+        return null;
+      });
     } else {
       const shells: ChatSession[] = serverSessions.map((s) => ({
         id: s.sessionId,
@@ -169,7 +175,10 @@ export function useSessionSync() {
               status: "pending" as const,
             })),
           })),
-        }).catch(() => null);
+        }).catch((e) => {
+          console.error("[chat-sync] debounced upsert failed", e);
+          return null;
+        });
         pendingUpserts.current.delete(s.id);
       }, 400);
       pendingUpserts.current.set(s.id, t);
