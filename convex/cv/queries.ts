@@ -1,4 +1,4 @@
-import { query } from "../_generated/server";
+import { internalQuery, query } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser, requireOwnedDoc } from "../_shared/auth";
 
@@ -51,5 +51,29 @@ export const getATSScansByCV = query({
       )
       .order("desc")
       .collect();
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Internal helpers — used by cv/actions.ts (cover letter generator).
+// ---------------------------------------------------------------------------
+
+export const _getOwnedCV = internalQuery({
+  args: { cvId: v.id("cvs"), userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const cv = await ctx.db.get(args.cvId);
+    if (!cv || cv.userId !== args.userId) return null;
+    return cv;
+  },
+});
+
+export const _getLatestCV = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .first();
   },
 });

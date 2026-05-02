@@ -184,6 +184,16 @@ export const profileTables = {
     ),
 
     avatarStorageId: v.optional(v.string()),
+
+    /**
+     * Weekly job digest opt-in. When enabled, the Monday cron sends
+     * a personalised email with top matches from the matcher. Default
+     * = undefined = NOT enrolled (opt-in, never opt-out — Indonesian
+     * inbox spam fatigue is real). lastDigestSentAt prevents double-
+     * sends if a cron retries.
+     */
+    digestEnabled: v.optional(v.boolean()),
+    lastDigestSentAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
     .index("by_public_slug", ["publicSlug"])

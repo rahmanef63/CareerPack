@@ -50,4 +50,13 @@ crons.daily(
   internal.matcher.external.pruneOldJobs,
 );
 
+// Weekly job digest — Monday 02:00 UTC = 09:00 WIB. Sends top job
+// matches to opted-in users (digestEnabled=true on userProfiles).
+// Idempotent: skips users emailed within last 6 days.
+crons.weekly(
+  "weekly-job-digest",
+  { dayOfWeek: "monday", hourUTC: 2, minuteUTC: 0 },
+  internal.notifications.digest.sendWeeklyDigest,
+);
+
 export default crons;

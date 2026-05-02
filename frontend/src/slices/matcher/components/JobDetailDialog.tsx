@@ -1,10 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Briefcase,
   Calendar,
   ExternalLink,
+  FileText,
   MapPin,
   ScanText,
   Tag,
@@ -13,6 +14,7 @@ import {
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { CoverLetterDialog } from "./CoverLetterDialog";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -45,6 +47,7 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialogProps) {
+  const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   return (
     <ResponsiveDialog open={!!job} onOpenChange={(o) => !o && onOpenChange(false)}>
       <ResponsiveDialogContent size="2xl">
@@ -163,6 +166,15 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
               </Button>
               <Button
                 type="button"
+                variant="outline"
+                onClick={() => setCoverLetterOpen(true)}
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Cover Letter
+              </Button>
+              <Button
+                type="button"
                 variant="secondary"
                 onClick={() => onScanATS(job)}
                 className="gap-2"
@@ -182,6 +194,11 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
           </>
         )}
       </ResponsiveDialogContent>
+      <CoverLetterDialog
+        job={job}
+        open={coverLetterOpen}
+        onOpenChange={setCoverLetterOpen}
+      />
     </ResponsiveDialog>
   );
 }

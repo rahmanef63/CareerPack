@@ -413,3 +413,26 @@ export const updateMyPublicProfile = mutation({
     return { ok: true as const };
   },
 });
+
+/**
+ * Opt user in/out of the weekly job digest email. Stored on userProfiles
+ * so the cron sweep can filter by `digestEnabled === true`. Resets
+ * `lastDigestSentAt` on opt-out so re-enrolling later doesn't skip
+ * the next sweep due to the 6-day idempotency guard.
+ */
+export const setDigestEnabled = mutation({
+  args: { enabled: v.boolean() },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile) throw new Error("Profil belum dibuat. Lengkapi profil dulu.");
+    await ctx.db.patch(profile._id, {
+      digestEnabled: args.enabled,
+      lastDigestSentAt: args.enabled ? profile.lastDigestSentAt : undefined,
+    });
+    return { ok: true as const, enabled: args.enabled };
+  },
+});

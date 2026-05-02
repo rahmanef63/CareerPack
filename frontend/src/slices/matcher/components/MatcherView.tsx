@@ -23,6 +23,7 @@ import { ATSScannerForm } from "./ATSScannerForm";
 import { JobBrowser } from "./JobBrowser";
 import { JobCard } from "./JobCard";
 import { JobDetailDialog } from "./JobDetailDialog";
+import { SalaryInsightsCard } from "./SalaryInsightsCard";
 
 type TopTab = "listings" | "ats" | "history";
 type ListingsTab = "saya" | "explore";
@@ -133,6 +134,8 @@ export function MatcherView() {
               ))}
             </ResponsiveCarousel>
           )}
+
+          <SalaryInsightsCard />
 
           <Tabs
             value={listingsTab}

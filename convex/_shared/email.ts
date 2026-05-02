@@ -262,6 +262,73 @@ export async function renderWelcomeEmail(fullName: string, dashboardUrl: string,
   }, recipient);
 }
 
+export interface DigestJobItem {
+  title: string;
+  company: string;
+  location: string;
+  workMode: string;
+  category?: string;
+  score: number;
+  applyUrl?: string;
+  detailUrl: string;
+}
+
+export async function renderJobDigestEmail(
+  fullName: string,
+  jobs: DigestJobItem[],
+  dashboardUrl: string,
+  recipient: string,
+): Promise<RenderedEmail> {
+  const greeting = fullName ? `Halo ${escapeHtml(fullName)},` : "Halo,";
+  const cards = jobs
+    .map((j) => {
+      const score = `${j.score}% cocok`;
+      const meta = [j.location, j.workMode]
+        .filter(Boolean)
+        .map(escapeHtml)
+        .join(" · ");
+      return `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">
+  <tr><td style="padding:14px 16px">
+    <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:${TEXT}">
+      <a href="${escapeHtml(j.detailUrl)}" style="color:${TEXT};text-decoration:none">${escapeHtml(j.title)}</a>
+    </p>
+    <p style="margin:0 0 6px;font-size:13px;color:${MUTED}">${escapeHtml(j.company)} · ${meta}</p>
+    <p style="margin:0;font-size:12px">
+      <span style="display:inline-block;padding:2px 8px;background:${BRAND_COLOR}1A;color:${BRAND_COLOR};border-radius:999px;font-weight:600">${score}</span>
+      ${j.applyUrl ? `<a href="${escapeHtml(j.applyUrl)}" style="margin-left:10px;color:${BRAND_COLOR};text-decoration:underline">Lamar →</a>` : ""}
+    </p>
+  </td></tr>
+</table>`;
+    })
+    .join("");
+
+  const bodyHtml = `<p style="margin:0 0 12px">${greeting}</p>
+<p style="margin:0 0 16px">Ini ${jobs.length} lowongan baru yang paling cocok dengan profil kamu minggu ini:</p>
+${cards}
+<p style="margin:16px 0 0;font-size:13px;color:${MUTED}">Kalau kamu tidak mau menerima digest mingguan, kamu bisa matikan dari Setelan atau klik link Unsubscribe di bawah.</p>`;
+
+  const bodyText = [
+    greeting,
+    "",
+    `${jobs.length} lowongan baru cocok untukmu minggu ini:`,
+    "",
+    ...jobs.map((j, i) => `${i + 1}. ${j.title} @ ${j.company} (${j.score}% cocok)\n   ${j.detailUrl}${j.applyUrl ? `\n   Lamar: ${j.applyUrl}` : ""}`),
+  ].join("\n");
+
+  return renderEmail(
+    {
+      subject: `${jobs.length} lowongan cocok untukmu — CareerPack`,
+      preheader: `Top ${jobs.length} lowongan minggu ini berdasarkan target role + skills kamu.`,
+      bodyHtml,
+      bodyText,
+      ctaUrl: dashboardUrl,
+      ctaLabel: "Buka Dashboard",
+    },
+    recipient,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Unsubscribe — HMAC-signed token over the recipient email so users can
 // only unsubscribe themselves, not arbitrary addresses.

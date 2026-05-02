@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Briefcase,
   FileUser,
@@ -46,6 +46,8 @@ import { WelcomeTipCard } from "@/shared/components/layout/WelcomeTipCard";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { StatCard } from "@/shared/components/stats/StatCard";
 import { Reveal } from "@/shared/components/motion/Reveal";
+import { ProfileCompletenessCard } from "./ProfileCompletenessCard";
+import { OnboardingWizard } from "./OnboardingWizard";
 
 /**
  * Recharts (~100 kB gz) is deferred until after first paint — the
@@ -73,6 +75,8 @@ const DashboardTrendChart = dynamic(
 );
 
 export function DashboardHome() {
+  const [wizardOpen, setWizardOpen] = useState(false);
+
   const { state } = useAuth();
   const { applications, isLoading: loadingApps } = useApplications();
 
@@ -153,6 +157,12 @@ export function DashboardHome() {
           companion={<WelcomeTipCard />}
         />
       </Reveal>
+
+      <Reveal id="dash-completeness" delay={40}>
+        <ProfileCompletenessCard onStartWizard={() => setWizardOpen(true)} />
+      </Reveal>
+
+      <OnboardingWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
       <DashboardTwoCol
         rail={

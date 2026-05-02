@@ -51,6 +51,7 @@ import type * as matcher_queries from "../matcher/queries.js";
 import type * as matcher_seedJobs from "../matcher/seedJobs.js";
 import type * as mockInterview_mutations from "../mockInterview/mutations.js";
 import type * as mockInterview_queries from "../mockInterview/queries.js";
+import type * as notifications_digest from "../notifications/digest.js";
 import type * as notifications_mutations from "../notifications/mutations.js";
 import type * as notifications_queries from "../notifications/queries.js";
 import type * as onboarding_mutations from "../onboarding/mutations.js";
@@ -121,6 +122,7 @@ declare const fullApi: ApiFromModules<{
   "matcher/seedJobs": typeof matcher_seedJobs;
   "mockInterview/mutations": typeof mockInterview_mutations;
   "mockInterview/queries": typeof mockInterview_queries;
+  "notifications/digest": typeof notifications_digest;
   "notifications/mutations": typeof notifications_mutations;
   "notifications/queries": typeof notifications_queries;
   "onboarding/mutations": typeof onboarding_mutations;

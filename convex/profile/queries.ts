@@ -36,6 +36,146 @@ export const getCurrentUser = query({
   },
 });
 
+/**
+ * Profile completeness — gauge + actionable suggestions for the
+ * dashboard. Returns 0-100 score plus an ordered list of unfinished
+ * items so the UI can render a "tambah X dulu" call-to-action.
+ *
+ * Weights (sum 100): basics 30 (fullName 5 / location 5 / targetRole 10 /
+ * experienceLevel 10), bio 10, skills 15 (≥3 skills), CV attached 20,
+ * portfolio item 10, public profile enabled 10, contact link 5
+ * (linkedin or portfolio URL).
+ */
+export const getProfileCompleteness = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await optionalUser(ctx);
+    if (!userId) return null;
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    const cv = await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    const portfolio = await ctx.db
+      .query("portfolioItems")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    interface Item {
+      id: string;
+      label: string;
+      points: number;
+      done: boolean;
+      hint: string;
+      href?: string;
+    }
+
+    const items: Item[] = [
+      {
+        id: "fullName",
+        label: "Nama lengkap",
+        points: 5,
+        done: !!profile?.fullName && profile.fullName.trim().length >= 2,
+        hint: "Tambah nama lengkap di Profil",
+        href: "/dashboard/settings",
+      },
+      {
+        id: "location",
+        label: "Lokasi",
+        points: 5,
+        done: !!profile?.location && profile.location.trim().length >= 2,
+        hint: "Tambah kota / negara untuk match lowongan lokal",
+        href: "/dashboard/settings",
+      },
+      {
+        id: "targetRole",
+        label: "Target role",
+        points: 10,
+        done: !!profile?.targetRole && profile.targetRole.trim().length >= 3,
+        hint: "Set target role supaya matcher bisa rekomendasi lowongan",
+        href: "/dashboard/settings",
+      },
+      {
+        id: "experienceLevel",
+        label: "Level pengalaman",
+        points: 10,
+        done: !!profile?.experienceLevel && profile.experienceLevel.trim().length > 0,
+        hint: "Pilih junior / mid-level / senior / lead",
+        href: "/dashboard/settings",
+      },
+      {
+        id: "bio",
+        label: "Bio singkat",
+        points: 10,
+        done: !!profile?.bio && profile.bio.trim().length >= 30,
+        hint: "Tulis 1-2 kalimat tentang dirimu",
+        href: "/dashboard/personal-branding",
+      },
+      {
+        id: "skills",
+        label: "Minimum 3 skill",
+        points: 15,
+        done: (profile?.skills ?? []).filter((s) => s.trim().length > 0).length >= 3,
+        hint: "Tambah skill teknis untuk match score lebih akurat",
+        href: "/dashboard/settings",
+      },
+      {
+        id: "cv",
+        label: "CV terisi",
+        points: 20,
+        done: !!cv,
+        hint: "Buat atau import CV di CV Generator",
+        href: "/dashboard/cv-generator",
+      },
+      {
+        id: "portfolio",
+        label: "Minimum 1 portfolio item",
+        points: 10,
+        done: !!portfolio,
+        hint: "Tambah project / karya untuk personal branding",
+        href: "/dashboard/portfolio",
+      },
+      {
+        id: "publicEnabled",
+        label: "Public profile aktif",
+        points: 10,
+        done: profile?.publicEnabled === true,
+        hint: "Aktifkan public profile sebagai shareable link",
+        href: "/dashboard/personal-branding",
+      },
+      {
+        id: "contact",
+        label: "LinkedIn / portfolio URL",
+        points: 5,
+        done:
+          (profile?.linkedinUrl ?? "").trim().length > 0 ||
+          (profile?.portfolioUrl ?? "").trim().length > 0,
+        hint: "Tambah link LinkedIn atau portfolio website",
+        href: "/dashboard/settings",
+      },
+    ];
+
+    const earned = items.filter((i) => i.done).reduce((sum, i) => sum + i.points, 0);
+    const max = items.reduce((sum, i) => sum + i.points, 0);
+    const score = Math.round((earned / max) * 100);
+    const missing = items.filter((i) => !i.done);
+
+    return {
+      score,
+      earned,
+      max,
+      done: items.filter((i) => i.done).map(({ id, label, points }) => ({ id, label, points })),
+      missing: missing.map(({ id, label, points, hint, href }) => ({ id, label, points, hint, href })),
+    };
+  },
+});
+
 export const userExistsByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {

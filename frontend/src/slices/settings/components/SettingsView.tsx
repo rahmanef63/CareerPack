@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { AppearanceSection } from "./AppearanceSection";
+import { NotificationsCard } from "./NotificationsCard";
 import { ProfileSection } from "./ProfileSection";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 
@@ -67,6 +68,7 @@ export function SettingsView() {
         </TabsList>
         <TabsContent value="profile" className="space-y-4">
           <ProfileSection />
+          <NotificationsCard />
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

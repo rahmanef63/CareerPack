@@ -145,6 +145,94 @@ export const getMatches = query({
 });
 
 // ---------------------------------------------------------------------
+// Salary insights — aggregate jobListings by category. Cheap full-table
+// scan (cap 500 most-recent rows) since jobListings is bounded volume.
+// Returns p25/p50/p75 in original currency; UI renders bars.
+// ---------------------------------------------------------------------
+
+export const getSalaryInsights = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db
+      .query("jobListings")
+      .withIndex("by_posted")
+      .order("desc")
+      .take(500);
+
+    interface Bucket {
+      values: number[];
+      count: number;
+      remoteCount: number;
+      currencies: Map<string, number>;
+    }
+
+    const byCategory = new Map<string, Bucket>();
+
+    for (const row of rows) {
+      const cat = row.category ?? "other";
+      const bucket: Bucket = byCategory.get(cat) ?? {
+        values: [],
+        count: 0,
+        remoteCount: 0,
+        currencies: new Map(),
+      };
+      bucket.count += 1;
+      if (row.workMode === "remote") bucket.remoteCount += 1;
+
+      // Mid-point of salary range. Skip rows with no salary data.
+      const min = row.salaryMin;
+      const max = row.salaryMax;
+      let mid: number | null = null;
+      if (min && max) mid = (min + max) / 2;
+      else if (min) mid = min;
+      else if (max) mid = max;
+
+      if (mid !== null && Number.isFinite(mid) && mid > 0) {
+        bucket.values.push(mid);
+        const cur = row.currency ?? "USD";
+        bucket.currencies.set(cur, (bucket.currencies.get(cur) ?? 0) + 1);
+      }
+      byCategory.set(cat, bucket);
+    }
+
+    return Array.from(byCategory.entries())
+      .map(([category, b]) => {
+        const sorted = b.values.slice().sort((a, b) => a - b);
+        const dominantCurrency = pickDominantCurrency(b.currencies);
+        return {
+          category,
+          count: b.count,
+          withSalaryCount: sorted.length,
+          remotePct: b.count > 0 ? Math.round((b.remoteCount / b.count) * 100) : 0,
+          currency: dominantCurrency,
+          p25: percentile(sorted, 0.25),
+          p50: percentile(sorted, 0.5),
+          p75: percentile(sorted, 0.75),
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+  },
+});
+
+function percentile(sorted: number[], p: number): number | null {
+  if (sorted.length === 0) return null;
+  const idx = Math.floor((sorted.length - 1) * p);
+  return Math.round(sorted[idx]);
+}
+
+function pickDominantCurrency(counts: Map<string, number>): string {
+  let best = "USD";
+  let max = 0;
+  for (const [cur, n] of counts) {
+    if (n > max) {
+      max = n;
+      best = cur;
+    }
+  }
+  return best;
+}
+
+// ---------------------------------------------------------------------
 // ATS scan history
 // ---------------------------------------------------------------------
 
