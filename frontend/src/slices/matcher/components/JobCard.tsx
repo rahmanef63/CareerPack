@@ -1,12 +1,12 @@
 "use client";
 
-import { Briefcase, ExternalLink, MapPin, Sparkles, Wallet } from "lucide-react";
+import { Briefcase, ExternalLink, MapPin, Sparkles, Tag, Wallet } from "lucide-react";
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import type { JobListing } from "../types";
-import { WORK_MODE_LABELS } from "../types";
+import { CATEGORY_COLORS, CATEGORY_LABELS, WORK_MODE_LABELS } from "../types";
 
 function formatSalary(min?: number, max?: number, currency = "IDR"): string {
   if (!min && !max) return "Gaji dinegosiasikan";
@@ -34,6 +34,10 @@ interface JobCardProps {
 
 export function JobCard({ job, score, variant = "list", onView }: JobCardProps) {
   const isCarousel = variant === "carousel";
+  const categoryLabel = job.category ? CATEGORY_LABELS[job.category] : undefined;
+  const categoryColor = job.category
+    ? CATEGORY_COLORS[job.category] ?? "bg-muted text-muted-foreground"
+    : undefined;
   return (
     <article
       className={cn(
@@ -60,6 +64,27 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
           </Badge>
         )}
       </header>
+
+      {(categoryLabel || job.seniority) && (
+        <div className="flex flex-wrap gap-1.5">
+          {categoryLabel && (
+            <Badge className={cn("gap-1 border-0 text-[10px]", categoryColor)}>
+              <Tag className="h-3 w-3" />
+              {categoryLabel}
+            </Badge>
+          )}
+          {job.seniority && (
+            <Badge variant="outline" className="text-[10px] uppercase">
+              {job.seniority}
+            </Badge>
+          )}
+          {job.employmentType && job.employmentType !== "full-time" && (
+            <Badge variant="outline" className="text-[10px] uppercase">
+              {job.employmentType}
+            </Badge>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1">

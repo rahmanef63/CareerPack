@@ -37,11 +37,11 @@ interface FetchResult {
  */
 
 const REMOTEOK_URL = "https://remoteok.com/api";
-const WWR_RSS_URLS = [
-  "https://weworkremotely.com/categories/remote-programming-jobs.rss",
-  "https://weworkremotely.com/categories/remote-design-jobs.rss",
-  "https://weworkremotely.com/categories/remote-customer-support-jobs.rss",
-  "https://weworkremotely.com/categories/remote-product-jobs.rss",
+const WWR_FEEDS: Array<{ url: string; category: string }> = [
+  { url: "https://weworkremotely.com/categories/remote-programming-jobs.rss", category: "engineering" },
+  { url: "https://weworkremotely.com/categories/remote-design-jobs.rss", category: "design" },
+  { url: "https://weworkremotely.com/categories/remote-customer-support-jobs.rss", category: "support" },
+  { url: "https://weworkremotely.com/categories/remote-product-jobs.rss", category: "product" },
 ];
 
 interface NormalizedJob {
@@ -61,6 +61,7 @@ interface NormalizedJob {
   salaryMin?: number;
   salaryMax?: number;
   currency?: string;
+  category?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -81,10 +82,12 @@ export const fetchJobFeeds = internalAction({
       console.warn(`[feeds] remoteok skipped: ${err instanceof Error ? err.message : "?"}`);
     }
 
-    // WeWorkRemotely RSS — multiple categories.
-    for (const url of WWR_RSS_URLS) {
+    // WeWorkRemotely RSS — multiple categories. URL → category mapping
+    // is the only ground-truth signal we get for bidang tagging; RSS
+    // body itself doesn't carry it.
+    for (const { url, category } of WWR_FEEDS) {
       try {
-        const list = await fetchWWR(url);
+        const list = await fetchWWR(url, category);
         all.push(...list);
       } catch (err) {
         console.warn(`[feeds] wwr ${url} skipped: ${err instanceof Error ? err.message : "?"}`);
@@ -113,7 +116,7 @@ async function fetchRemoteOK(): Promise<NormalizedJob[]> {
   return items.map(normalizeRemoteOK).filter((j): j is NormalizedJob => j !== null);
 }
 
-async function fetchWWR(url: string): Promise<NormalizedJob[]> {
+async function fetchWWR(url: string, category: string): Promise<NormalizedJob[]> {
   const res = await fetch(url, {
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; CareerPack-JobSync/1.0; +https://careerpack.org)",
@@ -122,10 +125,10 @@ async function fetchWWR(url: string): Promise<NormalizedJob[]> {
   });
   if (!res.ok) throw new Error(`http_${res.status}`);
   const xml = await res.text();
-  return parseWWRRss(xml);
+  return parseWWRRss(xml, category);
 }
 
-function parseWWRRss(xml: string): NormalizedJob[] {
+function parseWWRRss(xml: string, category: string): NormalizedJob[] {
   const out: NormalizedJob[] = [];
   // RSS items — non-greedy match across whole `<item>...</item>` blocks.
   const itemRe = /<item>([\s\S]*?)<\/item>/g;
@@ -134,11 +137,11 @@ function parseWWRRss(xml: string): NormalizedJob[] {
     const block = m[1];
     const guid = extractTag(block, "guid") ?? extractTag(block, "link");
     if (!guid) continue;
-    const titleRaw = extractTag(block, "title") ?? "";
+    const titleRaw = decodeEntities(extractTag(block, "title") ?? "");
     const link = extractTag(block, "link") ?? "";
     const descRaw = extractTag(block, "description") ?? "";
     const pubDate = extractTag(block, "pubDate");
-    const region = extractTag(block, "region") ?? "";
+    const region = decodeEntities(extractTag(block, "region") ?? "");
 
     // WWR title format: "Company Name: Job Position"
     const colonIdx = titleRaw.indexOf(":");
@@ -146,7 +149,10 @@ function parseWWRRss(xml: string): NormalizedJob[] {
     const title = colonIdx > 0 ? titleRaw.slice(colonIdx + 1).trim() : titleRaw.trim();
     if (!title || !company) continue;
 
-    const description = stripHtml(descRaw).slice(0, 4000);
+    // Decode entities first (RSS escapes HTML inside CDATA-less text),
+    // THEN strip the now-real tags. Skipping decode means stripHtml is
+    // a no-op on `&lt;img...&gt;` blobs and the garbage leaks to UI.
+    const description = stripHtml(decodeEntities(descRaw)).slice(0, 4000);
     const postedAt = pubDate ? Date.parse(pubDate) : Date.now();
     const t = title.toLowerCase();
     const seniority = /\b(senior|lead|principal|staff)\b/.test(t)
@@ -179,6 +185,7 @@ function parseWWRRss(xml: string): NormalizedJob[] {
       requiredSkills: skills.slice(0, 15),
       postedAt: Number.isFinite(postedAt) ? postedAt : Date.now(),
       applyUrl: link || undefined,
+      category,
     });
   }
   return out;
@@ -196,17 +203,17 @@ function extractTag(block: string, tag: string): string | undefined {
 function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
   const id = strField(raw, "id") ?? strField(raw, "slug");
   if (!id) return null;
-  const title = strField(raw, "position");
-  const company = strField(raw, "company");
+  const title = decodeEntities(strField(raw, "position") ?? "");
+  const company = decodeEntities(strField(raw, "company") ?? "");
   if (!title || !company) return null;
-  const description = stripHtml(strField(raw, "description") ?? "").slice(0, 4000);
+  const description = stripHtml(decodeEntities(strField(raw, "description") ?? "")).slice(0, 4000);
   const tags = Array.isArray(raw.tags)
     ? raw.tags.filter((t): t is string => typeof t === "string").slice(0, 20)
     : [];
   const dateStr = strField(raw, "date");
   const parsed = dateStr ? Date.parse(dateStr) : Date.now();
   const postedAt = Number.isFinite(parsed) ? parsed : Date.now();
-  const location = strField(raw, "location") ?? "Worldwide";
+  const location = decodeEntities(strField(raw, "location") ?? "Worldwide");
   const applyUrl = strField(raw, "apply_url") ?? strField(raw, "url");
   const companyLogo = strField(raw, "company_logo") ?? strField(raw, "logo");
   const salaryMin = numField(raw, "salary_min");
@@ -243,7 +250,22 @@ function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
     salaryMin,
     salaryMax,
     currency: salaryMin !== undefined || salaryMax !== undefined ? "USD" : undefined,
+    category: inferCategory(title, tagsLower),
   };
+}
+
+/** Best-effort category inference from RemoteOK title + tags. WWR feeds
+ *  carry category in the URL so they don't need this. Falls back to
+ *  "engineering" for unknown tech roles since RemoteOK is mostly that. */
+function inferCategory(title: string, tagsLower: string[]): string {
+  const t = title.toLowerCase();
+  const hay = `${t} ${tagsLower.join(" ")}`;
+  if (/\b(designer|design|ux|ui|figma)\b/.test(hay)) return "design";
+  if (/\b(support|customer|success|cs)\b/.test(hay)) return "support";
+  if (/\b(product manager|product owner|pm)\b/.test(hay)) return "product";
+  if (/\b(marketing|seo|growth|content)\b/.test(hay)) return "marketing";
+  if (/\b(data|analyst|analytics|ml|machine learning|scientist)\b/.test(hay)) return "data";
+  return "engineering";
 }
 
 export const _ingestExternalJobs = internalMutation({
@@ -266,6 +288,7 @@ export const _ingestExternalJobs = internalMutation({
         salaryMin: v.optional(v.number()),
         salaryMax: v.optional(v.number()),
         currency: v.optional(v.string()),
+        category: v.optional(v.string()),
       }),
     ),
   },
@@ -298,10 +321,42 @@ export const _ingestExternalJobs = internalMutation({
         companyLogo: j.companyLogo,
         source: j.source,
         externalId: j.externalId,
+        category: j.category,
       });
       inserted++;
     }
     return { inserted, skipped };
+  },
+});
+
+/** One-shot backfill: re-decodes title + description for existing rows
+ *  whose payload still has entity-encoded HTML leaks (`&lt;img...`).
+ *  Caps 500 rows/run; rerun until `updated === 0`. Source filter limits
+ *  scope to feed-fetched rows — user-paste + seed are clean at insert. */
+export const _backfillEntityDecode = internalMutation({
+  args: { source: v.optional(v.string()), max: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const cap = Math.min(args.max ?? 500, 1000);
+    const source = args.source ?? "wwr";
+    const rows = await ctx.db
+      .query("jobListings")
+      .withIndex("by_source_posted", (q) => q.eq("source", source))
+      .take(cap);
+    let updated = 0;
+    for (const row of rows) {
+      const newTitle = decodeEntities(row.title);
+      const newCompany = decodeEntities(row.company);
+      const newDesc = stripHtml(decodeEntities(row.description));
+      if (newTitle === row.title && newCompany === row.company && newDesc === row.description) continue;
+      await ctx.db.patch(row._id, {
+        title: newTitle,
+        company: newCompany,
+        description: newDesc.slice(0, 4000),
+      });
+      updated++;
+    }
+    console.log(`[backfill] source=${source} scanned=${rows.length} updated=${updated}`);
+    return { scanned: rows.length, updated };
   },
 });
 
@@ -428,6 +483,7 @@ export const addUserJob = mutation({
       throw new Error("Judul dan perusahaan wajib diisi.");
     }
     const externalId = `user:${userId}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 8)}`;
+    const skillsLower = args.requiredSkills.map((s) => s.toLowerCase());
     return await ctx.db.insert("jobListings", {
       title: args.title.trim(),
       company: args.company.trim(),
@@ -445,6 +501,7 @@ export const addUserJob = mutation({
       source: "user-paste",
       externalId,
       addedBy: userId,
+      category: inferCategory(args.title, skillsLower),
     });
   },
 });
@@ -514,6 +571,32 @@ function numField(o: Record<string, unknown>, k: string): number | undefined {
 
 function stripHtml(s: string): string {
   return s.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/** Decode the HTML entity subset RSS feeds actually emit. Numeric refs
+ *  first (so `&#38;` doesn't survive after `&amp;` is decoded), `&amp;`
+ *  last so a literal `&amp;lt;` round-trips correctly to `&lt;` instead
+ *  of cascade-decoding to `<`. */
+function decodeEntities(s: string): string {
+  if (!s) return s;
+  return s
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => safeCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, n) => safeCodePoint(parseInt(n, 10)))
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&");
+}
+
+function safeCodePoint(n: number): string {
+  if (!Number.isFinite(n) || n < 0 || n > 0x10ffff) return "";
+  try {
+    return String.fromCodePoint(n);
+  } catch {
+    return "";
+  }
 }
 
 function stripCodeFence(s: string): string {

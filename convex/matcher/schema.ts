@@ -33,6 +33,11 @@ export const matcherTables = {
     externalId: v.optional(v.string()),
     /** User who pasted this listing (only when source="user-paste"). */
     addedBy: v.optional(v.id("users")),
+    /** Functional bidang/category — derived from feed URL (WWR) or tag
+     *  inference (RemoteOK). One of: engineering, design, support,
+     *  product, marketing, data. UI renders as a colored pill badge so
+     *  users can scan listings by domain at a glance. */
+    category: v.optional(v.string()),
   })
     .index("by_posted", ["postedAt"])
     .index("by_workMode", ["workMode", "postedAt"])
