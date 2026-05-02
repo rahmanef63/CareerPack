@@ -15,10 +15,11 @@ import { useAuth } from '@/shared/hooks/useAuth';
 
 export function LoginPage() {
     const router = useRouter();
-    const { login, register } = useAuth();
+    const { login, register, loginAsDemo } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isDemoLoading, setIsDemoLoading] = useState(false);
 
     // Login form
     const [loginEmail, setLoginEmail] = useState('');
@@ -115,6 +116,31 @@ export function LoginPage() {
         }
     };
 
+    // Demo path — creates a fresh Anonymous Convex session per click.
+    // NO shared email/password account (the old pattern leaked data
+    // across concurrent demo visitors via realtime sync). Each demo
+    // visitor gets their own isolated user row + seeded starter data.
+    const handleDemoLogin = async () => {
+        setError('');
+        setIsDemoLoading(true);
+        try {
+            const result = await loginAsDemo();
+            if (result.ok) {
+                notify.success('Sesi demo dimulai 🎉', {
+                    description: 'Mengarahkan ke dashboard (data akan dihapus saat logout).',
+                    duration: 3000,
+                });
+                router.push('/dashboard');
+            } else {
+                showError(result.error);
+            }
+        } catch (err) {
+            showError(err instanceof Error ? err.message : 'Demo gagal dimulai');
+        } finally {
+            setIsDemoLoading(false);
+        }
+    };
+
     return (
         <AuthShell
             title="Selamat Datang"
@@ -200,6 +226,29 @@ export function LoginPage() {
                                         {isLoading ? 'Memuat...' : 'Masuk'}
                                     </Button>
                                 </form>
+
+                                {/* Demo session — anonymous Convex provider.
+                                    Each click = new isolated session (no shared
+                                    account across visitors, no data leak). */}
+                                <div className="mt-6 pt-6 border-t border-border">
+                                    <p className="text-sm text-muted-foreground text-center mb-3">
+                                        Mau coba dulu?
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full"
+                                        onClick={handleDemoLogin}
+                                        disabled={isDemoLoading || isLoading}
+                                    >
+                                        <User className="w-4 h-4 mr-2" />
+                                        {isDemoLoading ? 'Memulai sesi demo…' : 'Masuk sebagai Tamu'}
+                                    </Button>
+                                    <p className="text-xs text-muted-foreground text-center mt-2">
+                                        Sesi pribadi · tanpa daftar · data akan dihapus saat logout
+                                    </p>
+                                </div>
                             </TabsContent>
 
                             <TabsContent value="register">

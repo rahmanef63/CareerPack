@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id, Doc } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { useDemoAgendaOverlay } from "@/shared/hooks/useDemoOverlay";
 
 export type AgendaType = "interview" | "deadline" | "followup";
 
@@ -50,14 +51,17 @@ export interface CreateAgendaInput {
 export function useAgenda() {
   const { state } = useAuth();
   const isAuthenticated = state.isAuthenticated;
+  const isDemo = state.isDemo;
 
   const raw = useQuery(
     api.calendar.queries.listEvents,
-    isAuthenticated ? {} : "skip",
+    isAuthenticated && !isDemo ? {} : "skip",
   );
   const createMutation = useMutation(api.calendar.mutations.createEvent);
   const deleteMutation = useMutation(api.calendar.mutations.deleteEvent);
   const updateMutation = useMutation(api.calendar.mutations.updateEvent);
+
+  const demo = useDemoAgendaOverlay();
 
   const items: AgendaItem[] = raw ? raw.map(fromConvex) : [];
 
@@ -84,6 +88,8 @@ export function useAgenda() {
     },
     [updateMutation],
   );
+
+  if (isDemo) return demo;
 
   return {
     items,

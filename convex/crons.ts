@@ -11,6 +11,16 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
+// Daily anonymous-user cleanup. Runs at 17:00 UTC (≈ 00:00 WIB) so
+// the lower-traffic window absorbs the cascade-delete cost. Each run
+// purges up to 50 stale demo accounts (no email, _creationTime older
+// than 7 days). Keeps the admin user table tidy as demo traffic grows.
+crons.daily(
+  "cleanup-inactive-demo-users",
+  { hourUTC: 17, minuteUTC: 0 },
+  internal.admin.cleanup.cleanupInactiveDemoUsers,
+);
+
 // Hourly calendar reminder sweep. Inserts a `notifications` row for each
 // event whose reminder window has opened. Idempotent — `reminderSentAt`
 // guards against double-firing if the cron retries.

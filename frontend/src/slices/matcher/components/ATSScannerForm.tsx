@@ -32,10 +32,10 @@ interface ATSScannerFormProps {
 }
 
 export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
-  // Skip the CV query for unauth users — `getUserCVs` requires auth
-  // via `requireUser`, otherwise it throws on the server.
+  // Skip the CV query for unauth / demo users — `getUserCVs` requires
+  // auth via `requireUser`, otherwise it throws on the server.
   const { state } = useAuth();
-  const cvsEnabled = state.isAuthenticated;
+  const cvsEnabled = state.isAuthenticated && !state.isDemo;
   const cvs = useQuery(api.cv.queries.getUserCVs, cvsEnabled ? {} : "skip");
   const [cvId, setCvId] = useState<Id<"cvs"> | "">("");
   const [userPickedCv, setUserPickedCv] = useState(false);

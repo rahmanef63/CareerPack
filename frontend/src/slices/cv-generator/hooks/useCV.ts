@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { type CVData, type CVDisplayPrefs, type CVTemplateId, type SkillCategory, type ProficiencyLevel } from '../types';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { useDemoCVOverlay } from '@/shared/hooks/useDemoOverlay';
 import { defaultDisplayPrefs } from '../constants';
 import { api } from "../../../../../convex/_generated/api";
 import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
@@ -40,13 +41,18 @@ function toProficiencyLevel(value: number): ProficiencyLevel {
 export function useCV() {
     const { state } = useAuth();
     const isAuthenticated = state.isAuthenticated;
+    const isDemo = state.isDemo;
 
+    // Both branches must run unconditionally — Convex skips when unauth
+    // or in demo, while the demo overlay always returns localStorage data.
     const cvs = useQuery(
         api.cv.queries.getUserCVs,
-        isAuthenticated ? {} : "skip",
+        isAuthenticated && !isDemo ? {} : "skip",
     );
     const createCVMutation = useMutation(api.cv.mutations.createCV);
     const updateCVMutation = useMutation(api.cv.mutations.updateCV);
+
+    const demo = useDemoCVOverlay();
 
     const [activeCVId, setActiveCVId] = useState<Id<"cvs"> | null>(null);
     // Track the newest id we've already auto-selected so we can detect
@@ -227,6 +233,16 @@ export function useCV() {
             throw error;
         }
     }, [activeCVId, createCVMutation, updateCVMutation, isAuthenticated]);
+
+    if (isDemo) {
+        return {
+            cvData: demo.cvData,
+            saveCV: demo.saveCV,
+            isLoading: demo.isLoading,
+            createCV: createCVMutation,
+            activeCVId: null as Id<"cvs"> | null,
+        };
+    }
 
     return {
         cvData,

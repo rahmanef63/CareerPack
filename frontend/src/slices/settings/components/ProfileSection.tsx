@@ -6,6 +6,7 @@ import { Plus, Trash2, UserRound, X } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { useDemoProfileOverlay } from "@/shared/hooks/useDemoOverlay";
 import { api } from "../../../../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
@@ -53,13 +54,16 @@ const EXPERIENCE_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
 export function ProfileSection() {
   const { state: authState } = useAuth();
   const isAuthenticated = authState.isAuthenticated;
+  const isDemo = authState.isDemo;
 
   const currentUser = useQuery(
     api.profile.queries.getCurrentUser,
-    isAuthenticated ? {} : "skip",
+    isAuthenticated && !isDemo ? {} : "skip",
   );
   const saveProfile = useMutation(api.profile.mutations.createOrUpdateProfile);
   const updateAvatar = useMutation(api.profile.mutations.updateAvatar);
+
+  const demoProfile = useDemoProfileOverlay();
 
   const [profile, setProfile] = useState<ProfileState>(EMPTY_PROFILE);
   const [hydratedFrom, setHydratedFrom] = useState<string | null>(null);
@@ -67,8 +71,8 @@ export function ProfileSection() {
   const [skillInput, setSkillInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
 
-  const hasProfile = !!currentUser?.profile;
-  const avatarUrl = currentUser?.avatarUrl ?? null;
+  const hasProfile = isDemo ? true : !!currentUser?.profile;
+  const avatarUrl = isDemo ? null : currentUser?.avatarUrl ?? null;
 
   // Re-hydrate whenever the upstream profile content changes. One-shot
   // boolean missed the QuickFill case where Convex patches the profile
@@ -76,6 +80,13 @@ export function ProfileSection() {
   // fields — stable while the user types locally (Convex copy hasn't
   // changed), updates when the server actually patches.
   useEffect(() => {
+    if (isDemo) {
+      if (hydratedFrom !== "demo") {
+        setProfile(demoProfile.profile);
+        setHydratedFrom("demo");
+      }
+      return;
+    }
     if (currentUser?.profile) {
       const p = currentUser.profile;
       const fingerprint = [
@@ -100,7 +111,7 @@ export function ProfileSection() {
       });
       setHydratedFrom(fingerprint);
     }
-  }, [currentUser, hydratedFrom]);
+  }, [currentUser, hydratedFrom, isDemo, demoProfile.profile]);
 
   const setField = <K extends keyof ProfileState>(key: K, value: ProfileState[K]) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
@@ -137,16 +148,27 @@ export function ProfileSection() {
     }
     setSaving(true);
     try {
-      await saveProfile({
-        fullName: profile.fullName.trim(),
-        phone: profile.phone.trim() || undefined,
-        location: profile.location.trim(),
-        targetRole: profile.targetRole.trim(),
-        experienceLevel: profile.experienceLevel,
-        bio: profile.bio.trim() || undefined,
-        skills: profile.skills,
-        interests: profile.interests,
-      });
+      if (isDemo) {
+        await demoProfile.save({
+          ...profile,
+          fullName: profile.fullName.trim(),
+          phone: profile.phone.trim(),
+          location: profile.location.trim(),
+          targetRole: profile.targetRole.trim(),
+          bio: profile.bio.trim(),
+        });
+      } else {
+        await saveProfile({
+          fullName: profile.fullName.trim(),
+          phone: profile.phone.trim() || undefined,
+          location: profile.location.trim(),
+          targetRole: profile.targetRole.trim(),
+          experienceLevel: profile.experienceLevel,
+          bio: profile.bio.trim() || undefined,
+          skills: profile.skills,
+          interests: profile.interests,
+        });
+      }
       notify.success("Profil tersimpan");
     } catch (err) {
       notify.fromError(err, "Gagal menyimpan profil");

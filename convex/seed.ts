@@ -49,8 +49,9 @@ export const seedForCurrentUser = mutation({
         ...(shouldBeAdmin ? { role: "admin" as const } : {}),
       });
 
-      // First-time signup — fire welcome email out-of-band. Failures
-      // land in the backend log and never block the seed.
+      // First-time signup with a real email — fire welcome email out-of-band.
+      // Anonymous accounts have no email; skip those silently. Failures land
+      // in the backend log and never block the seed.
       if (authEmail.length > 0) {
         await ctx.scheduler.runAfter(0, internal.seed.deliverWelcomeEmail, {
           to: authEmail,

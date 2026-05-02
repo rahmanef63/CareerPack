@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id, Doc } from "../../../../convex/_generated/dataModel";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { useDemoApplicationsOverlay } from "@/shared/hooks/useDemoOverlay";
 import { withMutationToast } from "@/shared/lib/notify";
 import type { Application, ApplicationStatus } from "@/shared/types";
 
@@ -35,10 +36,14 @@ export interface CreateApplicationInput {
 export function useApplications() {
   const { state } = useAuth();
   const isAuthenticated = state.isAuthenticated;
+  const isDemo = state.isDemo;
 
+  // Both hooks must run unconditionally (rules of hooks) — Convex
+  // useQuery skips when unauth, demo overlay always returns local data.
+  // We pick which result to expose based on the demo flag.
   const raw = useQuery(
     api.applications.queries.getUserApplications,
-    isAuthenticated ? {} : "skip",
+    isAuthenticated && !isDemo ? {} : "skip",
   );
   const createMutation = useMutation(api.applications.mutations.createApplication);
   const updateStatusMutation = useMutation(
@@ -46,7 +51,9 @@ export function useApplications() {
   );
   const deleteMutation = useMutation(api.applications.mutations.deleteApplication);
 
-  const applications: Application[] = raw ? raw.map(fromConvex) : [];
+  const demo = useDemoApplicationsOverlay();
+
+  const realApplications: Application[] = raw ? raw.map(fromConvex) : [];
 
   // Each wrapper toasts on failure + re-throws so callers that need to
   // gate UI on success (close dialog, reset form) can still `await`.
@@ -96,8 +103,10 @@ export function useApplications() {
     [deleteMutation],
   );
 
+  if (isDemo) return demo;
+
   return {
-    applications,
+    applications: realApplications,
     isLoading: isAuthenticated && raw === undefined,
     create,
     updateStatus,
