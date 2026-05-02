@@ -1,35 +1,58 @@
 "use client";
 
 import { useEffect } from "react";
-import { toast } from "sonner";
+
+/** sessionStorage key shared with UpdateChecker — same loop guard. */
+const RELOAD_GUARD_KEY = "_car_update_reload_at";
+const GUARD_WINDOW_MS = 90 * 1000;
 
 /**
- * Listen for new Service Worker installations and prompt the user to
- * reload so they pick up the latest bundle without a manual hard
- * refresh.
+ * Auto-activate new Service Workers silently. When a new SW finishes
+ * installing while the old one still controls the page, we postMessage
+ * SKIP_WAITING and reload on `controllerchange`. No toast, no user
+ * confirmation — same policy as UpdateChecker: latest version
+ * always wins, user gets a fresh app on next paint.
  *
- * Flow:
- * 1. SW v3-2026-04-25 is active (current).
- * 2. Deploy ships with SW cache name v4-... bumped.
- * 3. Browser fetches the new sw.js, sees the bytes differ, installs
- *    it. The new SW enters `installed` state but waits because the
- *    old one is still controlling pages.
- * 4. We detect the `statechange` to `installed` while there's a
- *    `controller` (= upgrade scenario, not first install) and toast
- *    a "Versi baru siap" prompt with a "Muat ulang" action.
- * 5. User clicks → we postMessage SKIP_WAITING to the new SW; it
- *    activates and replaces the old one. We reload.
+ * Why not show a "new version" prompt anymore: the prompt was firing
+ * repeatedly across deploys and confusing users who just want the
+ * latest. Silent activation matches PWA best practice for non-
+ * destructive updates (no schema migrations to worry about here —
+ * Convex handles backend independently).
  *
- * Without this, users on existing PWA installs would keep seeing
- * the cached old bundle until they manually hard-reload — common
- * complaint after deploys.
+ * Loop guard via shared sessionStorage timestamp ensures we don't
+ * fire activation twice within 90s if the SW lifecycle re-emits.
  */
 export function SWUpdatePrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) return;
 
-    let toastShown = false;
+    const claimGuard = (): boolean => {
+      try {
+        const last = parseInt(
+          window.sessionStorage.getItem(RELOAD_GUARD_KEY) ?? "0",
+          10,
+        );
+        if (Number.isFinite(last) && Date.now() - last < GUARD_WINDOW_MS) {
+          return false;
+        }
+        window.sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+        return true;
+      } catch {
+        return true; // private mode — accept one possible extra reload
+      }
+    };
+
+    const activate = (worker: ServiceWorker | null) => {
+      if (!worker) return;
+      if (!claimGuard()) return;
+      worker.postMessage({ type: "SKIP_WAITING" });
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        () => window.location.reload(),
+        { once: true },
+      );
+    };
 
     const onUpdateFound = (registration: ServiceWorkerRegistration) => {
       const installing = registration.installing;
@@ -37,58 +60,21 @@ export function SWUpdatePrompt() {
       installing.addEventListener("statechange", () => {
         if (
           installing.state === "installed" &&
-          navigator.serviceWorker.controller &&
-          !toastShown
+          navigator.serviceWorker.controller
         ) {
-          // New version waiting — controller present means this is an
-          // upgrade, not a first-time install.
-          toastShown = true;
-          toast("Versi baru CareerPack siap", {
-            description: "Muat ulang untuk pakai pembaruan terbaru.",
-            action: {
-              label: "Muat ulang",
-              onClick: () => {
-                installing.postMessage({ type: "SKIP_WAITING" });
-                // Listen for activation, then reload.
-                navigator.serviceWorker.addEventListener(
-                  "controllerchange",
-                  () => window.location.reload(),
-                  { once: true },
-                );
-              },
-            },
-            duration: Infinity, // user must dismiss / act
-          });
+          activate(installing);
         }
       });
     };
 
     navigator.serviceWorker.ready
       .then((registration) => {
-        // Manual update check + listen for future updates that come
-        // via Workbox's lifecycle.
         registration.addEventListener("updatefound", () =>
           onUpdateFound(registration),
         );
-        // Also surface an update that was already waiting at boot
-        // (rare — can happen after force-quit + reopen).
-        if (registration.waiting && navigator.serviceWorker.controller && !toastShown) {
-          toastShown = true;
-          toast("Versi baru CareerPack siap", {
-            description: "Muat ulang untuk pakai pembaruan terbaru.",
-            action: {
-              label: "Muat ulang",
-              onClick: () => {
-                registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-                navigator.serviceWorker.addEventListener(
-                  "controllerchange",
-                  () => window.location.reload(),
-                  { once: true },
-                );
-              },
-            },
-            duration: Infinity,
-          });
+        // Activation may already be queued from a previous tab session.
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          activate(registration.waiting);
         }
       })
       .catch(() => {

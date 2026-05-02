@@ -1,32 +1,67 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { forceFreshReload } from "@/shared/lib/staleBundle";
 
-const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-const FOCUS_DEBOUNCE_MS = 30 * 1000; // don't recheck within 30s of last poll
+/** sessionStorage key — last auto-reload timestamp (ms). */
+const RELOAD_GUARD_KEY = "_car_update_reload_at";
+/** Don't auto-reload again within this window — defeats reload loops
+ *  if the new bundle still mismatches (server bug, broken deploy). */
+const GUARD_WINDOW_MS = 90 * 1000;
+/** Periodic background check cadence. */
+const POLL_INTERVAL_MS = 5 * 60 * 1000;
+/** Skip a check if we polled within this window (focus debounce). */
+const FOCUS_DEBOUNCE_MS = 30 * 1000;
 
 /**
- * Compares the build ID frozen into the client bundle (at compile
- * time, via `next.config.ts` env injection) against the build ID
- * returned by `/api/build-id` (live from the running server). When
- * they diverge — i.e. a new deploy has shipped while this tab still
- * runs the old JS — show a sticky toast prompting a hard refresh.
+ * Silent auto-update. Compares the build ID frozen into the client
+ * bundle (build-time inject via `next.config.ts` env) against the
+ * live build ID served by `/api/build-id`. On mismatch, calls
+ * `forceFreshReload()` which purges SW + Cache Storage and reloads
+ * with a cache-buster — so the new bundle actually loads instead of
+ * the browser re-serving the same stale chunks.
  *
- * Polls every 5 minutes and on tab focus (debounced). Toast is shown
- * at most once per session; the user can dismiss it but the next poll
- * will re-show if they ignored it.
+ * No toast. No "Refresh" button. The user just gets a fresh app.
+ *
+ * Anti-loop: sessionStorage timestamp ensures we never auto-reload
+ * twice within ~90s. If the post-reload client STILL detects a
+ * mismatch (shouldn't happen, but e.g. server returns "unknown" or
+ * the freshly fetched bundle is also stale), we silently skip — no
+ * spam, no loop.
  */
 export function UpdateChecker() {
   const localBuildId = process.env.NEXT_PUBLIC_BUILD_ID ?? "unknown";
   const lastPolledAt = useRef(0);
-  const toastShown = useRef(false);
+  const reloading = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (localBuildId === "unknown") return; // dev mode — skip
 
     let stopped = false;
+
+    const tryAutoReload = async () => {
+      if (reloading.current) return;
+      // Loop guard.
+      try {
+        const last = parseInt(
+          window.sessionStorage.getItem(RELOAD_GUARD_KEY) ?? "0",
+          10,
+        );
+        if (Number.isFinite(last) && Date.now() - last < GUARD_WINDOW_MS) {
+          return;
+        }
+        window.sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
+      } catch {
+        // sessionStorage unavailable (private mode) — fall through; risk
+        // of one extra reload is acceptable, the SW unregister itself is
+        // idempotent.
+      }
+      reloading.current = true;
+      // forceFreshReload: SW unregister + caches.delete(*) + location.replace
+      // with `?_v=...`. Total budget capped at ~3s by withTimeout.
+      await forceFreshReload();
+    };
 
     const check = async () => {
       lastPolledAt.current = Date.now();
@@ -36,43 +71,29 @@ export function UpdateChecker() {
         const j = (await r.json()) as { buildId?: string };
         if (stopped) return;
         if (!j.buildId || j.buildId === "unknown") return;
-        if (j.buildId !== localBuildId && !toastShown.current) {
-          toastShown.current = true;
-          toast("Versi baru tersedia", {
-            description: "Refresh halaman untuk pakai update terbaru.",
-            duration: Infinity,
-            action: {
-              label: "Refresh",
-              onClick: () => {
-                // Cache-bust query param so SW + browser cache both miss.
-                const url = new URL(window.location.href);
-                url.searchParams.set("_v", Date.now().toString(36));
-                window.location.replace(url.toString());
-              },
-            },
-            onDismiss: () => {
-              // Re-arm so the next poll can show again if user dismisses.
-              toastShown.current = false;
-            },
-          });
-        }
+        if (j.buildId === localBuildId) return;
+        await tryAutoReload();
       } catch {
         // Network blip — ignore.
       }
     };
 
-    const onFocus = () => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
       if (Date.now() - lastPolledAt.current < FOCUS_DEBOUNCE_MS) return;
       void check();
     };
 
-    void check();
+    void check(); // initial
     const id = window.setInterval(() => void check(), POLL_INTERVAL_MS);
-    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+
     return () => {
       stopped = true;
       window.clearInterval(id);
-      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, [localBuildId]);
 
