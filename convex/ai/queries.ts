@@ -124,6 +124,50 @@ export const listAIOverrides = query({
   },
 });
 
+// ----- AI Skills (admin-curated prompt templates) -----
+
+export const listAISkills = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const rows = await ctx.db.query("aiSkills").collect();
+    return rows.sort((a, b) => a.label.localeCompare(b.label, "id"));
+  },
+});
+
+export const _getEnabledSkillBySlash = internalQuery({
+  args: { slashCommand: v.string() },
+  handler: async (ctx, { slashCommand }) => {
+    const row = await ctx.db
+      .query("aiSkills")
+      .withIndex("by_slash", (q) => q.eq("slashCommand", slashCommand))
+      .first();
+    if (!row || !row.enabled) return null;
+    return { systemPrompt: row.systemPrompt, label: row.label };
+  },
+});
+
+// ----- AI Tools (admin-curated action catalog) -----
+
+export const listAITools = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const rows = await ctx.db.query("aiTools").collect();
+    return rows.sort((a, b) => a.type.localeCompare(b.type));
+  },
+});
+
+export const _getEnabledTools = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("aiTools").collect();
+    return rows
+      .filter((r) => r.enabled)
+      .map((r) => ({ type: r.type, description: r.description }));
+  },
+});
+
 // ----- Chat sessions -----
 
 export const listChatSessions = query({

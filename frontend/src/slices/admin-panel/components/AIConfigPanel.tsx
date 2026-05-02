@@ -11,6 +11,8 @@ import {
   Trash2,
   Wand2,
   Server,
+  Settings2,
+  Wrench,
 } from "lucide-react";
 
 import { api } from "../../../../../convex/_generated/api";
@@ -40,8 +42,11 @@ import {
   ResponsiveAlertDialogTitle,
   ResponsiveAlertDialogTrigger,
 } from "@/shared/components/ui/responsive-alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { OpenRouterModelPicker } from "./OpenRouterModelPicker";
 import { UserModelOverrideSection } from "./UserModelOverrideSection";
+import { AISkillsPanel } from "./AISkillsPanel";
+import { AIToolsPanel } from "./AIToolsPanel";
 
 interface ProviderOption {
   id: string;
@@ -179,7 +184,23 @@ export function AIConfigPanel() {
   const aiEnabled = form.enabled;
 
   return (
-    <div className="space-y-4">
+    <Tabs defaultValue="config" className="w-full">
+      <TabsList variant="pills">
+        <TabsTrigger value="config">
+          <Settings2 className="w-3.5 h-3.5" />
+          Konfigurasi
+        </TabsTrigger>
+        <TabsTrigger value="skills">
+          <Sparkles className="w-3.5 h-3.5" />
+          Skills
+        </TabsTrigger>
+        <TabsTrigger value="tools">
+          <Wrench className="w-3.5 h-3.5" />
+          Tools
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="config" className="mt-4 space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -376,6 +397,15 @@ export function AIConfigPanel() {
         globalProvider={current?.provider ?? null}
         globalEnabled={!!current?.enabled}
       />
-    </div>
+      </TabsContent>
+
+      <TabsContent value="skills" className="mt-4">
+        <AISkillsPanel />
+      </TabsContent>
+
+      <TabsContent value="tools" className="mt-4">
+        <AIToolsPanel />
+      </TabsContent>
+    </Tabs>
   );
 }

@@ -59,6 +59,38 @@ export const aiTables = {
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
 
+  // AI skill catalog. A "skill" is a named system-prompt template the
+  // chat agent can apply, optionally bound to a slash command. Admin
+  // edits the prompt; chat action looks it up by slash command.
+  aiSkills: defineTable({
+    key: v.string(),
+    label: v.string(),
+    slashCommand: v.optional(v.string()),
+    description: v.string(),
+    systemPrompt: v.string(),
+    enabled: v.boolean(),
+    isSeed: v.boolean(),
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_slash", ["slashCommand"]),
+
+  // AI tool catalog. A "tool" is a structured action type the agent
+  // can emit for the user to approve (cv.fillExperience etc.). Admin
+  // curates which tools are advertised; client whitelist still gates
+  // execution server-side.
+  aiTools: defineTable({
+    type: v.string(),
+    label: v.string(),
+    description: v.string(),
+    payloadSchema: v.optional(v.string()),
+    enabled: v.boolean(),
+    isSeed: v.boolean(),
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  }).index("by_type", ["type"]),
+
   rateLimitEvents: defineTable({
     userId: v.id("users"),
     key: v.string(),

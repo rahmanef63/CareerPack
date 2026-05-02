@@ -4,6 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireUser, requireAdmin } from "../_shared/auth";
 import { AI_PROVIDERS } from "../_shared/aiProviders";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
+import { DEFAULT_AI_SKILLS, DEFAULT_AI_TOOLS } from "../_seeds/aiDefaults";
 
 // ----- AI Settings -----
 
@@ -189,6 +190,208 @@ export const clearUserAIModelOverride = mutation({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .first();
     if (existing) await ctx.db.delete(existing._id);
+  },
+});
+
+// ----- AI Skills (admin) -----
+
+export const seedAISkills = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const adminId = await requireAdmin(ctx);
+    let inserted = 0;
+    const now = Date.now();
+    for (const seed of DEFAULT_AI_SKILLS) {
+      const existing = await ctx.db
+        .query("aiSkills")
+        .withIndex("by_key", (q) => q.eq("key", seed.key))
+        .first();
+      if (existing) continue;
+      await ctx.db.insert("aiSkills", {
+        key: seed.key,
+        label: seed.label,
+        slashCommand: seed.slashCommand,
+        description: seed.description,
+        systemPrompt: seed.systemPrompt,
+        enabled: true,
+        isSeed: true,
+        updatedBy: adminId,
+        updatedAt: now,
+      });
+      inserted++;
+    }
+    return { inserted, total: DEFAULT_AI_SKILLS.length };
+  },
+});
+
+export const upsertAISkill = mutation({
+  args: {
+    id: v.optional(v.id("aiSkills")),
+    key: v.string(),
+    label: v.string(),
+    slashCommand: v.optional(v.string()),
+    description: v.string(),
+    systemPrompt: v.string(),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const adminId = await requireAdmin(ctx);
+    const key = args.key.trim();
+    const label = args.label.trim();
+    const slashCommand = args.slashCommand?.trim() || undefined;
+    const description = args.description.trim();
+    const systemPrompt = args.systemPrompt.trim();
+
+    if (!key) throw new Error("Key wajib");
+    if (!label) throw new Error("Label wajib");
+    if (!systemPrompt) throw new Error("System prompt wajib");
+    if (slashCommand && !slashCommand.startsWith("/")) {
+      throw new Error("Slash command harus diawali /");
+    }
+
+    const patch = {
+      key,
+      label,
+      slashCommand,
+      description,
+      systemPrompt,
+      enabled: args.enabled,
+      updatedBy: adminId,
+      updatedAt: Date.now(),
+    };
+
+    if (args.id) {
+      const existing = await ctx.db.get(args.id);
+      if (!existing) throw new Error("Skill tidak ditemukan");
+      await ctx.db.patch(args.id, patch);
+      return args.id;
+    }
+
+    const dup = await ctx.db
+      .query("aiSkills")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .first();
+    if (dup) throw new Error(`Key "${key}" sudah dipakai`);
+
+    return await ctx.db.insert("aiSkills", { ...patch, isSeed: false });
+  },
+});
+
+export const toggleAISkill = mutation({
+  args: { id: v.id("aiSkills"), enabled: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    await ctx.db.patch(args.id, { enabled: args.enabled, updatedAt: Date.now() });
+  },
+});
+
+export const deleteAISkill = mutation({
+  args: { id: v.id("aiSkills") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const row = await ctx.db.get(args.id);
+    if (!row) return;
+    if (row.isSeed) {
+      throw new Error("Skill default tidak bisa dihapus — nonaktifkan saja.");
+    }
+    await ctx.db.delete(args.id);
+  },
+});
+
+// ----- AI Tools (admin) -----
+
+export const seedAITools = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const adminId = await requireAdmin(ctx);
+    let inserted = 0;
+    const now = Date.now();
+    for (const seed of DEFAULT_AI_TOOLS) {
+      const existing = await ctx.db
+        .query("aiTools")
+        .withIndex("by_type", (q) => q.eq("type", seed.type))
+        .first();
+      if (existing) continue;
+      await ctx.db.insert("aiTools", {
+        type: seed.type,
+        label: seed.label,
+        description: seed.description,
+        payloadSchema: seed.payloadSchema,
+        enabled: true,
+        isSeed: true,
+        updatedBy: adminId,
+        updatedAt: now,
+      });
+      inserted++;
+    }
+    return { inserted, total: DEFAULT_AI_TOOLS.length };
+  },
+});
+
+export const upsertAITool = mutation({
+  args: {
+    id: v.optional(v.id("aiTools")),
+    type: v.string(),
+    label: v.string(),
+    description: v.string(),
+    payloadSchema: v.optional(v.string()),
+    enabled: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const adminId = await requireAdmin(ctx);
+    const type = args.type.trim();
+    const label = args.label.trim();
+    const description = args.description.trim();
+    const payloadSchema = args.payloadSchema?.trim() || undefined;
+
+    if (!type) throw new Error("Type wajib");
+    if (!label) throw new Error("Label wajib");
+
+    const patch = {
+      type,
+      label,
+      description,
+      payloadSchema,
+      enabled: args.enabled,
+      updatedBy: adminId,
+      updatedAt: Date.now(),
+    };
+
+    if (args.id) {
+      const existing = await ctx.db.get(args.id);
+      if (!existing) throw new Error("Tool tidak ditemukan");
+      await ctx.db.patch(args.id, patch);
+      return args.id;
+    }
+
+    const dup = await ctx.db
+      .query("aiTools")
+      .withIndex("by_type", (q) => q.eq("type", type))
+      .first();
+    if (dup) throw new Error(`Type "${type}" sudah dipakai`);
+
+    return await ctx.db.insert("aiTools", { ...patch, isSeed: false });
+  },
+});
+
+export const toggleAITool = mutation({
+  args: { id: v.id("aiTools"), enabled: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    await ctx.db.patch(args.id, { enabled: args.enabled, updatedAt: Date.now() });
+  },
+});
+
+export const deleteAITool = mutation({
+  args: { id: v.id("aiTools") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const row = await ctx.db.get(args.id);
+    if (!row) return;
+    if (row.isSeed) {
+      throw new Error("Tool default tidak bisa dihapus — nonaktifkan saja.");
+    }
+    await ctx.db.delete(args.id);
   },
 });
 
