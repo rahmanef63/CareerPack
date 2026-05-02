@@ -248,7 +248,7 @@ export function AIAgentConsole({
         className={cn(
           "p-0 flex flex-col bg-card",
           isMobile
-            ? "h-[100dvh] max-h-[100dvh] rounded-t-3xl"
+            ? "h-[80dvh] max-h-[80dvh] rounded-t-3xl"
             : "w-full sm:max-w-2xl lg:max-w-3xl",
         )}
       >
