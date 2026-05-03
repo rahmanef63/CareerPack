@@ -1,8 +1,10 @@
 # Portofolio
 
+> **Portability tier:** L — slice + FileUpload stack + 1 Convex domain + schema (multi-media + multi-link)
+
 ## Tujuan
 
-Showcase proyek, sertifikasi, dan publikasi user. Emoji + gradient cover (zero-file-upload), category tabs, featured carousel.
+Showcase proyek, sertifikasi, publikasi dengan dukungan multi-media (gambar / video / PDF), multi-link (live / repo / case-study), tech stack, role/client/duration metadata, dan per-item public branding visibility. Featured carousel + filter tabs + import dari CV projects.
 
 ## Route & Entry
 
@@ -16,112 +18,239 @@ Showcase proyek, sertifikasi, dan publikasi user. Emoji + gradient cover (zero-f
 portfolio/
 ├─ index.ts
 ├─ components/
-│  ├─ PortfolioView.tsx    Page — header + stats + Sparkles featured carousel + category tabs + grid
-│  ├─ PortfolioCard.tsx    Gradient-cover card dengan emoji, tech stack, favorite + delete
-│  └─ PortfolioForm.tsx    ResponsiveDialog — emoji picker + gradient swatch + tech chip input
-├─ hooks/usePortfolio.ts
-├─ constants/index.ts      CATEGORY_LABELS, COVER_GRADIENTS, EMOJI_SUGGESTIONS, DEFAULT_FORM
-└─ types/index.ts          PortfolioItem, PortfolioCategory, PortfolioFilter, PortfolioFormValues
+│  ├─ PortfolioView.tsx              Page — header + stats + featured carousel + tabs + grid
+│  ├─ PortfolioCard.tsx              Cover (media[0] / emoji+gradient) + tech chips + actions
+│  ├─ PortfolioDetailDialog.tsx      Read-only deep view — media gallery, links, outcomes
+│  ├─ PortfolioForm.tsx              ResponsiveDialog shell mounting BasicTab/DetailTab
+│  ├─ LibraryPicker.tsx              Pick existing files dari `files` table (avoids re-upload)
+│  └─ portfolio-form/
+│     ├─ BasicTab.tsx                Title, category, date, cover, featured toggle
+│     ├─ DetailTab.tsx               Role/client/duration, outcomes, skills, branding visibility
+│     ├─ CoverPreview.tsx            Live cover preview (media[0] or emoji+gradient)
+│     ├─ LinksEditor.tsx             Typed multi-link editor (live/repo/slides/etc.)
+│     └─ MediaEditor.tsx             Multi-media uploader (image/video/pdf)
+├─ hooks/usePortfolio.ts             Convex CRUD wrappers
+├─ lib/itemToValues.ts               Doc → form values mapping
+├─ constants/index.ts                CATEGORY_LABELS, COVER_GRADIENTS, EMOJI_SUGGESTIONS, DEFAULT_FORM
+└─ types/index.ts                    PortfolioItem, PortfolioCategory, PortfolioFilter, PortfolioFormValues
 ```
 
 ## Data Flow
 
-| Operation | Convex fn | Purpose |
+Backend domain: `convex/portfolio/`. Tabel: `portfolioItems`.
+
+| Hook / method | Convex op | Purpose |
 |---|---|---|
-| List | `api.portfolio.queries.listPortfolio` | Owner items desc by createdAt |
-| Create | `api.portfolio.mutations.createPortfolioItem` | Insert with techStack default `[]`, featured default `false` |
-| Update | `api.portfolio.mutations.updatePortfolioItem` | Partial patch — all fields optional |
-| Delete | `api.portfolio.mutations.deletePortfolioItem` | Ownership-checked hard delete |
-| Feature | `api.portfolio.mutations.togglePortfolioFeatured` | Flip `featured` flag |
+| `usePortfolio.items` | `api.portfolio.queries.listPortfolio` | Owner items desc by createdAt; resolves `media[].storageId` → URL inline |
+| `usePortfolio.create` | `api.portfolio.mutations.createPortfolioItem` | Insert (validates link + media kinds) |
+| `usePortfolio.update` | `api.portfolio.mutations.updatePortfolioItem` | Partial patch |
+| `usePortfolio.remove` | `api.portfolio.mutations.deletePortfolioItem` | Ownership-checked hard delete |
+| `usePortfolio.bulkRemove` | `api.portfolio.mutations.bulkDeletePortfolioItems` | Multi-select delete |
+| `usePortfolio.toggleFeatured` | `api.portfolio.mutations.togglePortfolioFeatured` | Flip `featured` |
+| `usePortfolio.toggleBrandingShow` | `api.portfolio.mutations.togglePortfolioBrandingShow` | Per-item public visibility override |
+| `LibraryPicker` | `api.files.queries.listMyFiles` | Pick prior uploads tanpa re-upload |
 
-## Schema
-
-Tabel `portfolioItems`:
+Schema (lihat `convex/portfolio/schema.ts` — abridged):
 
 ```ts
-{
-  userId, title, description,
-  category: "project" | "certification" | "publication",
-  coverEmoji?,     // e.g. "🚀"
-  coverGradient?,  // Tailwind gradient class, e.g. "from-cyan-400 to-cyan-600"
-  link?,
-  techStack?: string[],
-  date: string,    // ISO YYYY-MM-DD
-  featured: boolean
-}
+portfolioItems: defineTable({
+  userId: v.id("users"),
+  title: v.string(),
+  description: v.string(),
+  category: v.string(),                     // "project" | "certification" | "publication"
+  // Legacy single-cover (preserved for back-compat reads)
+  coverEmoji: v.optional(v.string()),
+  coverGradient: v.optional(v.string()),
+  coverStorageId: v.optional(v.string()),
+  // Multi-media gallery
+  media: v.optional(v.array(v.object({
+    storageId: v.string(),
+    kind: v.string(),                       // image | video | pdf | file
+    caption: v.optional(v.string()),
+  }))),
+  // Legacy single-link + new typed multi-link
+  link: v.optional(v.string()),
+  links: v.optional(v.array(v.object({
+    url: v.string(),
+    label: v.string(),
+    kind: v.string(),                       // live | repo | case-study | slides | video | article | store | other
+  }))),
+  techStack: v.optional(v.array(v.string())),
+  date: v.string(),                         // ISO YYYY-MM-DD
+  featured: v.boolean(),
+  // Rich metadata
+  role: v.optional(v.string()),
+  client: v.optional(v.string()),
+  duration: v.optional(v.string()),
+  outcomes: v.optional(v.array(v.string())),
+  collaborators: v.optional(v.array(v.string())),
+  skills: v.optional(v.array(v.string())),
+  // Per-item branding visibility (overrides global publicPortfolioShow)
+  brandingShow: v.optional(v.boolean()),
+  sortOrder: v.optional(v.number()),
+})
+  .index("by_user", ["userId"])
+  .index("by_user_category", ["userId", "category"])
+  .index("by_user_featured", ["userId", "featured"]),
 ```
 
-Indexes: `by_user`, `by_user_category`, `by_user_featured`.
+## State Lokal
 
-## UI
-
-1. **ResponsivePageHeader** — title + description + "Tambah" action.
-2. **Stats strip** — Total / Unggulan / Proyek / Sertifikasi.
-3. **"Unggulan" `ResponsiveCarousel`** (items dengan `featured=true`) dengan Sparkles icon.
-4. **Filter tabs (`variant="pills"`)** — Semua / Proyek / Sertifikasi / Publikasi dengan count badges.
-5. **3-col grid** PortfolioCard (1/2/3 responsive).
-
-Tiap card: gradient banner dengan emoji besar + "Unggulan" star badge kiri-atas + category badge kanan-atas + tech stack chips + favorite toggle + delete action.
+- Filter tab (`PortfolioFilter`: all / project / certification / publication)
+- Form values via `itemToValues(doc)` — controlled across BasicTab / DetailTab
+- Featured carousel auto-derived dari `items.filter(i => i.featured)`
+- Detail dialog state (`activeItemId`)
+- Demo overlay state via `useDemoPortfolioOverlay`
 
 ## Dependensi
 
+- `@/shared/components/files/FileUpload` — multi-media upload
+- `@/shared/components/onboarding` — `QuickFillButton` (auto-import dari CV projects)
 - `@/shared/components/ui/responsive-page-header`
 - `@/shared/components/ui/responsive-carousel`
-- `@/shared/components/ui/responsive-dialog` (form)
-- `@/shared/components/ui/responsive-select` (category picker)
-- shadcn: `card`, `input`, `textarea`, `badge`, `switch`, `tabs`
+- `@/shared/components/ui/responsive-dialog`
+- `@/shared/components/ui/responsive-alert-dialog`
+- `@/shared/components/ui/responsive-select`
+- `@/shared/components/layout/PageContainer`
+- `@/shared/hooks/useAuth`, `@/shared/hooks/useDemoOverlay` (`useDemoPortfolioOverlay`)
+- `@/shared/lib/formatDate` (`formatMonthYear`), `@/shared/lib/notify`, `@/shared/lib/utils` (`cn`)
+- shadcn: `badge`, `button`, `checkbox`, `input`, `label`, `skeleton`, `switch`, `tabs`, `textarea`
+- Convex: `api.portfolio.*`, `api.files.queries.listMyFiles`
 
 ## Catatan Desain
 
-- **Emoji + gradient as cover** — tanpa file upload storage. User pilih dari 20 emoji suggestion + 8 gradient palette. Scale-up opsi: upload real cover via Convex storage (kalau dibutuhkan).
-- `featured` carousel bukan "popularitas" algoritmik — user manual toggle. Sengaja opt-in supaya tidak ada surprise.
-- Delete hard (tanpa archive). ResponsiveAlertDialog confirmation wajar ditambah nanti jika user complain.
+- **Multi-media + multi-link** — schema mendukung gallery + typed links (live/repo/slides/dst.). Legacy `coverStorageId` + `link` masih dibaca untuk row lama; tulisan baru pakai `media[]` + `links[]`.
+- **`media[0]` jadi cover** kalau ada; fallback ke `coverEmoji + coverGradient` (zero-storage).
+- **`brandingShow` per-item** override `publicPortfolioShow` global — user bisa kurasi item mana yang muncul di public page tanpa unshare semua.
+- **`LibraryPicker`** baca `api.files.queries.listMyFiles` jadi user bisa attach file yang sudah di-upload via slice lain (mis. CV avatar) tanpa duplikasi storage.
+- Manifest belum ada — slice bukan AI bus subscriber.
 
 ## Extending
 
-- Upload real image cover (Convex storage + presigned URL)
-- Public share link (`/p/:shareId` read-only route)
-- Sync otomatis dari `cvs.projects` — auto-populate portfolio dari Proyek section di CV Generator
-- Reorder drag & drop — pakai `MicroInteractions.useDragReorder`
-- Template gallery (preset cover + copy struktur)
+- Reorder drag & drop pakai `MicroInteractions.useDragReorder` + `sortOrder` field (sudah ada di schema).
+- Public share link (`/p/:shareId`) — read-only route untuk item single.
+- Auto-sync dari `cvs.projects` setiap save (sekarang manual via `QuickFillButton`).
+- AI skill: `portfolio.create-from-cv-project` — manifest + binder pattern mirip networking.
 
 ---
 
 ## Portabilitas
 
-**Tier:** L — slice + FileUpload integration + Convex module + schema.
+**Tier:** L
 
-**Files:**
+**Files untuk dicopy:**
 
 ```
+# Slice
 frontend/src/slices/portfolio/
-frontend/src/shared/hooks/usePortfolio.ts          # if not inside slice
-frontend/src/shared/components/files/FileUpload.tsx # cover image upload
+
+# Shared deps
+frontend/src/shared/components/files/FileUpload.tsx                     # multi-media
+frontend/src/shared/components/onboarding/                              # QuickFillButton
+frontend/src/shared/components/ui/responsive-page-header.tsx
+frontend/src/shared/components/ui/responsive-carousel.tsx
+frontend/src/shared/components/ui/responsive-dialog.tsx
+frontend/src/shared/components/ui/responsive-alert-dialog.tsx
+frontend/src/shared/components/ui/responsive-select.tsx
+frontend/src/shared/components/layout/PageContainer.tsx
 frontend/src/shared/hooks/useFileUpload.ts
-frontend/src/shared/lib/imageConvert.ts
-convex/portfolio/
-convex/files/
+frontend/src/shared/hooks/useDemoOverlay.ts                             # demoPortfolio overlay
+frontend/src/shared/lib/imageConvert.ts                                 # WebP + crop
+frontend/src/shared/lib/formatDate.ts                                   # formatMonthYear
+frontend/src/shared/lib/notify.ts
+frontend/src/shared/lib/utils.ts
+
+# Backend
+convex/portfolio/                                                       # schema + queries + mutations
+convex/files/                                                           # required for media + LibraryPicker
 ```
 
-**cp:**
+**cp commands:**
 
 ```bash
-SRC=~/projects/CareerPack DST=~/projects/<target>
+SRC=~/projects/CareerPack
+DST=~/projects/<target>
+
+# Slice
+mkdir -p "$DST/frontend/src/slices"
 cp -r "$SRC/frontend/src/slices/portfolio" "$DST/frontend/src/slices/"
-cp "$SRC/convex/portfolio/"              "$DST/convex/"
-# + full file-upload copy per file-upload.md
+
+# Shared deps
+mkdir -p "$DST/frontend/src/shared/components/files"
+mkdir -p "$DST/frontend/src/shared/components/onboarding"
+mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/src/shared/components/layout"
+mkdir -p "$DST/frontend/src/shared/hooks"
+mkdir -p "$DST/frontend/src/shared/lib"
+
+cp    "$SRC/frontend/src/shared/components/files/FileUpload.tsx"          "$DST/frontend/src/shared/components/files/"
+cp -r "$SRC/frontend/src/shared/components/onboarding"                    "$DST/frontend/src/shared/components/"
+cp    "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
+cp    "$SRC/frontend/src/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/src/shared/components/ui/"
+cp    "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/src/shared/components/ui/"
+cp    "$SRC/frontend/src/shared/components/ui/responsive-alert-dialog.tsx" "$DST/frontend/src/shared/components/ui/"
+cp    "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"      "$DST/frontend/src/shared/components/ui/"
+cp    "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"      "$DST/frontend/src/shared/components/layout/"
+cp    "$SRC/frontend/src/shared/hooks/useFileUpload.ts"                   "$DST/frontend/src/shared/hooks/"
+cp    "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"                  "$DST/frontend/src/shared/hooks/"
+cp    "$SRC/frontend/src/shared/lib/imageConvert.ts"                      "$DST/frontend/src/shared/lib/"
+cp    "$SRC/frontend/src/shared/lib/formatDate.ts"                        "$DST/frontend/src/shared/lib/"
+cp    "$SRC/frontend/src/shared/lib/notify.ts"                            "$DST/frontend/src/shared/lib/"
+
+# Backend
+cp -r "$SRC/convex/portfolio" "$DST/convex/"
+cp -r "$SRC/convex/files"     "$DST/convex/"     # if not already ported
 ```
 
-**Schema:** add `portfolioItems` table (title, description, category union ["project"|"certification"|"publication"], coverEmoji?, coverGradient?, coverStorageId?, link?, techStack?, date, featured) with `by_user`, `by_user_category`, `by_user_featured` indexes.
+**Schema additions** — copy verbatim dari `convex/portfolio/schema.ts` (snippet di "Data Flow"). Indexes wajib: `by_user`, `by_user_category`, `by_user_featured`. Plus `files` table dari `file-upload.md`.
 
-**Convex api.d.ts:** add `portfolio`.
+**Convex api.d.ts** — add `portfolio` + `files` modules:
 
-**npm deps:** `react-easy-crop` (from file-upload).
+```ts
+import type * as portfolio_mutations from "../portfolio/mutations.js";
+import type * as portfolio_queries from "../portfolio/queries.js";
 
-**Nav:** `portfolio` slug in MORE_APPS.
+declare const fullApi: ApiFromModules<{
+  // ...
+  "portfolio/mutations": typeof portfolio_mutations;
+  "portfolio/queries":  typeof portfolio_queries;
+}>;
+```
 
-**i18n:** category labels ("Project", "Sertifikasi", "Publikasi"), cover emoji set, "Jadikan unggulan".
+**npm deps:**
 
-**Pattern:** cover image takes priority; falls back to emoji+gradient. See `listPortfolio` inline URL resolution.
+```bash
+pnpm -F frontend add react-easy-crop      # transitive via FileUpload
+```
 
-See `file-upload.md` + `_porting-guide.md`.
+**Env vars** — none specific; Convex storage baseline.
+
+**Manifest + binder wiring** — N/A (slice tidak punya manifest saat ini).
+
+**Nav registration** — `dashboardRoutes.tsx` + `navConfig.ts` (see `_porting-guide.md` §4). Slug `portfolio` (label "Portofolio", icon `Folder`, hue `from-orange-400 to-orange-600`, placement `MORE_APPS`).
+
+**i18n** — Indonesian copy:
+- Category labels: "Proyek" / "Sertifikasi" / "Publikasi"
+- Form sections: "Informasi Dasar" / "Detail" / "Media" / "Tautan"
+- Actions: "Tambah", "Simpan", "Hapus", "Jadikan unggulan"
+- Link kinds: "live", "repo", "case-study", "slides", "video", "article", "store", "other" — keys English, label optional
+
+**Common breakage after port:**
+
+- **Cover blank** — `listPortfolio` resolve `media[0].storageId` lewat `getUrl()`. Kalau `convex/files/` belum diport, query throw. Port `files/` lebih dulu (lihat `file-upload.md`).
+- **LibraryPicker error** — butuh `api.files.queries.listMyFiles`. Sama: `files/` wajib.
+- **`techStack` chip ilang** — schema lama (pre-multi-media) tidak punya array; kalau target sudah punya rows lama, run migrasi additive.
+- **`react-easy-crop` SSR** — `FileUpload` adalah Client Component, jangan `import` di Server Component parent.
+- **`QuickFillButton` undefined** — `@/shared/components/onboarding` belum dicopy; tanpanya, tombol auto-import dari CV projects ilang.
+
+**Testing the port:**
+
+1. Navigate `/dashboard/portfolio` → grid render
+2. Klik "Tambah" → form buka dengan 2 tab (Basic / Detail)
+3. Upload image di Media tab → preview muncul, simpan → cover render di card
+4. Tambah typed link (live + repo) → muncul di detail dialog
+5. Toggle "Unggulan" → item naik ke featured carousel
+6. Toggle `brandingShow` → cek public page tidak menampilkan item (kalau `/[slug]` route ported)
+7. Reload → semua data persist
+
+Run `_porting-guide.md` §9 checklist.

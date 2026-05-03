@@ -1,14 +1,20 @@
 # Pencocok Lowongan (Matcher)
 
+> **Portability tier:** L — slice + 1 Convex domain (2 tables) + AI actions (ATS scoring, cover-letter, CV-tailoring) + external feed pipelines
+
 ## Tujuan
 
-AI mencocokkan profil user dengan katalog lowongan — skor per-lowongan berbasis targetRole + skills + seniority + lokasi. Mobile-first: carousel top match, filter tabs per work mode, detail via responsive dialog.
+End-to-end job-search workflow:
+1. **Browser lowongan** — katalog gabungan seed + RemoteOK + WeWorkRemotely + paste-by-user; filter work mode + category.
+2. **AI ATS Scanner** — scan CV vs JD → skor 0-100, breakdown, missing keywords, format issues, recommendations. Persist sebagai `atsScans`.
+3. **Cover letter generator** + **resume-tailor** — AI-driven outputs disimpan ulang ke CV.
+4. **Salary insights** — heuristik berbasis seed listings.
 
 ## Route & Entry
 
 - URL: `/dashboard/matcher`
 - Slice: `frontend/src/slices/matcher/`
-- Komponen utama: `MatcherView.tsx`, `JobCard.tsx`
+- Komponen utama: `MatcherView.tsx` (tab shell), `JobBrowser.tsx`, `ATSScannerForm.tsx`
 
 ## Struktur Slice
 
@@ -16,109 +22,251 @@ AI mencocokkan profil user dengan katalog lowongan — skor per-lowongan berbasi
 matcher/
 ├─ index.ts
 ├─ components/
-│  ├─ MatcherView.tsx      Page — header + top-match carousel + filter tabs + grid + detail dialog
-│  └─ JobCard.tsx          Reusable card (list + carousel variants), score badge opsional
-├─ hooks/useMatcher.ts     Convex hooks (listJobs + getMatches + seedDemoJobs)
-└─ types/index.ts          JobListing, JobMatch, WorkModeFilter
+│  ├─ MatcherView.tsx              Page shell — tabs (Browse / ATS / Insights)
+│  ├─ JobBrowser.tsx               List + filter + carousel "Cocok Untuk Anda"
+│  ├─ JobCard.tsx                  Reusable card variants (list / carousel)
+│  ├─ JobDetailDialog.tsx          Full description + skill badges + apply CTA
+│  ├─ AddJobDialog.tsx             Paste-a-listing form (source = "user-paste")
+│  ├─ ATSScannerForm.tsx           CV picker + JD textarea + scan trigger
+│  ├─ ATSResultCard.tsx            Score breakdown + matched / missing keywords
+│  ├─ ATSHistoryList.tsx           Daftar scan tersimpan
+│  ├─ CoverLetterDialog.tsx        AI cover letter (per CV + JD)
+│  ├─ ResumeTailorDialog.tsx       AI rewrite CV bullets untuk JD spesifik
+│  └─ SalaryInsightsCard.tsx       Median + range per role/seniority
+├─ hooks/
+│  ├─ useMatcher.ts                listJobs, getMatches, listMyScans, getSalaryInsights
+│  └─ useATSScan.ts                Trigger `scanCV` action + poll history
+├─ lib/format.ts                   Salary / date formatting helpers
+└─ types/index.ts                  JobListing, JobMatch, WorkModeFilter, ATSScan, ATSBreakdown
 ```
 
 ## Data Flow
 
-| Operation | Convex fn | Purpose |
+Backend domain: `convex/matcher/`. Tabel: `jobListings`, `atsScans`.
+
+| Hook / method | Convex op | Purpose |
 |---|---|---|
-| List | `api.matcher.queries.listJobs({ workMode?, limit? })` | Paginated by `postedAt` desc, optional `workMode` filter (`by_workMode` index) |
-| Match | `api.matcher.queries.getMatches({ limit? })` | Scored against caller's `userProfile`. Returns `[{ job, score }]` sorted desc, filter `score > 0` |
-| Seed | `api.matcher.mutations.seedDemoJobs()` | Idempotent insert of 8 demo listings (Tokopedia, Gojek, Shopee, dst.) |
+| `useMatcher.jobs` | `api.matcher.queries.listJobs({ workMode?, limit? })` | Paginated by `postedAt` desc |
+| `useMatcher.matches` | `api.matcher.queries.getMatches({ limit? })` | Skor terhadap `userProfile` |
+| `useMatcher.salary` | `api.matcher.queries.getSalaryInsights({ role })` | Median + range per role/seniority |
+| `useMatcher.seed` | `api.matcher.mutations.seedDemoJobs` | Idempotent insert demo (Tokopedia, Gojek, dll.) |
+| `useATSScan.scan` | `api.matcher.actions.scanCV({ cvId, jobListingId? \| rawJobText })` | AI ATS pipeline; insert `atsScans` row |
+| `useATSScan.history` | `api.matcher.queries.listMyScans` | Riwayat scan |
+| `useATSScan.detail` | `api.matcher.queries.getScan({ scanId })` | Full scan record |
+| `CoverLetterDialog.generate` | `api.cv.actions.generateCoverLetter` | AI cover letter (cross-domain ke `cv`) |
+| `ResumeTailorDialog.tailor` | `api.cv.actions.tailorCVForJob` + `api.cv.mutations.updateCV` | AI rewrite + persist |
+| `JobBrowser.viewCV` | `api.cv.queries.getUserCVs` | Picker untuk ATS / cover letter |
 
-### Scoring heuristic (in `convex/matcher/`)
+Backend modules:
 
-- Role match (title contains `targetRole`): **+40pt** (strong) / **+20pt** (any word match)
-- Skill overlap (case-insensitive): **+10pt** per match, cap **+40pt**
-- Seniority in title/seniority field: **+10pt**
-- Location: `workMode=remote` → **+10pt**; else same-city → **+10pt**
-- Cap total: **100pt**
-
-Absent `userProfile` → returns `0` (no matches shown).
-
-## Schema
-
-Tabel `jobListings` (public catalog — no `userId`):
-
-```ts
-{
-  title, company, location,
-  workMode: "remote" | "hybrid" | "onsite",
-  employmentType, seniority,
-  salaryMin?, salaryMax?, currency?,
-  description, requiredSkills: string[],
-  postedAt: number,
-  applyUrl?, companyLogo?  // emoji
-}
+```
+convex/matcher/
+├─ schema.ts          jobListings + atsScans tables
+├─ queries.ts         listJobs, getMatches, listMyScans, getScan, getSalaryInsights
+├─ mutations.ts       seedDemoJobs, addUserPastedJob
+├─ actions.ts         scanCV (AI ATS), extractKeywords (lazy keyword cache)
+├─ atsScore.ts        Pure scoring helpers (heuristic + LLM-augmented)
+├─ atsScore.test.ts   Vitest coverage
+├─ external.ts        RemoteOK + WeWorkRemotely fetchers (Convex action)
+└─ seedJobs.ts        Demo dataset
 ```
 
-Indexes: `by_posted`, `by_workMode`.
+Schema (`convex/matcher/schema.ts`, abridged):
 
-## UI — App Store-style layout
+```ts
+jobListings: defineTable({
+  title, company, location, workMode, employmentType, seniority,
+  salaryMin?, salaryMax?, currency?, description,
+  requiredSkills: v.array(v.string()),
+  postedAt: v.number(),
+  applyUrl?, companyLogo?,
+  // AI keyword cache (one-shot per listing)
+  extractedKeywords?: v.array(v.string()),
+  extractedKeywordsAt?: v.number(),
+  // Provenance
+  source?: v.string(),                // "seed" | "remoteok" | "wwr" | "user-paste"
+  externalId?: v.string(),            // stable per-source id, "remoteok:123456"
+  addedBy?: v.id("users"),
+  category?: v.string(),              // engineering|design|support|product|marketing|data
+})
+  .index("by_posted", ["postedAt"])
+  .index("by_workMode", ["workMode", "postedAt"])
+  .index("by_external", ["externalId"])
+  .index("by_source_posted", ["source", "postedAt"]),
 
-1. **ResponsivePageHeader** — title + description + "Seed Demo" action.
-2. **"Cocok Untuk Anda" `ResponsiveCarousel`** (top 6 matches, cellWidth 80/72 mobile). Each card shows `X% cocok` badge.
-3. **Filter Tabs (`variant="pills"`)** — Semua / Remote / Hybrid / On-site.
-4. **2-col grid** of listings (1-col on mobile) sorted by `postedAt`.
-5. **`ResponsiveDialog` detail** — full description + skill badges + "Lamar di …" external link.
+atsScans: defineTable({
+  userId: v.id("users"),
+  cvId: v.id("cvs"),
+  jobListingId?: v.id("jobListings"),
+  jobTitle, jobCompany?, rawJobText,
+  score: v.number(), grade: v.string(),
+  breakdown: v.object({ keywordCoverage, hardSkills, experienceFit, sectionCompleteness, parseability }),
+  matchedKeywords: v.array(v.string()),
+  missingKeywords: v.array(v.string()),
+  formatIssues: v.array(v.string()),
+  recommendations: v.array(v.string()),
+  createdAt: v.number(),
+})
+  .index("by_user", ["userId"])
+  .index("by_user_cv", ["userId", "cvId"])
+  .index("by_user_listing", ["userId", "jobListingId"]),
+```
+
+## State Lokal
+
+- Tab state (`MatcherView`)
+- Filter (work mode + category) di `JobBrowser`
+- ATS form: `cvId`, `rawJobText`, `jobListingId?`
+- Detail dialog state (`activeJobId`, `activeScanId`)
 
 ## Dependensi
 
 - `@/shared/components/ui/responsive-page-header`
 - `@/shared/components/ui/responsive-carousel`
 - `@/shared/components/ui/responsive-dialog`
+- `@/shared/components/ui/responsive-select`
 - `@/shared/components/ui/tabs` (pills variant)
-- shadcn: `card`, `badge`, `button`
+- `@/shared/components/layout/PageContainer`
+- `@/shared/hooks/useAuth`
+- `@/shared/lib/notify`, `@/shared/lib/utils` (`cn`)
+- shadcn: `badge`, `button`, `card`, `checkbox`, `input`, `label`, `progress`, `skeleton`, `textarea`
+- Convex: `api.matcher.*`, plus cross-domain `api.cv.queries.getUserCVs`, `api.cv.actions.generateCoverLetter`, `api.cv.actions.tailorCVForJob`, `api.cv.mutations.updateCV`
 
 ## Catatan Desain
 
-- Demo seed dipicu manual lewat tombol header — MVP tanpa scraper / aggregator. Scale-up: integrasi API job board (JobStreet, LinkedIn Jobs) via Convex action.
-- Score heuristic sengaja simple + deterministik — enak di-debug, tidak perlu LLM call.
-- Salary rendering: `jt` suffix untuk > 1M IDR, fallback raw number.
+- **Public catalog** — `jobListings` tidak ada `userId`. Visible ke semua user; per-user filtering hanya saat scoring.
+- **`extractedKeywords` cached** — pertama kali listing di-scan, AI ekstraksi keyword dan persist; scan berikut re-use cache (one-shot per listing).
+- **External feed pipelines** — `external.ts` jalankan periodic fetch dari RemoteOK + WeWorkRemotely (cron di `convex/crons.ts`). Dedup via `externalId`.
+- **Score heuristic deterministik** — base score di `atsScore.ts` pure; AI augmentation optional via OpenAI proxy.
+- **Cross-domain calls ke `cv`** — slice butuh `api.cv.*` (cover letter, tailor). Kalau target tidak port `cv-generator` slice + `convex/cv/`, fitur ini ilang.
+- Manifest belum ada — slice bukan AI bus subscriber.
 
 ## Extending
 
-- Save/bookmark job (join table `savedJobs` + userId)
-- Auto-apply button → integrate dengan CV generator export
-- Score explanation (per-axis breakdown) di dialog detail
-- LLM-based matching untuk semantic skill similarity (butuh vector embedding)
-- Notifikasi baru: push notification ke user saat score job baru > threshold
+- Save/bookmark job (tabel `savedJobs` + userId).
+- LLM-based matching untuk semantic skill similarity (vector embedding).
+- Notification baru: push ke user saat job baru cocok > threshold.
+- Slice manifest: AI skill `matcher.scan-cv` (kind:"mutation"), `matcher.list-jobs` (kind:"query") — pattern mirip networking.
 
 ---
 
 ## Portabilitas
 
-**Tier:** M — slice + Convex module + schema + optional AI scoring.
+**Tier:** L
 
-**Files:**
+**Files untuk dicopy:**
 
 ```
+# Slice
 frontend/src/slices/matcher/
-convex/matcher/
+
+# Shared deps
+frontend/src/shared/components/ui/responsive-page-header.tsx
+frontend/src/shared/components/ui/responsive-carousel.tsx
+frontend/src/shared/components/ui/responsive-dialog.tsx
+frontend/src/shared/components/ui/responsive-select.tsx
+frontend/src/shared/components/layout/PageContainer.tsx
+frontend/src/shared/lib/notify.ts
+frontend/src/shared/lib/utils.ts
+
+# Backend
+convex/matcher/                                        # full domain
+# Cross-domain dependency:
+convex/cv/                                             # required for cover-letter + tailor flows
+convex/_shared/aiProviders.ts                          # OpenAI-compatible proxy
+convex/_shared/rateLimit.ts                            # AI quota gate
+convex/_shared/sanitize.ts                             # prompt sanitization
 ```
 
-**cp:**
+**cp commands:**
 
 ```bash
-SRC=~/projects/CareerPack DST=~/projects/<target>
+SRC=~/projects/CareerPack
+DST=~/projects/<target>
+
+# Slice
+mkdir -p "$DST/frontend/src/slices"
 cp -r "$SRC/frontend/src/slices/matcher" "$DST/frontend/src/slices/"
-cp "$SRC/convex/matcher/"              "$DST/convex/"
+
+# Shared deps
+mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/src/shared/components/layout"
+mkdir -p "$DST/frontend/src/shared/lib"
+
+cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
+cp "$SRC/frontend/src/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/src/shared/components/ui/"
+cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/src/shared/components/ui/"
+cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"      "$DST/frontend/src/shared/components/ui/"
+cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"      "$DST/frontend/src/shared/components/layout/"
+cp "$SRC/frontend/src/shared/lib/notify.ts"                            "$DST/frontend/src/shared/lib/"
+
+# Backend
+cp -r "$SRC/convex/matcher"  "$DST/convex/"
+cp -r "$SRC/convex/cv"       "$DST/convex/"             # required for cover-letter + tailor (skip if already ported)
+mkdir -p "$DST/convex/_shared"
+cp "$SRC/convex/_shared/aiProviders.ts" "$DST/convex/_shared/"
+cp "$SRC/convex/_shared/rateLimit.ts"   "$DST/convex/_shared/"
+cp "$SRC/convex/_shared/sanitize.ts"    "$DST/convex/_shared/"
 ```
 
-**Schema:** add `jobListings` (public catalog — no userId) with `by_posted`, `by_workMode` indexes. Optionally seed via `api.matcher.mutations.seedDemoJobs`.
+**Schema additions** — copy `jobListings` + `atsScans` tables verbatim dari `convex/matcher/schema.ts`. Indexes wajib: `by_posted`, `by_workMode`, `by_external`, `by_source_posted` (jobListings); `by_user`, `by_user_cv`, `by_user_listing` (atsScans).
 
-**Convex api.d.ts:** add `matcher`.
+`atsScans.cvId` referensi `cvs` table — pastikan `cv-generator` ported lebih dulu (lihat `cv-generator.md`).
 
-**npm deps:** none.
+**Convex api.d.ts**:
 
-**Nav:** `matcher` slug in MORE_APPS (badge "AI").
+```ts
+import type * as matcher_actions   from "../matcher/actions.js";
+import type * as matcher_atsScore  from "../matcher/atsScore.js";
+import type * as matcher_external  from "../matcher/external.js";
+import type * as matcher_mutations from "../matcher/mutations.js";
+import type * as matcher_queries   from "../matcher/queries.js";
+import type * as matcher_seedJobs  from "../matcher/seedJobs.js";
 
-**AI scoring:** `getMatches` optionally uses user's CV + skills + target role to score jobs. If target has no AI, fallback to simple string match on `requiredSkills`.
+declare const fullApi: ApiFromModules<{
+  // ...
+  "matcher/actions":   typeof matcher_actions;
+  "matcher/atsScore":  typeof matcher_atsScore;
+  "matcher/external":  typeof matcher_external;
+  "matcher/mutations": typeof matcher_mutations;
+  "matcher/queries":   typeof matcher_queries;
+  "matcher/seedJobs":  typeof matcher_seedJobs;
+}>;
+```
 
-**i18n:** work modes ("remote/hybrid/onsite"), employment types, seniority — all Indonesian.
+**npm deps** — none specific (heuristik pure TS).
 
-See `_porting-guide.md`.
+**Env vars** — required untuk AI actions:
+- `CONVEX_OPENAI_BASE_URL` (OpenAI-compatible endpoint)
+- `CONVEX_OPENAI_API_KEY`
+
+External feeds (`external.ts`) tidak butuh credential — RemoteOK + WeWorkRemotely public JSON. Optional cron schedule di `convex/crons.ts`.
+
+**Manifest + binder wiring** — N/A.
+
+**Nav registration** — `dashboardRoutes.tsx` + `navConfig.ts`. Slug `matcher` (label "Pencocok Lowongan", icon `Compass`, hue `from-cyan-400 to-cyan-600`, badge `"AI"`).
+
+**i18n** — Indonesian:
+- Tab labels: "Lowongan", "ATS Scanner", "Wawasan Gaji"
+- Work modes: keys English (`remote`/`hybrid`/`onsite`) — translate display labels
+- Salary suffix: "jt" (juta) untuk > 1M IDR
+- Score grades: "A/B/C/D" disertai narrative Indonesian
+
+**Common breakage after port:**
+
+- **Cross-domain `api.cv.*` undefined** — port `cv-generator` slice + `convex/cv/` lebih dulu, atau strip `CoverLetterDialog` + `ResumeTailorDialog` dari slice.
+- **`scanCV` throw rate-limit** — pastikan `_shared/rateLimit.ts` ported + `rateLimitEvents` table ada di schema.
+- **External feed kosong** — `external.ts` butuh fetch outbound. Self-hosted Convex behind firewall? whitelist `remoteok.com` + `weworkremotely.com`.
+- **`extractedKeywords` selalu null** — AI proxy env var miss. Cek `CONVEX_OPENAI_*`.
+- **Cron tidak jalan** — `external.ts` fetcher harus diregistrasikan di `convex/crons.ts`. Tanpa itu listing tidak refresh.
+
+**Testing the port:**
+
+1. Navigate `/dashboard/matcher` → tab shell render
+2. Tab Browse: klik "Seed Demo" → 8 listings muncul
+3. Tab ATS: pilih CV + paste JD → klik "Scan" → result card render dalam ~5-15s
+4. Klik history scan lama → detail dialog buka tanpa re-fetch AI
+5. Detail listing → "Generate Cover Letter" → output muncul (butuh `api.cv.actions.*`)
+6. Reload → scan history persist
+
+Run `_porting-guide.md` §9 checklist.

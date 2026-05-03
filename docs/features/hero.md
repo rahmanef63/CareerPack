@@ -1,13 +1,17 @@
-# Hero (Landing)
+# Hero (Marketing Landing)
+
+> **Portability tier:** S — slice-only.
 
 ## Tujuan
 
-Halaman marketing public untuk visitor belum login. Jual proposisi CareerPack (CV ATS, roadmap, checklist, AI) + CTA ke sign-up/login.
+Halaman marketing publik untuk visitor belum login. Jual proposisi
+(CV ATS, roadmap, checklist, AI agent) + CTA ke sign-up/login + tombol
+"Coba Demo" yang membuat sesi anonim dengan data sample.
 
 ## Route & Entry
 
 - URL: `/`
-- Page file: `frontend/app/(marketing)/page.tsx` — redirect `/dashboard` kalau sudah login
+- Page file: `frontend/app/(marketing)/page.tsx` — redirect `/dashboard` jika sudah login.
 - Slice: `frontend/src/slices/hero/`
 - Komponen utama: `HeroSection.tsx`
 
@@ -15,60 +19,80 @@ Halaman marketing public untuk visitor belum login. Jual proposisi CareerPack (C
 
 ```
 hero/
-├─ index.ts                      export { HeroSection }
-└─ components/HeroSection.tsx    IntersectionObserver untuk slide-up animation
+├─ index.ts                   export { HeroSection }
+└─ components/HeroSection.tsx IntersectionObserver slide-up + Demo CTA
 ```
 
 ## Data Flow
 
-Tidak ada data Convex. Pure static marketing page. CTA `onGetStarted` di-wire dari page ke `router.push("/login")`.
+Tidak ada query Convex langsung. Demo button delegasi ke `useAuth().loginAsDemo()` (Anonymous provider) → seed sample data lewat `seedForCurrentUser` → push to `/dashboard`.
 
 ## State Lokal
 
-- `heroRef` — anchor untuk `IntersectionObserver` yang tambah class `animate-slide-up` ke `.animate-on-scroll` children.
+- `heroRef` — anchor untuk `IntersectionObserver` (`animate-on-scroll` children).
+- `isDemoLoading` — guard CTA reentry while seeding.
 
 ## Dependensi
 
-- `@/shared/components/Logo` → `BrandMark`
-- `@/shared/components/ui/button`, `badge`
-- `lucide-react` icons (ArrowRight, Sparkles, Target, TrendingUp, Users, CheckCircle)
+- `@/shared/components/brand/Logo` → `BrandMark`.
+- `@/shared/hooks/useAuth` — `loginAsDemo`.
+- `@/shared/lib/notify` — sonner wrapper.
+- `@/shared/lib/routes` — `ROUTES.dashboard.home`.
+- shadcn `button`, `badge`.
+- `lucide-react` icons.
+- CSS keyframes from `shared/styles/App.css` (`@keyframes slide-up`).
 
 ## Catatan Desain
 
-- Hero langsung render bahkan saat auth state masih loading — redirect terjadi di `useEffect`. Trade-off: flash cepat, tapi content-first untuk SEO / open-graph.
-- Animasi scroll-triggered pakai CSS keyframes dari `shared/styles/App.css` (`@keyframes slide-up`).
+- Hero langsung render walau auth state masih loading; redirect via `useEffect`. Trade-off: SEO/OG content-first, kemungkinan flash kecil.
+- Demo session (`Anonymous` provider) seeds CV/checklist/roadmap contoh — useful untuk PWA install preview tanpa daftar dulu.
 
 ## Extending
 
-- Tambah section testimonial / pricing → append child section di `HeroSection`, tidak perlu route baru.
-- A/B test CTA → hook variant via `useUIPrefs` atau query param.
+- Section testimonial / pricing — append child di `HeroSection`.
+- A/B test CTA via `useUIPrefs` atau query param.
+- Native video player untuk preview produk (ganti `Play` icon dummy).
 
 ---
 
 ## Portabilitas
 
-**Tier:** S — slice-only, self-contained marketing landing component.
+**Tier:** S
 
-**Files (1):**
+**Files (1 slice + 1 page):**
 
 ```
 frontend/src/slices/hero/
+frontend/app/(marketing)/page.tsx                       # invokes <HeroSection />
 ```
 
 **cp:**
 
 ```bash
 SRC=~/projects/CareerPack DST=~/projects/<target>
-mkdir -p "$DST/frontend/src/slices"
+mkdir -p "$DST/frontend/src/slices" "$DST/frontend/app/(marketing)"
 cp -r "$SRC/frontend/src/slices/hero" "$DST/frontend/src/slices/"
+cp "$SRC/frontend/app/(marketing)/page.tsx" "$DST/frontend/app/(marketing)/"
 ```
 
-**Shared deps:** `@/shared/components/brand/Logo` (BrandMark). Copy or swap for your own logo component.
+**Shared deps:**
+- `@/shared/components/brand/Logo` (BrandMark)
+- `@/shared/hooks/useAuth` (only for demo CTA — replace with `() => router.push("/login")` if no demo flow desired)
+- `@/shared/lib/notify`, `@/shared/lib/routes`
 
 **Schema / npm / env:** none.
 
-**Integration:** import `<HeroSection />` in target's `app/(marketing)/page.tsx`.
+**Integration:** `<HeroSection onGetStarted={() => router.push("/login")} />`.
 
-**i18n:** Indonesian copy (features list, CTA labels). Bulk edit when transplanting.
+**i18n:** Indonesian feature list + CTA labels. Bulk edit on transplant.
 
-See `_porting-guide.md` for baseline stack requirements.
+**Common breakage:**
+- Demo CTA throws → port `Anonymous` provider in `convex/auth.ts` + `loginAsDemo` in `useAuth`. Or just remove the Demo button.
+- `ROUTES.dashboard.home` undefined → port `frontend/src/shared/lib/routes.ts` or hardcode `"/dashboard"`.
+
+**Testing:**
+1. Visit `/` while logged-out → hero renders, scroll triggers slide-up.
+2. Click "Coba Demo" → toast "Sesi demo dimulai" → land on `/dashboard` with sample data.
+3. Visit `/` while logged-in → auto-redirect `/dashboard`.
+
+See `_porting-guide.md` for baseline stack.

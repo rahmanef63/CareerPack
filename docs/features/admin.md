@@ -1,106 +1,124 @@
-# Admin Dashboard
+# Admin Dashboard (`/admin` route)
+
+> **Portability tier:** S — single page wrapper around `admin-panel` slice. The substantive admin functionality lives in [`admin-panel.md`](./admin-panel.md).
 
 ## Tujuan
 
-Panel admin internal — overview user, CV, application, AI usage + konfigurasi AI global. Visibility + operasi admin-only (bukan fitur end-user).
+Top-level role-gated page at `/admin`. Renders the same `<AdminPanel>`
+slice that's wrapped under `/dashboard/admin-panel`, but via the
+non-dashboard route so admins can deep-link without the dashboard
+shell. Historical: this used to be a dedicated `slices/admin/` slice
+with mock-data; that slice was retired and the route now just delegates
+to the live `admin-panel` slice.
 
 ## Route & Entry
 
 - URL: `/admin`
-- Page: `frontend/app/admin/page.tsx` (role guard)
-- Slice: `frontend/src/slices/admin/`
-- Komponen utama: `AdminDashboard.tsx`
+- Page: `frontend/app/admin/page.tsx`
+- Renders: `<AdminPanel />` from `@/slices/admin-panel`
+- Guard: `<RouteGuard mode="role" requiredRole="admin">`
 
-## Struktur Slice
+## Struktur
 
-```
-admin/
-├─ index.ts
-├─ components/AdminDashboard.tsx
-├─ types/index.ts               AdminStats, AIConfig
-└─ utils/mockDataGenerator.ts   generateAllMockData — placeholder sampling untuk UI dev
+There is **no `slices/admin/` folder anymore**. The page is a
+two-import wrapper:
+
+```tsx
+// frontend/app/admin/page.tsx
+import { RouteGuard } from "@/shared/components/auth/RouteGuard";
+import { AdminPanel } from "@/slices/admin-panel";
+
+export default function AdminPage() {
+  return (
+    <RouteGuard mode="role" requiredRole="admin">
+      <AdminPanel />
+    </RouteGuard>
+  );
+}
 ```
 
 ## Data Flow
 
-Saat ini mayoritas pakai **mock data** (`mockDataGenerator.ts`) — admin endpoint Convex belum wired. Stats hard-coded untuk development UI.
-
-Type contract tetap kontrak `AdminStats`:
-```ts
-{
-  totalUsers, activeUsers, totalCVs, totalApplications,
-  aiUsage: { totalRequests, totalTokens, lastMonth }
-}
-```
-
-Ke depan: wire ke Convex query (butuh admin-scoped queries di `convex/profile/` atau module baru `admin.ts` dengan `requireAdmin` guard).
+Identical to `admin-panel.md` — same slice, same Convex queries.
 
 ## Role Guard
 
-`app/admin/page.tsx`:
-```tsx
-if (!state.isAuthenticated) → /login
-else if (state.user?.role !== "admin") → /
-else → <AdminDashboard />
-```
+`RouteGuard mode="role" requiredRole="admin"` reads
+`useAuth().state.user?.role` (mirrored from `userProfiles.role`).
+Mismatch → redirect to `/dashboard`. Server enforcement still happens
+inside each Convex query/mutation (`requireAdmin`).
 
-Field `role` di-read dari `userProfile`. Saat ini semua user hard-code `"user"` di `useAuth.tsx`. Untuk bikin admin: manual update field role di Convex dashboard atau tambah kolom di schema `userProfiles`.
+Admin role bootstrap:
+- `ADMIN_BOOTSTRAP_EMAILS` env (comma-separated) auto-promoted on
+  first login.
+- Manual: edit `userProfiles.role` directly in Convex dashboard.
 
 ## Dependensi
 
-- `@/shared/hooks/useAuth` — role check
-- Imports mockDataGenerator yang pakai types lintas slice: `CVData`, `Application`, `ChecklistItem`, `InterviewSession`
-- shadcn: `card`, `table`, `badge`, `button`, `tabs`, `chart`
+- `@/shared/components/auth/RouteGuard`
+- `@/slices/admin-panel` — full implementation
+- See `admin-panel.md` for everything else
 
 ## Catatan Desain
 
-- Cross-slice type import di `mockDataGenerator.ts` = exception yang di-accept karena admin memang perlu agregasi semua domain. Tetap violate slice isolation — kalau cleanup ketat, pindah types ke `@/shared/types`.
-- Mock-first approach: UI bisa develop tanpa backend ready, tapi production wiring wajib sebelum ship.
+- The two routes (`/admin` and `/dashboard/admin-panel`) intentionally
+  render the same component. `/admin` skips the dashboard shell
+  (sidebar, bottom nav) — useful when admins want a focused full-page
+  view; `/dashboard/admin-panel` keeps shell consistency for casual
+  drop-ins.
+- The legacy `slices/admin/` directory with mock-data has been removed;
+  if you see a doc reference to `mockDataGenerator.ts`, it's stale.
 
 ## Extending
 
-1. **Backend guard helper** — `convex/_shared/auth.ts` tambah `requireAdmin(ctx)` yang cek `userProfile.role === "admin"`.
-2. **Admin module** — `convex/admin/`: `listAllUsers`, `getGlobalStats`, `updateUserRole`, `viewErrorLogs`.
-3. **Error log viewer** — tabel `errorLogs` sudah ada (lihat [../backend.md](../backend.md)) — admin query `orderBy timestamp desc` + filter source.
-4. **AI usage monitor** — aggregate dari `rateLimitEvents` per user + per key (`ai:minute`, `ai:day`).
-5. **Role editor** — bulk assign admin / moderator / user.
+See `admin-panel.md → Extending`.
 
 ---
 
 ## Portabilitas
 
-**Tier:** M — slice + Convex admin module + role-based guard.
+**Tier:** S — page wrapper only; the heavy lifting is in
+`admin-panel.md`.
 
-> **Note:** This is the **role-based** admin (multiple admins allowed, `userProfiles.role === "admin"`). For single-email super-admin, see `admin-panel.md`.
-
-**Files:**
+**Files untuk dicopy (1 page + dependency on admin-panel slice):**
 
 ```
-frontend/src/slices/admin/
-convex/admin/
-# Plus `requireAdmin` helper in convex/_shared/auth.ts (already there if auth ported)
+frontend/app/admin/page.tsx
+frontend/app/admin/error.tsx                       # if present, optional Next error boundary
 ```
 
 **cp:**
 
 ```bash
 SRC=~/projects/CareerPack DST=~/projects/<target>
-cp -r "$SRC/frontend/src/slices/admin" "$DST/frontend/src/slices/"
-cp "$SRC/convex/admin/"              "$DST/convex/"
+mkdir -p "$DST/frontend/app/admin"
+cp "$SRC/frontend/app/admin/page.tsx"  "$DST/frontend/app/admin/"
+cp "$SRC/frontend/app/admin/error.tsx" "$DST/frontend/app/admin/" 2>/dev/null || true
 ```
 
-**Schema:** `userProfiles.role` field (`v.union(v.literal("admin"), v.literal("moderator"), v.literal("user"))` optional). Add `roleAuditLogs` table for audit trail.
+**Prerequisite:** port `admin-panel` first (see `admin-panel.md`).
+The page won't compile without `<AdminPanel>` available.
 
-**Convex api.d.ts:** add `admin`.
+**Schema:** none beyond `userProfiles.role` (`v.union(v.literal("admin"), v.literal("user"))`).
 
-**npm deps:** none.
+**Convex api.d.ts:** none beyond what `admin-panel` already requires.
 
-**Env vars:** `ADMIN_BOOTSTRAP_EMAILS` (comma-separated emails auto-promoted on first login).
+**npm deps / env vars:** see `admin-panel.md`. Add `ADMIN_BOOTSTRAP_EMAILS`.
 
-**Nav:** `/admin` route (NOT under `/dashboard`). RouteGuard mode="role" requiredRole="admin".
+**Nav:** the route lives **outside `(dashboard)/`** so it has no
+`dashboardRoutes.tsx` entry. Linking from header user menu via plain
+`<Link href="/admin">`.
 
-**i18n:** admin action labels, audit log entries in Indonesian.
+**i18n:** all strings come from `admin-panel`.
 
-**When to use vs admin-panel:** admin = user role management (promote/demote), moderator CRUD. admin-panel = single-email analytics. They can coexist.
+**Common breakage:**
+- `RouteGuard` mode="role" not implemented → port the role branch from
+  `frontend/src/shared/components/auth/RouteGuard.tsx`.
+- `userProfiles.role` field missing → add to schema; default `"user"`.
 
-See `_porting-guide.md`.
+**Testing:**
+1. Non-admin visits `/admin` → redirect to `/dashboard`.
+2. Admin (role="admin") visits → `<AdminPanel>` renders without sidebar.
+3. Bootstrap email signs up first time → role auto-set to `"admin"`.
+
+Run `_porting-guide.md` §9 checklist.

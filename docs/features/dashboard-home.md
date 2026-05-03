@@ -1,13 +1,17 @@
 # Dashboard Home
 
+> **Portability tier:** M — slice + multiple shared hooks; reads from 4+ Convex domains.
+
 ## Tujuan
 
-Landing setelah login. Rangkum metrics utama (lamaran aktif, CV terbaru, interview stats) + agenda mendatang + quick action ke feature lain.
+Landing setelah login. Rangkum metrics utama (lamaran aktif, profile
+completeness, tren mingguan), upcoming agenda, onboarding wizard
+untuk profil baru, dan quick-action ke fitur lain.
 
 ## Route & Entry
 
 - URL: `/dashboard`
-- Resolved dari catch-all (slug `""` di `dashboardRoutes.tsx`)
+- Resolved via catch-all (slug `""` di `dashboardRoutes.tsx`)
 - Slice: `frontend/src/slices/dashboard-home/`
 - Komponen utama: `DashboardHome.tsx`
 
@@ -15,72 +19,111 @@ Landing setelah login. Rangkum metrics utama (lamaran aktif, CV terbaru, intervi
 
 ```
 dashboard-home/
-├─ index.ts
-└─ components/DashboardHome.tsx
+├─ index.ts                         export { DashboardHome }
+└─ components/
+   ├─ DashboardHome.tsx             Aggregator + layout
+   ├─ DashboardTrendChart.tsx       Recharts AreaChart (lamaran/minggu)
+   ├─ OnboardingWizard.tsx          First-run profil wizard (gated by hasProfile)
+   └─ ProfileCompletenessCard.tsx   Progress + jump-links to settings
 ```
 
 ## Data Flow
 
-Read-only aggregator — tidak punya mutation sendiri. Subscribes ke:
+Read-only aggregator. Subscribes via shared hooks:
 
-| Hook | Sumber |
+| Hook | Convex |
 |---|---|
-| `useApplications()` | `@/shared/hooks` → `api.applications.queries.getUserApplications` |
-| `useAgenda()` | `@/shared/hooks` → `api.calendar.queries.listEvents` |
-| `useAuth()` | user profile + session |
+| `useApplications()` | `api.applications.queries.getUserApplications` |
+| `useAgenda()` | `api.calendar.queries.listEvents` |
+| `useAuth()` | session + `api.profile.queries.getCurrentUser` |
+| `useQuery(api.profile.queries.getProfileCompleteness)` | Per-section completion percent |
 
-Data yang di-compute client-side (via `useMemo`):
-- Distribusi status lamaran (applied / screening / interview / offer / rejected)
-- Area chart lamaran per minggu (pakai Recharts)
-- 3 agenda terdekat (sort `date`, slice 3)
+Client-side derivations (memoized):
+- Distribusi status lamaran (applied / screening / interview / offer / rejected).
+- Area chart per minggu via `DashboardTrendChart` (lazy-imported).
+- 3 agenda terdekat (sort `date`, slice 3).
+- Profile completeness rings + jump CTA.
+
+Onboarding wizard mounts when `getCurrentUser()` returns no `userProfile` — collects fullName, location, targetRole, experienceLevel, then calls `api.profile.mutations.createOrUpdateProfile`. Bypassable via "skip" → resumable from settings later.
 
 ## State Lokal
 
-Minim — hanya memo derivation. Tidak ada form input.
+- `wizardOpen` — onboarding modal control.
+- `chartRangeDays` (default 56) — for trend chart.
+- Memoized derivations only; no form state outside wizard.
 
 ## Dependensi
 
-- Cross-slice hooks: `useApplications`, `useAgenda`, `useAuth`
-- UI: shadcn `card`, `button`, `badge`, `separator`, `chart`
-- Recharts: `Area`, `AreaChart`, `CartesianGrid`, `XAxis`
-- `@/shared/components/ErrorBoundary` per-section
+- `@/shared/hooks/useApplications`, `useAgenda`, `useAuth`.
+- `@/shared/components/error/ErrorBoundary` per-section.
+- `@/shared/components/ui/responsive-tooltip`, `responsive-page-header`, `card`, `button`, `badge`, `separator`.
+- `@/shared/components/onboarding/QuickFillButton`.
+- `recharts` — `AreaChart`, `CartesianGrid`, `XAxis`.
+- `lucide-react`.
 
 ## Catatan Desain
 
-- Chart config pakai CSS custom property `var(--chart-sky)` dari `shared/styles/index.css` supaya ikut tema dark/light.
-- Quick action card pakai `Link` ke `/dashboard/<slug>` — jangan hardcode fallback tanpa prefix `/dashboard` (regresi yang sudah di-fix sebelumnya).
+- **Recharts CSS tokens.** Chart colors come from `var(--chart-sky)` etc., declared in `shared/styles/index.css`, so dark/light theme switch is automatic.
+- **Quick-action prefix.** All `<Link>` use full `/dashboard/<slug>` — historic regression lost the prefix and fell back to marketing route.
+- **Wizard idempotent.** Re-opening the wizard from settings overwrites; no duplicate `userProfiles` rows possible (single-row constraint by `userId` index).
+- **Lazy chart.** `DashboardTrendChart` imported via `next/dynamic` — keeps recharts out of the initial bundle for users who never scroll.
 
 ## Extending
 
-- Tambah widget "skill progress" → subscribe ke `api.roadmap.queries.getUserRoadmap`, hitung persentase.
-- Personalisasi layout drag-and-drop → simpan order di `userProfiles` (butuh schema migration).
+- "Skill progress" widget — subscribe to `api.roadmap.queries.getUserRoadmap`, compute %.
+- Drag-and-drop layout customization — persist order on `userProfiles` (schema migration).
+- Stacked status histogram in trend chart.
 
 ---
 
 ## Portabilitas
 
-**Tier:** M — slice + reads multiple Convex tables for stats.
+**Tier:** M
 
-**Files (1):**
+**Files untuk dicopy:**
 
 ```
+# Slice
 frontend/src/slices/dashboard-home/
+
+# Shared hooks (likely already present if those slices ported)
+frontend/src/shared/hooks/useApplications.ts
+frontend/src/shared/hooks/useAgenda.ts
+frontend/src/shared/hooks/useAuth.tsx
+frontend/src/shared/components/onboarding/                # QuickFillButton
 ```
 
 **cp:**
 
 ```bash
-cp -r ~/projects/CareerPack/frontend/src/slices/dashboard-home ~/projects/<target>/frontend/src/slices/
+SRC=~/projects/CareerPack DST=~/projects/<target>
+cp -r "$SRC/frontend/src/slices/dashboard-home" "$DST/frontend/src/slices/"
+cp "$SRC/frontend/src/shared/hooks/useApplications.ts" "$DST/frontend/src/shared/hooks/"
+cp "$SRC/frontend/src/shared/hooks/useAgenda.ts"       "$DST/frontend/src/shared/hooks/"
+cp -r "$SRC/frontend/src/shared/components/onboarding/." "$DST/frontend/src/shared/components/onboarding/"
 ```
 
-**Shared deps:** `useAuth`, shadcn Card/Badge/Progress, lucide-react icons.
+**Backend deps:** `api.profile.queries.{getCurrentUser, getProfileCompleteness}`, `api.applications.queries.getUserApplications`, `api.calendar.queries.listEvents`. Stub these to empty arrays for greenfield targets without those slices yet.
 
-**Backend deps:** `api.profile.queries.getUserStats`, `api.applications.queries.getUserApplications`, etc. — requires `users.ts`, `applications.ts` modules ported. For a clean-slate target with no data yet, stub these queries to return empty arrays.
+**Schema additions:** none. Reads existing tables.
 
-**Schema / npm / env:** none specific.
+**Convex api.d.ts:** depends on `profile`, `applications`, `calendar` modules.
 
-**Integration:** register as `""` (root) key in `dashboardRoutes.tsx`.
+**npm deps:**
 
-**i18n:** heavy Indonesian copy — greeting "Halo, {firstName}", KPI labels, "Langkah Selanjutnya". Bulk edit.
+```bash
+pnpm -F frontend add recharts
+```
 
-See `_porting-guide.md`.
+**Integration:** register as `""` (root) key in `dashboardRoutes.tsx`. Catch-all picks empty segment → DashboardHome.
+
+**i18n:** Heavy Indonesian copy — greeting "Halo, {firstName}", KPI labels, "Langkah Selanjutnya". Bulk edit when transplanting.
+
+**Common breakage:**
+
+- Onboarding wizard fires on every reload → `getCurrentUser` is throwing instead of returning `null` — check `optionalUser` is used, not `requireUser`.
+- Trend chart blank on first day → empty bucket array; verify `useApplications` returns empty array (not `undefined`) for empty state.
+
+**Testing:** sign in fresh → wizard appears → skip → completeness card shows < 100% → fill missing fields from settings → percent updates live (Convex reactivity).
+
+Run `_porting-guide.md` §9 checklist.

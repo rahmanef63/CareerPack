@@ -17,7 +17,7 @@ hook + drop-zone component.
 | `convertImageToWebP()` | Pure fn | Canvas re-encode (quality 0.9, EXIF strip, original resolution) |
 | `applyCropToImage()` | Pure fn | Canvas source-rect crop + re-encode |
 | `describeConversion()` | Pure fn | "3,4 MB → 1,1 MB (−68%)" formatter |
-| `files` table + `files.ts` | Convex backend | Tenant-scoped metadata + enumeration-safe getFileUrl |
+| `files` table + `convex/files/` | Convex backend | Tenant-scoped metadata + enumeration-safe getFileUrl. Module is a folder (`schema.ts`, `queries.ts`, `mutations.ts`) — paths: `api.files.queries.{getFileUrl,listMyFiles}` and `api.files.mutations.{generateUploadUrl,saveFile,updateFileMetadata,deleteFile}` |
 
 ## Data Flow
 
@@ -86,8 +86,10 @@ ctx.storage.getUrl(storageId) OR null  (enumeration-safe)
 **Files untuk dicopy (6 files):**
 
 ```
-# Backend
-convex/files/                                              # 5 fns: generateUploadUrl, saveFile, getFileUrl, listMyFiles, deleteFile
+# Backend (folder, not flat file)
+convex/files/                                              # schema.ts + queries.ts + mutations.ts
+# Functions: api.files.queries.{getFileUrl, listMyFiles}
+#            api.files.mutations.{generateUploadUrl, saveFile, updateFileMetadata, deleteFile}
 # (also add `files` table to target's convex/schema.ts — see below)
 
 # Pure utilities (no React)
@@ -110,7 +112,7 @@ mkdir -p "$DST/frontend/src/shared/lib"
 mkdir -p "$DST/frontend/src/shared/hooks"
 mkdir -p "$DST/frontend/src/shared/components/files"
 
-cp "$SRC/convex/files/"                                    "$DST/convex/"
+cp -r "$SRC/convex/files/"                                 "$DST/convex/"
 cp "$SRC/frontend/src/shared/lib/imageConvert.ts"            "$DST/frontend/src/shared/lib/"
 cp "$SRC/frontend/src/shared/hooks/useFileUpload.ts"         "$DST/frontend/src/shared/hooks/"
 cp "$SRC/frontend/src/shared/components/files/FileUpload.tsx" "$DST/frontend/src/shared/components/files/"
@@ -137,9 +139,11 @@ files: defineTable({
 **Convex api.d.ts** — add:
 
 ```ts
-import type * as files from "../files.js";
-// …inside fullApi:
-files: typeof files;
+import type * as files_mutations from "../files/mutations.js";
+import type * as files_queries from "../files/queries.js";
+// …inside fullApi (Convex auto-derives once you run `convex dev` — but if you're
+// hand-editing api.d.ts):
+files: { mutations: typeof files_mutations; queries: typeof files_queries; };
 ```
 
 **npm deps:**

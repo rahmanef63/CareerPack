@@ -43,14 +43,18 @@ Tier column refers to porting effort — see `_porting-guide.md` §8:
 | `mock-interview` | `/dashboard/interview` | **L** | [mock-interview.md](./mock-interview.md) |
 | `financial-calculator` | `/dashboard/calculator` | **L** | [financial-calculator.md](./financial-calculator.md) |
 | `portfolio` | `/dashboard/portfolio` | **L** | [portfolio.md](./portfolio.md) |
+| `personal-branding` (public profile builder) | `/dashboard/personal-branding`, `/[slug]` | **XL** | [personal-branding.md](./personal-branding.md) |
 | **Secondary tools** | | | |
 | `matcher` (job matching) | `/dashboard/matcher` | **M** | [matcher.md](./matcher.md) |
 | `networking` (contacts) | `/dashboard/networking` | **M** | [networking.md](./networking.md) |
 | `notifications` | `/dashboard/notifications` | **M** | [notifications.md](./notifications.md) |
+| `library` (content library) | `/dashboard/library` | **M** | [library.md](./library.md) |
+| `database` (per-user table hub) | `/dashboard/database` | **M** | [database.md](./database.md) |
+| `help` (pusat bantuan) | `/dashboard/help` | **S** | [help.md](./help.md) |
 | **Settings + admin** | | | |
 | `settings` (multi-section) | `/dashboard/settings` | **L** | [settings.md](./settings.md) |
 | `ai-settings` | `/dashboard/ai-settings` | **M** | [ai-settings.md](./ai-settings.md) |
-| `admin` (role-based) | `/admin` | **M** | [admin.md](./admin.md) |
+| `admin` (role-gated `/admin` route) | `/admin` | **S** | [admin.md](./admin.md) |
 
 ## How to use for porting
 
