@@ -30,6 +30,9 @@ Tier column refers to porting effort — see `_porting-guide.md` §8:
 | File upload (Convex storage + WebP convert + crop) | — | **XL** | [file-upload.md](./file-upload.md) |
 | Auth (`@convex-dev/auth` + PBKDF2 + JWT) | `/login`, `/forgot-password`, `/reset-password/[token]` | **XL** | [auth.md](./auth.md) |
 | AI Agent (chat console + action bus + slash commands) | global FAB | **XL** | [ai-agent.md](./ai-agent.md) |
+| Responsive shell + 14 responsive-* shadcn wrappers | wraps `(dashboard)/` | **XL** | [responsive-shell.md](./responsive-shell.md) |
+| PWA shell (sw.js + offline + install + theme-color + bottom-nav) | global | **L** | [pwa.md](./pwa.md) |
+| Theme Preset System (mode + 36 OKLCH presets + PWA chrome sync) | — | **L** | [theme-preset.md](./theme-preset.md) |
 | Admin Panel (super-admin analytics) | `/dashboard/admin-panel` | **L** | [admin-panel.md](./admin-panel.md) |
 | **Landing + dashboard shell** | | | |
 | `hero` (marketing landing) | `/` | **S** | [hero.md](./hero.md) |
