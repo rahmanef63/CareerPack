@@ -32,7 +32,7 @@ Last updated: 2026-05-01.
 
 `admin-panel`, `ai-agent`, `ai-settings`, `auth`, `calendar`, `career-dashboard`, `cv-generator`, `dashboard-home`, `database`, `document-checklist`, `financial-calculator`, `help`, `hero`, `library`, `matcher`, `mock-interview`, `networking`, `notifications`, `personal-branding`, `portfolio`, `settings`, `skill-roadmap`.
 
-AI manifest coverage: 9/22 — `settings`, `calendar`, `career-dashboard` (applications), `networking` (contacts), `document-checklist` (documents), `cv-generator`, `skill-roadmap`, `matcher`, `mock-interview`. Remaining productive slices without manifest: `financial-calculator`, `portfolio`, `personal-branding`, `notifications`. Passive slices (no AI surface needed): `auth`, `hero`, `dashboard-home`, `ai-agent`, `ai-settings`, `admin-panel`, `library`, `help`, `database`.
+AI manifest coverage: 22/22 — every slice exports a `manifest.ts` and is registered in `sliceRegistry`. Skill density varies by purpose: productive slices (CV, calendar, applications, contacts, documents, roadmap, matcher, interview, financial, portfolio, notifications, branding) expose mutation/query skills via capability binders; passive slices (auth, hero, dashboard-home, ai-agent, ai-settings, admin-panel, library, help, database) register for nav + route consolidation only or expose 1 read-only skill. Admin-panel intentionally exposes no skills (super-admin only; admin actions stay in panel UI).
 
 ## Known Work Remaining
 
@@ -57,7 +57,7 @@ Dulu split dual-agent → akhirnya dikerjakan single-agent, semua selesai di bra
 Per audit ulang setelah manifest expansion. See [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05-05-en-i18n-discovery.md) for the i18n plan; entries below cover the rest.
 
 1. Konsolidasi 3 dispatch path AI (legacy `useCVAIActions` + `slashCommands` + manifest binder) → satu jalur manifest
-2. Manifest coverage 4 slice produktif tersisa: `financial-calculator`, `portfolio`, `personal-branding`, `notifications`
+2. ~~Manifest coverage 4 slice produktif tersisa~~ ✓ landed 2026-05-05 (`6c40eac`); 22/22 coverage achieved 2026-05-05
 3. Per-IP rate limit `requestReset` (migrate ke `httpAction`)
 4. `userProfiles.lastActiveAt` heartbeat tracking
 5. Backup cron eksekusi (script ready 2026-05-01, install ke VPS pending)

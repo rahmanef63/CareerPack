@@ -456,6 +456,30 @@ export const DEFAULT_AI_TOOLS: ReadonlyArray<AiToolSeed> = [
       '{ "availableForHire": "boolean", "availabilityNote?": "string" }',
   },
 
+  // dashboard / ai-settings / library / help (passive slice queries)
+  {
+    type: "dashboard.get-overview",
+    label: "Ringkasan dashboard saya",
+    description: "Query — completeness profil + role + targetRole.",
+  },
+  {
+    type: "ai.get-config",
+    label: "Lihat konfigurasi AI saya",
+    description: "Query — provider + model aktif (apiKey di-strip).",
+  },
+  {
+    type: "library.list-files",
+    label: "Lihat file di library",
+    description: "Query — daftar file user upload.",
+  },
+  {
+    type: "help.submit-feedback",
+    label: "Kirim feedback ke admin",
+    description:
+      "Submit feedback (subject 1-100, message 5-2000 char).",
+    payloadSchema: '{ "subject": "string", "message": "string" }',
+  },
+
   // settings / profile
   {
     type: "settings.update-phone",

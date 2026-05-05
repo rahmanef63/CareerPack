@@ -280,4 +280,47 @@ export const SKILL_HANDLERS: Record<string, SkillHandler> = {
       ctaUrl: p.publicCtaUrl ?? null,
     };
   },
+
+  "dashboard.get-overview": async (ctx) => {
+    const completeness = await ctx.runQuery(
+      api.profile.queries.getProfileCompleteness,
+      {},
+    );
+    const me = await ctx.runQuery(api.profile.queries.getCurrentUser, {});
+    return {
+      profileCompleteness: completeness ?? null,
+      role: me?.profile?.role ?? "user",
+      targetRole: me?.profile?.targetRole ?? null,
+      fullName: me?.profile?.fullName ?? null,
+      experienceLevel: me?.profile?.experienceLevel ?? null,
+    };
+  },
+
+  "ai.get-config": async (ctx) => {
+    const cfg = await ctx.runQuery(api.ai.queries.getMyAISettings, {});
+    if (!cfg) return null;
+    // Strip apiKey path entirely; expose only provider + model.
+    return {
+      provider: cfg.provider,
+      model: cfg.model,
+      baseUrl: cfg.baseUrl,
+      enabled: cfg.enabled,
+      hasKey: cfg.hasKey,
+      keyPreview: cfg.keyPreview,
+    };
+  },
+
+  "library.list-files": async (ctx) => {
+    const files = await ctx.runQuery(api.files.queries.listMyFiles, {});
+    return files.slice(0, 50).map((f) => ({
+      fileId: f._id,
+      fileName: f.fileName,
+      fileType: f.fileType,
+      fileSize: f.fileSize,
+      tags: f.tags ?? [],
+      note: f.note ?? "",
+      createdAt: f.createdAt,
+      usedIn: f.usedIn ?? [],
+    }));
+  },
 };

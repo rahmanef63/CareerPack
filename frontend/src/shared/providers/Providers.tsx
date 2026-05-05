@@ -32,6 +32,7 @@ import { FinancialCapabilities } from "@/slices/financial-calculator"
 import { PortfolioCapabilities } from "@/slices/portfolio"
 import { NotificationsCapabilities } from "@/slices/notifications"
 import { BrandingCapabilities } from "@/slices/personal-branding"
+import { HelpCapabilities } from "@/slices/help"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -56,6 +57,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 <PortfolioCapabilities />
                 <NotificationsCapabilities />
                 <BrandingCapabilities />
+                <HelpCapabilities />
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />

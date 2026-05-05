@@ -12,6 +12,15 @@ import { financialCalculatorManifest } from "@/slices/financial-calculator";
 import { portfolioManifest } from "@/slices/portfolio";
 import { notificationsManifest } from "@/slices/notifications";
 import { personalBrandingManifest } from "@/slices/personal-branding";
+import { authManifest } from "@/slices/auth";
+import { heroManifest } from "@/slices/hero";
+import { dashboardHomeManifest } from "@/slices/dashboard-home";
+import { aiAgentManifest } from "@/slices/ai-agent";
+import { aiSettingsManifest } from "@/slices/ai-settings";
+import { adminPanelManifest } from "@/slices/admin-panel";
+import { libraryManifest } from "@/slices/library";
+import { helpManifest } from "@/slices/help";
+import { databaseManifest } from "@/slices/database";
 
 /**
  * Central slice manifest registry.
@@ -47,6 +56,16 @@ export const SLICE_REGISTRY: ReadonlyArray<SliceManifest> = [
   portfolioManifest,
   notificationsManifest,
   personalBrandingManifest,
+  // Passive / route-only / minimal-skill slices.
+  authManifest,
+  heroManifest,
+  dashboardHomeManifest,
+  aiAgentManifest,
+  aiSettingsManifest,
+  adminPanelManifest,
+  libraryManifest,
+  helpManifest,
+  databaseManifest,
 ];
 
 /* ────────────────────────────────────────────────────────────────
