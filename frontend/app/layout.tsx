@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
+import Script from "next/script"
 import {
   DM_Sans,
   Fira_Code,
@@ -188,6 +189,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    google: "MJabZyJ6aQpSRew2ItvrV30bz6wEjM55bkpmWIY4MaM",
+  },
 }
 
 export const viewport: Viewport = {
@@ -229,6 +233,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <Providers>{children}</Providers>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-P1B124M70R"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-P1B124M70R');`}
+        </Script>
       </body>
     </html>
   )
