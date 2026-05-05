@@ -30,7 +30,7 @@ CareerPack/
 │  │  │  ├─ styles/                     index.css (Tailwind + tokens), App.css (animations)
 │  │  │  ├─ types/                      Cross-cutting types (auth, agent, api, chat, …)
 │  │  │  └─ data/                       indonesianData.ts (province/city lookup)
-│  │  └─ slices/                        13 feature slices (lihat docs/features)
+│  │  └─ slices/                        22 feature slices (lihat docs/features)
 │  ├─ public/                           manifest.webmanifest, sw.js, icons, brand svgs
 │  ├─ next.config.ts                    output: "standalone", outputFileTracingRoot ke root
 │  ├─ tsconfig.json                     `@/*` → `./src/*`

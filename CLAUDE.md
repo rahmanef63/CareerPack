@@ -50,7 +50,7 @@ Three route groups under `frontend/app/`:
 
 ### Slice pattern
 
-`frontend/src/slices/<kebab-name>/` — 14 feature slices (`cv-generator`, `ai-agent`, `calendar`, `career-dashboard`, `skill-roadmap`, `document-checklist`, `mock-interview`, `financial-calculator`, `dashboard-home`, `settings`, `ai-settings`, `hero`, `auth`, `admin`). Each exports public API via `index.ts` barrel.
+`frontend/src/slices/<kebab-name>/` — 22 feature slices (`admin-panel`, `ai-agent`, `ai-settings`, `auth`, `calendar`, `career-dashboard`, `cv-generator`, `dashboard-home`, `database`, `document-checklist`, `financial-calculator`, `help`, `hero`, `library`, `matcher`, `mock-interview`, `networking`, `notifications`, `personal-branding`, `portfolio`, `settings`, `skill-roadmap`). Each exports public API via `index.ts` barrel.
 
 Slice folders contain `components/`, and optionally `hooks/`, `lib/`, `utils/`, `types/`, `constants/`, `config.ts`. Empty folders with `export {}` are intentional feature-contract scaffolding — don't delete them.
 

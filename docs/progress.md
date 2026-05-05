@@ -28,11 +28,11 @@ Last updated: 2026-05-01.
 - [x] GitHub Actions: CI (typecheck+lint+test+build) + auto-deploy Convex on `convex/**` push
 - [x] Docs lengkap: `docs/architecture.md`, `backend.md`, `auth.md`, `development.md`, `deployment.md`, `features/*`
 
-## Active Slices (18)
+## Active Slices (22)
 
-`hero`, `auth`, `dashboard-home`, `cv-generator`, `calendar`, `career-dashboard`, `skill-roadmap`, `document-checklist`, `mock-interview`, `financial-calculator`, `settings`, `ai-agent`, `ai-settings`, `admin`, `matcher`, `networking`, `portfolio`, `notifications`.
+`admin-panel`, `ai-agent`, `ai-settings`, `auth`, `calendar`, `career-dashboard`, `cv-generator`, `dashboard-home`, `database`, `document-checklist`, `financial-calculator`, `help`, `hero`, `library`, `matcher`, `mock-interview`, `networking`, `notifications`, `personal-branding`, `portfolio`, `settings`, `skill-roadmap`.
 
-Placeholder (remaining): `help` — rendered via `DashboardPlaceholders`.
+AI manifest coverage: 9/22 — `settings`, `calendar`, `career-dashboard` (applications), `networking` (contacts), `document-checklist` (documents), `cv-generator`, `skill-roadmap`, `matcher`, `mock-interview`. Remaining productive slices without manifest: `financial-calculator`, `portfolio`, `personal-branding`, `notifications`. Passive slices (no AI surface needed): `auth`, `hero`, `dashboard-home`, `ai-agent`, `ai-settings`, `admin-panel`, `library`, `help`, `database`.
 
 ## Known Work Remaining
 
@@ -46,10 +46,26 @@ Dulu split dual-agent → akhirnya dikerjakan single-agent, semua selesai di bra
 
 ### Follow-ups (next round)
 
-- [ ] V2 password reset: integrasi email delivery (Resend/SMTP) — ganti `errorLogs` insert di `convex/passwordReset.ts`
-- [ ] Seed admin user awal — sementara harus manual `updateUserRole` via Convex dashboard
-- [ ] Rate limit per-IP untuk `requestReset` (saat ini hanya default Convex)
-- [ ] Activity tracking → `userProfiles.lastActiveAt` supaya `admin.listAllUsers` bisa nyajikan kolom itu (sekarang optional dan selalu absent)
+- [x] V2 password reset: integrasi email delivery — Resend via `convex/_shared/email.ts`, scheduled via internal action `deliverResetEmail` (landed 2026-05-01)
+- [x] Rate limit per-email untuk `requestReset` — 5 req/hour bucket keyed by user._id (landed 2026-05-01). Per-IP masih open (butuh migrate `requestReset` → `httpAction`).
+- [ ] Seed admin user awal — masih harus manual `updateUserRole` via Convex dashboard
+- [ ] Per-IP rate limit `requestReset` (saat ini hanya per-email)
+- [ ] Activity tracking → `userProfiles.lastActiveAt` supaya `admin.listAllUsers` bisa nyajikan kolom itu
+
+### Backlog snapshot — 2026-05-05
+
+Per audit ulang setelah manifest expansion. See [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05-05-en-i18n-discovery.md) for the i18n plan; entries below cover the rest.
+
+1. Konsolidasi 3 dispatch path AI (legacy `useCVAIActions` + `slashCommands` + manifest binder) → satu jalur manifest
+2. Manifest coverage 4 slice produktif tersisa: `financial-calculator`, `portfolio`, `personal-branding`, `notifications`
+3. Per-IP rate limit `requestReset` (migrate ke `httpAction`)
+4. `userProfiles.lastActiveAt` heartbeat tracking
+5. Backup cron eksekusi (script ready 2026-05-01, install ke VPS pending)
+6. EN i18n phase 1 (next-intl + `[locale]` segment)
+7. AI tool-call output eval suite (vitest snapshot untuk `parseJobFromText` + `parseImportText` JSON shape)
+8. Notification cron cadence: bump dari hourly ke 15-min untuk akurasi reminder
+9. Roadmap template content gap — tambah seed untuk domain non-tech (business, health, government, hospitality)
+10. Sentry / observability — surface `errorLogs` ke admin UI atau wire external sink
 
 ## Smoke Test Checklist
 
