@@ -1,26 +1,34 @@
 import type { SliceManifest, SliceSkill } from "@/shared/types/sliceManifest";
-import { settingsManifest } from "@/slices/settings";
-import { calendarManifest } from "@/slices/calendar";
-import { careerDashboardManifest } from "@/slices/career-dashboard";
-import { networkingManifest } from "@/slices/networking";
-import { documentChecklistManifest } from "@/slices/document-checklist";
-import { cvGeneratorManifest } from "@/slices/cv-generator";
-import { skillRoadmapManifest } from "@/slices/skill-roadmap";
-import { matcherManifest } from "@/slices/matcher";
-import { mockInterviewManifest } from "@/slices/mock-interview";
-import { financialCalculatorManifest } from "@/slices/financial-calculator";
-import { portfolioManifest } from "@/slices/portfolio";
-import { notificationsManifest } from "@/slices/notifications";
-import { personalBrandingManifest } from "@/slices/personal-branding";
-import { authManifest } from "@/slices/auth";
-import { heroManifest } from "@/slices/hero";
-import { dashboardHomeManifest } from "@/slices/dashboard-home";
-import { aiAgentManifest } from "@/slices/ai-agent";
-import { aiSettingsManifest } from "@/slices/ai-settings";
-import { adminPanelManifest } from "@/slices/admin-panel";
-import { libraryManifest } from "@/slices/library";
-import { helpManifest } from "@/slices/help";
-import { databaseManifest } from "@/slices/database";
+// Import each manifest from its `manifest.ts` file directly — NOT via the
+// slice barrel `@/slices/<slice>`. Reason: ai-agent's barrel re-exports
+// `AIAgentConsole` / `slashCommands` / `ApproveActionCard`, which import
+// `ALL_SKILLS` / `SKILLS_BY_*` from THIS module. Going via the barrel
+// would close the cycle and break with a `Cannot access X before
+// initialization` TDZ error in production minified bundles. Direct
+// `/manifest` imports keep this file's transitive graph at lucide +
+// type-only — no React, no Convex, no slice components.
+import { settingsManifest } from "@/slices/settings/manifest";
+import { calendarManifest } from "@/slices/calendar/manifest";
+import { careerDashboardManifest } from "@/slices/career-dashboard/manifest";
+import { networkingManifest } from "@/slices/networking/manifest";
+import { documentChecklistManifest } from "@/slices/document-checklist/manifest";
+import { cvGeneratorManifest } from "@/slices/cv-generator/manifest";
+import { skillRoadmapManifest } from "@/slices/skill-roadmap/manifest";
+import { matcherManifest } from "@/slices/matcher/manifest";
+import { mockInterviewManifest } from "@/slices/mock-interview/manifest";
+import { financialCalculatorManifest } from "@/slices/financial-calculator/manifest";
+import { portfolioManifest } from "@/slices/portfolio/manifest";
+import { notificationsManifest } from "@/slices/notifications/manifest";
+import { personalBrandingManifest } from "@/slices/personal-branding/manifest";
+import { authManifest } from "@/slices/auth/manifest";
+import { heroManifest } from "@/slices/hero/manifest";
+import { dashboardHomeManifest } from "@/slices/dashboard-home/manifest";
+import { aiAgentManifest } from "@/slices/ai-agent/manifest";
+import { aiSettingsManifest } from "@/slices/ai-settings/manifest";
+import { adminPanelManifest } from "@/slices/admin-panel/manifest";
+import { libraryManifest } from "@/slices/library/manifest";
+import { helpManifest } from "@/slices/help/manifest";
+import { databaseManifest } from "@/slices/database/manifest";
 
 /**
  * Central slice manifest registry.
