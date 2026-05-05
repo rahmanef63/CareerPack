@@ -5,6 +5,9 @@ import { careerDashboardManifest } from "@/slices/career-dashboard";
 import { networkingManifest } from "@/slices/networking";
 import { documentChecklistManifest } from "@/slices/document-checklist";
 import { cvGeneratorManifest } from "@/slices/cv-generator";
+import { skillRoadmapManifest } from "@/slices/skill-roadmap";
+import { matcherManifest } from "@/slices/matcher";
+import { mockInterviewManifest } from "@/slices/mock-interview";
 
 /**
  * Central slice manifest registry.
@@ -33,8 +36,10 @@ export const SLICE_REGISTRY: ReadonlyArray<SliceManifest> = [
   networkingManifest,
   documentChecklistManifest,
   cvGeneratorManifest,
-  // future: skill-roadmap, mock-interview, matcher,
-  // financial-calculator, portfolio, personal-branding, …
+  skillRoadmapManifest,
+  matcherManifest,
+  mockInterviewManifest,
+  // future: financial-calculator, portfolio, personal-branding, …
   // (one line each as their manifests land).
 ];
 

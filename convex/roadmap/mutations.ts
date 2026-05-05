@@ -251,3 +251,82 @@ export const resetRoadmap = mutation({
     if (existing) await ctx.db.delete(existing._id);
   },
 });
+
+/**
+ * Seed the user's active roadmap from a public template slug.
+ *
+ * Server-side equivalent of the client effect in `useSkillRoadmap`
+ * (slice's auto-seed flow), enabling AI agent + scripted callers to
+ * start a roadmap with one round-trip. Does NOT call seedRoadmap —
+ * that has a different validator shape and is meant for the client
+ * effect that already flattens nodes via `buildTreeFromNodes`. Here
+ * the template's flat node array maps directly onto the skills shape.
+ */
+export const startFromTemplate = mutation({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const slug = trimLen("Slug", args.slug, MAX_PATH_LEN).toLowerCase();
+
+    const tpl = await ctx.db
+      .query("roadmapTemplates")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (!tpl || !tpl.isPublic) {
+      throw new Error("Template tidak ditemukan");
+    }
+
+    const skills = tpl.nodes.map((n, idx) => {
+      if (!LEVEL_WHITELIST.has(n.difficulty)) {
+        throw new Error(`Difficulty node "${n.id}" tidak valid`);
+      }
+      return {
+        id: trimLen("Skill ID", n.id, MAX_ID_LEN),
+        name: trimLen("Skill name", n.title, MAX_NAME_LEN),
+        category: slug,
+        level: n.difficulty,
+        priority: idx,
+        estimatedHours: assertFiniteNonNeg("Hours", n.estimatedHours, MAX_HOURS),
+        prerequisites: n.prerequisites.map((p) =>
+          trimLen("Prerequisite ID", p, MAX_ID_LEN),
+        ),
+        status: "not-started",
+        resources: n.resources.slice(0, MAX_RESOURCES).map((r) => {
+          if (!RESOURCE_TYPE_WHITELIST.has(r.type)) {
+            throw new Error("Tipe resource tidak valid");
+          }
+          return {
+            type: r.type,
+            title: trimLen("Resource title", r.title, MAX_TITLE_LEN),
+            url: trimLen("URL", r.url || "#", MAX_URL_LEN),
+            completed: false,
+          };
+        }),
+      };
+    });
+
+    const savedDoc = await ctx.db
+      .query("roadmapSaved")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!savedDoc) {
+      await ctx.db.insert("roadmapSaved", { userId, slugs: [slug] });
+    } else if (!savedDoc.slugs.includes(slug)) {
+      await ctx.db.patch(savedDoc._id, { slugs: [...savedDoc.slugs, slug] });
+    }
+
+    const existing = await ctx.db
+      .query("skillRoadmaps")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (existing) await ctx.db.delete(existing._id);
+
+    return await ctx.db.insert("skillRoadmaps", {
+      userId,
+      careerPath: slug,
+      templateId: tpl._id,
+      skills,
+      progress: 0,
+    });
+  },
+});

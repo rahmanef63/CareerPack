@@ -103,4 +103,116 @@ export const SKILL_HANDLERS: Record<string, SkillHandler> = {
       educationCount: c.education?.length ?? 0,
     }));
   },
+
+  "roadmap.list": async (ctx) => {
+    const r = await ctx.runQuery(api.roadmap.queries.getUserRoadmap, {});
+    if (!r) return null;
+    return {
+      careerPath: r.careerPath,
+      progress: r.progress,
+      skills: r.skills.slice(0, 100).map((s) => ({
+        skillId: s.id,
+        name: s.name,
+        level: s.level,
+        status: s.status,
+        estimatedHours: s.estimatedHours,
+        resourceCount: s.resources?.length ?? 0,
+      })),
+    };
+  },
+
+  "roadmap.list-templates": async (ctx) => {
+    const tpls = await ctx.runQuery(
+      api.roadmap.templates.listPublicTemplates,
+      {},
+    );
+    return tpls.slice(0, 60).map((t) => ({
+      slug: t.slug,
+      title: t.title,
+      domain: t.domain,
+      description: t.description,
+      nodeCount: t.nodeCount,
+      totalHours: t.totalHours,
+      tags: t.tags ?? [],
+    }));
+  },
+
+  "matcher.list-jobs": async (ctx) => {
+    const jobs = await ctx.runQuery(api.matcher.queries.listJobs, {
+      limit: 50,
+    });
+    return jobs.map((j) => ({
+      jobId: j._id,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      workMode: j.workMode,
+      seniority: j.seniority,
+      employmentType: j.employmentType,
+      source: j.source,
+      requiredSkills: (j.requiredSkills ?? []).slice(0, 12),
+      salaryMin: j.salaryMin ?? null,
+      salaryMax: j.salaryMax ?? null,
+      currency: j.currency ?? null,
+    }));
+  },
+
+  "matcher.list-mine": async (ctx) => {
+    const jobs = await ctx.runQuery(api.matcher.queries.listJobs, {
+      mineOnly: true,
+      limit: 50,
+    });
+    return jobs.map((j) => ({
+      jobId: j._id,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      workMode: j.workMode,
+      seniority: j.seniority,
+      requiredSkills: (j.requiredSkills ?? []).slice(0, 12),
+      postedAt: j.postedAt,
+    }));
+  },
+
+  "matcher.list-scans": async (ctx) => {
+    const scans = await ctx.runQuery(api.matcher.queries.listMyScans, {
+      limit: 20,
+    });
+    return scans.map((s) => ({
+      scanId: s._id,
+      cvId: s.cvId,
+      jobListingId: s.jobListingId ?? null,
+      jobTitle: s.jobTitle,
+      jobCompany: s.jobCompany ?? "",
+      score: s.score,
+      grade: s.grade,
+      createdAt: s.createdAt,
+    }));
+  },
+
+  "interview.list-sessions": async (ctx) => {
+    const sessions = await ctx.runQuery(
+      api.mockInterview.queries.getUserInterviews,
+      {},
+    );
+    return sessions.slice(0, 30).map((s) => ({
+      interviewId: s._id,
+      type: s.type,
+      role: s.role,
+      difficulty: s.difficulty,
+      overallScore: s.overallScore ?? null,
+      completedAt: s.completedAt ?? null,
+      questionCount: s.questions?.length ?? 0,
+      answeredCount:
+        s.questions?.filter((q) => q.userAnswer && q.userAnswer.length > 0)
+          .length ?? 0,
+    }));
+  },
+
+  "interview.get-analytics": async (ctx) => {
+    return await ctx.runQuery(
+      api.mockInterview.queries.getInterviewAnalytics,
+      {},
+    );
+  },
 };

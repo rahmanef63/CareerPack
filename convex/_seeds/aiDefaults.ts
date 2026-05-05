@@ -267,6 +267,93 @@ export const DEFAULT_AI_TOOLS: ReadonlyArray<AiToolSeed> = [
     payloadSchema: '{ "text": "string" }',
   },
 
+  // skill-roadmap (granular CRUD via slice manifest)
+  {
+    type: "roadmap.list",
+    label: "Lihat roadmap saya",
+    description: "Query — roadmap aktif user (careerPath, progress, skills).",
+  },
+  {
+    type: "roadmap.list-templates",
+    label: "Lihat template roadmap publik",
+    description: "Query — daftar template publik (slug, judul, domain).",
+  },
+  {
+    type: "roadmap.start-from-template",
+    label: "Mulai roadmap dari template",
+    description:
+      "Buat roadmap aktif baru dari template slug (replace existing).",
+    payloadSchema: '{ "slug": "string" }',
+  },
+  {
+    type: "roadmap.update-progress",
+    label: "Update status skill di roadmap",
+    description:
+      "Ubah status 1 skill (not-started|in-progress|completed).",
+    payloadSchema: '{ "skillId": "string", "status": "string" }',
+  },
+  {
+    type: "roadmap.toggle-resource",
+    label: "Tandai resource learning",
+    description: "Toggle completed pada 1 resource di skill.",
+    payloadSchema:
+      '{ "skillId": "string", "resourceTitle": "string", "completed": "boolean" }',
+  },
+  {
+    type: "roadmap.reset",
+    label: "Reset roadmap",
+    description: "Hapus roadmap aktif user. Destructive.",
+  },
+
+  // matcher (granular CRUD via slice manifest)
+  {
+    type: "matcher.list-jobs",
+    label: "Lihat lowongan publik",
+    description: "Query — feed publik (RemoteOK + WWR + paste user lain).",
+  },
+  {
+    type: "matcher.list-mine",
+    label: "Lihat lowongan saya",
+    description: "Query — lowongan yang user paste sendiri.",
+  },
+  {
+    type: "matcher.add-job",
+    label: "Tambah lowongan dari teks",
+    description:
+      "Parser AI ubah JD mentah jadi struktur lalu insert. Min 80 karakter.",
+    payloadSchema: '{ "text": "string" }',
+  },
+  {
+    type: "matcher.scan-ats",
+    label: "Scan ATS (CV vs lowongan)",
+    description: "Hitung skor ATS antara CV user dan lowongan tertentu.",
+    payloadSchema:
+      '{ "cvId": "string", "jobListingId": "string" }',
+  },
+  {
+    type: "matcher.list-scans",
+    label: "Lihat riwayat scan ATS",
+    description: "Query — 20 scan terbaru user.",
+  },
+
+  // mock-interview (read + delete via slice manifest)
+  {
+    type: "interview.list-sessions",
+    label: "Lihat sesi wawancara",
+    description: "Query — daftar sesi mock interview user.",
+  },
+  {
+    type: "interview.get-analytics",
+    label: "Ringkasan performa wawancara",
+    description: "Query — agregat: total sesi, rata-rata skor, trend.",
+  },
+  {
+    type: "interview.delete-session",
+    label: "Hapus sesi wawancara",
+    description: "Hapus 1 sesi mock interview. Destructive.",
+    payloadSchema: '{ "interviewId": "string" }',
+  },
+
   // settings / profile
   {
     type: "settings.update-phone",
