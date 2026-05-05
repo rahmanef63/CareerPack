@@ -42,5 +42,8 @@
     "sharp": "^0.34.5",
     "simple-git-hooks": "^2.13.1",
     "vitest": "^4.1.4"
+  },
+  "dependencies": {
+    "@auth/core": "^0.37.4"
   }
 }

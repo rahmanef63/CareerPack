@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@auth/core':
+        specifier: ^0.37.4
+        version: 0.37.4
     devDependencies:
       '@convex-dev/auth':
         specifier: ^0.0.90
