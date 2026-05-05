@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   type ReactNode,
 } from "react";
@@ -45,6 +46,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userProfile = useQuery(api.profile.queries.getCurrentUser, isAuthenticated ? {} : "skip");
   const updateProfile = useMutation(api.profile.mutations.createOrUpdateProfile);
   const seedForCurrentUser = useMutation(api.seed.seedForCurrentUser);
+  const heartbeat = useMutation(api.profile.mutations.heartbeat);
+
+  /**
+   * Heartbeat — fires once on mount + every 5 min while authenticated.
+   * Server throttles inserts to ≥4 min apart, so the cadence is safe
+   * across multi-tab. Updates `userProfiles.lastActiveAt` for the
+   * admin "active in last 24h" column. Also re-fires on tab focus
+   * via the `visibilitychange` listener so a long-idle tab refreshes
+   * its activity stamp the moment the user returns.
+   */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fire = () => {
+      heartbeat({}).catch(() => {
+        /* swallow — best-effort, no UI surface */
+      });
+    };
+    fire();
+    const interval = window.setInterval(fire, 5 * 60 * 1000);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") fire();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isAuthenticated, heartbeat]);
 
   /**
    * Run `seedForCurrentUser` with bounded retry. After `signIn` resolves,

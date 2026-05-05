@@ -354,6 +354,108 @@ export const DEFAULT_AI_TOOLS: ReadonlyArray<AiToolSeed> = [
     payloadSchema: '{ "interviewId": "string" }',
   },
 
+  // financial-calculator (granular CRUD via slice manifest)
+  {
+    type: "financial.list-budget",
+    label: "Lihat variabel anggaran",
+    description: "Query — variabel anggaran user (label, value, kind, color).",
+  },
+  {
+    type: "financial.add-budget",
+    label: "Tambah variabel anggaran",
+    description: "Tambah 1 variabel (expense|savings) dengan label + nilai.",
+    payloadSchema:
+      '{ "label": "string", "value": "number", "kind": "expense|savings", "iconName?": "string", "color?": "string" }',
+  },
+  {
+    type: "financial.update-budget",
+    label: "Edit variabel anggaran",
+    description: "Patch field variabel berdasarkan id.",
+    payloadSchema:
+      '{ "id": "string", "label?": "string", "value?": "number", "kind?": "expense|savings", "iconName?": "string", "color?": "string" }',
+  },
+  {
+    type: "financial.delete-budget",
+    label: "Hapus variabel anggaran",
+    description: "Hapus 1 variabel berdasarkan id. Destructive.",
+    payloadSchema: '{ "id": "string" }',
+  },
+
+  // portfolio (granular CRUD via slice manifest)
+  {
+    type: "portfolio.list",
+    label: "Lihat portfolio items",
+    description: "Query — semua item portfolio user.",
+  },
+  {
+    type: "portfolio.create",
+    label: "Tambah item portfolio",
+    description: "Buat 1 item (text-only fields).",
+    payloadSchema:
+      '{ "title": "string", "description": "string", "category": "string", "date": "string", "link?": "string" }',
+  },
+  {
+    type: "portfolio.delete",
+    label: "Hapus item portfolio",
+    description: "Hapus 1 item. Destructive.",
+    payloadSchema: '{ "itemId": "string" }',
+  },
+  {
+    type: "portfolio.toggle-featured",
+    label: "Toggle featured portfolio",
+    description: "Toggle flag featured pada item.",
+    payloadSchema: '{ "itemId": "string" }',
+  },
+
+  // notifications (read + bulk ops)
+  {
+    type: "notifications.list",
+    label: "Lihat notifikasi",
+    description: "Query — 50 notifikasi terakhir user.",
+  },
+  {
+    type: "notifications.mark-all-read",
+    label: "Tandai semua dibaca",
+    description: "Set read=true pada semua notifikasi user.",
+  },
+  {
+    type: "notifications.delete-all",
+    label: "Hapus semua notifikasi",
+    description: "Hapus semua notifikasi user. Destructive.",
+  },
+
+  // personal-branding (public page surface)
+  {
+    type: "branding.get-status",
+    label: "Lihat status halaman publik",
+    description: "Query — enabled, slug, theme, mode, available-for-hire.",
+  },
+  {
+    type: "branding.toggle-public",
+    label: "Aktif/non-aktifkan halaman publik",
+    description: "Set publicEnabled.",
+    payloadSchema: '{ "enabled": "boolean" }',
+  },
+  {
+    type: "branding.set-slug",
+    label: "Ganti slug halaman publik",
+    description: "Slug lowercase 3-40 char, server cek uniqueness + reserved.",
+    payloadSchema: '{ "slug": "string" }',
+  },
+  {
+    type: "branding.set-theme",
+    label: "Ganti tema halaman publik",
+    description: "linktree|bento|magazine|template-v1..v3.",
+    payloadSchema: '{ "theme": "string" }',
+  },
+  {
+    type: "branding.set-available",
+    label: "Set status open-for-work",
+    description: "Toggle badge + note pendek (≤80 char).",
+    payloadSchema:
+      '{ "availableForHire": "boolean", "availabilityNote?": "string" }',
+  },
+
   // settings / profile
   {
     type: "settings.update-phone",

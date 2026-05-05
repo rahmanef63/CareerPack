@@ -5,6 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { requireEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
+import { stripCodeFence } from "../_shared/aiOutput";
 import { SKILL_HANDLERS } from "./skillHandlers";
 
 async function requireQuota(ctx: ActionCtx): Promise<void> {
@@ -814,7 +815,3 @@ Aturan:
   },
 });
 
-function stripCodeFence(s: string): string {
-  const fenced = s.trim().match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-  return fenced ? fenced[1] : s.trim();
-}

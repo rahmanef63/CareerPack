@@ -6,6 +6,7 @@ import { requireUser } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { requireEnv } from "../_shared/env";
+import { stripCodeFence } from "../_shared/aiOutput";
 
 interface FetchResult {
   fetched: number;
@@ -612,7 +613,3 @@ function safeCodePoint(n: number): string {
   }
 }
 
-function stripCodeFence(s: string): string {
-  const fenced = s.trim().match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-  return fenced ? fenced[1] : s.trim();
-}

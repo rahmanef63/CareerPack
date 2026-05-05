@@ -28,6 +28,10 @@ import { CVCapabilities } from "@/slices/cv-generator"
 import { RoadmapCapabilities } from "@/slices/skill-roadmap"
 import { MatcherCapabilities } from "@/slices/matcher"
 import { InterviewCapabilities } from "@/slices/mock-interview"
+import { FinancialCapabilities } from "@/slices/financial-calculator"
+import { PortfolioCapabilities } from "@/slices/portfolio"
+import { NotificationsCapabilities } from "@/slices/notifications"
+import { BrandingCapabilities } from "@/slices/personal-branding"
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -48,6 +52,10 @@ export function Providers({ children }: { children: ReactNode }) {
                 <RoadmapCapabilities />
                 <MatcherCapabilities />
                 <InterviewCapabilities />
+                <FinancialCapabilities />
+                <PortfolioCapabilities />
+                <NotificationsCapabilities />
+                <BrandingCapabilities />
                 <ThemeColorSync />
                 <CommandPalette />
                 <ExtensionErrorFilter />

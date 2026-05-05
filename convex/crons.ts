@@ -21,12 +21,14 @@ crons.daily(
   internal.admin.cleanup.cleanupInactiveDemoUsers,
 );
 
-// Hourly calendar reminder sweep. Inserts a `notifications` row for each
-// event whose reminder window has opened. Idempotent — `reminderSentAt`
-// guards against double-firing if the cron retries.
-crons.hourly(
+// 15-minute calendar reminder sweep. Inserts a `notifications` row for
+// each event whose reminder window has opened. Idempotent —
+// `reminderSentAt` guards against double-firing if the cron retries.
+// Hourly cadence used to give 15-minute reminders up to ~60 min slack;
+// 15-min cadence tightens worst-case skew to ~15 min.
+crons.cron(
   "calendar-reminder-sweep",
-  { minuteUTC: 5 },
+  "*/15 * * * *",
   internal.calendar.reminders.sweepReminders,
 );
 

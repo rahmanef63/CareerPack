@@ -503,3 +503,35 @@ export const setDigestEnabled = mutation({
     return { ok: true as const, enabled: args.enabled };
   },
 });
+
+/**
+ * Heartbeat — updates `userProfiles.lastActiveAt` to Date.now().
+ *
+ * Called by the client from `useAuth` on app focus + on a 5-minute
+ * interval while the tab is foreground. Server-side throttle: only
+ * patches if the previous heartbeat is more than 4 min ago, so a
+ * frantic client cannot spam the row. No-op for unauthenticated
+ * sessions or users without a profile.
+ *
+ * Surfaced by `admin.queries.listAllUsers` for the active-users
+ * column. Replaces the previously-empty `lastActiveAt` field that
+ * was schema-declared but never written.
+ */
+export const heartbeat = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile) return { ok: false as const };
+
+    const now = Date.now();
+    const prev = profile.lastActiveAt ?? 0;
+    if (now - prev < 4 * 60 * 1000) return { ok: true as const, throttled: true };
+
+    await ctx.db.patch(profile._id, { lastActiveAt: now });
+    return { ok: true as const, throttled: false };
+  },
+});

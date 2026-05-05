@@ -194,6 +194,15 @@ export const profileTables = {
      */
     digestEnabled: v.optional(v.boolean()),
     lastDigestSentAt: v.optional(v.number()),
+
+    /**
+     * Heartbeat last-active timestamp. Updated by `profile.mutations.heartbeat`
+     * from the client at most every 5 min when the app is in foreground.
+     * Surfaced in `admin.queries.listAllUsers` so the admin can see who
+     * is active in the last 24h / 7d. Optional + additive — defaults to
+     * undefined for legacy rows.
+     */
+    lastActiveAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
     .index("by_public_slug", ["publicSlug"])

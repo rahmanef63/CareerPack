@@ -215,4 +215,69 @@ export const SKILL_HANDLERS: Record<string, SkillHandler> = {
       {},
     );
   },
+
+  "financial.list-budget": async (ctx) => {
+    const vars = await ctx.runQuery(
+      api.financial.queries.listBudgetVariables,
+      {},
+    );
+    return vars.map((v) => ({
+      id: v._id,
+      label: v.label,
+      value: v.value,
+      kind: v.kind,
+      iconName: v.iconName,
+      color: v.color,
+      order: v.order,
+    }));
+  },
+
+  "portfolio.list": async (ctx) => {
+    const items = await ctx.runQuery(api.portfolio.queries.listPortfolio, {});
+    return items.slice(0, 50).map((p) => ({
+      itemId: p._id,
+      title: p.title,
+      category: p.category,
+      description: p.description.length > 200
+        ? p.description.slice(0, 200) + "…"
+        : p.description,
+      featured: Boolean(p.featured),
+      date: p.date,
+      link: p.link ?? null,
+    }));
+  },
+
+  "notifications.list": async (ctx) => {
+    const list = await ctx.runQuery(
+      api.notifications.queries.getUserNotifications,
+      {},
+    );
+    return list.slice(0, 50).map((n) => ({
+      notificationId: n._id,
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      read: n.read,
+      scheduledFor: n.scheduledFor ?? null,
+      actionUrl: n.actionUrl ?? null,
+      createdAt: n._creationTime,
+    }));
+  },
+
+  "branding.get-status": async (ctx) => {
+    const me = await ctx.runQuery(api.profile.queries.getCurrentUser, {});
+    if (!me?.profile) return null;
+    const p = me.profile;
+    return {
+      enabled: Boolean(p.publicEnabled),
+      slug: p.publicSlug ?? null,
+      headline: p.publicHeadline ?? null,
+      theme: p.publicTheme ?? "linktree",
+      mode: p.publicMode ?? "auto",
+      availableForHire: Boolean(p.publicAvailableForHire),
+      availabilityNote: p.publicAvailabilityNote ?? null,
+      ctaLabel: p.publicCtaLabel ?? null,
+      ctaUrl: p.publicCtaUrl ?? null,
+    };
+  },
 };
