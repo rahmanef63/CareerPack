@@ -105,6 +105,31 @@ export const listAllUsers = query({
   },
 });
 
+/**
+ * Distinct sources currently present in `errorLogs`. Powers the
+ * ErrorLogsPanel filter dropdown so admin sees only sources that
+ * actually have rows. Caps at 200 most-recent rows scanned — beyond
+ * that, the slow-changing top sources will dominate anyway.
+ */
+export const listErrorSources = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const recent = await ctx.db
+      .query("errorLogs")
+      .withIndex("by_time")
+      .order("desc")
+      .take(200);
+    const counts = new Map<string, number>();
+    for (const r of recent) {
+      counts.set(r.source, (counts.get(r.source) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([source, count]) => ({ source, count }));
+  },
+});
+
 export const viewErrorLogs = query({
   args: {
     cursor: v.optional(v.union(v.string(), v.null())),

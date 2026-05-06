@@ -251,7 +251,10 @@ Hard rules:
 
     if (!response.ok) {
       const detail = await response.text().catch(() => "");
-      console.error(`[cv.generateCoverLetter] gateway ${response.status}`, detail.slice(0, 300));
+      await recordError(ctx, {
+        source: "cv.generateCoverLetter",
+        message: `gateway ${response.status} ${detail.slice(0, 300)}`,
+      });
       throw new ConvexError(
         response.status === 429
           ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
@@ -387,7 +390,10 @@ Hard rules:
 
     if (!response.ok) {
       const detail = await response.text().catch(() => "");
-      console.error(`[cv.tailor] gateway ${response.status}`, detail.slice(0, 300));
+      await recordError(ctx, {
+        source: "cv.tailor",
+        message: `gateway ${response.status} ${detail.slice(0, 300)}`,
+      });
       throw new ConvexError(
         response.status === 429
           ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."

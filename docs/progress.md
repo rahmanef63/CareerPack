@@ -4,6 +4,7 @@ Last updated: 2026-05-06.
 
 ## Recent batches
 
+- 2026-05-06 — Polish sprint: error sink wired to all remaining AI gateway sites (cv.tailor, cv.generateCoverLetter, matcher.ats.extractKeywords). ErrorLogsPanel UX — dynamic source filter (count badges), copy-to-clipboard, retention-preset clear buttons (>30d / >7d / >24h) + `clearErrorLogs` admin mutation + `listErrorSources` query. Phase A consolidation kicked off — killed 7 zombie action types (`cv.fillExperience`, `cv.improveSummary`, `cv.addSkills`, `cv.setFormat`, `roadmap.generate`, `interview.startSession`, `match.recommend`), deleted `useCVAIActions` hook, slashCommands legacy `runAgent` shrunk from 243 → 130 lines (slashes now emit `nav.go` only). Audit + remaining-phase plan in [`progress/2026-05-06-ai-dispatch-audit.md`](./progress/2026-05-06-ai-dispatch-audit.md).
 - 2026-05-06 — Hardening sweep: per-IP rate limit on `requestReset` via httpAction (`/api/password-reset/request`, hashed-IP bucket, 10/hr/IP), AI extraction shape coercion (`coerceJobShape` / `coerceProfileShape` w/ 16 new vitest cases — 108 total), error sink stub (`_shared/errorSink.ts` writes to `errorLogs` + optional `ERROR_SINK_URL` / `SENTRY_DSN` forwarder, wired to ai.chat + cv.translate gateway failures).
 - [2026-05-01 — Hotspot follow-ups](./progress/2026-05-01-hotspot-followups.md): Resend email delivery for password reset, per-email rate limit, calendar reminders + ICS export, ImportCard server-side AI parse, backup recipe finalized, v2 iframe full mount-guard sweep.
 - [2026-05-01 — Slice refactor batch + seed URL cleanup](./progress/2026-05-01-slice-refactor-batch.md): 22 long files split, 10 slices reorganized to canonical layout, `TemplateNode` hoisted to `@/shared/types`, PB v2 iframe `#deckMount` null-guarded, 340 placeholder learning URLs replaced across 41 seed JSONs, refactor rules persisted to `.claude/skills/slice-refactor/`.
@@ -57,7 +58,7 @@ Dulu split dual-agent → akhirnya dikerjakan single-agent, semua selesai di bra
 
 Per audit ulang setelah manifest expansion. See [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05-05-en-i18n-discovery.md) for the i18n plan; entries below cover the rest.
 
-1. Konsolidasi 3 dispatch path AI (legacy `useCVAIActions` + `slashCommands` + manifest binder) → satu jalur manifest
+1. Konsolidasi dispatch path AI — Phase A landed 2026-05-06 (zombie types removed, useCVAIActions deleted). Phase B (legacy slashes → manifest skills) + Phase C (aiDefaults seed cleanup) tracked di [`progress/2026-05-06-ai-dispatch-audit.md`](./progress/2026-05-06-ai-dispatch-audit.md).
 2. ~~Manifest coverage 4 slice produktif tersisa~~ ✓ landed 2026-05-05 (`6c40eac`); 22/22 coverage achieved 2026-05-05
 3. ~~Per-IP rate limit `requestReset`~~ ✓ landed 2026-05-06 (httpAction `/api/password-reset/request`, hashed-IP bucket 10/hr)
 4. ~~`userProfiles.lastActiveAt` heartbeat tracking~~ ✓ landed 2026-05-05 (`6c40eac`)

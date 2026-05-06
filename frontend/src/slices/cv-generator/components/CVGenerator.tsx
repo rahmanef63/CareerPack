@@ -9,7 +9,6 @@ import { api } from '../../../../../convex/_generated/api';
 import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { useCV } from '../hooks/useCV';
-import { useCVAIActions } from '../hooks/useCVAIActions';
 import { CV_TEMPLATES, initialCVData, type CVFormat } from '../constants';
 import { MagneticTabs, useDragReorder } from '@/shared/components/interactions/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
@@ -136,8 +135,6 @@ export function CVGenerator() {
     setCvData(remoteCVData);
     setHydratedFromId(idStr);
   }, [remoteCVData, activeCVId, hydratedFromId]);
-
-  useCVAIActions({ setCVData: setCvData, setActiveSection, setFormat });
 
   const handleSave = async () => {
     setIsSaving(true);

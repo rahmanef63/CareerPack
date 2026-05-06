@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
-import { AlertOctagon, RefreshCw } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { AlertOctagon, Copy, RefreshCw, Trash2 } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import {
   Card,
@@ -21,38 +21,64 @@ import {
 } from "@/shared/components/ui/responsive-select";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { formatDateTime } from "@/shared/lib/formatDate";
-
-const SOURCE_OPTIONS = [
-  { value: "all", label: "Semua sumber" },
-  { value: "nextjs", label: "Next.js (onRequestError)" },
-  { value: "convex", label: "Convex" },
-  { value: "client", label: "Client" },
-] as const;
+import { notify } from "@/shared/lib/notify";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
+const RETENTION_PRESETS = [
+  { label: "> 30 hari", ms: 30 * 24 * 60 * 60 * 1000 },
+  { label: "> 7 hari", ms: 7 * 24 * 60 * 60 * 1000 },
+  { label: "> 24 jam", ms: 24 * 60 * 60 * 1000 },
+] as const;
+
 /**
- * Read-only viewer for the `errorLogs` table. Currently only
- * `instrumentation.ts.onRequestError` writes into it — Convex
- * server-side and client-side hooks could publish here later.
+ * Read + write surface for the `errorLogs` table.
  *
- * Filter dropdown narrows by `source` field; the underlying query
- * does the filter server-side. Pagination cursor lives in local
- * state so admin can browse history without re-running the query.
+ * Sources are now derived dynamically from `listErrorSources` instead of
+ * a hard-coded list — the slice-manifest expansion + the new
+ * `_shared/errorSink.ts` helper add new source labels (`ai.chat`,
+ * `cv.translate`, `cv.tailor`, `matcher.ats.extractKeywords`, …) faster
+ * than a static enum can keep up with.
+ *
+ * Admin can also clear stale rows via `clearErrorLogs` to keep the
+ * table from unbounded growth (no TTL cron yet).
  */
 export function ErrorLogsPanel() {
-  const [source, setSource] = useState<(typeof SOURCE_OPTIONS)[number]["value"]>("all");
+  const [source, setSource] = useState<string>("all");
   const [cursor, setCursor] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<number>(30);
 
+  const sources = useQuery(api.admin.queries.listErrorSources, {});
   const result = useQuery(api.admin.queries.viewErrorLogs, {
     cursor,
     limit: pageSize,
     source: source === "all" ? undefined : source,
   });
+  const clearLogs = useMutation(api.admin.mutations.clearErrorLogs);
 
   const logs = result?.page ?? [];
   const isLoading = result === undefined;
+
+  async function handleClear(olderThanMs: number) {
+    const label = RETENTION_PRESETS.find((p) => p.ms === olderThanMs)?.label ?? "lama";
+    if (!confirm(`Hapus log ${label}? Tidak bisa di-undo.`)) return;
+    try {
+      const r = await clearLogs({ olderThanMs });
+      notify.success(`Hapus ${r.deleted} log${r.hasMore ? " (masih ada lagi — re-jalankan)" : ""}`);
+      setCursor(null);
+    } catch (e) {
+      notify.fromError(e, "Gagal hapus log");
+    }
+  }
+
+  async function copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      notify.success("Disalin ke clipboard");
+    } catch (e) {
+      notify.fromError(e, "Gagal salin");
+    }
+  }
 
   return (
     <Card>
@@ -71,18 +97,19 @@ export function ErrorLogsPanel() {
           <ResponsiveSelect
             value={source}
             onValueChange={(v) => {
-              setSource(v as typeof source);
+              setSource(v);
               setCursor(null);
             }}
           >
             <ResponsiveSelectTrigger
-              className="h-9 sm:w-[220px]"
+              className="h-9 sm:w-[260px]"
               aria-label="Filter sumber"
             />
             <ResponsiveSelectContent drawerTitle="Sumber log">
-              {SOURCE_OPTIONS.map((o) => (
-                <ResponsiveSelectItem key={o.value} value={o.value}>
-                  {o.label}
+              <ResponsiveSelectItem value="all">Semua sumber</ResponsiveSelectItem>
+              {sources?.map((s) => (
+                <ResponsiveSelectItem key={s.source} value={s.source}>
+                  {s.source} ({s.count})
                 </ResponsiveSelectItem>
               ))}
             </ResponsiveSelectContent>
@@ -117,6 +144,20 @@ export function ErrorLogsPanel() {
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
+          <div className="ml-auto flex flex-wrap items-center gap-1">
+            {RETENTION_PRESETS.map((p) => (
+              <Button
+                key={p.ms}
+                variant="outline"
+                size="sm"
+                onClick={() => handleClear(p.ms)}
+                className="gap-1.5 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {p.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {isLoading && (
@@ -165,6 +206,29 @@ export function ErrorLogsPanel() {
                         <summary className="cursor-pointer line-clamp-2 font-mono text-foreground/80">
                           {l.message}
                         </summary>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 gap-1.5 px-2 text-[10px]"
+                            onClick={() =>
+                              copyToClipboard(
+                                [
+                                  `Source: ${l.source}`,
+                                  `Time: ${formatDateTime(l.timestamp)}`,
+                                  l.route ? `Route: ${l.route}` : null,
+                                  `Message: ${l.message}`,
+                                  l.stack ? `Stack:\n${l.stack}` : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join("\n"),
+                              )
+                            }
+                          >
+                            <Copy className="h-3 w-3" />
+                            Salin
+                          </Button>
+                        </div>
                         {l.stack && (
                           <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/50 p-2 text-[10px] text-muted-foreground">
                             {l.stack}

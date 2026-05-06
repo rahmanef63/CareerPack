@@ -9,16 +9,32 @@ export interface SlashCommand {
   example: string;
 }
 
-/** Hardcoded slash commands — legacy. Live alongside manifest-derived
- *  slashes during the migration. New skills should land in the slice's
- *  manifest, not here. */
+/**
+ * Legacy slash commands — kept for the popover so users with muscle
+ * memory don't lose discoverability. Emit `nav.go` only; the actual
+ * work happens on the destination page (where the slice's manifest
+ * binders take over).
+ *
+ * Pre-2026-05-06 these emitted hand-crafted actions
+ * (`cv.fillExperience`, `roadmap.generate`, `match.recommend`, …)
+ * but those types had no listener — `apply()` toasted "diterapkan"
+ * and silently did nothing. See `docs/progress/2026-05-06-ai-dispatch-audit.md`.
+ */
 const LEGACY_SLASH: SlashCommand[] = [
-  { cmd: "/cv", description: "Auto-isi CV dari deskripsi singkat", example: "/cv saya fresh grad TI ingin jadi backend dev" },
-  { cmd: "/roadmap", description: "Buat roadmap karir multi-bulan", example: "/roadmap product manager" },
-  { cmd: "/review", description: "Review CV dan beri skor", example: "/review" },
-  { cmd: "/interview", description: "Mulai simulasi wawancara", example: "/interview frontend" },
-  { cmd: "/match", description: "Rekomendasi 3 lowongan cocok", example: "/match" },
+  { cmd: "/cv", description: "Buka CV Generator", example: "/cv" },
+  { cmd: "/roadmap", description: "Buka Roadmap Karir", example: "/roadmap" },
+  { cmd: "/review", description: "Buka CV untuk review", example: "/review" },
+  { cmd: "/interview", description: "Buka simulasi wawancara", example: "/interview" },
+  { cmd: "/match", description: "Buka pencocok lowongan", example: "/match" },
 ];
+
+const LEGACY_NAV: Record<string, string> = {
+  "/cv": "cv",
+  "/roadmap": "roadmap",
+  "/review": "cv",
+  "/interview": "interview",
+  "/match": "matcher",
+};
 
 /** Slash commands derived from the slice manifests. Each manifest skill
  *  with a `slashCommand` becomes an entry here automatically. */
@@ -53,191 +69,79 @@ export interface AgentReply {
  * Resolution order:
  * 1. Manifest skill match (e.g. `/phone 0812…` → settings.update-phone)
  *    — generic, derived from slice manifests at registry load.
- * 2. Legacy hardcoded handlers in `runAgent` (e.g. `/cv`, `/roadmap`).
- *    Will shrink as slices get manifests.
+ * 2. Legacy nav fallback (e.g. `/cv` → nav.go(cv)). Bare nav for the
+ *    pre-manifest slash commands.
  */
 export function extractSlashActions(userInput: string): AgentAction[] {
   const trimmed = userInput.trim();
   if (!trimmed.startsWith("/")) return [];
 
-  // Try manifest-driven skills first.
   const cmdMatch = trimmed.match(/^(\/[a-z][a-z0-9_-]*)\s*(.*)$/i);
-  if (cmdMatch) {
-    const skill = SKILLS_BY_SLASH.get(cmdMatch[1].toLowerCase());
-    if (skill && skill.argsFromText) {
-      const payload = skill.argsFromText(cmdMatch[2]);
-      if (payload) {
-        // Cast: BusAction shape is compatible with AgentAction's
-        // string `type`; the discriminated union is for legacy paths.
-        return [{ type: skill.id, payload } as unknown as AgentAction];
-      }
+  if (!cmdMatch) return [];
+  const cmd = cmdMatch[1].toLowerCase();
+  const rest = cmdMatch[2];
+
+  // 1. Manifest-driven skill.
+  const skill = SKILLS_BY_SLASH.get(cmd);
+  if (skill && skill.argsFromText) {
+    const payload = skill.argsFromText(rest);
+    if (payload) {
+      return [{ type: skill.id, payload } as unknown as AgentAction];
     }
   }
 
-  // Fall back to the legacy hardcoded heuristic agent.
-  return runAgent(trimmed).actions;
+  // 2. Legacy nav fallback — `/cv`, `/roadmap`, etc. all jump to a page.
+  const view = LEGACY_NAV[cmd];
+  if (view) {
+    return [{ type: "nav.go", payload: { view } }];
+  }
+
+  return [];
 }
 
 /**
- * Heuristic agent — runs entirely client-side (mirrors generateFallbackResponse).
- * Returns an explanation plus typed actions the user can approve.
+ * Offline / gateway-failure fallback. Returns a friendly text reply
+ * with NO actions — keeps the consoles' assistant message non-empty
+ * when the backend chat action throws (rate-limit, network, AI key
+ * misconfig). Slash commands have already produced their nav.go via
+ * `extractSlashActions`; this fallback only handles the natural-text
+ * case.
  */
 export function runAgent(userInput: string): AgentReply {
-  const trimmed = userInput.trim();
-  const lower = trimmed.toLowerCase();
-
-  // Slash commands
-  if (lower.startsWith("/cv")) {
-    const desc = trimmed.replace(/^\/cv\s*/i, "") || "fresh graduate teknik informatika";
+  const lower = userInput.trim().toLowerCase();
+  if (lower.startsWith("/")) {
     return {
-      text:
-        `Saya susun draf pengalaman dari deskripsi: "${desc}".\n\n` +
-        `Klik **Terapkan** untuk menambahkan ke CV Anda. Saya juga bisa memperbaiki ringkasan profesional sekaligus.`,
-      actions: [
-        {
-          type: "cv.fillExperience",
-          payload: {
-            company: "Proyek Mandiri / Magang",
-            position: deriveRole(desc),
-            startDate: "2024-01",
-            endDate: "",
-            description:
-              `Membangun pengalaman relevan di bidang ${desc}. Berkontribusi pada delivery proyek end-to-end, ` +
-              `kolaborasi dalam tim agile, dan dokumentasi teknis yang rapi.`,
-          },
-        },
-        {
-          type: "cv.improveSummary",
-          payload: {
-            summary:
-              `Lulusan/profesional muda dengan minat kuat di ${desc}. Terbiasa belajar mandiri, ` +
-              `kolaboratif, dan fokus pada hasil yang terukur. Tertarik mengembangkan karir di tim teknis yang dinamis.`,
-          },
-        },
-      ],
+      text: "Coba lagi setelah beberapa saat — perintah slash sudah saya terima.",
+      actions: [],
     };
   }
-
-  if (lower.startsWith("/roadmap")) {
-    const goal = trimmed.replace(/^\/roadmap\s*/i, "") || "product manager";
+  if (/(cv|resume)/.test(lower)) {
     return {
-      text:
-        `Berikut roadmap **6 bulan** untuk menjadi *${goal}*. ` +
-        `Saya akan plot milestone bulanan dengan resource. Setujui untuk membuat roadmap di halaman Roadmap Karir.`,
-      actions: [
-        { type: "roadmap.generate", payload: { goal, months: 6 } },
-        { type: "nav.go", payload: { view: "roadmap" } },
-      ],
+      text: "Buka CV Generator untuk menyusun atau mengedit CV Anda.",
+      actions: [],
     };
   }
-
-  if (lower.startsWith("/review")) {
+  if (/(wawancara|interview)/.test(lower)) {
     return {
-      text:
-        `Saya scan CV Anda dan beri skor heuristik (0–100):\n\n` +
-        `• **Ringkasan**: cek panjang & kata kunci industri\n` +
-        `• **Pengalaman**: cek bullet terukur (angka, dampak)\n` +
-        `• **Skill**: cek balance technical vs soft\n\n` +
-        `Klik **Buka** untuk melihat skor di halaman CV.`,
-      actions: [{ type: "nav.go", payload: { view: "cv" } }],
+      text: "Buka simulasi wawancara untuk mulai latihan Q&A.",
+      actions: [],
     };
   }
-
-  if (lower.startsWith("/interview")) {
-    const topic = trimmed.replace(/^\/interview\s*/i, "") || "umum";
+  if (/(roadmap|skill|belajar)/.test(lower)) {
     return {
-      text: `Siap! Saya akan mulai simulasi wawancara topik **${topic}**. Pertanyaan pertama akan disajikan setelah Anda setujui.`,
-      actions: [
-        { type: "interview.startSession", payload: { topic } },
-        { type: "nav.go", payload: { view: "interview" } },
-      ],
+      text: "Buka Roadmap Karir — pilih template atau racik milestone sendiri.",
+      actions: [],
     };
   }
-
-  if (lower.startsWith("/match")) {
+  if (/(gaji|salary|penghasilan)/.test(lower)) {
     return {
-      text: `Berdasarkan profil Anda, ini 3 lowongan paling cocok. Klik **Lihat** untuk membukanya.`,
-      actions: [
-        {
-          type: "match.recommend",
-          payload: {
-            jobs: [
-              {
-                company: "Tokopedia",
-                role: "Frontend Engineer (Junior)",
-                reason: "Stack React/Next.js cocok dengan skill Anda",
-              },
-              {
-                company: "Mandiri Digital",
-                role: "Backend Developer Trainee",
-                reason: "Program management trainee, cocok untuk fresh grad",
-              },
-              {
-                company: "Gojek",
-                role: "Product Analyst Intern",
-                reason: "Lowongan analitis dengan jalur growth ke PM",
-              },
-            ],
-          },
-        },
-      ],
+      text: "Buka Kalkulator Gaji untuk simulasi pendapatan + budget.",
+      actions: [],
     };
   }
-
-  // Free-form heuristics — re-use intent detection from useAIChat fallback
-  if (/(cv|resume)/i.test(trimmed)) {
-    return {
-      text:
-        `Saya bisa bantu menyusun CV Anda. Ketik **/cv** diikuti deskripsi singkat tentang Anda, ` +
-        `atau saya akan menambahkan ringkasan profesional yang lebih impactful sekarang.`,
-      actions: [
-        {
-          type: "cv.improveSummary",
-          payload: {
-            summary:
-              `Profesional dengan etos kerja tinggi, fokus pada problem solving dan kolaborasi tim. ` +
-              `Berorientasi pada dampak terukur dan pengembangan diri berkelanjutan.`,
-          },
-        },
-      ],
-    };
-  }
-
-  if (/(wawancara|interview)/i.test(trimmed)) {
-    return {
-      text: `Bisa saya mulai simulasi wawancara untuk Anda? Topik default: umum.`,
-      actions: [{ type: "interview.startSession", payload: { topic: "umum" } }],
-    };
-  }
-
-  if (/(roadmap|skill|belajar)/i.test(trimmed)) {
-    return {
-      text: `Mau saya buatkan roadmap karir 6 bulan? Beritahu target Anda — atau ketik **/roadmap product manager**.`,
-      actions: [{ type: "nav.go", payload: { view: "roadmap" } }],
-    };
-  }
-
-  if (/(gaji|salary|penghasilan)/i.test(trimmed)) {
-    return {
-      text: `Saya bisa bantu hitung ekspektasi gaji. Buka Kalkulator Gaji untuk simulasi cepat.`,
-      actions: [{ type: "nav.go", payload: { view: "calculator" } }],
-    };
-  }
-
   return {
     text:
-      `Saya AI agent CareerPack. Saya bisa **melakukan tindakan**, bukan cuma menjawab. ` +
-      `Coba salah satu slash command: **/cv**, **/roadmap**, **/review**, **/interview**, **/match**.`,
+      "Saya AI agent CareerPack. Coba slash command seperti **/cv**, **/roadmap**, **/match**, atau ketik pertanyaan Anda.",
     actions: [],
   };
-}
-
-function deriveRole(desc: string): string {
-  const lower = desc.toLowerCase();
-  if (lower.includes("backend")) return "Backend Developer";
-  if (lower.includes("frontend")) return "Frontend Developer";
-  if (lower.includes("data")) return "Data Analyst";
-  if (lower.includes("design")) return "UI/UX Designer";
-  if (lower.includes("product")) return "Associate Product Manager";
-  return "Junior Software Engineer";
 }

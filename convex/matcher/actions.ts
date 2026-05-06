@@ -6,6 +6,7 @@ import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { optionalEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
+import { recordError } from "../_shared/errorSink";
 import { fallbackExtractKeywords, scoreATS } from "./atsScore";
 import type { JDForScoring, CVForScoring } from "./atsScore";
 import type { Id } from "../_generated/dataModel";
@@ -70,6 +71,7 @@ interface ExtractedJD {
 }
 
 async function aiExtractKeywords(
+  ctx: ActionCtx,
   cfg: ResolvedAI,
   jdText: string,
 ): Promise<ExtractedJD | null> {
@@ -101,7 +103,10 @@ Return ONLY a JSON object: {"keywords": string[], "hardSkills": string[]}. No ma
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    console.error(`[ats.extractKeywords] gateway ${response.status}`, detail.slice(0, 300));
+    await recordError(ctx, {
+      source: "matcher.ats.extractKeywords",
+      message: `gateway ${response.status} ${detail.slice(0, 300)}`,
+    });
     return null;
   }
 
@@ -233,7 +238,7 @@ export const scanCV = action({
       };
     } else {
       const cfg = await resolveAI(ctx, "gpt-4.1-nano");
-      const aiResult = cfg ? await aiExtractKeywords(cfg, jdText) : null;
+      const aiResult = cfg ? await aiExtractKeywords(ctx, cfg, jdText) : null;
       extracted = aiResult ?? {
         keywords: fallbackExtractKeywords(jdText, 18),
         hardSkills: jdHardSkillsHint,

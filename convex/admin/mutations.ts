@@ -247,6 +247,45 @@ export const adminBulkUpsertTemplates = mutation({
   },
 });
 
+/**
+ * Bulk-delete error log rows. Two modes:
+ *   - `olderThanMs`  → delete rows with `timestamp < now - olderThanMs`
+ *   - `source`       → delete all rows matching that source
+ * If both are passed, both filters are AND-combined. If neither is
+ * passed, deletes everything older than 30 days as a safety default.
+ *
+ * Capped at 1000 deletes per call so the mutation finishes within
+ * Convex's per-mutation budget. Returns `{ deleted, hasMore }`; admin
+ * can re-call to keep clearing.
+ */
+export const clearErrorLogs = mutation({
+  args: {
+    olderThanMs: v.optional(v.number()),
+    source: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const now = Date.now();
+    const cutoff = now - (args.olderThanMs ?? 30 * 24 * 60 * 60 * 1000);
+
+    const candidates = await ctx.db
+      .query("errorLogs")
+      .withIndex("by_time", (q) => q.lt("timestamp", cutoff))
+      .order("desc")
+      .take(1001);
+
+    const matching = args.source
+      ? candidates.filter((c) => c.source === args.source)
+      : candidates;
+
+    const toDelete = matching.slice(0, 1000);
+    for (const row of toDelete) {
+      await ctx.db.delete(row._id);
+    }
+    return { deleted: toDelete.length, hasMore: matching.length > 1000 };
+  },
+});
+
 export const adminSeedDefaultTemplates = mutation({
   args: { overwrite: v.optional(v.boolean()) },
   handler: async (ctx, args) => {

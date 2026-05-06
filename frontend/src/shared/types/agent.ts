@@ -1,53 +1,24 @@
 /**
  * AgentAction contract — shared between the AI agent (publisher) and
- * every slice that subscribes via the aiActionBus (CV, roadmap, etc).
- * Lives in shared because it's consumed by multiple slices.
+ * every slice that subscribes via the aiActionBus.
+ *
+ * As of 2026-05-06, the only typed action is `nav.go` — the AI's
+ * navigate primitive that every slash command + nav-link can emit.
+ * All other actions are manifest-driven (`<sliceId>.<verb>`) and flow
+ * as generic `{ type: string; payload: unknown }` envelopes through
+ * the bus, validated and dispatched by each slice's `*Capabilities`
+ * binder.
+ *
+ * Old discriminated arms (`cv.fillExperience`, `roadmap.generate`,
+ * `match.recommend`, …) have been removed — they were emitted only
+ * by the legacy `runAgent()` slash heuristic with no real backend
+ * listener. See [docs/progress/2026-05-06-ai-dispatch-audit.md].
  */
 
-export type AgentAction =
-  | {
-      type: "cv.fillExperience";
-      payload: {
-        company: string;
-        position: string;
-        startDate?: string;
-        endDate?: string;
-        description: string;
-      };
-    }
-  | {
-      type: "cv.improveSummary";
-      payload: { summary: string };
-    }
-  | {
-      type: "cv.addSkills";
-      payload: {
-        skills: Array<{
-          name: string;
-          category: "technical" | "soft" | "language" | "tool";
-        }>;
-      };
-    }
-  | {
-      type: "cv.setFormat";
-      payload: { format: "national" | "international" };
-    }
-  | {
-      type: "roadmap.generate";
-      payload: { goal: string; months: number };
-    }
-  | {
-      type: "interview.startSession";
-      payload: { topic: string };
-    }
-  | {
-      type: "match.recommend";
-      payload: { jobs: Array<{ company: string; role: string; reason: string }> };
-    }
-  | {
-      type: "nav.go";
-      payload: { view: string };
-    };
+export type AgentAction = {
+  type: "nav.go";
+  payload: { view: string };
+};
 
 export type AgentActionType = AgentAction["type"];
 
@@ -58,41 +29,6 @@ export interface AgentActionMeta {
 }
 
 export const AGENT_ACTION_META: Record<AgentActionType, AgentActionMeta> = {
-  "cv.fillExperience": {
-    label: "Tambah Pengalaman ke CV",
-    description: "AI akan menambahkan satu entri pengalaman baru ke CV Anda.",
-    cta: "Terapkan",
-  },
-  "cv.improveSummary": {
-    label: "Perbaiki Ringkasan Profesional",
-    description: "AI menulis ulang ringkasan agar lebih berdampak.",
-    cta: "Gunakan",
-  },
-  "cv.addSkills": {
-    label: "Tambah Skill ke CV",
-    description: "AI menyarankan beberapa skill relevan untuk ditambahkan.",
-    cta: "Tambah Semua",
-  },
-  "cv.setFormat": {
-    label: "Ganti Format CV",
-    description: "Ubah ke format CV yang disarankan.",
-    cta: "Ganti",
-  },
-  "roadmap.generate": {
-    label: "Buat Roadmap Karir",
-    description: "AI memplot roadmap multi-bulan menuju target karir Anda.",
-    cta: "Buat",
-  },
-  "interview.startSession": {
-    label: "Mulai Simulasi Wawancara",
-    description: "AI akan memulai sesi simulasi wawancara interaktif.",
-    cta: "Mulai",
-  },
-  "match.recommend": {
-    label: "Rekomendasi Lowongan",
-    description: "Lihat 3 lowongan yang AI cocokkan dengan profil Anda.",
-    cta: "Lihat",
-  },
   "nav.go": {
     label: "Buka Halaman",
     description: "Pindah ke halaman terkait.",
