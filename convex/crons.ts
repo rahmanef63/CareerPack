@@ -61,4 +61,14 @@ crons.weekly(
   internal.notifications.digest.sendWeeklyDigest,
 );
 
+// Daily TTL prune for append-only tables (errorLogs, rateLimitEvents,
+// passwordResetIpEvents, passwordResetTokens). Each capped at 1000
+// deletes per run — backlog clears in days, not minutes. 19:00 UTC =
+// 02:00 WIB, staggered after demo-user cleanup + job fetch + job prune.
+crons.daily(
+  "prune-append-only-tables",
+  { hourUTC: 19, minuteUTC: 0 },
+  internal.admin.cleanup.pruneAppendOnlyTables,
+);
+
 export default crons;
