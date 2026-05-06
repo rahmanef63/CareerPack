@@ -3,6 +3,7 @@ import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { renderResetEmail, sendEmail } from "./_shared/email";
+import { extractClientIp, sha256Hex } from "./_shared/clientIp";
 
 const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const PBKDF2_ITERATIONS = 100_000;
@@ -171,12 +172,20 @@ export const _ipGatedRequestReset = internalMutation({
   },
 });
 
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Max-Age": "86400",
+};
+
 /**
  * Public HTTP endpoint: `POST /api/password-reset/request`.
  * Body: `{ "email": string }`.
  *
  * Always returns 200 + `{ ok: true }`. On bad input returns 400. On
- * unsupported method returns 405.
+ * unsupported method returns 405. OPTIONS preflight returns 204 with
+ * permissive CORS — endpoint is anti-enumeration safe.
  *
  * IP extraction: prefer `x-forwarded-for` (first hop = client IP behind
  * trusted proxy / CDN), fallback to `x-real-ip`, fallback to "unknown".
@@ -184,22 +193,28 @@ export const _ipGatedRequestReset = internalMutation({
  * IPs persisted server-side.
  */
 export const handleRequestReset = httpAction(async (ctx, request) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
   if (request.method !== "POST") {
-    return new Response("method_not_allowed", { status: 405 });
+    return new Response("method_not_allowed", {
+      status: 405,
+      headers: CORS_HEADERS,
+    });
   }
 
   let parsed: unknown;
   try {
     parsed = await request.json();
   } catch {
-    return new Response("invalid_json", { status: 400 });
+    return new Response("invalid_json", { status: 400, headers: CORS_HEADERS });
   }
   if (!parsed || typeof parsed !== "object") {
-    return new Response("missing_payload", { status: 400 });
+    return new Response("missing_payload", { status: 400, headers: CORS_HEADERS });
   }
   const email = (parsed as Record<string, unknown>).email;
   if (typeof email !== "string" || email.length === 0 || email.length > 200) {
-    return new Response("missing_email", { status: 400 });
+    return new Response("missing_email", { status: 400, headers: CORS_HEADERS });
   }
 
   const ip = extractClientIp(request.headers);
@@ -212,30 +227,9 @@ export const handleRequestReset = httpAction(async (ctx, request) => {
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      // Intentionally permissive — endpoint is anti-enumeration safe.
-      "Access-Control-Allow-Origin": "*",
-    },
+    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
   });
 });
-
-function extractClientIp(headers: Headers): string {
-  const xff = headers.get("x-forwarded-for");
-  if (xff) {
-    const first = xff.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  const real = headers.get("x-real-ip");
-  if (real) return real.trim();
-  return "unknown";
-}
-
-async function sha256Hex(input: string): Promise<string> {
-  const enc = new TextEncoder().encode(input);
-  const buf = await crypto.subtle.digest("SHA-256", enc as BufferSource);
-  return hex(new Uint8Array(buf));
-}
 
 /**
  * Deliver the reset email out-of-band. Scheduled by `requestReset` —

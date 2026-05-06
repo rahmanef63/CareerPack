@@ -29,4 +29,13 @@ http.route({
   handler: handleRequestReset,
 });
 
+// CORS preflight — browsers send OPTIONS for cross-origin requests with
+// custom Content-Type (`application/json`). Same handler dispatches by
+// `request.method`.
+http.route({
+  path: "/api/password-reset/request",
+  method: "OPTIONS",
+  handler: handleRequestReset,
+});
+
 export default http;

@@ -4,6 +4,7 @@ Last updated: 2026-05-06.
 
 ## Recent batches
 
+- 2026-05-06 — Phase C consolidation + CORS preflight + helper tests: `DEFAULT_AI_TOOLS` reduced from 14 → 1+64 (only `nav.go` + manifest skills; 7 zombie tools removed). Phase B reconsidered + intentionally deferred — would dual-emit with AI tool_call output. CORS OPTIONS preflight on `/api/password-reset/request`. Extracted `extractClientIp` + `sha256Hex` to testable `_shared/clientIp.ts` (13 cases). Added Cloudflare `cf-connecting-ip` fallback to IP extraction. 121 vitest tests (was 108).
 - 2026-05-06 — Polish sprint: error sink wired to all remaining AI gateway sites (cv.tailor, cv.generateCoverLetter, matcher.ats.extractKeywords). ErrorLogsPanel UX — dynamic source filter (count badges), copy-to-clipboard, retention-preset clear buttons (>30d / >7d / >24h) + `clearErrorLogs` admin mutation + `listErrorSources` query. Phase A consolidation kicked off — killed 7 zombie action types (`cv.fillExperience`, `cv.improveSummary`, `cv.addSkills`, `cv.setFormat`, `roadmap.generate`, `interview.startSession`, `match.recommend`), deleted `useCVAIActions` hook, slashCommands legacy `runAgent` shrunk from 243 → 130 lines (slashes now emit `nav.go` only). Audit + remaining-phase plan in [`progress/2026-05-06-ai-dispatch-audit.md`](./progress/2026-05-06-ai-dispatch-audit.md).
 - 2026-05-06 — Hardening sweep: per-IP rate limit on `requestReset` via httpAction (`/api/password-reset/request`, hashed-IP bucket, 10/hr/IP), AI extraction shape coercion (`coerceJobShape` / `coerceProfileShape` w/ 16 new vitest cases — 108 total), error sink stub (`_shared/errorSink.ts` writes to `errorLogs` + optional `ERROR_SINK_URL` / `SENTRY_DSN` forwarder, wired to ai.chat + cv.translate gateway failures).
 - [2026-05-01 — Hotspot follow-ups](./progress/2026-05-01-hotspot-followups.md): Resend email delivery for password reset, per-email rate limit, calendar reminders + ICS export, ImportCard server-side AI parse, backup recipe finalized, v2 iframe full mount-guard sweep.
@@ -58,7 +59,7 @@ Dulu split dual-agent → akhirnya dikerjakan single-agent, semua selesai di bra
 
 Per audit ulang setelah manifest expansion. See [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05-05-en-i18n-discovery.md) for the i18n plan; entries below cover the rest.
 
-1. Konsolidasi dispatch path AI — Phase A landed 2026-05-06 (zombie types removed, useCVAIActions deleted). Phase B (legacy slashes → manifest skills) + Phase C (aiDefaults seed cleanup) tracked di [`progress/2026-05-06-ai-dispatch-audit.md`](./progress/2026-05-06-ai-dispatch-audit.md).
+1. ~~Konsolidasi dispatch path AI~~ ✓ closed 2026-05-06. Phase A (zombie types) + Phase C (seed cleanup) landed; Phase B intentionally deferred (would duplicate AI tool_call) — rationale di [`progress/2026-05-06-ai-dispatch-audit.md`](./progress/2026-05-06-ai-dispatch-audit.md).
 2. ~~Manifest coverage 4 slice produktif tersisa~~ ✓ landed 2026-05-05 (`6c40eac`); 22/22 coverage achieved 2026-05-05
 3. ~~Per-IP rate limit `requestReset`~~ ✓ landed 2026-05-06 (httpAction `/api/password-reset/request`, hashed-IP bucket 10/hr)
 4. ~~`userProfiles.lastActiveAt` heartbeat tracking~~ ✓ landed 2026-05-05 (`6c40eac`)

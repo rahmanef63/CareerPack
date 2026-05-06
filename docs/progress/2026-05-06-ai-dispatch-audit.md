@@ -116,6 +116,34 @@ remove. AI prompts shouldn't advertise tools that have no handler.
 2. **Phase C** sweep (fast, eliminates dead tool catalog rows).
 3. **Phase B** when there's appetite for new manifest skills.
 
+## 2026-05-06 update — Phase A + C landed, Phase B deferred
+
+Both Phase A and Phase C shipped the same day:
+- Phase A — 7 zombie types removed (`refactor(ai): polish sprint`).
+- Phase C — `DEFAULT_AI_TOOLS` rebuilt to reference only live manifest
+  skill IDs + `nav.go`.
+
+**Phase B reconsidered + intentionally deferred.** Adding `slashCommand`
+to existing manifest skills (`cv.create`, `matcher.list-jobs`,
+`roadmap.start-from-template`) would create a dual-dispatch problem:
+
+1. Client `extractSlashActions("/cv DESC")` — emits manifest action
+   immediately for ApproveActionCard.
+2. Same message goes to backend chat action — backend swaps system
+   prompt to `cv-builder` (per `aiSkills` slashCommand mapping), AI
+   responds with its own tool_calls (also `cv.create` + likely
+   `cv.add-experience`).
+3. Net result: 2-3 cards from one user input. Confusing UX.
+
+The legacy slashes currently emit `nav.go` only (instant feedback) and
+the AI's tool_call output handles the structured action (delayed but
+contextual). That's the right separation. Phase B is closed without
+changes.
+
+If a future skill is genuinely standalone (no AI tool_call counterpart),
+adding `slashCommand` to its manifest entry is fine — pattern lives in
+`settings/manifest.ts` with `/phone`, `/target`, `/lokasi`, `/bio`.
+
 ## Done criteria
 
 - [ ] Only `aiActionBus` subscribers are `*Capabilities` components +

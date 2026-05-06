@@ -10,6 +10,7 @@
 
 import type * as _shared_aiProviders from "../_shared/aiProviders.js";
 import type * as _shared_auth from "../_shared/auth.js";
+import type * as _shared_clientIp from "../_shared/clientIp.js";
 import type * as _shared_env from "../_shared/env.js";
 import type * as _shared_errorSink from "../_shared/errorSink.js";
 import type * as _shared_rateLimit from "../_shared/rateLimit.js";
@@ -82,6 +83,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "_shared/aiProviders": typeof _shared_aiProviders;
   "_shared/auth": typeof _shared_auth;
+  "_shared/clientIp": typeof _shared_clientIp;
   "_shared/env": typeof _shared_env;
   "_shared/errorSink": typeof _shared_errorSink;
   "_shared/rateLimit": typeof _shared_rateLimit;

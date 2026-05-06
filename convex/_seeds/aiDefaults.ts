@@ -71,50 +71,11 @@ export const DEFAULT_AI_SKILLS: ReadonlyArray<AiSkillSeed> = [
 ];
 
 export const DEFAULT_AI_TOOLS: ReadonlyArray<AiToolSeed> = [
-  {
-    type: "cv.fillExperience",
-    label: "Tambah pengalaman ke CV",
-    description: "Sisipkan satu entri pengalaman kerja ke CV aktif user.",
-    payloadSchema:
-      '{ "company": "string", "position": "string", "startDate": "YYYY-MM", "endDate": "YYYY-MM | empty", "description": "string" }',
-  },
-  {
-    type: "cv.improveSummary",
-    label: "Perbaiki ringkasan profesional",
-    description: "Ganti ringkasan profesional di CV dengan versi yang lebih impactful.",
-    payloadSchema: '{ "summary": "string" }',
-  },
-  {
-    type: "cv.addSkills",
-    label: "Tambah skill ke CV",
-    description: "Append skill baru ke daftar skill di CV.",
-    payloadSchema: '{ "skills": ["string", ...] }',
-  },
-  {
-    type: "cv.setFormat",
-    label: "Ganti template CV",
-    description: "Pilih template visual CV (modern / classic / minimal).",
-    payloadSchema: '{ "format": "modern | classic | minimal" }',
-  },
-  {
-    type: "roadmap.generate",
-    label: "Generate roadmap",
-    description: "Buat roadmap multi-bulan untuk target role.",
-    payloadSchema: '{ "goal": "string", "months": 3 | 6 | 12 }',
-  },
-  {
-    type: "interview.startSession",
-    label: "Mulai sesi wawancara",
-    description: "Buka halaman Mock Interview pada topik tertentu.",
-    payloadSchema: '{ "topic": "string" }',
-  },
-  {
-    type: "match.recommend",
-    label: "Rekomendasi lowongan",
-    description: "Tampilkan kartu rekomendasi lowongan dengan alasan match.",
-    payloadSchema:
-      '{ "jobs": [{ "company": "string", "role": "string", "reason": "string" }, ...] }',
-  },
+  // 7 legacy zombie tool types (cv.fillExperience, cv.improveSummary,
+  // cv.addSkills, cv.setFormat, roadmap.generate, interview.startSession,
+  // match.recommend) were removed 2026-05-06 — they had no listener and
+  // were silently dropped on apply. The manifest skills below cover the
+  // same functional area with real backend mutations.
   {
     type: "nav.go",
     label: "Pindah halaman",
