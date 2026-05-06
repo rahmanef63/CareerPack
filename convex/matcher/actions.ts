@@ -107,6 +107,10 @@ Return ONLY a JSON object: {"keywords": string[], "hardSkills": string[]}. No ma
       source: "matcher.ats.extractKeywords",
       message: `gateway ${response.status} ${detail.slice(0, 300)}`,
     });
+    const userId = await getAuthUserId(ctx);
+    if (userId) {
+      await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+    }
     return null;
   }
 

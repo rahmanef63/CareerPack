@@ -439,6 +439,38 @@ export const _checkAIQuota = internalMutation({
   },
 });
 
+/**
+ * Refund the most-recent AI quota events for a user. Called when the
+ * AI gateway returns a non-user error (provider 5xx, model deprecated,
+ * key revoked) so the user isn't billed for a request that never landed.
+ *
+ * Refund window: 60s. Wider would risk deleting unrelated successful
+ * events; tighter would miss long retry-then-fail flows.
+ *
+ * Only deletes the SINGLE most-recent event per bucket — that's the row
+ * `enforceRateLimit` just inserted before the failed call.
+ */
+export const _refundAIQuota = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const now = Date.now();
+    const refundWindow = 60 * 1000;
+    for (const key of ["ai:minute", "ai:day"] as const) {
+      const events = await ctx.db
+        .query("rateLimitEvents")
+        .withIndex("by_user_key_time", (q) =>
+          q.eq("userId", userId).eq("key", key).gte("timestamp", now - refundWindow),
+        )
+        .collect();
+      if (events.length === 0) continue;
+      // Delete the latest only — earlier rows could be from prior calls
+      // within the same window that succeeded.
+      const latest = events.reduce((a, b) => (a.timestamp >= b.timestamp ? a : b));
+      await ctx.db.delete(latest._id);
+    }
+  },
+});
+
 // ----- Chat sessions -----
 
 const MAX_SESSION_ID_LEN = 100;

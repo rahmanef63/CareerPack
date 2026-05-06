@@ -129,6 +129,10 @@ Return ONLY a JSON object of the shape { "translations": { "<key>": "<translated
         source: "cv.translate",
         message: `gateway ${response.status} ${detail.slice(0, 400)}`,
       });
+      const userId = await getAuthUserId(ctx);
+      if (userId) {
+        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+      }
       throw new ConvexError(
         response.status === 429
           ? "Layanan terjemahan sedang sibuk. Coba lagi beberapa saat."
@@ -255,6 +259,10 @@ Hard rules:
         source: "cv.generateCoverLetter",
         message: `gateway ${response.status} ${detail.slice(0, 300)}`,
       });
+      const userId = await getAuthUserId(ctx);
+      if (userId) {
+        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+      }
       throw new ConvexError(
         response.status === 429
           ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
@@ -394,6 +402,10 @@ Hard rules:
         source: "cv.tailor",
         message: `gateway ${response.status} ${detail.slice(0, 300)}`,
       });
+      const userId = await getAuthUserId(ctx);
+      if (userId) {
+        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+      }
       throw new ConvexError(
         response.status === 429
           ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."

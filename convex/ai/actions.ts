@@ -663,6 +663,11 @@ Aturan ketat penggunaan USER_CONTEXT:
           message: inferenceError,
           route: `model=${cfg.model} source=${cfg.source}`,
         });
+        // Refund the quota slot — user isn't at fault for gateway 5xx.
+        const userId = await getAuthUserId(ctx);
+        if (userId) {
+          await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+        }
         throw new Error(inferenceError);
       }
 
