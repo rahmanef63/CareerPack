@@ -6,6 +6,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { optionalEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
+import { recordError } from "../_shared/errorSink";
 
 /**
  * CV translation pipeline. Flattens every user-visible text field into
@@ -124,7 +125,10 @@ Return ONLY a JSON object of the shape { "translations": { "<key>": "<translated
 
     if (!response.ok) {
       const detail = await response.text().catch(() => "");
-      console.error(`[cv.translate] gateway ${response.status}`, detail.slice(0, 400));
+      await recordError(ctx, {
+        source: "cv.translate",
+        message: `gateway ${response.status} ${detail.slice(0, 400)}`,
+      });
       throw new ConvexError(
         response.status === 429
           ? "Layanan terjemahan sedang sibuk. Coba lagi beberapa saat."

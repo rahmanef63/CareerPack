@@ -34,6 +34,15 @@ const passwordResetTables = {
   })
     .index("by_user", ["userId"])
     .index("by_hash", ["tokenHash"]),
+
+  // Per-IP rate-limit bucket for unauthenticated `/api/password-reset/request`
+  // httpAction. Mutations don't see the request IP, so the IP must be
+  // hashed in the httpAction first and passed to the internal mutation.
+  // Stored hash (SHA-256 hex) — never raw IP — to keep the table privacy-safe.
+  passwordResetIpEvents: defineTable({
+    ipHash: v.string(),
+    timestamp: v.number(),
+  }).index("by_ipHash_time", ["ipHash", "timestamp"]),
 };
 
 export default defineSchema({

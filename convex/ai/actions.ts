@@ -5,7 +5,8 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { requireEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
-import { stripCodeFence } from "../_shared/aiOutput";
+import { parseJsonOrThrow, coerceProfileShape } from "../_shared/aiOutput";
+import { recordError } from "../_shared/errorSink";
 import { SKILL_HANDLERS } from "./skillHandlers";
 
 async function requireQuota(ctx: ActionCtx): Promise<void> {
@@ -654,6 +655,14 @@ Aturan ketat penggunaan USER_CONTEXT:
           undefined,
           inferenceError,
         );
+        // Surface to admin error sink before throwing — gateway failures
+        // are the most actionable signal for ops (key revoked, model
+        // deprecated, OpenRouter outage, billing cap).
+        await recordError(ctx, {
+          source: "ai.chat",
+          message: inferenceError,
+          route: `model=${cfg.model} source=${cfg.source}`,
+        });
         throw new Error(inferenceError);
       }
 
@@ -806,12 +815,7 @@ Aturan:
     if (typeof raw !== "string") {
       throw new Error("AI tidak mengembalikan teks. Coba lagi atau gunakan jalur Quick Fill manual.");
     }
-    const cleaned = stripCodeFence(raw);
-    try {
-      return JSON.parse(cleaned);
-    } catch {
-      throw new Error("AI mengembalikan format JSON tidak valid. Coba lagi atau gunakan jalur Quick Fill manual.");
-    }
+    return coerceProfileShape(parseJsonOrThrow(raw));
   },
 });
 

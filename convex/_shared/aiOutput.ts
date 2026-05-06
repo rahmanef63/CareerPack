@@ -51,3 +51,103 @@ export function readStringArray(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
   return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
 }
+
+// ---------------------------------------------------------------------------
+// Shape validators for AI extraction output
+// ---------------------------------------------------------------------------
+
+export type ParsedJobShape = {
+  title: string;
+  company: string;
+  location: string;
+  workMode: "remote" | "hybrid" | "onsite";
+  employmentType: "full-time" | "part-time" | "contract" | "internship";
+  seniority: "junior" | "mid-level" | "senior" | "lead";
+  salaryMin: number | null;
+  salaryMax: number | null;
+  currency: "IDR" | "USD" | "EUR" | null;
+  description: string;
+  requiredSkills: string[];
+  applyUrl: string | null;
+};
+
+const WORK_MODES: ParsedJobShape["workMode"][] = ["remote", "hybrid", "onsite"];
+const EMP_TYPES: ParsedJobShape["employmentType"][] = ["full-time", "part-time", "contract", "internship"];
+const SENIORITIES: ParsedJobShape["seniority"][] = ["junior", "mid-level", "senior", "lead"];
+const CURRENCIES: NonNullable<ParsedJobShape["currency"]>[] = ["IDR", "USD", "EUR"];
+
+function pickEnum<T extends string>(v: unknown, allowed: T[], fallback: T): T {
+  return typeof v === "string" && (allowed as string[]).includes(v) ? (v as T) : fallback;
+}
+
+function pickNullableEnum<T extends string>(v: unknown, allowed: T[]): T | null {
+  return typeof v === "string" && (allowed as string[]).includes(v) ? (v as T) : null;
+}
+
+/**
+ * Coerce + validate an AI-parsed job-listing shape. Returns a fully-
+ * typed `ParsedJobShape` with safe defaults for missing/malformed fields.
+ *
+ * Used by the matcher's `parseJobFromText` action — keeps the action
+ * thin (callAI → parseJsonOrThrow → coerceJobShape → return) and gives
+ * us a unit-testable boundary that doesn't need the AI proxy mocked.
+ */
+export function coerceJobShape(parsed: unknown): ParsedJobShape {
+  const obj = (parsed && typeof parsed === "object" ? parsed : {}) as Record<string, unknown>;
+  return {
+    title: readString(obj.title),
+    company: readString(obj.company),
+    location: readString(obj.location),
+    workMode: pickEnum(obj.workMode, WORK_MODES, "onsite"),
+    employmentType: pickEnum(obj.employmentType, EMP_TYPES, "full-time"),
+    seniority: pickEnum(obj.seniority, SENIORITIES, "mid-level"),
+    salaryMin: readNumber(obj.salaryMin) ?? null,
+    salaryMax: readNumber(obj.salaryMax) ?? null,
+    currency: pickNullableEnum(obj.currency, CURRENCIES),
+    description: readString(obj.description),
+    requiredSkills: readStringArray(obj.requiredSkills),
+    applyUrl: typeof obj.applyUrl === "string" && obj.applyUrl.length > 0 ? obj.applyUrl : null,
+  };
+}
+
+export type ParsedProfileShape = {
+  profile: {
+    fullName: string;
+    phone: string;
+    location: string;
+    targetRole: string;
+    experienceLevel: "entry-level" | "junior" | "mid-level" | "senior" | "lead";
+    bio: string;
+    skills: string[];
+    interests: string[];
+  };
+};
+
+const EXP_LEVELS: ParsedProfileShape["profile"]["experienceLevel"][] = [
+  "entry-level",
+  "junior",
+  "mid-level",
+  "senior",
+  "lead",
+];
+
+/**
+ * Coerce + validate an AI-parsed profile-import shape. Mirrors
+ * `coerceJobShape` for the `parseImportText` action.
+ */
+export function coerceProfileShape(parsed: unknown): ParsedProfileShape {
+  const root = (parsed && typeof parsed === "object" ? parsed : {}) as Record<string, unknown>;
+  const profileRaw = (root.profile && typeof root.profile === "object" ? root.profile : root) as Record<string, unknown>;
+  return {
+    profile: {
+      fullName: readString(profileRaw.fullName),
+      phone: readString(profileRaw.phone),
+      location: readString(profileRaw.location),
+      targetRole: readString(profileRaw.targetRole),
+      experienceLevel: pickEnum(profileRaw.experienceLevel, EXP_LEVELS, "mid-level"),
+      bio: readString(profileRaw.bio),
+      skills: readStringArray(profileRaw.skills),
+      interests: readStringArray(profileRaw.interests),
+    },
+  };
+}

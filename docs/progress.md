@@ -1,9 +1,10 @@
 # Progress Tracker
 
-Last updated: 2026-05-01.
+Last updated: 2026-05-06.
 
 ## Recent batches
 
+- 2026-05-06 — Hardening sweep: per-IP rate limit on `requestReset` via httpAction (`/api/password-reset/request`, hashed-IP bucket, 10/hr/IP), AI extraction shape coercion (`coerceJobShape` / `coerceProfileShape` w/ 16 new vitest cases — 108 total), error sink stub (`_shared/errorSink.ts` writes to `errorLogs` + optional `ERROR_SINK_URL` / `SENTRY_DSN` forwarder, wired to ai.chat + cv.translate gateway failures).
 - [2026-05-01 — Hotspot follow-ups](./progress/2026-05-01-hotspot-followups.md): Resend email delivery for password reset, per-email rate limit, calendar reminders + ICS export, ImportCard server-side AI parse, backup recipe finalized, v2 iframe full mount-guard sweep.
 - [2026-05-01 — Slice refactor batch + seed URL cleanup](./progress/2026-05-01-slice-refactor-batch.md): 22 long files split, 10 slices reorganized to canonical layout, `TemplateNode` hoisted to `@/shared/types`, PB v2 iframe `#deckMount` null-guarded, 340 placeholder learning URLs replaced across 41 seed JSONs, refactor rules persisted to `.claude/skills/slice-refactor/`.
 - [2026-04-25 — Convex restructure](./progress/2026-04-25-convex-restructure.md): flat `convex/` files reshaped into 17 domain folders mirroring frontend slices.
@@ -58,14 +59,14 @@ Per audit ulang setelah manifest expansion. See [`progress/2026-05-05-en-i18n-di
 
 1. Konsolidasi 3 dispatch path AI (legacy `useCVAIActions` + `slashCommands` + manifest binder) → satu jalur manifest
 2. ~~Manifest coverage 4 slice produktif tersisa~~ ✓ landed 2026-05-05 (`6c40eac`); 22/22 coverage achieved 2026-05-05
-3. Per-IP rate limit `requestReset` (migrate ke `httpAction`)
-4. `userProfiles.lastActiveAt` heartbeat tracking
-5. Backup cron eksekusi (script ready 2026-05-01, install ke VPS pending)
-6. EN i18n phase 1 (next-intl + `[locale]` segment)
-7. AI tool-call output eval suite (vitest snapshot untuk `parseJobFromText` + `parseImportText` JSON shape)
-8. Notification cron cadence: bump dari hourly ke 15-min untuk akurasi reminder
-9. Roadmap template content gap — tambah seed untuk domain non-tech (business, health, government, hospitality)
-10. Sentry / observability — surface `errorLogs` ke admin UI atau wire external sink
+3. ~~Per-IP rate limit `requestReset`~~ ✓ landed 2026-05-06 (httpAction `/api/password-reset/request`, hashed-IP bucket 10/hr)
+4. ~~`userProfiles.lastActiveAt` heartbeat tracking~~ ✓ landed 2026-05-05 (`6c40eac`)
+5. Backup cron eksekusi (script ready 2026-05-01, install ke VPS pending — manual ops)
+6. EN i18n phase 1 (next-intl + `[locale]` segment) — multi-day, 4 decisions pending di discovery doc
+7. ~~AI tool-call output eval suite~~ ✓ landed 2026-05-06 (`coerceJobShape` + `coerceProfileShape` + 16 cases)
+8. ~~Notification cron cadence: bump dari hourly ke 15-min~~ ✓ landed 2026-05-05 (`6c40eac`)
+9. Roadmap template content gap — tambah seed untuk domain non-tech (butuh domain expert)
+10. ~~Sentry / observability — wire external sink~~ ✓ landed 2026-05-06 (`_shared/errorSink.ts` + `ERROR_SINK_URL`/`SENTRY_DSN` env)
 
 ## Smoke Test Checklist
 

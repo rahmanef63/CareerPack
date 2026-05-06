@@ -6,7 +6,7 @@ import { requireUser } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { requireEnv } from "../_shared/env";
-import { stripCodeFence } from "../_shared/aiOutput";
+import { parseJsonOrThrow, coerceJobShape } from "../_shared/aiOutput";
 
 interface FetchResult {
   fetched: number;
@@ -448,14 +448,7 @@ Aturan:
     if (typeof raw !== "string") {
       throw new Error("AI tidak mengembalikan teks — coba lagi.");
     }
-    const cleaned = stripCodeFence(raw);
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch {
-      throw new Error("AI mengembalikan format JSON tidak valid — coba lagi.");
-    }
-    return parsed;
+    return coerceJobShape(parseJsonOrThrow(raw));
   },
 });
 

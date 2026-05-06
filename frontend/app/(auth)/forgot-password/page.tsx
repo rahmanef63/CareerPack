@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { useMutation } from "convex/react";
 import { ArrowLeft, CheckCircle2, Inbox, Mail } from "lucide-react";
-import { api } from "../../../../convex/_generated/api";
+import { convexHttpUrl } from "@/shared/lib/env";
 import { AuthShell } from "@/shared/containers/AuthShell";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -12,7 +11,6 @@ import { Label } from "@/shared/components/ui/label";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 
 export default function ForgotPasswordPage() {
-  const requestReset = useMutation(api.passwordReset.requestReset);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -22,8 +20,18 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    // Hit the per-IP-rate-limited HTTP endpoint instead of the public
+    // mutation. The mutation can't see the request IP — only the HTTP
+    // handler can, so per-IP throttling has to land here. Backend still
+    // returns 200 + `{ ok: true }` on rate-limit overflow to preserve
+    // the anti-enumeration property.
     try {
-      await requestReset({ email });
+      const res = await fetch(convexHttpUrl("/api/password-reset/request"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mengirim permintaan");

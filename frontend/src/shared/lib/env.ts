@@ -34,3 +34,18 @@ export const env = {
     return readEnv("NEXT_PUBLIC_CONVEX_URL");
   },
 } satisfies EnvShape;
+
+/**
+ * Build the URL for a Convex HTTP route (e.g. `/api/password-reset/request`).
+ *
+ * - Convex cloud: ws lives at `<dep>.convex.cloud`, HTTP at `<dep>.convex.site`.
+ * - Self-hosted: same host serves both — translate is a no-op.
+ *
+ * Strip trailing slash; caller appends a leading-slash path.
+ */
+export function convexHttpUrl(path: string): string {
+  const base = env.NEXT_PUBLIC_CONVEX_URL.replace(/\/$/, "");
+  const httpBase = base.replace(/\.convex\.cloud$/, ".convex.site");
+  const safePath = path.startsWith("/") ? path : `/${path}`;
+  return `${httpBase}${safePath}`;
+}

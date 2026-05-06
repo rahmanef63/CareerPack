@@ -5,6 +5,8 @@ import {
   readString,
   readNumber,
   readStringArray,
+  coerceJobShape,
+  coerceProfileShape,
 } from "./aiOutput";
 
 describe("stripCodeFence", () => {
@@ -127,5 +129,174 @@ describe("readStringArray", () => {
       "  Next.js  ",
       "Node.js",
     ]);
+  });
+});
+
+describe("coerceJobShape", () => {
+  it("returns full default shape for empty input", () => {
+    expect(coerceJobShape({})).toEqual({
+      title: "",
+      company: "",
+      location: "",
+      workMode: "onsite",
+      employmentType: "full-time",
+      seniority: "mid-level",
+      salaryMin: null,
+      salaryMax: null,
+      currency: null,
+      description: "",
+      requiredSkills: [],
+      applyUrl: null,
+    });
+  });
+
+  it("passes well-formed AI output through", () => {
+    const aiOutput = {
+      title: "Senior React Engineer",
+      company: "Acme",
+      location: "Jakarta",
+      workMode: "remote",
+      employmentType: "full-time",
+      seniority: "senior",
+      salaryMin: 20000000,
+      salaryMax: 35000000,
+      currency: "IDR",
+      description: "Build product UI.",
+      requiredSkills: ["React", "TypeScript", "Next.js"],
+      applyUrl: "https://acme.example/jobs/1",
+    };
+    expect(coerceJobShape(aiOutput)).toEqual(aiOutput);
+  });
+
+  it("rejects unknown enum values, falls back to default", () => {
+    const aiOutput = {
+      title: "Dev",
+      company: "Acme",
+      location: "Remote",
+      workMode: "TELEWORK",
+      employmentType: "freelance",
+      seniority: "rockstar",
+      currency: "GBP",
+    };
+    const out = coerceJobShape(aiOutput);
+    expect(out.workMode).toBe("onsite");
+    expect(out.employmentType).toBe("full-time");
+    expect(out.seniority).toBe("mid-level");
+    expect(out.currency).toBeNull();
+  });
+
+  it("coerces salary as numeric string", () => {
+    const out = coerceJobShape({ salaryMin: "5000000", salaryMax: "10000000" });
+    expect(out.salaryMin).toBe(5000000);
+    expect(out.salaryMax).toBe(10000000);
+  });
+
+  it("falls back to null when salary unparseable", () => {
+    const out = coerceJobShape({ salaryMin: "competitive", salaryMax: null });
+    expect(out.salaryMin).toBeNull();
+    expect(out.salaryMax).toBeNull();
+  });
+
+  it("filters non-string skills", () => {
+    const out = coerceJobShape({ requiredSkills: ["React", 42, null, "TypeScript", ""] });
+    expect(out.requiredSkills).toEqual(["React", "TypeScript"]);
+  });
+
+  it("nullifies empty applyUrl string", () => {
+    expect(coerceJobShape({ applyUrl: "" }).applyUrl).toBeNull();
+    expect(coerceJobShape({ applyUrl: 0 }).applyUrl).toBeNull();
+  });
+
+  it("survives null/undefined/non-object input", () => {
+    expect(() => coerceJobShape(null)).not.toThrow();
+    expect(() => coerceJobShape(undefined)).not.toThrow();
+    expect(() => coerceJobShape("not an object")).not.toThrow();
+    expect(() => coerceJobShape([1, 2, 3])).not.toThrow();
+  });
+
+  it("handles full snapshot of realistic AI reply", () => {
+    const raw = `{
+      "title": "Junior Backend Engineer",
+      "company": "GoTo",
+      "location": "Jakarta, Indonesia",
+      "workMode": "hybrid",
+      "employmentType": "full-time",
+      "seniority": "junior",
+      "salaryMin": 8000000,
+      "salaryMax": 14000000,
+      "currency": "IDR",
+      "description": "Build payment infra.",
+      "requiredSkills": ["Go", "PostgreSQL", "Kafka"],
+      "applyUrl": "https://gotocompany.com/careers/123"
+    }`;
+    const parsed = parseJsonOrThrow(raw);
+    expect(coerceJobShape(parsed)).toMatchSnapshot();
+  });
+
+  it("handles fenced markdown reply end-to-end", () => {
+    const fenced = '```json\n{"title":"Eng","company":"X","location":"Bandung","workMode":"onsite","seniority":"junior"}\n```';
+    const parsed = parseJsonOrThrow(fenced);
+    const shape = coerceJobShape(parsed);
+    expect(shape.title).toBe("Eng");
+    expect(shape.workMode).toBe("onsite");
+    expect(shape.seniority).toBe("junior");
+  });
+});
+
+describe("coerceProfileShape", () => {
+  it("returns full default shape for empty input", () => {
+    expect(coerceProfileShape({})).toEqual({
+      profile: {
+        fullName: "",
+        phone: "",
+        location: "",
+        targetRole: "",
+        experienceLevel: "mid-level",
+        bio: "",
+        skills: [],
+        interests: [],
+      },
+    });
+  });
+
+  it("accepts root-level profile object (AI shape)", () => {
+    const aiOutput = {
+      profile: {
+        fullName: "Jane Smith",
+        phone: "+628123",
+        location: "Bali, Indonesia",
+        targetRole: "Frontend Engineer",
+        experienceLevel: "senior",
+        bio: "10 yrs of UX",
+        skills: ["React"],
+        interests: ["yoga"],
+      },
+    };
+    expect(coerceProfileShape(aiOutput)).toEqual(aiOutput);
+  });
+
+  it("accepts flat object (no profile wrapper) — AI sometimes drops it", () => {
+    const aiOutput = {
+      fullName: "Jane",
+      location: "Jakarta",
+      targetRole: "PM",
+      experienceLevel: "mid-level",
+      skills: ["Roadmaps"],
+    };
+    const out = coerceProfileShape(aiOutput);
+    expect(out.profile.fullName).toBe("Jane");
+    expect(out.profile.location).toBe("Jakarta");
+    expect(out.profile.skills).toEqual(["Roadmaps"]);
+  });
+
+  it("rejects unknown experienceLevel, falls back to mid-level", () => {
+    const out = coerceProfileShape({ profile: { experienceLevel: "wizard" } });
+    expect(out.profile.experienceLevel).toBe("mid-level");
+  });
+
+  it("survives null/undefined/non-object input", () => {
+    expect(() => coerceProfileShape(null)).not.toThrow();
+    expect(() => coerceProfileShape(undefined)).not.toThrow();
+    expect(() => coerceProfileShape("not an object")).not.toThrow();
   });
 });

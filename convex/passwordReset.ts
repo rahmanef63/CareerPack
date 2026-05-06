@@ -1,4 +1,5 @@
-import { mutation, internalAction } from "./_generated/server";
+import { mutation, internalMutation, internalAction, httpAction } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { renderResetEmail, sendEmail } from "./_shared/email";
@@ -7,6 +8,10 @@ const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const PBKDF2_ITERATIONS = 100_000;
 const RESET_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const RESET_RATE_MAX = 5;
+// Per-IP cap: tighter than per-email so a single attacker IP can't hit
+// many different addresses to enumerate / spam Resend. 10 reset requests
+// per IP per hour is way past any legit user retry pattern.
+const IP_RATE_MAX = 10;
 
 function hex(bytes: Uint8Array): string {
   return Array.from(bytes)
@@ -77,63 +82,160 @@ function validatePassword(password: string) {
   }
 }
 
+/**
+ * Core flow shared by the public mutation and the IP-gated httpAction.
+ * Returns `{ ok: true }` even on failure / rate-limit to keep the
+ * anti-enumeration property — caller cannot distinguish "your email is
+ * registered" from "you hit the rate limit" from "spelled wrong".
+ */
+async function doRequestReset(ctx: MutationCtx, email: string): Promise<{ ok: true }> {
+  const normalized = email.trim().toLowerCase();
+  const user = await ctx.db
+    .query("users")
+    .filter((q) => q.eq(q.field("email"), normalized))
+    .first();
+  if (!user) return { ok: true as const };
+
+  const now = Date.now();
+
+  // Per-email rate limit. 5 requests/hour bucketed by user._id (1:1 to email).
+  const recent = await ctx.db
+    .query("passwordResetTokens")
+    .withIndex("by_user", (q) => q.eq("userId", user._id))
+    .filter((q) => q.gte(q.field("_creationTime"), now - RESET_RATE_WINDOW_MS))
+    .collect();
+  if (recent.length >= RESET_RATE_MAX) {
+    console.warn(`[password-reset] per-email rate-limited userId=${user._id} (${recent.length}/${RESET_RATE_MAX} in last hour)`);
+    return { ok: true as const };
+  }
+
+  // Invalidate pending tokens for this user (keep DB small, prevent parallel reuse)
+  for (const t of recent) {
+    if (!t.usedAt && t.expiresAt > now) {
+      await ctx.db.patch(t._id, { usedAt: now });
+    }
+  }
+
+  const rawBytes = crypto.getRandomValues(new Uint8Array(32));
+  const rawToken = toBase64Url(rawBytes);
+  const tokenHash = await hashSecret(rawToken);
+
+  await ctx.db.insert("passwordResetTokens", {
+    userId: user._id,
+    tokenHash,
+    expiresAt: now + TOKEN_TTL_MS,
+  });
+
+  await ctx.scheduler.runAfter(0, internal.passwordReset.deliverResetEmail, {
+    to: normalized,
+    rawToken,
+  });
+
+  return { ok: true as const };
+}
+
 export const requestReset = mutation({
   args: { email: v.string() },
-  handler: async (ctx, args) => {
-    const email = args.email.trim().toLowerCase();
-    // Always return ok — no enumeration of registered emails.
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), email))
-      .first();
+  handler: async (ctx, args) => doRequestReset(ctx, args.email),
+});
 
-    if (!user) return { ok: true as const };
-
+/**
+ * IP-gated wrapper invoked by the `/api/password-reset/request` httpAction.
+ * Mutations don't expose request IP, so the httpAction extracts the IP,
+ * hashes it (SHA-256 hex) for privacy, and passes the hash here.
+ *
+ * Two-tier rate limit (per-IP cap is enforced FIRST so an attacker can't
+ * make us hit `passwordResetTokens` index for many emails from one IP):
+ *   1. per-IP   — 10 req/hour (this function)
+ *   2. per-email — 5 req/hour (handled by `doRequestReset`)
+ *
+ * Returns `{ ok: true }` on rate-limit overflow to preserve anti-enumeration.
+ */
+export const _ipGatedRequestReset = internalMutation({
+  args: { email: v.string(), ipHash: v.string() },
+  handler: async (ctx, { email, ipHash }) => {
     const now = Date.now();
-
-    // Per-email rate limit. Mutations don't expose request IP, so we
-    // bucket by user._id (effectively per-email since email→user is 1:1).
-    // 5 requests/hour: enough for a real user retrying, low enough to
-    // blunt mass-spam against a single inbox. Silent on overflow to keep
-    // the anti-enumeration property — same response as a non-existent email.
-    const recent = await ctx.db
-      .query("passwordResetTokens")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .filter((q) => q.gte(q.field("_creationTime"), now - RESET_RATE_WINDOW_MS))
+    const windowStart = now - RESET_RATE_WINDOW_MS;
+    const events = await ctx.db
+      .query("passwordResetIpEvents")
+      .withIndex("by_ipHash_time", (q) =>
+        q.eq("ipHash", ipHash).gte("timestamp", windowStart),
+      )
       .collect();
-    if (recent.length >= RESET_RATE_MAX) {
-      console.warn(`[password-reset] rate-limited userId=${user._id} (${recent.length}/${RESET_RATE_MAX} in last hour)`);
+    if (events.length >= IP_RATE_MAX) {
+      console.warn(`[password-reset] per-IP rate-limited ipHash=${ipHash.slice(0, 8)}… (${events.length}/${IP_RATE_MAX} in last hour)`);
       return { ok: true as const };
     }
-
-    // Invalidate pending tokens for this user (keep DB small, prevent parallel reuse)
-    for (const t of recent) {
-      if (!t.usedAt && t.expiresAt > now) {
-        await ctx.db.patch(t._id, { usedAt: now });
-      }
-    }
-
-    const rawBytes = crypto.getRandomValues(new Uint8Array(32));
-    const rawToken = toBase64Url(rawBytes);
-    const tokenHash = await hashSecret(rawToken);
-
-    await ctx.db.insert("passwordResetTokens", {
-      userId: user._id,
-      tokenHash,
-      expiresAt: now + TOKEN_TTL_MS,
-    });
-
-    // Hand off to an action — only actions can fetch() to Resend.
-    // Action picks env vars at runtime and falls back to console log
-    // when RESEND_API_KEY is unset.
-    await ctx.scheduler.runAfter(0, internal.passwordReset.deliverResetEmail, {
-      to: email,
-      rawToken,
-    });
-
-    return { ok: true as const };
+    await ctx.db.insert("passwordResetIpEvents", { ipHash, timestamp: now });
+    return doRequestReset(ctx, email);
   },
 });
+
+/**
+ * Public HTTP endpoint: `POST /api/password-reset/request`.
+ * Body: `{ "email": string }`.
+ *
+ * Always returns 200 + `{ ok: true }`. On bad input returns 400. On
+ * unsupported method returns 405.
+ *
+ * IP extraction: prefer `x-forwarded-for` (first hop = client IP behind
+ * trusted proxy / CDN), fallback to `x-real-ip`, fallback to "unknown".
+ * Hashed before storage so privacy-conscious users don't end up with raw
+ * IPs persisted server-side.
+ */
+export const handleRequestReset = httpAction(async (ctx, request) => {
+  if (request.method !== "POST") {
+    return new Response("method_not_allowed", { status: 405 });
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = await request.json();
+  } catch {
+    return new Response("invalid_json", { status: 400 });
+  }
+  if (!parsed || typeof parsed !== "object") {
+    return new Response("missing_payload", { status: 400 });
+  }
+  const email = (parsed as Record<string, unknown>).email;
+  if (typeof email !== "string" || email.length === 0 || email.length > 200) {
+    return new Response("missing_email", { status: 400 });
+  }
+
+  const ip = extractClientIp(request.headers);
+  const ipHash = await sha256Hex(ip);
+
+  await ctx.runMutation(internal.passwordReset._ipGatedRequestReset, {
+    email,
+    ipHash,
+  });
+
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      // Intentionally permissive — endpoint is anti-enumeration safe.
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+});
+
+function extractClientIp(headers: Headers): string {
+  const xff = headers.get("x-forwarded-for");
+  if (xff) {
+    const first = xff.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const real = headers.get("x-real-ip");
+  if (real) return real.trim();
+  return "unknown";
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const enc = new TextEncoder().encode(input);
+  const buf = await crypto.subtle.digest("SHA-256", enc as BufferSource);
+  return hex(new Uint8Array(buf));
+}
 
 /**
  * Deliver the reset email out-of-band. Scheduled by `requestReset` —
