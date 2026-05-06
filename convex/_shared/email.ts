@@ -16,6 +16,7 @@
  */
 
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
+import { fetchWithTimeout, FETCH_TIMEOUTS } from "./fetchWithTimeout";
 
 const RESEND_API = "https://api.resend.com/emails";
 const APP_NAME = "CareerPack";
@@ -91,7 +92,8 @@ export async function sendEmail(
   }
 
   try {
-    const res = await fetch(RESEND_API, {
+    const res = await fetchWithTimeout(RESEND_API, {
+      timeoutMs: FETCH_TIMEOUTS.email,
       method: "POST",
       headers: {
         "Content-Type": "application/json",

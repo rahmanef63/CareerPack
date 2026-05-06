@@ -7,6 +7,7 @@ import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { requireEnv } from "../_shared/env";
 import { parseJsonOrThrow, coerceJobShape } from "../_shared/aiOutput";
+import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 
 interface FetchResult {
   fetched: number;
@@ -104,7 +105,8 @@ export const fetchJobFeeds = internalAction({
 });
 
 async function fetchRemoteOK(): Promise<NormalizedJob[]> {
-  const res = await fetch(REMOTEOK_URL, {
+  const res = await fetchWithTimeout(REMOTEOK_URL, {
+    timeoutMs: FETCH_TIMEOUTS.jobFeed,
     headers: {
       "User-Agent": "CareerPack-JobSync/1.0 (+https://careerpack.org)",
       Accept: "application/json",
@@ -118,7 +120,8 @@ async function fetchRemoteOK(): Promise<NormalizedJob[]> {
 }
 
 async function fetchWWR(url: string, category: string): Promise<NormalizedJob[]> {
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: FETCH_TIMEOUTS.jobFeed,
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; CareerPack-JobSync/1.0; +https://careerpack.org)",
       Accept: "application/rss+xml, text/xml",
@@ -532,7 +535,8 @@ async function resolveAIConfig(ctx: ActionCtx): Promise<AIConfig> {
 }
 
 async function callAI(cfg: AIConfig, body: Record<string, unknown>) {
-  const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
+  const res = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+    timeoutMs: FETCH_TIMEOUTS.aiChat,
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` },
     body: JSON.stringify({ ...body, model: cfg.model }),

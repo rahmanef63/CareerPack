@@ -7,6 +7,7 @@ import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { optionalEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { recordError } from "../_shared/errorSink";
+import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 
 /**
  * CV translation pipeline. Flattens every user-visible text field into
@@ -102,7 +103,8 @@ Return ONLY a JSON object of the shape { "translations": { "<key>": "<translated
       items: sanitized,
     };
 
-    const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+    const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+      timeoutMs: FETCH_TIMEOUTS.aiChat,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -236,7 +238,8 @@ Hard rules:
 
     const userPayload = `# TARGET JOB\n${cleanJD}\n\n# CANDIDATE CV\n${cvSummary}`;
 
-    const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+    const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+      timeoutMs: FETCH_TIMEOUTS.aiChat,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -378,7 +381,8 @@ Hard rules:
 
     const userPayload = JSON.stringify({ jd: cleanJD, experiences: expPayload });
 
-    const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+    const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+      timeoutMs: FETCH_TIMEOUTS.aiChat,
       method: "POST",
       headers: {
         "Content-Type": "application/json",

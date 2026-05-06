@@ -2,6 +2,7 @@ import { internalMutation } from "../_generated/server";
 import type { ActionCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
+import { fetchWithTimeout, FETCH_TIMEOUTS } from "./fetchWithTimeout";
 
 /**
  * Centralised error capture for Convex actions.
@@ -74,7 +75,8 @@ export async function recordError(
     );
   } else if (genericSink) {
     try {
-      await fetch(genericSink, {
+      await fetchWithTimeout(genericSink, {
+        timeoutMs: FETCH_TIMEOUTS.sentry,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -133,7 +135,8 @@ async function forwardToSentry(dsn: string, rec: ErrorRecord): Promise<void> {
     "\n" +
     JSON.stringify(event);
 
-  await fetch(endpoint, {
+  await fetchWithTimeout(endpoint, {
+    timeoutMs: FETCH_TIMEOUTS.sentry,
     method: "POST",
     headers: {
       "Content-Type": "application/x-sentry-envelope",

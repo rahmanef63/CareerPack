@@ -7,6 +7,7 @@ import { requireEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { parseJsonOrThrow, coerceProfileShape } from "../_shared/aiOutput";
 import { recordError } from "../_shared/errorSink";
+import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 import { SKILL_HANDLERS } from "./skillHandlers";
 
 async function requireQuota(ctx: ActionCtx): Promise<void> {
@@ -68,7 +69,8 @@ async function callAI(
 ) {
   const cfg = await resolveAI(ctx, fallbackModel);
   const payload = { ...body, model: cfg.model };
-  const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+  const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+    timeoutMs: FETCH_TIMEOUTS.aiChat,
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -524,7 +526,8 @@ Aturan ketat penggunaan USER_CONTEXT:
           payload.tool_choice = "auto";
         }
         const hopStart = Date.now();
-        const response = await fetch(`${cfg.baseUrl}/chat/completions`, {
+        const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+          timeoutMs: FETCH_TIMEOUTS.aiChat,
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -725,7 +728,9 @@ export const listOpenRouterModels = action({
   args: {},
   handler: async (ctx): Promise<Array<{ id: string; name: string; promptUsd: number; completionUsd: number; context: number }>> => {
     await requireQuota(ctx);
-    const r = await fetch("https://openrouter.ai/api/v1/models");
+    const r = await fetchWithTimeout("https://openrouter.ai/api/v1/models", {
+      timeoutMs: FETCH_TIMEOUTS.modelList,
+    });
     if (!r.ok) {
       throw new Error(`OpenRouter responded ${r.status}`);
     }
