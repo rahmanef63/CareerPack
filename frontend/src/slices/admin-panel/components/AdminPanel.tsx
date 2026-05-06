@@ -17,6 +17,7 @@ import {
   ScrollText,
   AlertTriangle,
   MessageSquare,
+  Activity,
 } from "lucide-react";
 import {
   BarChart,
@@ -83,6 +84,9 @@ const ErrorLogsPanel = dynamic(() => import("./ErrorLogsPanel").then((m) => m.Er
   ssr: false, loading: PanelSkeleton,
 });
 const AIConfigPanel = dynamic(() => import("./AIConfigPanel").then((m) => m.AIConfigPanel), {
+  ssr: false, loading: PanelSkeleton,
+});
+const AIUsagePanel = dynamic(() => import("./AIUsagePanel").then((m) => m.AIUsagePanel), {
   ssr: false, loading: PanelSkeleton,
 });
 
@@ -368,6 +372,10 @@ export function AdminPanel() {
             <Sparkles className="w-3.5 h-3.5" />
             AI
           </TabsTrigger>
+          <TabsTrigger value="ai-usage">
+            <Activity className="w-3.5 h-3.5" />
+            AI Usage
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4">
@@ -390,6 +398,9 @@ export function AdminPanel() {
         </TabsContent>
         <TabsContent value="ai" className="mt-4">
           <ErrorBoundary title="Panel AI gagal dimuat"><AIConfigPanel /></ErrorBoundary>
+        </TabsContent>
+        <TabsContent value="ai-usage" className="mt-4">
+          <ErrorBoundary title="Panel AI Usage gagal dimuat"><AIUsagePanel /></ErrorBoundary>
         </TabsContent>
       </Tabs>
     </PageContainer>

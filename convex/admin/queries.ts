@@ -106,6 +106,96 @@ export const listAllUsers = query({
 });
 
 /**
+ * 30-day rollup of AI usage + error trends, scoped for the admin dash.
+ *
+ * Returns:
+ *   - `daily`: 30-element array (oldest → newest) of `{ date, requests, errors }`
+ *   - `topUsers`: top-10 users by AI request count (last 30 days)
+ *   - `topErrorSources`: top-10 sources from errorLogs (last 30 days)
+ *   - `currentLoad`: requests in the last 60s + last 24h (rolling)
+ *
+ * Cost: scans `rateLimitEvents` and `errorLogs` once each. Both are
+ * append-only logs that admin already sweeps via `clearErrorLogs` /
+ * (TODO) rate-limit pruning, so unbounded growth is mitigated upstream.
+ */
+export const getAIUsageStats = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const now = Date.now();
+    const cutoff = now - THIRTY_DAYS_MS;
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    const [rateEvents, errorLogs, users] = await Promise.all([
+      ctx.db.query("rateLimitEvents").collect(),
+      ctx.db.query("errorLogs").collect(),
+      ctx.db.query("users").collect(),
+    ]);
+
+    const aiEvents = rateEvents.filter(
+      (e) => e.key === "ai:day" && e.timestamp >= cutoff,
+    );
+    const recentErrors = errorLogs.filter((e) => e.timestamp >= cutoff);
+
+    // Build daily buckets — start of each day in UTC, last 30 days.
+    const startOfToday = Math.floor(now / dayMs) * dayMs;
+    const daily = Array.from({ length: 30 }, (_, i) => {
+      const dayStart = startOfToday - (29 - i) * dayMs;
+      const dayEnd = dayStart + dayMs;
+      const requests = aiEvents.filter(
+        (e) => e.timestamp >= dayStart && e.timestamp < dayEnd,
+      ).length;
+      const errors = recentErrors.filter(
+        (e) => e.timestamp >= dayStart && e.timestamp < dayEnd,
+      ).length;
+      return {
+        date: new Date(dayStart).toISOString().slice(0, 10),
+        requests,
+        errors,
+      };
+    });
+
+    // Top users by AI request count (last 30 days).
+    const userCounts = new Map<string, number>();
+    for (const e of aiEvents) {
+      userCounts.set(e.userId, (userCounts.get(e.userId) ?? 0) + 1);
+    }
+    const userById = new Map(users.map((u) => [u._id, u]));
+    const topUsers = Array.from(userCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([userId, count]) => {
+        const u = userById.get(userId as Doc<"users">["_id"]);
+        return {
+          userId,
+          email: u?.email ?? null,
+          name: u?.name ?? null,
+          count,
+        };
+      });
+
+    const topErrorSources = countBy(recentErrors, (e) => e.source).slice(0, 10);
+
+    // Current rolling load.
+    const last60s = rateEvents.filter(
+      (e) => e.key === "ai:minute" && e.timestamp >= now - 60_000,
+    ).length;
+    const last24h = rateEvents.filter(
+      (e) => e.key === "ai:day" && e.timestamp >= now - dayMs,
+    ).length;
+
+    return {
+      daily,
+      topUsers,
+      topErrorSources,
+      currentLoad: { last60s, last24h },
+      totalRequests30d: aiEvents.length,
+      totalErrors30d: recentErrors.length,
+    };
+  },
+});
+
+/**
  * Distinct sources currently present in `errorLogs`. Powers the
  * ErrorLogsPanel filter dropdown so admin sees only sources that
  * actually have rows. Caps at 200 most-recent rows scanned — beyond

@@ -23,6 +23,7 @@ import type { AgentAction } from "@/shared/types/agent";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
 import { HistoryRail } from "./ai-agent-console/HistoryRail";
 import { Composer } from "./ai-agent-console/Composer";
+import { QuotaChip } from "./ai-agent-console/QuotaChip";
 import { ThinkingProgress } from "./ai-agent-console/ThinkingProgress";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { api } from "../../../../../convex/_generated/api";
@@ -333,6 +334,7 @@ export function AIAgentConsole({
               >
                 <Plus className="w-4 h-4" />
               </Button>
+              <QuotaChip />
               <Badge
                 variant="secondary"
                 className="text-[10px] hidden lg:inline-flex"

@@ -10,6 +10,66 @@ function maskKey(key: string): string {
   return `${key.slice(0, 4)}${"•".repeat(Math.max(4, key.length - 8))}${key.slice(-4)}`;
 }
 
+// ----- AI Quota -----
+
+/**
+ * Current user's remaining AI quota — minute + daily buckets.
+ *
+ * Returns `null` for unauthenticated users so SSR + logout don't crash.
+ * Reads `rateLimitEvents` directly instead of going through the
+ * enforce-helper so the query side-effect-free (helper inserts a row).
+ *
+ * UI shows the daily bucket as a chip ("X/100"); minute bucket only
+ * surfaces when nearly hit so users get warned before throttle kicks in.
+ *
+ * Buckets must match `convex/_shared/rateLimit.ts#AI_RATE_LIMITS`.
+ */
+export const getMyQuota = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+    const now = Date.now();
+    const minuteWindow = 60 * 1000;
+    const dayWindow = 24 * 60 * 60 * 1000;
+    const minuteMax = 10;
+    const dayMax = 100;
+
+    const events = await ctx.db
+      .query("rateLimitEvents")
+      .withIndex("by_user_key_time", (q) =>
+        q.eq("userId", userId).eq("key", "ai:day").gte("timestamp", now - dayWindow),
+      )
+      .collect();
+    const minuteEvents = await ctx.db
+      .query("rateLimitEvents")
+      .withIndex("by_user_key_time", (q) =>
+        q
+          .eq("userId", userId)
+          .eq("key", "ai:minute")
+          .gte("timestamp", now - minuteWindow),
+      )
+      .collect();
+
+    return {
+      minute: {
+        used: minuteEvents.length,
+        max: minuteMax,
+        remaining: Math.max(0, minuteMax - minuteEvents.length),
+        resetAt: minuteEvents[0]?.timestamp
+          ? minuteEvents[0].timestamp + minuteWindow
+          : null,
+      },
+      day: {
+        used: events.length,
+        max: dayMax,
+        remaining: Math.max(0, dayMax - events.length),
+        resetAt: events[0]?.timestamp ? events[0].timestamp + dayWindow : null,
+      },
+    };
+  },
+});
+
 // ----- AI Settings -----
 
 export const listAIProviders = query({
