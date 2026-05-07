@@ -2,6 +2,7 @@ import { internalMutation, httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { extractClientIp, sha256Hex } from "./_shared/clientIp";
+import { rejectIfBadOrigin } from "./_shared/origin";
 
 /**
  * `/api/auth/check-email` — IP rate-limited "does this email already
@@ -84,6 +85,9 @@ export const handleCheckEmail = httpAction(async (ctx, request) => {
       headers: CORS_HEADERS,
     });
   }
+
+  const originRejection = rejectIfBadOrigin(request, CORS_HEADERS);
+  if (originRejection) return originRejection;
 
   let parsed: unknown;
   try {

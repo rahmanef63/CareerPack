@@ -3,6 +3,7 @@ import { handleResendWebhook } from "./admin/webhooks";
 import { handleUnsubscribeGet, handleUnsubscribePost } from "./admin/unsubscribes";
 import { handleRequestReset } from "./passwordReset";
 import { handleCheckEmail } from "./authCheckEmail";
+import { handleHealth } from "./health";
 
 const http = httpRouter();
 
@@ -48,6 +49,12 @@ http.route({
   path: "/api/auth/check-email",
   method: "OPTIONS",
   handler: handleCheckEmail,
+});
+
+http.route({
+  path: "/api/health",
+  method: "GET",
+  handler: handleHealth,
 });
 
 export default http;

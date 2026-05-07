@@ -4,6 +4,8 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { renderResetEmail, sendEmail } from "./_shared/email";
 import { extractClientIp, sha256Hex } from "./_shared/clientIp";
+import { rejectIfBadOrigin } from "./_shared/origin";
+import { redactEmail } from "./_shared/redact";
 
 const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const PBKDF2_ITERATIONS = 100_000;
@@ -203,6 +205,9 @@ export const handleRequestReset = httpAction(async (ctx, request) => {
     });
   }
 
+  const originRejection = rejectIfBadOrigin(request, CORS_HEADERS);
+  if (originRejection) return originRejection;
+
   let parsed: unknown;
   try {
     parsed = await request.json();
@@ -256,7 +261,7 @@ export const deliverResetEmail = internalAction({
       alwaysSend: true, // security mail — bypass marketing unsubscribe list
     });
     if (!result.ok) {
-      console.error(`[password-reset] email delivery failed reason=${result.reason} to=${args.to}`);
+      console.error(`[password-reset] email delivery failed reason=${result.reason} to=${redactEmail(args.to)}`);
     }
     return result;
   },

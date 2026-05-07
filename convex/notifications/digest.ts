@@ -10,6 +10,7 @@ import { v } from "convex/values";
 import { internalAction, internalMutation, internalQuery } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { renderJobDigestEmail, sendEmail, type DigestJobItem } from "../_shared/email";
+import { redactEmail, redactId } from "../_shared/redact";
 import type { Doc } from "../_generated/dataModel";
 
 const SIX_DAYS_MS = 6 * 24 * 60 * 60 * 1000;
@@ -149,11 +150,11 @@ export const sendWeeklyDigest = internalAction({
           });
         } else {
           failed++;
-          console.warn(`[digest] send failed for ${recipient}: ${result.reason}`);
+          console.warn(`[digest] send failed for ${redactEmail(recipient)}: ${result.reason}`);
         }
       } catch (err) {
         failed++;
-        console.error(`[digest] error for profile ${profile._id}:`, err);
+        console.error(`[digest] error for profile ${redactId(profile._id)}:`, err);
       }
     }
 

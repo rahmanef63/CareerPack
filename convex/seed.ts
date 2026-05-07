@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { renderWelcomeEmail, sendEmail } from "./_shared/email";
+import { redactEmail } from "./_shared/redact";
 
 /**
  * Parse `ADMIN_BOOTSTRAP_EMAILS` — comma-separated list of emails that
@@ -89,7 +90,7 @@ export const deliverWelcomeEmail = internalAction({
       // Welcome respects unsubscribe — user opted out of marketing.
     });
     if (!result.ok) {
-      console.error(`[welcome] email delivery failed reason=${result.reason} to=${args.to}`);
+      console.error(`[welcome] email delivery failed reason=${result.reason} to=${redactEmail(args.to)}`);
     }
     return result;
   },
