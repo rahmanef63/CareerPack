@@ -25,6 +25,15 @@ function readEnv(key: keyof EnvShape): string {
     } catch {
       throw new Error(`[env] ${key} bukan URL valid: ${val}`);
     }
+    // Guard against the Dockerfile placeholder shipping to prod —
+    // happens when Dokploy build-arg `NEXT_PUBLIC_CONVEX_URL` isn't
+    // passed. NEXT_PUBLIC_* gets inlined at build time, so a wrong
+    // value silently disables every Convex call. Fail loud instead.
+    if (val.includes("example.convex.cloud")) {
+      throw new Error(
+        `[env] ${key} is the Docker build placeholder ('${val}'). Set a real Convex URL via the Dokploy build-arg or .env.local.`,
+      );
+    }
   }
   return val;
 }

@@ -32,8 +32,16 @@ describe("env validator (lazy getter)", () => {
   });
 
   it("pulangkan URL valid", async () => {
+    process.env.NEXT_PUBLIC_CONVEX_URL = "https://realdeploy.convex.cloud";
+    const mod = await import("./env");
+    expect(mod.env.NEXT_PUBLIC_CONVEX_URL).toBe("https://realdeploy.convex.cloud");
+  });
+
+  it("throw kalau nilai = Docker placeholder", async () => {
     process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
     const mod = await import("./env");
-    expect(mod.env.NEXT_PUBLIC_CONVEX_URL).toBe("https://example.convex.cloud");
+    expect(() => mod.env.NEXT_PUBLIC_CONVEX_URL).toThrow(
+      /placeholder|build-arg/,
+    );
   });
 });
