@@ -115,8 +115,9 @@ export const listAllUsers = query({
  *   - `currentLoad`: requests in the last 60s + last 24h (rolling)
  *
  * Cost: scans `rateLimitEvents` and `errorLogs` once each. Both are
- * append-only logs that admin already sweeps via `clearErrorLogs` /
- * (TODO) rate-limit pruning, so unbounded growth is mitigated upstream.
+ * append-only logs that the daily `pruneAppendOnlyTables` cron sweeps
+ * (errorLogs > 90d, rateLimitEvents > 7d), so unbounded growth is
+ * mitigated upstream and these scans stay bounded.
  */
 export const getAIUsageStats = query({
   args: {},

@@ -144,15 +144,19 @@ If a future skill is genuinely standalone (no AI tool_call counterpart),
 adding `slashCommand` to its manifest entry is fine — pattern lives in
 `settings/manifest.ts` with `/phone`, `/target`, `/lokasi`, `/bio`.
 
-## Done criteria
+## Done criteria — verified 2026-05-07
 
-- [ ] Only `aiActionBus` subscribers are `*Capabilities` components +
-      `AIAgentConsole`'s `nav.go` listener.
-- [ ] `runAgent()` deleted or pure pass-through to manifest.
-- [ ] No `subscribe("cv.fillExperience"…)` anywhere.
-- [ ] `agent.ts` action union shrinks to manifest skill IDs +
-      `nav.go` only.
-- [ ] AIToolsPanel admin docs reference only live skill IDs.
+- [x] Only `aiActionBus` subscribers are `*Capabilities` components +
+      `AIAgentConsole`'s `nav.go` listener. (Verified — 18
+      `subscribe()` callsites, all in `*Capabilities` or AIAgentConsole.)
+- [x] `runAgent()` reduced to pass-through (text-only fallback, 130
+      LoC down from 243; no legacy action emission).
+- [x] No `subscribe("cv.fillExperience"…)` anywhere. (Type union no
+      longer contains the legacy arms; useCVAIActions deleted.)
+- [x] `agent.ts` action union shrunk to `nav.go` only — manifest skill
+      IDs flow via `BusAction` carrying `skill.id`.
+- [x] `aiTools` seed (`DEFAULT_AI_TOOLS`) references only live skill
+      IDs + `nav.go` (1+64 entries; no zombie tools).
 
 ## Files touched
 

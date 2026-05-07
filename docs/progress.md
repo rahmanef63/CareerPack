@@ -1,9 +1,10 @@
 # Progress Tracker
 
-Last updated: 2026-05-06.
+Last updated: 2026-05-07.
 
 ## Recent batches
 
+- 2026-05-07 — Docs validation pass: verified all 7 commits from 2026-05-06 batch landed (143 tests green, 0 typecheck/lint warnings, all 5 Convex deploys success). Ticked AI-dispatch audit done-criteria (5/5 verified — 18 `subscribe()` callsites, all in `*Capabilities`/`AIAgentConsole`; legacy action union shrunk to `nav.go` only; zombie tool seeds removed). Cleaned stale TODO in `admin/queries.ts` re: rate-limit pruning (now done by `pruneAppendOnlyTables` cron).
 - 2026-05-06 — Hard-bound fetch latency: `_shared/fetchWithTimeout.ts` (AbortController + composable caller signal). Wired to all 13 outbound fetches: AI gateway calls (chat / cv translate / cv tailor / cv coverletter / matcher ATS / matcher external paste / chat completions), OpenRouter model list, Resend email, Sentry envelope, generic ERROR_SINK_URL, RemoteOK + WWR feed crawls. Per-purpose `FETCH_TIMEOUTS` const (aiChat 60s / sentry 5s / email 10s / modelList 10s / jobFeed 15s). 8 new vitest cases. 143 tests total.
 - 2026-05-06 — Schema growth bound: daily TTL cron `pruneAppendOnlyTables` for `errorLogs` (90d), `rateLimitEvents` (7d), `passwordResetIpEvents` (1d), `passwordResetTokens` (used / expired). Caps at 1000 deletes per table per run — backlog drains in days, single tick fits Convex mutation budget. Plugs unbounded-growth gap from tonight's table additions.
 - 2026-05-06 — Quota fairness + Sentry envelope: `_refundAIQuota` internal mutation refunds the latest minute+day rateLimitEvents row when AI gateway 5xx fails — wired to ai.chat / cv.translate / cv.tailor / cv.generateCoverLetter / matcher.ats.extractKeywords. `errorSink.ts` now speaks Sentry envelope protocol (DSN parse + `X-Sentry-Auth` header + framed JSON event) when `SENTRY_DSN` env is set; falls back to plain JSON POST for `ERROR_SINK_URL`. 14 new vitest cases (DSN parse + V8/Firefox stack parsing). 135 tests total.
