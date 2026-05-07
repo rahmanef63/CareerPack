@@ -78,6 +78,7 @@ export const updateCV = mutation({
         portfolio: v.optional(v.string()),
         summary: v.string(),
         avatarStorageId: v.optional(v.string()),
+        avatarUrl: v.optional(v.string()),
         dateOfBirth: v.optional(v.string()),
       })),
       displayPrefs: v.optional(v.object({

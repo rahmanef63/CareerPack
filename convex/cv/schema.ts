@@ -15,6 +15,11 @@ export const cvTables = {
       portfolio: v.optional(v.string()),
       summary: v.string(),
       avatarStorageId: v.optional(v.string()),
+      // Direct URL alternative to `avatarStorageId` — used when the
+      // user pastes a hosted image (LinkedIn / GitHub / Gravatar etc.)
+      // instead of uploading. Mutually exclusive with avatarStorageId
+      // by convention; the renderer prefers storageId when both set.
+      avatarUrl: v.optional(v.string()),
       dateOfBirth: v.optional(v.string()),
     }),
     displayPrefs: v.optional(v.object({

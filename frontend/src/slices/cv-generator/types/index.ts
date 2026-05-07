@@ -18,6 +18,10 @@ export interface UserProfile {
     experienceLevel: ExperienceLevel;
     /** Convex storage id for the CV photo (WebP). Optional. */
     avatarStorageId?: string;
+    /** Direct URL alternative — used when the user pastes a hosted
+     * image instead of uploading. Renderer prefers `avatarStorageId`
+     * when both are present. */
+    avatarUrl?: string;
     /** YYYY-MM-DD. Optional — only used when `displayPrefs.showAge` is on. */
     dateOfBirth?: string;
 }

@@ -1,13 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import { Trash2, User } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { FileUpload } from "@/shared/components/files/FileUpload";
+import { PhotoPicker } from "@/shared/components/files/PhotoPicker";
 import { InlineAISuggestChip } from "../../InlineAISuggestChip";
 import type { CVData } from "../../../types";
 import type { CVFormat } from "../../../constants";
@@ -19,13 +17,16 @@ interface Props {
   avatarStorageId?: string;
   updateProfile: (field: string, value: string) => void;
   onPhotoUploaded: (result: { storageId: string }) => void;
+  onPhotoFromLibrary: (file: { storageId: string }) => void;
+  onPhotoUrl: (url: string) => void;
   onPhotoClear: () => void;
   aiSuggestSummary: () => void;
 }
 
 export function PersonalInfoSection({
   cvData, format, photoUrl, avatarStorageId,
-  updateProfile, onPhotoUploaded, onPhotoClear, aiSuggestSummary,
+  updateProfile, onPhotoUploaded, onPhotoFromLibrary, onPhotoUrl, onPhotoClear,
+  aiSuggestSummary,
 }: Props) {
   return (
     <Card className="border-border overflow-hidden">
@@ -39,45 +40,23 @@ export function PersonalInfoSection({
       </CardHeader>
       <CardContent className="pt-6">
         {format === 'national' && (
-          <div className="mb-4">
+          <div className="mb-4 space-y-1">
             <Label className="text-sm">Foto Formal</Label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Wajib untuk format Nasional. Rasio 4:6 direkomendasikan —
-              kami akan memotong otomatis. Dikonversi ke WebP + EXIF dihapus.
+            <PhotoPicker
+              previewUrl={photoUrl || undefined}
+              hasStorage={!!avatarStorageId}
+              onUpload={onPhotoUploaded}
+              onPickFromLibrary={onPhotoFromLibrary}
+              onUrl={onPhotoUrl}
+              onClear={onPhotoClear}
+              cropAspect={4 / 6}
+              uploadHint="JPG/PNG/WebP, maks 10 MB. Dipotong rasio 4:6."
+            />
+            <p className="text-xs text-muted-foreground">
+              Wajib untuk format Nasional. Pilih cara: paste URL gambar,
+              unggah file (auto-crop 4:6 + WebP), atau pilih dari Library
+              Anda.
             </p>
-            {avatarStorageId && photoUrl ? (
-              <div className="flex items-start gap-4">
-                <Image
-                  src={photoUrl}
-                  alt="Foto CV"
-                  width={80}
-                  height={112}
-                  unoptimized
-                  className="w-20 h-28 rounded-lg object-cover border-2 border-border"
-                />
-                <div>
-                  <p className="text-sm text-muted-foreground">Foto sudah tersimpan.</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-2 gap-2"
-                    onClick={onPhotoClear}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Hapus foto
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <FileUpload
-                label=""
-                accept="image/*"
-                crop={{ aspect: 4 / 6 }}
-                hint="Pilih gambar JPG/PNG/WebP (maks 10 MB). Otomatis dipotong rasio 4:6."
-                onUploaded={onPhotoUploaded}
-              />
-            )}
           </div>
         )}
         <div className="grid sm:grid-cols-2 gap-4">

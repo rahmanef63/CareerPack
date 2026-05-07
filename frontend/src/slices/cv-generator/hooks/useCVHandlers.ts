@@ -12,17 +12,51 @@ export function useCVHandlers(
   setFormat: Dispatch<SetStateAction<CVFormat>>,
 ) {
   const handlePhotoUploaded = (result: { storageId: string }) => {
+    // Storage source supersedes any prior URL — clear avatarUrl so
+    // the renderer's storage-precedence rule doesn't strand the URL.
     setCvData((prev) => ({
       ...prev,
-      profile: { ...prev.profile, avatarStorageId: result.storageId },
+      profile: {
+        ...prev.profile,
+        avatarStorageId: result.storageId,
+        avatarUrl: undefined,
+      },
     }));
     notify.success('Foto CV terunggah');
+  };
+
+  const handlePhotoFromLibrary = (file: { storageId: string }) => {
+    setCvData((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        avatarStorageId: file.storageId,
+        avatarUrl: undefined,
+      },
+    }));
+    notify.success('Foto dipilih dari Library');
+  };
+
+  const handlePhotoUrl = (url: string) => {
+    setCvData((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        avatarUrl: url,
+        avatarStorageId: undefined,
+      },
+    }));
+    notify.success('Foto via URL diterapkan');
   };
 
   const handlePhotoClear = () => {
     setCvData((prev) => ({
       ...prev,
-      profile: { ...prev.profile, avatarStorageId: undefined },
+      profile: {
+        ...prev.profile,
+        avatarStorageId: undefined,
+        avatarUrl: undefined,
+      },
     }));
   };
 
@@ -171,7 +205,7 @@ export function useCVHandlers(
   };
 
   return {
-    handlePhotoUploaded, handlePhotoClear,
+    handlePhotoUploaded, handlePhotoFromLibrary, handlePhotoUrl, handlePhotoClear,
     aiSuggestSummary, aiSuggestExperienceDesc,
     updateProfile, updatePref, setFormatWithDefaults,
     addEducation, updateEducation, removeEducation,

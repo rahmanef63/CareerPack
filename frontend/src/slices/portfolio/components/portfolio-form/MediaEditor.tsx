@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { FileUpload } from "@/shared/components/files/FileUpload";
 import type { PortfolioMedia, PortfolioMediaKind } from "../../types";
-import { LibraryPicker } from "../LibraryPicker";
+import { LibraryPicker } from "@/shared/components/files/LibraryPicker";
 
 interface Props {
   media: PortfolioMedia[];

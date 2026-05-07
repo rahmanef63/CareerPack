@@ -119,6 +119,7 @@ export function useCV() {
             portfolio: activeCV.personalInfo.portfolio || "",
             summary: activeCV.personalInfo.summary,
             avatarStorageId: activeCV.personalInfo.avatarStorageId,
+            avatarUrl: activeCV.personalInfo.avatarUrl,
             dateOfBirth: activeCV.personalInfo.dateOfBirth,
             targetIndustry: "", // Not in schema yet
             experienceLevel: "fresh-graduate", // Not in schema yet
@@ -158,6 +159,7 @@ export function useCV() {
                     portfolio: data.profile.portfolio,
                     summary: data.profile.summary,
                     avatarStorageId: data.profile.avatarStorageId,
+                    avatarUrl: data.profile.avatarUrl,
                     dateOfBirth: data.profile.dateOfBirth,
                 },
                 displayPrefs: {

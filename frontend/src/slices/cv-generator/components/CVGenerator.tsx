@@ -37,11 +37,13 @@ export function CVGenerator() {
   const [activeSection, setActiveSection] = useState<string | null>('personal');
 
   const avatarStorageId = cvData.profile.avatarStorageId;
+  const avatarUrl = cvData.profile.avatarUrl;
   const resolvedPhotoUrl = useQuery(
     api.files.queries.getFileUrl,
     avatarStorageId ? { storageId: avatarStorageId } : "skip",
   );
-  const photoUrl = resolvedPhotoUrl ?? '';
+  // Storage takes precedence over external URL when both are set.
+  const photoUrl = resolvedPhotoUrl ?? avatarUrl ?? '';
 
   const toggleSection = useCallback((id: string) => {
     setActiveSection((prev) => (prev === id ? null : id));
@@ -240,6 +242,8 @@ export function CVGenerator() {
                 avatarStorageId={avatarStorageId}
                 updateProfile={handlers.updateProfile}
                 onPhotoUploaded={handlers.handlePhotoUploaded}
+                onPhotoFromLibrary={handlers.handlePhotoFromLibrary}
+                onPhotoUrl={handlers.handlePhotoUrl}
                 onPhotoClear={handlers.handlePhotoClear}
                 aiSuggestSummary={handlers.aiSuggestSummary}
               />
