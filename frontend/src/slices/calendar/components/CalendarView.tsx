@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { downloadIcs, eventsToIcs } from "../lib/ics";
 import { id as localeID } from "react-day-picker/locale";
-import { Calendar } from "@/shared/components/ui/calendar";
+import { UltimateCalendar, type MarkedDate } from "@/shared/components/ui/ultimate-calendar";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
@@ -77,6 +77,24 @@ export function CalendarView() {
     () => new Set(filtered.map((a) => a.date)),
     [filtered],
   );
+
+  // Marked-date dots for the calendar grid — one per unique date
+  // with at least one event; tinted by the highest-priority type.
+  const markedDates = useMemo<MarkedDate[]>(() => {
+    const seen = new Set<string>();
+    const out: MarkedDate[] = [];
+    for (const item of filtered) {
+      if (seen.has(item.date)) continue;
+      seen.add(item.date);
+      out.push({
+        date: new Date(item.date),
+        dot: true,
+        color: "after:bg-brand",
+        label: item.title,
+      });
+    }
+    return out;
+  }, [filtered]);
 
   // Pre-aggregate type counts for filter chip badges.
   const typeCounts = useMemo(() => {
@@ -222,21 +240,22 @@ export function CalendarView() {
             </Button>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Calendar
+            <UltimateCalendar
               mode="single"
               selected={selected}
               onSelect={setSelected}
               locale={localeID}
               timeZone={timeZone}
               captionLayout="dropdown"
-              className="rounded-lg border"
+              accent="primary"
+              highlightToday
+              markedDates={markedDates}
               modifiers={{
                 hasEvent: (date) =>
                   datesWithEvents.has(date.toISOString().slice(0, 10)),
               }}
               modifiersClassNames={{
-                hasEvent:
-                  "relative font-bold text-brand after:absolute after:left-1/2 after:bottom-0.5 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-brand",
+                hasEvent: "font-bold text-brand",
               }}
             />
           </CardContent>
