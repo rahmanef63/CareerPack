@@ -1,5 +1,5 @@
 import { action, type ActionCtx } from "../_generated/server";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { v, ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -190,10 +190,29 @@ export const generateCoverLetter = action({
     rawJD: v.optional(v.string()),
     language: v.optional(v.string()),
     tone: v.optional(v.string()),
+    idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+
+    return withIdempotency(ctx, userId, args.idempotencyKey, () =>
+      generateCoverLetterImpl(ctx, args, userId),
+    );
+  },
+});
+
+async function generateCoverLetterImpl(
+  ctx: ActionCtx,
+  args: {
+    cvId?: Id<"cvs">;
+    jobListingId?: Id<"jobListings">;
+    rawJD?: string;
+    language?: string;
+    tone?: string;
+  },
+  userId: Id<"users">,
+) {
     await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
 
     // CV — caller-supplied or pick newest.
@@ -271,10 +290,7 @@ Hard rules:
         source: "cv.generateCoverLetter",
         message: `gateway ${response.status} ${detail.slice(0, 300)}`,
       });
-      const userId = await getAuthUserId(ctx);
-      if (userId) {
-        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
-      }
+      await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
       throw new ConvexError(
         response.status === 429
           ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
@@ -287,8 +303,7 @@ Hard rules:
     if (!text) throw new ConvexError("AI tidak mengembalikan teks. Coba lagi.");
 
     return { text, jobMeta, language: lang, tone };
-  },
-});
+}
 
 // ---------------------------------------------------------------------------
 // Resume Tailor — given a JD, rewrite the user's CV achievements bullets
@@ -321,10 +336,27 @@ export const tailorCVForJob = action({
     cvId: v.optional(v.id("cvs")),
     jobListingId: v.optional(v.id("jobListings")),
     rawJD: v.optional(v.string()),
+    idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<TailorResult> => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+
+    return withIdempotency(ctx, userId, args.idempotencyKey, () =>
+      tailorCVForJobImpl(ctx, args, userId),
+    );
+  },
+});
+
+async function tailorCVForJobImpl(
+  ctx: ActionCtx,
+  args: {
+    cvId?: Id<"cvs">;
+    jobListingId?: Id<"jobListings">;
+    rawJD?: string;
+  },
+  userId: Id<"users">,
+): Promise<TailorResult> {
     await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
 
     const cv: Doc<"cvs"> | null = args.cvId
@@ -415,10 +447,7 @@ Hard rules:
         source: "cv.tailor",
         message: `gateway ${response.status} ${detail.slice(0, 300)}`,
       });
-      const userId = await getAuthUserId(ctx);
-      if (userId) {
-        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
-      }
+      await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
       throw new ConvexError(
         response.status === 429
           ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
@@ -465,8 +494,7 @@ Hard rules:
     });
 
     return { jobMeta, experiences: results };
-  },
-});
+}
 
 function buildCVSummary(cv: Doc<"cvs">): string {
   const parts: string[] = [];

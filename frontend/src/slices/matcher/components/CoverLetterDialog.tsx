@@ -63,6 +63,7 @@ export function CoverLetterDialog({ job, open, onOpenChange }: CoverLetterDialog
         jobListingId: job._id,
         language,
         tone,
+        idempotencyKey: crypto.randomUUID(),
       });
       setText(res.text);
       notify.success("Cover letter siap — edit dan copy", {

@@ -22,7 +22,7 @@ export function useATSScan() {
   const run = async (input: ScanInput) => {
     setPending(true);
     try {
-      const res = await scanAction(input);
+      const res = await scanAction({ ...input, idempotencyKey: crypto.randomUUID() });
       setLatestScanId(res.scanId);
       notify.success(`Skor ATS: ${res.score} (${res.grade})`);
       return res;

@@ -8,6 +8,7 @@ import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
+import { withIdempotency } from "../_shared/idempotency";
 import { fallbackExtractKeywords, scoreATS } from "./atsScore";
 import type { JDForScoring, CVForScoring } from "./atsScore";
 import type { Id } from "../_generated/dataModel";
@@ -190,6 +191,7 @@ export const scanCV = action({
     jdText: v.optional(v.string()),
     jobTitle: v.optional(v.string()),
     jobCompany: v.optional(v.string()),
+    idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<{
     scanId: Id<"atsScans">;
@@ -200,6 +202,24 @@ export const scanCV = action({
     if (!userId) {
       throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
     }
+
+    return withIdempotency(ctx, userId, args.idempotencyKey, () =>
+      scanCVImpl(ctx, args, userId),
+    );
+  },
+});
+
+async function scanCVImpl(
+  ctx: ActionCtx,
+  args: {
+    cvId: Id<"cvs">;
+    jobListingId?: Id<"jobListings">;
+    jdText?: string;
+    jobTitle?: string;
+    jobCompany?: string;
+  },
+  userId: Id<"users">,
+): Promise<{ scanId: Id<"atsScans">; score: number; grade: string }> {
     await ctx.runMutation(internal.matcher.actions._checkATSQuota, { userId });
 
     // 1) Load CV (must be owned by caller)
@@ -292,5 +312,4 @@ export const scanCV = action({
     });
 
     return { scanId, score: result.score, grade: result.grade };
-  },
-});
+}

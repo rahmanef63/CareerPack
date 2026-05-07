@@ -118,6 +118,7 @@ export function MatcherCapabilities() {
           const result = await scanCV({
             cvId: cvId as Id<"cvs">,
             jobListingId: jobListingId as Id<"jobListings">,
+            idempotencyKey: crypto.randomUUID(),
           });
           notify.success(`Skor ATS: ${result.score} (${result.grade})`);
         } catch (err) {

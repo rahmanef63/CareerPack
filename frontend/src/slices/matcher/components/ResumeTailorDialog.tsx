@@ -80,7 +80,10 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
     setResult(null);
     setAccepted(new Set());
     try {
-      const res = await tailor({ jobListingId: job._id });
+      const res = await tailor({
+        jobListingId: job._id,
+        idempotencyKey: crypto.randomUUID(),
+      });
       setResult(res);
       // Pre-select all changed bullets — user can deselect.
       const init = new Set<string>();
