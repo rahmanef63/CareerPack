@@ -43,6 +43,14 @@ const passwordResetTables = {
     ipHash: v.string(),
     timestamp: v.number(),
   }).index("by_ipHash_time", ["ipHash", "timestamp"]),
+
+  // Per-IP rate-limit bucket for `/api/auth/check-email` (gate on the
+  // signIn-vs-signUp pre-check). Without this, anyone could enumerate
+  // registered emails by spamming the public query.
+  loginCheckIpEvents: defineTable({
+    ipHash: v.string(),
+    timestamp: v.number(),
+  }).index("by_ipHash_time", ["ipHash", "timestamp"]),
 };
 
 export default defineSchema({

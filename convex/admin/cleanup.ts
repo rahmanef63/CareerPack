@@ -38,6 +38,8 @@ export const cleanupInactiveDemoUsers = internalMutation({
  *                             retaining data the live path skips.
  * - `passwordResetIpEvents` — 1 day. Per-IP bucket window is 1 hour,
  *                             so anything older is dead weight.
+ * - `loginCheckIpEvents`    — 1 day. Same shape + window as the
+ *                             password-reset bucket.
  * - `passwordResetTokens`   — `used` rows or expired rows are
  *                             immediately safe to drop. Active unused
  *                             tokens kept.
@@ -54,6 +56,7 @@ export const pruneAppendOnlyTables = internalMutation({
       errorLogs: 0,
       rateLimitEvents: 0,
       passwordResetIpEvents: 0,
+      loginCheckIpEvents: 0,
       passwordResetTokens: 0,
     };
 
@@ -91,6 +94,17 @@ export const pruneAppendOnlyTables = internalMutation({
       const batch = stale.slice(0, PRUNE_BATCH_MAX);
       for (const r of batch) await ctx.db.delete(r._id);
       stats.passwordResetIpEvents = batch.length;
+    }
+
+    // loginCheckIpEvents > 1 day — same pattern as passwordResetIpEvents.
+    {
+      const cutoff = now - DAY;
+      const stale = (
+        await ctx.db.query("loginCheckIpEvents").take(PRUNE_BATCH_MAX * 2)
+      ).filter((e) => e.timestamp < cutoff);
+      const batch = stale.slice(0, PRUNE_BATCH_MAX);
+      for (const r of batch) await ctx.db.delete(r._id);
+      stats.loginCheckIpEvents = batch.length;
     }
 
     // passwordResetTokens — used or expired (TTL 30m, so anything

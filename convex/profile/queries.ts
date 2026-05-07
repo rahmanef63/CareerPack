@@ -290,17 +290,6 @@ export const _getCompactUserContext = internalQuery({
   },
 });
 
-export const userExistsByEmail = query({
-  args: { email: v.string() },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), args.email))
-      .first();
-    return !!user;
-  },
-});
-
 export const getUserStats = query({
   args: {},
   handler: async (ctx) => {

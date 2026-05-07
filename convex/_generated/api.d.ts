@@ -27,6 +27,7 @@ import type * as ai_queries from "../ai/queries.js";
 import type * as applications_mutations from "../applications/mutations.js";
 import type * as applications_queries from "../applications/queries.js";
 import type * as auth from "../auth.js";
+import type * as authCheckEmail from "../authCheckEmail.js";
 import type * as calendar_mutations from "../calendar/mutations.js";
 import type * as calendar_queries from "../calendar/queries.js";
 import type * as calendar_reminders from "../calendar/reminders.js";
@@ -101,6 +102,7 @@ declare const fullApi: ApiFromModules<{
   "applications/mutations": typeof applications_mutations;
   "applications/queries": typeof applications_queries;
   auth: typeof auth;
+  authCheckEmail: typeof authCheckEmail;
   "calendar/mutations": typeof calendar_mutations;
   "calendar/queries": typeof calendar_queries;
   "calendar/reminders": typeof calendar_reminders;

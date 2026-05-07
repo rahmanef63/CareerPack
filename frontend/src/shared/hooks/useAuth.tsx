@@ -9,9 +9,10 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth, useQuery, useMutation, useConvex } from "convex/react";
+import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { ROUTES } from "@/shared/lib/routes";
+import { convexHttpUrl } from "@/shared/lib/env";
 import type {
   AuthState,
   AuthContextValue,
@@ -41,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
-  const convex = useConvex();
 
   const userProfile = useQuery(api.profile.queries.getCurrentUser, isAuthenticated ? {} : "skip");
   const updateProfile = useMutation(api.profile.mutations.createOrUpdateProfile);
@@ -131,9 +131,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
     try {
-      const exists = await convex.query(api.profile.queries.userExistsByEmail, {
-        email: credentials.email,
+      // IP rate-limited (30/hr) so attackers can't enumerate registered
+      // emails. See convex/authCheckEmail.ts.
+      const checkRes = await fetch(convexHttpUrl("/api/auth/check-email"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: credentials.email }),
       });
+      if (checkRes.status === 429) {
+        return { ok: false, error: "Terlalu banyak percobaan login. Coba lagi nanti." };
+      }
+      if (!checkRes.ok) {
+        return { ok: false, error: "Layanan login tidak tersedia. Coba lagi." };
+      }
+      const { exists } = (await checkRes.json()) as { exists: boolean };
 
       await signIn(
         "password",
