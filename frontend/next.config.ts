@@ -24,9 +24,13 @@ const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // 'unsafe-inline' covers Next.js's runtime style inlining.
-      // 'unsafe-eval' is needed for next-themes hydration script.
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",
+      // 'unsafe-inline' is unavoidable here: Next.js emits inline
+      // <script> for hydration / next-themes flash-prevention, and
+      // adopting nonces means wiring middleware that injects a
+      // per-request nonce into both the response and every emitted
+      // script tag — significant rework. 'unsafe-eval' is dropped
+      // (no eval / new Function in the bundle; verified via grep).
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
       // Google Fonts allowed globally so personal-branding template iframes
       // (rendered via srcDoc) inherit a CSP that lets them load Inter /
       // Cormorant / Manrope. about:srcdoc inherits the parent's CSP and

@@ -75,6 +75,66 @@ export const _ipGatedCheckEmail = internalMutation({
   },
 });
 
+/**
+ * Mutation behind `/api/auth/signin-attempt` — bumps the same
+ * `loginCheckIpEvents` bucket that gates email-check, so brute-force
+ * signIn attempts share a budget with the pre-check. Cap is still
+ * 30/hr/IP; each failed signIn burns one slot. Legit users (3 retries
+ * tops) stay well under, attackers cap out fast.
+ *
+ * Note: Convex auth `signIn()` is sealed — we can't intercept its
+ * verify path. This is a frontend-cooperation gate: the official
+ * client must call this httpAction after every failed signIn.
+ * Raw-WebSocket abuse bypasses, but mid-tier scripts running through
+ * the official flow are throttled.
+ */
+export const _bumpLoginFailure = internalMutation({
+  args: { ipHash: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { ipHash }) => {
+    await ctx.db.insert("loginCheckIpEvents", { ipHash, timestamp: Date.now() });
+    return null;
+  },
+});
+
+export const handleSignInAttempt = httpAction(async (ctx, request) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+  if (request.method !== "POST") {
+    return new Response("method_not_allowed", {
+      status: 405,
+      headers: CORS_HEADERS,
+    });
+  }
+  const originRejection = rejectIfBadOrigin(request, CORS_HEADERS);
+  if (originRejection) return originRejection;
+
+  let parsed: unknown;
+  try {
+    parsed = await request.json();
+  } catch {
+    return new Response("invalid_json", { status: 400, headers: CORS_HEADERS });
+  }
+  const success = (parsed as Record<string, unknown> | null)?.success;
+  if (typeof success !== "boolean") {
+    return new Response("missing_success", { status: 400, headers: CORS_HEADERS });
+  }
+
+  // Only bump the bucket on failure — successful logins shouldn't
+  // burn the legit user's quota.
+  if (!success) {
+    const ip = extractClientIp(request.headers);
+    const ipHash = await sha256Hex(ip);
+    await ctx.runMutation(internal.authCheckEmail._bumpLoginFailure, { ipHash });
+  }
+
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+  });
+});
+
 export const handleCheckEmail = httpAction(async (ctx, request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });

@@ -2,7 +2,7 @@ import { httpRouter } from "convex/server";
 import { handleResendWebhook } from "./admin/webhooks";
 import { handleUnsubscribeGet, handleUnsubscribePost } from "./admin/unsubscribes";
 import { handleRequestReset } from "./passwordReset";
-import { handleCheckEmail } from "./authCheckEmail";
+import { handleCheckEmail, handleSignInAttempt } from "./authCheckEmail";
 import { handleHealth } from "./health";
 
 const http = httpRouter();
@@ -49,6 +49,17 @@ http.route({
   path: "/api/auth/check-email",
   method: "OPTIONS",
   handler: handleCheckEmail,
+});
+
+http.route({
+  path: "/api/auth/signin-attempt",
+  method: "POST",
+  handler: handleSignInAttempt,
+});
+http.route({
+  path: "/api/auth/signin-attempt",
+  method: "OPTIONS",
+  handler: handleSignInAttempt,
 });
 
 http.route({

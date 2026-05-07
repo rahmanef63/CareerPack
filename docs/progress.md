@@ -4,6 +4,9 @@ Last updated: 2026-05-07.
 
 ## Recent batches
 
+- 2026-05-07 — signIn brute-force gate + CSP `unsafe-eval` drop + PWA validate. New `/api/auth/signin-attempt` httpAction (POST + OPTIONS) bumps the existing `loginCheckIpEvents` bucket on every failed login; brute-force scripts running through the official client share a 30/hr/IP budget with the email-pre-check, capping out fast. Convex auth's `signIn` is sealed → raw-WebSocket abuse is residual; PBKDF2-SHA256 100k iter (~100ms/attempt) handles the worst case. Dropped `'unsafe-eval'` from `script-src` in `next.config.ts` (verified zero `eval` / `new Function` callsites in bundle). PWA static config validated — manifest (10 icons + maskable + apple-touch + screenshots + shortcuts), sw.js (precache + versioned cache name).
+- 2026-05-07 — AI idempotency cache. New `aiIdempotency` table + `withIdempotency(ctx, userId, key, fn)` helper in `_shared/idempotency.ts`. Wraps action body so duplicate `(userId, key)` within 30m returns the cached `JSON.stringify(result)` — no quota deduct, no upstream call. First adopter: `cv.translate` (frontend mints `crypto.randomUUID()` per click). Result-size cap 10KB. `pruneAppendOnlyTables` extended to sweep `aiIdempotency` >30m. Pattern documented for further actions to adopt.
+- 2026-05-07 — Security batch: CSRF Origin gate + PII-safe logs + `/api/health` probe + encrypted backups. `_shared/origin.ts` rejects POSTs from origins not in `APP_URL` ∪ `localhost:3000` (wired to `/api/password-reset/request` + `/api/auth/check-email`). `_shared/redact.ts` shrinks emails to `a***@domain` and ids to `kf2abcde…` before logging — applied to passwordReset, seed, notifications/digest. `convex/health.ts` exposes `GET /api/health` returning `{ ok, ts, db }` (200) or `{ ok: false }` (503) for Dokploy / external uptime monitors. `backend/convex-self-hosted/backup.sh` now AES-256 encrypts via `gpg --symmetric` when `BACKUP_PASSPHRASE_FILE` is set + readable (no-op when unset → back-compat). 16 new vitest cases for redact + origin = 159 total.
 - 2026-05-07 — Login email enumeration plug: deleted public `userExistsByEmail` query; new `/api/auth/check-email` httpAction (POST + OPTIONS) gated 30/hr/IP via SHA-256 hashed-IP bucket (`loginCheckIpEvents` table, mirrors `passwordResetIpEvents` pattern). 429 on overflow. Frontend `useAuth.login` now `fetch()`s instead of `convex.query()`. `pruneAppendOnlyTables` cron extended to clean the new bucket >1d. Closes the WebSocket-side enumeration vector flagged during 2026-05-07 audit.
 - 2026-05-07 — Docs validation pass: verified all 7 commits from 2026-05-06 batch landed (143 tests green, 0 typecheck/lint warnings, all 5 Convex deploys success). Ticked AI-dispatch audit done-criteria (5/5 verified — 18 `subscribe()` callsites, all in `*Capabilities`/`AIAgentConsole`; legacy action union shrunk to `nav.go` only; zombie tool seeds removed). Cleaned stale TODO in `admin/queries.ts` re: rate-limit pruning (now done by `pruneAppendOnlyTables` cron).
 - 2026-05-06 — Hard-bound fetch latency: `_shared/fetchWithTimeout.ts` (AbortController + composable caller signal). Wired to all 13 outbound fetches: AI gateway calls (chat / cv translate / cv tailor / cv coverletter / matcher ATS / matcher external paste / chat completions), OpenRouter model list, Resend email, Sentry envelope, generic ERROR_SINK_URL, RemoteOK + WWR feed crawls. Per-purpose `FETCH_TIMEOUTS` const (aiChat 60s / sentry 5s / email 10s / modelList 10s / jobFeed 15s). 8 new vitest cases. 143 tests total.
@@ -56,25 +59,36 @@ Dulu split dual-agent → akhirnya dikerjakan single-agent, semua selesai di bra
 ### Follow-ups (next round)
 
 - [x] V2 password reset: integrasi email delivery — Resend via `convex/_shared/email.ts`, scheduled via internal action `deliverResetEmail` (landed 2026-05-01)
-- [x] Rate limit per-email untuk `requestReset` — 5 req/hour bucket keyed by user._id (landed 2026-05-01). Per-IP masih open (butuh migrate `requestReset` → `httpAction`).
-- [ ] Seed admin user awal — masih harus manual `updateUserRole` via Convex dashboard
-- [ ] Per-IP rate limit `requestReset` (saat ini hanya per-email)
-- [ ] Activity tracking → `userProfiles.lastActiveAt` supaya `admin.listAllUsers` bisa nyajikan kolom itu
+- [x] Rate limit per-email untuk `requestReset` — 5 req/hour bucket keyed by user._id (landed 2026-05-01). Per-IP closed 2026-05-06.
+- [x] Per-IP rate limit `requestReset` — closed 2026-05-06 (httpAction `/api/password-reset/request`, 10/hr/IP).
+- [x] Activity tracking `userProfiles.lastActiveAt` — closed 2026-05-05 (`6c40eac`).
+- [ ] Seed admin user awal — masih harus manual `updateUserRole` via Convex dashboard.
 
-### Backlog snapshot — 2026-05-05
+### Backlog snapshot — 2026-05-07
 
-Per audit ulang setelah manifest expansion. See [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05-05-en-i18n-discovery.md) for the i18n plan; entries below cover the rest.
+Re-audited after the 2026-05-07 hardening sweep. i18n plan still
+deferred — see [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05-05-en-i18n-discovery.md).
 
-1. ~~Konsolidasi dispatch path AI~~ ✓ closed 2026-05-06. Phase A (zombie types) + Phase C (seed cleanup) landed; Phase B intentionally deferred (would duplicate AI tool_call) — rationale di [`progress/2026-05-06-ai-dispatch-audit.md`](./progress/2026-05-06-ai-dispatch-audit.md).
-2. ~~Manifest coverage 4 slice produktif tersisa~~ ✓ landed 2026-05-05 (`6c40eac`); 22/22 coverage achieved 2026-05-05
-3. ~~Per-IP rate limit `requestReset`~~ ✓ landed 2026-05-06 (httpAction `/api/password-reset/request`, hashed-IP bucket 10/hr)
-4. ~~`userProfiles.lastActiveAt` heartbeat tracking~~ ✓ landed 2026-05-05 (`6c40eac`)
-5. Backup cron eksekusi (script ready 2026-05-01, install ke VPS pending — manual ops)
-6. EN i18n phase 1 (next-intl + `[locale]` segment) — multi-day, 4 decisions pending di discovery doc
-7. ~~AI tool-call output eval suite~~ ✓ landed 2026-05-06 (`coerceJobShape` + `coerceProfileShape` + 16 cases)
-8. ~~Notification cron cadence: bump dari hourly ke 15-min~~ ✓ landed 2026-05-05 (`6c40eac`)
-9. Roadmap template content gap — tambah seed untuk domain non-tech (butuh domain expert)
-10. ~~Sentry / observability — wire external sink~~ ✓ landed 2026-05-06 (`_shared/errorSink.ts` + `ERROR_SINK_URL`/`SENTRY_DSN` env)
+1. ~~Konsolidasi dispatch path AI~~ ✓ closed 2026-05-06.
+2. ~~Manifest coverage 22/22~~ ✓ closed 2026-05-05.
+3. ~~Per-IP rate limit `requestReset`~~ ✓ closed 2026-05-06.
+4. ~~`userProfiles.lastActiveAt` heartbeat~~ ✓ closed 2026-05-05.
+5. Backup cron eksekusi — script + AES-256 encrypt ready 2026-05-07, install ke VPS pending (manual ops, needs SSH).
+6. EN i18n phase 1 — multi-day, 4 decisions pending in discovery doc.
+7. ~~AI tool-call output eval suite~~ ✓ closed 2026-05-06.
+8. ~~Notification cron 15-min cadence~~ ✓ closed 2026-05-05.
+9. Roadmap template content gap — non-tech domains need a domain expert.
+10. ~~Sentry / external observability sink~~ ✓ closed 2026-05-06.
+11. ~~Login email enumeration plug~~ ✓ closed 2026-05-07 (`/api/auth/check-email`, 30/hr/IP).
+12. ~~CSRF Origin gate on state-changing httpActions~~ ✓ closed 2026-05-07.
+13. ~~PII redaction in console / errorLogs sites~~ ✓ closed 2026-05-07 (`_shared/redact.ts`).
+14. ~~`/api/health` probe for Dokploy / uptime monitors~~ ✓ closed 2026-05-07.
+15. ~~Encrypted backups~~ ✓ closed 2026-05-07 (`gpg --symmetric AES256` opt-in via `BACKUP_PASSPHRASE_FILE`).
+16. ~~AI idempotency cache (retry double-charge)~~ ✓ closed 2026-05-07 — wired to `cv.translate` as exemplar; other actions adopt by adding `idempotencyKey` arg + wrapping handler.
+17. ~~signIn brute-force gate (best-effort)~~ ✓ closed 2026-05-07 (`/api/auth/signin-attempt` shares `loginCheckIpEvents` budget). Raw-WebSocket bypass residual; PBKDF2-SHA256 100k iter is the floor.
+18. ~~CSP `unsafe-eval` drop~~ ✓ closed 2026-05-07. `unsafe-inline` for inline scripts/styles still required (Next.js hydration); nonce-based CSP would need middleware rework — deferred.
+19. ~~PWA static config validation~~ ✓ closed 2026-05-07 (manifest icons / shortcuts / screenshots all present; sw.js precache valid).
+20. AI idempotency rollout to remaining 4 actions (`cv.tailor` / `cv.generateCoverLetter` / `ai.chat` / `matcher.ats.extractKeywords`) — pattern landed 2026-05-07, callsite adoption pending.
 
 ## Smoke Test Checklist
 

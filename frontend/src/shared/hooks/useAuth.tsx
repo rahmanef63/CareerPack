@@ -167,6 +167,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       const msg = extractAuthError(error);
       console.error("Login gagal:", msg);
+      // Bump the per-IP login-failure bucket so brute-force scripts
+      // running through the official client flow burn quota fast.
+      // Fire-and-forget — surface the original auth error regardless.
+      void fetch(convexHttpUrl("/api/auth/signin-attempt"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ success: false }),
+      }).catch(() => {});
       // Fallback to a friendlier generic when the server returns a bare
       // "Server Error" without a specific reason (usually wrong pwd).
       const isGeneric = /server error/i.test(msg) || msg.trim() === "";
