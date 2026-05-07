@@ -7,6 +7,8 @@ import { ConvexClientProvider } from "@/shared/providers/ConvexClientProvider"
 import { AuthProvider } from "@/shared/hooks/useAuth"
 import { AIConfigProvider } from "@/shared/hooks/useAIConfig"
 import { UIPrefsProvider } from "@/shared/hooks/useUIPrefs"
+import { LocaleProvider } from "@/shared/hooks/useLocale"
+import { TranslateHint } from "@/shared/components/system/TranslateHint"
 import { ThemeColorSync } from "@/shared/components/pwa/ThemeColorSync"
 import { SWUpdatePrompt } from "@/shared/components/pwa/SWUpdatePrompt"
 import { RegisterSW } from "@/shared/components/pwa/RegisterSW"
@@ -42,6 +44,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <AuthProvider>
           <AIConfigProvider>
             <UIPrefsProvider>
+             <LocaleProvider>
               <TooltipProvider delayDuration={300}>
                 {children}
                 <SettingsCapabilities />
@@ -64,8 +67,10 @@ export function Providers({ children }: { children: ReactNode }) {
                 <RegisterSW />
                 <SWUpdatePrompt />
                 <UpdateChecker />
+                <TranslateHint />
                 <Toaster />
               </TooltipProvider>
+             </LocaleProvider>
             </UIPrefsProvider>
           </AIConfigProvider>
         </AuthProvider>

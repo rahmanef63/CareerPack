@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Languages,
   LayoutPanelTop,
   Monitor,
   Moon,
@@ -10,6 +11,7 @@ import {
   Type,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useLocale, type LocalePref } from "@/shared/hooks/useLocale";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
@@ -101,6 +103,40 @@ const NAV_OPTIONS: ReadonlyArray<SegmentedOption<NavStyle>> = [
   { value: "notched", label: "Lekukan" },
 ];
 
+const LOCALE_OPTIONS: ReadonlyArray<SegmentedOption<LocalePref>> = [
+  { value: "id", label: "Indonesia (id-ID)" },
+  { value: "en", label: "English (en-US)" },
+];
+
+function LocaleCard() {
+  const { locale, setLocale, formatDate, formatCurrency } = useLocale();
+  const sample = new Date();
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Languages className="w-4 h-4 text-brand" /> Bahasa &amp; Format
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Segmented<LocalePref>
+          value={locale}
+          onChange={setLocale}
+          options={LOCALE_OPTIONS}
+          ariaLabel="Locale preference"
+        />
+        <p className="text-xs text-muted-foreground">
+          Memilih <strong>en-US</strong> mengganti format tanggal &amp; angka
+          (mis. <span translate="no">{formatDate(sample)}</span> ·{" "}
+          <span translate="no">{formatCurrency(1500000)}</span>). Konten teks
+          tetap Bahasa Indonesia — gunakan fitur translate browser
+          (kanan-klik → Translate) untuk versi Inggris penuh.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function AppearanceSection() {
   const prefs = useUIPrefs();
   const { theme, setTheme } = useTheme();
@@ -148,6 +184,8 @@ export function AppearanceSection() {
           </p>
         </CardContent>
       </Card>
+
+      <LocaleCard />
 
       <Card>
         <CardHeader className="pb-2">
