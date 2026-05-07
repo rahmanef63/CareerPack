@@ -51,6 +51,20 @@ const passwordResetTables = {
     ipHash: v.string(),
     timestamp: v.number(),
   }).index("by_ipHash_time", ["ipHash", "timestamp"]),
+
+  // Idempotency cache for AI actions. WebSocket retry / user
+  // double-click should NOT charge quota or hit the upstream provider
+  // twice — the action wraps its body with `withIdempotency(ctx,
+  // userId, key, fn)`, which returns the cached result on duplicate
+  // keys. 30-minute TTL via `pruneAppendOnlyTables`.
+  aiIdempotency: defineTable({
+    userId: v.id("users"),
+    key: v.string(),
+    resultJson: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user_key", ["userId", "key"])
+    .index("by_createdAt", ["createdAt"]),
 };
 
 export default defineSchema({

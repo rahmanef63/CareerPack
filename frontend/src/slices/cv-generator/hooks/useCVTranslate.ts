@@ -101,7 +101,14 @@ export function useCVTranslate(source: CVData) {
           notify.info("Belum ada teks untuk diterjemahkan");
           return;
         }
-        const { translations } = await translateAction({ targetLang: lang, fields });
+        // Idempotency key — same click → same key → cached result on
+        // WebSocket retry. Mints once per user-action.
+        const idempotencyKey = crypto.randomUUID();
+        const { translations } = await translateAction({
+          targetLang: lang,
+          fields,
+          idempotencyKey,
+        });
         const next = applyTranslations(source, translations);
         setTranslatedCV(next);
         setActiveLang(lang);

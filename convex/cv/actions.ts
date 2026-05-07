@@ -8,6 +8,7 @@ import { optionalEnv } from "../_shared/env";
 import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
+import { withIdempotency } from "../_shared/idempotency";
 
 /**
  * CV translation pipeline. Flattens every user-visible text field into
@@ -70,27 +71,37 @@ export const translate = action({
       key: v.string(),
       text: v.string(),
     })),
+    /**
+     * Optional client-minted UUID. Same key within 30m → cached
+     * result returned, no quota deduct, no upstream call. Frontend
+     * generates one per user-click; missing key = no-cache fallback.
+     */
+    idempotencyKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireQuota(ctx);
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
 
-    const targetName = LANGUAGE_NAMES[args.targetLang];
-    if (!targetName) throw new ConvexError(`Bahasa target tidak didukung: ${args.targetLang}`);
+    return withIdempotency(ctx, userId, args.idempotencyKey, async () => {
+      await requireQuota(ctx);
 
-    const sanitized = args.fields
-      .filter((f) => f.text.trim().length > 0)
-      .map((f) => ({
-        key: sanitizeAIInput(f.key, 60),
-        text: sanitizeAIInput(f.text, 2000),
-      }));
+      const targetName = LANGUAGE_NAMES[args.targetLang];
+      if (!targetName) throw new ConvexError(`Bahasa target tidak didukung: ${args.targetLang}`);
 
-    if (sanitized.length === 0) {
-      return { translations: {} as Record<string, string> };
-    }
+      const sanitized = args.fields
+        .filter((f) => f.text.trim().length > 0)
+        .map((f) => ({
+          key: sanitizeAIInput(f.key, 60),
+          text: sanitizeAIInput(f.text, 2000),
+        }));
 
-    const cfg = await resolveAI(ctx, "gpt-4.1-nano");
+      if (sanitized.length === 0) {
+        return { translations: {} as Record<string, string> };
+      }
 
-    const systemPrompt = `You are a professional CV translator. Translate every value in the input JSON object into ${targetName}. Preserve:
+      const cfg = await resolveAI(ctx, "gpt-4.1-nano");
+
+      const systemPrompt = `You are a professional CV translator. Translate every value in the input JSON object into ${targetName}. Preserve:
 - tone and professionalism
 - industry-specific jargon when no natural equivalent exists
 - the original formatting (line breaks, bullet markers)
@@ -98,62 +109,60 @@ export const translate = action({
 Do NOT translate: proper names, company names, product names, URLs, email addresses, phone numbers, dates.
 Return ONLY a JSON object of the shape { "translations": { "<key>": "<translated text>" } }. No preamble, no markdown.`;
 
-    const userPayload = {
-      target_language: targetName,
-      items: sanitized,
-    };
+      const userPayload = {
+        target_language: targetName,
+        items: sanitized,
+      };
 
-    const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
-      timeoutMs: FETCH_TIMEOUTS.aiChat,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cfg.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: cfg.model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: wrapUserInput("cv_fields", JSON.stringify(userPayload)),
-          },
-        ],
-        temperature: 0.2,
-        max_tokens: 2500,
-        response_format: { type: "json_object" },
-      }),
-    });
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      await recordError(ctx, {
-        source: "cv.translate",
-        message: `gateway ${response.status} ${detail.slice(0, 400)}`,
+      const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+        timeoutMs: FETCH_TIMEOUTS.aiChat,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cfg.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: cfg.model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: wrapUserInput("cv_fields", JSON.stringify(userPayload)),
+            },
+          ],
+          temperature: 0.2,
+          max_tokens: 2500,
+          response_format: { type: "json_object" },
+        }),
       });
-      const userId = await getAuthUserId(ctx);
-      if (userId) {
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => "");
+        await recordError(ctx, {
+          source: "cv.translate",
+          message: `gateway ${response.status} ${detail.slice(0, 400)}`,
+        });
         await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+        throw new ConvexError(
+          response.status === 429
+            ? "Layanan terjemahan sedang sibuk. Coba lagi beberapa saat."
+            : "Gagal menghubungi layanan terjemahan. Coba lagi nanti.",
+        );
       }
-      throw new ConvexError(
-        response.status === 429
-          ? "Layanan terjemahan sedang sibuk. Coba lagi beberapa saat."
-          : "Gagal menghubungi layanan terjemahan. Coba lagi nanti.",
-      );
-    }
 
-    const data = await response.json();
-    const raw = data?.choices?.[0]?.message?.content ?? "{}";
+      const data = await response.json();
+      const raw = data?.choices?.[0]?.message?.content ?? "{}";
 
-    let parsed: { translations?: Record<string, string> };
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
-      throw new ConvexError("Hasil terjemahan tidak berupa JSON valid. Coba lagi.");
-    }
+      let parsed: { translations?: Record<string, string> };
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        throw new ConvexError("Hasil terjemahan tidak berupa JSON valid. Coba lagi.");
+      }
 
-    const translations = parsed.translations ?? {};
-    return { translations };
+      const translations = parsed.translations ?? {};
+      return { translations };
+    });
   },
 });
 

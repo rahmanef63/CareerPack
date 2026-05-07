@@ -40,6 +40,8 @@ export const cleanupInactiveDemoUsers = internalMutation({
  *                             so anything older is dead weight.
  * - `loginCheckIpEvents`    — 1 day. Same shape + window as the
  *                             password-reset bucket.
+ * - `aiIdempotency`         — 30 minutes. Cache lifetime exists only
+ *                             to dedupe retries; older rows are dead.
  * - `passwordResetTokens`   — `used` rows or expired rows are
  *                             immediately safe to drop. Active unused
  *                             tokens kept.
@@ -57,6 +59,7 @@ export const pruneAppendOnlyTables = internalMutation({
       rateLimitEvents: 0,
       passwordResetIpEvents: 0,
       loginCheckIpEvents: 0,
+      aiIdempotency: 0,
       passwordResetTokens: 0,
     };
 
@@ -105,6 +108,17 @@ export const pruneAppendOnlyTables = internalMutation({
       const batch = stale.slice(0, PRUNE_BATCH_MAX);
       for (const r of batch) await ctx.db.delete(r._id);
       stats.loginCheckIpEvents = batch.length;
+    }
+
+    // aiIdempotency > 30 minutes — uses by_createdAt for cheap range.
+    {
+      const cutoff = now - 30 * 60 * 1000;
+      const stale = await ctx.db
+        .query("aiIdempotency")
+        .withIndex("by_createdAt", (q) => q.lt("createdAt", cutoff))
+        .take(PRUNE_BATCH_MAX);
+      for (const r of stale) await ctx.db.delete(r._id);
+      stats.aiIdempotency = stale.length;
     }
 
     // passwordResetTokens — used or expired (TTL 30m, so anything
