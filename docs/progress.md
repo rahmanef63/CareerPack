@@ -4,6 +4,9 @@ Last updated: 2026-05-07.
 
 ## Recent batches
 
+- 2026-05-07 — Roadmap content gap (partial): added `business/hospitality-manager.json` — 8-node Hospitality & Hotel Management track (Front Office → Housekeeping → F&B → Revenue → Guest Experience → MICE Sales → GM Leadership) with Indonesia-specific resources (PHRI, Kemenparekraf, BPOM HACCP). Marks the start of clearing the "non-tech domain" gap; remaining domains (construction, agriculture, manufacturing) still need a domain expert pass.
+- 2026-05-07 — i18n phase 1 — browser-translate-first locale primitive. New `useLocale()` hook + `LocaleProvider` (id ↔ en, persisted to localStorage, auto-detects from `navigator.language`). Bound `Intl.*` formatters pivot date / number / currency between `id-ID`+IDR and `en-US`+USD. `<TranslateHint />` shows a one-time dismissible banner to non-id browsers pointing to right-click → Translate. Settings → Appearance → "Bahasa & Format" surfaces the toggle with a live sample. Existing `formatDate.ts` (50+ callsites, hard-coded id-ID) untouched this round — that refactor is the obvious next step. Aligns with the user's directive: "as dynamic as possible, lean on browser auto-translate."
+- 2026-05-07 — Idempotency rollout to remaining 3 retry-prone actions: `cv.tailor`, `cv.generateCoverLetter`, `matcher.scanCV` each take optional `idempotencyKey` + wrap their handler body via `withIdempotency(ctx, userId, key, () => impl(...))`. Frontend mints `crypto.randomUUID()` per click in the four call sites (CoverLetterDialog, ResumeTailorDialog, useATSScan, MatcherCapabilities). Skipped: `ai.chat` (streaming reconnect already retry-safe via chatConversations history merge); `matcher.ats.extractKeywords` is wrapped at the parent `scanCV` boundary instead.
 - 2026-05-07 — si-coder audit follow-up: build-time `NEXT_PUBLIC_CONVEX_URL` placeholder guard. Dockerfile uses `ARG NEXT_PUBLIC_CONVEX_URL=https://example.convex.cloud` as build default (Dokploy is expected to override via build-arg). If the override is missing, the dummy URL gets inlined into the JS bundle — every Convex call silently fails. `frontend/src/shared/lib/env.ts` now throws on read when the placeholder is detected, failing loud at first access instead of silently. 1 new vitest case = 160 total. Aligned with si-coder mandate: NEXT_PUBLIC vars must be real at build time, not placeholders.
 - 2026-05-07 — signIn brute-force gate + CSP `unsafe-eval` drop + PWA validate. New `/api/auth/signin-attempt` httpAction (POST + OPTIONS) bumps the existing `loginCheckIpEvents` bucket on every failed login; brute-force scripts running through the official client share a 30/hr/IP budget with the email-pre-check, capping out fast. Convex auth's `signIn` is sealed → raw-WebSocket abuse is residual; PBKDF2-SHA256 100k iter (~100ms/attempt) handles the worst case. Dropped `'unsafe-eval'` from `script-src` in `next.config.ts` (verified zero `eval` / `new Function` callsites in bundle). PWA static config validated — manifest (10 icons + maskable + apple-touch + screenshots + shortcuts), sw.js (precache + versioned cache name).
 - 2026-05-07 — AI idempotency cache. New `aiIdempotency` table + `withIdempotency(ctx, userId, key, fn)` helper in `_shared/idempotency.ts`. Wraps action body so duplicate `(userId, key)` within 30m returns the cached `JSON.stringify(result)` — no quota deduct, no upstream call. First adopter: `cv.translate` (frontend mints `crypto.randomUUID()` per click). Result-size cap 10KB. `pruneAppendOnlyTables` extended to sweep `aiIdempotency` >30m. Pattern documented for further actions to adopt.
@@ -75,10 +78,10 @@ deferred — see [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05
 3. ~~Per-IP rate limit `requestReset`~~ ✓ closed 2026-05-06.
 4. ~~`userProfiles.lastActiveAt` heartbeat~~ ✓ closed 2026-05-05.
 5. Backup cron eksekusi — script + AES-256 encrypt ready 2026-05-07, install ke VPS pending (manual ops, needs SSH).
-6. EN i18n phase 1 — multi-day, 4 decisions pending in discovery doc.
+6. ~~EN i18n phase 1~~ ✓ closed 2026-05-07 — browser-translate-first via `useLocale()` + `<TranslateHint />`. Full message-catalog translation deferred (multi-day, deemed unnecessary while browsers ship native page translation).
 7. ~~AI tool-call output eval suite~~ ✓ closed 2026-05-06.
 8. ~~Notification cron 15-min cadence~~ ✓ closed 2026-05-05.
-9. Roadmap template content gap — non-tech domains need a domain expert.
+9. Roadmap template content gap — partially closed 2026-05-07 (added `hospitality-manager`); remaining non-tech domains (construction, agriculture, manufacturing, gov-light) still need a domain expert pass.
 10. ~~Sentry / external observability sink~~ ✓ closed 2026-05-06.
 11. ~~Login email enumeration plug~~ ✓ closed 2026-05-07 (`/api/auth/check-email`, 30/hr/IP).
 12. ~~CSRF Origin gate on state-changing httpActions~~ ✓ closed 2026-05-07.
@@ -89,7 +92,8 @@ deferred — see [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05
 17. ~~signIn brute-force gate (best-effort)~~ ✓ closed 2026-05-07 (`/api/auth/signin-attempt` shares `loginCheckIpEvents` budget). Raw-WebSocket bypass residual; PBKDF2-SHA256 100k iter is the floor.
 18. ~~CSP `unsafe-eval` drop~~ ✓ closed 2026-05-07. `unsafe-inline` for inline scripts/styles still required (Next.js hydration); nonce-based CSP would need middleware rework — deferred.
 19. ~~PWA static config validation~~ ✓ closed 2026-05-07 (manifest icons / shortcuts / screenshots all present; sw.js precache valid).
-20. AI idempotency rollout to remaining 4 actions (`cv.tailor` / `cv.generateCoverLetter` / `ai.chat` / `matcher.ats.extractKeywords`) — pattern landed 2026-05-07, callsite adoption pending.
+20. ~~AI idempotency rollout~~ ✓ closed 2026-05-07 — `cv.tailor`, `cv.generateCoverLetter`, `matcher.scanCV` all wrapped + frontend mints `crypto.randomUUID()`. `ai.chat` skipped (already retry-safe); `matcher.ats.extractKeywords` wrapped at parent `scanCV` boundary.
+21. signIn raw-WebSocket bypass — residual; Convex auth `signIn` path is sealed in lib code. PBKDF2 100k floor + frontend-flow gate via `loginCheckIpEvents` are the working mitigations.
 
 ## Smoke Test Checklist
 

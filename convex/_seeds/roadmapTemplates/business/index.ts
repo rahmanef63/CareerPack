@@ -15,6 +15,7 @@ import sales from "./sales.json";
 import entrepreneur from "./entrepreneur.json";
 import supply_chain from "./supply-chain.json";
 import customer_service from "./customer-service.json";
+import hospitality_manager from "./hospitality-manager.json";
 
 export const businessTemplates: ReadonlyArray<RoadmapTemplateData> = [
   digital_marketing as RoadmapTemplateData,
@@ -25,4 +26,5 @@ export const businessTemplates: ReadonlyArray<RoadmapTemplateData> = [
   entrepreneur as RoadmapTemplateData,
   supply_chain as RoadmapTemplateData,
   customer_service as RoadmapTemplateData,
+  hospitality_manager as RoadmapTemplateData,
 ];

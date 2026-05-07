@@ -1,0 +1,278 @@
+{
+  "title": "Manajer Hospitality & Hotel",
+  "slug": "hospitality-manager",
+  "domain": "business",
+  "icon": "BedDouble",
+  "color": "bg-amber-400",
+  "description": "Kelola operasi hotel / properti hospitality — dari Front Office hingga Revenue Management — untuk pengalaman tamu kelas dunia di pasar pariwisata Indonesia.",
+  "tags": [
+    "hospitality",
+    "hotel",
+    "front-office",
+    "revenue-management",
+    "guest-experience"
+  ],
+  "order": 30,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "hosp-1",
+      "title": "Fondasi Industri Hospitality",
+      "description": "Pahami struktur industri hospitality Indonesia: rantai hotel internasional, properti lokal, OTA (Traveloka, Tiket.com, Booking), dan klasifikasi bintang.",
+      "difficulty": "beginner",
+      "estimatedHours": 10,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "hosp-r1",
+          "title": "Introduction to Hospitality - Coursera",
+          "type": "course",
+          "url": "https://www.coursera.org/learn/introduction-to-hospitality",
+          "free": false
+        },
+        {
+          "id": "hosp-r2",
+          "title": "PHRI - Asosiasi Hotel & Restoran Indonesia",
+          "type": "documentation",
+          "url": "https://phri.or.id/",
+          "free": true
+        },
+        {
+          "id": "hosp-r3",
+          "title": "Hospitality Industry Overview - Hotel Management",
+          "type": "documentation",
+          "url": "https://hotelmanagement.net/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hosp-2",
+      "title": "Front Office & Reservation Operations",
+      "description": "Kelola check-in / check-out, room blocking, walk-in, dan PMS modern (Opera, Cloudbeds). Tangani over-booking + room move dengan tenang.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": ["hosp-1"],
+      "parentId": "hosp-1",
+      "category": "Operasi",
+      "resources": [
+        {
+          "id": "hosp-r4",
+          "title": "Front Office Operations - AHLEI",
+          "type": "course",
+          "url": "https://www.ahlei.org/",
+          "free": false
+        },
+        {
+          "id": "hosp-r5",
+          "title": "Opera PMS Documentation - Oracle",
+          "type": "documentation",
+          "url": "https://docs.oracle.com/cd/E83770_01/opera_5_5_core/index.htm",
+          "free": true
+        },
+        {
+          "id": "hosp-r6",
+          "title": "Cloudbeds PMS Tutorial",
+          "type": "documentation",
+          "url": "https://www.cloudbeds.com/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hosp-3",
+      "title": "Housekeeping & Quality Standards",
+      "description": "Susun SOP room status, pengawasan staf housekeeping, brand standards (5-Star checklist), dan inspeksi rutin sebelum tamu masuk.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": ["hosp-1"],
+      "category": "Operasi",
+      "resources": [
+        {
+          "id": "hosp-r7",
+          "title": "Housekeeping Operations - AHLEI",
+          "type": "course",
+          "url": "https://www.ahlei.org/",
+          "free": false
+        },
+        {
+          "id": "hosp-r8",
+          "title": "Hotel Housekeeping Best Practices - Cornell",
+          "type": "course",
+          "url": "https://online.cornell.edu/hospitality/",
+          "free": false
+        },
+        {
+          "id": "hosp-r9",
+          "title": "Cleaning SOP Templates - Hotel Tech",
+          "type": "documentation",
+          "url": "https://hoteltechreport.com/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hosp-4",
+      "title": "Food & Beverage Service",
+      "description": "Operasi restoran hotel, banquet, room service. Standar kebersihan dapur (HACCP), menu engineering, dan upsell pairing wine / mocktail.",
+      "difficulty": "intermediate",
+      "estimatedHours": 18,
+      "prerequisites": ["hosp-1"],
+      "category": "F&B",
+      "resources": [
+        {
+          "id": "hosp-r10",
+          "title": "F&B Management - AHLEI",
+          "type": "course",
+          "url": "https://www.ahlei.org/",
+          "free": false
+        },
+        {
+          "id": "hosp-r11",
+          "title": "HACCP Indonesia - BPOM",
+          "type": "documentation",
+          "url": "https://www.pom.go.id/",
+          "free": true
+        },
+        {
+          "id": "hosp-r12",
+          "title": "Restaurant Operations - Cornell",
+          "type": "course",
+          "url": "https://online.cornell.edu/hospitality/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "hosp-5",
+      "title": "Revenue Management & Pricing Strategy",
+      "description": "Kuasai RevPAR, ADR, occupancy, demand forecasting, dan dynamic pricing per segmen (corporate / leisure / OTA). Channel manager + parity.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": ["hosp-2"],
+      "parentId": "hosp-2",
+      "category": "Komersial",
+      "resources": [
+        {
+          "id": "hosp-r13",
+          "title": "Hotel Revenue Management - Cornell",
+          "type": "course",
+          "url": "https://online.cornell.edu/hospitality/revenue-management/",
+          "free": false
+        },
+        {
+          "id": "hosp-r14",
+          "title": "STR Revenue Management Glossary",
+          "type": "documentation",
+          "url": "https://str.com/data-insights-blog",
+          "free": true
+        },
+        {
+          "id": "hosp-r15",
+          "title": "Duetto Revenue Strategy Blog",
+          "type": "documentation",
+          "url": "https://www.duettocloud.com/library",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hosp-6",
+      "title": "Guest Experience & Reputation",
+      "description": "Personalisasi tamu (CRM hotel), service recovery untuk komplain, monitoring TripAdvisor / Google Review / Booking score, dan respon publik yang elegan.",
+      "difficulty": "advanced",
+      "estimatedHours": 15,
+      "prerequisites": ["hosp-2", "hosp-3"],
+      "category": "Pelanggan",
+      "resources": [
+        {
+          "id": "hosp-r16",
+          "title": "Service Recovery - Cornell Hospitality",
+          "type": "course",
+          "url": "https://online.cornell.edu/hospitality/",
+          "free": false
+        },
+        {
+          "id": "hosp-r17",
+          "title": "Online Reputation Management - Revinate",
+          "type": "documentation",
+          "url": "https://www.revinate.com/blog/",
+          "free": true
+        },
+        {
+          "id": "hosp-r18",
+          "title": "Guest Experience - Hotel Tech Report",
+          "type": "documentation",
+          "url": "https://hoteltechreport.com/news",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "hosp-7",
+      "title": "Hospitality Sales & MICE",
+      "description": "Tutup deal corporate rate, group booking, dan event MICE (Meeting / Incentive / Convention / Exhibition) — segmen yang dominan di hospitality Jakarta + Bali.",
+      "difficulty": "advanced",
+      "estimatedHours": 18,
+      "prerequisites": ["hosp-5"],
+      "category": "Komersial",
+      "resources": [
+        {
+          "id": "hosp-r19",
+          "title": "Hotel Sales & Marketing - AHLEI",
+          "type": "course",
+          "url": "https://www.ahlei.org/",
+          "free": false
+        },
+        {
+          "id": "hosp-r20",
+          "title": "MICE Indonesia - Kemenparekraf",
+          "type": "documentation",
+          "url": "https://www.kemenparekraf.go.id/",
+          "free": true
+        },
+        {
+          "id": "hosp-r21",
+          "title": "Group Sales Strategy - Cornell",
+          "type": "course",
+          "url": "https://online.cornell.edu/hospitality/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "hosp-8",
+      "title": "Leadership & General Management",
+      "description": "Naik ke posisi Hotel Manager / GM: P&L ownership, owner relations, brand audit, staff development, dan operasi multi-departemen.",
+      "difficulty": "advanced",
+      "estimatedHours": 25,
+      "prerequisites": ["hosp-4", "hosp-6", "hosp-7"],
+      "category": "Kepemimpinan",
+      "resources": [
+        {
+          "id": "hosp-r22",
+          "title": "General Manager Program - Cornell",
+          "type": "course",
+          "url": "https://online.cornell.edu/hospitality/general-manager/",
+          "free": false
+        },
+        {
+          "id": "hosp-r23",
+          "title": "Hotel Financial Management - HFTP",
+          "type": "documentation",
+          "url": "https://www.hftp.org/",
+          "free": true
+        },
+        {
+          "id": "hosp-r24",
+          "title": "EHL Insights - Hospitality Leadership",
+          "type": "documentation",
+          "url": "https://hospitalityinsights.ehl.edu/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}
