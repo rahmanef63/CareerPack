@@ -146,6 +146,15 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 
 `.github/workflows/ci.yml` runs on PR + push to main: typecheck → lint → test → build (build uses a dummy `NEXT_PUBLIC_CONVEX_URL`). `.github/workflows/convex-deploy.yml` auto-deploys Convex on `convex/**` changes to main — requires secrets `CONVEX_SELF_HOSTED_URL` + `CONVEX_SELF_HOSTED_ADMIN_KEY`.
 
+## SSOT — rahman-shared adopted (2026-05-13, PR #25)
+
+- pnpm workspace: install via `pnpm --filter=careerpack-frontend add rahman-shared`
+- `frontend/src/shared/lib/utils.ts` is a 1-line re-export from `rahman-shared/lib/utils` — DO NOT inline cn back
+- `frontend/next.config.ts` has `transpilePackages: ["rahman-shared"]` (Turbopack TS hint, REQUIRED)
+- 140 `@/shared/lib/utils` import sites continue working — only resolution chain changed
+- Bump via `pnpm --filter=careerpack-frontend update rahman-shared`
+- Skill `/use-adopt-rahman-shared` codifies pattern
+
 ## Further reading
 
 - [docs/architecture.md](./docs/architecture.md) — full layout, routing table, providers
