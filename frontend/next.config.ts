@@ -108,6 +108,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, ".."),
+  transpilePackages: ["rahman-shared"],
   generateBuildId: async () => BUILD_ID,
   env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },
   async headers() {
