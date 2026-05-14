@@ -157,3 +157,96 @@ export const resetDocumentChecklist = mutation({
     if (existing) await ctx.db.delete(existing._id);
   },
 });
+
+/**
+ * Instantiate the user's personal `documentChecklists` row from a
+ * country's `documentTemplates` master list. Preserves prior
+ * completion / notes / expiry on matching document ids (same merge
+ * logic as `seedDocumentChecklist`).
+ *
+ * Idempotent — re-running same country re-merges over current state.
+ */
+export const instantiateFromTemplate = mutation({
+  args: { country: v.string() },
+  returns: v.object({
+    checklistId: v.id("documentChecklists"),
+    inserted: v.number(),
+    preserved: v.number(),
+  }),
+  handler: async (ctx, { country }) => {
+    const userId = await requireUser(ctx);
+
+    const template = await ctx.db
+      .query("documentTemplates")
+      .withIndex("by_country", (q) => q.eq("country", country))
+      .first();
+    if (!template) {
+      throw new Error(`Template untuk negara "${country}" tidak ditemukan`);
+    }
+
+    const existing = await ctx.db
+      .query("documentChecklists")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    const prior = new Map(
+      (existing?.documents ?? []).map((d) => [d.id, d]),
+    );
+
+    let preserved = 0;
+    const documents = template.documents.map((td) => {
+      const old = prior.get(td.id);
+      if (old) {
+        preserved++;
+        return {
+          id: td.id,
+          name: td.title,
+          category: td.category,
+          subcategory: td.subcategory,
+          required: td.required,
+          completed: old.completed,
+          notes: old.notes,
+          expiryDate: old.expiryDate,
+        };
+      }
+      return {
+        id: td.id,
+        name: td.title,
+        category: td.category,
+        subcategory: td.subcategory,
+        required: td.required,
+        completed: false,
+        notes: "",
+      };
+    });
+
+    const completedCount = documents.filter((d) => d.completed).length;
+    const progress = Math.round((completedCount / documents.length) * 100);
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        type: "country-template",
+        country: template.country,
+        documents,
+        progress,
+      });
+      return {
+        checklistId: existing._id,
+        inserted: documents.length - preserved,
+        preserved,
+      };
+    }
+
+    const checklistId = await ctx.db.insert("documentChecklists", {
+      userId,
+      type: "country-template",
+      country: template.country,
+      documents,
+      progress: 0,
+    });
+    return {
+      checklistId,
+      inserted: documents.length,
+      preserved: 0,
+    };
+  },
+});

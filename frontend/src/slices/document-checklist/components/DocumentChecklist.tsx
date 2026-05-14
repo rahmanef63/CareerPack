@@ -13,6 +13,7 @@ import type { ChecklistItem } from "../types";
 import { useChecklistData } from "../hooks/useChecklistData";
 import { CategorySection } from "./document-checklist/CategorySection";
 import { ItemDetailDialog } from "./document-checklist/ItemDetailDialog";
+import { CountryTemplateCard } from "./CountryTemplateCard";
 
 export function DocumentChecklist() {
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
@@ -33,6 +34,8 @@ export function DocumentChecklist() {
         title="Ceklis Dokumen"
         description="Kelola semua dokumen yang diperlukan untuk melamar pekerjaan"
       />
+
+      <CountryTemplateCard />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList variant="equal" cols={2}>

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import {
+  ArrowUpRight,
   CheckCircle2,
   Circle,
   CompassIcon as Compass,
@@ -61,6 +63,30 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /**
+ * Action type → dashboard route. Quest's "Jalankan" button uses this
+ * to navigate the user into the slice that owns the action. Returns
+ * null for action types with no automatic landing target (generic).
+ */
+function routeForActionType(type: string): string | null {
+  switch (type) {
+    case "tailor_cv":
+    case "subscribe_listings":
+      return "/dashboard/matcher";
+    case "add_roadmap_node":
+    case "study_skill":
+    case "report_outcome":
+      return "/dashboard/skill-roadmap";
+    case "set_calendar_block":
+      return "/dashboard/calendar";
+    case "prepare_documents":
+      return "/dashboard/document-checklist";
+    case "generic":
+    default:
+      return null;
+  }
+}
+
+/**
  * Career Quest panel — Phase 3 surface.
  *
  * Compose user intent → controlled-vocab DAG of cross-slice actions
@@ -69,6 +95,7 @@ const TYPE_LABELS: Record<string, string> = {
  * telemetry (Phase 4 integration follows).
  */
 export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
+  const router = useRouter();
   const quest = useQuery(api.engine.plan.queries.myActiveQuest, {}) as
     | ActiveQuest
     | null
@@ -231,32 +258,57 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
         </div>
 
         <ul className="space-y-1.5">
-          {quest.actions.map((a) => (
-            <li key={a.id}>
-              <button
-                type="button"
-                onClick={() => handleToggle(a.id)}
+          {quest.actions.map((a) => {
+            const route = routeForActionType(a.type);
+            return (
+              <li
+                key={a.id}
                 className={cn(
-                  "flex w-full items-start gap-2 rounded-md border px-2.5 py-1.5 text-left text-xs transition-colors",
+                  "flex items-start gap-2 rounded-md border px-2.5 py-1.5 text-xs transition-colors",
                   a.completed
-                    ? "border-emerald-300/50 bg-emerald-500/5 text-muted-foreground line-through"
+                    ? "border-emerald-300/50 bg-emerald-500/5"
                     : "border-border bg-card hover:bg-muted/40",
                 )}
               >
-                {a.completed ? (
-                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                ) : (
-                  <Circle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                )}
-                <span className="flex-1">
+                <button
+                  type="button"
+                  onClick={() => handleToggle(a.id)}
+                  className="shrink-0 pt-0.5"
+                  aria-label={a.completed ? "Tandai belum selesai" : "Tandai selesai"}
+                >
+                  {a.completed ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <Circle className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
+                </button>
+                <span
+                  className={cn(
+                    "flex-1",
+                    a.completed && "text-muted-foreground line-through",
+                  )}
+                >
                   {a.label}
                   <Badge variant="outline" className="ml-1 text-[9px]">
                     {TYPE_LABELS[a.type] ?? a.type}
                   </Badge>
                 </span>
-              </button>
-            </li>
-          ))}
+                {route && !a.completed && (
+                  <button
+                    type="button"
+                    onClick={() => router.push(route)}
+                    className="shrink-0 rounded px-1.5 py-0.5 text-[10px] text-brand hover:bg-brand/10"
+                    title={`Buka ${route}`}
+                  >
+                    <span className="flex items-center gap-0.5">
+                      Jalankan
+                      <ArrowUpRight className="h-2.5 w-2.5" />
+                    </span>
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
 
         <div className="flex items-center justify-between gap-2 pt-1">
