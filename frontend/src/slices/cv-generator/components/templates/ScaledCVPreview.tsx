@@ -15,6 +15,13 @@ const MAX_SCALE = 0.96;
 interface Props {
   cv: CVData;
   photoUrl: string;
+  /**
+   * Compact = sidebar/thumbnail context. Drops the 420px minHeight floor
+   * so short CV content doesn't leave a tall empty band below the page.
+   * Off (default) keeps the floor for the full preview dialog where a
+   * stable reservation prevents layout jitter while measuring.
+   */
+  compact?: boolean;
 }
 
 /**
@@ -28,7 +35,7 @@ interface Props {
  * grabs the page at proper A4 DPI regardless of preview scale.
  */
 export const ScaledCVPreview = forwardRef<HTMLDivElement, Props>(
-  function ScaledCVPreview({ cv, photoUrl }, captureRef) {
+  function ScaledCVPreview({ cv, photoUrl, compact = false }, captureRef) {
     const outerRef = useRef<HTMLDivElement>(null);
     const innerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(MAX_SCALE);
@@ -72,7 +79,7 @@ export const ScaledCVPreview = forwardRef<HTMLDivElement, Props>(
           // Reserve exact scaled height + vertical padding (py-4 = 16*2)
           // so there's no trailing gap below the preview.
           height: innerHeight ? innerHeight * scale + 32 : undefined,
-          minHeight: 420,
+          minHeight: compact ? (innerHeight ? undefined : 180) : 420,
           // overflow-x auto is the safety net: if our scale calc is off
           // by even a sub-pixel, the user can still pan horizontally
           // instead of seeing chopped text. overflow-y hidden because

@@ -37,7 +37,7 @@ export function PreviewSidebar({
           </CardHeader>
           <CardContent className="p-3">
             <div className="rounded-lg border border-border bg-muted/20 overflow-hidden">
-              <ScaledCVPreview cv={renderCV} photoUrl={photoUrl} />
+              <ScaledCVPreview cv={renderCV} photoUrl={photoUrl} compact />
             </div>
           </CardContent>
         </Card>

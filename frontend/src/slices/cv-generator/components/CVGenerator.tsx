@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQuery } from 'convex/react';
-import { Eye } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, Eye } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { QuickFillButton } from '@/shared/components/onboarding';
 import { api } from '../../../../../convex/_generated/api';
@@ -47,6 +47,23 @@ export function CVGenerator() {
 
   const toggleSection = useCallback((id: string) => {
     setActiveSection((prev) => (prev === id ? null : id));
+  }, []);
+  // "Collapse all" sentinel — when null nothing's expanded; user can still
+  // toggle one section open from the chevron. "Expand all" is opt-in via
+  // the same control flipping back to the multi-section legacy behaviour.
+  const [expandAll, setExpandAll] = useState(false);
+  const isSectionOpen = useCallback(
+    (id: string) => (expandAll ? true : activeSection === id),
+    [activeSection, expandAll],
+  );
+  const handleToggleAll = useCallback(() => {
+    setExpandAll((prev) => {
+      const next = !prev;
+      // Reset accordion focus so collapse returns to a clean "nothing
+      // open" state instead of leaving one orphan-expanded section.
+      if (!next) setActiveSection(null);
+      return next;
+    });
   }, []);
   const cvPreviewRef = useRef<HTMLDivElement>(null);
 
@@ -194,6 +211,26 @@ export function CVGenerator() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleToggleAll}
+            className="gap-1.5"
+            aria-pressed={expandAll}
+          >
+            {expandAll ? (
+              <>
+                <ChevronsDownUp className="w-4 h-4" />
+                Tutup semua
+              </>
+            ) : (
+              <>
+                <ChevronsUpDown className="w-4 h-4" />
+                Buka semua
+              </>
+            )}
+          </Button>
           <QuickFillButton variant="outline" size="sm" />
           <MagneticTabs<CVFormat>
             value={format}
@@ -240,6 +277,8 @@ export function CVGenerator() {
                 format={format}
                 photoUrl={photoUrl}
                 avatarStorageId={avatarStorageId}
+                isOpen={isSectionOpen('personal')}
+                onToggle={() => toggleSection('personal')}
                 updateProfile={handlers.updateProfile}
                 onPhotoUploaded={handlers.handlePhotoUploaded}
                 onPhotoFromLibrary={handlers.handlePhotoFromLibrary}
@@ -249,13 +288,13 @@ export function CVGenerator() {
               />
               <DisplayPrefsSection
                 cvData={cvData}
-                isOpen={activeSection === 'display'}
+                isOpen={isSectionOpen('display')}
                 onToggle={() => toggleSection('display')}
                 updatePref={handlers.updatePref}
               />
               <ExperienceSection
                 cvData={cvData}
-                isOpen={activeSection === 'experience'}
+                isOpen={isSectionOpen('experience')}
                 onToggle={() => toggleSection('experience')}
                 expDrag={expDrag}
                 addExperience={handlers.addExperience}
@@ -265,7 +304,7 @@ export function CVGenerator() {
               />
               <EducationSection
                 cvData={cvData}
-                isOpen={activeSection === 'education'}
+                isOpen={isSectionOpen('education')}
                 onToggle={() => toggleSection('education')}
                 addEducation={handlers.addEducation}
                 updateEducation={handlers.updateEducation}
@@ -273,7 +312,7 @@ export function CVGenerator() {
               />
               <SkillsSection
                 cvData={cvData}
-                isOpen={activeSection === 'skills'}
+                isOpen={isSectionOpen('skills')}
                 onToggle={() => toggleSection('skills')}
                 skillDrag={skillDrag}
                 addSkill={handlers.addSkill}
@@ -282,7 +321,7 @@ export function CVGenerator() {
               />
               <CertificationsSection
                 cvData={cvData}
-                isOpen={activeSection === 'certifications'}
+                isOpen={isSectionOpen('certifications')}
                 onToggle={() => toggleSection('certifications')}
                 addCertification={handlers.addCertification}
                 updateCertification={handlers.updateCertification}
@@ -290,7 +329,7 @@ export function CVGenerator() {
               />
               <ProjectsSection
                 cvData={cvData}
-                isOpen={activeSection === 'projects'}
+                isOpen={isSectionOpen('projects')}
                 onToggle={() => toggleSection('projects')}
                 addProject={handlers.addProject}
                 updateProject={handlers.updateProject}

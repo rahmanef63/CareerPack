@@ -1,13 +1,13 @@
 "use client";
 
 import { User } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 import { PhotoPicker } from "@/shared/components/files/PhotoPicker";
 import { InlineAISuggestChip } from "../../InlineAISuggestChip";
+import { SectionCard } from "../SectionCard";
 import type { CVData } from "../../../types";
 import type { CVFormat } from "../../../constants";
 
@@ -16,6 +16,8 @@ interface Props {
   format: CVFormat;
   photoUrl: string;
   avatarStorageId?: string;
+  isOpen: boolean;
+  onToggle: () => void;
   updateProfile: (field: string, value: string) => void;
   onPhotoUploaded: (result: { storageId: string }) => void;
   onPhotoFromLibrary: (file: { storageId: string }) => void;
@@ -25,21 +27,13 @@ interface Props {
 }
 
 export function PersonalInfoSection({
-  cvData, format, photoUrl, avatarStorageId,
+  cvData, format, photoUrl, avatarStorageId, isOpen, onToggle,
   updateProfile, onPhotoUploaded, onPhotoFromLibrary, onPhotoUrl, onPhotoClear,
   aiSuggestSummary,
 }: Props) {
   return (
-    <Card className="border-border overflow-hidden">
-      <CardHeader className="bg-muted/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-brand-muted flex items-center justify-center">
-            <User className="w-5 h-5 text-brand" />
-          </div>
-          <CardTitle className="text-lg">Informasi Pribadi</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-6">
+    <SectionCard title="Informasi Pribadi" icon={User} isOpen={isOpen} onToggle={onToggle}>
+      <>
         {format === 'national' && (
           <div className="mb-4 space-y-1">
             <Label className="text-sm">Foto Formal</Label>
@@ -118,7 +112,7 @@ export function PersonalInfoSection({
             />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </>
+    </SectionCard>
   );
 }
