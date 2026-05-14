@@ -97,6 +97,134 @@ deferred — see [`progress/2026-05-05-en-i18n-discovery.md`](./progress/2026-05
 20. ~~AI idempotency rollout~~ ✓ closed 2026-05-07 — `cv.tailor`, `cv.generateCoverLetter`, `matcher.scanCV` all wrapped + frontend mints `crypto.randomUUID()`. `ai.chat` skipped (already retry-safe); `matcher.ats.extractKeywords` wrapped at parent `scanCV` boundary.
 21. signIn raw-WebSocket bypass — residual; Convex auth `signIn` path is sealed in lib code. PBKDF2 100k floor + frontend-flow gate via `loginCheckIpEvents` are the working mitigations.
 
+### 2026-05-14 — CareerOS Engine moat (5-phase compound)
+
+Pivot dari "fitur SaaS" ke "engine substrate" — bikin replikasi via
+Notion/ChatGPT mahal karena perlu re-bangun semua substrate + dataset
+history yang user kita sudah punya. Semua landed dalam 1 hari.
+
+**Phase 1 — Truth Ledger + Constrained Rewriter** (`18c3934`)
+- `truthAtoms` table append-only, hash-addressable (`engine/atoms/`).
+- `cv.rewriteFromLedger` action — replaces `tailorCVForJob` UI flow.
+  LLM bound to atom payloads; pure-logic validator (`atoms/validator.ts`)
+  rejects hallucinated numbers + low-Jaccard rewrites in code, not
+  prompt discipline. **Halusinasi mustahil by-construction**.
+- 7 validator vitest cases. `seedFromCV` mutation idempotent.
+- Frontend `useTruthLedger` hook + rewritten `ResumeTailorDialog`
+  with validator-status badges + violation list.
+
+**Phase 2 — Career Graph + Time Machine** (`69d98ff`)
+- `careerNodes` (29 ID tech states) + `careerEdges` (36 transitions
+  with P, durasi, acquired skills, sampleSize) in `engine/graph/`.
+- BFS pure-lib (`engine/graph/lib.ts`): maxHops 5, minProb 0.01,
+  composite score `P × slack × 1/√hops`, cycle detect, frontier
+  cap 5k. 9 vitest cases.
+- `reach({startSlug, endSlug, budgetMonths, userSkills})` query +
+  `skillGap()` helper reuse Phase 1 atoms.
+- New "Lihat Karier" tab di skill-roadmap dengan `CareerTimeMachine`
+  panel — start/end dropdown (grouped by role+seniority), slider
+  budget 6-72mo, top-K paths with probability tone + skill-gap
+  callout from Truth Ledger.
+- Seed data di `_seeds/careerGraph/tech.ts` (modular per domain).
+
+**Phase 3 — Plan Compiler** (`4269ee2`)
+- `careerQuests` table, one active per user.
+- `engine/plan/lib.ts` validator dengan controlled action vocab
+  (`study_skill | add_roadmap_node | tailor_cv | subscribe_listings
+   | set_calendar_block | report_outcome | prepare_documents |
+   generic`). Cap action count, eta [1,60], label length. 7 vitest
+  cases.
+- `engine/plan/actions.ts → compile({intent, targetNodeSlug})` —
+  LLM emit JSON, validator strips off-vocab. Idempotency-cached,
+  quota-gated. **LLM physically cannot emit arbitrary side-effects**.
+- `QuestPanel` UI di Career Time Machine tab: textarea intent →
+  compile → checklist with progress bar + per-action "Jalankan →"
+  navigate ke slice yang relevan (`d8d75f2`).
+
+**Phase 4 — Outcome Calibrator** (`4269ee2`)
+- `outcomeEvents` table append-only feed
+  (apply/callback/interview/offer/accepted/rejected).
+- `engine/outcomes/{mutations,queries}`: `record()` + `cohortStats()`
+  per `targetNodeSlug` cohort.
+- `OutcomeReporter` panel di Career Time Machine — surface cohort
+  stats inline + dialog lapor hasil. Connects Phase 2 graph dengan
+  user-reported telemetry untuk Phase 4.5 (cron calibrator, future).
+
+**Phase 5 — Differential Privacy Aggregator** (`4269ee2`)
+- `engine/dp/lib.ts` Laplace mechanism + k-anonymity floor
+  (MIN_COHORT_N=5). 9 vitest cases.
+- `cohortStatsDP({targetNodeSlug, ε})` query — DP-protected variant
+  of cohortStats. `released: false` ketika cohort < 5.
+- `OutcomeReporter` switched ke DP query: ε badge + suppression
+  banner ketika cohort kecil.
+
+**Document Templates per Negara** (`4269ee2` schema+seed, `d8d75f2` UI)
+- `documentTemplates` table country-scoped, system-managed.
+- Seed 9 negara: ID, JP, KR, SG, AU, DE, NL, AE, SA — ~95 dokumen
+  total dengan `issuingAuthority` + `validityYears`. ID outbound
+  corridors prioritised.
+- `documents.queries.listTemplates` + `getTemplateByCountry` +
+  `documents.mutations.instantiateFromTemplate` — populates
+  `documentChecklists` from template, preserves prior progress.
+- `CountryTemplateCard` (flag grid + preview dialog) wired ke top
+  section `/dashboard/document-checklist`.
+
+**Admin Engine Seed UI** (`4269ee2`)
+- New tab "Engine Seed" di `/admin` (super-admin only): one-click
+  seed Career Graph + Document Templates from in-repo catalogs.
+  Idempotent (patch hanya bila konten berubah). Live stats vs
+  expected count.
+
+**Compound flow end-to-end:**
+```
+intent → /engine/plan/compile (Phase 3)
+       → quest checklist with typed actions
+       → click "Jalankan →" → slice page
+       → user does action → check off in quest
+       → lapor outcome (Phase 4)
+       → cohort stats DP-protected (Phase 5)
+       → future calibrator refines Phase 2 graph probabilities
+       → next intent compile sees better priors
+```
+
+**Stats**:
+- 192 vitest cases (sebelumnya 160 → +32 dari validator + lib tests)
+- 6 new Convex domains: `engine/{atoms,graph,outcomes,plan,dp}` +
+  `documentTemplates`
+- 3 seed catalogs (sebelumnya 1): roadmaps + careerGraph + documents
+
+**Audit-bp follow-up** (`2329b32`):
+- P1 IDEMPOTENCY-001: 5 callsites had `crypto.randomUUID()` per
+  call which defeated cache. Replaced dengan content-derived
+  `makeIdempotencyKey()` (`shared/lib/idempotencyKey.ts`).
+- P1 SELFHOST-HEALTH-001: published port 3211 in docker-compose,
+  documented `CONVEX_CLOUD_ORIGIN` + `CONVEX_SITE_ORIGIN` in env
+  example.
+- P2 sweep: CSP enumerated, `loggedInUser` validators,
+  `reverseYears` dev warn, `images.remotePatterns`, PhotoPicker
+  URL error toast, 3 native `<input>` → primitives migration.
+
+**Manual ops setelah deploy:**
+1. `/admin → Engine Seed`, klik:
+   - **Seed Career Graph** → 29 node + 36 edge
+   - **Seed Document Templates** → 9 negara
+2. Tanpa step ini, Career Time Machine + Country Template Card
+   tampil empty state.
+
+### Backlog tersisa (true defer)
+
+- Phase 4.5: outcome → graph edge probability cron calibrator
+  (Bayesian update per cohort, gated MIN_COHORT_N).
+- Truth Ledger editor standalone — sekarang akses cuma via Tailor.
+- Plan action payload typing — `study_skill.payload = {skill: string}`
+  enables deep-link route (mis. `?seed=typescript`).
+- Quest history view (abandoned / completed retrospective).
+- Convex deploy reliability — Phase 2 deploy 1x gagal (transient,
+  next deploy success). Investigate kalau berulang.
+- Truly out-of-code: backup VPS install, non-tech roadmap domain
+  expert content.
+- signIn raw-WebSocket bypass — sealed in Convex auth lib.
+
 ## Smoke Test Checklist
 
 - [ ] `pnpm dev` sukses (Convex push + Next.js start)
