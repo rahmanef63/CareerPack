@@ -1,7 +1,8 @@
-import { mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "../_shared/auth";
 import { defaultRoadmapTemplates } from "../_seeds/roadmapTemplates";
+import { DOCUMENT_SEED_BY_COUNTRY } from "../_seeds/documents";
 import { cascadeDeleteUser } from "./lib/cascadeDelete";
 import { ensureNotLastAdmin, applyRoleChange } from "./lib/userOps";
 import {
@@ -314,5 +315,113 @@ export const adminSeedDefaultTemplates = mutation({
     }
 
     return { inserted, skipped };
+  },
+});
+
+/**
+ * Bootstrap (or refresh) the per-country document templates from the
+ * in-repo seed catalog. Idempotent: matches by `country`, patches
+ * existing rows if seed content changed, inserts only missing rows.
+ * Admin-only.
+ */
+export const adminSeedDocumentTemplates = mutation({
+  args: { overwrite: v.optional(v.boolean()) },
+  returns: v.object({
+    inserted: v.number(),
+    updated: v.number(),
+    skipped: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    for (const country of DOCUMENT_SEED_BY_COUNTRY) {
+      const existing = await ctx.db
+        .query("documentTemplates")
+        .withIndex("by_country", (q) => q.eq("country", country.country))
+        .first();
+
+      if (existing) {
+        const sigOld = JSON.stringify({
+          documents: existing.documents,
+          description: existing.description,
+          flag: existing.flag,
+          countryLabel: existing.countryLabel,
+        });
+        const sigNew = JSON.stringify({
+          documents: country.documents,
+          description: country.description,
+          flag: country.flag,
+          countryLabel: country.countryLabel,
+        });
+        if (sigOld !== sigNew || args.overwrite) {
+          await ctx.db.patch(existing._id, {
+            country: country.country,
+            countryLabel: country.countryLabel,
+            flag: country.flag,
+            description: country.description,
+            documents: country.documents,
+            isSystem: true,
+          });
+          updated++;
+        } else {
+          skipped++;
+        }
+        continue;
+      }
+
+      await ctx.db.insert("documentTemplates", {
+        country: country.country,
+        countryLabel: country.countryLabel,
+        flag: country.flag,
+        description: country.description,
+        documents: country.documents,
+        isSystem: true,
+      });
+      inserted++;
+    }
+
+    return { inserted, updated, skipped };
+  },
+});
+
+/**
+ * Stats for the Admin Engine Seed panel — quick badge counts for
+ * each seeded catalog so the operator sees current population before
+ * deciding to re-run a seed.
+ */
+export const adminGetSeedStats = query({
+  args: {},
+  returns: v.object({
+    careerNodeCount: v.number(),
+    careerEdgeCount: v.number(),
+    documentTemplateCount: v.number(),
+    roadmapTemplateCount: v.number(),
+    expected: v.object({
+      careerNodes: v.number(),
+      documentTemplates: v.number(),
+    }),
+  }),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const [nodes, edges, docs, roadmaps] = await Promise.all([
+      ctx.db.query("careerNodes").collect(),
+      ctx.db.query("careerEdges").collect(),
+      ctx.db.query("documentTemplates").collect(),
+      ctx.db.query("roadmapTemplates").collect(),
+    ]);
+    return {
+      careerNodeCount: nodes.length,
+      careerEdgeCount: edges.length,
+      documentTemplateCount: docs.length,
+      roadmapTemplateCount: roadmaps.length,
+      expected: {
+        careerNodes: 29,
+        documentTemplates: DOCUMENT_SEED_BY_COUNTRY.length,
+      },
+    };
   },
 });

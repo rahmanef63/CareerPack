@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   MessageSquare,
   Activity,
+  Database,
 } from "lucide-react";
 import {
   BarChart,
@@ -87,6 +88,9 @@ const AIConfigPanel = dynamic(() => import("./AIConfigPanel").then((m) => m.AICo
   ssr: false, loading: PanelSkeleton,
 });
 const AIUsagePanel = dynamic(() => import("./AIUsagePanel").then((m) => m.AIUsagePanel), {
+  ssr: false, loading: PanelSkeleton,
+});
+const EngineSeedPanel = dynamic(() => import("./EngineSeedPanel").then((m) => m.EngineSeedPanel), {
   ssr: false, loading: PanelSkeleton,
 });
 
@@ -376,6 +380,10 @@ export function AdminPanel() {
             <Activity className="w-3.5 h-3.5" />
             AI Usage
           </TabsTrigger>
+          <TabsTrigger value="engine-seed">
+            <Database className="w-3.5 h-3.5" />
+            Engine Seed
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4">
@@ -401,6 +409,9 @@ export function AdminPanel() {
         </TabsContent>
         <TabsContent value="ai-usage" className="mt-4">
           <ErrorBoundary title="Panel AI Usage gagal dimuat"><AIUsagePanel /></ErrorBoundary>
+        </TabsContent>
+        <TabsContent value="engine-seed" className="mt-4">
+          <ErrorBoundary title="Panel Engine Seed gagal dimuat"><EngineSeedPanel /></ErrorBoundary>
         </TabsContent>
       </Tabs>
     </PageContainer>

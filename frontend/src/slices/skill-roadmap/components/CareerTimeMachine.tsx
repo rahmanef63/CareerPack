@@ -24,6 +24,8 @@ import {
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 import { useCareerReach, type RankedPathDTO } from "../hooks/useCareerReach";
+import { OutcomeReporter } from "./OutcomeReporter";
+import { QuestPanel } from "./QuestPanel";
 
 const PROB_TONE = {
   high: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300/50",
@@ -72,6 +74,10 @@ export function CareerTimeMachine() {
 
   return (
     <div className="space-y-4">
+      {/* Phase 3 — Plan Compiler. Sits at top so users hit the
+          intent-compile flow before the reachability dropdowns. */}
+      <QuestPanel targetNodeSlug={r.endSlug ?? undefined} />
+
       <Card className="border-border">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -162,6 +168,13 @@ export function CareerTimeMachine() {
             pathCount={r.reach.paths.length}
             targetSkillGap={r.reach.targetSkillGap}
             userSkillCount={userSkills.length}
+          />
+
+          {/* Phase 4 — cohort stats + reporter for the target node.
+              Engine refines its predictions from real user telemetry. */}
+          <OutcomeReporter
+            targetNodeSlug={r.reach.endNode.slug}
+            targetNodeLabel={r.reach.endNode.label}
           />
 
           {r.reach.paths.length === 0 ? (
