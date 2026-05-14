@@ -5,6 +5,46 @@ import type { NextConfig } from "next"
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
+ * Resolve the Convex origins (HTTP + WebSocket) from the build-time
+ * NEXT_PUBLIC_CONVEX_URL so we can enumerate them in CSP rather than
+ * relying on the broad `https:` / `wss:` source values, which let any
+ * remote origin act as a connect target if XSS ever lands.
+ *
+ * Falls back to empty strings if the env is missing or malformed —
+ * `env.ts` already enforces it at runtime; this is best-effort at
+ * build-config eval.
+ */
+function convexOrigins(url: string | undefined): {
+  http: string
+  ws: string
+  hostname: string
+  isHttps: boolean
+} {
+  if (!url) return { http: "", ws: "", hostname: "", isHttps: false }
+  try {
+    const u = new URL(url)
+    const wsScheme = u.protocol === "https:" ? "wss:" : "ws:"
+    return {
+      http: `${u.protocol}//${u.host}`,
+      ws: `${wsScheme}//${u.host}`,
+      hostname: u.hostname,
+      isHttps: u.protocol === "https:",
+    }
+  } catch {
+    return { http: "", ws: "", hostname: "", isHttps: false }
+  }
+}
+
+const CONVEX = convexOrigins(process.env.NEXT_PUBLIC_CONVEX_URL)
+// Wildcard fallbacks so the same build CSP works for cloud Convex
+// (storage on *.convex.cloud, sometimes *.convex.site) without requiring
+// a separate env. Self-hosted deploys also benefit because CONVEX.http
+// matches the API origin and these wildcards cover the site origin if it
+// shares the convex.* suffix.
+const CONVEX_WILDCARDS_HTTP = "https://*.convex.cloud https://*.convex.site"
+const CONVEX_WILDCARDS_WS = "wss://*.convex.cloud wss://*.convex.site"
+
+/**
  * Security + observability headers applied to every response.
  *
  * - `Content-Security-Policy` is intentionally permissive in the
@@ -37,11 +77,15 @@ const SECURITY_HEADERS = [
       // meta-CSP can only tighten, not relax — so it must be set here.
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // Convex storage returns image URLs; data: covers favicons + base64
-      // splash; blob: covers next/image runtime.
-      "img-src 'self' data: blob: https:",
+      // splash; blob: covers next/image runtime. Allow Unsplash for
+      // personal-branding template thumbnails + the Convex deploy origin
+      // for stored avatars/portfolio media.
+      `img-src 'self' data: blob: https://images.unsplash.com ${CONVEX.http} ${CONVEX_WILDCARDS_HTTP}`,
       "font-src 'self' data: https://fonts.gstatic.com",
-      // Convex WebSocket origin + HTTP actions.
-      "connect-src 'self' https: wss:",
+      // Enumerate connect-src to the Convex deploy origin + WS upgrade.
+      // `https:`/`wss:` were too broad — defeated CSP exfil-control if
+      // XSS ever landed.
+      `connect-src 'self' ${CONVEX.http} ${CONVEX.ws} ${CONVEX_WILDCARDS_HTTP} ${CONVEX_WILDCARDS_WS}`,
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
@@ -111,6 +155,23 @@ const nextConfig: NextConfig = {
   transpilePackages: ["rahman-shared"],
   generateBuildId: async () => BUILD_ID,
   env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },
+  // next/image remote allow-list. Drops the need for `unoptimized` on
+  // known-safe sources (Convex storage, Unsplash). data: / blob: still
+  // bypass via the `unoptimized` flag on a per-component basis.
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "*.convex.cloud" },
+      { protocol: "https", hostname: "*.convex.site" },
+      // Self-hosted deploy host (skip localhost / IP addresses — those
+      // serve dev only and `unoptimized` is fine there).
+      ...(CONVEX.isHttps &&
+      CONVEX.hostname &&
+      !/^(localhost|127\.|10\.|192\.168\.|0\.)/.test(CONVEX.hostname)
+        ? [{ protocol: "https" as const, hostname: CONVEX.hostname }]
+        : []),
+    ],
+  },
   async headers() {
     return [
       {

@@ -5,6 +5,7 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import { notify } from "@/shared/lib/notify";
+import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 
 interface ScanInput {
   cvId: Id<"cvs">;
@@ -22,7 +23,14 @@ export function useATSScan() {
   const run = async (input: ScanInput) => {
     setPending(true);
     try {
-      const res = await scanAction({ ...input, idempotencyKey: crypto.randomUUID() });
+      const idempotencyKey = makeIdempotencyKey("scan", [
+        input.cvId,
+        input.jobListingId,
+        input.jdText,
+        input.jobTitle,
+        input.jobCompany,
+      ]);
+      const res = await scanAction({ ...input, idempotencyKey });
       setLatestScanId(res.scanId);
       notify.success(`Skor ATS: ${res.score} (${res.grade})`);
       return res;

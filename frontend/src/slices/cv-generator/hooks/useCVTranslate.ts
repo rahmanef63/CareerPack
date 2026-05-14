@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useAction } from "convex/react";
 import { notify } from "@/shared/lib/notify";
+import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 import { api } from "../../../../../convex/_generated/api";
 import type { CVData } from "../types";
 
@@ -101,9 +102,13 @@ export function useCVTranslate(source: CVData) {
           notify.info("Belum ada teks untuk diterjemahkan");
           return;
         }
-        // Idempotency key — same click → same key → cached result on
-        // WebSocket retry. Mints once per user-action.
-        const idempotencyKey = crypto.randomUUID();
+        // Stable derived key — same (lang, source content) → same key →
+        // backend cache hits on retry / double-click. Different content
+        // or different lang → new key → fresh translation.
+        const idempotencyKey = makeIdempotencyKey("translate", [
+          lang,
+          ...fields.map((f) => `${f.key}=${f.text}`),
+        ]);
         const { translations } = await translateAction({
           targetLang: lang,
           fields,

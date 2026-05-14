@@ -4,6 +4,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Switch } from "@/shared/components/ui/switch";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import {
   ResponsiveSelect,
   ResponsiveSelectContent,
@@ -62,12 +63,11 @@ export function BasicTab({ values, setValues }: Props) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="date">Tanggal</Label>
-          <Input
+          <DatePicker
             id="date"
-            type="date"
             value={values.date}
-            onChange={(e) => setValues((v) => ({ ...v, date: e.target.value }))}
-            required
+            onChange={(v) => setValues((prev) => ({ ...prev, date: v }))}
+            placeholder="Pilih tanggal"
           />
         </div>
       </div>

@@ -167,17 +167,15 @@ export function UltimateCalendar({
   } as CSSProperties;
 
   // Year-dropdown reverse — DayPicker formats years via
-  // `formatters.formatYearDropdown`, but the *order* comes from the
-  // surrounding `<select>` rendered by DayPicker itself. Easiest
-  // hack: format the label so the visual ordering matches. We
-  // can't reorder option DOM without overriding the YearsDropdown
-  // component, so flip via CSS `flex-direction: column-reverse`
-  // is not viable for native select. Instead, expose
-  // `formatYearCaption` for the label only — full reverse needs
-  // a custom YearsDropdown component (out of scope here).
-  // The boolean is passed through but currently a no-op until we
-  // ship a custom dropdown; leaving the prop for forward-compat.
-  void reverseYears;
+  // No-op until a custom YearsDropdown lands — DayPicker renders the
+  // year picker as a native `<select>` whose option order can't be
+  // reversed without forking the Dropdown component. Warn loudly in
+  // dev so callers don't think the prop works.
+  if (process.env.NODE_ENV !== "production" && reverseYears) {
+    console.warn(
+      "[UltimateCalendar] `reverseYears` is not implemented yet — ignored.",
+    );
+  }
 
   return (
     <div

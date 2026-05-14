@@ -23,6 +23,7 @@ import {
 } from "@/shared/components/ui/responsive-select";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { notify } from "@/shared/lib/notify";
+import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 
 import type { JobListing } from "../types";
 
@@ -63,7 +64,7 @@ export function CoverLetterDialog({ job, open, onOpenChange }: CoverLetterDialog
         jobListingId: job._id,
         language,
         tone,
-        idempotencyKey: crypto.randomUUID(),
+        idempotencyKey: makeIdempotencyKey("cover", [job._id, language, tone]),
       });
       setText(res.text);
       notify.success("Cover letter siap — edit dan copy", {

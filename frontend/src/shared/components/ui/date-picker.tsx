@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
-import { Calendar } from "@/shared/components/ui/calendar";
+import { UltimateCalendar } from "@/shared/components/ui/ultimate-calendar";
 import {
   ResponsivePopover,
   ResponsivePopoverContent,
@@ -88,7 +88,7 @@ export function DatePicker({
         </Button>
       </ResponsivePopoverTrigger>
       <ResponsivePopoverContent className="w-auto p-0" align="start">
-        <Calendar
+        <UltimateCalendar
           mode="single"
           selected={selected}
           onSelect={(d) => {
@@ -97,6 +97,7 @@ export function DatePicker({
           }}
           locale={locale}
           captionLayout={captionLayout}
+          highlightToday
           disabled={(date) => {
             if (fromDate && date < fromDate) return true;
             if (toDate && date > toDate) return true;

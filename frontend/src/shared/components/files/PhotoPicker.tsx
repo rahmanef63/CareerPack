@@ -6,6 +6,7 @@ import { Link as LinkIcon, Upload, ImageIcon, Trash2, Check, X } from "lucide-re
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { cn } from "@/shared/lib/utils";
+import { notify } from "@/shared/lib/notify";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -79,13 +80,17 @@ export function PhotoPicker({
     try {
       parsed = new URL(trimmed);
     } catch {
+      notify.error("URL tidak valid");
       return;
     }
     // Reject `javascript:` / `vbscript:` / `file:` etc. — only http(s)
     // and data: are safe to render via <img src>. data: keeps the door
     // open for inline base64 paste from screenshot tooling.
     const allowed = ["http:", "https:", "data:"];
-    if (!allowed.includes(parsed.protocol)) return;
+    if (!allowed.includes(parsed.protocol)) {
+      notify.error("Protokol URL tidak diizinkan (hanya http/https/data:)");
+      return;
+    }
     onUrl(trimmed);
     setUrlInput("");
     setUrlMode(false);

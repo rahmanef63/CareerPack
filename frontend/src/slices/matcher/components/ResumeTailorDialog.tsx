@@ -27,6 +27,7 @@ import {
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 import { notify } from "@/shared/lib/notify";
+import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 
 import type { JobListing } from "../types";
 
@@ -82,7 +83,7 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
     try {
       const res = await tailor({
         jobListingId: job._id,
-        idempotencyKey: crypto.randomUUID(),
+        idempotencyKey: makeIdempotencyKey("tailor", [job._id, cv?._id]),
       });
       setResult(res);
       // Pre-select all changed bullets — user can deselect.

@@ -6,6 +6,7 @@ import { api } from "../../../../../convex/_generated/api";
 import type { Id } from "../../../../../convex/_generated/dataModel";
 import { subscribe } from "@/shared/lib/aiActionBus";
 import { notify } from "@/shared/lib/notify";
+import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 
 interface AddJobPayload {
   text: string;
@@ -118,7 +119,7 @@ export function MatcherCapabilities() {
           const result = await scanCV({
             cvId: cvId as Id<"cvs">,
             jobListingId: jobListingId as Id<"jobListings">,
-            idempotencyKey: crypto.randomUUID(),
+            idempotencyKey: makeIdempotencyKey("scan", [cvId, jobListingId]),
           });
           notify.success(`Skor ATS: ${result.score} (${result.grade})`);
         } catch (err) {

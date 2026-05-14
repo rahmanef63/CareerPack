@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { DatePicker } from "@/shared/components/ui/date-picker";
 import { PhotoPicker } from "@/shared/components/files/PhotoPicker";
 import { InlineAISuggestChip } from "../../InlineAISuggestChip";
 import type { CVData } from "../../../types";
@@ -92,8 +93,13 @@ export function PersonalInfoSection({
           </div>
           <div className="space-y-2">
             <Label htmlFor="profile-dob">Tanggal Lahir (opsional)</Label>
-            <Input id="profile-dob" type="date" value={cvData.profile.dateOfBirth || ''}
-              onChange={(e) => updateProfile('dateOfBirth', e.target.value)} />
+            <DatePicker
+              id="profile-dob"
+              value={cvData.profile.dateOfBirth || ''}
+              onChange={(v) => updateProfile('dateOfBirth', v)}
+              toDate={new Date()}
+              placeholder="Pilih tanggal lahir"
+            />
             <p className="text-xs text-muted-foreground">
               Hanya digunakan untuk menghitung usia. Tidak disimpan sebagai tanggal eksplisit di CV.
             </p>

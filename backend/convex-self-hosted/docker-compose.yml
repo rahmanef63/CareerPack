@@ -17,6 +17,10 @@ services:
     # the internet if the proxy/firewall is misconfigured.
     ports:
       - "127.0.0.1:3210:3210"
+      # Site origin (HTTP actions / httpAction routes — `/api/health` etc.)
+      # served by Convex on a separate port. Required so external uptime
+      # probes can reach the health endpoint via Dokploy's reverse proxy.
+      - "127.0.0.1:3211:3211"
     # SECURITY/RELIABILITY: this volume holds ALL user data + uploaded
     # files. Treat it as the project's only durable asset. Backup plan
     # (planned, two-layer on-VPS): see docs/db-backup.md
@@ -27,8 +31,14 @@ services:
     # backend is wedged (DB connection lost, panic recovering), the
     # container becomes unhealthy and Dokploy restarts it instead of
     # silently serving 5xx for hours.
+    # Liveness AND public route-plane validation. /version verifies the
+    # API port (3210) is up; /api/health verifies the site origin (3211)
+    # is serving httpActions — the same plane Dokploy proxies for the
+    # external uptime probe.
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3210/version || exit 1"]
+      test:
+        - "CMD-SHELL"
+        - "wget -q -O - http://127.0.0.1:3210/version && wget -q -O - http://127.0.0.1:3211/api/health || exit 1"
       interval: 30s
       timeout: 5s
       retries: 3
