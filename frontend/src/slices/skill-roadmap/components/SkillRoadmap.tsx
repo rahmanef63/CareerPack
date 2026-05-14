@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Trophy } from "lucide-react";
+import { Compass, Sparkles, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
@@ -10,6 +10,7 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { RoadmapBrowser } from "./RoadmapBrowser";
+import { CareerTimeMachine } from "./CareerTimeMachine";
 import { GamificationPanel } from "./GamificationPanel";
 import { SavedRoadmapsGrid } from "./SavedRoadmapsGrid";
 import { useRoadmapGamification } from "../hooks/useRoadmapGamification";
@@ -45,10 +46,10 @@ export function SkillRoadmap() {
 
       <Tabs
         value={r.activeTab ?? "my"}
-        onValueChange={(v) => r.setActiveTab(v as "my" | "browse")}
+        onValueChange={(v) => r.setActiveTab(v as "my" | "browse" | "time-machine")}
         className="space-y-4"
       >
-        <TabsList variant="equal" cols={2} className="w-full sm:max-w-md">
+        <TabsList variant="equal" cols={3} className="w-full sm:max-w-xl">
           <TabsTrigger value="my">
             <Trophy className="w-3.5 h-3.5" />
             Skill Saya
@@ -62,7 +63,17 @@ export function SkillRoadmap() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="time-machine">
+            <Compass className="w-3.5 h-3.5" />
+            Lihat Karier
+          </TabsTrigger>
         </TabsList>
+
+        {/* Career Time Machine — graph-engine reachability across the
+            ID labor market manifold. Pure Convex, no graph-DB dep. */}
+        <TabsContent value="time-machine" className="mt-4">
+          <CareerTimeMachine />
+        </TabsContent>
 
         {/* Browse — search, sort, filter, grid/table toggle. Selecting a
             roadmap auto-jumps back to "Skill Saya" so the user sees the

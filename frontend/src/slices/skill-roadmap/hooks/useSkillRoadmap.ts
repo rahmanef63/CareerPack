@@ -21,7 +21,7 @@ export function useSkillRoadmap() {
   // `activeTab` defaults to null too — set once after data resolves so
   // first-timers don't see the "my" tab flash before being snapped to
   // "browse".
-  const [activeTab, setActiveTab] = useState<"my" | "browse" | null>(null);
+  const [activeTab, setActiveTab] = useState<"my" | "browse" | "time-machine" | null>(null);
   const [completedNodes, setCompletedNodes] = useState<Set<string>>(new Set());
   const [domainFilter, setDomainFilter] = useState<string>('all');
   // `selectedBrowseSlug` is decoupled from `activeSlug` — the browse
