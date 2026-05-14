@@ -63,7 +63,7 @@ export function CVPreviewDialog({
         <DialogHeader>
           <div className="flex flex-wrap items-center justify-between gap-2 pr-8">
             <DialogTitle className="flex items-center gap-2">
-              Pratinjau CV
+              Lihat CV
               {activeLang && (
                 <Badge variant="secondary" className="bg-brand-muted text-brand-muted-foreground">
                   {activeLang.toUpperCase()}

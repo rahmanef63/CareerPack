@@ -9,6 +9,8 @@ import { resolveProviderBaseUrl } from "../_shared/aiProviders";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 import { withIdempotency } from "../_shared/idempotency";
+import { validateRewrite } from "../engine/atoms/validator";
+import { api } from "../_generated/api";
 
 /**
  * CV translation pipeline. Flattens every user-visible text field into
@@ -495,6 +497,223 @@ Hard rules:
 
     return { jobMeta, experiences: results };
 }
+
+// ────────────────────────────────────────────────────────────────────
+// Constrained Rewriter — Truth Ledger gated paraphrase
+// ────────────────────────────────────────────────────────────────────
+
+interface LedgerRewrite {
+  atomId: Id<"truthAtoms">;
+  type: string;
+  sourceRef?: string;
+  original: string;
+  rewritten: string;
+  /** Passed pure-logic validator (`engine/atoms/validator.ts`). */
+  accepted: boolean;
+  /** Validator complaint reasons when `accepted=false`. */
+  violations: string[];
+  /** False when the rewriter returned the original verbatim. */
+  changed: boolean;
+}
+
+interface LedgerRewriteResult {
+  jobMeta: string;
+  rewrites: LedgerRewrite[];
+  /** Atom count fetched from the ledger (active, non-superseded). */
+  atomCount: number;
+  /** Number of atoms the AI elected to rewrite (changed text). */
+  changedCount: number;
+  /** Of changed rewrites, how many passed the validator. */
+  acceptedCount: number;
+}
+
+/**
+ * The Truth-Ledger-gated rewriter. Where `tailorCVForJob` lets the
+ * LLM freelance bullets from a JSON blob of experiences,
+ * `rewriteFromLedger` ships the *atoms* — append-only attested
+ * facts — and demands a per-atom paraphrase that passes a pure
+ * Indonesian/English-aware numeric+lexical validator. Hallucination
+ * is rejected in code, not in prompt discipline.
+ */
+export const rewriteFromLedger = action({
+  args: {
+    cvId: v.id("cvs"),
+    jobListingId: v.optional(v.id("jobListings")),
+    rawJD: v.optional(v.string()),
+    idempotencyKey: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<LedgerRewriteResult> => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+    }
+    return withIdempotency(ctx, userId, args.idempotencyKey, () =>
+      rewriteFromLedgerImpl(ctx, args, userId),
+    );
+  },
+});
+
+async function rewriteFromLedgerImpl(
+  ctx: ActionCtx,
+  args: {
+    cvId: Id<"cvs">;
+    jobListingId?: Id<"jobListings">;
+    rawJD?: string;
+  },
+  userId: Id<"users">,
+): Promise<LedgerRewriteResult> {
+  await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
+
+  const atoms = (await ctx.runQuery(api.engine.atoms.queries.listByCv, {
+    cvId: args.cvId,
+  })) as Array<Doc<"truthAtoms">>;
+
+  if (atoms.length === 0) {
+    throw new ConvexError(
+      "Truth Ledger kosong. Seed dulu dari CV (klik 'Bangun Ledger' di editor) sebelum tailor.",
+    );
+  }
+
+  let jdText: string;
+  let jobMeta = "";
+  if (args.jobListingId) {
+    const job = await ctx.runQuery(internal.matcher.queries._getListing, {
+      listingId: args.jobListingId,
+    });
+    if (!job) throw new ConvexError("Lowongan tidak ditemukan.");
+    jobMeta = `${job.title} · ${job.company}`;
+    jdText = `${job.title} di ${job.company}\nSkills dibutuhkan: ${job.requiredSkills.join(", ")}\n\n${job.description}`;
+  } else if (args.rawJD && args.rawJD.trim().length >= 80) {
+    jdText = args.rawJD;
+  } else {
+    throw new ConvexError(
+      "Sertakan jobListingId atau rawJD minimal 80 karakter.",
+    );
+  }
+
+  const cleanJD = sanitizeAIInput(jdText, 6000);
+
+  // Cap atoms shipped per request — keeps tokens predictable.
+  const MAX_ATOMS = 24;
+  const shipped = atoms.slice(0, MAX_ATOMS);
+
+  const atomPayload = shipped.map((a) => ({
+    id: a._id,
+    type: a.type,
+    claim: a.claim,
+  }));
+
+  const cfg = await resolveAI(ctx, "gpt-4.1-mini");
+
+  const systemPrompt = `You are a Truth-Ledger-gated resume rewriter for Indonesian + English bullets. Each input atom is an ATTESTED FACT. You may paraphrase to better target a target job description, but you MUST NOT:
+
+- Introduce numbers, percentages, monetary amounts, dates, or counts that are not in the original atom.
+- Drop numbers that ARE in the original.
+- Invent technology names, company names, or proper nouns.
+- Replace the atom with a different topic.
+
+You MAY:
+- Reorder words.
+- Swap synonyms (Indonesian and English both fine — match the original language).
+- Lead with a strong action verb (Membangun / Built, Memimpin / Led, Mengoptimasi / Optimised…).
+- Inject JD keywords ONLY when the original atom plausibly relates to that keyword.
+
+Output WAJIB: single JSON object of shape:
+{
+  "rewrites": [
+    { "id": "<atom id verbatim>", "rewritten": "<paraphrased claim>" }
+  ]
+}
+
+One entry per input atom, SAME id. If you cannot improve an atom, return the original text verbatim. NO preamble, NO markdown, NO code fences.`;
+
+  const userPayload = JSON.stringify({ jd: cleanJD, atoms: atomPayload });
+
+  const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+    timeoutMs: FETCH_TIMEOUTS.aiChat,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cfg.apiKey}`,
+    },
+    body: JSON.stringify({
+      model: cfg.model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: wrapUserInput("ledger_rewrite_input", userPayload) },
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    await recordError(ctx, {
+      source: "cv.rewriteFromLedger",
+      message: `gateway ${response.status} ${detail.slice(0, 300)}`,
+    });
+    await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+    throw new ConvexError(
+      response.status === 429
+        ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
+        : "Gagal menghubungi layanan AI. Coba lagi nanti.",
+    );
+  }
+
+  const data = await response.json();
+  const raw = data?.choices?.[0]?.message?.content ?? "{}";
+  let parsed: { rewrites?: Array<{ id: string; rewritten: string }> };
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new ConvexError("AI mengembalikan format JSON tidak valid. Coba lagi.");
+  }
+
+  const rewriteMap = new Map<string, string>();
+  for (const r of parsed.rewrites ?? []) {
+    if (typeof r.id === "string" && typeof r.rewritten === "string") {
+      rewriteMap.set(r.id, r.rewritten);
+    }
+  }
+
+  const rewrites: LedgerRewrite[] = shipped.map((atom) => {
+    const candidate = (rewriteMap.get(atom._id) ?? atom.claim).trim();
+    const original = atom.claim;
+    const changed = candidate !== original.trim();
+
+    // Validator only runs when the AI actually changed the text —
+    // otherwise we always accept the verbatim original.
+    const validation = changed
+      ? validateRewrite(original, candidate)
+      : { ok: true as const, violations: [] as string[] };
+
+    return {
+      atomId: atom._id,
+      type: atom.type,
+      sourceRef: atom.sourceRef,
+      original,
+      rewritten: candidate,
+      accepted: validation.ok,
+      violations: validation.violations,
+      changed,
+    };
+  });
+
+  const changedCount = rewrites.filter((r) => r.changed).length;
+  const acceptedCount = rewrites.filter((r) => r.changed && r.accepted).length;
+
+  return {
+    jobMeta,
+    rewrites,
+    atomCount: atoms.length,
+    changedCount,
+    acceptedCount,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────
 
 function buildCVSummary(cv: Doc<"cvs">): string {
   const parts: string[] = [];

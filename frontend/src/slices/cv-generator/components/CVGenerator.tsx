@@ -155,7 +155,7 @@ export function CVGenerator() {
     if (!node) {
       if (!previewOpen) {
         setPreviewOpen(true);
-        notify.info('Buka pratinjau dulu, lalu ekspor');
+        notify.info('Buka tampilan CV dulu, lalu ekspor');
       }
       return;
     }
@@ -181,7 +181,7 @@ export function CVGenerator() {
   return (
     <PageContainer size="lg">
       {/* Header — mobile-friendly, with compact format toggle inline
-          (no Card chrome) + mobile-only "Pratinjau" button so small
+          (no Card chrome) + mobile-only "Lihat CV" button so small
           viewports can reach the preview dialog without scrolling to
           the bottom sidebar. */}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -215,10 +215,10 @@ export function CVGenerator() {
               setPreviewOpen(true);
             }}
             className="lg:hidden gap-1.5"
-            aria-label="Buka pratinjau CV"
+            aria-label="Buka tampilan CV"
           >
             <Eye className="w-4 h-4" />
-            Pratinjau
+            Lihat CV
           </Button>
         </div>
       </div>

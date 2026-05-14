@@ -89,6 +89,14 @@ export const ScaledCVPreview = forwardRef<HTMLDivElement, Props>(
             // Mark this branch as the printable subtree so a future
             // print-stylesheet can target it without DOM hunting.
             flexShrink: 0,
+            // Clip anything that overflows the A4 page width — matches
+            // actual print behaviour. Without this, long URLs / unbroken
+            // tokens / floated children visually escape the page box.
+            overflow: "hidden",
+            // Force long tokens (URLs, IDs) to wrap at ANY character so
+            // they stay inside the page instead of poking out the side.
+            wordBreak: "break-word",
+            overflowWrap: "anywhere",
           }}
         >
           <div ref={innerRef}>

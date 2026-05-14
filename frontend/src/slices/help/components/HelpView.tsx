@@ -39,7 +39,7 @@ interface FAQItem {
 const FAQ: ReadonlyArray<FAQItem> = [
   {
     q: "Bagaimana cara membuat CV ATS-friendly?",
-    a: "Buka menu CV di sidebar atau bottom nav, pilih format (Nasional atau Internasional), isi tiap bagian (Profil, Pengalaman, Pendidikan, Keterampilan, Sertifikasi, Proyek), lalu klik Pratinjau CV untuk melihat hasil, dan Unduh PDF untuk ekspor. Untuk format Internasional, foto tidak ditampilkan (mengikuti standar ATS internasional).",
+    a: "Buka menu CV di sidebar atau bottom nav, pilih format (Nasional atau Internasional), isi tiap bagian (Profil, Pengalaman, Pendidikan, Keterampilan, Sertifikasi, Proyek), lalu klik Lihat CV untuk melihat hasil, dan Unduh PDF untuk ekspor. Untuk format Internasional, foto tidak ditampilkan (mengikuti standar ATS internasional).",
   },
   {
     q: "Apakah data saya aman?",
@@ -77,7 +77,7 @@ interface Shortcut {
 }
 
 const SHORTCUTS: ReadonlyArray<Shortcut> = [
-  { keys: ["Ctrl", "P"], desc: "Cetak halaman saat ini (atau pratinjau CV)" },
+  { keys: ["Ctrl", "P"], desc: "Cetak halaman saat ini (atau Lihat CV)" },
   { keys: ["Esc"], desc: "Tutup dialog / drawer / popover aktif" },
   { keys: ["Tab"], desc: "Pindah fokus ke elemen interaktif berikutnya" },
   { keys: ["Shift", "Tab"], desc: "Pindah fokus ke elemen sebelumnya" },

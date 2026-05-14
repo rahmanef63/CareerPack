@@ -32,7 +32,7 @@ export function PreviewSidebar({
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Eye className="w-4 h-4 text-brand" />
-              Pratinjau Hidup
+              Lihat CV
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3">
