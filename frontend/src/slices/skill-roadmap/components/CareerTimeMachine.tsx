@@ -26,6 +26,7 @@ import { cn } from "@/shared/lib/utils";
 import { useCareerReach, type RankedPathDTO } from "../hooks/useCareerReach";
 import { OutcomeReporter } from "./OutcomeReporter";
 import { QuestPanel } from "./QuestPanel";
+import { QuestHistory } from "./QuestHistory";
 
 const PROB_TONE = {
   high: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300/50",
@@ -77,6 +78,9 @@ export function CareerTimeMachine() {
       {/* Phase 3 — Plan Compiler. Sits at top so users hit the
           intent-compile flow before the reachability dropdowns. */}
       <QuestPanel targetNodeSlug={r.endSlug ?? undefined} />
+
+      {/* Quest retrospective — only renders when past quests exist. */}
+      <QuestHistory />
 
       <Card className="border-border">
         <CardHeader className="pb-3">

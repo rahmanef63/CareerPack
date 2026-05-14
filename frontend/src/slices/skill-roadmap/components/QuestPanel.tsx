@@ -87,6 +87,45 @@ function routeForActionType(type: string): string | null {
 }
 
 /**
+ * Build deep-link query string from a payload, when it has a known
+ * shape per action type. Defensive — payload is `unknown` because
+ * the LLM may emit anything; we only forward keys we recognize.
+ */
+function payloadQueryString(type: string, payload: unknown): string {
+  if (!payload || typeof payload !== "object") return "";
+  const p = payload as Record<string, unknown>;
+  const parts: string[] = [];
+  const push = (k: string, v: unknown) => {
+    if (typeof v === "string" && v.trim().length > 0) {
+      parts.push(`${k}=${encodeURIComponent(v.trim())}`);
+    }
+  };
+  switch (type) {
+    case "study_skill":
+    case "add_roadmap_node":
+      push("skill", p.skill);
+      push("node", p.nodeSlug ?? p.slug);
+      break;
+    case "tailor_cv":
+      push("cvId", p.cvId);
+      push("jobId", p.jobListingId ?? p.jobId);
+      break;
+    case "subscribe_listings":
+      push("q", p.query ?? p.q);
+      break;
+    case "prepare_documents":
+      push("country", p.country);
+      break;
+    case "set_calendar_block":
+      push("title", p.title);
+      break;
+    default:
+      break;
+  }
+  return parts.length === 0 ? "" : `?${parts.join("&")}`;
+}
+
+/**
  * Career Quest panel — Phase 3 surface.
  *
  * Compose user intent → controlled-vocab DAG of cross-slice actions
@@ -260,6 +299,8 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
         <ul className="space-y-1.5">
           {quest.actions.map((a) => {
             const route = routeForActionType(a.type);
+            const qs = route ? payloadQueryString(a.type, a.payload) : "";
+            const target = route ? `${route}${qs}` : null;
             return (
               <li
                 key={a.id}
@@ -293,12 +334,12 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
                     {TYPE_LABELS[a.type] ?? a.type}
                   </Badge>
                 </span>
-                {route && !a.completed && (
+                {target && !a.completed && (
                   <button
                     type="button"
-                    onClick={() => router.push(route)}
+                    onClick={() => router.push(target)}
                     className="shrink-0 rounded px-1.5 py-0.5 text-[10px] text-brand hover:bg-brand/10"
-                    title={`Buka ${route}`}
+                    title={`Buka ${target}`}
                   >
                     <span className="flex items-center gap-0.5">
                       Jalankan
