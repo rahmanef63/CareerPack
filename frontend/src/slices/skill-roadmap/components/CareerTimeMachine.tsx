@@ -27,6 +27,7 @@ import { useCareerReach, type RankedPathDTO } from "../hooks/useCareerReach";
 import { OutcomeReporter } from "./OutcomeReporter";
 import { QuestPanel } from "./QuestPanel";
 import { QuestHistory } from "./QuestHistory";
+import { ActionEfficacyCard } from "./ActionEfficacyCard";
 
 const PROB_TONE = {
   high: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300/50",
@@ -81,6 +82,9 @@ export function CareerTimeMachine() {
 
       {/* Quest retrospective — only renders when past quests exist. */}
       <QuestHistory />
+
+      {/* Action efficacy — only renders ≥3 attempts. */}
+      <ActionEfficacyCard />
 
       <Card className="border-border">
         <CardHeader className="pb-3">
