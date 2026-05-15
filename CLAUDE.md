@@ -23,6 +23,8 @@ All scripts run from repo root (pnpm workspace, `packageManager = pnpm@10.24.0`)
 
 Pre-commit hook (`simple-git-hooks` + `lint-staged`) runs ESLint `--fix` on frontend TS and `tsc --noEmit` on `convex/**/*.ts`. Do not bypass with `--no-verify`.
 
+**Pre-push hook auto-deploys Convex on push to main.** `scripts/pre-push.sh` (wired via `simple-git-hooks`) diffs the push range against `convex/**`; if anything changed it runs `pnpm backend:deploy` before the push lands. Fast path skips deploy when no Convex changes (~50ms). Skipped when `backend/convex-self-hosted/convex.env` is absent (teammate without admin key) or when `SKIP_CONVEX_DEPLOY=1` is set. Push aborts if deploy fails — fix and retry, or `SKIP_CONVEX_DEPLOY=1 git push` for an emergency bypass.
+
 All `backend:*` scripts pass `--env-file backend/convex-self-hosted/convex.env`. That file is a secret — never commit it.
 
 ## Architecture

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
-import { toast } from "sonner";
+import { notify } from "@/shared/lib/notify";
 import { useState, type ReactNode } from "react";
 import type {
   ColumnDef,
@@ -121,7 +121,7 @@ export function defineResource<T extends { _id: string }>(
           const { wrapperKey, mode, scope, formatSuccess } = config.importConfig!;
           const wrappedPayload = unwrapImport(parsed, wrapperKey, mode);
           if (wrappedPayload === null) {
-            toast.error(
+            notify.error(
               mode === "array"
                 ? `Format tidak dikenali — kirim array atau objek \`{ ${wrapperKey}: [...] }\`.`
                 : `Format tidak dikenali — kirim objek atau \`{ ${wrapperKey}: {...} }\`.`,
@@ -134,9 +134,9 @@ export function defineResource<T extends { _id: string }>(
           })) as QuickFillResultShape & { batchId: string | null };
           const successMsg = formatSuccess(res);
           if (successMsg) {
-            toast.success(successMsg);
+            notify.success(successMsg);
           } else {
-            toast.error(
+            notify.error(
               res.warnings[0] ??
                 `${config.resourceLabel} tidak dapat diimpor — periksa format JSON.`,
             );

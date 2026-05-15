@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { notify } from "@/shared/lib/notify";
 import {
   isStaleBundleError,
   forceFreshReload,
@@ -36,14 +36,12 @@ export function ExtensionErrorFilter() {
     const triggerStaleNotice = () => {
       if (staleToastShownRef.current) return;
       staleToastShownRef.current = true;
-      toast("Aplikasi versi lama terdeteksi", {
+      notify.action("Aplikasi versi lama terdeteksi", {
         description:
           "Mohon maaf, perangkat Anda masih memuat versi cache lama. Klik untuk muat ulang dengan cache bersih.",
-        action: {
-          label: "Muat Ulang",
-          onClick: () => {
-            void forceFreshReload();
-          },
+        actionLabel: "Muat Ulang",
+        onAction: () => {
+          void forceFreshReload();
         },
         duration: Infinity,
       });

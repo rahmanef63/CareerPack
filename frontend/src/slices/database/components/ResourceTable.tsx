@@ -2,7 +2,7 @@
 
 import { useRef, useState, type ReactNode } from "react";
 import { Download, Trash2, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/shared/lib/notify";
 import { Button } from "@/shared/components/ui/button";
 import {
   ResponsiveAlertDialog,
@@ -89,14 +89,12 @@ export function ResourceTable<T>({
       ? rows.filter((r) => ids.has(rowKey(r)))
       : rows;
     if (picked.length === 0) {
-      toast.info("Tidak ada data untuk diekspor.");
+      notify.info("Tidak ada data untuk diekspor.");
       return;
     }
     const shaped = exportShape ? picked.map(exportShape) : picked;
     downloadJson(timestampedFilename(exportPrefix), shaped);
-    toast.success(
-      `${picked.length} ${resourceLabel} diekspor ke JSON.`,
-    );
+    notify.success(`${picked.length} ${resourceLabel} diekspor ke JSON.`);
   };
 
   const handleImportClick = () => {
@@ -114,9 +112,9 @@ export function ResourceTable<T>({
       const parsed = await readJsonFile(file);
       await onImport(parsed);
     } catch (err) {
-      toast.error(
-        `Gagal mengimpor: ${err instanceof Error ? err.message : "format JSON tidak valid"}`,
-      );
+      notify.fromError(err, "Gagal mengimpor JSON", {
+        fallback: "Format JSON tidak valid",
+      });
     } finally {
       setBusy(false);
     }
@@ -128,13 +126,11 @@ export function ResourceTable<T>({
     setBusy(true);
     try {
       const res = await onBulkDelete(ids);
-      toast.success(`${res.deleted} ${resourceLabel} dihapus.`);
+      notify.success(`${res.deleted} ${resourceLabel} dihapus.`);
       setSelectedIds(new Set());
       setConfirmOpen(false);
     } catch (err) {
-      toast.error(
-        `Gagal menghapus: ${err instanceof Error ? err.message : "tidak dikenal"}`,
-      );
+      notify.fromError(err, `Gagal menghapus ${resourceLabel}`);
     } finally {
       setBusy(false);
     }

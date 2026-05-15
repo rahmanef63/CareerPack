@@ -154,6 +154,38 @@ export const notify = {
       description,
     });
   },
+  /**
+   * Action toast — surface a message with an inline button. Useful
+   * for recovery flows (e.g. stale cache → "Muat Ulang"). Optional
+   * `kind` tones the toast variant. `duration: Infinity` is a common
+   * choice for action toasts so the user can't miss it.
+   */
+  action(
+    message: string,
+    opts: {
+      description?: string;
+      actionLabel: string;
+      onAction: () => void;
+      kind?: "info" | "success" | "warning" | "error";
+      duration?: number;
+    },
+  ) {
+    const { description, actionLabel, onAction, kind = "info", duration } = opts;
+    const fn =
+      kind === "success"
+        ? toast.success
+        : kind === "warning"
+          ? toast.warning
+          : kind === "error"
+            ? toast.error
+            : toast.info;
+    return fn(message, {
+      id: idFor(`act-${kind}`, message),
+      description,
+      action: { label: actionLabel, onClick: onAction },
+      duration,
+    });
+  },
   dismiss: toast.dismiss,
 };
 

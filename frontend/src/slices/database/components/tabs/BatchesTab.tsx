@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Undo2 } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/shared/lib/notify";
 import { api } from "../../../../../../convex/_generated/api";
 import type { Doc, Id } from "../../../../../../convex/_generated/dataModel";
 import { Button } from "@/shared/components/ui/button";
@@ -29,11 +29,9 @@ export function BatchesTab() {
     setPendingId(id);
     try {
       const res = await undoBatch({ batchId: id });
-      toast.success(`Batch dibatalkan — ${res.deleted} baris dihapus.`);
+      notify.success(`Batch dibatalkan — ${res.deleted} baris dihapus.`);
     } catch (err) {
-      toast.error(
-        `Gagal undo: ${err instanceof Error ? err.message : "tidak dikenal"}`,
-      );
+      notify.fromError(err, "Gagal membatalkan batch");
     } finally {
       setPendingId(null);
     }
