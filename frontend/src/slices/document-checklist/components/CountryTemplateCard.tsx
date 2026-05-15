@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { useSearchParams } from "next/navigation";
 import { Globe, Loader2, MapPin, ScrollText } from "lucide-react";
 import { api } from "../../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
@@ -65,6 +66,20 @@ export function CountryTemplateCard() {
     | TemplateSummary[]
     | undefined;
   const [previewCountry, setPreviewCountry] = useState<string | null>(null);
+
+  // Deep-link from Quest "Jalankan" — open preview if ?country=<code>
+  // matches a loaded template.
+  const sp = useSearchParams();
+  const appliedRef = useRef(false);
+  useEffect(() => {
+    if (appliedRef.current) return;
+    if (!templates) return;
+    const country = sp?.get("country");
+    if (country && templates.some((t) => t.country === country)) {
+      setPreviewCountry(country);
+      appliedRef.current = true;
+    }
+  }, [sp, templates]);
 
   return (
     <>

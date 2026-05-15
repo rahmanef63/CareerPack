@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "convex/react";
+import { useSearchParams } from "next/navigation";
+import { notify } from "@/shared/lib/notify";
 import {
   ArrowRight,
   Compass,
@@ -73,6 +75,26 @@ export function CareerTimeMachine() {
   );
 
   const r = useCareerReach({ userSkills });
+
+  // Deep-link from Quest "Jalankan" — apply once on mount.
+  //   ?node=<slug>  → preselect TimeMachine target
+  //   ?skill=<name> → toast "Fokus skill: X"
+  const sp = useSearchParams();
+  const appliedRef = useRef(false);
+  useEffect(() => {
+    if (appliedRef.current) return;
+    if (r.isLoadingNodes) return;
+    const node = sp?.get("node");
+    const skill = sp?.get("skill");
+    if (node && r.nodes.some((n) => n.slug === node)) {
+      r.setEndSlug(node);
+      appliedRef.current = true;
+    }
+    if (skill) {
+      notify.info(`Fokus skill: ${skill}`);
+      appliedRef.current = true;
+    }
+  }, [sp, r]);
 
   return (
     <div className="space-y-4">
