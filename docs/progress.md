@@ -1,6 +1,6 @@
 # Progress Tracker
 
-Last updated: 2026-05-07.
+Last updated: 2026-05-15.
 
 ## Recent batches
 
@@ -211,14 +211,132 @@ intent → /engine/plan/compile (Phase 3)
 2. Tanpa step ini, Career Time Machine + Country Template Card
    tampil empty state.
 
+### 2026-05-15 — Engine moat Phase 4.5 close + BSDL kitab bootstrap
+
+11 commits, single session. Engine moat 85% → 100% (visible loop
+end-to-end). Kitab Bidirectional Sync Description Language adopted
+as consumer; document-checklist slice harvested.
+
+**Phase 4.5 full — Bayesian calibrator + visible loop:**
+
+- `7eec3d1` Outcome calibrator daily cron (`engine/outcomes/calibrator.ts`).
+  Bayesian conjugate Beta-Binomial update per (fromNodeSlug,
+  toNodeSlug) edge. `MIN_COHORT_K = 5` k-anonymity floor mirroring
+  Phase 5 DP. Rolling 180-day window. Adds `fromNodeSlug` to
+  `outcomeEvents` + new `nodeOutcomeStats` table indexed by_edge +
+  by_to. Cron registered at 20:00 UTC (03:00 WIB) in `crons.ts`.
+  10 vitest cases on `engine/outcomes/lib.ts` (prior fallback, large-
+  sample pull, prior-anchored, clamping, bucket helpers).
+
+- `9e46994` Phase 4.5 loop close — calibrated edge blend in reach.
+  Pure helper `applyCalibratedProbabilities(edges, statsByEdgeKey,
+  slugByNodeId, minN)` + `edgeKey(from, to)` in `graph/lib.ts`.
+  Reach query loads `nodeOutcomeStats`, substitutes
+  `edge.probability` with `posteriorProb` when present + above
+  `MIN_CALIBRATION_N` floor. Response surfaces `calibratedEdgeIds`
+  per path. 5 new vitest cases (substitution above floor, no-op
+  below, no-op missing, immutability, missing-endpoint guard) — 14
+  total on graph lib. **Calibrator output finally drives planning.**
+
+- `dc1b102` Calibrated-edge badge on PathRow. CareerTimeMachine
+  renders sky-toned `<Badge>` with Activity icon + tooltip
+  ("kalibrasi N/total") when path crosses calibrated edges.
+  `RankedPathDTO.calibratedEdgeIds?: string[]` added to
+  `useCareerReach.ts`. **End-to-end loop is now visible to user**:
+  outcome report → cron updates posterior → reach blends →
+  badge surfaces which edges learned.
+
+**UX surfaces (Phase 4.5 lite + deep-link):**
+
+- `02af921` Quest history retrospective view. New `QuestHistory`
+  component reads `api.engine.plan.queries.myQuests({limit: 20})`,
+  filters `status !== "active"`. Auto-hides when empty. Payload-
+  aware deep-link builder in `QuestPanel.payloadQueryString(type,
+  payload)` — defensively forwards known keys (skill, node, cvId,
+  jobId, q, country, title) per action type.
+
+- `020b3dc` Phase 4.5 lite — `ActionEfficacyCard` self-telemetry.
+  `myActionEfficacy` query aggregates user's own `careerQuests.
+  actions[]` per type (attempted, completed, completionRate,
+  avgDaysToComplete). Renders only when `totalAttempts ≥ 3`.
+  Bridge feedback before community cohort kicks in.
+
+- `c78ad6d` Deep-link landings. `CountryTemplateCard` reads
+  `?country=` → `setPreviewCountry` on mount. CareerTimeMachine
+  reads `?node=` → `setEndSlug`. `?skill=` → notify info toast as
+  lookup hint.
+
+**BSDL — Rahman Resources kitab consumer:**
+
+- `5bff643` CLAUDE.md "Rahman Resources kitab — Bidirectional Sync"
+  block. Adoption guide, `.kitab.json` template, generalisation rules
+  table (❌ Locked vs ✅ Portable), trigger prompts table.
+
+- `02233d7` First consumer manifest:
+  `frontend/src/slices/document-checklist/.kitab.json`
+  (kitabVersion 0.1.0, consumerVersion 0.1.0, syncDirection
+  bidirectional, generalisation status `needs-adapter` with 5
+  blockers).
+
+- `2f19f28` `docs/kitabsync.md` — consumer-side scrape-friendly
+  report. Kitab snapshot ref `de7411b9...` (`main`). 15 kitab slugs
+  scanned: 1 in-sync (document-checklist), 0 drift, 14 kitab-only,
+  21 local-only (out of scope — CareerPack-domain features).
+  Verdict + generalisation breakdown + priority-ordered adoption
+  candidates (vector-search, audit-log, seo, full-width-toggle,
+  admin triage). 2-row run history table.
+
+- `a737de0` Slice README scaffold + `.gitignore .harvest/`.
+
+- `bfcd90e` First kitab blocker resolved locally — raw-button.
+  Swapped 4 raw `<button>` → `<Button>` from
+  `@/shared/components/ui/button` in CategoryFilter.tsx (×2),
+  ChecklistItemCard.tsx, CountryTemplateCard.tsx. Custom Tailwind
+  preserved (h-auto, justify-start, hover overrides).
+  consumerVersion bumped 0.1.0 → 0.2.0. Remaining 4 blockers
+  flagged NOT-locally-fixable in `.kitab.json` (no workspace
+  concept, no t() infra, no `@convex/*` alias) — sanitizer handles
+  at `/rr-send` time.
+
+**Compound flow now end-to-end visible:**
+```
+report outcome (kind, fromNodeSlug, targetNodeSlug)
+  → outcomeEvents append
+  → daily cron 03:00 WIB
+  → bayesianPosterior(priorP, priorN, successes, total)
+  → nodeOutcomeStats upserted (posteriorP, posteriorN)
+  → reach query loads stats, builds slug↔nodeId map
+  → applyCalibratedProbabilities substitutes edge.probability
+  → findPaths uses calibrated probabilities
+  → resolved path carries calibratedEdgeIds
+  → PathRow renders "kalibrasi N/total" badge
+  → next user sees community-learned probabilities
+```
+
+**Stats:**
+- 11 commits single day, 0 reverts
+- 14 graph lib vitest cases (+5 calibration); 10 outcomes lib cases.
+- 7 new files (calibrator.ts, lib.test.ts additions, QuestHistory,
+  ActionEfficacyCard, .kitab.json, README, kitabsync.md).
+- Engine moat: 100% end-to-end visible loop.
+
 ### Backlog tersisa (true defer)
 
-- Phase 4.5: outcome → graph edge probability cron calibrator
-  (Bayesian update per cohort, gated MIN_COHORT_N).
+- ~~Phase 4.5: outcome → graph edge probability cron calibrator~~
+  ✓ closed 2026-05-15 (`7eec3d1` + `9e46994` + `dc1b102`).
 - Truth Ledger editor standalone — sekarang akses cuma via Tailor.
-- Plan action payload typing — `study_skill.payload = {skill: string}`
-  enables deep-link route (mis. `?seed=typescript`).
-- Quest history view (abandoned / completed retrospective).
+- ~~Plan action payload typing — `study_skill.payload = {skill: string}`
+  enables deep-link route~~ ✓ closed 2026-05-15
+  (`02af921` payload-aware deep-link builder; `c78ad6d` landing
+  handlers).
+- ~~Quest history view (abandoned / completed retrospective)~~
+  ✓ closed 2026-05-15 (`02af921` QuestHistory component).
+- `/rr-send document-checklist` — push slice UP to kitab repo.
+  Sanitizer must remodel 4 NOT-locally-fixable blockers
+  (auth-scope, table-shape, hardcoded-copy, deep-relative-import).
+  Cross-repo write — needs explicit user confirmation.
+- vector-search kitab adoption — gated on Convex vector-index
+  validation on pinned Dokploy image.
 - Convex deploy reliability — Phase 2 deploy 1x gagal (transient,
   next deploy success). Investigate kalau berulang.
 - Truly out-of-code: backup VPS install, non-tech roadmap domain
