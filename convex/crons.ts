@@ -71,4 +71,15 @@ crons.daily(
   internal.admin.cleanup.pruneAppendOnlyTables,
 );
 
+// Daily engine outcome calibrator — Bayesian posterior update of
+// careerEdges from outcomeEvents reports (Phase 4.5). 20:00 UTC =
+// 03:00 WIB. Idempotent: re-running upserts the same nodeOutcomeStats
+// rows with fresh aggregates. Gated by MIN_COHORT_K = 5 so noisy
+// micro-cohorts are skipped.
+crons.daily(
+  "engine-outcome-calibrator",
+  { hourUTC: 20, minuteUTC: 0 },
+  internal.engine.outcomes.calibrator.runCalibrator,
+);
+
 export default crons;

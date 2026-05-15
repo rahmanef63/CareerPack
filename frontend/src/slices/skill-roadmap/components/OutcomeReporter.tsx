@@ -47,6 +47,9 @@ const CONFIDENCE_TONE = {
 interface OutcomeReporterProps {
   targetNodeSlug: string;
   targetNodeLabel: string;
+  /** User's current role slug — drives the Phase 4.5 calibrator's
+   *  edge attribution. Optional: standalone reports may not know it. */
+  fromNodeSlug?: string;
 }
 
 /**
@@ -61,6 +64,7 @@ interface OutcomeReporterProps {
 export function OutcomeReporter({
   targetNodeSlug,
   targetNodeLabel,
+  fromNodeSlug,
 }: OutcomeReporterProps) {
   // DP-protected aggregate (Phase 5). Counts are noised + cohort
   // suppressed below k-anonymity floor so individual users can't be
@@ -80,6 +84,7 @@ export function OutcomeReporter({
       await recordOutcome({
         kind,
         targetNodeSlug,
+        fromNodeSlug,
         notes: notes.trim() || undefined,
       });
       notify.success(`Tercatat: ${KIND_LABELS[kind]} untuk ${targetNodeLabel}`);

@@ -25,6 +25,10 @@ export const record = mutation({
     cvId: v.optional(v.id("cvs")),
     jobListingId: v.optional(v.id("jobListings")),
     targetNodeSlug: v.optional(v.string()),
+    /** User's role at the time the outcome happened — required for
+     *  Phase 4.5 edge calibration; optional so legacy / standalone
+     *  reports still record. */
+    fromNodeSlug: v.optional(v.string()),
     notes: v.optional(v.string()),
     occurredAt: v.optional(v.number()),
   },
@@ -40,6 +44,7 @@ export const record = mutation({
       cvId: args.cvId,
       jobListingId: args.jobListingId,
       targetNodeSlug: args.targetNodeSlug,
+      fromNodeSlug: args.fromNodeSlug,
       notes,
       occurredAt: args.occurredAt ?? Date.now(),
     });

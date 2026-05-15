@@ -205,6 +205,7 @@ export function CareerTimeMachine() {
           <OutcomeReporter
             targetNodeSlug={r.reach.endNode.slug}
             targetNodeLabel={r.reach.endNode.label}
+            fromNodeSlug={r.reach.startNode?.slug}
           />
 
           {r.reach.paths.length === 0 ? (

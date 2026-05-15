@@ -48,6 +48,8 @@ import type * as engine_atoms_validator from "../engine/atoms/validator.js";
 import type * as engine_graph_lib from "../engine/graph/lib.js";
 import type * as engine_graph_mutations from "../engine/graph/mutations.js";
 import type * as engine_graph_queries from "../engine/graph/queries.js";
+import type * as engine_outcomes_calibrator from "../engine/outcomes/calibrator.js";
+import type * as engine_outcomes_lib from "../engine/outcomes/lib.js";
 import type * as engine_outcomes_mutations from "../engine/outcomes/mutations.js";
 import type * as engine_outcomes_queries from "../engine/outcomes/queries.js";
 import type * as engine_plan_actions from "../engine/plan/actions.js";
@@ -143,6 +145,8 @@ declare const fullApi: ApiFromModules<{
   "engine/graph/lib": typeof engine_graph_lib;
   "engine/graph/mutations": typeof engine_graph_mutations;
   "engine/graph/queries": typeof engine_graph_queries;
+  "engine/outcomes/calibrator": typeof engine_outcomes_calibrator;
+  "engine/outcomes/lib": typeof engine_outcomes_lib;
   "engine/outcomes/mutations": typeof engine_outcomes_mutations;
   "engine/outcomes/queries": typeof engine_outcomes_queries;
   "engine/plan/actions": typeof engine_plan_actions;
