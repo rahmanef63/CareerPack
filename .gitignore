@@ -64,3 +64,4 @@ coverage
 # si-coder is personal Dokploy deployment automation — not project code,
 # not relevant to public contributors.
 .claude/skills/si-coder/
+.harvest/
