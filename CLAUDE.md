@@ -165,3 +165,80 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 - [docs/features/](./docs/features/) — per-slice deep dives (one file per slice)
 - [.claude/skills/slice-refactor/SKILL.md](./.claude/skills/slice-refactor/SKILL.md) — file-length thresholds, canonical slice layout (flat vs complex-slice variant), refactor protocol, DRY rules, iframe-template caveats
 - [.claude/skills/slice-new/SKILL.md](./.claude/skills/slice-new/SKILL.md) — scaffolding a fresh slice + dual SSOT registration
+
+---
+
+## Rahman Resources kitab — Bidirectional Sync (BSDL)
+
+> Added 2026-05-15 by Wave N+3 (BSDL).
+
+This project is a **consumer** of slices from the
+[Rahman Resources kitab](https://github.com/rahmanef63/resource-site).
+Slices live in `frontend/slices/<slug>/` and should each ship a
+`.kitab.json` so the kitab can detect drift, route sync direction
+(UP via `/rr-send`, DOWN via `npx rahman-resources update`), and enforce
+the generalisation gate before accepting an upstream push.
+
+### Adopt a slice from kitab
+
+```bash
+npx rahman-resources@latest add <slug>
+# Then write .kitab.json next to the slice files (template below).
+```
+
+### `.kitab.json` template
+
+Drop at `frontend/slices/<slug>/.kitab.json`:
+
+```json
+{
+  "$schema": "https://resource.rahmanef.com/schemas/kitab-consumer.json",
+  "kitabSlug": "<slug>",
+  "kitabVersion": "0.1.0",
+  "consumerVersion": "0.1.0",
+  "syncDirection": "bidirectional",
+  "generalization": {
+    "status": "portable",
+    "auditedAt": "2026-05-15",
+    "blockers": []
+  },
+  "lastPullAt": null,
+  "lastPushAt": null
+}
+```
+
+Fields:
+
+| Field | Notes |
+|---|---|
+| `kitabSlug` | kebab-case, must match a kitab `slice.contract.ts` `id`. |
+| `kitabVersion` | semver of last kitab version pulled DOWN. |
+| `consumerVersion` | bump after each local edit. |
+| `syncDirection` | `bidirectional` \| `down-only` \| `up-only` \| `frozen`. |
+| `generalization.status` | `portable` \| `needs-adapter` \| `consumer-locked`. |
+| `generalization.blockers[]` | required if status ≠ `portable`. |
+
+### Trigger prompts (paste in Claude Code)
+
+| Goal | Prompt |
+|---|---|
+| Pull latest kitab version | `pull latest <slug> from kitab and update my .kitab.json (kitabVersion + lastPullAt)` |
+| Bump after local edit | `i edited <slug> — bump consumerVersion in .kitab.json and re-audit generalization` |
+| Audit before push UP | `/rr-prep <slug> --fix` |
+| Push UP to kitab | `/rr-send <slug>` |
+| Adopt new slice from kitab | `adopt slice <slug> from kitab and create .kitab.json` |
+| Show sync status | (run from kitab repo) `npm run scan:consumers` |
+
+### Generalisation rules (UP-sync gate)
+
+The kitab refuses ingestion of slices that bake in this project's domain.
+Replace consumer-specific bits with props before push UP:
+
+| ❌ Locked | ✅ Portable |
+|---|---|
+| `<Link href="/dashboard/applications">` | `<Link href={\`${basePath}/${labels.list}\`}>` |
+| Convex table `applications` | Generic `<slug>_records` |
+| `requirePermission("apply.create")` hardcoded | `requirePermission(props.permission)` |
+| Hero text literal `"Lamar"` | `<Hero text={t.applyCta} />` from props |
+
+Spec: [`docs/consumer-manifest.md`](https://github.com/rahmanef63/resource-site/blob/main/docs/consumer-manifest.md).
