@@ -1,0 +1,45 @@
+{
+  "$schema": "https://resource.rahmanef.com/schemas/kitab-consumer.json",
+  "kitabSlug": "document-checklist",
+  "kitabVersion": "0.1.0",
+  "consumerVersion": "0.1.0",
+  "syncDirection": "bidirectional",
+  "generalization": {
+    "status": "needs-adapter",
+    "auditedAt": "2026-05-15",
+    "blockers": [
+      {
+        "id": "auth-scope",
+        "severity": "warn",
+        "file": "convex/documents/mutations.ts",
+        "message": "All 4 mutations use requireUser(ctx) — user-scoped instead of workspace-scoped. Kitab convention demands requirePermission(ctx, workspaceId, perm). Sanitizer must remodel during /rr-send."
+      },
+      {
+        "id": "table-shape",
+        "severity": "warn",
+        "file": "convex/documents/schema.ts",
+        "message": "Tables documentChecklists + documentTemplates are indexed by_user / by_country, not by_workspace, and table names are not slug-prefixed. Rename to document_checklist_items + document_checklist_templates with workspaceId column + by_workspace index before UP-sync."
+      },
+      {
+        "id": "raw-button",
+        "severity": "warn",
+        "file": "components/document-checklist/CategoryFilter.tsx, ChecklistItemCard.tsx, components/CountryTemplateCard.tsx",
+        "message": "4 raw <button> elements (CategoryFilter:32,50; ChecklistItemCard:31; CountryTemplateCard:101). Sanitizer should convert to <Button> from @/components/ui/button."
+      },
+      {
+        "id": "hardcoded-copy",
+        "severity": "warn",
+        "file": "components/DocumentChecklist.tsx, components/CountryTemplateCard.tsx",
+        "message": "Indonesian UI copy hardcoded (\"Template Dokumen per Negara\", \"Kerja Lokal\", \"Kerja Luar Negeri\", \"Pengingat\", \"Destinasi Populer\"). Replace with t() / props before UP-sync."
+      },
+      {
+        "id": "deep-relative-import",
+        "severity": "info",
+        "file": "hooks/useChecklistData.ts, components/CountryTemplateCard.tsx, components/DocumentChecklistCapabilities.tsx",
+        "message": "Deep relative import '../../../../../convex/_generated/api'. Sanitizer should rewrite to '@convex/_generated/api' alias on push UP."
+      }
+    ]
+  },
+  "lastPullAt": null,
+  "lastPushAt": null
+}
