@@ -29,6 +29,13 @@ export interface RankedPathDTO {
   acquiredSkills: string[];
   score: number;
   nodes: CareerNodeSummary[];
+  /**
+   * Subset of edgeIds whose probability was substituted from the
+   * daily Bayesian calibrator (Phase 4.5). Empty when the path uses
+   * only curated seed edges. Visible-loop signal that the engine is
+   * learning from reported outcomes.
+   */
+  calibratedEdgeIds?: string[];
 }
 
 interface ReachResult {

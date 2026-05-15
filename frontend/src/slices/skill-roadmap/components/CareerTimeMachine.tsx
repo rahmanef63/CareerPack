@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { useSearchParams } from "next/navigation";
 import { notify } from "@/shared/lib/notify";
 import {
+  Activity,
   ArrowRight,
   Compass,
   Clock,
@@ -343,6 +344,7 @@ interface PathRowProps {
 function PathRow({ path, rank }: PathRowProps) {
   const probPct = Math.round(path.cumulativeProbability * 100);
   const tone = probTone(path.cumulativeProbability);
+  const calibratedCount = path.calibratedEdgeIds?.length ?? 0;
   return (
     <Card className={cn("border-l-4", PROB_TONE[tone])}>
       <CardContent className="space-y-2 pt-3">
@@ -361,6 +363,16 @@ function PathRow({ path, rank }: PathRowProps) {
             </span>
             <span className="text-muted-foreground">·</span>
             <span className="text-muted-foreground">{path.hops} hop</span>
+            {calibratedCount > 0 && (
+              <Badge
+                variant="outline"
+                className="gap-1 border-sky-300/50 bg-sky-500/10 text-[10px] text-sky-700 dark:text-sky-300"
+                title={`Probabilitas ${calibratedCount} dari ${path.hops} edge dikalibrasi dari laporan outcome komunitas (Phase 4.5 Bayesian calibrator)`}
+              >
+                <Activity className="h-2.5 w-2.5" />
+                kalibrasi {calibratedCount}/{path.hops}
+              </Badge>
+            )}
           </div>
           <span className="text-[10px] text-muted-foreground">
             score {path.score.toFixed(3)}
