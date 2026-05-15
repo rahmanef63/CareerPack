@@ -113,12 +113,13 @@ export function CountryTemplateCard() {
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
               {templates.map((t) => (
-                <button
+                <Button
                   key={t._id}
                   type="button"
+                  variant="outline"
                   onClick={() => setPreviewCountry(t.country)}
                   className={cn(
-                    "flex flex-col items-start gap-1 rounded-md border border-border bg-card p-3 text-left transition-colors",
+                    "h-auto flex flex-col items-start gap-1 rounded-md border border-border bg-card p-3 text-left transition-colors justify-start",
                     "hover:border-brand/50 hover:bg-brand/5",
                   )}
                 >
@@ -132,7 +133,7 @@ export function CountryTemplateCard() {
                     <ScrollText className="h-3 w-3" />
                     {t.documentCount} dok · {t.requiredCount} wajib
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}

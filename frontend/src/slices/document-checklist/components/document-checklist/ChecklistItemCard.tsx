@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Circle, Calendar, ChevronRight, FileText } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { indonesianCategoryLabels } from "@/shared/data/indonesianData";
 import type { ChecklistItem } from "../../types";
@@ -28,7 +29,10 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
       )}
       onClick={() => onSelect(item)}
     >
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         onClick={(e) => {
           e.stopPropagation();
           onToggle(item.id);
@@ -36,12 +40,12 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
         className={cn(
           "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200",
           item.completed
-            ? "bg-success text-brand-foreground"
+            ? "bg-success text-brand-foreground hover:bg-success/90"
             : "bg-muted text-muted-foreground hover:bg-brand-muted hover:text-brand",
         )}
       >
         {item.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-      </button>
+      </Button>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">

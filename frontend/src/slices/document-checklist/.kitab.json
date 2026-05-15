@@ -2,17 +2,19 @@
   "$schema": "https://resource.rahmanef.com/schemas/kitab-consumer.json",
   "kitabSlug": "document-checklist",
   "kitabVersion": "0.1.0",
-  "consumerVersion": "0.1.0",
+  "consumerVersion": "0.2.0",
   "syncDirection": "bidirectional",
   "generalization": {
     "status": "needs-adapter",
     "auditedAt": "2026-05-15",
     "blockers": [
-      "convex/documents/mutations.ts — all 4 mutations use requireUser(ctx); kitab convention demands requirePermission(ctx, workspaceId, perm). Sanitizer must remodel during /rr-send.",
-      "convex/documents/schema.ts — tables documentChecklists + documentTemplates indexed by_user/by_country, not by_workspace, and table names not slug-prefixed. Rename to document_checklist_items + document_checklist_templates with workspaceId column + by_workspace index before UP-sync.",
-      "components/document-checklist/CategoryFilter.tsx:32,50; ChecklistItemCard.tsx:31; components/CountryTemplateCard.tsx:101 — 4 raw <button> elements. Sanitizer should convert to <Button> from @/components/ui/button.",
-      "components/DocumentChecklist.tsx + components/CountryTemplateCard.tsx — Indonesian UI copy hardcoded (\"Template Dokumen per Negara\", \"Kerja Lokal\", \"Kerja Luar Negeri\", \"Pengingat\", \"Destinasi Populer\"). Replace with t() / props before UP-sync.",
-      "hooks/useChecklistData.ts + components/CountryTemplateCard.tsx + components/DocumentChecklistCapabilities.tsx — deep relative import '../../../../../convex/_generated/api'. Sanitizer should rewrite to '@convex/_generated/api' alias on push UP."
+      "convex/documents/mutations.ts — all 4 mutations use requireUser(ctx); kitab convention demands requirePermission(ctx, workspaceId, perm). Sanitizer remodels during /rr-send. NOT locally fixable: CareerPack has no workspace concept.",
+      "convex/documents/schema.ts — tables documentChecklists + documentTemplates indexed by_user/by_country, not by_workspace, and table names not slug-prefixed. Sanitizer renames to document_checklist_items + document_checklist_templates with workspaceId column + by_workspace index. NOT locally fixable: would break CareerPack single-user model.",
+      "components/DocumentChecklist.tsx + components/CountryTemplateCard.tsx — Indonesian UI copy hardcoded (\"Template Dokumen per Negara\", \"Kerja Lokal\", \"Kerja Luar Negeri\", \"Pengingat\", \"Destinasi Populer\"). Sanitizer extracts to props/t() during /rr-send. NOT locally fixable: CareerPack is single-locale (id), no t() infra.",
+      "hooks/useChecklistData.ts + components/CountryTemplateCard.tsx + components/DocumentChecklistCapabilities.tsx — deep relative import '../../../../../convex/_generated/api'. Sanitizer rewrites to '@convex/_generated/api' alias on push UP. NOT locally fixable: CareerPack tsconfig has only @/* alias (per CLAUDE.md)."
+    ],
+    "resolvedBlockers": [
+      "raw-button (2026-05-15) — swapped 4 raw <button> → <Button> from @/shared/components/ui/button in CategoryFilter.tsx (×2), ChecklistItemCard.tsx, CountryTemplateCard.tsx. Typecheck + lint clean."
     ]
   },
   "lastPullAt": null,
