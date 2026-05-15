@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { findPaths, skillGap, type GraphNode, type GraphEdge } from "./lib";
+import {
+  applyCalibratedProbabilities,
+  edgeKey,
+  findPaths,
+  MIN_CALIBRATION_N,
+  skillGap,
+  type CalibratedStat,
+  type GraphEdge,
+  type GraphNode,
+} from "./lib";
 import type { Id } from "../../_generated/dataModel";
 
 // Test fixture: tiny 5-node, 6-edge DAG.
@@ -128,6 +137,78 @@ describe("findPaths", () => {
     const top = paths[0];
     expect(top.acquiredSkills).toContain("TypeScript");
     expect(top.acquiredSkills).toContain("System Design");
+  });
+});
+
+describe("applyCalibratedProbabilities", () => {
+  const slugByNodeId = new Map<string, string>([
+    ["junior", "junior"],
+    ["mid", "mid"],
+    ["senior", "senior"],
+  ]);
+
+  it("substitutes probability when posteriorN >= floor", () => {
+    const stats = new Map<string, CalibratedStat>([
+      [edgeKey("junior", "mid"), { posteriorProb: 0.42, posteriorN: 20 }],
+    ]);
+    const result = applyCalibratedProbabilities(
+      [e("junior", "mid", 0.7, 18)],
+      stats,
+      slugByNodeId,
+    );
+    expect(result[0].probability).toBeCloseTo(0.42);
+    expect(result[0].calibrated).toBe(true);
+  });
+
+  it("keeps curated probability when posteriorN below floor", () => {
+    const stats = new Map<string, CalibratedStat>([
+      [
+        edgeKey("junior", "mid"),
+        { posteriorProb: 0.42, posteriorN: MIN_CALIBRATION_N - 1 },
+      ],
+    ]);
+    const result = applyCalibratedProbabilities(
+      [e("junior", "mid", 0.7, 18)],
+      stats,
+      slugByNodeId,
+    );
+    expect(result[0].probability).toBeCloseTo(0.7);
+    expect(result[0].calibrated).toBeUndefined();
+  });
+
+  it("keeps curated probability when no posterior exists", () => {
+    const result = applyCalibratedProbabilities(
+      [e("junior", "mid", 0.7, 18)],
+      new Map(),
+      slugByNodeId,
+    );
+    expect(result[0].probability).toBeCloseTo(0.7);
+    expect(result[0].calibrated).toBeUndefined();
+  });
+
+  it("returns a new array — input untouched", () => {
+    const input = [e("junior", "mid", 0.7, 18)];
+    const stats = new Map<string, CalibratedStat>([
+      [edgeKey("junior", "mid"), { posteriorProb: 0.42, posteriorN: 20 }],
+    ]);
+    const result = applyCalibratedProbabilities(input, stats, slugByNodeId);
+    expect(input[0].probability).toBeCloseTo(0.7);
+    expect(input[0].calibrated).toBeUndefined();
+    expect(result).not.toBe(input);
+  });
+
+  it("skips when slug map lacks an endpoint", () => {
+    const stats = new Map<string, CalibratedStat>([
+      [edgeKey("junior", "mid"), { posteriorProb: 0.42, posteriorN: 20 }],
+    ]);
+    const partialSlugMap = new Map<string, string>([["junior", "junior"]]);
+    const result = applyCalibratedProbabilities(
+      [e("junior", "mid", 0.7, 18)],
+      stats,
+      partialSlugMap,
+    );
+    expect(result[0].probability).toBeCloseTo(0.7);
+    expect(result[0].calibrated).toBeUndefined();
   });
 });
 

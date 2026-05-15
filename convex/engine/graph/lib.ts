@@ -26,6 +26,50 @@ export interface GraphEdge {
   durationMonthsMedian: number;
   acquiredSkills: string[];
   sampleSize: number;
+  /** True when probability was substituted from nodeOutcomeStats. */
+  calibrated?: boolean;
+}
+
+/**
+ * Minimum posteriorN before substituting a calibrated probability
+ * over the curated seed. Matches MIN_COHORT_K in
+ * outcomes/lib.ts — calibrator never publishes below that floor, so
+ * this is belt-and-suspenders.
+ */
+export const MIN_CALIBRATION_N = 5;
+
+export interface CalibratedStat {
+  posteriorProb: number;
+  posteriorN: number;
+}
+
+/**
+ * Substitutes curated edge probability with calibrated posterior
+ * when one exists for that (fromSlug, toSlug) edge and meets the
+ * sample-size floor. Returns a new edge array; input untouched.
+ *
+ * Pure helper — slug↔nodeId resolution stays in the query layer.
+ */
+export function applyCalibratedProbabilities(
+  edges: ReadonlyArray<GraphEdge>,
+  statsByEdgeKey: ReadonlyMap<string, CalibratedStat>,
+  slugByNodeId: ReadonlyMap<string, string>,
+  minN: number = MIN_CALIBRATION_N,
+): GraphEdge[] {
+  return edges.map((e) => {
+    const fromSlug = slugByNodeId.get(String(e.fromNodeId));
+    const toSlug = slugByNodeId.get(String(e.toNodeId));
+    if (!fromSlug || !toSlug) return e;
+    const stat = statsByEdgeKey.get(edgeKey(fromSlug, toSlug));
+    if (!stat) return e;
+    if (stat.posteriorN < minN) return e;
+    return { ...e, probability: stat.posteriorProb, calibrated: true };
+  });
+}
+
+/** Stable composite key for (from, to) edge stat lookup. */
+export function edgeKey(fromSlug: string, toSlug: string): string {
+  return `${fromSlug}${toSlug}`;
 }
 
 export interface RankedPath {
