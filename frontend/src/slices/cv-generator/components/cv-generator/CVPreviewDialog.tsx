@@ -22,7 +22,7 @@ import { TRANSLATE_LANGUAGES, type CVLangCode } from "../../hooks/useCVTranslate
 import { ScaledCVPreview } from "../templates/ScaledCVPreview";
 import { TemplateThumb } from "./TemplatePicker";
 import { PreviewToolbar } from "./PreviewToolbar";
-import { usePreviewControls } from "../../hooks/usePreviewControls";
+import type { PreviewLayout } from "../../hooks/usePreviewControls";
 
 interface Props {
   previewOpen: boolean;
@@ -47,6 +47,8 @@ interface Props {
   revertTranslation: () => void;
   activeLang: string | null;
   isTranslating: boolean;
+  layout: PreviewLayout;
+  onLayoutChange: (layout: PreviewLayout) => void;
 }
 
 export function CVPreviewDialog({
@@ -54,10 +56,8 @@ export function CVPreviewDialog({
   currentTemplateIdx, templateIds, swipeStartXRef, swipeDx,
   onSwipeStart, onSwipeMove, onSwipeEnd, cycleTemplate, updatePref,
   onExportPDF, isExporting, translate, revertTranslation, activeLang, isTranslating,
+  layout, onLayoutChange,
 }: Props) {
-  // Full-screen reader by default — the page-break overlay + zoom only
-  // pay off when there's real screen real estate to work with.
-  const ctrl = usePreviewControls({ mode: "screen" });
   return (
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
       <DialogContent
@@ -128,17 +128,8 @@ export function CVPreviewDialog({
             thumb below. ←/→ keys on desktop too. */}
         <div className="space-y-3">
           <PreviewToolbar
-            zoomPct={ctrl.zoomPct}
-            isOverriding={ctrl.isOverriding}
-            onZoomIn={ctrl.zoomIn}
-            onZoomOut={ctrl.zoomOut}
-            onFitWidth={ctrl.fitWidth}
-            mode={ctrl.mode}
-            onModeChange={ctrl.setMode}
-            showPageBreaks={ctrl.showPageBreaks}
-            onTogglePageBreaks={() =>
-              ctrl.setShowPageBreaks(!ctrl.showPageBreaks)
-            }
+            layout={layout}
+            onLayoutChange={onLayoutChange}
           />
           <div className="relative">
             <div
@@ -161,9 +152,7 @@ export function CVPreviewDialog({
                 ref={cvPreviewRef}
                 cv={renderCV}
                 photoUrl={photoUrl}
-                zoom={ctrl.zoom}
-                mode={ctrl.mode}
-                showPageBreaks={ctrl.showPageBreaks}
+                layout={layout}
               />
             </div>
             <button

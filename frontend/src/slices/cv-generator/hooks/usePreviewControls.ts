@@ -1,59 +1,25 @@
 "use client";
 
-import { useCallback, useState } from "react";
-
-export type PreviewMode = "screen" | "print";
-
-const ZOOM_MIN = 0.4;
-const ZOOM_MAX = 2;
-const ZOOM_STEP = 0.1;
+import { useState } from "react";
 
 /**
- * Lifts preview chrome state out of the renderer so a sidebar mini and
- * the full-screen dialog can share the same controls. `mode === "print"`
- * forces 1:1 scale + dashed A4 break guides; `screen` keeps auto-fit.
+ * Layout mode shared by preview chrome + PDF export.
  *
- * `zoom === null` = auto-fit (ScaledCVPreview measures the container).
- * Any number > 0 = explicit user override.
+ * - `long`: render everything on one continuous canvas. PDF export
+ *   produces a single page sized to the actual content height — no
+ *   forced A4 break. Best for web sharing, scrollable reading.
+ * - `paginated`: classic A4 multi-page layout. Preview overlays a
+ *   dashed break line at each A4 boundary so the user can see where
+ *   the PDF will split before exporting.
+ *
+ * Default = `paginated` because that's still what most recruiters
+ * expect, and the user can flip to `long` in one click.
  */
-export function usePreviewControls(initial?: {
-  mode?: PreviewMode;
-  zoom?: number | null;
-}) {
-  const [mode, setMode] = useState<PreviewMode>(initial?.mode ?? "screen");
-  const [zoom, setZoom] = useState<number | null>(initial?.zoom ?? null);
-  const [showPageBreaks, setShowPageBreaks] = useState(false);
+export type PreviewLayout = "long" | "paginated";
 
-  const effectiveZoom = mode === "print" ? 1 : zoom;
-  const zoomPct =
-    effectiveZoom !== null ? Math.round(effectiveZoom * 100) : null;
-
-  const zoomIn = useCallback(() => {
-    setZoom((z) =>
-      Math.min(ZOOM_MAX, (z ?? 1) + ZOOM_STEP),
-    );
-  }, []);
-  const zoomOut = useCallback(() => {
-    setZoom((z) =>
-      Math.max(ZOOM_MIN, (z ?? 1) - ZOOM_STEP),
-    );
-  }, []);
-  const fitWidth = useCallback(() => setZoom(null), []);
-  const resetZoom = useCallback(() => setZoom(1), []);
-
-  return {
-    mode,
-    setMode,
-    zoom: effectiveZoom,
-    zoomPct,
-    showPageBreaks,
-    setShowPageBreaks,
-    zoomIn,
-    zoomOut,
-    fitWidth,
-    resetZoom,
-    isOverriding: zoom !== null,
-  };
+export function usePreviewControls(initial?: { layout?: PreviewLayout }) {
+  const [layout, setLayout] = useState<PreviewLayout>(
+    initial?.layout ?? "paginated",
+  );
+  return { layout, setLayout };
 }
-
-export const ZOOM_LIMITS = { min: ZOOM_MIN, max: ZOOM_MAX, step: ZOOM_STEP };

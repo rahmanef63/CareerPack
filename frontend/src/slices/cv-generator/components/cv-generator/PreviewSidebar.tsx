@@ -17,7 +17,7 @@ import { ProgressWalker } from "@/shared/components/stats/ProgressWalker";
 import { CVScoreBadge, computeScore } from "../CVScoreBadge";
 import { ScaledCVPreview } from "../templates/ScaledCVPreview";
 import { PreviewToolbar } from "./PreviewToolbar";
-import { usePreviewControls } from "../../hooks/usePreviewControls";
+import type { PreviewLayout } from "../../hooks/usePreviewControls";
 import type { AutosaveStatus } from "../../hooks/useAutosave";
 import type { CVData } from "../../types";
 
@@ -33,6 +33,8 @@ interface Props {
   autosaveStatus: AutosaveStatus;
   autosaveLastAt: number | null;
   dirty: boolean;
+  layout: PreviewLayout;
+  onLayoutChange: (layout: PreviewLayout) => void;
 }
 
 export function PreviewSidebar({
@@ -47,9 +49,10 @@ export function PreviewSidebar({
   autosaveStatus,
   autosaveLastAt,
   dirty,
+  layout,
+  onLayoutChange,
 }: Props) {
   const score = computeScore(cvData);
-  const ctrl = usePreviewControls();
   return (
     <div className="min-w-0 lg:col-span-1">
       <div className="sticky top-24 space-y-4">
@@ -69,19 +72,9 @@ export function PreviewSidebar({
           </CardHeader>
           <CardContent className="space-y-2 p-3">
             <PreviewToolbar
-              zoomPct={ctrl.zoomPct}
-              isOverriding={ctrl.isOverriding}
-              onZoomIn={ctrl.zoomIn}
-              onZoomOut={ctrl.zoomOut}
-              onFitWidth={ctrl.fitWidth}
-              mode={ctrl.mode}
-              onModeChange={ctrl.setMode}
-              showPageBreaks={ctrl.showPageBreaks}
-              onTogglePageBreaks={() =>
-                ctrl.setShowPageBreaks(!ctrl.showPageBreaks)
-              }
+              layout={layout}
+              onLayoutChange={onLayoutChange}
               onFullscreen={onPreviewOpen}
-              compact
               className="text-xs"
             />
             <div className="rounded-lg border border-border bg-muted/20 overflow-hidden">
@@ -89,9 +82,7 @@ export function PreviewSidebar({
                 cv={renderCV}
                 photoUrl={photoUrl}
                 compact
-                zoom={ctrl.zoom}
-                mode={ctrl.mode}
-                showPageBreaks={ctrl.showPageBreaks}
+                layout={layout}
               />
             </div>
           </CardContent>

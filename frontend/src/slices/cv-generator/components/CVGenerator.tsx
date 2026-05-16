@@ -10,6 +10,7 @@ import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { useCV } from '../hooks/useCV';
 import { useAutosave } from '../hooks/useAutosave';
+import { usePreviewControls } from '../hooks/usePreviewControls';
 import { CV_TEMPLATES, initialCVData, type CVFormat } from '../constants';
 import { MagneticTabs, useDragReorder } from '@/shared/components/interactions/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
@@ -67,6 +68,11 @@ export function CVGenerator() {
     });
   }, []);
   const cvPreviewRef = useRef<HTMLDivElement>(null);
+  // Shared preview layout — both sidebar mini AND modal read this, and
+  // exportPDF uses it to decide between A4 multi-page vs single tall
+  // page. Lifting here keeps the source of truth in one place so the
+  // PDF output never disagrees with what the user is looking at.
+  const previewCtrl = usePreviewControls();
 
   const handlers = useCVHandlers(setCvData, setFormat);
 
@@ -210,7 +216,7 @@ export function CVGenerator() {
     }
     setIsExporting(true);
     try {
-      await exportCVToPDF({ node, cvData });
+      await exportCVToPDF({ node, cvData, layout: previewCtrl.layout });
     } catch (err) {
       notify.fromError(err, 'Gagal ekspor PDF');
     } finally {
@@ -381,6 +387,8 @@ export function CVGenerator() {
               autosaveStatus={autosave.status}
               autosaveLastAt={autosave.lastSavedAt}
               dirty={autosave.dirty}
+              layout={previewCtrl.layout}
+              onLayoutChange={previewCtrl.setLayout}
             />
           </>
         )}
@@ -413,6 +421,8 @@ export function CVGenerator() {
         revertTranslation={revertTranslation}
         activeLang={activeLang}
         isTranslating={isTranslating}
+        layout={previewCtrl.layout}
+        onLayoutChange={previewCtrl.setLayout}
       />
     </PageContainer>
   );
