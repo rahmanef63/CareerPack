@@ -24,10 +24,12 @@ export const debugUserByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, args) => {
     const target = args.email.trim().toLowerCase();
-    const users = await ctx.db.query("users").collect();
-    const user = users.find(
-      (u) => ((u as { email?: string }).email ?? "").toLowerCase() === target,
-    );
+    // `authTables.users` ships with an `email` index — exact-match
+    // lookup is O(log N) instead of the previous full-table scan.
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", target))
+      .first();
     if (!user) {
       return {
         found: false as const,
@@ -55,10 +57,10 @@ export const promoteToAdminByEmail = internalMutation({
   args: { email: v.string() },
   handler: async (ctx, args) => {
     const target = args.email.trim().toLowerCase();
-    const users = await ctx.db.query("users").collect();
-    const user = users.find(
-      (u) => ((u as { email?: string }).email ?? "").toLowerCase() === target,
-    );
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", target))
+      .first();
     if (!user) {
       return { ok: false as const, reason: "user not found" };
     }

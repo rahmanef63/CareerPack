@@ -1,10 +1,5 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { HeroSection } from "@/slices/hero";
 import { JsonLd } from "@/shared/components/seo/JsonLd";
-import { useAuth } from "@/shared/hooks/useAuth";
+import { MarketingLanding } from "./_components/MarketingLanding";
 
 const SITE_URL = "https://careerpack.org";
 
@@ -33,21 +28,17 @@ const WEBSITE_LD = {
   },
 };
 
+/**
+ * Server-rendered marketing landing. JSON-LD ships in the initial HTML
+ * (crawlers see it pre-hydration). The auth-redirect + Hero interaction
+ * lives inside `<MarketingLanding>` — a thin client island.
+ */
 export default function LandingPage() {
-  const router = useRouter();
-  const { state } = useAuth();
-
-  useEffect(() => {
-    if (!state.isLoading && state.isAuthenticated) {
-      router.replace("/dashboard");
-    }
-  }, [state.isLoading, state.isAuthenticated, router]);
-
   return (
     <>
       <JsonLd data={ORGANIZATION_LD} />
       <JsonLd data={WEBSITE_LD} />
-      <HeroSection onGetStarted={() => router.push("/login")} />
+      <MarketingLanding />
     </>
   );
 }

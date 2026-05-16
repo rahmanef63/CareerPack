@@ -82,4 +82,14 @@ crons.daily(
   internal.engine.outcomes.calibrator.runCalibrator,
 );
 
+// Hourly admin-dashboard aggregator — replaces 5 unbounded `.collect()`
+// calls that fired on every admin tick (users/cvs/jobApplications/
+// rateLimitEvents/errorLogs). Reads from the denormalized `adminStats`
+// singleton; staleness budget ≤ 1h, fine for an internal-ops dashboard.
+crons.cron(
+  "admin-stats-aggregator",
+  "0 * * * *",
+  internal.admin.aggregator.recomputeAdminStats,
+);
+
 export default crons;

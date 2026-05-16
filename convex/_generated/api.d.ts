@@ -19,6 +19,8 @@ import type * as _shared_origin from "../_shared/origin.js";
 import type * as _shared_rateLimit from "../_shared/rateLimit.js";
 import type * as _shared_redact from "../_shared/redact.js";
 import type * as _shared_sanitize from "../_shared/sanitize.js";
+import type * as admin_aggregator from "../admin/aggregator.js";
+import type * as admin_bootstrap from "../admin/bootstrap.js";
 import type * as admin_cleanup from "../admin/cleanup.js";
 import type * as admin_mutations from "../admin/mutations.js";
 import type * as admin_queries from "../admin/queries.js";
@@ -116,6 +118,8 @@ declare const fullApi: ApiFromModules<{
   "_shared/rateLimit": typeof _shared_rateLimit;
   "_shared/redact": typeof _shared_redact;
   "_shared/sanitize": typeof _shared_sanitize;
+  "admin/aggregator": typeof admin_aggregator;
+  "admin/bootstrap": typeof admin_bootstrap;
   "admin/cleanup": typeof admin_cleanup;
   "admin/mutations": typeof admin_mutations;
   "admin/queries": typeof admin_queries;

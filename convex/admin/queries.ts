@@ -36,34 +36,44 @@ function countBy<T>(items: T[], key: (t: T) => string | null | undefined): Array
 
 // --- Admin (role-gated) ---
 
+/**
+ * Reads denormalized counters from the `adminStats` singleton (recomputed
+ * hourly by `internal.admin.aggregator.recomputeAdminStats`). Previously
+ * full-scanned `users` + `cvs` + `jobApplications` + `rateLimitEvents` on
+ * every dashboard tick — now O(1).
+ *
+ * Returns `computedAt` so the UI can render a "Last updated X min ago"
+ * hint. Falls back to zero-shape when the cron hasn't run yet (fresh deploy).
+ */
 export const getGlobalStats = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-
-    const [users, cvs, applications, rateEvents] = await Promise.all([
-      ctx.db.query("users").collect(),
-      ctx.db.query("cvs").collect(),
-      ctx.db.query("jobApplications").collect(),
-      ctx.db.query("rateLimitEvents").collect(),
-    ]);
-
-    const cutoff = Date.now() - THIRTY_DAYS_MS;
-    const recentEvents = rateEvents.filter((e) => e.timestamp >= cutoff);
-    const activeUserIds = new Set(recentEvents.map((e) => e.userId));
-    const aiEvents = rateEvents.filter((e) => e.key.startsWith("ai:"));
-    const aiEventsLastMonth = aiEvents.filter((e) => e.timestamp >= cutoff);
-
+    const doc = await ctx.db
+      .query("adminStats")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .first();
+    if (!doc) {
+      return {
+        totalUsers: 0,
+        activeUsers: 0,
+        totalCVs: 0,
+        totalApplications: 0,
+        aiUsage: { totalRequests: 0, totalTokens: 0, lastMonth: 0 },
+        computedAt: null as number | null,
+      };
+    }
     return {
-      totalUsers: users.length,
-      activeUsers: activeUserIds.size,
-      totalCVs: cvs.length,
-      totalApplications: applications.length,
+      totalUsers: doc.totalUsers,
+      activeUsers: doc.activeUsers30d,
+      totalCVs: doc.totalCVs,
+      totalApplications: doc.totalApplications,
       aiUsage: {
-        totalRequests: aiEvents.length,
+        totalRequests: doc.aiTotalRequests,
         totalTokens: 0,
-        lastMonth: aiEventsLastMonth.length,
+        lastMonth: doc.aiLastMonth,
       },
+      computedAt: doc.computedAt,
     };
   },
 });
@@ -119,79 +129,50 @@ export const listAllUsers = query({
  * (errorLogs > 90d, rateLimitEvents > 7d), so unbounded growth is
  * mitigated upstream and these scans stay bounded.
  */
+/**
+ * 30-day rollup of AI usage + error trends. Reads denormalized
+ * `adminStats` doc (recomputed hourly). Returns zero-shape when cron
+ * hasn't yet populated the doc.
+ *
+ * Staleness budget: ≤ 1h. Acceptable for a trend chart spanning 30 days.
+ */
 export const getAIUsageStats = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const now = Date.now();
-    const cutoff = now - THIRTY_DAYS_MS;
-    const dayMs = 24 * 60 * 60 * 1000;
-
-    const [rateEvents, errorLogs, users] = await Promise.all([
-      ctx.db.query("rateLimitEvents").collect(),
-      ctx.db.query("errorLogs").collect(),
-      ctx.db.query("users").collect(),
-    ]);
-
-    const aiEvents = rateEvents.filter(
-      (e) => e.key === "ai:day" && e.timestamp >= cutoff,
-    );
-    const recentErrors = errorLogs.filter((e) => e.timestamp >= cutoff);
-
-    // Build daily buckets — start of each day in UTC, last 30 days.
-    const startOfToday = Math.floor(now / dayMs) * dayMs;
-    const daily = Array.from({ length: 30 }, (_, i) => {
-      const dayStart = startOfToday - (29 - i) * dayMs;
-      const dayEnd = dayStart + dayMs;
-      const requests = aiEvents.filter(
-        (e) => e.timestamp >= dayStart && e.timestamp < dayEnd,
-      ).length;
-      const errors = recentErrors.filter(
-        (e) => e.timestamp >= dayStart && e.timestamp < dayEnd,
-      ).length;
+    const doc = await ctx.db
+      .query("adminStats")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .first();
+    if (!doc) {
       return {
-        date: new Date(dayStart).toISOString().slice(0, 10),
-        requests,
-        errors,
+        daily: [] as Array<{ date: string; requests: number; errors: number }>,
+        topUsers: [] as Array<{
+          userId: string;
+          email: string | null;
+          name: string | null;
+          count: number;
+        }>,
+        topErrorSources: [] as Array<{ value: string; count: number }>,
+        currentLoad: { last60s: 0, last24h: 0 },
+        totalRequests30d: 0,
+        totalErrors30d: 0,
+        computedAt: null as number | null,
       };
-    });
-
-    // Top users by AI request count (last 30 days).
-    const userCounts = new Map<string, number>();
-    for (const e of aiEvents) {
-      userCounts.set(e.userId, (userCounts.get(e.userId) ?? 0) + 1);
     }
-    const userById = new Map(users.map((u) => [u._id, u]));
-    const topUsers = Array.from(userCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([userId, count]) => {
-        const u = userById.get(userId as Doc<"users">["_id"]);
-        return {
-          userId,
-          email: u?.email ?? null,
-          name: u?.name ?? null,
-          count,
-        };
-      });
-
-    const topErrorSources = countBy(recentErrors, (e) => e.source).slice(0, 10);
-
-    // Current rolling load.
-    const last60s = rateEvents.filter(
-      (e) => e.key === "ai:minute" && e.timestamp >= now - 60_000,
-    ).length;
-    const last24h = rateEvents.filter(
-      (e) => e.key === "ai:day" && e.timestamp >= now - dayMs,
-    ).length;
-
     return {
-      daily,
-      topUsers,
-      topErrorSources,
-      currentLoad: { last60s, last24h },
-      totalRequests30d: aiEvents.length,
-      totalErrors30d: recentErrors.length,
+      daily: doc.aiDaily30d,
+      topUsers: doc.topAIUsers.map((u) => ({
+        userId: u.userId as string,
+        email: u.email,
+        name: u.name,
+        count: u.count,
+      })),
+      topErrorSources: doc.topErrorSources,
+      currentLoad: { last60s: doc.aiLast60s, last24h: doc.aiLast24h },
+      totalRequests30d: doc.aiTotalRequests30d,
+      totalErrors30d: doc.totalErrors30d,
+      computedAt: doc.computedAt,
     };
   },
 });

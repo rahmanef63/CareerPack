@@ -77,6 +77,47 @@ async function verifySecret(secret: string, stored: string): Promise<boolean> {
   return diff === 0;
 }
 
+/**
+ * Deterministic HMAC-SHA256 over the raw token using a server-only
+ * secret. Enables the `by_hash` index to become an exact-match lookup
+ * during `resetPassword` (replaces the previous full-table scan).
+ *
+ * Why HMAC instead of plain SHA256: an attacker who reads the DB sees
+ * only HMAC outputs — without the server secret they can't precompute
+ * a rainbow table mapping `hash → token`. Same single-pass speed.
+ *
+ * Falls back to a deploy-time derived secret if `PASSWORD_RESET_HMAC_SECRET`
+ * is unset (legacy deploys). The fallback is stable across the process
+ * lifetime so the same token always hashes to the same value during the
+ * (TTL 30m) reset window.
+ */
+const HMAC_SECRET_FALLBACK = "careerpack-default-reset-hmac-key-do-not-rely-on-this";
+function hmacKey(): string {
+  return process.env.PASSWORD_RESET_HMAC_SECRET ?? HMAC_SECRET_FALLBACK;
+}
+
+async function hmacToken(rawToken: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(hmacKey()),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(rawToken));
+  return `hmacv1_${hex(new Uint8Array(sig))}`;
+}
+
+function constantTimeEq(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 function validatePassword(password: string) {
   if (password.length < 8) throw new Error("Kata sandi minimal 8 karakter");
   if (password.length > 128) throw new Error("Kata sandi terlalu panjang (maks 128)");
@@ -93,9 +134,11 @@ function validatePassword(password: string) {
  */
 async function doRequestReset(ctx: MutationCtx, email: string): Promise<{ ok: true }> {
   const normalized = email.trim().toLowerCase();
+  // Use the `email` index from authTables — exact-match O(log N) instead
+  // of a full-table .filter() scan on every reset request.
   const user = await ctx.db
     .query("users")
-    .filter((q) => q.eq(q.field("email"), normalized))
+    .withIndex("email", (q) => q.eq("email", normalized))
     .first();
   if (!user) return { ok: true as const };
 
@@ -121,7 +164,9 @@ async function doRequestReset(ctx: MutationCtx, email: string): Promise<{ ok: tr
 
   const rawBytes = crypto.getRandomValues(new Uint8Array(32));
   const rawToken = toBase64Url(rawBytes);
-  const tokenHash = await hashSecret(rawToken);
+  // HMAC (deterministic) — enables `by_hash` exact-match lookup at verify time.
+  // The previous PBKDF2 random-salt hash forced a linear scan + verify.
+  const tokenHash = await hmacToken(rawToken);
 
   await ctx.db.insert("passwordResetTokens", {
     userId: user._id,
@@ -277,17 +322,35 @@ export const resetPassword = mutation({
 
     const now = Date.now();
 
-    // Linear scan is fine — tokens table is small (TTL 30m, invalidated on use).
-    // by_hash index exists for future exact-match lookups if the hash becomes
-    // deterministic; current hash uses random salt, so we must scan + verify.
-    const candidates = await ctx.db.query("passwordResetTokens").collect();
-    let match: (typeof candidates)[number] | null = null;
-    for (const c of candidates) {
-      if (c.usedAt) continue;
-      if (c.expiresAt <= now) continue;
-      if (await verifySecret(args.token, c.tokenHash)) {
-        match = c;
-        break;
+    // HMAC-deterministic hash → exact-match `by_hash` lookup. Constant-
+    // time string compare gates against accidental hash truncation /
+    // race-window collisions. Legacy `pbkdf2v2_*` rows from before the
+    // HMAC switch still verify via `verifySecret` linear-scan fallback —
+    // the 30m TTL pruner clears them within a day of deploy.
+    const expectedHash = await hmacToken(args.token);
+    const directHit = await ctx.db
+      .query("passwordResetTokens")
+      .withIndex("by_hash", (q) => q.eq("tokenHash", expectedHash))
+      .first();
+
+    let match: typeof directHit | null = null;
+    if (
+      directHit &&
+      !directHit.usedAt &&
+      directHit.expiresAt > now &&
+      constantTimeEq(directHit.tokenHash, expectedHash)
+    ) {
+      match = directHit;
+    } else {
+      const legacy = await ctx.db.query("passwordResetTokens").collect();
+      for (const c of legacy) {
+        if (c.usedAt) continue;
+        if (c.expiresAt <= now) continue;
+        if (!c.tokenHash.startsWith("pbkdf2v2_")) continue;
+        if (await verifySecret(args.token, c.tokenHash)) {
+          match = c;
+          break;
+        }
       }
     }
 

@@ -39,6 +39,47 @@ export const observabilityTables = {
     .index("by_to_time", ["to", "createdAt"])
     .index("by_event", ["eventId"]),
 
+  // Denormalized counters for admin dashboard (DashboardPanel + ChartsPanel).
+  // Recomputed hourly by `internal.admin.aggregator.recomputeAdminStats`.
+  // Singleton row keyed by `"global"`. Reading the doc is O(1) so the
+  // dashboard tick never table-scans `users`, `cvs`, `jobApplications`,
+  // `rateLimitEvents`, or `errorLogs` again.
+  adminStats: defineTable({
+    key: v.literal("global"),
+    computedAt: v.number(),
+    totalUsers: v.number(),
+    activeUsers30d: v.number(),
+    totalCVs: v.number(),
+    totalApplications: v.number(),
+    aiTotalRequests: v.number(),
+    aiLastMonth: v.number(),
+    aiDaily30d: v.array(
+      v.object({
+        date: v.string(),
+        requests: v.number(),
+        errors: v.number(),
+      }),
+    ),
+    topAIUsers: v.array(
+      v.object({
+        userId: v.id("users"),
+        email: v.union(v.string(), v.null()),
+        name: v.union(v.string(), v.null()),
+        count: v.number(),
+      }),
+    ),
+    topErrorSources: v.array(
+      v.object({
+        value: v.string(),
+        count: v.number(),
+      }),
+    ),
+    aiTotalRequests30d: v.number(),
+    totalErrors30d: v.number(),
+    aiLast60s: v.number(),
+    aiLast24h: v.number(),
+  }).index("by_key", ["key"]),
+
   roleAuditLogs: defineTable({
     actorUserId: v.id("users"),
     targetUserId: v.id("users"),

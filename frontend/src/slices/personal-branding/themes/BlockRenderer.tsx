@@ -105,9 +105,21 @@ function HeadingBlock({ payload }: { payload: HeadingPayload }) {
   return <h2 className={className}>{payload.text}</h2>;
 }
 
-/** Lightweight markdown-ish renderer: bolds **a**, italics _b_, links
- *  [label](url). Server already strips control chars; we still escape
- *  HTML entities before swapping in tags. */
+/**
+ * Lightweight markdown-ish renderer: bolds **a**, italics _b_, links
+ * [label](url). Server already strips control chars; we still escape
+ * HTML entities before swapping in tags.
+ *
+ * Hardening:
+ *   - URL scheme allowlist (http/https only). `javascript:` /
+ *     `data:` / `vbscript:` cannot be smuggled even if the input
+ *     somehow bypasses the server validator.
+ *   - `data-pb-md` attribute on every emitted link so a CSP /
+ *     security audit can grep for renderer-origin anchors and
+ *     distinguish them from theme-author HTML.
+ */
+const SAFE_URL_RE = /^https?:\/\/[^\s)<>"']+$/i;
+
 function inlineMarkdown(text: string): { __html: string } {
   const escaped = text
     .replace(/&/g, "&amp;")
@@ -118,8 +130,11 @@ function inlineMarkdown(text: string): { __html: string } {
   let s = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   s = s.replace(/(?<!\w)_(.+?)_(?!\w)/g, "<em>$1</em>");
   s = s.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:text-brand">$1</a>',
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    (_full, label: string, url: string) => {
+      if (!SAFE_URL_RE.test(url)) return label;
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" data-pb-md="link" class="underline underline-offset-2 hover:text-brand">${label}</a>`;
+    },
   );
   s = s.replace(/\n/g, "<br />");
   return { __html: s };

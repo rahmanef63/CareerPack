@@ -1,27 +1,23 @@
 import { notFound } from "next/navigation";
-import { resolveDashboardView } from "@/shared/lib/dashboardRoutes";
+import {
+  DASHBOARD_VIEWS,
+  resolveDashboardView,
+} from "@/shared/lib/dashboardRoutes";
 import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
 
-// Prerender selayaknya static per slug — Next.js akan generate di build time.
+/**
+ * Static-prerender every registered dashboard slug at build time.
+ * Derived from `DASHBOARD_VIEWS` so adding a slice in dashboardRoutes.tsx
+ * automatically extends prerendering — no duplicate manual list to
+ * keep in sync.
+ *
+ * Excludes `admin-panel` from prerender (super-admin-only, no value
+ * caching the shell for a route most users never hit).
+ */
 export function generateStaticParams() {
-  // `{}` = /dashboard (slug kosong), lainnya jadi /dashboard/<slug>
-  return [
-    {},
-    { slug: ["cv"] },
-    { slug: ["calendar"] },
-    { slug: ["applications"] },
-    { slug: ["roadmap"] },
-    { slug: ["checklist"] },
-    { slug: ["interview"] },
-    { slug: ["calculator"] },
-    { slug: ["settings"] },
-    { slug: ["ai-settings"] },
-    { slug: ["matcher"] },
-    { slug: ["networking"] },
-    { slug: ["portfolio"] },
-    { slug: ["notifications"] },
-    { slug: ["help"] },
-  ];
+  return Object.keys(DASHBOARD_VIEWS)
+    .filter((slug) => slug !== "admin-panel")
+    .map((slug) => (slug === "" ? {} : { slug: [slug] }));
 }
 
 interface PageProps {

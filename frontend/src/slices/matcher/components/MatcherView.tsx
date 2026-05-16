@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "convex/react";
 import { Compass, Download, Plus, Sparkles, Trophy } from "lucide-react";
 
+import { api } from "../../../../../convex/_generated/api";
 import { Button } from "@/shared/components/ui/button";
 import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
@@ -40,6 +42,7 @@ export function MatcherView() {
     seedDemo,
   } = useMatcher();
   const [seeding, setSeeding] = useState(false);
+  const isAdmin = useQuery(api.admin.queries.amIAdmin, {});
   const [addOpen, setAddOpen] = useState(false);
   const [detail, setDetail] = useState<JobListing | null>(null);
   /** When user clicks "Cek ATS" on a JobCard, we jump to the ATS tab
@@ -85,17 +88,19 @@ export function MatcherView() {
                 <Plus className="h-4 w-4" />
                 <span>Tambah Lowongan</span>
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSeed}
-                disabled={seeding}
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>{seeding ? "Memuat…" : "Muat Contoh"}</span>
-              </Button>
+              {isAdmin && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSeed}
+                  disabled={seeding}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>{seeding ? "Memuat…" : "Muat Contoh"}</span>
+                </Button>
+              )}
             </div>
           ) : null
         }

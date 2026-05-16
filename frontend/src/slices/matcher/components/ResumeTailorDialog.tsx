@@ -30,7 +30,7 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 import { notify } from "@/shared/lib/notify";
 import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
-import { useTruthLedger } from "@/slices/cv-generator/hooks/useTruthLedger";
+import { useTruthLedger } from "@/shared/hooks/useTruthLedger";
 
 import type { JobListing } from "../types";
 
