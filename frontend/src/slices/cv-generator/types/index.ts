@@ -33,6 +33,9 @@ export interface CVDisplayPrefs {
     showAge: boolean;
     showGraduationYear: boolean;
     templateId: CVTemplateId;
+    /** Optional hex (#RRGGBB) override for the template's accent color.
+     *  When unset the template falls back to its built-in palette. */
+    accentColor?: string;
 }
 
 export interface Education {

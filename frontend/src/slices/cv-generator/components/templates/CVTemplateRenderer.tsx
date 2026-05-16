@@ -18,12 +18,13 @@ interface Props {
 export const CVTemplateRenderer = forwardRef<HTMLDivElement, Props>(
   function CVTemplateRenderer({ cv, photoUrl }, ref) {
     const templateId = cv.displayPrefs.templateId;
+    const accent = cv.displayPrefs.accentColor;
     return (
       <div ref={ref} style={{ display: "inline-block" }}>
-        {templateId === "modern" && <CVTemplateModern cv={cv} photoUrl={photoUrl} />}
-        {templateId === "minimal" && <CVTemplateMinimal cv={cv} />}
+        {templateId === "modern" && <CVTemplateModern cv={cv} photoUrl={photoUrl} accent={accent} />}
+        {templateId === "minimal" && <CVTemplateMinimal cv={cv} accent={accent} />}
         {templateId !== "modern" && templateId !== "minimal" && (
-          <CVTemplateClassic cv={cv} photoUrl={photoUrl} />
+          <CVTemplateClassic cv={cv} photoUrl={photoUrl} accent={accent} />
         )}
       </div>
     );

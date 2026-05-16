@@ -21,6 +21,8 @@ import type { CVData, CVTemplateId } from "../../types";
 import { TRANSLATE_LANGUAGES, type CVLangCode } from "../../hooks/useCVTranslate";
 import { ScaledCVPreview } from "../templates/ScaledCVPreview";
 import { TemplateThumb } from "./TemplatePicker";
+import { PreviewToolbar } from "./PreviewToolbar";
+import { usePreviewControls } from "../../hooks/usePreviewControls";
 
 interface Props {
   previewOpen: boolean;
@@ -53,11 +55,14 @@ export function CVPreviewDialog({
   onSwipeStart, onSwipeMove, onSwipeEnd, cycleTemplate, updatePref,
   onExportPDF, isExporting, translate, revertTranslation, activeLang, isTranslating,
 }: Props) {
+  // Full-screen reader by default — the page-break overlay + zoom only
+  // pay off when there's real screen real estate to work with.
+  const ctrl = usePreviewControls({ mode: "screen" });
   return (
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
       <DialogContent
         size="content"
-        className="max-h-[95dvh] overflow-y-auto"
+        className="h-[95dvh] max-h-[95dvh] w-[min(96vw,1100px)] max-w-[96vw] overflow-y-auto"
         drawerClassName="max-h-[95dvh]"
       >
         <DialogHeader>
@@ -122,6 +127,19 @@ export function CVPreviewDialog({
             template: tap an overlay arrow, swipe the preview, or tap a
             thumb below. ←/→ keys on desktop too. */}
         <div className="space-y-3">
+          <PreviewToolbar
+            zoomPct={ctrl.zoomPct}
+            isOverriding={ctrl.isOverriding}
+            onZoomIn={ctrl.zoomIn}
+            onZoomOut={ctrl.zoomOut}
+            onFitWidth={ctrl.fitWidth}
+            mode={ctrl.mode}
+            onModeChange={ctrl.setMode}
+            showPageBreaks={ctrl.showPageBreaks}
+            onTogglePageBreaks={() =>
+              ctrl.setShowPageBreaks(!ctrl.showPageBreaks)
+            }
+          />
           <div className="relative">
             <div
               onPointerDown={onSwipeStart}
@@ -139,7 +157,14 @@ export function CVPreviewDialog({
                 touchAction: 'pan-y',
               }}
             >
-              <ScaledCVPreview ref={cvPreviewRef} cv={renderCV} photoUrl={photoUrl} />
+              <ScaledCVPreview
+                ref={cvPreviewRef}
+                cv={renderCV}
+                photoUrl={photoUrl}
+                zoom={ctrl.zoom}
+                mode={ctrl.mode}
+                showPageBreaks={ctrl.showPageBreaks}
+              />
             </div>
             <button
               type="button"

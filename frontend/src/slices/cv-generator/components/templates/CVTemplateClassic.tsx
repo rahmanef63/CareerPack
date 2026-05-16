@@ -6,16 +6,20 @@ import { calcAge, formatMonthYear, tidyUrl, yearOnly } from "../../utils/format"
 interface Props {
   cv: CVData;
   photoUrl: string;
+  accent?: string;
 }
+
+const DEFAULT_ACCENT = "#0d4f3c";
 
 /**
  * Klasik Eksekutif — sidebar foto + serif headline + accent rule.
  * Indonesian convention: photo, age, full date range. Rendered light-
  * mode only; theme-agnostic so the PDF is identical for every user.
  */
-export function CVTemplateClassic({ cv, photoUrl }: Props) {
+export function CVTemplateClassic({ cv, photoUrl, accent }: Props) {
   const { profile, displayPrefs } = cv;
   const age = displayPrefs.showAge ? calcAge(profile.dateOfBirth) : null;
+  const ACCENT = accent || DEFAULT_ACCENT;
 
   return (
     <div
@@ -30,7 +34,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
     >
       <header
         className="flex items-start gap-6 border-b-2 pb-5"
-        style={{ borderColor: "#0d4f3c" }}
+        style={{ borderColor: ACCENT }}
       >
         {displayPrefs.showPicture && photoUrl && (
           <Image
@@ -50,7 +54,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
               fontSize: "26pt",
               lineHeight: 1.05,
               letterSpacing: "-0.01em",
-              color: "#0d4f3c",
+              color: ACCENT,
               fontWeight: 600,
             }}
           >
@@ -106,13 +110,13 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
       </header>
 
       {profile.summary && (
-        <Section title="Ringkasan Profesional">
+        <Section title="Ringkasan Profesional" accent={ACCENT}>
           <p style={{ textAlign: "justify" }}>{profile.summary}</p>
         </Section>
       )}
 
       {cv.experience.length > 0 && (
-        <Section title="Pengalaman Kerja">
+        <Section title="Pengalaman Kerja" accent={ACCENT}>
           {cv.experience.map((exp) => (
             <div key={exp.id} style={{ marginBottom: "4mm" }}>
               <div className="flex items-baseline justify-between gap-3">
@@ -145,7 +149,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
       )}
 
       {cv.education.length > 0 && (
-        <Section title="Pendidikan">
+        <Section title="Pendidikan" accent={ACCENT}>
           {cv.education.map((edu) => {
             const range = displayPrefs.showGraduationYear
               ? `${yearOnly(edu.startDate)} – ${yearOnly(edu.endDate) || "Sekarang"}`
@@ -174,7 +178,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
       )}
 
       {cv.skills.length > 0 && (
-        <Section title="Keterampilan">
+        <Section title="Keterampilan" accent={ACCENT}>
           <div className="flex flex-wrap" style={{ gap: "1.5mm" }}>
             {cv.skills.map((s) => (
               <span
@@ -195,7 +199,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
       )}
 
       {cv.certifications.length > 0 && (
-        <Section title="Sertifikasi">
+        <Section title="Sertifikasi" accent={ACCENT}>
           {cv.certifications.map((cert) => (
             <div key={cert.id} className="flex justify-between" style={{ marginBottom: "1.5mm" }}>
               <span>
@@ -211,7 +215,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
       )}
 
       {cv.projects.length > 0 && (
-        <Section title="Proyek">
+        <Section title="Proyek" accent={ACCENT}>
           {cv.projects.map((proj) => (
             <div key={proj.id} style={{ marginBottom: "3mm" }}>
               <h3 style={{ fontWeight: 600, fontSize: "10.5pt" }}>{proj.name}</h3>
@@ -219,7 +223,7 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
                 <p style={{ marginTop: "0.5mm", textAlign: "justify" }}>{proj.description}</p>
               )}
               {proj.link && (
-                <p style={{ marginTop: "0.5mm", color: "#0d4f3c", fontSize: "9pt" }}>
+                <p style={{ marginTop: "0.5mm", color: ACCENT, fontSize: "9pt" }}>
                   {tidyUrl(proj.link)}
                 </p>
               )}
@@ -231,7 +235,15 @@ export function CVTemplateClassic({ cv, photoUrl }: Props) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  accent,
+  children,
+}: {
+  title: string;
+  accent: string;
+  children: React.ReactNode;
+}) {
   return (
     <section style={{ marginTop: "6mm" }}>
       <h2
@@ -240,7 +252,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.08em",
-          color: "#0d4f3c",
+          color: accent,
           borderBottom: "1px solid #d4d4d4",
           paddingBottom: "1mm",
           marginBottom: "2.5mm",

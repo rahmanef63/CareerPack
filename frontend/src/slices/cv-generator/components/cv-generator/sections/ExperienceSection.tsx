@@ -7,6 +7,7 @@ import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { SwipeToDelete } from "@/shared/components/interactions/MicroInteractions";
 import { InlineAISuggestChip } from "../../InlineAISuggestChip";
+import { CharCounter } from "../../CharCounter";
 import { SectionCard } from "../SectionCard";
 import type { CVData, Experience } from "../../../types";
 
@@ -91,7 +92,10 @@ export function ExperienceSection({
                     onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
-                  <Label>Deskripsi</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label>Deskripsi</Label>
+                    <CharCounter value={exp.description} recommendedMax={500} />
+                  </div>
                   <Textarea
                     placeholder="Jelaskan tanggung jawab dan pencapaian Anda..."
                     value={exp.description}

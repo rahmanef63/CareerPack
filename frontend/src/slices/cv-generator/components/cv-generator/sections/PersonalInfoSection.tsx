@@ -7,6 +7,7 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 import { PhotoPicker } from "@/shared/components/files/PhotoPicker";
 import { InlineAISuggestChip } from "../../InlineAISuggestChip";
+import { CharCounter } from "../../CharCounter";
 import { SectionCard } from "../SectionCard";
 import type { CVData } from "../../../types";
 import type { CVFormat } from "../../../constants";
@@ -99,9 +100,12 @@ export function PersonalInfoSection({
             </p>
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <Label htmlFor="profile-summary">Ringkasan Profesional</Label>
-              <InlineAISuggestChip label="Saran AI" onClick={aiSuggestSummary} />
+              <div className="flex items-center gap-2">
+                <CharCounter value={cvData.profile.summary} recommendedMax={400} />
+                <InlineAISuggestChip label="Saran AI" onClick={aiSuggestSummary} />
+              </div>
             </div>
             <Textarea
               id="profile-summary"
@@ -110,6 +114,9 @@ export function PersonalInfoSection({
               onChange={(e) => updateProfile('summary', e.target.value)}
               className="min-h-[100px]"
             />
+            <p className="text-[10px] text-muted-foreground">
+              Target ideal: 200–400 karakter. Singkat tapi padat — rekruter scan 6 detik pertama.
+            </p>
           </div>
         </div>
       </>

@@ -3,17 +3,21 @@ import { calcAge, formatMonthYear, tidyUrl, yearOnly } from "../../utils/format"
 
 interface Props {
   cv: CVData;
+  /** Accent kept ATS-light: only used for the underline below section
+   *  headings. The body stays pure black to maximise scraper accuracy. */
+  accent?: string;
 }
 
 /**
- * Minimal ATS — single column, pure black on white, no photo / accent.
- * Optimized for ATS scrapers: real headings, plain bullets, semantic
- * order (header → summary → experience → education → skills → other).
+ * Minimal ATS — single column, pure black on white, no photo. ATS
+ * scrapers stay happy: real headings, plain bullets, semantic order
+ * (header → summary → experience → education → skills → other).
  * Default for international applications.
  */
-export function CVTemplateMinimal({ cv }: Props) {
+export function CVTemplateMinimal({ cv, accent }: Props) {
   const { profile, displayPrefs } = cv;
   const age = displayPrefs.showAge ? calcAge(profile.dateOfBirth) : null;
+  const ACCENT = accent || "#000000";
 
   return (
     <div
@@ -35,7 +39,7 @@ export function CVTemplateMinimal({ cv }: Props) {
             textTransform: "uppercase",
           }}
         >
-          {profile.name || "Your Name"}
+          {profile.name || "Nama Lengkap"}
         </h1>
         <p
           style={{
@@ -58,13 +62,13 @@ export function CVTemplateMinimal({ cv }: Props) {
       </header>
 
       {profile.summary && (
-        <Section title="Summary">
+        <Section title="Summary" accent={ACCENT}>
           <p style={{ textAlign: "justify" }}>{profile.summary}</p>
         </Section>
       )}
 
       {cv.experience.length > 0 && (
-        <Section title="Experience">
+        <Section title="Experience" accent={ACCENT}>
           {cv.experience.map((exp) => (
             <article key={exp.id} style={{ marginBottom: "3.5mm" }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: "3mm" }}>
@@ -92,7 +96,7 @@ export function CVTemplateMinimal({ cv }: Props) {
       )}
 
       {cv.education.length > 0 && (
-        <Section title="Education">
+        <Section title="Education" accent={ACCENT}>
           {cv.education.map((edu) => {
             const range = displayPrefs.showGraduationYear
               ? `${yearOnly(edu.startDate)} – ${yearOnly(edu.endDate) || "Present"}`
@@ -117,13 +121,13 @@ export function CVTemplateMinimal({ cv }: Props) {
       )}
 
       {cv.skills.length > 0 && (
-        <Section title="Skills">
+        <Section title="Skills" accent={ACCENT}>
           <p>{cv.skills.map((s) => s.name).join(" · ")}</p>
         </Section>
       )}
 
       {cv.certifications.length > 0 && (
-        <Section title="Certifications">
+        <Section title="Certifications" accent={ACCENT}>
           <ul style={{ paddingLeft: "5mm", listStyle: "disc" }}>
             {cv.certifications.map((c) => (
               <li key={c.id}>
@@ -137,7 +141,7 @@ export function CVTemplateMinimal({ cv }: Props) {
       )}
 
       {cv.projects.length > 0 && (
-        <Section title="Projects">
+        <Section title="Projects" accent={ACCENT}>
           {cv.projects.map((proj) => (
             <div key={proj.id} style={{ marginBottom: "2.5mm" }}>
               <strong>{proj.name}</strong>
@@ -158,7 +162,15 @@ export function CVTemplateMinimal({ cv }: Props) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  accent,
+  children,
+}: {
+  title: string;
+  accent: string;
+  children: React.ReactNode;
+}) {
   return (
     <section style={{ marginTop: "4mm" }}>
       <h2
@@ -167,7 +179,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.1em",
-          borderBottom: "1px solid black",
+          borderBottom: `1px solid ${accent}`,
           paddingBottom: "0.8mm",
           marginBottom: "2mm",
         }}

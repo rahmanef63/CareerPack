@@ -9,6 +9,7 @@ import { api } from '../../../../../convex/_generated/api';
 import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { useCV } from '../hooks/useCV';
+import { useAutosave } from '../hooks/useAutosave';
 import { CV_TEMPLATES, initialCVData, type CVFormat } from '../constants';
 import { MagneticTabs, useDragReorder } from '@/shared/components/interactions/MicroInteractions';
 import { DocChecklistInline } from './DocChecklistInline';
@@ -142,23 +143,54 @@ export function CVGenerator() {
   const expDrag = useDragReorder<Experience>(cvData.experience, setExperienceList);
   const skillDrag = useDragReorder<Skill>(cvData.skills, setSkillsList);
 
+  // Autosave: debounced save 2.5s after the last edit. Status feeds
+  // the "Tersimpan otomatis" badge in the sidebar. Disabled while the
+  // initial CV is hydrating so we don't fire a no-op round-trip on
+  // mount.
+  const autosaveSave = useCallback(async (next: CVData) => {
+    await saveCV(next);
+  }, [saveCV]);
+  const autosave = useAutosave(cvData, autosaveSave, {
+    disabled: isCVLoading || hydratedFromId === null,
+    debounceMs: 2500,
+  });
+
   // Hydrate form from the active Convex CV. Watching the CV's id (not
   // a one-shot boolean) means a freshly-imported QuickFill CV becomes
   // active — useCV picks the newest — and the form swaps over without
   // a page reload. Demo mode has no activeCVId, so we use the literal
   // "demo" sentinel so demo data still loads once.
+  const resetBaseline = autosave.resetBaseline;
   useEffect(() => {
     if (!remoteCVData) return;
     const idStr = activeCVId ? String(activeCVId) : "demo";
     if (hydratedFromId === idStr) return;
     setCvData(remoteCVData);
     setHydratedFromId(idStr);
-  }, [remoteCVData, activeCVId, hydratedFromId]);
+    resetBaseline(remoteCVData);
+  }, [remoteCVData, activeCVId, hydratedFromId, resetBaseline]);
+
+  // beforeunload guard: warn the user if they close the tab with
+  // unsaved edits AND the autosave failed (otherwise autosave handles
+  // it). The browser shows a generic "Leave site?" prompt — text is
+  // ignored by modern Chrome/Firefox but a non-empty returnValue is
+  // required to trigger the dialog.
+  useEffect(() => {
+    if (!autosave.dirty) return;
+    if (autosave.status !== "error" && autosave.status !== "dirty") return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [autosave.dirty, autosave.status]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await saveCV(cvData);
+      autosave.resetBaseline(cvData);
       notify.success("CV tersimpan");
     } catch (err) {
       notify.fromError(err, "Gagal menyimpan CV");
@@ -346,6 +378,9 @@ export function CVGenerator() {
               onPreviewOpen={() => setPreviewOpen(true)}
               onSave={handleSave}
               onExportClick={handleExportClick}
+              autosaveStatus={autosave.status}
+              autosaveLastAt={autosave.lastSavedAt}
+              dirty={autosave.dirty}
             />
           </>
         )}

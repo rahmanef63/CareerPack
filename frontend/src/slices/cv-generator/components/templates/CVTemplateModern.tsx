@@ -5,19 +5,34 @@ import { calcAge, formatMonthYear, tidyUrl, yearOnly } from "../../utils/format"
 interface Props {
   cv: CVData;
   photoUrl: string;
+  accent?: string;
 }
 
-const ACCENT = "#1d4ed8";
-const ACCENT_SOFT = "#eff6ff";
+const DEFAULT_ACCENT = "#1d4ed8";
+
+/** Lighten a hex color toward white for the soft pill background. */
+function softTint(hex: string): string {
+  const m = /^#?([\da-f]{6})$/i.exec(hex);
+  if (!m) return "#eff6ff";
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  // 88% toward white — same vibe as Tailwind's `-50` shade.
+  const lift = (c: number) => Math.round(c + (255 - c) * 0.88);
+  return `rgb(${lift(r)}, ${lift(g)}, ${lift(b)})`;
+}
 
 /**
  * Modern Akzent — full-width brand band header, two-column body with
  * sidebar for skills/contact. Geometric sans across the board, subtle
  * accent strip on each section heading.
  */
-export function CVTemplateModern({ cv, photoUrl }: Props) {
+export function CVTemplateModern({ cv, photoUrl, accent }: Props) {
   const { profile, displayPrefs } = cv;
   const age = displayPrefs.showAge ? calcAge(profile.dateOfBirth) : null;
+  const ACCENT = accent || DEFAULT_ACCENT;
+  const ACCENT_SOFT = softTint(ACCENT);
 
   return (
     <div
@@ -83,7 +98,7 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
         }}
       >
         <aside>
-          <SidebarBlock title="Kontak">
+          <SidebarBlock title="Kontak" accent={ACCENT} accentSoft={ACCENT_SOFT}>
             <div style={{ display: "grid", gap: "1.5mm", fontSize: "8.5pt", color: "#404040" }}>
               {profile.email && <span>{profile.email}</span>}
               {profile.phone && <span>{profile.phone}</span>}
@@ -95,7 +110,7 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
           </SidebarBlock>
 
           {cv.skills.length > 0 && (
-            <SidebarBlock title="Keterampilan">
+            <SidebarBlock title="Keterampilan" accent={ACCENT} accentSoft={ACCENT_SOFT}>
               <ul style={{ display: "grid", gap: "1.2mm", fontSize: "9pt" }}>
                 {cv.skills.map((s) => (
                   <li key={s.id} style={{ display: "flex", alignItems: "center", gap: "2mm" }}>
@@ -115,7 +130,7 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
           )}
 
           {cv.certifications.length > 0 && (
-            <SidebarBlock title="Sertifikasi">
+            <SidebarBlock title="Sertifikasi" accent={ACCENT} accentSoft={ACCENT_SOFT}>
               <ul style={{ display: "grid", gap: "2mm", fontSize: "8.5pt" }}>
                 {cv.certifications.map((c) => (
                   <li key={c.id}>
@@ -133,13 +148,13 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
 
         <main style={{ minWidth: 0 }}>
           {profile.summary && (
-            <MainBlock title="Profil">
+            <MainBlock title="Profil" accent={ACCENT}>
               <p style={{ textAlign: "justify" }}>{profile.summary}</p>
             </MainBlock>
           )}
 
           {cv.experience.length > 0 && (
-            <MainBlock title="Pengalaman">
+            <MainBlock title="Pengalaman" accent={ACCENT}>
               <div style={{ display: "grid", gap: "4mm" }}>
                 {cv.experience.map((exp) => (
                   <div key={exp.id} style={{ position: "relative", paddingLeft: "4mm" }}>
@@ -173,7 +188,7 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
           )}
 
           {cv.education.length > 0 && (
-            <MainBlock title="Pendidikan">
+            <MainBlock title="Pendidikan" accent={ACCENT}>
               <div style={{ display: "grid", gap: "3mm" }}>
                 {cv.education.map((edu) => {
                   const range = displayPrefs.showGraduationYear
@@ -198,7 +213,7 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
           )}
 
           {cv.projects.length > 0 && (
-            <MainBlock title="Proyek">
+            <MainBlock title="Proyek" accent={ACCENT}>
               <div style={{ display: "grid", gap: "3mm" }}>
                 {cv.projects.map((proj) => (
                   <div key={proj.id}>
@@ -222,7 +237,17 @@ export function CVTemplateModern({ cv, photoUrl }: Props) {
   );
 }
 
-function SidebarBlock({ title, children }: { title: string; children: React.ReactNode }) {
+function SidebarBlock({
+  title,
+  accent,
+  accentSoft,
+  children,
+}: {
+  title: string;
+  accent: string;
+  accentSoft: string;
+  children: React.ReactNode;
+}) {
   return (
     <section style={{ marginBottom: "5mm" }}>
       <h2
@@ -231,8 +256,8 @@ function SidebarBlock({ title, children }: { title: string; children: React.Reac
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.12em",
-          color: ACCENT,
-          background: ACCENT_SOFT,
+          color: accent,
+          background: accentSoft,
           padding: "1mm 2mm",
           marginBottom: "2mm",
           borderRadius: "1mm",
@@ -245,7 +270,15 @@ function SidebarBlock({ title, children }: { title: string; children: React.Reac
   );
 }
 
-function MainBlock({ title, children }: { title: string; children: React.ReactNode }) {
+function MainBlock({
+  title,
+  accent,
+  children,
+}: {
+  title: string;
+  accent: string;
+  children: React.ReactNode;
+}) {
   return (
     <section style={{ marginBottom: "5mm" }}>
       <h2
@@ -256,7 +289,7 @@ function MainBlock({ title, children }: { title: string; children: React.ReactNo
           color: "#171717",
           marginBottom: "2.5mm",
           paddingBottom: "1mm",
-          borderBottom: `2px solid ${ACCENT}`,
+          borderBottom: `2px solid ${accent}`,
           display: "inline-block",
         }}
       >
