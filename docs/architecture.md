@@ -77,7 +77,7 @@ Semua via catch-all: `app/(dashboard)/dashboard/[[...slug]]/page.tsx`.
 | `ai-settings` | `ai-settings` → `AISettingsPanel` |
 | `matcher` / `networking` / `portfolio` / `notifications` / `help` | `DashboardPlaceholders` (coming-soon) |
 
-Registry: `frontend/src/shared/lib/dashboardRoutes.tsx`. Tambah feature baru = daftar satu baris di `DASHBOARD_VIEWS` + item di `navConfig.ts`.
+Registry: `frontend/shared/lib/dashboardRoutes.tsx`. Tambah feature baru = daftar satu baris di `DASHBOARD_VIEWS` + item di `navConfig.ts`.
 
 ### Role-guarded
 
@@ -87,7 +87,7 @@ Registry: `frontend/src/shared/lib/dashboardRoutes.tsx`. Tambah feature baru = d
 
 ## 3. Navigation SSOT
 
-File: `frontend/src/shared/components/navConfig.ts`.
+File: `frontend/shared/components/navConfig.ts`.
 
 - `PRIMARY_NAV` — 3 tab utama di BottomNav mobile (home, cv, calendar) + sidebar desktop
 - `MORE_APPS` — 11 tile di "Lainnya" (MoreDrawer mobile / sidebar desktop)
@@ -98,7 +98,7 @@ File: `frontend/src/shared/components/navConfig.ts`.
 
 ## 4. Slice Pattern
 
-Setiap slice self-contained di `src/slices/<kebab-name>/`:
+Setiap slice self-contained di `slices/<kebab-name>/`:
 
 ```
 <slice>/
@@ -125,7 +125,7 @@ Semua sub-folder opsional — buat hanya kalau ada isi. Jangan biarkan stub koso
 ```
 ThemeProvider (next-themes, class strategy)
 └─ ConvexClientProvider (@convex-dev/auth/react ConvexAuthNextjsProvider)
-   └─ AuthProvider (src/shared/hooks/useAuth)
+   └─ AuthProvider (shared/hooks/useAuth)
       └─ AIConfigProvider (temperature/model/maxTokens pref, localStorage)
          └─ UIPrefsProvider (font scale, density, prefer-reduced-motion)
             └─ {children}
@@ -135,7 +135,7 @@ ThemeProvider (next-themes, class strategy)
 
 ## 6. Responsive Container
 
-`frontend/src/shared/containers/ResponsiveContainer.tsx` pilih:
+`frontend/shared/containers/ResponsiveContainer.tsx` pilih:
 - `< lg` → `MobileContainer` (BottomNav 5-slot + AI FAB + MoreDrawer)
 - `≥ lg` → `DesktopContainer` (AppSidebar + SiteHeader)
 
@@ -147,7 +147,7 @@ Side-panel global: `<AIAgentConsole>` (slice `ai-agent`). Slash commands terdaft
 
 ## 8. Env Flow
 
-- `NEXT_PUBLIC_CONVEX_URL` — dibaca di `src/shared/lib/env.ts` (lazy getter + URL-validation)
+- `NEXT_PUBLIC_CONVEX_URL` — dibaca di `shared/lib/env.ts` (lazy getter + URL-validation)
 - Convex env (API key OpenAI, JWT, site url) — set di Convex dashboard / self-hosted `.env`
 
 Lihat [development.md](./development.md) untuk full env matrix.

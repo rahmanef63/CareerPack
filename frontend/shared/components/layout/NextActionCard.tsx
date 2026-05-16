@@ -12,7 +12,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { useApplications } from "@/shared/hooks/useApplications";
 import { nextBestAction } from "@/shared/lib/nextBestAction";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { QuickActionsCard } from "./QuickActionsCard";
 
 /**

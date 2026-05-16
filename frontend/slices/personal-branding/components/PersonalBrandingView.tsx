@@ -14,7 +14,7 @@ import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-hea
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoProfileOverlay } from "@/shared/hooks/useDemoOverlay";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 
 import { usePBForm } from "../form/usePBForm";
 import { usePreviewBranding } from "../form/usePreviewBranding";

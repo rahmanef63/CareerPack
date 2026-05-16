@@ -244,22 +244,22 @@ sebelum hydrate. Trade-off: registry harus inlined atau di-fetch sync —
 
 ```
 # Provider + lib (state + apply pipeline)
-frontend/src/shared/providers/ThemePresetProvider.tsx
-frontend/src/shared/lib/themePresets.ts
-frontend/src/shared/lib/presetGroups.ts
-frontend/src/shared/lib/registryFonts.ts        # font alias map (untuk variants registry)
+frontend/shared/providers/ThemePresetProvider.tsx
+frontend/shared/lib/themePresets.ts
+frontend/shared/lib/presetGroups.ts
+frontend/shared/lib/registryFonts.ts        # font alias map (untuk variants registry)
 
 # next-themes wrapper (1-line passthrough)
-frontend/src/shared/components/theme/theme-provider.tsx
+frontend/shared/components/theme/theme-provider.tsx
 
 # Switcher UI (Popover dengan tabs mode + list preset)
-frontend/src/shared/components/theme/ThemePresetSwitcher.tsx
+frontend/shared/components/theme/ThemePresetSwitcher.tsx
 
 # PWA chrome sync
-frontend/src/shared/components/pwa/ThemeColorSync.tsx
+frontend/shared/components/pwa/ThemeColorSync.tsx
 
 # CSS dasar — :root + .dark + html.theme-transition rule
-frontend/src/shared/styles/index.css
+frontend/shared/styles/index.css
 
 # Tailwind token wiring
 frontend/tailwind.config.ts                      # patch, JANGAN replace
@@ -275,21 +275,21 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Provider + lib
-mkdir -p "$DST/frontend/src/shared/providers"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/components/theme"
-mkdir -p "$DST/frontend/src/shared/components/pwa"
-mkdir -p "$DST/frontend/src/shared/styles"
+mkdir -p "$DST/frontend/shared/providers"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/components/theme"
+mkdir -p "$DST/frontend/shared/components/pwa"
+mkdir -p "$DST/frontend/shared/styles"
 mkdir -p "$DST/frontend/public/r"
 
-cp "$SRC/frontend/src/shared/providers/ThemePresetProvider.tsx"        "$DST/frontend/src/shared/providers/"
-cp "$SRC/frontend/src/shared/lib/themePresets.ts"                       "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/presetGroups.ts"                       "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/registryFonts.ts"                      "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/components/theme/theme-provider.tsx"       "$DST/frontend/src/shared/components/theme/"
-cp "$SRC/frontend/src/shared/components/theme/ThemePresetSwitcher.tsx"  "$DST/frontend/src/shared/components/theme/"
-cp "$SRC/frontend/src/shared/components/pwa/ThemeColorSync.tsx"         "$DST/frontend/src/shared/components/pwa/"
-cp "$SRC/frontend/src/shared/styles/index.css"                          "$DST/frontend/src/shared/styles/"
+cp "$SRC/frontend/shared/providers/ThemePresetProvider.tsx"        "$DST/frontend/shared/providers/"
+cp "$SRC/frontend/shared/lib/themePresets.ts"                       "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/presetGroups.ts"                       "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/registryFonts.ts"                      "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/components/theme/theme-provider.tsx"       "$DST/frontend/shared/components/theme/"
+cp "$SRC/frontend/shared/components/theme/ThemePresetSwitcher.tsx"  "$DST/frontend/shared/components/theme/"
+cp "$SRC/frontend/shared/components/pwa/ThemeColorSync.tsx"         "$DST/frontend/shared/components/pwa/"
+cp "$SRC/frontend/shared/styles/index.css"                          "$DST/frontend/shared/styles/"
 cp "$SRC/frontend/public/r/registry.json"                               "$DST/frontend/public/r/"
 ```
 

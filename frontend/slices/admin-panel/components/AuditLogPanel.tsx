@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { History } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { formatDateTime } from "@/shared/lib/formatDate";

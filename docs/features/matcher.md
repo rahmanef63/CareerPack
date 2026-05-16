@@ -13,7 +13,7 @@ End-to-end job-search workflow:
 ## Route & Entry
 
 - URL: `/dashboard/matcher`
-- Slice: `frontend/src/slices/matcher/`
+- Slice: `frontend/slices/matcher/`
 - Komponen utama: `MatcherView.tsx` (tab shell), `JobBrowser.tsx`, `ATSScannerForm.tsx`
 
 ## Struktur Slice
@@ -158,16 +158,16 @@ atsScans: defineTable({
 
 ```
 # Slice
-frontend/src/slices/matcher/
+frontend/slices/matcher/
 
 # Shared deps
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-carousel.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/utils.ts
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-carousel.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts
 
 # Backend
 convex/matcher/                                        # full domain
@@ -185,20 +185,20 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/matcher" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/matcher" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/lib"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/lib"
 
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"      "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                            "$DST/frontend/src/shared/lib/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-select.tsx"      "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx"      "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/lib/notify.ts"                            "$DST/frontend/shared/lib/"
 
 # Backend
 cp -r "$SRC/convex/matcher"  "$DST/convex/"

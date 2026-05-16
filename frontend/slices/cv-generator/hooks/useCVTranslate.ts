@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useAction } from "convex/react";
 import { notify } from "@/shared/lib/notify";
 import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import type { CVData } from "../types";
 
 export const TRANSLATE_LANGUAGES: Array<{

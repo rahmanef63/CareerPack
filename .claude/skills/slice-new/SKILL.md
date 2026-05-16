@@ -5,7 +5,7 @@ description: Scaffold a new feature slice in CareerPack and wire it into the two
 
 # /slice-new — scaffold a CareerPack slice
 
-CareerPack is slice-based. A slice is self-contained under `frontend/src/slices/<kebab-name>/` and plugs into the dashboard via two SSOT files. Missing either edit = broken route or dead nav item.
+CareerPack is slice-based. A slice is self-contained under `frontend/slices/<kebab-name>/` and plugs into the dashboard via two SSOT files. Missing either edit = broken route or dead nav item.
 
 ## Inputs required
 
@@ -20,15 +20,15 @@ Do not proceed without all five.
 
 ## Steps
 
-1. **Create slice folder:** `frontend/src/slices/<slug>/`
+1. **Create slice folder:** `frontend/slices/<slug>/`
    - `index.ts` — `export { <Component> } from "./components/<Component>"`
    - `components/<Component>.tsx` — minimal `"use client"` component rendering a placeholder Card with heading + "Coming soon" message. Use shadcn `Card` + `CardHeader` + `CardTitle` + `CardContent`. Header text matches the label.
 
-2. **Register view** in `frontend/src/shared/lib/dashboardRoutes.tsx`:
+2. **Register view** in `frontend/shared/lib/dashboardRoutes.tsx`:
    - Add a `const <SLUG_UPPER>: View = dynamic(() => import("@/slices/<slug>").then(m => m.<Component>), { loading: loadingFallback });`
    - Add `<slug>: <SLUG_UPPER>,` to `DASHBOARD_VIEWS`.
 
-3. **Register nav item** in `frontend/src/shared/components/layout/navConfig.ts`:
+3. **Register nav item** in `frontend/shared/components/layout/navConfig.ts`:
    - Append to the chosen bucket array. Match existing object shape exactly — `{ key, label, href: "/dashboard/<slug>", icon }`.
    - Import the lucide icon at the top if not already imported.
 

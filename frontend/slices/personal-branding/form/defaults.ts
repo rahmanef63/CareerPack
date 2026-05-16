@@ -5,7 +5,7 @@
  * for an example pattern.
  */
 
-import { DEFAULT_AUTO_TOGGLES } from "../../../../../convex/profile/autoBlocks";
+import { DEFAULT_AUTO_TOGGLES } from "../../../../convex/profile/autoBlocks";
 import type { FormState } from "./types";
 
 export const DEFAULT_FORM_STATE: FormState = {

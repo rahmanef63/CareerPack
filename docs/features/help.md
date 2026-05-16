@@ -12,7 +12,7 @@ informasi statis + 1 form mutation.
 ## Route & Entry
 
 - URL: `/dashboard/help`
-- Slice: `frontend/src/slices/help/`
+- Slice: `frontend/slices/help/`
 - Komponen utama: `HelpView.tsx`
 
 ## Struktur Slice
@@ -78,7 +78,7 @@ Halaman tidak fetch query apapun — semua konten hardcoded di
 
 ```
 # Slice
-frontend/src/slices/help/
+frontend/slices/help/
 
 # Backend (kalau belum)
 convex/feedback/
@@ -90,8 +90,8 @@ convex/feedback/
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/slices" "$DST/convex/feedback"
-cp -r "$SRC/frontend/src/slices/help"        "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices" "$DST/convex/feedback"
+cp -r "$SRC/frontend/slices/help"        "$DST/frontend/slices/"
 cp -r "$SRC/convex/feedback/."               "$DST/convex/feedback/"
 ```
 

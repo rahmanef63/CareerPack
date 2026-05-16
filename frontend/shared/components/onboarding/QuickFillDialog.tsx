@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "convex/react";
 import { AlertCircle, Sparkles } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { notify } from "@/shared/lib/notify";
 
 import {
@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui
 import type {
   QuickFillScope,
   QuickFillResult,
-} from "../../../../../convex/onboarding/types";
+} from "../../../../convex/onboarding/types";
 import { buildPrompt } from "./lib/promptBuilder";
 import { parseQuickFillJSON } from "./lib/parser";
 import { buildPreview } from "./lib/preview";

@@ -15,7 +15,7 @@ dll).
 ## Route & Entry
 
 - URL: `/dashboard/applications`
-- Slice: `frontend/src/slices/career-dashboard/`
+- Slice: `frontend/slices/career-dashboard/`
 - Komponen utama: `CareerDashboard.tsx`
 - Lazy-loaded via `manifest.route.component`.
 
@@ -123,22 +123,22 @@ Schema highlights:
 
 ```
 # Slice itself
-frontend/src/slices/career-dashboard/
+frontend/slices/career-dashboard/
 
 # Shared deps
-frontend/src/shared/hooks/useApplications.ts
-frontend/src/shared/components/data-table/             # generic DataTable
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/components/onboarding/             # QuickFillButton (if used)
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-alert-dialog.tsx
-frontend/src/shared/components/ui/responsive-dropdown-menu.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/lib/formatDate.ts
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/aiActionBus.ts                 # if not yet present
-frontend/src/shared/types/sliceManifest.ts             # if not yet present
+frontend/shared/hooks/useApplications.ts
+frontend/shared/components/data-table/             # generic DataTable
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/components/onboarding/             # QuickFillButton (if used)
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/components/ui/responsive-dropdown-menu.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/lib/formatDate.ts
+frontend/shared/lib/notify.ts
+frontend/shared/lib/aiActionBus.ts                 # if not yet present
+frontend/shared/types/sliceManifest.ts             # if not yet present
 
 # Backend
 convex/applications/                                   # queries.ts, mutations.ts, schema.ts
@@ -151,31 +151,31 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/career-dashboard" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/career-dashboard" "$DST/frontend/slices/"
 
 # Shared helpers
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/types"
-mkdir -p "$DST/frontend/src/shared/components/data-table"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/components/onboarding"
-mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/types"
+mkdir -p "$DST/frontend/shared/components/data-table"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/components/onboarding"
+mkdir -p "$DST/frontend/shared/components/ui"
 
-cp "$SRC/frontend/src/shared/hooks/useApplications.ts"        "$DST/frontend/src/shared/hooks/"
-cp -r "$SRC/frontend/src/shared/components/data-table/"       "$DST/frontend/src/shared/components/"
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx" "$DST/frontend/src/shared/components/layout/"
-cp -r "$SRC/frontend/src/shared/components/onboarding/"       "$DST/frontend/src/shared/components/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx"     "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"          "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-alert-dialog.tsx"    "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dropdown-menu.tsx"   "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"          "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/lib/formatDate.ts"               "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                   "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/aiActionBus.ts"              "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/types/sliceManifest.ts"          "$DST/frontend/src/shared/types/"
+cp "$SRC/frontend/shared/hooks/useApplications.ts"        "$DST/frontend/shared/hooks/"
+cp -r "$SRC/frontend/shared/components/data-table/"       "$DST/frontend/shared/components/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx" "$DST/frontend/shared/components/layout/"
+cp -r "$SRC/frontend/shared/components/onboarding/"       "$DST/frontend/shared/components/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx"     "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"          "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-alert-dialog.tsx"    "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dropdown-menu.tsx"   "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-select.tsx"          "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/lib/formatDate.ts"               "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/notify.ts"                   "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/aiActionBus.ts"              "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/types/sliceManifest.ts"          "$DST/frontend/shared/types/"
 
 # Backend
 cp -r "$SRC/convex/applications" "$DST/convex/"
@@ -260,7 +260,7 @@ headers in `columns.tsx`.
 - **AI skill silent** — re-seed `DEFAULT_AI_TOOLS` after editing
   `aiDefaults.ts` (admin "Seed default" button).
 - **Status colors not matching** — port `--status-*` CSS tokens from
-  `frontend/src/shared/styles/index.css` if target's theme is custom.
+  `frontend/shared/styles/index.css` if target's theme is custom.
 
 **Testing the port:**
 

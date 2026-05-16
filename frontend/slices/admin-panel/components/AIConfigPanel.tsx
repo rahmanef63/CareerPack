@@ -15,7 +15,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { notify } from "@/shared/lib/notify";
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";

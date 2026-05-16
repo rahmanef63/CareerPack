@@ -93,14 +93,14 @@ Catatan: script `backend:dev` saat ini point ke `--env-file backend/convex-self-
 ### TypeScript
 
 - `strict: true`, `noEmit: true` (Next + separate convex tsconfig)
-- Path alias: `@/*` → `frontend/src/*`
+- Path alias: `@/*` → `frontend/*`
 - Convex generated types: `import { api } from "../../../../convex/_generated/api"`
 
 ### React
 
 - Default ke **Server Component**. Pakai `"use client"` hanya kalau butuh state/effect/browser API.
 - Slice catch-all views di-lazy via `next/dynamic` di `dashboardRoutes.tsx` — jangan bypass.
-- Styling: Tailwind + shadcn. Brand palette `career-{50..900}` di `tailwind.config.ts`. Design tokens di `src/shared/styles/index.css`.
+- Styling: Tailwind + shadcn. Brand palette `career-{50..900}` di `tailwind.config.ts`. Design tokens di `shared/styles/index.css`.
 
 ### Convex
 
@@ -131,7 +131,7 @@ Pastikan `pnpm install` sekali supaya hook ter-install (`prepare` script).
 ## 8. Testing
 
 Vitest. Sekarang ada 3 file, 18 test:
-- `frontend/src/shared/lib/env.test.ts` — env validator
+- `frontend/shared/lib/env.test.ts` — env validator
 - `convex/_shared/rateLimit.test.ts` — token bucket
 - `convex/_shared/sanitize.test.ts` — input sanitizer
 

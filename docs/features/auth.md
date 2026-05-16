@@ -13,7 +13,7 @@ token berbasis email + link sekali pakai (TTL 30 menit).
 - URL: `/login` — page `frontend/app/(marketing)/login/page.tsx`
 - URL: `/forgot-password` — `frontend/app/(marketing)/forgot-password/page.tsx`
 - URL: `/reset-password/[token]` — `frontend/app/(marketing)/reset-password/[token]/page.tsx`
-- Slice: `frontend/src/slices/auth/`
+- Slice: `frontend/slices/auth/`
 - Komponen utama: `LoginPage.tsx`
 
 ## Struktur Slice
@@ -121,16 +121,16 @@ the verifier with backwards-compat for legacy `pbkdf2_` (10k) hashes.
 
 ```
 # Frontend slice + pages
-frontend/src/slices/auth/
+frontend/slices/auth/
 frontend/app/(marketing)/login/page.tsx
 frontend/app/(marketing)/forgot-password/page.tsx
 frontend/app/(marketing)/reset-password/[token]/page.tsx
 
 # Shared
-frontend/src/shared/hooks/useAuth.tsx
-frontend/src/shared/types/auth.ts
-frontend/src/shared/components/auth/RouteGuard.tsx
-frontend/src/shared/containers/AuthShell.tsx
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/types/auth.ts
+frontend/shared/components/auth/RouteGuard.tsx
+frontend/shared/containers/AuthShell.tsx
 
 # Backend
 convex/auth.ts
@@ -147,7 +147,7 @@ convex/_seeds/                                   # seedForCurrentUser bootstrap 
 ```bash
 SRC=~/projects/CareerPack DST=~/projects/<target>
 
-cp -r "$SRC/frontend/src/slices/auth"            "$DST/frontend/src/slices/"
+cp -r "$SRC/frontend/slices/auth"            "$DST/frontend/slices/"
 mkdir -p "$DST/frontend/app/(marketing)/login" \
          "$DST/frontend/app/(marketing)/forgot-password" \
          "$DST/frontend/app/(marketing)/reset-password/[token]"
@@ -155,10 +155,10 @@ cp "$SRC/frontend/app/(marketing)/login/page.tsx"               "$DST/frontend/a
 cp "$SRC/frontend/app/(marketing)/forgot-password/page.tsx"     "$DST/frontend/app/(marketing)/forgot-password/"
 cp "$SRC/frontend/app/(marketing)/reset-password/[token]/page.tsx" "$DST/frontend/app/(marketing)/reset-password/[token]/"
 
-cp "$SRC/frontend/src/shared/hooks/useAuth.tsx" "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/types/auth.ts"     "$DST/frontend/src/shared/types/"
-cp -r "$SRC/frontend/src/shared/components/auth" "$DST/frontend/src/shared/components/"
-cp "$SRC/frontend/src/shared/containers/AuthShell.tsx" "$DST/frontend/src/shared/containers/"
+cp "$SRC/frontend/shared/hooks/useAuth.tsx" "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/types/auth.ts"     "$DST/frontend/shared/types/"
+cp -r "$SRC/frontend/shared/components/auth" "$DST/frontend/shared/components/"
+cp "$SRC/frontend/shared/containers/AuthShell.tsx" "$DST/frontend/shared/containers/"
 
 cp "$SRC/convex/auth.ts"          "$DST/convex/"
 cp "$SRC/convex/auth.config.ts"   "$DST/convex/"

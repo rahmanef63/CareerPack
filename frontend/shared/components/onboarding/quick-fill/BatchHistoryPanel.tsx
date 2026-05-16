@@ -7,7 +7,7 @@ import { notify } from "@/shared/lib/notify";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
-import { api } from "../../../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 
 /**
  * Riwayat tab — shows every Quick Fill batch the user has run, newest

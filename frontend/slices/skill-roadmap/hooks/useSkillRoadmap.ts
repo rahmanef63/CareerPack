@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import type { BrowserCategory } from "../components/RoadmapBrowser";
 import type { SavedRoadmapCard } from "../components/SavedRoadmapsGrid";
 import { FALLBACK_CATEGORIES } from "../constants/builder";

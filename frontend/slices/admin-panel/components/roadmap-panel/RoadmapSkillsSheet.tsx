@@ -10,7 +10,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/shared/components/ui/sheet";
 import { cn } from "@/shared/lib/utils";
-import type { Id } from "../../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 import {
   LEVEL_COLOR, LEVEL_LABEL, STATUS_COLOR, STATUS_LABEL,
 } from "../../constants/roadmap";

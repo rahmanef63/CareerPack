@@ -15,7 +15,7 @@ All scripts run from repo root (pnpm workspace, `packageManager = pnpm@10.24.0`)
 | Typecheck frontend + convex | `pnpm typecheck` |
 | Run all tests | `pnpm test` |
 | Watch tests | `pnpm test:watch` |
-| Run single test file | `pnpm exec vitest run <path>` (e.g. `pnpm exec vitest run frontend/src/shared/lib/env.test.ts`) |
+| Run single test file | `pnpm exec vitest run <path>` (e.g. `pnpm exec vitest run frontend/shared/lib/env.test.ts`) |
 | Convex dev (watch push) | `pnpm backend:dev` |
 | Convex one-shot sync (types only) | `pnpm backend:dev-sync` |
 | Convex deploy to prod | `pnpm backend:deploy` |
@@ -45,14 +45,14 @@ Three route groups under `frontend/app/`:
 3. `admin/page.tsx` — role-guarded (`state.user?.role === "admin"`).
 
 **Adding a dashboard page = two edits, nothing else:**
-1. Register the view in `frontend/src/shared/lib/dashboardRoutes.tsx` (`DASHBOARD_VIEWS` map). Lazy-load via `next/dynamic` — do not bypass.
-2. Add an entry in `frontend/src/shared/components/layout/navConfig.ts`. The `href` must match the slug key in `DASHBOARD_VIEWS`.
+1. Register the view in `frontend/shared/lib/dashboardRoutes.tsx` (`DASHBOARD_VIEWS` map). Lazy-load via `next/dynamic` — do not bypass.
+2. Add an entry in `frontend/shared/components/layout/navConfig.ts`. The `href` must match the slug key in `DASHBOARD_VIEWS`.
 
 `navConfig.ts` is the nav SSOT: `PRIMARY_NAV` (mobile BottomNav tabs + desktop sidebar primaries), `MORE_APPS` (MoreDrawer / sidebar secondaries), and `activeNavForPath()` for active-state matching.
 
 ### Slice pattern
 
-`frontend/src/slices/<kebab-name>/` — 22 feature slices (`admin-panel`, `ai-agent`, `ai-settings`, `auth`, `calendar`, `career-dashboard`, `cv-generator`, `dashboard-home`, `database`, `document-checklist`, `financial-calculator`, `help`, `hero`, `library`, `matcher`, `mock-interview`, `networking`, `notifications`, `personal-branding`, `portfolio`, `settings`, `skill-roadmap`). Each exports public API via `index.ts` barrel.
+`frontend/slices/<kebab-name>/` — 22 feature slices (`admin-panel`, `ai-agent`, `ai-settings`, `auth`, `calendar`, `career-dashboard`, `cv-generator`, `dashboard-home`, `database`, `document-checklist`, `financial-calculator`, `help`, `hero`, `library`, `matcher`, `mock-interview`, `networking`, `notifications`, `personal-branding`, `portfolio`, `settings`, `skill-roadmap`). Each exports public API via `index.ts` barrel.
 
 Slice folders contain `components/`, and optionally `hooks/`, `lib/`, `utils/`, `types/`, `constants/`, `config.ts`. Empty folders with `export {}` are intentional feature-contract scaffolding — don't delete them.
 
@@ -64,7 +64,7 @@ Slice folders contain `components/`, and optionally `hooks/`, `lib/`, `utils/`, 
 
 ### Responsive shell
 
-`frontend/src/shared/containers/ResponsiveContainer.tsx` picks layout by `useIsMobile()` (shared `use-mobile` hook):
+`frontend/shared/containers/ResponsiveContainer.tsx` picks layout by `useIsMobile()` (shared `use-mobile` hook):
 - `< lg` → `MobileContainer`: 5-slot BottomNav + AI FAB + MoreDrawer.
 - `≥ lg` → `DesktopContainer`: shadcn `Sidebar` (collapsible icon mode) + `SiteHeader`.
 
@@ -137,10 +137,10 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 
 ## Conventions
 
-- TS strict, `@/*` → `frontend/src/*`.
+- TS strict, `@/*` → `frontend/*`.
 - Convex generated types imported from relative path: `../../../../convex/_generated/api`.
 - Default to **Server Components**. Only mark `"use client"` when state/effects/browser APIs are needed.
-- Tailwind + shadcn/ui. Brand palette `career-{50..900}` lives in `tailwind.config.ts`; design tokens in `src/shared/styles/index.css`.
+- Tailwind + shadcn/ui. Brand palette `career-{50..900}` lives in `tailwind.config.ts`; design tokens in `shared/styles/index.css`.
 - File naming: slice folders `kebab-case`, React components `PascalCase.tsx`, hooks `camelCase.ts(x)`, shadcn primitives `kebab-case.tsx` (matches upstream).
 - i18n: UI strings are Indonesian (see `<html lang="id">`). Error messages thrown from Convex are also Indonesian — match existing strings when adding new errors.
 
@@ -151,7 +151,7 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 ## SSOT — rahman-shared adopted (2026-05-13, PR #25)
 
 - pnpm workspace: install via `pnpm --filter=careerpack-frontend add rahman-shared`
-- `frontend/src/shared/lib/utils.ts` is a 1-line re-export from `rahman-shared/lib/utils` — DO NOT inline cn back
+- `frontend/shared/lib/utils.ts` is a 1-line re-export from `rahman-shared/lib/utils` — DO NOT inline cn back
 - `frontend/next.config.ts` has `transpilePackages: ["rahman-shared"]` (Turbopack TS hint, REQUIRED)
 - 140 `@/shared/lib/utils` import sites continue working — only resolution chain changed
 - Bump via `pnpm --filter=careerpack-frontend update rahman-shared`

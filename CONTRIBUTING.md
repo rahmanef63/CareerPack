@@ -82,7 +82,7 @@ di-merge jika ada yang gagal.
 ### Struktur
 
 - **Slice pattern**: setiap fitur frontend hidup di
-  `frontend/src/slices/<kebab-name>/` dengan `index.ts` barrel.
+  `frontend/slices/<kebab-name>/` dengan `index.ts` barrel.
   Slice tidak boleh saling import — kode lintas-slice diangkat ke
   `@/shared/*`.
 - **Convex backend**: per domain folder
@@ -94,11 +94,11 @@ di-merge jika ada yang gagal.
 
 ### TypeScript / React
 
-- **Strict TS**, alias `@/*` → `frontend/src/*`.
+- **Strict TS**, alias `@/*` → `frontend/*`.
 - Default **Server Component**. Tambah `"use client"` hanya jika butuh
   state/effect/browser API.
 - Tailwind + shadcn/ui. Token desain di
-  `frontend/src/shared/styles/index.css`.
+  `frontend/shared/styles/index.css`.
 - File naming: folder slice `kebab-case`, komponen React `PascalCase.tsx`,
   hook `camelCase.ts(x)`, primitif shadcn `kebab-case.tsx`.
 

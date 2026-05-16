@@ -14,7 +14,7 @@ import {
   Target,
   AlertCircle,
 } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Slider } from "@/shared/components/ui/slider";

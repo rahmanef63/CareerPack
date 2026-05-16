@@ -26,7 +26,7 @@ import { Composer } from "./ai-agent-console/Composer";
 import { QuotaChip } from "./ai-agent-console/QuotaChip";
 import { ThinkingProgress } from "./ai-agent-console/ThinkingProgress";
 import { useSessionSync } from "../hooks/useSessionSync";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 
 interface AIAgentConsoleProps {
   open: boolean;

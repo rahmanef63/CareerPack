@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoPortfolioOverlay } from "@/shared/hooks/useDemoOverlay";
 import type { PortfolioFormValues, PortfolioItemId } from "../types";

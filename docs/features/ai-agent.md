@@ -14,7 +14,7 @@ server lalu hasilnya di-feed-back ke LLM untuk multi-hop reasoning.
 
 - Tidak punya URL sendiri — di-mount sebagai Sheet side-panel.
 - Entry: AI FAB (mobile) atau tombol di `SiteHeader` (desktop), dibuka dari `ResponsiveContainer`.
-- Slice: `frontend/src/slices/ai-agent/`.
+- Slice: `frontend/slices/ai-agent/`.
 
 ## Struktur Slice
 
@@ -48,7 +48,7 @@ AI-callable surfaces is split across three layers:
 
 ### 1. Per-slice manifest (`SliceManifest`)
 
-Source: `frontend/src/shared/types/sliceManifest.ts`. Each slice that
+Source: `frontend/shared/types/sliceManifest.ts`. Each slice that
 opts into AI / nav / routing exports a `manifest.ts` declaring its
 `id`, `route`, `nav` placement, and a `skills: SliceSkill[]` array.
 `SliceSkill.kind` is one of:
@@ -68,7 +68,7 @@ for client-side slash parsing.
 
 ### 2. Central registry (`sliceRegistry.ts`)
 
-Source: `frontend/src/shared/lib/sliceRegistry.ts`. Imports each
+Source: `frontend/shared/lib/sliceRegistry.ts`. Imports each
 slice's manifest and exposes derived collections:
 
 | Export | Purpose |
@@ -86,7 +86,7 @@ catalog, and slash popover all update automatically.
 
 ### 3. Capability binders (`Providers.tsx`)
 
-Source: `frontend/src/shared/providers/Providers.tsx`. Each
+Source: `frontend/shared/providers/Providers.tsx`. Each
 `<XxxCapabilities>` component subscribes to the `aiActionBus` for the
 slice's skill IDs and runs each one via the slice's local hooks
 (useMutation, useRouter). Mounting them all in `Providers.tsx` keeps
@@ -101,7 +101,7 @@ inserting one JSX line in `Providers.tsx`.
 
 ### 4. Action bus (`aiActionBus.ts`)
 
-Source: `frontend/src/shared/lib/aiActionBus.ts`. `publish()` /
+Source: `frontend/shared/lib/aiActionBus.ts`. `publish()` /
 `subscribe()` keyed by `action.type`. Two overloads:
 
 - Legacy: type-narrowed `AgentActionType` literals (`"nav.go"`,
@@ -303,15 +303,15 @@ generic.
 
 ```
 # Slice
-frontend/src/slices/ai-agent/
+frontend/slices/ai-agent/
 
 # Shared infra (manifest framework — REQUIRED)
-frontend/src/shared/types/sliceManifest.ts
-frontend/src/shared/types/agent.ts
-frontend/src/shared/lib/aiActionBus.ts
-frontend/src/shared/lib/sliceRegistry.ts
-frontend/src/shared/components/ai/AIFab.tsx
-frontend/src/shared/providers/Providers.tsx          # binder mount points
+frontend/shared/types/sliceManifest.ts
+frontend/shared/types/agent.ts
+frontend/shared/lib/aiActionBus.ts
+frontend/shared/lib/sliceRegistry.ts
+frontend/shared/components/ai/AIFab.tsx
+frontend/shared/providers/Providers.tsx          # binder mount points
 
 # Backend
 convex/ai/
@@ -328,22 +328,22 @@ convex/_shared/env.ts
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/slices" \
-         "$DST/frontend/src/shared/types" \
-         "$DST/frontend/src/shared/lib" \
-         "$DST/frontend/src/shared/components/ai" \
-         "$DST/frontend/src/shared/providers" \
+mkdir -p "$DST/frontend/slices" \
+         "$DST/frontend/shared/types" \
+         "$DST/frontend/shared/lib" \
+         "$DST/frontend/shared/components/ai" \
+         "$DST/frontend/shared/providers" \
          "$DST/convex/ai" \
          "$DST/convex/_seeds" \
          "$DST/convex/_shared"
 
-cp -r "$SRC/frontend/src/slices/ai-agent"               "$DST/frontend/src/slices/"
-cp "$SRC/frontend/src/shared/types/sliceManifest.ts"    "$DST/frontend/src/shared/types/"
-cp "$SRC/frontend/src/shared/types/agent.ts"            "$DST/frontend/src/shared/types/"
-cp "$SRC/frontend/src/shared/lib/aiActionBus.ts"        "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/sliceRegistry.ts"      "$DST/frontend/src/shared/lib/"
-cp -r "$SRC/frontend/src/shared/components/ai"          "$DST/frontend/src/shared/components/"
-cp "$SRC/frontend/src/shared/providers/Providers.tsx"   "$DST/frontend/src/shared/providers/"
+cp -r "$SRC/frontend/slices/ai-agent"               "$DST/frontend/slices/"
+cp "$SRC/frontend/shared/types/sliceManifest.ts"    "$DST/frontend/shared/types/"
+cp "$SRC/frontend/shared/types/agent.ts"            "$DST/frontend/shared/types/"
+cp "$SRC/frontend/shared/lib/aiActionBus.ts"        "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/sliceRegistry.ts"      "$DST/frontend/shared/lib/"
+cp -r "$SRC/frontend/shared/components/ai"          "$DST/frontend/shared/components/"
+cp "$SRC/frontend/shared/providers/Providers.tsx"   "$DST/frontend/shared/providers/"
 
 cp -r "$SRC/convex/ai/"                                 "$DST/convex/"
 cp "$SRC/convex/_seeds/aiDefaults.ts"                   "$DST/convex/_seeds/"

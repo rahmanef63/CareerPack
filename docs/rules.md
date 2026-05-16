@@ -6,7 +6,7 @@ PR body referring to the rule by ID.
 
 ## R1. Slices own their feature, share via `@/shared/*`
 
-- Slice = one feature folder under `frontend/src/slices/<kebab-name>/`.
+- Slice = one feature folder under `frontend/slices/<kebab-name>/`.
 - A slice **must not** import from another slice. Cross-slice code goes
   to `@/shared/hooks/`, `@/shared/components/`, `@/shared/lib/`, or
   `@/shared/types/`.
@@ -18,9 +18,9 @@ PR body referring to the rule by ID.
 ## R2. Theme tokens are the only color source
 
 - **No hex** in `.tsx` / `.ts` files outside two explicitly allowed
-  locations: `frontend/src/slices/financial-calculator/constants/
+  locations: `frontend/slices/financial-calculator/constants/
   budgetIcons.ts` (user-selectable envelope swatches) and
-  `frontend/src/shared/components/ui/chart.tsx` (shadcn recharts
+  `frontend/shared/components/ui/chart.tsx` (shadcn recharts
   attribute matchers).
 - **No palette classes** (`bg-sky-500`, `text-violet-600`, etc.) in any
   slice. Use semantic tokens: `bg-primary`, `text-brand`,
@@ -176,7 +176,7 @@ must be explicitly commented with the rationale.
   — **do not** bounce the user back to `/login`. Success path is
   `toast → router.push("/dashboard")`. `RouteGuard` absorbs the brief
   `isLoading` window.
-- Toaster config is fixed in `src/shared/components/ui/sonner.tsx`
+- Toaster config is fixed in `shared/components/ui/sonner.tsx`
   (`richColors`, `position="top-center"`, `closeButton`). Do not
   override per-toast unless there's a specific accessibility reason.
 - Copy in Indonesian (**R8**); match existing tone.

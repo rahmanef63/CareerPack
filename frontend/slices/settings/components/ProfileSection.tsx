@@ -7,7 +7,7 @@ import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoProfileOverlay } from "@/shared/hooks/useDemoOverlay";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";

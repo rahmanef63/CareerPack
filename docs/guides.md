@@ -12,13 +12,13 @@ Paired with `docs/rules.md` (non-negotiables) and `docs/architecture.md`
 
 ```bash
 # 1. Scaffold the slice
-mkdir -p frontend/src/slices/my-feature/{components,hooks,types}
-cat > frontend/src/slices/my-feature/index.ts <<'EOF'
+mkdir -p frontend/slices/my-feature/{components,hooks,types}
+cat > frontend/slices/my-feature/index.ts <<'EOF'
 export { MyFeatureView } from "./components/MyFeatureView";
 EOF
 ```
 
-**2. Register the view** in `frontend/src/shared/lib/dashboardRoutes.tsx`:
+**2. Register the view** in `frontend/shared/lib/dashboardRoutes.tsx`:
 
 ```tsx
 const MY_FEATURE: View = dynamic(
@@ -32,7 +32,7 @@ export const DASHBOARD_VIEWS: Record<string, View> = {
 };
 ```
 
-**3. Add to nav** in `frontend/src/shared/components/layout/navConfig.ts`:
+**3. Add to nav** in `frontend/shared/components/layout/navConfig.ts`:
 
 ```ts
 export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
@@ -141,7 +141,7 @@ Don't write to `:root.style.setProperty` directly. Always go through
 
 1. Pick the OKLCH value. Open `/r/registry.json` and read modern-minimal's
    equivalent token for reference.
-2. Add to `frontend/src/shared/styles/index.css`:
+2. Add to `frontend/shared/styles/index.css`:
 
    ```css
    :root {
@@ -248,7 +248,7 @@ confirms `noindex` when opt-in is off.
 
 ## G8. Add an admin panel
 
-Admin views live in `frontend/src/slices/admin/components/`. Pattern:
+Admin views live in `frontend/slices/admin/components/`. Pattern:
 
 ```tsx
 // AdminFooPanel.tsx
@@ -637,7 +637,7 @@ client doesn't need a second round-trip.
 End result: drop a photo in Settings → Profil Saya and it appears
 in the sidebar immediately on next query refetch.
 
-Reference consumer: `frontend/src/slices/settings/components/
+Reference consumer: `frontend/slices/settings/components/
 ProfileSection.tsx` — gates the `<FileUpload crop={{ aspect: 1 }}>`
 behind "profile must be saved first" so `updateAvatar` always has a
 `userProfiles` row to patch.

@@ -3,13 +3,13 @@
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { Eye } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { PersonalBrandingPage } from "../themes";
 import {
   buildAutoBlocks,
   type AutoCVInput,
   type AutoPortfolioItem,
-} from "../../../../../convex/profile/autoBlocks";
+} from "../../../../convex/profile/autoBlocks";
 import type { Block } from "../blocks/types";
 import type { FormState } from "../form/types";
 import { usePreviewBranding } from "../form/usePreviewBranding";

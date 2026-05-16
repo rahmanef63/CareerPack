@@ -18,7 +18,7 @@ gamification (XP, badges, theme: warrior / scholar / explorer / artisan).
 ## Route & Entry
 
 - URL: `/dashboard/roadmap`
-- Slice: `frontend/src/slices/skill-roadmap/`
+- Slice: `frontend/slices/skill-roadmap/`
 - Komponen utama: `SkillRoadmap.tsx`
 - **No manifest yet** — slice belum diregister di `sliceRegistry.ts`;
   nav fallback ke `dashboardRoutes.tsx` + `navConfig.ts` (legacy).
@@ -133,15 +133,15 @@ Progress auto-computed inside `updateSkillProgress`:
 
 ```
 # Slice itself
-frontend/src/slices/skill-roadmap/
+frontend/slices/skill-roadmap/
 
 # Shared deps
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/types/index.ts                        # if exports TemplateNode
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/lib/notify.ts
+frontend/shared/types/index.ts                        # if exports TemplateNode
 
 # Backend
 convex/roadmap/                                           # queries.ts, mutations.ts, templates.ts, saved.ts, schema.ts
@@ -154,19 +154,19 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/skill-roadmap" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/skill-roadmap" "$DST/frontend/slices/"
 
 # Shared helpers
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/components/ui"
 
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"        "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx"   "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"        "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"        "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                              "$DST/frontend/src/shared/lib/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx"        "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx"   "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"        "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-select.tsx"        "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/lib/notify.ts"                              "$DST/frontend/shared/lib/"
 
 # Backend (full module — 5 files)
 cp -r "$SRC/convex/roadmap" "$DST/convex/"
@@ -270,9 +270,9 @@ import its `roadmapTables` const into `convex/schema.ts`.
 
 **Nav registration** (legacy):
 
-1. `frontend/src/shared/lib/dashboardRoutes.tsx` — add lazy import
+1. `frontend/shared/lib/dashboardRoutes.tsx` — add lazy import
    for `SkillRoadmap` keyed by slug `roadmap`.
-2. `frontend/src/shared/components/layout/navConfig.ts` — add
+2. `frontend/shared/components/layout/navConfig.ts` — add
    `MORE_APPS` entry with `href: "/dashboard/roadmap"`.
 
 **Env vars** — none beyond Convex baseline.

@@ -13,7 +13,7 @@ sebelum delete.
 ## Route & Entry
 
 - URL: `/dashboard/library`
-- Slice: `frontend/src/slices/library/`
+- Slice: `frontend/slices/library/`
 - Komponen utama: `LibraryView.tsx`
 
 ## Struktur Slice
@@ -92,12 +92,12 @@ Result di-pakai LibraryView untuk warning sebelum delete.
 
 ```
 # Slice
-frontend/src/slices/library/
+frontend/slices/library/
 
 # Shared (already required by file-upload.md)
-frontend/src/shared/components/files/FileUpload.tsx
-frontend/src/shared/hooks/useFileUpload.ts
-frontend/src/shared/lib/imageConvert.ts
+frontend/shared/components/files/FileUpload.tsx
+frontend/shared/hooks/useFileUpload.ts
+frontend/shared/lib/imageConvert.ts
 
 # Backend
 convex/files/                                            # already from file-upload.md
@@ -109,8 +109,8 @@ convex/files/                                            # already from file-upl
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/library" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/library" "$DST/frontend/slices/"
 # (FileUpload + convex/files/ assumed already ported per file-upload.md)
 ```
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { MORE_APPS, type MoreAppTile } from "@/shared/components/layout/navConfig";
 
 /**

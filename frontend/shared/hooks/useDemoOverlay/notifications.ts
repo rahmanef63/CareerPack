@@ -7,7 +7,7 @@ import {
   type DemoNotificationSeed,
   type DemoNotificationType,
 } from "@/shared/data/demoUser";
-import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../../../convex/_generated/dataModel";
 import { HOUR } from "./_constants";
 
 const NOTIFICATIONS_KEY = "careerpack:demo:notifications";

@@ -26,7 +26,7 @@ export type {
   BlockTextAlign,
   EmbedProvider,
   SocialPlatform,
-} from "../../../../../convex/profile/blocks";
+} from "../../../../convex/profile/blocks";
 export {
   ALLOWED_BLOCK_TYPES,
   ALLOWED_EMBED_PROVIDERS,
@@ -40,7 +40,7 @@ export {
   BLOCK_PADDINGS,
   BLOCK_TEXT_ALIGNS,
   parseEmbedUrl,
-} from "../../../../../convex/profile/blocks";
+} from "../../../../convex/profile/blocks";
 
 /**
  * Three full-page HTML templates served from

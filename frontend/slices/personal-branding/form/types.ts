@@ -17,7 +17,7 @@ import type {
   HeaderBg,
   PersonalBrandingTheme,
 } from "../blocks/types";
-import type { AutoToggles } from "../../../../../convex/profile/autoBlocks";
+import type { AutoToggles } from "../../../../convex/profile/autoBlocks";
 
 export type Mode = "auto" | "custom";
 

@@ -7,18 +7,18 @@ Scope: backlog item #1 — Konsolidasi 3 dispatch path AI → satu jalur manifes
 
 ### 1. Manifest binders (modern, SSOT)
 
-- `frontend/src/slices/<slice>/components/<slice>Capabilities.tsx`
+- `frontend/slices/<slice>/components/<slice>Capabilities.tsx`
 - 12 productive slices have a `*Capabilities` component.
 - Each subscribes to manifest skill IDs (`cv.create`, `calendar.create-event`,
   `matcher.add-job`, …) via `aiActionBus.subscribe()`.
 - Calls real Convex mutations / actions; surfaces success / error via `notify`.
-- All mounted once in `frontend/src/shared/providers/Providers.tsx`.
+- All mounted once in `frontend/shared/providers/Providers.tsx`.
 - Source of action: AI tool calls from `convex/ai/actions.ts` →
   `ApproveActionCard` → user approves → bus publish.
 
 ### 2. Slash command parser (`extractSlashActions`)
 
-`frontend/src/slices/ai-agent/lib/slashCommands.ts` (243 lines).
+`frontend/slices/ai-agent/lib/slashCommands.ts` (243 lines).
 
 - **Manifest path** (lines 64-75): matches user input against
   `SKILLS_BY_SLASH`, builds a `BusAction` via `skill.argsFromText()`.
@@ -33,7 +33,7 @@ slashes. Used by Composer popover.
 
 ### 3. Legacy CV bus listeners (`useCVAIActions`)
 
-`frontend/src/slices/cv-generator/hooks/useCVAIActions.ts` (66 lines).
+`frontend/slices/cv-generator/hooks/useCVAIActions.ts` (66 lines).
 
 - Subscribes to legacy types
   `cv.fillExperience` / `cv.improveSummary` / `cv.addSkills` / `cv.setFormat`.
@@ -69,9 +69,9 @@ Replace each legacy slash output with `nav.go` to the right page:
 ```
 
 Then:
-1. Delete `frontend/src/slices/cv-generator/hooks/useCVAIActions.ts`
+1. Delete `frontend/slices/cv-generator/hooks/useCVAIActions.ts`
 2. Remove its call from `CVGenerator.tsx`
-3. Remove legacy types from `frontend/src/shared/types/agent.ts`
+3. Remove legacy types from `frontend/shared/types/agent.ts`
    (`cv.fillExperience` / `cv.improveSummary` / `cv.addSkills` /
    `cv.setFormat` / `roadmap.generate` / `interview.startSession` /
    `match.recommend`). Keep `nav.go`.
@@ -161,18 +161,18 @@ adding `slashCommand` to its manifest entry is fine — pattern lives in
 ## Files touched
 
 Phase A:
-- `frontend/src/slices/ai-agent/lib/slashCommands.ts` — strip ~120 lines
-- `frontend/src/slices/cv-generator/hooks/useCVAIActions.ts` — DELETE
-- `frontend/src/slices/cv-generator/components/CVGenerator.tsx` — remove import + call
-- `frontend/src/shared/types/agent.ts` — shrink discriminated union
-- `frontend/src/slices/ai-agent/components/ApproveActionCard.tsx` —
+- `frontend/slices/ai-agent/lib/slashCommands.ts` — strip ~120 lines
+- `frontend/slices/cv-generator/hooks/useCVAIActions.ts` — DELETE
+- `frontend/slices/cv-generator/components/CVGenerator.tsx` — remove import + call
+- `frontend/shared/types/agent.ts` — shrink discriminated union
+- `frontend/slices/ai-agent/components/ApproveActionCard.tsx` —
   drop `case` arms
 
 Phase B (later):
 - `convex/mockInterview/mutations.ts` — add `start` mutation
 - `convex/cv/actions.ts` — add `score` action
-- `frontend/src/slices/mock-interview/manifest.ts` — register
-- `frontend/src/slices/cv-generator/manifest.ts` — register
+- `frontend/slices/mock-interview/manifest.ts` — register
+- `frontend/slices/cv-generator/manifest.ts` — register
 
 Phase C:
 - `convex/_seeds/aiDefaults.ts` — drop legacy tool defs

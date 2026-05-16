@@ -9,7 +9,7 @@ Showcase proyek, sertifikasi, publikasi dengan dukungan multi-media (gambar / vi
 ## Route & Entry
 
 - URL: `/dashboard/portfolio`
-- Slice: `frontend/src/slices/portfolio/`
+- Slice: `frontend/slices/portfolio/`
 - Komponen utama: `PortfolioView.tsx`, `PortfolioCard.tsx`, `PortfolioForm.tsx`
 
 ## Struktur Slice
@@ -142,23 +142,23 @@ portfolioItems: defineTable({
 
 ```
 # Slice
-frontend/src/slices/portfolio/
+frontend/slices/portfolio/
 
 # Shared deps
-frontend/src/shared/components/files/FileUpload.tsx                     # multi-media
-frontend/src/shared/components/onboarding/                              # QuickFillButton
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-carousel.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-alert-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/hooks/useFileUpload.ts
-frontend/src/shared/hooks/useDemoOverlay.ts                             # demoPortfolio overlay
-frontend/src/shared/lib/imageConvert.ts                                 # WebP + crop
-frontend/src/shared/lib/formatDate.ts                                   # formatMonthYear
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/utils.ts
+frontend/shared/components/files/FileUpload.tsx                     # multi-media
+frontend/shared/components/onboarding/                              # QuickFillButton
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-carousel.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/hooks/useFileUpload.ts
+frontend/shared/hooks/useDemoOverlay.ts                             # demoPortfolio overlay
+frontend/shared/lib/imageConvert.ts                                 # WebP + crop
+frontend/shared/lib/formatDate.ts                                   # formatMonthYear
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts
 
 # Backend
 convex/portfolio/                                                       # schema + queries + mutations
@@ -172,30 +172,30 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/portfolio" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/portfolio" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/components/files"
-mkdir -p "$DST/frontend/src/shared/components/onboarding"
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
+mkdir -p "$DST/frontend/shared/components/files"
+mkdir -p "$DST/frontend/shared/components/onboarding"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
 
-cp    "$SRC/frontend/src/shared/components/files/FileUpload.tsx"          "$DST/frontend/src/shared/components/files/"
-cp -r "$SRC/frontend/src/shared/components/onboarding"                    "$DST/frontend/src/shared/components/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-alert-dialog.tsx" "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"      "$DST/frontend/src/shared/components/layout/"
-cp    "$SRC/frontend/src/shared/hooks/useFileUpload.ts"                   "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"                  "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/lib/imageConvert.ts"                      "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/formatDate.ts"                        "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/notify.ts"                            "$DST/frontend/src/shared/lib/"
+cp    "$SRC/frontend/shared/components/files/FileUpload.tsx"          "$DST/frontend/shared/components/files/"
+cp -r "$SRC/frontend/shared/components/onboarding"                    "$DST/frontend/shared/components/"
+cp    "$SRC/frontend/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-alert-dialog.tsx" "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-select.tsx"      "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/layout/PageContainer.tsx"      "$DST/frontend/shared/components/layout/"
+cp    "$SRC/frontend/shared/hooks/useFileUpload.ts"                   "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/hooks/useDemoOverlay.ts"                  "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/lib/imageConvert.ts"                      "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/formatDate.ts"                        "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/notify.ts"                            "$DST/frontend/shared/lib/"
 
 # Backend
 cp -r "$SRC/convex/portfolio" "$DST/convex/"

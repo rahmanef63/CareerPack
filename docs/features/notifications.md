@@ -9,7 +9,7 @@ Inbox notifikasi in-app — deadline dokumen, reminder interview, update lamaran
 ## Route & Entry
 
 - URL: `/dashboard/notifications`
-- Slice: `frontend/src/slices/notifications/`
+- Slice: `frontend/slices/notifications/`
 - Komponen utama: `NotificationsView.tsx`
 
 ## Struktur Slice
@@ -100,16 +100,16 @@ notifications: defineTable({
 
 ```
 # Slice
-frontend/src/slices/notifications/
+frontend/slices/notifications/
 
 # Shared deps
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-alert-dialog.tsx
-frontend/src/shared/hooks/useAuth.tsx
-frontend/src/shared/hooks/useDemoOverlay.ts
-frontend/src/shared/lib/formatDate.ts
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/utils.ts
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/hooks/useDemoOverlay.ts
+frontend/shared/lib/formatDate.ts
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts
 
 # Backend
 convex/notifications/                                                   # schema + queries + mutations + digest
@@ -122,20 +122,20 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/notifications" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/notifications" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
 
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx"     "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-alert-dialog.tsx"    "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/hooks/useAuth.tsx"                            "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"                      "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/lib/formatDate.ts"                            "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                                "$DST/frontend/src/shared/lib/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx"     "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-alert-dialog.tsx"    "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/hooks/useAuth.tsx"                            "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/hooks/useDemoOverlay.ts"                      "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/lib/formatDate.ts"                            "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/notify.ts"                                "$DST/frontend/shared/lib/"
 
 # Backend
 cp -r "$SRC/convex/notifications" "$DST/convex/"

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { CheckCircle2, FileUp, Linkedin, Loader2, Sparkles } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/shared/components/ui/button";
 import {
   ResponsiveDialog,

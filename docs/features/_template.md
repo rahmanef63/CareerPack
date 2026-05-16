@@ -9,7 +9,7 @@
 ## Route & Entry
 
 - URL: `/dashboard/<slug>` (or N/A for infrastructure)
-- Slice: `frontend/src/slices/<slice>/`
+- Slice: `frontend/slices/<slice>/`
 - Main component: `<Name>.tsx`
 
 ## Struktur Slice
@@ -62,12 +62,12 @@ What's a natural next step (deferred features, obvious follow-ups).
 
 ```
 # Slice itself
-frontend/src/slices/<slice>/
+frontend/slices/<slice>/
 
 # Shared dependencies
-frontend/src/shared/hooks/<hook>.ts
-frontend/src/shared/components/<component>.tsx
-frontend/src/shared/types/<types>.ts
+frontend/shared/hooks/<hook>.ts
+frontend/shared/components/<component>.tsx
+frontend/shared/types/<types>.ts
 
 # Backend
 convex/<module>.ts
@@ -81,12 +81,12 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/<slice>" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/<slice>" "$DST/frontend/slices/"
 
 # Shared helpers
-mkdir -p "$DST/frontend/src/shared/hooks"
-cp "$SRC/frontend/src/shared/hooks/<hook>.ts" "$DST/frontend/src/shared/hooks/"
+mkdir -p "$DST/frontend/shared/hooks"
+cp "$SRC/frontend/shared/hooks/<hook>.ts" "$DST/frontend/shared/hooks/"
 
 # Backend module
 cp "$SRC/convex/<module>.ts" "$DST/convex/"

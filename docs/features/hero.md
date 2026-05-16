@@ -12,7 +12,7 @@ Halaman marketing publik untuk visitor belum login. Jual proposisi
 
 - URL: `/`
 - Page file: `frontend/app/(marketing)/page.tsx` — redirect `/dashboard` jika sudah login.
-- Slice: `frontend/src/slices/hero/`
+- Slice: `frontend/slices/hero/`
 - Komponen utama: `HeroSection.tsx`
 
 ## Struktur Slice
@@ -62,7 +62,7 @@ Tidak ada query Convex langsung. Demo button delegasi ke `useAuth().loginAsDemo(
 **Files (1 slice + 1 page):**
 
 ```
-frontend/src/slices/hero/
+frontend/slices/hero/
 frontend/app/(marketing)/page.tsx                       # invokes <HeroSection />
 ```
 
@@ -70,8 +70,8 @@ frontend/app/(marketing)/page.tsx                       # invokes <HeroSection /
 
 ```bash
 SRC=~/projects/CareerPack DST=~/projects/<target>
-mkdir -p "$DST/frontend/src/slices" "$DST/frontend/app/(marketing)"
-cp -r "$SRC/frontend/src/slices/hero" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices" "$DST/frontend/app/(marketing)"
+cp -r "$SRC/frontend/slices/hero" "$DST/frontend/slices/"
 cp "$SRC/frontend/app/(marketing)/page.tsx" "$DST/frontend/app/(marketing)/"
 ```
 
@@ -88,7 +88,7 @@ cp "$SRC/frontend/app/(marketing)/page.tsx" "$DST/frontend/app/(marketing)/"
 
 **Common breakage:**
 - Demo CTA throws → port `Anonymous` provider in `convex/auth.ts` + `loginAsDemo` in `useAuth`. Or just remove the Demo button.
-- `ROUTES.dashboard.home` undefined → port `frontend/src/shared/lib/routes.ts` or hardcode `"/dashboard"`.
+- `ROUTES.dashboard.home` undefined → port `frontend/shared/lib/routes.ts` or hardcode `"/dashboard"`.
 
 **Testing:**
 1. Visit `/` while logged-out → hero renders, scroll triggers slide-up.

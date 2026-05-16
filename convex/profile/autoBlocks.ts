@@ -11,7 +11,7 @@
  *
  * Imported by:
  * - convex/profile/queries.ts → getBySlug (server branch when publicMode === "auto")
- * - frontend/src/slices/personal-branding/auto/* → preview + builder
+ * - frontend/slices/personal-branding/auto/* → preview + builder
  */
 
 import type { Block } from "./blocks";

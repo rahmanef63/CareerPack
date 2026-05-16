@@ -10,27 +10,36 @@ const compat = new FlatCompat({
 });
 
 const SLICES = [
-  "admin",
+  "admin-panel",
   "ai-agent",
+  "ai-settings",
   "auth",
   "calendar",
   "career-dashboard",
   "cv-generator",
   "dashboard-home",
+  "database",
   "document-checklist",
   "financial-calculator",
+  "help",
   "hero",
+  "library",
+  "matcher",
   "mock-interview",
+  "networking",
+  "notifications",
+  "personal-branding",
+  "portfolio",
   "settings",
   "skill-roadmap",
 ];
 
 // Tiap slice tidak boleh import internal slice lain (components/hooks/utils).
 // `types` barrel boleh sebagai public contract antar slice.
-// Admin dikecualikan (meta-tool generator mock data).
-const ISOLATED_SLICES = SLICES.filter((s) => s !== "admin");
+// admin-panel dikecualikan (meta-tool generator mock data).
+const ISOLATED_SLICES = SLICES.filter((s) => s !== "admin-panel");
 const sliceIsolation = ISOLATED_SLICES.map((slice) => ({
-  files: [`src/slices/${slice}/**/*.{ts,tsx}`],
+  files: [`slices/${slice}/**/*.{ts,tsx}`],
   rules: {
     "no-restricted-imports": [
       "error",

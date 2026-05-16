@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { notify } from "@/shared/lib/notify";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoPBOverlay } from "@/shared/hooks/useDemoOverlay";
 import {
   DEFAULT_AUTO_TOGGLES,
-} from "../../../../../convex/profile/autoBlocks";
+} from "../../../../convex/profile/autoBlocks";
 import {
   TEMPLATE_THEMES,
   type Block,
@@ -19,7 +19,7 @@ import {
 function isKnownTheme(t: unknown): t is PersonalBrandingTheme {
   return typeof t === "string" && (TEMPLATE_THEMES as readonly string[]).includes(t);
 }
-import type { AutoToggles } from "../../../../../convex/profile/autoBlocks";
+import type { AutoToggles } from "../../../../convex/profile/autoBlocks";
 import { DEFAULT_FORM_STATE } from "./defaults";
 import { validateSlug } from "./slugValidation";
 import type {

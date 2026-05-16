@@ -11,8 +11,8 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
-import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Doc, Id } from "../../../../convex/_generated/dataModel";
 import { notify } from "@/shared/lib/notify";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";

@@ -4,8 +4,8 @@ import { type CVData, type CVDisplayPrefs, type CVTemplateId, type SkillCategory
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useDemoCVOverlay } from '@/shared/hooks/useDemoOverlay';
 import { defaultDisplayPrefs } from '../constants';
-import { api } from "../../../../../convex/_generated/api";
-import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Doc, Id } from "../../../../convex/_generated/dataModel";
 
 const ALLOWED_TEMPLATES: CVTemplateId[] = ["classic", "modern", "minimal"];
 

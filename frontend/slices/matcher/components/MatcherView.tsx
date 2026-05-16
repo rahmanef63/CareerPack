@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Compass, Download, Plus, Sparkles, Trophy } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/shared/components/ui/button";
 import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";

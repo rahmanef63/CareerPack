@@ -12,7 +12,7 @@ Toggle lewat UI atau via AI agent (skill `documents.toggle`).
 ## Route & Entry
 
 - URL: `/dashboard/checklist`
-- Slice: `frontend/src/slices/document-checklist/`
+- Slice: `frontend/slices/document-checklist/`
 - Komponen utama: `DocumentChecklist.tsx`
 - Lazy-loaded via `manifest.route.component`.
 
@@ -121,20 +121,20 @@ seeding pakai itu via `_seeds/`.
 
 ```
 # Slice itself
-frontend/src/slices/document-checklist/
+frontend/slices/document-checklist/
 
 # Shared deps
-frontend/src/shared/hooks/useAuth.tsx                  # baseline (per _porting-guide.md §1)
-frontend/src/shared/hooks/useDemoOverlay.ts            # onboarding overlay (or stub)
-frontend/src/shared/data/indonesianData.ts             # contains template + category labels
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/date-picker.tsx
-frontend/src/shared/components/ui/scroll-area.tsx
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/aiActionBus.ts                 # if not yet present
-frontend/src/shared/types/sliceManifest.ts             # if not yet present
+frontend/shared/hooks/useAuth.tsx                  # baseline (per _porting-guide.md §1)
+frontend/shared/hooks/useDemoOverlay.ts            # onboarding overlay (or stub)
+frontend/shared/data/indonesianData.ts             # contains template + category labels
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/date-picker.tsx
+frontend/shared/components/ui/scroll-area.tsx
+frontend/shared/lib/notify.ts
+frontend/shared/lib/aiActionBus.ts                 # if not yet present
+frontend/shared/types/sliceManifest.ts             # if not yet present
 
 # Backend
 convex/documents/                                      # queries.ts, mutations.ts, schema.ts
@@ -147,27 +147,27 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/document-checklist" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/document-checklist" "$DST/frontend/slices/"
 
 # Shared helpers
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/types"
-mkdir -p "$DST/frontend/src/shared/data"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/types"
+mkdir -p "$DST/frontend/shared/data"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/components/ui"
 
-cp "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"          "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/data/indonesianData.ts"           "$DST/frontend/src/shared/data/"
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx" "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/date-picker.tsx"            "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/scroll-area.tsx"            "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                    "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/aiActionBus.ts"               "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/types/sliceManifest.ts"           "$DST/frontend/src/shared/types/"
+cp "$SRC/frontend/shared/hooks/useDemoOverlay.ts"          "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/data/indonesianData.ts"           "$DST/frontend/shared/data/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx" "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/date-picker.tsx"            "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/scroll-area.tsx"            "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/lib/notify.ts"                    "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/aiActionBus.ts"               "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/types/sliceManifest.ts"           "$DST/frontend/shared/types/"
 
 # Backend
 cp -r "$SRC/convex/documents" "$DST/convex/"

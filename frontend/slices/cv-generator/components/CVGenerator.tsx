@@ -5,7 +5,7 @@ import { useQuery } from 'convex/react';
 import { ChevronsDownUp, ChevronsUpDown, Download, Eye, Save } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { QuickFillButton } from '@/shared/components/onboarding';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { useCV } from '../hooks/useCV';

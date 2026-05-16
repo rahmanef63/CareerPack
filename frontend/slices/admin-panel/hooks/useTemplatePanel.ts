@@ -3,8 +3,8 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { notify } from "@/shared/lib/notify";
-import { api } from "../../../../../convex/_generated/api";
-import type { Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import {
   EXPORT_FORMAT, EXPORT_VERSION,
   type AuditableTemplate, type ExportEnvelope, type ExportTemplate,

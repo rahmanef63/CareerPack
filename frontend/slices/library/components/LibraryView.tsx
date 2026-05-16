@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Upload } from "lucide-react";
 import { notify } from "@/shared/lib/notify";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Button } from "@/shared/components/ui/button";

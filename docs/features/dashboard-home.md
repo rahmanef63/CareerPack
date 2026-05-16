@@ -12,7 +12,7 @@ untuk profil baru, dan quick-action ke fitur lain.
 
 - URL: `/dashboard`
 - Resolved via catch-all (slug `""` di `dashboardRoutes.tsx`)
-- Slice: `frontend/src/slices/dashboard-home/`
+- Slice: `frontend/slices/dashboard-home/`
 - Komponen utama: `DashboardHome.tsx`
 
 ## Struktur Slice
@@ -84,23 +84,23 @@ Onboarding wizard mounts when `getCurrentUser()` returns no `userProfile` — co
 
 ```
 # Slice
-frontend/src/slices/dashboard-home/
+frontend/slices/dashboard-home/
 
 # Shared hooks (likely already present if those slices ported)
-frontend/src/shared/hooks/useApplications.ts
-frontend/src/shared/hooks/useAgenda.ts
-frontend/src/shared/hooks/useAuth.tsx
-frontend/src/shared/components/onboarding/                # QuickFillButton
+frontend/shared/hooks/useApplications.ts
+frontend/shared/hooks/useAgenda.ts
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/components/onboarding/                # QuickFillButton
 ```
 
 **cp:**
 
 ```bash
 SRC=~/projects/CareerPack DST=~/projects/<target>
-cp -r "$SRC/frontend/src/slices/dashboard-home" "$DST/frontend/src/slices/"
-cp "$SRC/frontend/src/shared/hooks/useApplications.ts" "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/hooks/useAgenda.ts"       "$DST/frontend/src/shared/hooks/"
-cp -r "$SRC/frontend/src/shared/components/onboarding/." "$DST/frontend/src/shared/components/onboarding/"
+cp -r "$SRC/frontend/slices/dashboard-home" "$DST/frontend/slices/"
+cp "$SRC/frontend/shared/hooks/useApplications.ts" "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/hooks/useAgenda.ts"       "$DST/frontend/shared/hooks/"
+cp -r "$SRC/frontend/shared/components/onboarding/." "$DST/frontend/shared/components/onboarding/"
 ```
 
 **Backend deps:** `api.profile.queries.{getCurrentUser, getProfileCompleteness}`, `api.applications.queries.getUserApplications`, `api.calendar.queries.listEvents`. Stub these to empty arrays for greenfield targets without those slices yet.

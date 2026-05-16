@@ -37,8 +37,8 @@ CareerPack/
 
 ## Design Prinsip
 
-1. **Slice-based architecture** — setiap fitur = satu folder di `src/slices/<name>/`. Komponen, hooks, types, constants hidup berdampingan. Cross-slice coupling dilarang — pakai `@/shared/*` sebagai jembatan.
-2. **App Router + catch-all dashboard** — semua dashboard view di-resolve via `/dashboard/[[...slug]]/page.tsx` yang memakai `DASHBOARD_VIEWS` registry (SSOT di `src/shared/lib/dashboardRoutes.tsx`). Tiap view di-lazy via `next/dynamic` — code-splitting otomatis per slice.
+1. **Slice-based architecture** — setiap fitur = satu folder di `slices/<name>/`. Komponen, hooks, types, constants hidup berdampingan. Cross-slice coupling dilarang — pakai `@/shared/*` sebagai jembatan.
+2. **App Router + catch-all dashboard** — semua dashboard view di-resolve via `/dashboard/[[...slug]]/page.tsx` yang memakai `DASHBOARD_VIEWS` registry (SSOT di `shared/lib/dashboardRoutes.tsx`). Tiap view di-lazy via `next/dynamic` — code-splitting otomatis per slice.
 3. **Convex = SSOT data** — tidak ada REST/tRPC layer. Frontend pakai `useQuery`/`useMutation` langsung. Auth pakai `@convex-dev/auth`.
 4. **Typecheck ketat** — `strict: true`, ESLint `--max-warnings=0`, `tsc --noEmit` untuk frontend + Convex. CI gagal kalau ada warning.
-5. **Env lazy** — `src/shared/lib/env.ts` baca env via getter, bukan time module load, supaya Next layout bundle tidak crash sebelum ErrorBoundary siap.
+5. **Env lazy** — `shared/lib/env.ts` baca env via getter, bukan time module load, supaya Next layout bundle tidak crash sebelum ErrorBoundary siap.

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useAction, useQuery } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
-import type { Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { notify } from "@/shared/lib/notify";
 import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 

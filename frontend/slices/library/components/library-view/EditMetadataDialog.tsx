@@ -16,7 +16,7 @@ import {
   ResponsiveDialogTitle,
 } from "@/shared/components/ui/responsive-dialog";
 import { notify } from "@/shared/lib/notify";
-import type { Id } from "../../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 import type { LibraryFile } from "../../types/file";
 
 interface Props {

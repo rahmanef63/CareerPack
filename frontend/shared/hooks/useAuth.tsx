@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { ROUTES } from "@/shared/lib/routes";
 import { convexHttpUrl } from "@/shared/lib/env";
 import type {

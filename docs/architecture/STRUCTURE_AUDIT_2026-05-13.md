@@ -2,7 +2,7 @@
 
 Auto-generated via `audit-structure` skill.
 
-Run: `node ~/.agents/skills/audit-structure/scripts/audit-structure.mjs --slice-base frontend/src/slices --shared-base frontend/src/shared --verbose`
+Run: `node ~/.agents/skills/audit-structure/scripts/audit-structure.mjs --slice-base frontend/slices --shared-base frontend/shared --verbose`
 
 ## Summary
 
@@ -69,7 +69,7 @@ Listing top 10 via `--verbose`. Run:
 
 ```bash
 node ~/.agents/skills/audit-structure/scripts/audit-structure.mjs \
-  --slice-base frontend/src/slices --shared-base frontend/src/shared \
+  --slice-base frontend/slices --shared-base frontend/shared \
   --json | jq '.size[0:10] | .[] | "\(.loc) LOC  \(.file)"'
 ```
 
@@ -94,5 +94,5 @@ These are pre-existing operator-backlog items, not new audit findings.
 
 ```bash
 node ~/.agents/skills/audit-structure/scripts/audit-structure.mjs \
-  --slice-base frontend/src/slices --shared-base frontend/src/shared --quick
+  --slice-base frontend/slices --shared-base frontend/shared --quick
 ```

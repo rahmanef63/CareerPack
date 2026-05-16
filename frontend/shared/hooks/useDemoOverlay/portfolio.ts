@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { notify } from "@/shared/lib/notify";
 import { useLocalStorageState } from "../useLocalStorageState";
 import { DEMO_PORTFOLIO, type DemoPortfolioSeed } from "@/shared/data/demoUser";
-import type { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import type {
   PortfolioFormValues, PortfolioItem, PortfolioItemId,
 } from "@/slices/portfolio/types";

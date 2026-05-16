@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, X } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";

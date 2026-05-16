@@ -9,7 +9,7 @@ Tab utama personalisasi user — profil pribadi (CV-relevant), preferensi tampil
 ## Route & Entry
 
 - URL: `/dashboard/settings` (dan legacy `/dashboard/ai-settings` redirect ke sini)
-- Slice: `frontend/src/slices/settings/`
+- Slice: `frontend/slices/settings/`
 - Komponen utama: `SettingsView.tsx`
 
 ## Struktur Slice
@@ -173,29 +173,29 @@ Semua skill punya `argsFromText` parser → user bisa typing `/phone 08123456789
 
 ```
 # Slice (manifest + binder + 5 components)
-frontend/src/slices/settings/
+frontend/slices/settings/
 
 # Shared deps
-frontend/src/shared/types/sliceManifest.ts                              # SliceManifest, SliceSkill
-frontend/src/shared/lib/sliceRegistry.ts
-frontend/src/shared/lib/aiActionBus.ts
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/utils.ts
-frontend/src/shared/hooks/useAuth.tsx
-frontend/src/shared/hooks/useDemoOverlay.ts
-frontend/src/shared/hooks/useUIPrefs.tsx
-frontend/src/shared/providers/ThemePresetProvider.tsx
-frontend/src/shared/components/files/FileUpload.tsx
-frontend/src/shared/hooks/useFileUpload.ts
-frontend/src/shared/lib/imageConvert.ts
-frontend/src/shared/components/ai-settings/AISettingsPanel.tsx
-frontend/src/shared/components/onboarding/                              # QuickFillButton
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-alert-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/lib/themePresets.ts                                 # tweakcn preset list
-frontend/src/shared/lib/presetGroups.ts
+frontend/shared/types/sliceManifest.ts                              # SliceManifest, SliceSkill
+frontend/shared/lib/sliceRegistry.ts
+frontend/shared/lib/aiActionBus.ts
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/hooks/useDemoOverlay.ts
+frontend/shared/hooks/useUIPrefs.tsx
+frontend/shared/providers/ThemePresetProvider.tsx
+frontend/shared/components/files/FileUpload.tsx
+frontend/shared/hooks/useFileUpload.ts
+frontend/shared/lib/imageConvert.ts
+frontend/shared/components/ai-settings/AISettingsPanel.tsx
+frontend/shared/components/onboarding/                              # QuickFillButton
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/lib/themePresets.ts                                 # tweakcn preset list
+frontend/shared/lib/presetGroups.ts
 
 # Backend
 convex/profile/                                                         # full domain (schema + queries + mutations + blocks + autoBlocks + brandingPayload)
@@ -211,39 +211,39 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/settings" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/settings" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/types"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/providers"
-mkdir -p "$DST/frontend/src/shared/components/files"
-mkdir -p "$DST/frontend/src/shared/components/ai-settings"
-mkdir -p "$DST/frontend/src/shared/components/onboarding"
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/components/layout"
+mkdir -p "$DST/frontend/shared/types"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/providers"
+mkdir -p "$DST/frontend/shared/components/files"
+mkdir -p "$DST/frontend/shared/components/ai-settings"
+mkdir -p "$DST/frontend/shared/components/onboarding"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/components/layout"
 
-cp    "$SRC/frontend/src/shared/types/sliceManifest.ts"                     "$DST/frontend/src/shared/types/"
-cp    "$SRC/frontend/src/shared/lib/sliceRegistry.ts"                       "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/aiActionBus.ts"                         "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/notify.ts"                              "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/themePresets.ts"                        "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/presetGroups.ts"                        "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/imageConvert.ts"                        "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/hooks/useAuth.tsx"                          "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"                    "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/hooks/useUIPrefs.tsx"                       "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/hooks/useFileUpload.ts"                     "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/providers/ThemePresetProvider.tsx"          "$DST/frontend/src/shared/providers/"
-cp    "$SRC/frontend/src/shared/components/files/FileUpload.tsx"            "$DST/frontend/src/shared/components/files/"
-cp    "$SRC/frontend/src/shared/components/ai-settings/AISettingsPanel.tsx" "$DST/frontend/src/shared/components/ai-settings/"
-cp -r "$SRC/frontend/src/shared/components/onboarding"                      "$DST/frontend/src/shared/components/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx"   "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-alert-dialog.tsx"  "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"        "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"        "$DST/frontend/src/shared/components/layout/"
+cp    "$SRC/frontend/shared/types/sliceManifest.ts"                     "$DST/frontend/shared/types/"
+cp    "$SRC/frontend/shared/lib/sliceRegistry.ts"                       "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/aiActionBus.ts"                         "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/notify.ts"                              "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/themePresets.ts"                        "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/presetGroups.ts"                        "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/imageConvert.ts"                        "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/hooks/useAuth.tsx"                          "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/hooks/useDemoOverlay.ts"                    "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/hooks/useUIPrefs.tsx"                       "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/hooks/useFileUpload.ts"                     "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/providers/ThemePresetProvider.tsx"          "$DST/frontend/shared/providers/"
+cp    "$SRC/frontend/shared/components/files/FileUpload.tsx"            "$DST/frontend/shared/components/files/"
+cp    "$SRC/frontend/shared/components/ai-settings/AISettingsPanel.tsx" "$DST/frontend/shared/components/ai-settings/"
+cp -r "$SRC/frontend/shared/components/onboarding"                      "$DST/frontend/shared/components/"
+cp    "$SRC/frontend/shared/components/ui/responsive-page-header.tsx"   "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-alert-dialog.tsx"  "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-select.tsx"        "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/layout/PageContainer.tsx"        "$DST/frontend/shared/components/layout/"
 
 # Backend
 cp -r "$SRC/convex/profile" "$DST/convex/"
@@ -282,13 +282,13 @@ pnpm -F frontend add next-themes react-easy-crop
 
 **Manifest + binder wiring** (CRITICAL):
 
-1. **Register manifest** in `frontend/src/shared/lib/sliceRegistry.ts`:
+1. **Register manifest** in `frontend/shared/lib/sliceRegistry.ts`:
    ```ts
    import { settingsManifest } from "@/slices/settings";
    export const SLICE_REGISTRY = [settingsManifest, /* … */];
    ```
 
-2. **Mount binder globally** in `frontend/src/shared/providers/Providers.tsx`:
+2. **Mount binder globally** in `frontend/shared/providers/Providers.tsx`:
    ```ts
    import { SettingsCapabilities } from "@/slices/settings";
    // ...

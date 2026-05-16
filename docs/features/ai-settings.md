@@ -10,7 +10,7 @@ Per-user AI provider config — user pilih provider (OpenAI / OpenRouter / Groq 
 
 - URL: `/dashboard/ai-settings` (resolve ke `SettingsView` dengan tab AI aktif — bookmark legacy)
 - Embedded juga sebagai sub-tab "AI" di Settings (`SettingsView` → render `AISettingsPanel`)
-- Slice: `frontend/src/slices/ai-settings/`
+- Slice: `frontend/slices/ai-settings/`
 - Komponen utama: `AISettingsPanel.tsx` (lives at `@/shared/components/ai-settings/`)
 
 ## Struktur Slice
@@ -20,7 +20,7 @@ ai-settings/
 └─ index.ts          Re-exports `AISettingsPanel` from @/shared/components/ai-settings
 ```
 
-`index.ts` adalah satu-satunya file di slice — slice ini dengan sengaja tipis. Komponen sebenarnya hidup di `frontend/src/shared/components/ai-settings/AISettingsPanel.tsx` supaya bisa di-embed di `SettingsView` (tab AI) tanpa cross-slice import (R1).
+`index.ts` adalah satu-satunya file di slice — slice ini dengan sengaja tipis. Komponen sebenarnya hidup di `frontend/shared/components/ai-settings/AISettingsPanel.tsx` supaya bisa di-embed di `SettingsView` (tab AI) tanpa cross-slice import (R1).
 
 ```ts
 // slices/ai-settings/index.ts
@@ -161,10 +161,10 @@ API key di-mask saat `getMyAISettings` return — 4 char prefix + middle `••
 
 ```
 # Slice (1 file — pure re-export)
-frontend/src/slices/ai-settings/
+frontend/slices/ai-settings/
 
 # Real component (lives in shared)
-frontend/src/shared/components/ai-settings/AISettingsPanel.tsx
+frontend/shared/components/ai-settings/AISettingsPanel.tsx
 
 # Backend
 convex/ai/                                                              # full domain (queries + mutations + actions + skillHandlers + schema)
@@ -182,12 +182,12 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice (re-export only)
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/ai-settings" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/ai-settings" "$DST/frontend/slices/"
 
 # Real component
-mkdir -p "$DST/frontend/src/shared/components/ai-settings"
-cp "$SRC/frontend/src/shared/components/ai-settings/AISettingsPanel.tsx" "$DST/frontend/src/shared/components/ai-settings/"
+mkdir -p "$DST/frontend/shared/components/ai-settings"
+cp "$SRC/frontend/shared/components/ai-settings/AISettingsPanel.tsx" "$DST/frontend/shared/components/ai-settings/"
 
 # Backend
 cp -r "$SRC/convex/ai" "$DST/convex/"

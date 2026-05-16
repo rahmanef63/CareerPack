@@ -23,9 +23,9 @@ missing, port it from here first.
 | **pnpm workspace OR single-package** | Imports use `@/` path alias to `frontend/src` | `pnpm-workspace.yaml` or `tsconfig.paths` |
 | **Self-hosted Convex** (`convex/` dir + `@convex-dev/auth`) | Every data-touching feature uses `useQuery`/`useMutation` | `convex/schema.ts` exists, `convex/_generated/` present |
 | **Tailwind v3** with **OKLCH tokens** | Every component uses semantic tokens (`bg-primary`, `text-brand`, `border-border/40`) | Grep for `oklch(var(` in `tailwind.config.ts` |
-| **shadcn/ui primitives** | Every component uses `Button`, `Card`, `Input`, `Dialog`, etc. | `frontend/src/shared/components/ui/` |
+| **shadcn/ui primitives** | Every component uses `Button`, `Card`, `Input`, `Dialog`, etc. | `frontend/shared/components/ui/` |
 | **sonner Toaster** mounted at root | Features fire `toast.success` / `toast.error` | `Providers.tsx` includes `<Toaster />` |
-| **Responsive shell** | Features assume MobileContainer (BottomNav) + DesktopContainer (Sidebar) wrap `(dashboard)/` | Copy containers from `frontend/src/shared/containers/` if absent |
+| **Responsive shell** | Features assume MobileContainer (BottomNav) + DesktopContainer (Sidebar) wrap `(dashboard)/` | Copy containers from `frontend/shared/containers/` if absent |
 
 If the target is greenfield Next.js + Convex + shadcn — minimum 1 hour
 to set up the baseline. See `docs/architecture.md` for the full shell
@@ -42,9 +42,9 @@ slice.
 ### Auth
 
 ```
-frontend/src/shared/hooks/useAuth.tsx
-frontend/src/shared/types/auth.ts
-frontend/src/shared/components/auth/RouteGuard.tsx
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/types/auth.ts
+frontend/shared/components/auth/RouteGuard.tsx
 convex/_shared/auth.ts                 → requireUser, optionalUser, requireOwnedDoc
 convex/auth.ts                      → @convex-dev/auth Password provider + PBKDF2
 convex/auth.config.ts
@@ -54,7 +54,7 @@ convex/http.ts
 ### UI primitives (shadcn — assume already present)
 
 ```
-frontend/src/shared/components/ui/
+frontend/shared/components/ui/
   button.tsx, card.tsx, input.tsx, label.tsx, textarea.tsx,
   dialog.tsx, responsive-dialog.tsx, select.tsx, responsive-select.tsx,
   tabs.tsx, badge.tsx, progress.tsx, scroll-area.tsx, sheet.tsx,
@@ -69,10 +69,10 @@ wrappers wholesale; use upstream.
 ### Cross-cutting utilities
 
 ```
-frontend/src/shared/lib/utils.ts            → cn() classname merger
-frontend/src/shared/lib/env.ts              → lazy env getter
-frontend/src/shared/hooks/use-mobile.tsx    → viewport detection
-frontend/src/shared/components/interactions/MicroInteractions.tsx
+frontend/shared/lib/utils.ts            → cn() classname merger
+frontend/shared/lib/env.ts              → lazy env getter
+frontend/shared/hooks/use-mobile.tsx    → viewport detection
+frontend/shared/components/interactions/MicroInteractions.tsx
   (several slices consume MagneticTabs, SwipeToDelete, useDragReorder,
    TypingDots, AnimatedProgress — copy if needed)
 ```
@@ -80,7 +80,7 @@ frontend/src/shared/components/interactions/MicroInteractions.tsx
 ### Theme (only if the slice uses slash-opacity utilities)
 
 ```
-frontend/src/shared/styles/index.css        → OKLCH :root vars
+frontend/shared/styles/index.css        → OKLCH :root vars
 frontend/tailwind.config.ts                 → oklch(var(--x) / <alpha-value>)
 ```
 
@@ -126,9 +126,9 @@ If the slice uses `files` (Convex storage), also port:
 ```
 convex/files/
 convex/schema.ts → files table (tenantId scope)
-frontend/src/shared/hooks/useFileUpload.ts
-frontend/src/shared/lib/imageConvert.ts
-frontend/src/shared/components/files/FileUpload.tsx
+frontend/shared/hooks/useFileUpload.ts
+frontend/shared/lib/imageConvert.ts
+frontend/shared/components/files/FileUpload.tsx
 ```
 
 See `file-upload.md` for the complete file-storage porting doc.
@@ -139,9 +139,9 @@ See `file-upload.md` for the complete file-storage porting doc.
 
 If the slice renders in `(dashboard)/dashboard/[[...slug]]`:
 
-1. Add import + entry in `frontend/src/shared/lib/dashboardRoutes.tsx`
+1. Add import + entry in `frontend/shared/lib/dashboardRoutes.tsx`
    (`DASHBOARD_VIEWS` map). Lazy-load via `next/dynamic`.
-2. Add to `frontend/src/shared/components/layout/navConfig.ts`
+2. Add to `frontend/shared/components/layout/navConfig.ts`
    (`PRIMARY_NAV` or `MORE_APPS`). Slug must match `DASHBOARD_VIEWS`
    key.
 3. **Optional** super-admin / role gate: add `superAdminOnly: true`

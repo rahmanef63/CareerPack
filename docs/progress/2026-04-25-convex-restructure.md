@@ -14,7 +14,7 @@
 |---|---|
 | Opensource-ready | `convex/cv/`, `convex/matcher/` instantly scannable for outside contributors. |
 | AI context | Loading `convex/<domain>/**` ≈ 5–6k tokens vs ~10k via grep on flat layout. |
-| Frontend ↔ backend symmetry | `frontend/src/slices/cv/` ↔ `convex/cv/`. Mental model matches. |
+| Frontend ↔ backend symmetry | `frontend/slices/cv/` ↔ `convex/cv/`. Mental model matches. |
 | Future ATS Match feature | Lands in `convex/matcher/atsMatch.ts` next to the rest, not as another flat file. |
 | Schema fragmentation | Per-domain `schema.ts` keeps table definitions next to their usage; root schema becomes a thin orchestrator. |
 

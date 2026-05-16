@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { notify } from "@/shared/lib/notify";
 import { Plus, Trash2 } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
-import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Doc, Id } from "../../../../convex/_generated/dataModel";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,

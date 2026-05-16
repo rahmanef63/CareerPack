@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Activity, ChartLine, Lock, MessageCircle, Plus } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import {

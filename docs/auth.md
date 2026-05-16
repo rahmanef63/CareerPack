@@ -27,7 +27,7 @@ convexAuth({
 
 ## 2. Frontend Context
 
-File: `frontend/src/shared/hooks/useAuth.tsx`.
+File: `frontend/shared/hooks/useAuth.tsx`.
 
 `<AuthProvider>` wrap app. Pakai:
 

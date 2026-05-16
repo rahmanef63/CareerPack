@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { Activity, CheckCircle2, Clock, Target } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,

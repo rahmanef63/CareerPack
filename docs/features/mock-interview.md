@@ -13,7 +13,7 @@ bank) kalau quota AI habis atau action gagal.
 ## Route & Entry
 
 - URL: `/dashboard/interview`
-- Slice: `frontend/src/slices/mock-interview/`
+- Slice: `frontend/slices/mock-interview/`
 - Komponen utama: `MockInterview.tsx`
 - **No manifest yet** — slice belum diregister di `sliceRegistry.ts`;
   nav fallback ke `dashboardRoutes.tsx` + `navConfig.ts` (legacy).
@@ -118,13 +118,13 @@ Schema:
 
 ```
 # Slice itself
-frontend/src/slices/mock-interview/
+frontend/slices/mock-interview/
 
 # Shared deps
-frontend/src/shared/data/indonesianData.ts            # indonesianInterviewQuestions + difficulty labels
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/lib/notify.ts
+frontend/shared/data/indonesianData.ts            # indonesianInterviewQuestions + difficulty labels
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/lib/notify.ts
 
 # Backend
 convex/mockInterview/                                 # queries.ts, mutations.ts, schema.ts
@@ -141,19 +141,19 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/mock-interview" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/mock-interview" "$DST/frontend/slices/"
 
 # Shared helpers
-mkdir -p "$DST/frontend/src/shared/data"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/shared/data"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/components/ui"
 
-cp "$SRC/frontend/src/shared/data/indonesianData.ts"                   "$DST/frontend/src/shared/data/"
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"      "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                            "$DST/frontend/src/shared/lib/"
+cp "$SRC/frontend/shared/data/indonesianData.ts"                   "$DST/frontend/shared/data/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx"      "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/lib/notify.ts"                            "$DST/frontend/shared/lib/"
 
 # Backend
 cp -r "$SRC/convex/mockInterview" "$DST/convex/"
@@ -214,9 +214,9 @@ exist. Skip the manifest wiring section.
 
 **Nav registration** (legacy):
 
-1. `frontend/src/shared/lib/dashboardRoutes.tsx` — add lazy import
+1. `frontend/shared/lib/dashboardRoutes.tsx` — add lazy import
    for `MockInterview` keyed by slug `interview`.
-2. `frontend/src/shared/components/layout/navConfig.ts` — add to
+2. `frontend/shared/components/layout/navConfig.ts` — add to
    `MORE_APPS` with `href: "/dashboard/interview"`.
 
 **i18n & content** — `indonesianInterviewQuestions` di

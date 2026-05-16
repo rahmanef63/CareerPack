@@ -47,7 +47,7 @@ Captured in `.claude/skills/slice-refactor/SKILL.md`:
 
 ### Commit `8a269bf` — hoist roadmap `TemplateNode` + `RESOURCE_TYPES` to shared
 
-- New `frontend/src/shared/types/roadmap.ts` — canonical `TemplateNode`, `TemplateNodeResource`, `ROADMAP_RESOURCE_TYPES`.
+- New `frontend/shared/types/roadmap.ts` — canonical `TemplateNode`, `TemplateNodeResource`, `ROADMAP_RESOURCE_TYPES`.
 - `slices/admin-panel/types/template.ts`: form-draft `TemplateNode = Omit<TemplateNodeStrict, "estimatedHours"> & { estimatedHours: number | "" }` — extends, doesn't restate.
 - `slices/skill-roadmap/types/builder.ts`: re-exports `TemplateNode` from shared.
 
@@ -63,7 +63,7 @@ Captured in `.claude/skills/slice-refactor/SKILL.md`:
   - `DIRECT_MAP` (35+ slugs → known replacements)
   - `KEYWORD_FALLBACK` (35+ keyword matches by resource title)
   - `PLACEHOLDER_HOSTS = [dicoding.com, skillacademy.id, petanikode.com, youtube.com/@ProgrammerZamanNow, youtube.com/@sekolahkoding]`
-- `frontend/src/shared/data/demoUser.ts` — demo CV cert link → `freecodecamp.org/certification/...`
+- `frontend/shared/data/demoUser.ts` — demo CV cert link → `freecodecamp.org/certification/...`
 - Icon audit: every roadmap JSON `"icon"` value verified valid lucide-react PascalCase. No non-lucide icon library imports anywhere in frontend (180 files use `lucide-react`).
 
 ## 4. Side incident

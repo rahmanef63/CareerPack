@@ -113,7 +113,7 @@ The page won't compile without `<AdminPanel>` available.
 
 **Common breakage:**
 - `RouteGuard` mode="role" not implemented → port the role branch from
-  `frontend/src/shared/components/auth/RouteGuard.tsx`.
+  `frontend/shared/components/auth/RouteGuard.tsx`.
 - `userProfiles.role` field missing → add to schema; default `"user"`.
 
 **Testing:**

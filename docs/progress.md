@@ -9,7 +9,7 @@ Last updated: 2026-05-15.
 - 2026-05-07 — Roadmap content gap (partial): added `business/hospitality-manager.json` — 8-node Hospitality & Hotel Management track (Front Office → Housekeeping → F&B → Revenue → Guest Experience → MICE Sales → GM Leadership) with Indonesia-specific resources (PHRI, Kemenparekraf, BPOM HACCP). Marks the start of clearing the "non-tech domain" gap; remaining domains (construction, agriculture, manufacturing) still need a domain expert pass.
 - 2026-05-07 — i18n phase 1 — browser-translate-first locale primitive. New `useLocale()` hook + `LocaleProvider` (id ↔ en, persisted to localStorage, auto-detects from `navigator.language`). Bound `Intl.*` formatters pivot date / number / currency between `id-ID`+IDR and `en-US`+USD. `<TranslateHint />` shows a one-time dismissible banner to non-id browsers pointing to right-click → Translate. Settings → Appearance → "Bahasa & Format" surfaces the toggle with a live sample. Existing `formatDate.ts` (50+ callsites, hard-coded id-ID) untouched this round — that refactor is the obvious next step. Aligns with the user's directive: "as dynamic as possible, lean on browser auto-translate."
 - 2026-05-07 — Idempotency rollout to remaining 3 retry-prone actions: `cv.tailor`, `cv.generateCoverLetter`, `matcher.scanCV` each take optional `idempotencyKey` + wrap their handler body via `withIdempotency(ctx, userId, key, () => impl(...))`. Frontend mints `crypto.randomUUID()` per click in the four call sites (CoverLetterDialog, ResumeTailorDialog, useATSScan, MatcherCapabilities). Skipped: `ai.chat` (streaming reconnect already retry-safe via chatConversations history merge); `matcher.ats.extractKeywords` is wrapped at the parent `scanCV` boundary instead.
-- 2026-05-07 — si-coder audit follow-up: build-time `NEXT_PUBLIC_CONVEX_URL` placeholder guard. Dockerfile uses `ARG NEXT_PUBLIC_CONVEX_URL=https://example.convex.cloud` as build default (Dokploy is expected to override via build-arg). If the override is missing, the dummy URL gets inlined into the JS bundle — every Convex call silently fails. `frontend/src/shared/lib/env.ts` now throws on read when the placeholder is detected, failing loud at first access instead of silently. 1 new vitest case = 160 total. Aligned with si-coder mandate: NEXT_PUBLIC vars must be real at build time, not placeholders.
+- 2026-05-07 — si-coder audit follow-up: build-time `NEXT_PUBLIC_CONVEX_URL` placeholder guard. Dockerfile uses `ARG NEXT_PUBLIC_CONVEX_URL=https://example.convex.cloud` as build default (Dokploy is expected to override via build-arg). If the override is missing, the dummy URL gets inlined into the JS bundle — every Convex call silently fails. `frontend/shared/lib/env.ts` now throws on read when the placeholder is detected, failing loud at first access instead of silently. 1 new vitest case = 160 total. Aligned with si-coder mandate: NEXT_PUBLIC vars must be real at build time, not placeholders.
 - 2026-05-07 — signIn brute-force gate + CSP `unsafe-eval` drop + PWA validate. New `/api/auth/signin-attempt` httpAction (POST + OPTIONS) bumps the existing `loginCheckIpEvents` bucket on every failed login; brute-force scripts running through the official client share a 30/hr/IP budget with the email-pre-check, capping out fast. Convex auth's `signIn` is sealed → raw-WebSocket abuse is residual; PBKDF2-SHA256 100k iter (~100ms/attempt) handles the worst case. Dropped `'unsafe-eval'` from `script-src` in `next.config.ts` (verified zero `eval` / `new Function` callsites in bundle). PWA static config validated — manifest (10 icons + maskable + apple-touch + screenshots + shortcuts), sw.js (precache + versioned cache name).
 - 2026-05-07 — AI idempotency cache. New `aiIdempotency` table + `withIdempotency(ctx, userId, key, fn)` helper in `_shared/idempotency.ts`. Wraps action body so duplicate `(userId, key)` within 30m returns the cached `JSON.stringify(result)` — no quota deduct, no upstream call. First adopter: `cv.translate` (frontend mints `crypto.randomUUID()` per click). Result-size cap 10KB. `pruneAppendOnlyTables` extended to sweep `aiIdempotency` >30m. Pattern documented for further actions to adopt.
 - 2026-05-07 — Security batch: CSRF Origin gate + PII-safe logs + `/api/health` probe + encrypted backups. `_shared/origin.ts` rejects POSTs from origins not in `APP_URL` ∪ `localhost:3000` (wired to `/api/password-reset/request` + `/api/auth/check-email`). `_shared/redact.ts` shrinks emails to `a***@domain` and ids to `kf2abcde…` before logging — applied to passwordReset, seed, notifications/digest. `convex/health.ts` exposes `GET /api/health` returning `{ ok, ts, db }` (200) or `{ ok: false }` (503) for Dokploy / external uptime monitors. `backend/convex-self-hosted/backup.sh` now AES-256 encrypts via `gpg --symmetric` when `BACKUP_PASSPHRASE_FILE` is set + readable (no-op when unset → back-compat). 16 new vitest cases for redact + origin = 159 total.
@@ -28,7 +28,7 @@ Last updated: 2026-05-15.
 
 ## Current Stack
 
-- Frontend: Next.js 15 App Router (`frontend/`, slice-based di `src/slices/`)
+- Frontend: Next.js 15 App Router (`frontend/`, slice-based di `slices/`)
 - State/UI: React 19 + Tailwind 3 + shadcn (36 UI files aktif)
 - Backend: Convex (`convex/`) — self-hosted default (Dokploy), cloud tetap didukung
 - Auth: `@convex-dev/auth` — Password (PBKDF2-SHA256 100k) + Anonymous provider
@@ -38,7 +38,7 @@ Last updated: 2026-05-15.
 
 - [x] Vite → Next.js App Router (`frontend/`)
 - [x] React Router → App Router route tree (`(marketing)`, `(dashboard)`, `/admin`)
-- [x] Feature folders pindah ke `src/slices/` (bukan `features/` — dokumen lama sudah dihapus)
+- [x] Feature folders pindah ke `slices/` (bukan `features/` — dokumen lama sudah dihapus)
 - [x] Catch-all dashboard `/dashboard/[[...slug]]` + registry `DASHBOARD_VIEWS`
 - [x] Unused files dihapus (21 shadcn UI + empty stubs + slice config vestigial + shared/index barrel)
 - [x] AI action flow: heuristic offline + OpenAI-compat online via `convex/ai.ts`
@@ -273,7 +273,7 @@ as consumer; document-checklist slice harvested.
   table (❌ Locked vs ✅ Portable), trigger prompts table.
 
 - `02233d7` First consumer manifest:
-  `frontend/src/slices/document-checklist/.kitab.json`
+  `frontend/slices/document-checklist/.kitab.json`
   (kitabVersion 0.1.0, consumerVersion 0.1.0, syncDirection
   bidirectional, generalisation status `needs-adapter` with 5
   blockers).

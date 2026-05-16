@@ -36,7 +36,7 @@ import {
   describeConversion,
   isConvertibleImage,
 } from "@/shared/lib/imageConvert";
-import type { Id } from "../../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
 export interface FileUploadResult {
   storageId: string;

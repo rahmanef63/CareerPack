@@ -9,7 +9,7 @@ Kontak profesional (rekruter, mentor, peer, lainnya) dengan profil ringkas + qui
 ## Route & Entry
 
 - URL: `/dashboard/networking`
-- Slice: `frontend/src/slices/networking/`
+- Slice: `frontend/slices/networking/`
 - Komponen utama: `NetworkingView.tsx`, `ContactCard.tsx`, `ContactForm.tsx`
 
 ## Struktur Slice
@@ -125,21 +125,21 @@ Role enum di-normalise server-side ke salah satu dari `recruiter | mentor | peer
 
 ```
 # Slice (includes manifest.ts + NetworkingCapabilities.tsx)
-frontend/src/slices/networking/
+frontend/slices/networking/
 
 # Shared deps
-frontend/src/shared/types/sliceManifest.ts                              # SliceManifest, SliceSkill
-frontend/src/shared/lib/sliceRegistry.ts                                # central registry (target add manifest here)
-frontend/src/shared/lib/aiActionBus.ts                                  # publish/subscribe pubsub
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/utils.ts
-frontend/src/shared/hooks/useAuth.tsx
-frontend/src/shared/hooks/useDemoOverlay.ts
-frontend/src/shared/components/onboarding/                              # QuickFillButton
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-carousel.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
+frontend/shared/types/sliceManifest.ts                              # SliceManifest, SliceSkill
+frontend/shared/lib/sliceRegistry.ts                                # central registry (target add manifest here)
+frontend/shared/lib/aiActionBus.ts                                  # publish/subscribe pubsub
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/hooks/useDemoOverlay.ts
+frontend/shared/components/onboarding/                              # QuickFillButton
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-carousel.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
 
 # Backend
 convex/contacts/                                                        # schema + queries + mutations
@@ -154,27 +154,27 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/networking" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/networking" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/types"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/components/onboarding"
+mkdir -p "$DST/frontend/shared/types"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/components/onboarding"
 
-cp    "$SRC/frontend/src/shared/types/sliceManifest.ts"                   "$DST/frontend/src/shared/types/"
-cp    "$SRC/frontend/src/shared/lib/sliceRegistry.ts"                     "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/aiActionBus.ts"                       "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/lib/notify.ts"                            "$DST/frontend/src/shared/lib/"
-cp    "$SRC/frontend/src/shared/hooks/useAuth.tsx"                        "$DST/frontend/src/shared/hooks/"
-cp    "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"                  "$DST/frontend/src/shared/hooks/"
-cp -r "$SRC/frontend/src/shared/components/onboarding"                    "$DST/frontend/src/shared/components/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp    "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"      "$DST/frontend/src/shared/components/ui/"
+cp    "$SRC/frontend/shared/types/sliceManifest.ts"                   "$DST/frontend/shared/types/"
+cp    "$SRC/frontend/shared/lib/sliceRegistry.ts"                     "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/aiActionBus.ts"                       "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/lib/notify.ts"                            "$DST/frontend/shared/lib/"
+cp    "$SRC/frontend/shared/hooks/useAuth.tsx"                        "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/hooks/useDemoOverlay.ts"                  "$DST/frontend/shared/hooks/"
+cp -r "$SRC/frontend/shared/components/onboarding"                    "$DST/frontend/shared/components/"
+cp    "$SRC/frontend/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-carousel.tsx"    "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"      "$DST/frontend/shared/components/ui/"
+cp    "$SRC/frontend/shared/components/ui/responsive-select.tsx"      "$DST/frontend/shared/components/ui/"
 
 # Backend
 cp -r "$SRC/convex/contacts" "$DST/convex/"
@@ -204,7 +204,7 @@ declare const fullApi: ApiFromModules<{
 
 **Manifest + binder wiring** (CRITICAL — slice-manifest framework):
 
-1. **Register manifest** in `frontend/src/shared/lib/sliceRegistry.ts`:
+1. **Register manifest** in `frontend/shared/lib/sliceRegistry.ts`:
    ```ts
    import { networkingManifest } from "@/slices/networking";
    export const SLICE_REGISTRY: ReadonlyArray<SliceManifest> = [
@@ -213,7 +213,7 @@ declare const fullApi: ApiFromModules<{
    ];
    ```
 
-2. **Mount binder globally** in `frontend/src/shared/providers/Providers.tsx`:
+2. **Mount binder globally** in `frontend/shared/providers/Providers.tsx`:
    ```ts
    import { NetworkingCapabilities } from "@/slices/networking";
    // ...

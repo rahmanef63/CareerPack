@@ -1,7 +1,7 @@
 "use client";
 
-import { api } from "../../../../../../convex/_generated/api";
-import type { Doc } from "../../../../../../convex/_generated/dataModel";
+import { api } from "../../../../../convex/_generated/api";
+import type { Doc } from "../../../../../convex/_generated/dataModel";
 import type { ColumnDef, FilterDef } from "@/shared/components/data-table";
 import { Badge } from "@/shared/components/ui/badge";
 import { defineResource } from "../../lib/defineResource";

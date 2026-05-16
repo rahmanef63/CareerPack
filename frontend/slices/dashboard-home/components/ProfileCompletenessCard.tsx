@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { ArrowRight, Check, CheckCircle2, Sparkles } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";

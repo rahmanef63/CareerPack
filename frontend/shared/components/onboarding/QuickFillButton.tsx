@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { Button, type ButtonProps } from "@/shared/components/ui/button";
-import type { QuickFillScope } from "../../../../../convex/onboarding/types";
+import type { QuickFillScope } from "../../../../convex/onboarding/types";
 import { QuickFillDialog } from "./QuickFillDialog";
 
 interface QuickFillButtonProps extends Omit<ButtonProps, "onClick"> {

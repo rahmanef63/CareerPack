@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { subscribe } from "@/shared/lib/aiActionBus";
 import { notify } from "@/shared/lib/notify";
 

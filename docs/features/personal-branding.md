@@ -14,7 +14,7 @@ real-time.
 
 - URL builder: `/dashboard/personal-branding`
 - URL public profile: `/[slug]` — page `frontend/app/[slug]/page.tsx` (catch-all marketing route, di-resolve via `api.profile.queries.getBySlug`)
-- Slice: `frontend/src/slices/personal-branding/`
+- Slice: `frontend/slices/personal-branding/`
 - Komponen utama: `PersonalBrandingView.tsx` (~250 baris orchestrator)
 
 ## Struktur Slice
@@ -190,17 +190,17 @@ items. Lazy: only re-runs when watched fields change.
 
 ```
 # Slice (large)
-frontend/src/slices/personal-branding/
+frontend/slices/personal-branding/
 
 # Public route
 frontend/app/[slug]/page.tsx
 frontend/app/[slug]/error.tsx       # if exists
 
 # Shared
-frontend/src/shared/hooks/useDemoOverlay.ts
-frontend/src/shared/components/onboarding/QuickFillButton.tsx
-frontend/src/shared/components/layout/PreviewSplitLayout.tsx
-frontend/src/shared/components/brand/Logo.tsx
+frontend/shared/hooks/useDemoOverlay.ts
+frontend/shared/components/onboarding/QuickFillButton.tsx
+frontend/shared/components/layout/PreviewSplitLayout.tsx
+frontend/shared/components/brand/Logo.tsx
 
 # Backend
 convex/profile/                                            # adds public-slug fields + autoBlocks + brandingPayload
@@ -213,19 +213,19 @@ convex/onboarding/                                         # Quick Fill batch hy
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/slices" \
+mkdir -p "$DST/frontend/slices" \
          "$DST/frontend/app/[slug]" \
-         "$DST/frontend/src/shared/hooks" \
-         "$DST/frontend/src/shared/components/onboarding" \
-         "$DST/frontend/src/shared/components/layout" \
+         "$DST/frontend/shared/hooks" \
+         "$DST/frontend/shared/components/onboarding" \
+         "$DST/frontend/shared/components/layout" \
          "$DST/convex/profile" "$DST/convex/onboarding"
 
-cp -r "$SRC/frontend/src/slices/personal-branding" "$DST/frontend/src/slices/"
+cp -r "$SRC/frontend/slices/personal-branding" "$DST/frontend/slices/"
 cp "$SRC/frontend/app/[slug]/page.tsx"             "$DST/frontend/app/[slug]/"
 cp "$SRC/frontend/app/[slug]/error.tsx"            "$DST/frontend/app/[slug]/" 2>/dev/null || true
-cp "$SRC/frontend/src/shared/hooks/useDemoOverlay.ts"               "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/components/onboarding/QuickFillButton.tsx" "$DST/frontend/src/shared/components/onboarding/"
-cp "$SRC/frontend/src/shared/components/layout/PreviewSplitLayout.tsx"  "$DST/frontend/src/shared/components/layout/"
+cp "$SRC/frontend/shared/hooks/useDemoOverlay.ts"               "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/components/onboarding/QuickFillButton.tsx" "$DST/frontend/shared/components/onboarding/"
+cp "$SRC/frontend/shared/components/layout/PreviewSplitLayout.tsx"  "$DST/frontend/shared/components/layout/"
 
 cp -r "$SRC/convex/profile/."    "$DST/convex/profile/"
 cp -r "$SRC/convex/onboarding/." "$DST/convex/onboarding/"

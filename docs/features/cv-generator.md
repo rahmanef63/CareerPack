@@ -18,7 +18,7 @@ CRUD penuh exposed via AI agent (skill `cv.list`, `cv.create`,
 ## Route & Entry
 
 - URL: `/dashboard/cv`
-- Slice: `frontend/src/slices/cv-generator/`
+- Slice: `frontend/slices/cv-generator/`
 - Komponen utama: `CVGenerator.tsx`
 - Lazy-loaded via `manifest.route.component`.
 
@@ -167,21 +167,21 @@ handle:
 
 ```
 # Slice itself (fully self-contained within the folder)
-frontend/src/slices/cv-generator/
+frontend/slices/cv-generator/
 
 # Shared deps
-frontend/src/shared/components/interactions/MicroInteractions.tsx
-frontend/src/shared/components/files/FileUpload.tsx
-frontend/src/shared/components/stats/ProgressWalker.tsx
-frontend/src/shared/components/ui/responsive-carousel.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/ui/dropdown-menu.tsx
-frontend/src/shared/hooks/useFileUpload.ts
-frontend/src/shared/lib/imageConvert.ts
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/aiActionBus.ts                # if not yet present
-frontend/src/shared/types/sliceManifest.ts            # if not yet present
+frontend/shared/components/interactions/MicroInteractions.tsx
+frontend/shared/components/files/FileUpload.tsx
+frontend/shared/components/stats/ProgressWalker.tsx
+frontend/shared/components/ui/responsive-carousel.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/ui/dropdown-menu.tsx
+frontend/shared/hooks/useFileUpload.ts
+frontend/shared/lib/imageConvert.ts
+frontend/shared/lib/notify.ts
+frontend/shared/lib/aiActionBus.ts                # if not yet present
+frontend/shared/types/sliceManifest.ts            # if not yet present
 
 # Backend
 convex/cv/                                            # actions.ts (translate), mutations.ts, queries.ts, schema.ts
@@ -195,30 +195,30 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/cv-generator" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/cv-generator" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/components/interactions"
-mkdir -p "$DST/frontend/src/shared/components/files"
-mkdir -p "$DST/frontend/src/shared/components/stats"
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/types"
+mkdir -p "$DST/frontend/shared/components/interactions"
+mkdir -p "$DST/frontend/shared/components/files"
+mkdir -p "$DST/frontend/shared/components/stats"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/types"
 
-cp "$SRC/frontend/src/shared/components/interactions/MicroInteractions.tsx" "$DST/frontend/src/shared/components/interactions/"
-cp "$SRC/frontend/src/shared/components/files/FileUpload.tsx"               "$DST/frontend/src/shared/components/files/"
-cp "$SRC/frontend/src/shared/components/stats/ProgressWalker.tsx"           "$DST/frontend/src/shared/components/stats/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-carousel.tsx"         "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"           "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"           "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/dropdown-menu.tsx"               "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/hooks/useFileUpload.ts"                        "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/lib/imageConvert.ts"                           "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                                 "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/aiActionBus.ts"                            "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/types/sliceManifest.ts"                        "$DST/frontend/src/shared/types/"
+cp "$SRC/frontend/shared/components/interactions/MicroInteractions.tsx" "$DST/frontend/shared/components/interactions/"
+cp "$SRC/frontend/shared/components/files/FileUpload.tsx"               "$DST/frontend/shared/components/files/"
+cp "$SRC/frontend/shared/components/stats/ProgressWalker.tsx"           "$DST/frontend/shared/components/stats/"
+cp "$SRC/frontend/shared/components/ui/responsive-carousel.tsx"         "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"           "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-select.tsx"           "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/dropdown-menu.tsx"               "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/hooks/useFileUpload.ts"                        "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/lib/imageConvert.ts"                           "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/notify.ts"                                 "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/aiActionBus.ts"                            "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/types/sliceManifest.ts"                        "$DST/frontend/shared/types/"
 
 # Backend
 cp -r "$SRC/convex/cv"    "$DST/convex/"
@@ -297,12 +297,12 @@ pnpm -F frontend add html2pdf.js jspdf html2canvas react-easy-crop
 
 **Manifest + binder wiring:**
 
-1. `frontend/src/shared/lib/sliceRegistry.ts`:
+1. `frontend/shared/lib/sliceRegistry.ts`:
    ```ts
    import { cvGeneratorManifest } from "@/slices/cv-generator";
    export const SLICE_REGISTRY = [/* …, */ cvGeneratorManifest];
    ```
-2. `frontend/src/shared/providers/Providers.tsx`:
+2. `frontend/shared/providers/Providers.tsx`:
    ```ts
    import { CVCapabilities } from "@/slices/cv-generator";
    <CVCapabilities />

@@ -5,7 +5,7 @@ import { notify } from "@/shared/lib/notify";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
-import type { QuickFillResult } from "../../../../../../convex/onboarding/types";
+import type { QuickFillResult } from "../../../../../convex/onboarding/types";
 
 interface Props {
   result: QuickFillResult;

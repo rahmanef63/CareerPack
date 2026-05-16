@@ -261,23 +261,23 @@ route handler. ~1–2 hours to port assuming target already has Next.js
 
 ```
 # Frontend — PWA components (4 files)
-frontend/src/shared/components/pwa/RegisterSW.tsx
-frontend/src/shared/components/pwa/SWUpdatePrompt.tsx
-frontend/src/shared/components/pwa/ThemeColorSync.tsx
-frontend/src/shared/components/pwa/InstallSidebarButton.tsx
+frontend/shared/components/pwa/RegisterSW.tsx
+frontend/shared/components/pwa/SWUpdatePrompt.tsx
+frontend/shared/components/pwa/ThemeColorSync.tsx
+frontend/shared/components/pwa/InstallSidebarButton.tsx
 
 # Frontend — System / update layer (1 file)
-frontend/src/shared/components/system/UpdateChecker.tsx
+frontend/shared/components/system/UpdateChecker.tsx
 
 # Frontend — hook + libs (3 files)
-frontend/src/shared/hooks/usePWAInstall.tsx
-frontend/src/shared/lib/pwa.ts
-frontend/src/shared/lib/staleBundle.ts
+frontend/shared/hooks/usePWAInstall.tsx
+frontend/shared/lib/pwa.ts
+frontend/shared/lib/staleBundle.ts
 
 # Frontend — mobile shell (the "PWA navbar" — 3 files)
-frontend/src/shared/components/layout/BottomNav.tsx
-frontend/src/shared/components/layout/MoreDrawer.tsx
-frontend/src/shared/containers/MobileContainer.tsx
+frontend/shared/components/layout/BottomNav.tsx
+frontend/shared/components/layout/MoreDrawer.tsx
+frontend/shared/containers/MobileContainer.tsx
 # (also navConfig.ts must already exist in target — see _porting-guide.md)
 
 # Next.js app router (3 files)
@@ -317,26 +317,26 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # PWA components
-mkdir -p "$DST/frontend/src/shared/components/pwa"
-mkdir -p "$DST/frontend/src/shared/components/system"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/containers"
+mkdir -p "$DST/frontend/shared/components/pwa"
+mkdir -p "$DST/frontend/shared/components/system"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/containers"
 
-cp "$SRC/frontend/src/shared/components/pwa/RegisterSW.tsx"          "$DST/frontend/src/shared/components/pwa/"
-cp "$SRC/frontend/src/shared/components/pwa/SWUpdatePrompt.tsx"      "$DST/frontend/src/shared/components/pwa/"
-cp "$SRC/frontend/src/shared/components/pwa/ThemeColorSync.tsx"      "$DST/frontend/src/shared/components/pwa/"
-cp "$SRC/frontend/src/shared/components/pwa/InstallSidebarButton.tsx" "$DST/frontend/src/shared/components/pwa/"
-cp "$SRC/frontend/src/shared/components/system/UpdateChecker.tsx"    "$DST/frontend/src/shared/components/system/"
-cp "$SRC/frontend/src/shared/hooks/usePWAInstall.tsx"                "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/lib/pwa.ts"                             "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/staleBundle.ts"                     "$DST/frontend/src/shared/lib/"
+cp "$SRC/frontend/shared/components/pwa/RegisterSW.tsx"          "$DST/frontend/shared/components/pwa/"
+cp "$SRC/frontend/shared/components/pwa/SWUpdatePrompt.tsx"      "$DST/frontend/shared/components/pwa/"
+cp "$SRC/frontend/shared/components/pwa/ThemeColorSync.tsx"      "$DST/frontend/shared/components/pwa/"
+cp "$SRC/frontend/shared/components/pwa/InstallSidebarButton.tsx" "$DST/frontend/shared/components/pwa/"
+cp "$SRC/frontend/shared/components/system/UpdateChecker.tsx"    "$DST/frontend/shared/components/system/"
+cp "$SRC/frontend/shared/hooks/usePWAInstall.tsx"                "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/lib/pwa.ts"                             "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/staleBundle.ts"                     "$DST/frontend/shared/lib/"
 
 # Mobile shell (the navbar)
-cp "$SRC/frontend/src/shared/components/layout/BottomNav.tsx"        "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/MoreDrawer.tsx"       "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/containers/MobileContainer.tsx"         "$DST/frontend/src/shared/containers/"
+cp "$SRC/frontend/shared/components/layout/BottomNav.tsx"        "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/MoreDrawer.tsx"       "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/containers/MobileContainer.tsx"         "$DST/frontend/shared/containers/"
 
 # App router pages
 mkdir -p "$DST/frontend/app/offline"

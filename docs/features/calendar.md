@@ -12,7 +12,7 @@ push notification N menit sebelum jadwal.
 ## Route & Entry
 
 - URL: `/dashboard/calendar`
-- Slice: `frontend/src/slices/calendar/`
+- Slice: `frontend/slices/calendar/`
 - Komponen utama: `CalendarView.tsx`
 - Lazy-loaded via `manifest.route.component` — tidak perlu manual
   register ke `dashboardRoutes.tsx` lagi.
@@ -111,21 +111,21 @@ Indexes: `by_user`, `by_user_date`, `by_user_application`, `by_date`.
 
 ```
 # Slice itself
-frontend/src/slices/calendar/
+frontend/slices/calendar/
 
 # Shared deps (hook + format + styles + agenda types)
-frontend/src/shared/hooks/useAgenda.ts
-frontend/src/shared/lib/formatDate.ts
-frontend/src/shared/lib/agendaStyles.ts
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/aiActionBus.ts                 # if not yet present
-frontend/src/shared/types/sliceManifest.ts             # if not yet present
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/components/ui/date-picker.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/calendar.tsx          # shadcn
+frontend/shared/hooks/useAgenda.ts
+frontend/shared/lib/formatDate.ts
+frontend/shared/lib/agendaStyles.ts
+frontend/shared/lib/notify.ts
+frontend/shared/lib/aiActionBus.ts                 # if not yet present
+frontend/shared/types/sliceManifest.ts             # if not yet present
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/components/ui/date-picker.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/calendar.tsx          # shadcn
 
 # Backend
 convex/calendar/                                        # queries.ts, mutations.ts, reminders.ts, schema.ts
@@ -138,28 +138,28 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/calendar" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/calendar" "$DST/frontend/slices/"
 
 # Shared helpers
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/types"
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/components/ui"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/types"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/components/ui"
 
-cp "$SRC/frontend/src/shared/hooks/useAgenda.ts"                 "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/lib/formatDate.ts"                  "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/agendaStyles.ts"                "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                      "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/aiActionBus.ts"                 "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/types/sliceManifest.ts"             "$DST/frontend/src/shared/types/"
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx" "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/ui/date-picker.tsx"      "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx" "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx" "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/calendar.tsx"         "$DST/frontend/src/shared/components/ui/"
+cp "$SRC/frontend/shared/hooks/useAgenda.ts"                 "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/lib/formatDate.ts"                  "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/agendaStyles.ts"                "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/notify.ts"                      "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/aiActionBus.ts"                 "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/types/sliceManifest.ts"             "$DST/frontend/shared/types/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx" "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/ui/date-picker.tsx"      "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx" "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-select.tsx" "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx" "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/calendar.tsx"         "$DST/frontend/shared/components/ui/"
 
 # Backend
 cp -r "$SRC/convex/calendar" "$DST/convex/"
@@ -199,13 +199,13 @@ pnpm -F frontend add react-day-picker date-fns
 
 **Manifest + binder wiring** (manifest-driven slice):
 
-1. Add to `frontend/src/shared/lib/sliceRegistry.ts`:
+1. Add to `frontend/shared/lib/sliceRegistry.ts`:
    ```ts
    import { calendarManifest } from "@/slices/calendar";
    // …
    export const SLICE_REGISTRY = [/* …, */ calendarManifest];
    ```
-2. Mount binder in `frontend/src/shared/providers/Providers.tsx`:
+2. Mount binder in `frontend/shared/providers/Providers.tsx`:
    ```ts
    import { CalendarCapabilities } from "@/slices/calendar";
    // … inside the providers tree:
@@ -225,9 +225,9 @@ pnpm -F frontend add react-day-picker date-fns
 
 **Nav registration:** if the target has not adopted the manifest
 registry yet, fall back to legacy nav: add a `MORE_APPS`/`PRIMARY_NAV`
-entry in `frontend/src/shared/components/layout/navConfig.ts` with
+entry in `frontend/shared/components/layout/navConfig.ts` with
 `href: "/dashboard/calendar"`, AND a lazy entry in
-`frontend/src/shared/lib/dashboardRoutes.tsx`. With manifest registry
+`frontend/shared/lib/dashboardRoutes.tsx`. With manifest registry
 in place — no nav edits needed (derived from `manifest.nav`).
 
 **Env vars** — none beyond Convex baseline. Reminder cron uses the

@@ -7,7 +7,7 @@
  * pasted back into the second step of the wizard.
  */
 
-import type { QuickFillScope } from "../../../../../../convex/onboarding/types";
+import type { QuickFillScope } from "../../../../../convex/onboarding/types";
 
 const SCHEMA_PROFILE = `"profile": {
     "fullName": "string (nama lengkap)",

@@ -27,7 +27,7 @@ Detail setup dev + env matrix: [docs/development.md](./docs/development.md).
 ## Repo Structure
 
 ```
-frontend/       Next.js 15 App Router, src/slices/<feature>, src/shared/*
+frontend/       Next.js 15 App Router, slices/<feature>, shared/*
 convex/         Schema + functions (auth, cv, applications, roadmaps, …)
 backend/        Docker stack Convex self-hosted (opsional)
 docs/           Dokumentasi komplit (architecture, backend, per-feature)

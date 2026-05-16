@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAction } from "convex/react";
 import { Check, Loader2, RefreshCw } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/lib/utils";

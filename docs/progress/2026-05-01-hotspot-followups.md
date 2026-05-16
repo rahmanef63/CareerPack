@@ -37,18 +37,18 @@
 - `convex/calendar/reminders.ts` (new) — internalMutation `sweepReminders`. Walks today's + tomorrow's events; for each event with `reminderMinutes` set whose reminder window opened, inserts a `notifications` row and sets `reminderSentAt`. Skips events that already have it set; marks events that ended >30 min ago as sent so retries don't fire late.
 - `convex/crons.ts` — wires it to run hourly at `:05`. Hourly granularity = a 15-minute reminder may fire up to ~60 min early; tighten cadence later if needed.
 - `convex/calendar/mutations.ts` — `createEvent` accepts `reminderMinutes`; `updateEvent` clears `reminderSentAt` whenever the user reschedules so the cron can re-fire.
-- `frontend/src/shared/hooks/useAgenda.ts` — passthrough `reminderMinutes` on the AgendaItem type.
-- `frontend/src/slices/calendar/components/CalendarView.tsx` — new `Pengingat` select in `AddAgendaDialog` with options *Tanpa pengingat / 15 menit / 1 jam / 1 hari sebelum*.
+- `frontend/shared/hooks/useAgenda.ts` — passthrough `reminderMinutes` on the AgendaItem type.
+- `frontend/slices/calendar/components/CalendarView.tsx` — new `Pengingat` select in `AddAgendaDialog` with options *Tanpa pengingat / 15 menit / 1 jam / 1 hari sebelum*.
 
 ### 4 — Calendar ICS export
 
-- `frontend/src/slices/calendar/lib/ics.ts` (new) — minimal RFC 5545 builder. Pure JS, no deps. Emits floating local-time DTSTART (importing client uses local TZ), 60-min default duration, `VALARM` block when `reminderMinutes` is set.
+- `frontend/slices/calendar/lib/ics.ts` (new) — minimal RFC 5545 builder. Pure JS, no deps. Emits floating local-time DTSTART (importing client uses local TZ), 60-min default duration, `VALARM` block when `reminderMinutes` is set.
 - `CalendarView` page header now has *Ekspor .ics* button next to *Tambah Agenda*. Disabled when there are no events. Filename `careerpack-agenda-YYYY-MM-DD.ics`.
 
 ### 5 — ImportCard server-side AI parse
 
 - New action `convex/ai/actions.ts#parseImportText` — takes raw resume / LinkedIn text, sanitizes through the existing pipeline (`requireQuota` → `sanitizeAIInput` → `wrapUserInput`), prompts the AI proxy for a strict JSON QuickFill profile payload, parses + returns it.
-- `frontend/src/slices/personal-branding/sections/ImportCard.tsx` — replaces the *Segera hadir* placeholder with a real *Parse Otomatis (server-side)* card: textarea + button, runs the action, pipes result straight into the existing `api.onboarding.mutations.quickFill` apply pipeline.
+- `frontend/slices/personal-branding/sections/ImportCard.tsx` — replaces the *Segera hadir* placeholder with a real *Parse Otomatis (server-side)* card: textarea + button, runs the action, pipes result straight into the existing `api.onboarding.mutations.quickFill` apply pipeline.
 - Scope fixed to `profile` for now — broader scopes (`cv`, `portfolio`, etc.) still go through the copy-paste flow because their JSON schema is too large for the current `max_tokens=800` budget. Easy to widen later by raising `max_tokens` and adding a scope arg.
 
 ### 6 — Backup recipe finalized

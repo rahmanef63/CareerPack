@@ -11,7 +11,7 @@ Output: readiness score, gap analysis, dan chart breakdown.
 ## Route & Entry
 
 - URL: `/dashboard/calculator`
-- Slice: `frontend/src/slices/financial-calculator/`
+- Slice: `frontend/slices/financial-calculator/`
 - Komponen utama: `FinancialCalculator.tsx`
 
 ## Struktur Slice
@@ -123,20 +123,20 @@ budgetVariables: defineTable({
 
 ```
 # Slice (self-contained, recharts dynamic-imported di FinancialCalculator)
-frontend/src/slices/financial-calculator/
+frontend/slices/financial-calculator/
 
 # Shared deps
-frontend/src/shared/data/indonesianData.ts                              # cost of living + job market
-frontend/src/shared/lib/formatCurrency.ts                               # formatIDR, formatShortIDR
-frontend/src/shared/providers/ThemePresetProvider.tsx                   # chart token bridge (or stub useThemePreset → null)
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-alert-dialog.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/ui/responsive-tooltip.tsx
-frontend/src/shared/components/layout/PageContainer.tsx
-frontend/src/shared/lib/notify.ts
-frontend/src/shared/lib/utils.ts                                        # cn()
+frontend/shared/data/indonesianData.ts                              # cost of living + job market
+frontend/shared/lib/formatCurrency.ts                               # formatIDR, formatShortIDR
+frontend/shared/providers/ThemePresetProvider.tsx                   # chart token bridge (or stub useThemePreset → null)
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/ui/responsive-tooltip.tsx
+frontend/shared/components/layout/PageContainer.tsx
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts                                        # cn()
 
 # Backend
 convex/financial/                                                       # schema + queries + mutations
@@ -149,26 +149,26 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Slice
-mkdir -p "$DST/frontend/src/slices"
-cp -r "$SRC/frontend/src/slices/financial-calculator" "$DST/frontend/src/slices/"
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/financial-calculator" "$DST/frontend/slices/"
 
 # Shared deps
-mkdir -p "$DST/frontend/src/shared/data"
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/providers"
-mkdir -p "$DST/frontend/src/shared/components/ui"
-mkdir -p "$DST/frontend/src/shared/components/layout"
+mkdir -p "$DST/frontend/shared/data"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/providers"
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/components/layout"
 
-cp "$SRC/frontend/src/shared/data/indonesianData.ts"                                "$DST/frontend/src/shared/data/"
-cp "$SRC/frontend/src/shared/lib/formatCurrency.ts"                                 "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/lib/notify.ts"                                         "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/providers/ThemePresetProvider.tsx"                     "$DST/frontend/src/shared/providers/"
-cp "$SRC/frontend/src/shared/components/layout/PageContainer.tsx"                   "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-page-header.tsx"              "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-dialog.tsx"                   "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-alert-dialog.tsx"             "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-select.tsx"                   "$DST/frontend/src/shared/components/ui/"
-cp "$SRC/frontend/src/shared/components/ui/responsive-tooltip.tsx"                  "$DST/frontend/src/shared/components/ui/"
+cp "$SRC/frontend/shared/data/indonesianData.ts"                                "$DST/frontend/shared/data/"
+cp "$SRC/frontend/shared/lib/formatCurrency.ts"                                 "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/notify.ts"                                         "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/providers/ThemePresetProvider.tsx"                     "$DST/frontend/shared/providers/"
+cp "$SRC/frontend/shared/components/layout/PageContainer.tsx"                   "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx"              "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-dialog.tsx"                   "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-alert-dialog.tsx"             "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-select.tsx"                   "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-tooltip.tsx"                  "$DST/frontend/shared/components/ui/"
 
 # Backend
 cp -r "$SRC/convex/financial" "$DST/convex/"
@@ -221,7 +221,7 @@ pnpm -F frontend add recharts
 - **Chart tooltip blank / white-on-white** — `useChartColors` resolves `--chart-*` CSS vars from `ThemePresetProvider`. Kalau target tidak port theme-preset system, stub `useThemePreset()` agar return `null` dan fallback ke palet hardcoded di `useChartColors`.
 - **`recharts` SSR error** — pastikan `FinancialCalculator.tsx` adalah Client Component (`"use client"` sudah di-set di slice; jangan dihapus).
 - **Budget variable icons missing** — `constants/budgetIcons.ts` map ke `lucide-react`. Kalau target pakai versi lucide berbeda, beberapa nama bisa drift.
-- **Empty city compare tab** — `indonesianCityCostOfLiving` tidak dicopy. Verify `frontend/src/shared/data/indonesianData.ts` ada di target.
+- **Empty city compare tab** — `indonesianCityCostOfLiving` tidak dicopy. Verify `frontend/shared/data/indonesianData.ts` ada di target.
 - **`formatIDR` undefined** — pastikan `formatCurrency.ts` dicopy; tidak ada ekuivalen built-in.
 
 **Testing the port:**

@@ -1,6 +1,6 @@
 # Rahman Resources (rr) — slice usage di CareerPack
 
-> Project ini punya konvensi path khusus: slice di `frontend/src/slices/` (ada extra `src/` segment).
+> Project ini punya konvensi path khusus: slice di `frontend/slices/` (ada extra `src/` segment).
 > Full distribution guide: https://github.com/rahmanef63/resource-site/blob/main/docs/distribution.md
 
 ## Struktur project
@@ -25,7 +25,7 @@ CareerPack/
 └── convex/
 ```
 
-**Catatan path:** CareerPack pakai monorepo struktur. Slice di `frontend/src/slices/` (bukan `frontend/slices/` seperti project lain). `/rr` skill auto-detect ini.
+**Catatan path:** CareerPack pakai monorepo struktur. Slice di `frontend/slices/` (bukan `frontend/slices/` seperti project lain). `/rr` skill auto-detect ini.
 
 ## Slice dari rr (terinstall via `npx rr add`)
 
@@ -54,17 +54,17 @@ Per audit 2026-05-16, slice CareerPack worth-lifting:
 ```bash
 cd ~/projects/CareerPack
 npx rr add seo                # contoh
-# CLI default install ke slices/ — tapi CareerPack pakai frontend/src/slices/
-# Mungkin perlu manual: mv slices/ frontend/src/slices/
+# CLI default install ke slices/ — tapi CareerPack pakai frontend/slices/
+# Mungkin perlu manual: mv slices/ frontend/slices/
 ```
 
-**Catatan:** CLI saat ini install ke `slices/<name>/` flat. Karena CareerPack pakai `frontend/src/slices/`, ada gap. Workaround: install dulu, lalu manual move. Long-term fix: CLI bisa baca config (mis. `rr.json`) dengan custom install path.
+**Catatan:** CLI saat ini install ke `slices/<name>/` flat. Karena CareerPack pakai `frontend/slices/`, ada gap. Workaround: install dulu, lalu manual move. Long-term fix: CLI bisa baca config (mis. `rr.json`) dengan custom install path.
 
 ### Lift slice CareerPack → rr
 
 ```bash
 # pastikan slice bersih (no hardcode "CareerPack", no job-search specific)
-cp -r frontend/src/slices/cv-generator/ ~/projects/resources/frontend/slices/cv-generator/
+cp -r frontend/slices/cv-generator/ ~/projects/resources/frontend/slices/cv-generator/
 cd ~/projects/resources
 # edit imports + bikin metadata + commit + push
 ```

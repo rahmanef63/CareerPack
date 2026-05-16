@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Database, Loader2, RefreshCw, Sparkles, Network, FileStack } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,

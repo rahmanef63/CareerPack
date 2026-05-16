@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import {
   SCOPE_LABELS,
   type QuickFillScope,
-} from "../../../../../../convex/onboarding/types";
+} from "../../../../../convex/onboarding/types";
 
 export const SCOPE_ORDER: QuickFillScope[] = [
   "all",

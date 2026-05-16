@@ -4,11 +4,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["convex/**/*.test.ts", "frontend/src/**/*.test.{ts,tsx}"],
+    include: ["convex/**/*.test.ts", "frontend/{shared,slices}/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["convex/_lib/**/*.ts", "frontend/src/shared/lib/**/*.ts"],
+      include: ["convex/_lib/**/*.ts", "frontend/shared/lib/**/*.ts"],
     },
   },
 });

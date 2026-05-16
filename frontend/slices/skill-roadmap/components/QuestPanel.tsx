@@ -14,8 +14,8 @@ import {
   Trash2,
   WandSparkles,
 } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
-import type { Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,

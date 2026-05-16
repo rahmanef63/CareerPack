@@ -14,7 +14,7 @@ Jaga baseline stabil:
 ## Completed
 
 - Migrasi Vite → Next.js selesai
-- Semua slice self-contained di `src/slices/` (13 slice)
+- Semua slice self-contained di `slices/` (13 slice)
 - Convex auth stable (PBKDF2-SHA256 100k, backward-compat hash)
 - Per-user AI provider (slice `ai-settings` + `convex/aiSettings.ts`)
 - CI: typecheck, lint, test, build (GH Actions)

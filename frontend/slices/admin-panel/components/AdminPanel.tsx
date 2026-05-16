@@ -44,7 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
 import { ErrorBoundary } from "@/shared/components/error/ErrorBoundary";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { StatCard } from '@/shared/components/stats/StatCard';
 import { formatFileSize as formatBytes } from "@/shared/lib/formatFileSize";

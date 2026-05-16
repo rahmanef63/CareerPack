@@ -32,4 +32,4 @@ Kitab port: convert `requireUser` → `requirePermission(ctx, workspaceId, "docu
 
 ## Origin
 
-Harvested from `CareerPack` on `2026-05-15`. Source path: `frontend/src/slices/document-checklist/`.
+Harvested from `CareerPack` on `2026-05-15`. Source path: `frontend/slices/document-checklist/`.

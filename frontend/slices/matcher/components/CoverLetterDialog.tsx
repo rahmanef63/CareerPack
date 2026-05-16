@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAction } from "convex/react";
 import { Copy, Download, FileText, Loader2, Sparkles } from "lucide-react";
 
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
 import {

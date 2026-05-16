@@ -12,7 +12,7 @@ point of operational control for super-admins / admins.
 ## Route & Entry
 
 - URL: `/dashboard/admin-panel`
-- Slice: `frontend/src/slices/admin-panel/`
+- Slice: `frontend/slices/admin-panel/`
 - Main component: `AdminPanel.tsx`
 
 ## Struktur Slice
@@ -109,11 +109,11 @@ Three-layer access enforcement still in place:
 
 ```
 # Slice (full tree)
-frontend/src/slices/admin-panel/
+frontend/slices/admin-panel/
 
 # Shared
-frontend/src/shared/hooks/useVisibleMoreApps.ts
-frontend/src/shared/components/data-table/                # generic table
+frontend/shared/hooks/useVisibleMoreApps.ts
+frontend/shared/components/data-table/                # generic table
 
 # Backend
 convex/admin/
@@ -129,16 +129,16 @@ convex/_shared/auth.ts                                    # requireAdmin / requi
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/slices" \
-         "$DST/frontend/src/shared/hooks" \
-         "$DST/frontend/src/shared/components/data-table" \
+mkdir -p "$DST/frontend/slices" \
+         "$DST/frontend/shared/hooks" \
+         "$DST/frontend/shared/components/data-table" \
          "$DST/convex/admin" "$DST/convex/ai" \
          "$DST/convex/roadmap" "$DST/convex/feedback" \
          "$DST/convex/_shared"
 
-cp -r "$SRC/frontend/src/slices/admin-panel"             "$DST/frontend/src/slices/"
-cp "$SRC/frontend/src/shared/hooks/useVisibleMoreApps.ts" "$DST/frontend/src/shared/hooks/"
-cp -r "$SRC/frontend/src/shared/components/data-table/."  "$DST/frontend/src/shared/components/data-table/"
+cp -r "$SRC/frontend/slices/admin-panel"             "$DST/frontend/slices/"
+cp "$SRC/frontend/shared/hooks/useVisibleMoreApps.ts" "$DST/frontend/shared/hooks/"
+cp -r "$SRC/frontend/shared/components/data-table/."  "$DST/frontend/shared/components/data-table/"
 cp -r "$SRC/convex/admin/."     "$DST/convex/admin/"
 cp -r "$SRC/convex/ai/."        "$DST/convex/ai/"
 cp -r "$SRC/convex/roadmap/."   "$DST/convex/roadmap/"

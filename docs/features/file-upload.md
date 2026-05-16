@@ -93,13 +93,13 @@ convex/files/                                              # schema.ts + queries
 # (also add `files` table to target's convex/schema.ts — see below)
 
 # Pure utilities (no React)
-frontend/src/shared/lib/imageConvert.ts                     # Canvas WebP + crop pipeline
+frontend/shared/lib/imageConvert.ts                     # Canvas WebP + crop pipeline
 
 # React hook
-frontend/src/shared/hooks/useFileUpload.ts                  # Validate → convert → XHR upload
+frontend/shared/hooks/useFileUpload.ts                  # Validate → convert → XHR upload
 
 # React component
-frontend/src/shared/components/files/FileUpload.tsx         # Drag-drop + crop dialog + progress
+frontend/shared/components/files/FileUpload.tsx         # Drag-drop + crop dialog + progress
 ```
 
 **cp commands:**
@@ -108,14 +108,14 @@ frontend/src/shared/components/files/FileUpload.tsx         # Drag-drop + crop d
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/shared/lib"
-mkdir -p "$DST/frontend/src/shared/hooks"
-mkdir -p "$DST/frontend/src/shared/components/files"
+mkdir -p "$DST/frontend/shared/lib"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/components/files"
 
 cp -r "$SRC/convex/files/"                                 "$DST/convex/"
-cp "$SRC/frontend/src/shared/lib/imageConvert.ts"            "$DST/frontend/src/shared/lib/"
-cp "$SRC/frontend/src/shared/hooks/useFileUpload.ts"         "$DST/frontend/src/shared/hooks/"
-cp "$SRC/frontend/src/shared/components/files/FileUpload.tsx" "$DST/frontend/src/shared/components/files/"
+cp "$SRC/frontend/shared/lib/imageConvert.ts"            "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/hooks/useFileUpload.ts"         "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/components/files/FileUpload.tsx" "$DST/frontend/shared/components/files/"
 ```
 
 **Schema additions** — append to target's `convex/schema.ts` inside

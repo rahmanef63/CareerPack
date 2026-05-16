@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAction, useMutation } from "convex/react";
 import { Loader2, Plus, Wand2 } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,

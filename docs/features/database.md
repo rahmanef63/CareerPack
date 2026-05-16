@@ -14,7 +14,7 @@ masal isi mereka sendiri.
 ## Route & Entry
 
 - URL: `/dashboard/database`
-- Slice: `frontend/src/slices/database/`
+- Slice: `frontend/slices/database/`
 - Komponen utama: `DatabaseView.tsx`
 
 ## Struktur Slice
@@ -88,11 +88,11 @@ Lintas domain Convex. Setiap tab declarative via `defineResource`.
 
 ```
 # Slice
-frontend/src/slices/database/
+frontend/slices/database/
 
 # Shared deps
-frontend/src/shared/components/data-table/
-frontend/src/shared/lib/formatDate.ts
+frontend/shared/components/data-table/
+frontend/shared/lib/formatDate.ts
 
 # Backend (any of these the target hasn't already ported)
 convex/cv/                   convex/portfolio/    convex/goals/
@@ -105,13 +105,13 @@ convex/applications/         convex/contacts/     convex/onboarding/
 SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
-mkdir -p "$DST/frontend/src/slices" \
-         "$DST/frontend/src/shared/components/data-table" \
-         "$DST/frontend/src/shared/lib"
+mkdir -p "$DST/frontend/slices" \
+         "$DST/frontend/shared/components/data-table" \
+         "$DST/frontend/shared/lib"
 
-cp -r "$SRC/frontend/src/slices/database"                         "$DST/frontend/src/slices/"
-cp -r "$SRC/frontend/src/shared/components/data-table/."          "$DST/frontend/src/shared/components/data-table/"
-cp "$SRC/frontend/src/shared/lib/formatDate.ts"                    "$DST/frontend/src/shared/lib/"
+cp -r "$SRC/frontend/slices/database"                         "$DST/frontend/slices/"
+cp -r "$SRC/frontend/shared/components/data-table/."          "$DST/frontend/shared/components/data-table/"
+cp "$SRC/frontend/shared/lib/formatDate.ts"                    "$DST/frontend/shared/lib/"
 
 # Backend domains (only if target doesn't have them yet)
 for d in cv portfolio goals applications contacts onboarding; do

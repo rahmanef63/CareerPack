@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useQuery } from "convex/react";
 import { Search, FileText, Video, Image as ImageIcon } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,

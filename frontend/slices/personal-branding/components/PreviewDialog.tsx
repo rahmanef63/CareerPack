@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "convex/react";
 import { Eye, FileImage, Monitor, Smartphone, Tablet } from "lucide-react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -20,7 +20,7 @@ import {
   buildAutoBlocks,
   type AutoCVInput,
   type AutoPortfolioItem,
-} from "../../../../../convex/profile/autoBlocks";
+} from "../../../../convex/profile/autoBlocks";
 import type { Block } from "../blocks/types";
 import type { FormState } from "../form/types";
 import { usePreviewBranding } from "../form/usePreviewBranding";

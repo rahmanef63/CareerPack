@@ -25,7 +25,7 @@ A file is a refactor candidate when it crosses the upper bound for its kind. Tar
 ## Canonical slice layout (flat — most slices)
 
 ```
-frontend/src/slices/<slug>/
+frontend/slices/<slug>/
   components/         <- React components (.tsx) only
   hooks/              <- useX.ts(x) — slice-wide hooks
   types/              <- types/index.ts barrel + domain files (e.g. status.ts)

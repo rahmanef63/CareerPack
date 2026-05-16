@@ -5,7 +5,7 @@
 > - **Kitab repo**: <https://github.com/rahmanef63/resource-site>
 > - **Kitab snapshot ref**: `de7411b90cf2d63cf974025f1228b36deb4d90bb` (`main`)
 > - **Consumer repo HEAD**: see `Run history` below
-> - **Scanned paths**: `frontend/slices/` (absent), `src/slices/` (absent), `frontend/src/slices/` ✓
+> - **Scanned paths**: `frontend/slices/` (absent), `slices/` (absent), `frontend/slices/` ✓
 > - **Local manifest format**: `.kitab.json` per slice (template in `CLAUDE.md` § Rahman Resources kitab — BSDL)
 
 ## Snapshot
@@ -82,8 +82,8 @@
 
 ### `document-checklist` — in-sync · needs-adapter
 
-- **Local path**: `frontend/src/slices/document-checklist/`
-- **Manifest**: `frontend/src/slices/document-checklist/.kitab.json`
+- **Local path**: `frontend/slices/document-checklist/`
+- **Manifest**: `frontend/slices/document-checklist/.kitab.json`
 - **kitabVersion**: `0.1.0` (== kitab `main`) → `in-sync`
 - **consumerVersion**: `0.1.0`
 - **syncDirection**: `bidirectional`

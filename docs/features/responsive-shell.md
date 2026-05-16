@@ -59,7 +59,7 @@ BottomNav + MoreDrawer + vaul JS.
 
 ## Responsive primitive map
 
-All 14 wrappers live in `frontend/src/shared/components/ui/responsive-*.tsx`.
+All 14 wrappers live in `frontend/shared/components/ui/responsive-*.tsx`.
 API surface mirrors the upstream component — same `Root`/`Trigger`/
 `Content`/`Item` decomposition, prefixed `Responsive*`. Mode switch is
 internal, propagated via React Context so child sub-components pick the
@@ -98,7 +98,7 @@ every `responsive-*` is viewport-branching.
 ## `useIsMobile()` hook contract
 
 ```ts
-// frontend/src/shared/hooks/use-mobile.ts
+// frontend/shared/hooks/use-mobile.ts
 const MOBILE_BREAKPOINT = 1024; // === Tailwind `lg`
 export function useIsMobile(): boolean
 ```
@@ -115,7 +115,7 @@ export function useIsMobile(): boolean
 
 ## Nav SSOT
 
-`frontend/src/shared/components/layout/navConfig.ts` is the **single
+`frontend/shared/components/layout/navConfig.ts` is the **single
 source of truth** for every nav surface in the app:
 
 - `PRIMARY_NAV` — 3 entries (`home`, `cv`, `calendar`). Tabs in mobile
@@ -226,7 +226,7 @@ drawer's open-state.
 1. Pick the upstream primitive(s). Identify desktop variant
    (`@/shared/components/ui/<thing>`) and mobile variant (almost always
    `Drawer` from `@/shared/components/ui/drawer`).
-2. Create `frontend/src/shared/components/ui/responsive-<thing>.tsx`.
+2. Create `frontend/shared/components/ui/responsive-<thing>.tsx`.
 3. Boilerplate:
    - `"use client"`
    - `type Mode = "<desktop>" | "drawer";`
@@ -266,61 +266,61 @@ it.
 
 ```
 # Containers (4 files)
-frontend/src/shared/containers/ResponsiveContainer.tsx
-frontend/src/shared/containers/MobileContainer.tsx
-frontend/src/shared/containers/DesktopContainer.tsx
-frontend/src/shared/containers/AuthShell.tsx
+frontend/shared/containers/ResponsiveContainer.tsx
+frontend/shared/containers/MobileContainer.tsx
+frontend/shared/containers/DesktopContainer.tsx
+frontend/shared/containers/AuthShell.tsx
 
 # Hook
-frontend/src/shared/hooks/use-mobile.ts
+frontend/shared/hooks/use-mobile.ts
 
 # Responsive primitive wrappers (14 files)
-frontend/src/shared/components/ui/responsive-alert-dialog.tsx
-frontend/src/shared/components/ui/responsive-carousel.tsx
-frontend/src/shared/components/ui/responsive-combobox.tsx
-frontend/src/shared/components/ui/responsive-context-menu.tsx
-frontend/src/shared/components/ui/responsive-data-table.tsx
-frontend/src/shared/components/ui/responsive-dialog.tsx
-frontend/src/shared/components/ui/responsive-dropdown-menu.tsx
-frontend/src/shared/components/ui/responsive-filter-bar.tsx
-frontend/src/shared/components/ui/responsive-hover-card.tsx
-frontend/src/shared/components/ui/responsive-page-header.tsx
-frontend/src/shared/components/ui/responsive-popover.tsx
-frontend/src/shared/components/ui/responsive-select.tsx
-frontend/src/shared/components/ui/responsive-tooltip.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/components/ui/responsive-carousel.tsx
+frontend/shared/components/ui/responsive-combobox.tsx
+frontend/shared/components/ui/responsive-context-menu.tsx
+frontend/shared/components/ui/responsive-data-table.tsx
+frontend/shared/components/ui/responsive-dialog.tsx
+frontend/shared/components/ui/responsive-dropdown-menu.tsx
+frontend/shared/components/ui/responsive-filter-bar.tsx
+frontend/shared/components/ui/responsive-hover-card.tsx
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-popover.tsx
+frontend/shared/components/ui/responsive-select.tsx
+frontend/shared/components/ui/responsive-tooltip.tsx
 # (no responsive-sheet — see "Sheet vs Drawer" in Catatan Desain)
 
 # Upstream shadcn primitives the wrappers depend on
 # (install via `npx shadcn add` — see commands below)
-frontend/src/shared/components/ui/dialog.tsx
-frontend/src/shared/components/ui/sheet.tsx
-frontend/src/shared/components/ui/drawer.tsx
-frontend/src/shared/components/ui/alert-dialog.tsx
-frontend/src/shared/components/ui/select.tsx
-frontend/src/shared/components/ui/tooltip.tsx
-frontend/src/shared/components/ui/popover.tsx
-frontend/src/shared/components/ui/dropdown-menu.tsx
-frontend/src/shared/components/ui/hover-card.tsx
-frontend/src/shared/components/ui/context-menu.tsx
-frontend/src/shared/components/ui/command.tsx
-frontend/src/shared/components/ui/table.tsx
-frontend/src/shared/components/ui/sidebar.tsx
+frontend/shared/components/ui/dialog.tsx
+frontend/shared/components/ui/sheet.tsx
+frontend/shared/components/ui/drawer.tsx
+frontend/shared/components/ui/alert-dialog.tsx
+frontend/shared/components/ui/select.tsx
+frontend/shared/components/ui/tooltip.tsx
+frontend/shared/components/ui/popover.tsx
+frontend/shared/components/ui/dropdown-menu.tsx
+frontend/shared/components/ui/hover-card.tsx
+frontend/shared/components/ui/context-menu.tsx
+frontend/shared/components/ui/command.tsx
+frontend/shared/components/ui/table.tsx
+frontend/shared/components/ui/sidebar.tsx
 
 # Layout pieces (mobile + desktop nav shell)
-frontend/src/shared/components/layout/BottomNav.tsx
-frontend/src/shared/components/layout/MoreDrawer.tsx
-frontend/src/shared/components/layout/SiteHeader.tsx
-frontend/src/shared/components/layout/app-sidebar.tsx
-frontend/src/shared/components/layout/nav-main.tsx
-frontend/src/shared/components/layout/nav-secondary.tsx
-frontend/src/shared/components/layout/nav-user.tsx
-frontend/src/shared/components/layout/MobileUserMenu.tsx
-frontend/src/shared/components/layout/DashboardFooter.tsx
-frontend/src/shared/components/layout/Breadcrumb.tsx        # used by SiteHeader
+frontend/shared/components/layout/BottomNav.tsx
+frontend/shared/components/layout/MoreDrawer.tsx
+frontend/shared/components/layout/SiteHeader.tsx
+frontend/shared/components/layout/app-sidebar.tsx
+frontend/shared/components/layout/nav-main.tsx
+frontend/shared/components/layout/nav-secondary.tsx
+frontend/shared/components/layout/nav-user.tsx
+frontend/shared/components/layout/MobileUserMenu.tsx
+frontend/shared/components/layout/DashboardFooter.tsx
+frontend/shared/components/layout/Breadcrumb.tsx        # used by SiteHeader
 
 # Nav SSOT + dashboard registry
-frontend/src/shared/components/layout/navConfig.ts
-frontend/src/shared/lib/dashboardRoutes.tsx
+frontend/shared/components/layout/navConfig.ts
+frontend/shared/lib/dashboardRoutes.tsx
 ```
 
 ### Transitive shared deps (already documented in their own files)
@@ -328,20 +328,20 @@ frontend/src/shared/lib/dashboardRoutes.tsx
 These are imported by the layout files; port them too if missing:
 
 ```
-frontend/src/shared/components/interactions/MicroInteractions.tsx   # Ripple, useHapticPress
-frontend/src/shared/components/interactions/PullToRefresh.tsx
-frontend/src/shared/components/feedback/LoadingScreen.tsx
-frontend/src/shared/components/feedback/PageSkeleton.tsx
-frontend/src/shared/components/brand/Logo.tsx                         # BrandMark
-frontend/src/shared/components/decor/ParangPattern.tsx                # used by ResponsivePageHeader
-frontend/src/shared/components/theme/ThemePresetSwitcher.tsx          # used in both top bars
-frontend/src/shared/components/ai/AIFab.tsx                           # mobile FAB
-frontend/src/shared/components/pwa/InstallSidebarButton.tsx
-frontend/src/shared/hooks/usePWAInstall.ts
-frontend/src/shared/hooks/useVisibleMoreApps.ts                       # super-admin gate
-frontend/src/shared/hooks/useAuth.tsx                                 # transitive via NavUser
-frontend/src/shared/lib/utils.ts                                      # cn()
-frontend/src/shared/lib/routes.ts                                     # ROUTES used by MobileUserMenu
+frontend/shared/components/interactions/MicroInteractions.tsx   # Ripple, useHapticPress
+frontend/shared/components/interactions/PullToRefresh.tsx
+frontend/shared/components/feedback/LoadingScreen.tsx
+frontend/shared/components/feedback/PageSkeleton.tsx
+frontend/shared/components/brand/Logo.tsx                         # BrandMark
+frontend/shared/components/decor/ParangPattern.tsx                # used by ResponsivePageHeader
+frontend/shared/components/theme/ThemePresetSwitcher.tsx          # used in both top bars
+frontend/shared/components/ai/AIFab.tsx                           # mobile FAB
+frontend/shared/components/pwa/InstallSidebarButton.tsx
+frontend/shared/hooks/usePWAInstall.ts
+frontend/shared/hooks/useVisibleMoreApps.ts                       # super-admin gate
+frontend/shared/hooks/useAuth.tsx                                 # transitive via NavUser
+frontend/shared/lib/utils.ts                                      # cn()
+frontend/shared/lib/routes.ts                                     # ROUTES used by MobileUserMenu
 ```
 
 ### cp commands
@@ -351,33 +351,33 @@ SRC=~/projects/CareerPack
 DST=~/projects/<target>
 
 # Containers + hook
-mkdir -p "$DST/frontend/src/shared/containers"
-mkdir -p "$DST/frontend/src/shared/hooks"
-cp "$SRC/frontend/src/shared/containers/ResponsiveContainer.tsx" "$DST/frontend/src/shared/containers/"
-cp "$SRC/frontend/src/shared/containers/MobileContainer.tsx"     "$DST/frontend/src/shared/containers/"
-cp "$SRC/frontend/src/shared/containers/DesktopContainer.tsx"    "$DST/frontend/src/shared/containers/"
-cp "$SRC/frontend/src/shared/containers/AuthShell.tsx"           "$DST/frontend/src/shared/containers/"
-cp "$SRC/frontend/src/shared/hooks/use-mobile.ts"                "$DST/frontend/src/shared/hooks/"
+mkdir -p "$DST/frontend/shared/containers"
+mkdir -p "$DST/frontend/shared/hooks"
+cp "$SRC/frontend/shared/containers/ResponsiveContainer.tsx" "$DST/frontend/shared/containers/"
+cp "$SRC/frontend/shared/containers/MobileContainer.tsx"     "$DST/frontend/shared/containers/"
+cp "$SRC/frontend/shared/containers/DesktopContainer.tsx"    "$DST/frontend/shared/containers/"
+cp "$SRC/frontend/shared/containers/AuthShell.tsx"           "$DST/frontend/shared/containers/"
+cp "$SRC/frontend/shared/hooks/use-mobile.ts"                "$DST/frontend/shared/hooks/"
 
 # All 13 actual responsive-* wrapper files
-mkdir -p "$DST/frontend/src/shared/components/ui"
-cp "$SRC/frontend/src/shared/components/ui/responsive-"*.tsx     "$DST/frontend/src/shared/components/ui/"
+mkdir -p "$DST/frontend/shared/components/ui"
+cp "$SRC/frontend/shared/components/ui/responsive-"*.tsx     "$DST/frontend/shared/components/ui/"
 
 # Layout shell + nav SSOT + dashboard registry
-mkdir -p "$DST/frontend/src/shared/components/layout"
-mkdir -p "$DST/frontend/src/shared/lib"
-cp "$SRC/frontend/src/shared/components/layout/BottomNav.tsx"      "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/MoreDrawer.tsx"     "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/SiteHeader.tsx"     "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/app-sidebar.tsx"    "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/nav-main.tsx"       "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/nav-secondary.tsx"  "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/nav-user.tsx"       "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/MobileUserMenu.tsx" "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/DashboardFooter.tsx" "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/Breadcrumb.tsx"     "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/components/layout/navConfig.ts"       "$DST/frontend/src/shared/components/layout/"
-cp "$SRC/frontend/src/shared/lib/dashboardRoutes.tsx"              "$DST/frontend/src/shared/lib/"
+mkdir -p "$DST/frontend/shared/components/layout"
+mkdir -p "$DST/frontend/shared/lib"
+cp "$SRC/frontend/shared/components/layout/BottomNav.tsx"      "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/MoreDrawer.tsx"     "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/SiteHeader.tsx"     "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/app-sidebar.tsx"    "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/nav-main.tsx"       "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/nav-secondary.tsx"  "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/nav-user.tsx"       "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/MobileUserMenu.tsx" "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/DashboardFooter.tsx" "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/Breadcrumb.tsx"     "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/components/layout/navConfig.ts"       "$DST/frontend/shared/components/layout/"
+cp "$SRC/frontend/shared/lib/dashboardRoutes.tsx"              "$DST/frontend/shared/lib/"
 ```
 
 ### shadcn install (upstream primitives the wrappers wrap)
