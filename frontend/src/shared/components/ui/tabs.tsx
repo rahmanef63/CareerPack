@@ -54,7 +54,7 @@ const VARIANT_LIST_CLASS: Record<TabsListVariant, string> = {
   // trigger (in TabsTrigger below) keeps each trigger at its content
   // width so text never gets squished.
   pills:
-    "flex w-full items-stretch justify-evenly gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
+    "flex w-full items-stretch justify-between gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   equal:
     // Grid fills container; each trigger = fr. Auto-cols-fr used when no
@@ -62,7 +62,7 @@ const VARIANT_LIST_CLASS: Record<TabsListVariant, string> = {
     "grid w-full gap-1 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground " +
     "auto-cols-fr [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
   segmented:
-    "flex w-full items-stretch justify-evenly gap-1 overflow-x-auto rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm " +
+    "flex w-full items-stretch justify-between gap-1 overflow-x-auto rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm " +
     "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
 }
 

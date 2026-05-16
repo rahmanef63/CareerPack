@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQuery } from 'convex/react';
-import { ChevronsDownUp, ChevronsUpDown, Eye } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, Download, Eye, Save } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { QuickFillButton } from '@/shared/components/onboarding';
 import { api } from '../../../../../convex/_generated/api';
@@ -235,39 +235,36 @@ export function CVGenerator() {
 
   return (
     <PageContainer size="lg">
-      {/* Header — mobile-friendly, with compact format toggle inline
-          (no Card chrome) + mobile-only "Lihat CV" button so small
-          viewports can reach the preview dialog without scrolling to
-          the bottom sidebar. */}
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* Header — single dense row on desktop. Title left, controls
+          right: collapse-all toggle, format pills, QuickFill, then the
+          3 primary actions (Lihat / Simpan / Unduh) inline so the
+          sidebar can drop its redundant action stack. Mobile wraps. */}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pembuat CV</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-0.5 truncate">
             {format === 'national'
               ? 'Format Indonesia · dengan foto, data lengkap'
               : 'Format Internasional · ATS-friendly, no photo, 1 halaman'}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleToggleAll}
-            className="gap-1.5"
+            className="h-8 gap-1.5 px-2"
             aria-pressed={expandAll}
           >
             {expandAll ? (
-              <>
-                <ChevronsDownUp className="w-4 h-4" />
-                Tutup semua
-              </>
+              <ChevronsDownUp className="w-4 h-4" />
             ) : (
-              <>
-                <ChevronsUpDown className="w-4 h-4" />
-                Buka semua
-              </>
+              <ChevronsUpDown className="w-4 h-4" />
             )}
+            <span className="hidden sm:inline">
+              {expandAll ? 'Tutup' : 'Buka'} semua
+            </span>
           </Button>
           <QuickFillButton variant="outline" size="sm" />
           <MagneticTabs<CVFormat>
@@ -278,22 +275,47 @@ export function CVGenerator() {
               { id: 'international', label: 'Internasional' },
             ]}
           />
+          <span className="mx-0.5 hidden h-6 w-px bg-border sm:inline-block" aria-hidden />
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={(e) => {
-              // Blur before opening — Radix's aria-hidden on background
-              // would otherwise trip the "descendant retained focus" a11y
-              // warning.
               e.currentTarget.blur();
               setPreviewOpen(true);
             }}
-            className="lg:hidden gap-1.5"
+            className="h-8 gap-1.5 px-2"
             aria-label="Buka tampilan CV"
           >
             <Eye className="w-4 h-4" />
-            Lihat CV
+            <span className="hidden sm:inline">Lihat CV</span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="h-8 gap-1.5 px-2"
+            aria-label="Simpan CV"
+          >
+            <Save className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {isSaving ? 'Menyimpan…' : 'Simpan'}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleExportClick}
+            disabled={isExporting}
+            className="h-8 gap-1.5 bg-brand px-2 text-brand-foreground hover:bg-brand"
+            aria-label="Unduh PDF"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {isExporting ? 'Mengekspor…' : 'Unduh'}
+            </span>
           </Button>
         </div>
       </div>
@@ -379,11 +401,7 @@ export function CVGenerator() {
               cvData={cvData}
               renderCV={renderCV}
               photoUrl={photoUrl}
-              isSaving={isSaving}
-              isExporting={isExporting}
               onPreviewOpen={() => setPreviewOpen(true)}
-              onSave={handleSave}
-              onExportClick={handleExportClick}
               autosaveStatus={autosave.status}
               autosaveLastAt={autosave.lastSavedAt}
               dirty={autosave.dirty}
