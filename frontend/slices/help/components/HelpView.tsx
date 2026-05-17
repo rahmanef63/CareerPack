@@ -54,10 +54,6 @@ const FAQ: ReadonlyArray<FAQItem> = [
     a: "AI Assistant ada sebagai tombol bulat (FAB) di pojok kanan bawah (mobile) atau Sidebar (desktop). Anda bisa minta bantuan menulis ringkasan CV, review pengalaman, draft surat lamaran, atau strategi wawancara. AI memakai kuota harian/jam — lihat Pengaturan → AI & Integrasi untuk detail.",
   },
   {
-    q: "Saya admin — bagaimana aksesnya?",
-    a: "Akses admin dikelola via peran (role). Admin perlu ditetapkan lewat Admin Dashboard oleh admin existing, atau via konfigurasi env `ADMIN_BOOTSTRAP_EMAILS` di backend. Setelah peran terset, ikon Admin muncul di menu pengguna (pojok kanan atas desktop).",
-  },
-  {
     q: "Export data saya ke tempat lain?",
     a: "Saat ini export CV ke PDF tersedia dari halaman CV. Export data global (GDPR-style) ke JSON sedang direncanakan. Untuk data individual (aplikasi, checklist, roadmap, dst.), Anda bisa screenshot atau print page via Ctrl+P.",
   },

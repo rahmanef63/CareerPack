@@ -11,7 +11,7 @@ export default function AdminError(props: {
       {...props}
       segment="admin"
       title="Panel admin bermasalah"
-      description="Cek log Convex di Dokploy. Akses pengguna lain tidak terdampak."
+      description="Cek log internal. Akses pengguna lain tidak terdampak."
     />
   );
 }
