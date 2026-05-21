@@ -87,9 +87,15 @@ export const ScaledCVPreview = forwardRef<HTMLDivElement, Props>(
         ref={outerRef}
         className="flex justify-center bg-neutral-100 dark:bg-neutral-800 rounded-md px-2 py-4"
         style={{
+          // Scaled inner element keeps 794 px layout width via flexShrink:0;
+          // overflow:hidden lets it sit visually clipped to the available
+          // container width without producing a horizontal scrollbar on
+          // the CV page (the scale factor already shrinks it to fit).
+          width: "100%",
+          maxWidth: "100%",
           height: innerHeight ? innerHeight * scale + 32 : undefined,
           minHeight: compact ? (innerHeight ? undefined : 180) : 420,
-          overflowX: "auto",
+          overflowX: "hidden",
           overflowY: "hidden",
         }}
       >

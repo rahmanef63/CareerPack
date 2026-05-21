@@ -55,7 +55,12 @@ export function PreviewSidebar({
   const profileLabel = cvData.profile.name ? "Lengkap" : "Belum";
   return (
     <div className="min-w-0 lg:col-span-1">
-      <div className="sticky top-24 space-y-4">
+      {/* Cap sticky container to viewport height — without this, tall
+          preview + score cards push past the fold and the user can't
+          reach the bottom score cards without scrolling the whole page.
+          Internal overflow-y-auto lets the sidebar scroll independently
+          while staying pinned. */}
+      <div className="sticky top-24 max-h-[calc(100dvh-7rem)] space-y-4 overflow-y-auto pr-1 [scrollbar-width:thin]">
         <Card className="hidden border-border lg:block">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center justify-between gap-2">

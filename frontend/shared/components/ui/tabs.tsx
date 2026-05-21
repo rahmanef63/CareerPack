@@ -101,7 +101,11 @@ const TabsTrigger = React.forwardRef<
       "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
+      // Active pill: stronger separation from `bg-muted` container in
+      // light theme — bare `bg-background + shadow` produced
+      // white-on-white at low contrast. Adds shadow-md + 1px border so
+      // the pill always reads as a lifted surface.
+      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md data-[state=active]:ring-1 data-[state=active]:ring-border/60",
       // In segmented parents, active pill becomes fully rounded.
       "group-data-[variant=segmented]:rounded-full",
       className,

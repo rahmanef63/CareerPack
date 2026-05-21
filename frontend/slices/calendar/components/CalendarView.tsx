@@ -223,8 +223,8 @@ export function CalendarView() {
 
       <FilterChips filter={filter} setFilter={setFilter} counts={typeCounts} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <Card className="flex flex-col">
           <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base flex items-center gap-2">
               <CalendarIcon className="w-4 h-4 text-brand" /> Pilih Tanggal
@@ -239,7 +239,7 @@ export function CalendarView() {
               Hari ini
             </Button>
           </CardHeader>
-          <CardContent className="flex justify-center">
+          <CardContent className="flex flex-1 items-center justify-center p-3 sm:p-5">
             <UltimateCalendar
               mode="single"
               selected={selected}
@@ -248,7 +248,9 @@ export function CalendarView() {
               timeZone={timeZone}
               captionLayout="dropdown"
               accent="primary"
+              size="lg"
               highlightToday
+              wrapperClassName="w-full max-w-full"
               markedDates={markedDates}
               modifiers={{
                 hasEvent: (date) =>
