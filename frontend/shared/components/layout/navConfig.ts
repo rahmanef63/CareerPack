@@ -82,7 +82,7 @@ export const PRIMARY_NAV: ReadonlyArray<NavItem<Exclude<PrimaryNavId, "more">>> 
  */
 export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
   { id: "applications", label: "Lamaran", icon: Briefcase, href: "/dashboard/applications", hue: "from-violet-400 to-violet-600" },
-  { id: "interview", label: "Simulasi Wawancara", icon: MessageSquare, href: "/dashboard/interview", hue: "from-pink-400 to-pink-600" },
+  { id: "interview", label: "Simulasi Wawancara", icon: MessageSquare, href: "/dashboard/interview", hue: "from-pink-400 to-pink-600", badge: "AI" },
   { id: "roadmap", label: "Roadmap Skill", icon: Map, href: "/dashboard/roadmap", hue: "from-sky-400 to-sky-600" },
   { id: "checklist", label: "Ceklis Dokumen", icon: ListChecks, href: "/dashboard/checklist", hue: "from-emerald-400 to-emerald-600" },
   { id: "calculator", label: "Kalkulator Keuangan", icon: Wallet, href: "/dashboard/calculator", hue: "from-amber-400 to-amber-600" },
@@ -90,7 +90,7 @@ export const MORE_APPS: ReadonlyArray<MoreAppTile> = [
   { id: "networking", label: "Jaringan", icon: Users, href: "/dashboard/networking", hue: "from-rose-400 to-rose-600" },
   { id: "portfolio", label: "Portofolio", icon: Folder, href: "/dashboard/portfolio", hue: "from-orange-400 to-orange-600" },
   { id: "library", label: "Content Library", icon: Library, href: "/dashboard/library", hue: "from-lime-400 to-lime-600" },
-  { id: "personal-branding", label: "Personal Branding", icon: Globe, href: "/dashboard/personal-branding", hue: "from-fuchsia-400 to-fuchsia-600" },
+  { id: "personal-branding", label: "Personal Branding", icon: Globe, href: "/dashboard/personal-branding", hue: "from-fuchsia-400 to-fuchsia-600", badge: "AI" },
   { id: "database", label: "Database", icon: Database, href: "/dashboard/database", hue: "from-indigo-400 to-indigo-600" },
   { id: "notifications", label: "Notifikasi", icon: Bell, href: "/dashboard/notifications", hue: "from-yellow-400 to-yellow-600" },
   { id: "settings", label: "Pengaturan", icon: SettingsIcon, href: "/dashboard/settings", hue: "from-slate-500 to-slate-700" },

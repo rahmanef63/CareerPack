@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, usePathname } from "next/navigation";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
@@ -50,6 +50,15 @@ export function ResponsiveContainer({ children }: ResponsiveContainerProps) {
     pathname === "/dashboard"
       ? "home"
       : pathname.replace(/^\/dashboard\//, "").split("/")[0] || "home";
+
+  // Global event bridge — any view can dispatch `careerpack:open-ai`
+  // to open the AI console without prop-drilling onAITap through every
+  // slice. Dashboard "Mulai chat" + future entry points use this.
+  useEffect(() => {
+    const handler = () => setAiOpen(true);
+    window.addEventListener("careerpack:open-ai", handler);
+    return () => window.removeEventListener("careerpack:open-ai", handler);
+  }, []);
 
   return (
     <>

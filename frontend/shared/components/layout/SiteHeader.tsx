@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LogOut,
@@ -47,6 +48,15 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
   const user = state.user;
   const label = labelForPath(pathname) ?? "Dashboard";
   const initials = (user?.name || "U").slice(0, 1).toUpperCase();
+  // OS-aware shortcut label. Default "Ctrl K" SSR-safe (majority users),
+  // swap to ⌘K post-mount on Mac. No hydration mismatch — value updates
+  // after first paint via useEffect.
+  const [shortcutLabel, setShortcutLabel] = useState("Ctrl K");
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)) {
+      setShortcutLabel("⌘K");
+    }
+  }, []);
 
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/80 backdrop-blur px-3 lg:px-4">
@@ -93,7 +103,7 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
             <span>Cari fitur, halaman, aksi…</span>
           </span>
           <kbd className="hidden rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono lg:inline">
-            ⌘K
+            {shortcutLabel}
           </kbd>
         </Button>
         <Button

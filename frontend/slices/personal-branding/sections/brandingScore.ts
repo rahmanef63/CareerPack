@@ -23,16 +23,31 @@ export interface ScoreRow {
   actionLabel?: string;
 }
 
+export type BrandingGrade = "A" | "B" | "C" | "D" | "E";
+
 export interface BrandingScore {
   rows: ReadonlyArray<ScoreRow>;
   earned: number;
   weight: number;
   /** 0-100, rounded. */
   score: number;
-  grade: "A" | "B" | "C" | "D" | "E";
+  grade: BrandingGrade;
   /** Required-tier rows that did not earn full weight. */
   requiredMissing: ReadonlyArray<ScoreRow>;
 }
+
+/**
+ * Human-friendly grade labels — letters alone read like school grades
+ * (D feels like failure). Descriptive phrasing maps to coaching tone:
+ * lowest tier still implies forward motion ("Mulai bangun") not defeat.
+ */
+export const GRADE_LABEL: Record<BrandingGrade, string> = {
+  A: "Premium",
+  B: "Profesional",
+  C: "Cukup",
+  D: "Butuh Pengembangan",
+  E: "Mulai Bangun",
+};
 
 /**
  * Where each row's data lives. In-page anchors point at an `id` on

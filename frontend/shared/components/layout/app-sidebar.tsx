@@ -42,13 +42,34 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
     icon: n.icon,
   }));
 
-  const moreItems: NavSecondaryItem[] = visibleMore.map((m) => ({
-    id: m.id,
-    title: m.label,
-    url: m.href,
-    icon: m.icon,
-    badge: m.badge,
-  }));
+  // Two-group split: "Alat Lainnya" (tools the user invokes daily)
+  // vs "Akun & Sistem" (notifications/settings/help/admin meta-features).
+  // Without the divider the sidebar reads as one long flat list and
+  // users mis-classify Settings as a tool of equal weight to Matcher.
+  const SYSTEM_IDS = new Set([
+    "notifications",
+    "settings",
+    "help",
+    "admin-panel",
+  ]);
+  const moreItems: NavSecondaryItem[] = visibleMore
+    .filter((m) => !SYSTEM_IDS.has(m.id))
+    .map((m) => ({
+      id: m.id,
+      title: m.label,
+      url: m.href,
+      icon: m.icon,
+      badge: m.badge,
+    }));
+  const systemItems: NavSecondaryItem[] = visibleMore
+    .filter((m) => SYSTEM_IDS.has(m.id))
+    .map((m) => ({
+      id: m.id,
+      title: m.label,
+      url: m.href,
+      icon: m.icon,
+      badge: m.badge,
+    }));
 
   return (
     <Sidebar collapsible="icon" aria-label="Navigasi utama" {...props}>
@@ -85,6 +106,13 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
           activeId={active?.id}
           label="Alat Lainnya"
         />
+        {systemItems.length > 0 && (
+          <NavSecondary
+            items={systemItems}
+            activeId={active?.id}
+            label="Akun & Sistem"
+          />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <InstallSidebarButton />

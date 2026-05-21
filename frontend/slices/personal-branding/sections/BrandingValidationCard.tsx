@@ -12,7 +12,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Progress } from "@/shared/components/ui/progress";
 import { cn } from "@/shared/lib/utils";
 import type { BrandingPayload } from "../themes";
-import { scoreBranding, type ScoreRow } from "./brandingScore";
+import { GRADE_LABEL, scoreBranding, type ScoreRow } from "./brandingScore";
 
 /**
  * Smooth-scroll for in-page anchors so the user lands on the field
@@ -129,10 +129,16 @@ export function BrandingValidationCard({
             </p>
           </div>
           <div className="text-right">
-            <div className={cn("text-3xl font-bold leading-none", gradeColor)}>
-              {grade}
+            <div className={cn("text-2xl font-bold leading-none", gradeColor)}>
+              {score}
+              <span className="text-xs font-normal text-muted-foreground">/100</span>
             </div>
-            <div className="text-xs text-muted-foreground">{score}/100</div>
+            <div
+              className={cn("mt-1 text-[11px] font-medium uppercase tracking-wide", gradeColor)}
+              title={`Skor ${score}/100 — tier ${grade}`}
+            >
+              {GRADE_LABEL[grade]}
+            </div>
           </div>
         </div>
         <Progress value={score} className="mt-3 h-2" />

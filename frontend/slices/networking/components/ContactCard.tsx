@@ -11,6 +11,17 @@ import {
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+  ResponsiveAlertDialogTrigger,
+} from "@/shared/components/ui/responsive-alert-dialog";
 import { cn } from "@/shared/lib/utils";
 import type { Contact, ContactRole } from "../types";
 import { ROLE_EMOJIS, ROLE_LABELS } from "../constants";
@@ -99,7 +110,9 @@ export function ContactCard({
       )}
 
       {c.notes && (
-        <p className="line-clamp-2 text-xs text-muted-foreground">{c.notes}</p>
+        <p className="line-clamp-2 break-words text-xs text-muted-foreground [overflow-wrap:anywhere]">
+          {c.notes}
+        </p>
       )}
 
       <footer className="mt-auto flex items-center justify-between gap-2 pt-1">
@@ -151,16 +164,38 @@ export function ContactCard({
             </Button>
           )}
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive"
-          onClick={onDelete}
-          aria-label="Hapus"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        <ResponsiveAlertDialog>
+          <ResponsiveAlertDialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive"
+              aria-label="Hapus kontak"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </ResponsiveAlertDialogTrigger>
+          <ResponsiveAlertDialogContent>
+            <ResponsiveAlertDialogHeader>
+              <ResponsiveAlertDialogTitle>
+                Hapus kontak {c.name}?
+              </ResponsiveAlertDialogTitle>
+              <ResponsiveAlertDialogDescription>
+                Aksi ini permanen. Riwayat interaksi juga akan dihapus.
+              </ResponsiveAlertDialogDescription>
+            </ResponsiveAlertDialogHeader>
+            <ResponsiveAlertDialogFooter>
+              <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
+              <ResponsiveAlertDialogAction
+                variant="destructive"
+                onClick={onDelete}
+              >
+                Ya, hapus
+              </ResponsiveAlertDialogAction>
+            </ResponsiveAlertDialogFooter>
+          </ResponsiveAlertDialogContent>
+        </ResponsiveAlertDialog>
       </footer>
     </article>
   );

@@ -1,5 +1,22 @@
 /** Curated grouping of the tweakcn preset registry by design mood.
- *  Presets not listed fall into "Other" dynamically. */
+ *  Presets not listed fall into "Other" dynamically.
+ *
+ *  Gimmicky names (Doom 64, Cyberpunk, Neo Brutalism, Retro Arcade,
+ *  Bubblegum, Candyland, Pastel Dreams) are excluded — CareerPack is a
+ *  career-tool, not a designer playground. Decision fatigue hurts
+ *  conversion. Curated list shows ~20 professional themes grouped by
+ *  mood. Hidden presets stay in the registry (data untouched) so users
+ *  with `?theme=doom-64` deep links still work. */
+
+export const HIDDEN_PRESETS: ReadonlySet<string> = new Set([
+  "neo-brutalism",
+  "doom-64",
+  "retro-arcade",
+  "cyberpunk",
+  "bubblegum",
+  "candyland",
+  "pastel-dreams",
+]);
 
 export const PRESET_GROUPS: ReadonlyArray<{
   id: string;
@@ -7,13 +24,8 @@ export const PRESET_GROUPS: ReadonlyArray<{
   presets: ReadonlyArray<string>;
 }> = [
   {
-    id: "brutalism",
-    label: "Brutalism",
-    presets: ["neo-brutalism", "doom-64", "retro-arcade", "cyberpunk"],
-  },
-  {
     id: "refined",
-    label: "Refined",
+    label: "Profesional",
     presets: [
       "modern-minimal",
       "vercel",
@@ -32,7 +44,7 @@ export const PRESET_GROUPS: ReadonlyArray<{
   },
   {
     id: "warm",
-    label: "Warm",
+    label: "Hangat",
     presets: [
       "mocha-mousse",
       "solar-dusk",
@@ -43,20 +55,17 @@ export const PRESET_GROUPS: ReadonlyArray<{
   },
   {
     id: "artistic",
-    label: "Artistic",
+    label: "Artistik",
     presets: [
       "claymorphism",
       "kodama-grove",
-      "bubblegum",
-      "candyland",
       "nature",
-      "pastel-dreams",
       "northern-lights",
     ],
   },
   {
     id: "moody",
-    label: "Dark & Moody",
+    label: "Gelap",
     presets: [
       "cosmic-night",
       "perpetuity",
@@ -81,7 +90,10 @@ export interface PresetGroup<T extends PresetMeta = PresetMeta> {
 }
 
 export function groupPresets<T extends PresetMeta>(all: T[]): PresetGroup<T>[] {
-  const byName = new Map(all.map((p) => [p.name, p]));
+  // Drop hidden presets entirely from picker. Registry data preserved
+  // (deep-link `?theme=doom-64` still resolves via the unfiltered registry).
+  const visible = all.filter((p) => !HIDDEN_PRESETS.has(p.name));
+  const byName = new Map(visible.map((p) => [p.name, p]));
   const seen = new Set<string>();
   const grouped: PresetGroup<T>[] = PRESET_GROUPS.map((g) => ({
     id: g.id,
@@ -95,7 +107,7 @@ export function groupPresets<T extends PresetMeta>(all: T[]): PresetGroup<T>[] {
       }),
   })).filter((g) => g.items.length > 0);
 
-  const rest = all.filter((p) => !seen.has(p.name));
+  const rest = visible.filter((p) => !seen.has(p.name));
   if (rest.length) {
     grouped.push({ id: "other", label: "Lainnya", items: rest });
   }

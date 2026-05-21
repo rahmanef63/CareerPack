@@ -21,8 +21,10 @@ export function DatabaseView() {
       <header className="space-y-1.5">
         <h1 className="text-2xl font-bold tracking-tight">Database</h1>
         <p className="text-sm text-muted-foreground">
-          Kelola seluruh data Anda di satu tempat. Cari, filter, sortir,
-          ekspor, atau impor JSON per tabel.
+          Tampilan tabular lintas-fitur untuk bulk-edit, ekspor, dan
+          impor JSON. Halaman fitur (CV, Lamaran, Jaringan, Portofolio,
+          dst.) tetap jadi tempat utama untuk membuat &amp; edit per
+          item — Database fokus pada operasi massal &amp; transfer data.
         </p>
       </header>
 

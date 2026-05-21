@@ -134,7 +134,7 @@ function NotificationRow({ n, onRead, onDismiss }: NotificationRowProps) {
             {formatRelative(n._creationTime)}
           </span>
         </div>
-        <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+        <p className="mt-0.5 line-clamp-2 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">
           {n.message}
         </p>
       </div>
@@ -330,6 +330,16 @@ export function NotificationsView() {
               <p className="mt-1 text-xs text-muted-foreground">
                 Pemberitahuan terkait progres karir akan muncul di sini.
               </p>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="mt-4"
+              >
+                <Link href="/dashboard/settings#notifications">
+                  Atur preferensi notifikasi
+                </Link>
+              </Button>
             </div>
           ) : (
             groups.map((g) => (

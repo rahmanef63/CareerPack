@@ -298,13 +298,18 @@ export function DashboardHome() {
               </Link>
             </Button>
             <Separator />
-            <Button asChild variant="ghost" className="justify-between text-brand">
-              <Link href="/dashboard/calendar">
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> Mulai chat dengan AI
-                </span>
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              className="justify-between text-brand"
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("careerpack:open-ai"))
+              }
+            >
+              <span className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> Mulai chat dengan AI
+              </span>
+              <ArrowUpRight className="w-4 h-4" />
             </Button>
           </CardContent>
         </Card>
