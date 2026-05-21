@@ -18,6 +18,7 @@ interface JobCardProps {
 
 export function JobCard({ job, score, variant = "list", onView }: JobCardProps) {
   const isCarousel = variant === "carousel";
+  const isTopMatch = score !== undefined && score >= 80;
   const categoryLabel = job.category ? CATEGORY_LABELS[job.category] : undefined;
   const categoryColor = job.category
     ? CATEGORY_COLORS[job.category] ?? "bg-muted text-muted-foreground"
@@ -25,10 +26,19 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
   return (
     <article
       className={cn(
-        "flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md",
+        "group relative flex h-full flex-col gap-3 rounded-xl border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md",
+        isTopMatch
+          ? "border-brand/40 shadow-[0_0_0_1px_oklch(var(--brand)/0.15)] hover:shadow-cta"
+          : "border-border",
         isCarousel && "w-full",
       )}
     >
+      {isTopMatch && (
+        <span className="absolute -top-2 left-4 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-brand-from to-brand-to px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-foreground shadow-cta">
+          <Sparkles className="h-3 w-3" />
+          Top Match
+        </span>
+      )}
       <header className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-xl">
           {job.companyLogo ?? "🏢"}
@@ -41,10 +51,15 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
             {job.company}
           </p>
         </div>
-        {score !== undefined && score > 0 && (
+        {score !== undefined && score > 0 && !isTopMatch && (
           <Badge className="gap-1 bg-brand-muted text-brand">
             <Sparkles className="h-3 w-3" />
             {score}% cocok
+          </Badge>
+        )}
+        {isTopMatch && (
+          <Badge className="gap-1 bg-brand text-brand-foreground">
+            {score}%
           </Badge>
         )}
       </header>

@@ -5,8 +5,12 @@ import { Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
-} from "@/shared/components/ui/dialog";
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/shared/components/ui/responsive-dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -31,13 +35,13 @@ export function SkillFormDialog({
   open, onOpenChange, skillDraft, setSkillDraft, busy, onSave,
 }: Props) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent size="2xl">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>
             {skillDraft.name ? `Edit: ${skillDraft.name}` : "Tambah Skill"}
-          </DialogTitle>
-        </DialogHeader>
+          </ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
 
         <div className="grid gap-4 py-2">
           {/* name + category */}
@@ -256,7 +260,7 @@ export function SkillFormDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <ResponsiveDialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Batal
           </Button>
@@ -267,8 +271,8 @@ export function SkillFormDialog({
             {busy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Simpan
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }

@@ -65,6 +65,10 @@ export function MoreDrawer({ open, onOpenChange }: MoreDrawerProps) {
       <DrawerContent
         className="!mt-0 h-[min(92dvh,720px)] rounded-t-3xl border-0 p-0 flex flex-col"
       >
+        <span
+          aria-hidden
+          className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-border"
+        />
         <DrawerHeader className="relative border-b border-border pt-2 pb-3 text-center">
           <DrawerTitle>Semua Fitur</DrawerTitle>
           <DrawerDescription>Geser ke bawah untuk tutup · pilih menu untuk membuka</DrawerDescription>

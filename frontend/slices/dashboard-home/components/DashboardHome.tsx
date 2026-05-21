@@ -151,7 +151,15 @@ export function DashboardHome() {
         <ResponsivePageHeader
           variant="split"
           breadcrumb={<Breadcrumb />}
-          title={<>Halo, {firstName} <span aria-hidden>👋</span></>}
+          title={
+            <>
+              Halo,{" "}
+              <span className="font-display brand-gradient-text font-semibold">
+                {firstName}
+              </span>{" "}
+              <span aria-hidden>👋</span>
+            </>
+          }
           description="Ini ringkasan progres karir Anda minggu ini."
           actions={<QuickFillButton variant="outline" size="sm" className="gap-2" />}
           companion={<WelcomeTipCard />}

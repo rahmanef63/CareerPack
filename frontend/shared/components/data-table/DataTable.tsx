@@ -218,8 +218,9 @@ export function DataTable<T>({
                     key={id}
                     data-state={selected ? "selected" : undefined}
                     className={cn(
-                      onRowClick && "cursor-pointer",
-                      selected && "bg-brand-muted/20",
+                      "transition-colors",
+                      onRowClick && "cursor-pointer hover:bg-muted/40",
+                      selected && "bg-brand-muted/20 hover:bg-brand-muted/30",
                     )}
                   >
                     {selectionEnabled && (

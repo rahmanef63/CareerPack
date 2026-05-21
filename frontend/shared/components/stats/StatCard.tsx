@@ -58,7 +58,12 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={className}>
+    <Card
+      className={cn(
+        "relative overflow-hidden bg-gradient-to-br from-card via-card to-brand-muted/15 transition-shadow hover:shadow-md dark:to-brand-muted/10",
+        className,
+      )}
+    >
       <CardHeader className="pb-2 flex-row items-start justify-between space-y-0">
         <div className="min-w-0">
           <CardDescription className="text-xs">{label}</CardDescription>

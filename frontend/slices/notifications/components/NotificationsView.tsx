@@ -140,9 +140,11 @@ function NotificationRow({ n, onRead, onDismiss }: NotificationRowProps) {
       </div>
       {!n.read && (
         <span
-          aria-label="Belum dibaca"
-          className="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand"
-        />
+          className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-foreground"
+        >
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-foreground" />
+          Baru
+        </span>
       )}
     </div>
   );
