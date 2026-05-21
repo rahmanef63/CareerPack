@@ -1,6 +1,14 @@
 # Calendar
 
 > **Portability tier:** M — slice + shared agenda hook + Convex module + schema table + manifest/binder wiring
+>
+> **Recent changes (2026-05-20):**
+> - Calendar Card uses `flex flex-col` + CardContent `flex flex-1`
+>   so the card stretches to match the right-column height (today +
+>   upcoming). Grid switched `items-start → items-stretch`.
+> - `UltimateCalendar` bumped to `size="lg"` (cell-size 2.5 rem,
+>   was 2 rem) + `wrapperClassName="w-full"` — bigger touch targets,
+>   fuller utilization of the calendar column.
 
 ## Tujuan
 

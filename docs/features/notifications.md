@@ -1,6 +1,16 @@
 # Notifikasi
 
 > **Portability tier:** M — slice + 1 Convex domain + cron digest action
+>
+> **Recent changes (2026-05-20):**
+> - Unread state: bare brand-color dot → "Baru" pill badge (uppercase
+>   text + inner dot). Pairs color with non-color indicator → WCAG 1.4.1
+>   safe.
+> - Empty state: added secondary CTA `<Link href="/dashboard/settings#notifications">Atur preferensi notifikasi</Link>` so users have a next-action when no notifications.
+> - Tab spread fix: `TabsList variant="pills"` now `justify-start`
+>   (was `justify-between` — tabs spread to viewport edges).
+> - Message body: `break-words [overflow-wrap:anywhere]` so paste of
+>   space-stripped text wraps gracefully.
 
 ## Tujuan
 

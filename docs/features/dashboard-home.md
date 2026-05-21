@@ -1,6 +1,14 @@
 # Dashboard Home
 
 > **Portability tier:** M — slice + multiple shared hooks; reads from 4+ Convex domains.
+>
+> **Recent changes (2026-05-20):**
+> - "Mulai chat dengan AI" button BUG FIX — was `<Link href="/dashboard/calendar">` (wrong route). Now dispatches `window.dispatchEvent(new CustomEvent("careerpack:open-ai"))`. Listener lives in `ResponsiveContainer` (see [responsive-shell.md](./responsive-shell.md)) and toggles `setAiOpen(true)`.
+> - Greeting name applies `font-display brand-gradient-text font-semibold`
+>   — editorial-serif accent on the personal name. Verb stays sans.
+> - `StatCard` (shared) gained `hover:shadow-md` + `bg-gradient-to-br
+>   from-card via-card to-brand-muted/15` so KPI strip no longer reads
+>   as flat shadcn boilerplate.
 
 ## Tujuan
 

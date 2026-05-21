@@ -1,6 +1,16 @@
 # Theme Preset System (Infrastructure)
 
 > **Portability tier:** L — not a slice, but a self-contained platform layer (provider + lib + CSS + Tailwind tokens). Two orthogonal axes (mode + preset) layered on top of OKLCH CSS variables.
+>
+> **Recent changes (2026-05-20):**
+> - `HIDDEN_PRESETS` set added — 7 gimmicky themes culled from picker
+>   (Doom 64, Cyberpunk, Neo Brutalism, Retro Arcade, Bubblegum,
+>   Candyland, Pastel Dreams). Registry JSON intact; deep-links still work.
+> - Group labels Indonesianized in `PRESET_GROUPS` (Refined→Profesional,
+>   Warm→Hangat, Artistic→Artistik, Dark & Moody→Gelap).
+> - Tabs active state in `tabs.tsx` upgraded: `shadow-md + ring-1
+>   ring-border/60` — fixes low-contrast active pill in light theme
+>   (was bare `shadow` only). Cross-cuts all `TabsList` variants.
 
 ## Tujuan
 
@@ -11,10 +21,10 @@ memungkinkan dua pengaturan visual berjalan bebas:
 
 1. **Mode** — `light` / `dark` / `system` (mengikuti OS), dikelola
    `next-themes` lewat `<html class="dark">`.
-2. **Preset warna** — 36 palette dari registry tweakcn
-   (`modern-minimal`, `vercel`, `claude`, `bubblegum`, dst.), dikelola
-   `ThemePresetProvider` lewat injeksi `<style id="theme-preset-vars">`
-   ke `<head>`.
+2. **Preset warna** — 36 palette di registry tweakcn (29 ditampilkan
+   default + 7 hidden via `HIDDEN_PRESETS`; lihat **Preset catalog**
+   di bawah), dikelola `ThemePresetProvider` lewat injeksi
+   `<style id="theme-preset-vars">` ke `<head>`.
 
 Keduanya persistan: mode disimpan oleh next-themes (`localStorage` key
 `theme`), preset oleh provider sendiri (`careerpack:theme-preset`). PWA
@@ -71,18 +81,50 @@ Aliran detail:
 ## Preset catalog
 
 Registry sumber: `frontend/public/r/registry.json` (verbatim copy
-tweakcn). Total **36 preset**, dikurasi ke 6 grup mood di
-`shared/lib/presetGroups.ts`:
+tweakcn). Total **36 preset** di registry — **29 ditampilkan** di
+picker, **7 di-hide** untuk app karir (decision fatigue + ketidak-
+appropriate-an nama "Doom 64" / "Cyberpunk" di konteks SaaS karir).
+
+### Visible groups (di-render di `ThemePresetSwitcher`)
+
+Dikurasi via `PRESET_GROUPS` di `shared/lib/presetGroups.ts`:
 
 | Group ID | Label (UI) | Presets |
 |---|---|---|
-| `brutalism` | Brutalism | `neo-brutalism`, `doom-64`, `retro-arcade`, `cyberpunk` |
-| `refined` | Refined | `modern-minimal` (default), `vercel`, `claude`, `supabase`, `mono`, `graphite`, `clean-slate`, `amber-minimal` |
+| `refined` | Profesional | `modern-minimal` (default), `vercel`, `claude`, `supabase`, `mono`, `graphite`, `clean-slate`, `amber-minimal` |
 | `bold` | Bold | `t3-chat`, `bold-tech`, `twitter`, `tangerine`, `quantum-rose` |
-| `warm` | Warm | `mocha-mousse`, `solar-dusk`, `caffeine`, `vintage-paper`, `sunset-horizon` |
-| `artistic` | Artistic | `claymorphism`, `kodama-grove`, `bubblegum`, `candyland`, `nature`, `pastel-dreams`, `northern-lights` |
-| `moody` | Dark & Moody | `cosmic-night`, `perpetuity`, `catppuccin`, `elegant-luxury`, `ocean-breeze`, `midnight-bloom`, `starry-night` |
+| `warm` | Hangat | `mocha-mousse`, `solar-dusk`, `caffeine`, `vintage-paper`, `sunset-horizon` |
+| `artistic` | Artistik | `claymorphism`, `kodama-grove`, `nature`, `northern-lights` |
+| `moody` | Gelap | `cosmic-night`, `perpetuity`, `catppuccin`, `elegant-luxury`, `ocean-breeze`, `midnight-bloom`, `starry-night` |
 | `other` | Lainnya | Sisa preset registry yang tak tercatat di atas (auto-fallback) |
+
+### Hidden presets (`HIDDEN_PRESETS` set)
+
+Tetap di `registry.json` (deep-link `?theme=doom-64` masih resolve),
+tapi tidak muncul di picker:
+
+```ts
+// shared/lib/presetGroups.ts
+export const HIDDEN_PRESETS: ReadonlySet<string> = new Set([
+  "neo-brutalism",
+  "doom-64",
+  "retro-arcade",
+  "cyberpunk",
+  "bubblegum",
+  "candyland",
+  "pastel-dreams",
+]);
+```
+
+Filter terjadi di `groupPresets(all)` — `visible = all.filter(p => !HIDDEN_PRESETS.has(p.name))`.
+
+**Untuk consumer project yang ingin show all 36**: hapus
+`HIDDEN_PRESETS` set + skip filter di `groupPresets`. Atau replace
+dengan set kosong.
+
+**Untuk consumer project yang ingin curate berbeda**: edit array
+`HIDDEN_PRESETS` (tambah/hapus nama). Edit `PRESET_GROUPS` untuk
+mengelompokkan ulang. Registry tidak perlu disentuh.
 
 Default preset (= no `<style>` tag, pakai variabel CSS yang sudah
 dipanggang di `index.css`): **`modern-minimal`**. Di-export sebagai

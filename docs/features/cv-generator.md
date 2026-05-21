@@ -2,6 +2,18 @@
 
 > **Portability tier:** L — slice + 4+ shared deps + 1 Convex module
 > + schema table + manifest/binder wiring + external PDF libs
+>
+> **Recent changes (2026-05-20):**
+> - `ScaledCVPreview`: outer container `overflowX: auto → hidden` +
+>   `width: 100%`. The 794 px A4 inner element (kept at full width via
+>   `flexShrink: 0` so html2canvas captures at print DPI) no longer
+>   leaks a horizontal scrollbar onto the CV page.
+> - `PreviewSidebar`: sticky container now `max-h-[calc(100dvh-7rem)]
+>   overflow-y-auto`. Tall preview + score cards used to overflow the
+>   viewport; internal scroll keeps every section reachable.
+> - `CharCounter`: over-limit shows `· target ideal terlampaui` hint +
+>   title tooltip instead of bare red number — clarifies soft-limit
+>   semantics.
 
 ## Tujuan
 

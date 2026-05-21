@@ -1,6 +1,13 @@
 # Jaringan (Networking)
 
 > **Portability tier:** L — slice + manifest + capability binder + 1 Convex domain + AI bus wiring
+>
+> **Recent changes (2026-05-20):**
+> - `ContactCard`: Trash button now wrapped in `ResponsiveAlertDialog`
+>   confirm. Direct destructive primary action was a misclick hazard
+>   (5 contact cards in grid each with visible delete icon).
+> - Notes field: `break-words [overflow-wrap:anywhere]` for graceful
+>   wrap on space-stripped paste content.
 
 ## Tujuan
 

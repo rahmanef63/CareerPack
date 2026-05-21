@@ -2,6 +2,10 @@
 
 > **Portability tier:** L — slice + Convex module + schema table +
 > AI actions + curated Indonesian question bank fallback
+>
+> **Recent changes (2026-05-20):**
+> - AI badge added to `navConfig.ts` Simulasi Wawancara entry for
+>   consistent labeling alongside Matcher + Personal Branding.
 
 ## Tujuan
 

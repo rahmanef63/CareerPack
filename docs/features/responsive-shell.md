@@ -1,6 +1,31 @@
 # Responsive Shell + Responsive Primitives (Infrastructure)
 
 > **Portability tier:** XL — not a slice. App-level layout (containers + nav SSOT + dashboard registry) plus a 14-component shadcn wrapper family. Every dashboard page and every modal in the project assumes this layer exists.
+>
+> **Recent changes (2026-05-20):**
+> - `SiteHeader`: search-button kbd now OS-aware (`⌘K` on Mac, `Ctrl K`
+>   elsewhere). State + `useEffect` reads `navigator.platform` post-mount,
+>   default `Ctrl K` is SSR-safe.
+> - `ResponsiveContainer`: added global event bridge —
+>   `window.addEventListener("careerpack:open-ai", () => setAiOpen(true))`.
+>   Lets any slice/page open the AI console without prop-drilling
+>   `onAITap`. Pair with `window.dispatchEvent(new CustomEvent("careerpack:open-ai"))` from the call-site.
+> - `app-sidebar.tsx`: split `MORE_APPS` into two `NavSecondary` groups —
+>   "Alat Lainnya" (tools) + "Akun & Sistem" (notifications/settings/
+>   help/admin). Improves IA so Settings doesn't read as a tool of
+>   equal weight to Matcher.
+> - `MoreDrawer`: added swipe-handle pill (4×36 px rounded bar above
+>   DrawerTitle) — gesture affordance for vaul-managed drag-to-close.
+> - `Input`: focus ring bumped `ring-1 → ring-2` for low-vision visibility.
+> - `Tabs` active pill: `shadow + bg-background → shadow-md + ring-1
+>   ring-border/60 + bg-background`. Fixes white-on-white at low contrast
+>   when `bg-muted` container is barely darker than `bg-background` in
+>   the light theme. Affects every `TabsList variant` (pills / equal /
+>   segmented).
+> - `Tabs pills` justify: `between → start` so tabs no longer spread to
+>   container edges.
+> - `DataTable` rows: `transition-colors` + `hover:bg-muted/40` when
+>   `onRowClick` set, plus selected-row hover preservation.
 
 ## Tujuan
 

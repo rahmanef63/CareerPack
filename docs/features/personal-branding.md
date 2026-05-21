@@ -1,6 +1,15 @@
 # Personal Branding (Public Profile Builder)
 
 > **Portability tier:** XL — slice + portfolio backend integration + theme system + iframe-template hydrator + public profile route.
+>
+> **Recent changes (2026-05-20):**
+> - Grade display: bare letter `A/B/C/D/E` → descriptive labels via
+>   `GRADE_LABEL` map in `brandingScore.ts` (Premium / Profesional /
+>   Cukup / Butuh Pengembangan / Mulai Bangun). Score 0–100 stays as
+>   primary number; label sits underneath as small uppercase subtext.
+>   Letter grades alone read like school-report (D = "fail") and
+>   psychologically discouraged users on a coaching surface.
+> - `BrandingScore` type now exports `BrandingGrade` + `GRADE_LABEL`.
 
 ## Tujuan
 

@@ -1,6 +1,12 @@
 # Help (Pusat Bantuan)
 
 > **Portability tier:** S — slice-only with one mutation (feedback).
+>
+> **Recent changes (2026-05-20):**
+> - Admin FAQ Q&A removed from `HelpView.tsx` — was disclosing
+>   `ADMIN_BOOTSTRAP_EMAILS` env var + role-bootstrap mechanism +
+>   admin UI location. Hardening sweep: admin onboarding now lives
+>   strictly server-side, not in user-facing docs.
 
 ## Tujuan
 

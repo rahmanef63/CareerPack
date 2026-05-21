@@ -66,6 +66,27 @@ Install shadcn: `npx shadcn@latest init` — pick the components on
 demand when each slice needs one. Don't copy CareerPack's shadcn
 wrappers wholesale; use upstream.
 
+#### CareerPack-divergent shadcn customizations
+
+If you DO want pixel-parity, the following primitives drift from
+stock shadcn and should be copied verbatim (or the changes re-applied):
+
+- **`tabs.tsx`** — added `variant` (`pills` / `equal` / `segmented`)
+  + `cols` props. Active pill uses `shadow-md + ring-1 ring-border/60`
+  (not bare `shadow`) so it's visible against `bg-muted` container in
+  light theme. See [theme-preset.md](./theme-preset.md) for the
+  cross-cut. `pills` defaults to `justify-start`.
+- **`input.tsx`** — `focus-visible:ring-2` (stock is `ring-1`) for
+  low-vision visibility.
+- **`responsive-dialog.tsx` / `responsive-alert-dialog.tsx` /
+  `responsive-select.tsx` / `responsive-tooltip.tsx` /
+  `responsive-page-header.tsx`** — auto-switch Dialog ↔ Drawer at
+  `useIsMobile()` breakpoint. Stock shadcn has no responsive
+  primitives; you'll need either these wrappers or hand-rolled
+  `if (isMobile) <Sheet>` per call-site.
+- **`tabs.tsx` mobile target** — `h-11 sm:h-9` enforces WCAG 2.5.5
+  44 px minimum on mobile.
+
 ### Cross-cutting utilities
 
 ```

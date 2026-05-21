@@ -1,6 +1,12 @@
 # Auth (LoginPage + Forgot/Reset Password)
 
 > **Portability tier:** XL — full auth platform: slice + Convex `@convex-dev/auth` + custom PBKDF2-SHA256 + JWT keys + password-reset flow + JWT-aware `RouteGuard`.
+>
+> **Recent changes (2026-05-20):**
+> - Password show/hide eye toggle: added `aria-label` (dinamis
+>   "Tampilkan/Sembunyikan password") + `aria-pressed={showPassword}` +
+>   `focus-visible:ring-2 ring-ring`. Applies to both login + register
+>   password fields.
 
 ## Tujuan
 

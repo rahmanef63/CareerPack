@@ -1,6 +1,15 @@
 # Database (Hub Tabel User)
 
 > **Portability tier:** M — slice + shared `data-table` infra; reads cross-domain Convex.
+>
+> **Recent changes (2026-05-20):**
+> - Subheader copy reframed to clarify role vs per-feature pages:
+>   Database = bulk-edit + import/export massal; per-feature pages
+>   (CV, Lamaran, Networking, Portofolio) tetap tempat utama untuk
+>   create/edit per item.
+> - `DataTable` rows: `transition-colors` + `hover:bg-muted/40` on
+>   clickable rows (added in shared/data-table/DataTable.tsx — affects
+>   every consumer including Database tabs).
 
 ## Tujuan
 

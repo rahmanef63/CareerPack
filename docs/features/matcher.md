@@ -1,6 +1,15 @@
 # Pencocok Lowongan (Matcher)
 
 > **Portability tier:** L — slice + 1 Convex domain (2 tables) + AI actions (ATS scoring, cover-letter, CV-tailoring) + external feed pipelines
+>
+> **Recent changes (2026-05-20):**
+> - `JobCard`: when `score >= 80` ("Top Match"), card gets brand ring
+>   (`border-brand/40` + `shadow-[0_0_0_1px_oklch(var(--brand)/0.15)]`)
+>   + "Top Match" gradient ribbon (top-left) + solid brand percentage
+>   badge. Hover lift via `-translate-y-0.5 hover:shadow-md` (or
+>   `shadow-cta` for top matches).
+> - AI badge on `navConfig.ts` — Matcher entry keeps it; consistent
+>   labeling now also on Simulasi Wawancara + Personal Branding.
 
 ## Tujuan
 
