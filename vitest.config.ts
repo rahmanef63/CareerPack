@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["convex/_lib/**/*.ts", "frontend/shared/lib/**/*.ts"],
+      include: ["convex/_shared/**/*.ts", "frontend/shared/lib/**/*.ts"],
     },
   },
 });

@@ -1,7 +1,7 @@
 import { mutation, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { requireUser } from "./_shared/auth";
 import { renderWelcomeEmail, sendEmail } from "./_shared/email";
 import { redactEmail } from "./_shared/redact";
 
@@ -27,8 +27,7 @@ export const seedForCurrentUser = mutation({
     // Auth required. Earlier versions had an unauth fallback that picked
     // the "first user in the DB" if no email matched — that path was a
     // public oracle + plant-into-victim-account exploit. Removed.
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
+    const userId = await requireUser(ctx);
 
     const authUser = await ctx.db.get(userId);
     const authEmail = (authUser as { email?: string } | null)?.email?.toLowerCase() ?? "";

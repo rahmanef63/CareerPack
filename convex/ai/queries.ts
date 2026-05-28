@@ -1,6 +1,5 @@
 import { query, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { optionalUser, requireAdmin } from "../_shared/auth";
 import { listProvidersPublic } from "../_shared/aiProviders";
 
@@ -27,7 +26,7 @@ function maskKey(key: string): string {
 export const getMyQuota = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
     const now = Date.now();
     const minuteWindow = 60 * 1000;
@@ -80,7 +79,7 @@ export const listAIProviders = query({
 export const getMyAISettings = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = await optionalUser(ctx);
     if (!userId) return null;
     const row = await ctx.db
       .query("aiSettings")

@@ -1,6 +1,5 @@
 import { mutation, internalMutation } from "../_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireUser, requireAdmin } from "../_shared/auth";
 import { AI_PROVIDERS } from "../_shared/aiProviders";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
@@ -17,8 +16,7 @@ export const setMyAISettings = mutation({
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
+    const userId = await requireUser(ctx);
 
     const spec = AI_PROVIDERS[args.provider];
     if (!spec) throw new Error(`Provider tidak dikenal: ${args.provider}`);
@@ -61,8 +59,7 @@ export const setMyAISettings = mutation({
 export const toggleAIEnabled = mutation({
   args: { enabled: v.boolean() },
   handler: async (ctx, { enabled }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
+    const userId = await requireUser(ctx);
     const existing = await ctx.db
       .query("aiSettings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -76,8 +73,7 @@ export const toggleAIEnabled = mutation({
 export const clearMyAISettings = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
+    const userId = await requireUser(ctx);
     const existing = await ctx.db
       .query("aiSettings")
       .withIndex("by_user", (q) => q.eq("userId", userId))
