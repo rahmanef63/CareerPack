@@ -35,7 +35,8 @@ export const runCalibrator = internalMutation({
       .take(10_000);
 
     const buckets = new Map<string, EventCountBucket>();
-    const key = (f: string, t: string) => `${f}${t}`;
+    // "|" delimiter (never in kebab slugs) so the split below is exact.
+    const key = (f: string, t: string) => `${f}|${t}`;
     for (const e of events) {
       if (!e.fromNodeSlug || !e.targetNodeSlug) continue;
       if (e.occurredAt < cutoff) continue;
@@ -69,7 +70,7 @@ export const runCalibrator = internalMutation({
     const now = Date.now();
     for (const [k, b] of buckets) {
       if (bucketTotal(b) < MIN_COHORT_K) continue;
-      const sep = k.indexOf("");
+      const sep = k.indexOf("|");
       const fromSlug = k.slice(0, sep);
       const toSlug = k.slice(sep + 1);
 

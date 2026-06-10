@@ -4,10 +4,16 @@
 # Wired via simple-git-hooks. Reads the standard pre-push stdin format
 # ("<local_ref> <local_sha> <remote_ref> <remote_sha>" per ref).
 #
+# Also runs the quality gate (pnpm typecheck + vitest run) before anything
+# else: GitHub Actions CI is workflow_dispatch-only since 2026-05-14, so this
+# hook is the last automated gate before code (and a possible Convex deploy)
+# reaches main.
+#
 # Skips:
+#   - $SKIP_PUSH_CHECKS=1              (typecheck+test gate bypass, emergency)
 #   - $SKIP_CONVEX_DEPLOY=1            (explicit bypass, e.g. emergency push)
 #   - missing backend/convex-self-hosted/convex.env (teammate without admin key)
-#   - no convex/** changes in the push range (fast path, ~50ms)
+#   - no convex/** changes in the push range (fast path for the deploy step)
 #
 # Fails loud on deploy failure so the push aborts — the goal is "git push
 # main is the deploy trigger".
@@ -16,6 +22,24 @@ set -euo pipefail
 
 ZERO_SHA="0000000000000000000000000000000000000000"
 ENV_FILE="backend/convex-self-hosted/convex.env"
+
+# --- Quality gate: typecheck + tests (stdin redirected so subprocesses
+# --- can't eat the ref list this hook reads below).
+if [[ "${SKIP_PUSH_CHECKS:-0}" == "1" ]]; then
+  echo "[pre-push] SKIP_PUSH_CHECKS=1 — typecheck+test gate skipped." >&2
+else
+  echo "[pre-push] Quality gate: pnpm typecheck…" >&2
+  if ! pnpm typecheck < /dev/null; then
+    echo "[pre-push] Typecheck FAILED — aborting push. Fix and retry, or 'SKIP_PUSH_CHECKS=1 git push' to bypass." >&2
+    exit 1
+  fi
+  echo "[pre-push] Quality gate: vitest run…" >&2
+  if ! pnpm exec vitest run < /dev/null; then
+    echo "[pre-push] Tests FAILED — aborting push. Fix and retry, or 'SKIP_PUSH_CHECKS=1 git push' to bypass." >&2
+    exit 1
+  fi
+  echo "[pre-push] Quality gate OK." >&2
+fi
 
 if [[ "${SKIP_CONVEX_DEPLOY:-0}" == "1" ]]; then
   echo "[pre-push] SKIP_CONVEX_DEPLOY=1 — Convex deploy skipped." >&2

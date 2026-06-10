@@ -212,6 +212,23 @@ describe("applyCalibratedProbabilities", () => {
   });
 });
 
+describe("edgeKey", () => {
+  it("joins slugs with a visible '|' delimiter", () => {
+    expect(edgeKey("junior", "mid")).toBe("junior|mid");
+  });
+
+  it("does not collide across different splits of the same concatenation", () => {
+    // The old delimiter-less form made ("a","bc") and ("ab","c") collide.
+    expect(edgeKey("a", "bc")).not.toBe(edgeKey("ab", "c"));
+  });
+
+  it("round-trips a stat keyed and looked up by the same (from,to) pair", () => {
+    const m = new Map<string, number>([[edgeKey("senior-data", "lead-data"), 1]]);
+    expect(m.get(edgeKey("senior-data", "lead-data"))).toBe(1);
+    expect(m.get(edgeKey("senior", "data-lead-data"))).toBeUndefined();
+  });
+});
+
 describe("skillGap", () => {
   it("returns skills missing from the user set", () => {
     const gap = skillGap(

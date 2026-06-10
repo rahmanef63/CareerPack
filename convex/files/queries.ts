@@ -36,25 +36,39 @@ export const listMyFiles = query({
       .withIndex("by_tenant", (q) => q.eq("tenantId", userId.toString()))
       .collect();
 
-    // Usage map: storageId → portfolio titles that reference it.
-    // Cross-feature usage (CV/branding) lives off-storage in JSON
-    // blobs; flagged at the slice level if needed later.
+    // Usage map: storageId → labels of entities that reference it.
+    // Covers every domain that pins storageIds: portfolio (cover +
+    // media), CV avatars, and the profile avatar.
+    const usageBySid = new Map<string, string[]>();
+    const addUsage = (sid: string | undefined, label: string) => {
+      if (!sid) return;
+      const list = usageBySid.get(sid) ?? [];
+      if (!list.includes(label)) list.push(label);
+      usageBySid.set(sid, list);
+    };
+
     const portfolio = await ctx.db
       .query("portfolioItems")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
-
-    const usageBySid = new Map<string, string[]>();
     for (const item of portfolio) {
-      const sids = new Set<string>();
-      if (item.coverStorageId) sids.add(item.coverStorageId);
-      for (const m of item.media ?? []) sids.add(m.storageId);
-      for (const sid of sids) {
-        const list = usageBySid.get(sid) ?? [];
-        list.push(item.title);
-        usageBySid.set(sid, list);
-      }
+      addUsage(item.coverStorageId, item.title);
+      for (const m of item.media ?? []) addUsage(m.storageId, item.title);
     }
+
+    const cvs = await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    for (const cv of cvs) {
+      addUsage(cv.personalInfo.avatarStorageId, `CV: ${cv.title}`);
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    addUsage(profile?.avatarStorageId, "Foto profil");
 
     const enriched = await Promise.all(
       rows.map(async (r) => ({

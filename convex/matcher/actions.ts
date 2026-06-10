@@ -225,6 +225,7 @@ async function scanCVImpl(
     // 1) Load CV (must be owned by caller)
     const cv = await ctx.runQuery(internal.matcher.queries._getOwnedCV, {
       cvId: args.cvId,
+      userId,
     });
     if (!cv) throw new ConvexError("CV tidak ditemukan");
 

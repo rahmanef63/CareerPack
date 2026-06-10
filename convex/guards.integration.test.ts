@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "./schema";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { enforceRateLimit, AI_RATE_LIMITS } from "./_shared/rateLimit";
 import type { Id } from "./_generated/dataModel";
 
@@ -135,6 +135,49 @@ describe("user-scoped ownership boundary", () => {
       .withIdentity(identity(alice))
       .query(api.ai.queries.getChatSession, { sessionId: "s1" });
     expect(aliceView?.title).toBe("Alice session");
+  });
+});
+
+describe("matcher ATS scan cannot read another user's CV (IDOR guard)", () => {
+  it("_getOwnedCV returns null for a non-owner and the doc for the owner", async () => {
+    const t = setup();
+    const alice = await insertUser(t, { email: "alice@x.com" });
+    const bob = await insertUser(t, { email: "bob@x.com" });
+
+    const cvId = await t.run((ctx) =>
+      ctx.db.insert("cvs", {
+        userId: alice,
+        title: "Alice CV",
+        template: "modern",
+        personalInfo: {
+          fullName: "Alice",
+          email: "alice@x.com",
+          phone: "",
+          location: "",
+          summary: "",
+        },
+        experience: [],
+        education: [],
+        skills: [],
+        certifications: [],
+        languages: [],
+        projects: [],
+        isDefault: true,
+      }),
+    );
+
+    // Bob must NOT be able to load Alice's CV through the scan path.
+    const asBob = await t.query(internal.matcher.queries._getOwnedCV, {
+      cvId,
+      userId: bob,
+    });
+    expect(asBob).toBeNull();
+
+    const asAlice = await t.query(internal.matcher.queries._getOwnedCV, {
+      cvId,
+      userId: alice,
+    });
+    expect(asAlice?.title).toBe("Alice CV");
   });
 });
 

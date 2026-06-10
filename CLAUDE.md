@@ -23,7 +23,7 @@ All scripts run from repo root (pnpm workspace, `packageManager = pnpm@10.24.0`)
 
 Pre-commit hook (`simple-git-hooks` + `lint-staged`) runs ESLint `--fix` on frontend TS and `tsc --noEmit` on `convex/**/*.ts`. Do not bypass with `--no-verify`.
 
-**Pre-push hook auto-deploys Convex on push to main.** `scripts/pre-push.sh` (wired via `simple-git-hooks`) diffs the push range against `convex/**`; if anything changed it runs `pnpm backend:deploy` before the push lands. Fast path skips deploy when no Convex changes (~50ms). Skipped when `backend/convex-self-hosted/convex.env` is absent (teammate without admin key) or when `SKIP_CONVEX_DEPLOY=1` is set. Push aborts if deploy fails — fix and retry, or `SKIP_CONVEX_DEPLOY=1 git push` for an emergency bypass.
+**Pre-push hook = quality gate + Convex auto-deploy.** `scripts/pre-push.sh` (wired via `simple-git-hooks`) first runs `pnpm typecheck` + `pnpm exec vitest run` on every push (bypass: `SKIP_PUSH_CHECKS=1`) — GitHub Actions CI is manual-only, so this gate is the last automated check before main. It then diffs the push range against `convex/**`; if anything changed it runs `pnpm backend:deploy` before the push lands (fast path skips deploy when no Convex changes). Deploy is skipped when `backend/convex-self-hosted/convex.env` is absent (teammate without admin key) or when `SKIP_CONVEX_DEPLOY=1` is set. Push aborts if the gate or the deploy fails — fix and retry, or use the bypass vars for an emergency push.
 
 All `backend:*` scripts pass `--env-file backend/convex-self-hosted/convex.env`. That file is a secret — never commit it.
 
@@ -72,8 +72,8 @@ AI agent is global — `<AIAgentConsole>` from `slices/ai-agent`, opened from bo
 
 ### Providers tree
 
-`app/layout.tsx` mounts in this order (inner to outer):
-`ThemeProvider` → `ConvexClientProvider` (`ConvexAuthNextjsProvider`) → `AuthProvider` → `AIConfigProvider` → `UIPrefsProvider` → children + `InstallChip` + Sonner `Toaster`.
+`app/layout.tsx` mounts `<Providers>` (`frontend/shared/providers/Providers.tsx`), which nests outer→inner:
+`ThemeProvider` → `ThemePresetProvider` → `ConvexClientProvider` (`ConvexAuthNextjsProvider`) → `AuthProvider` → `AIConfigProvider` → `UIPrefsProvider` → `LocaleProvider` → `TooltipProvider` → children, plus siblings of children: 14 slice `*Capabilities` binders (aiActionBus subscribers), PWA/system components (`RegisterSW`, `SWUpdatePrompt`, `UpdateChecker`, `ThemeColorSync`, `TranslateHint`, `ExtensionErrorFilter`, `CommandPalette`), and Sonner `Toaster`. The PWA install entry is `InstallSidebarButton` inside the desktop sidebar (the old floating `InstallChip` is gone). Root layout also wires GA4 via `next/script`.
 
 ### Convex backend
 
@@ -119,7 +119,7 @@ Each domain folder contains `schema.ts` (table fragment), and any of
 
 `@convex-dev/auth` with `Password` (primary) + `Anonymous` providers. Password hashing is **custom PBKDF2-SHA256 100k iter**, not the default Scrypt — Scrypt takes >60s behind Dokploy's reverse proxy and blows past WebSocket action timeouts. Do not revert to Scrypt. New hashes use prefix `pbkdf2v2_`; verifier still accepts legacy `pbkdf2_` (10k iter) for backward compat.
 
-Login flow (`useAuth.login`) is **login-or-register in one call**: query `userExistsByEmail` first, then `signIn` with `flow: "signIn"` or `flow: "signUp"`. After success, `seedForCurrentUser()` bootstraps starter CV/checklist/roadmap; failures are logged and swallowed.
+Login flow (`useAuth.login`) is **login-or-register in one call**: `fetch` the `/api/auth/check-email` httpAction first (IP-gated 30/hr; the old public `userExistsByEmail` query was deleted 2026-05-07 to plug enumeration), then `signIn` with `flow: "signIn"` or `flow: "signUp"`. After success, `seedForCurrentUser()` bootstraps starter CV/checklist/roadmap; failures are logged and swallowed.
 
 ## Hard constraints — DO NOT violate
 
@@ -146,7 +146,7 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 
 ## CI
 
-`.github/workflows/ci.yml` runs on PR + push to main: typecheck → lint → test → build (build uses a dummy `NEXT_PUBLIC_CONVEX_URL`). `.github/workflows/convex-deploy.yml` auto-deploys Convex on `convex/**` changes to main — requires secrets `CONVEX_SELF_HOSTED_URL` + `CONVEX_SELF_HOSTED_ADMIN_KEY`.
+**GitHub Actions is manual-only since 2026-05-14** (`b678c58`, cost reduction — the original push/PR triggers are preserved as `.github/workflows/*.yml.bak`). Both `ci.yml` (typecheck → lint → test → build, build uses a dummy `NEXT_PUBLIC_CONVEX_URL`) and `convex-deploy.yml` run via `workflow_dispatch` only; `convex-deploy.yml` requires secrets `CONVEX_SELF_HOSTED_URL` + `CONVEX_SELF_HOSTED_ADMIN_KEY`. Automated gating happens locally instead: pre-commit (ESLint `--fix` + convex `tsc`) and pre-push (typecheck + vitest + Convex auto-deploy — see Commands).
 
 ## SSOT — rahman-shared adopted (2026-05-13, PR #25)
 
@@ -170,77 +170,16 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 
 ---
 
-## Rahman Resources kitab — Bidirectional Sync (BSDL)
+## Rahman Resources kitab — BSDL (legacy, removed 2026-05-16)
 
-> Added 2026-05-15 by Wave N+3 (BSDL).
+This project briefly adopted the kitab **Bidirectional Sync (BSDL)** consumer
+manifest (`.kitab.json` per slice, added 2026-05-15). The kitab repo tore BSDL
+down on 2026-05-16; the manifest was deleted here in `75eabcc` and **no tool
+reads `.kitab.json` anymore**.
 
-This project is a **consumer** of slices from the
-[Rahman Resources kitab](https://github.com/rahmanef63/resource-site).
-Slices live in `frontend/slices/<slug>/` and should each ship a
-`.kitab.json` so the kitab can detect drift, route sync direction
-(UP via `/rr-send`, DOWN via `npx rahman-resources update`), and enforce
-the generalisation gate before accepting an upstream push.
-
-### Adopt a slice from kitab
-
-```bash
-npx rahman-resources@latest add <slug>
-# Then write .kitab.json next to the slice files (template below).
-```
-
-### `.kitab.json` template
-
-Drop at `frontend/slices/<slug>/.kitab.json`:
-
-```json
-{
-  "$schema": "https://resource.rahmanef.com/schemas/kitab-consumer.json",
-  "kitabSlug": "<slug>",
-  "kitabVersion": "0.1.0",
-  "consumerVersion": "0.1.0",
-  "syncDirection": "bidirectional",
-  "generalization": {
-    "status": "portable",
-    "auditedAt": "2026-05-15",
-    "blockers": []
-  },
-  "lastPullAt": null,
-  "lastPushAt": null
-}
-```
-
-Fields:
-
-| Field | Notes |
-|---|---|
-| `kitabSlug` | kebab-case, must match a kitab `slice.contract.ts` `id`. |
-| `kitabVersion` | semver of last kitab version pulled DOWN. |
-| `consumerVersion` | bump after each local edit. |
-| `syncDirection` | `bidirectional` \| `down-only` \| `up-only` \| `frozen`. |
-| `generalization.status` | `portable` \| `needs-adapter` \| `consumer-locked`. |
-| `generalization.blockers[]` | required if status ≠ `portable`. |
-
-### Trigger prompts (paste in Claude Code)
-
-| Goal | Prompt |
-|---|---|
-| Pull latest kitab version | `pull latest <slug> from kitab and update my .kitab.json (kitabVersion + lastPullAt)` |
-| Bump after local edit | `i edited <slug> — bump consumerVersion in .kitab.json and re-audit generalization` |
-| Audit before push UP | `/rr-prep <slug> --fix` |
-| Push UP to kitab | `/rr-send <slug>` |
-| Adopt new slice from kitab | `adopt slice <slug> from kitab and create .kitab.json` |
-| Show sync status | (run from kitab repo) `npm run scan:consumers` |
-
-### Generalisation rules (UP-sync gate)
-
-The kitab refuses ingestion of slices that bake in this project's domain.
-Replace consumer-specific bits with props before push UP:
-
-| ❌ Locked | ✅ Portable |
-|---|---|
-| `<Link href="/dashboard/applications">` | `<Link href={\`${basePath}/${labels.list}\`}>` |
-| Convex table `applications` | Generic `<slug>_records` |
-| `requirePermission("apply.create")` hardcoded | `requirePermission(props.permission)` |
-| Hero text literal `"Lamar"` | `<Hero text={t.applyCta} />` from props |
-
-Spec: [`docs/consumer-manifest.md`](https://github.com/rahmanef63/resource-site/blob/main/docs/consumer-manifest.md).
+- **Do not create `.kitab.json` files.** Do not use `/rr-prep` / `/rr-send`.
+- Sharing a slice with another repo is now manual: `cp -r` the slice into the
+  target, adapt (routes, tables, copy), and commit there.
+- Historical context: [`docs/kitabsync.md`](./docs/kitabsync.md) (consumer
+  scrape report, snapshot 2026-05-15) and the rr repo's CLAUDE.md
+  "BSDL (legacy) — removed 2026-05-16" section.

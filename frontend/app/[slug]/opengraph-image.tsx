@@ -149,6 +149,7 @@ export default async function OGImage({
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
           {/* Avatar circle — either user's photo or initials fallback */}
           {profile.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- next/og ImageResponse renders off-DOM; next/image is unsupported here
             <img
               src={profile.avatarUrl}
               alt=""

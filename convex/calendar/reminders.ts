@@ -67,13 +67,25 @@ export const sweepReminders = internalMutation({
   },
 });
 
-function parseEventStart(date: string, time: string): number | null {
-  // date "YYYY-MM-DD", time "HH:mm". Treat as local time of the server
-  // (Dokploy default UTC). For multi-timezone support, store offset on
-  // the event row — out of scope for this batch.
-  const m = /^(\d{2}):(\d{2})$/.exec(time);
-  if (!m) return null;
-  const ms = Date.parse(`${date}T${time}:00.000Z`);
+/**
+ * App timezone offset. Event `date`/`time` are stored as the user's
+ * wall-clock (WIB) — the same floating-local convention the ICS export
+ * uses (see `frontend/slices/calendar/lib/ics.ts`). The server runs UTC
+ * (Dokploy), so we must anchor the wall-clock to WIB, NOT to `Z`, or
+ * every reminder fires 7h off for the entire (Indonesian) user base.
+ *
+ * Single-offset assumption: CareerPack is ID-only. WIT/WITA users get a
+ * 1–2h skew (vs the old 7h bug). Store a per-event offset if true
+ * multi-timezone support is ever needed.
+ */
+export const APP_UTC_OFFSET = "+07:00"; // WIB (UTC+7)
+
+export function parseEventStart(date: string, time: string): number | null {
+  // date "YYYY-MM-DD", time "HH:mm" → epoch ms, interpreting the
+  // wall-clock as WIB.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  if (!/^(\d{2}):(\d{2})$/.test(time)) return null;
+  const ms = Date.parse(`${date}T${time}:00.000${APP_UTC_OFFSET}`);
   return Number.isFinite(ms) ? ms : null;
 }
 

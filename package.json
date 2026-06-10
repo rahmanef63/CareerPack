@@ -10,6 +10,7 @@
     "lint": "pnpm --filter careerpack-frontend lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "cd frontend && pnpm exec tsc --noEmit && pnpm exec tsc --noEmit -p ../convex/tsconfig.json",
     "frontend:dev": "pnpm --filter careerpack-frontend dev",
     "frontend:build": "pnpm --filter careerpack-frontend build",

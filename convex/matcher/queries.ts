@@ -2,6 +2,7 @@ import { query, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser, requireUser, requireOwnedDoc } from "../_shared/auth";
 import type { Doc } from "../_generated/dataModel";
+import { summarizeSalaries } from "./salaryStats";
 
 const MAX_LIST = 100;
 const MAX_SCAN_HISTORY = 50;
@@ -159,78 +160,11 @@ export const getSalaryInsights = query({
       .order("desc")
       .take(500);
 
-    interface Bucket {
-      values: number[];
-      count: number;
-      remoteCount: number;
-      currencies: Map<string, number>;
-    }
-
-    const byCategory = new Map<string, Bucket>();
-
-    for (const row of rows) {
-      const cat = row.category ?? "other";
-      const bucket: Bucket = byCategory.get(cat) ?? {
-        values: [],
-        count: 0,
-        remoteCount: 0,
-        currencies: new Map(),
-      };
-      bucket.count += 1;
-      if (row.workMode === "remote") bucket.remoteCount += 1;
-
-      // Mid-point of salary range. Skip rows with no salary data.
-      const min = row.salaryMin;
-      const max = row.salaryMax;
-      let mid: number | null = null;
-      if (min && max) mid = (min + max) / 2;
-      else if (min) mid = min;
-      else if (max) mid = max;
-
-      if (mid !== null && Number.isFinite(mid) && mid > 0) {
-        bucket.values.push(mid);
-        const cur = row.currency ?? "USD";
-        bucket.currencies.set(cur, (bucket.currencies.get(cur) ?? 0) + 1);
-      }
-      byCategory.set(cat, bucket);
-    }
-
-    return Array.from(byCategory.entries())
-      .map(([category, b]) => {
-        const sorted = b.values.slice().sort((a, b) => a - b);
-        const dominantCurrency = pickDominantCurrency(b.currencies);
-        return {
-          category,
-          count: b.count,
-          withSalaryCount: sorted.length,
-          remotePct: b.count > 0 ? Math.round((b.remoteCount / b.count) * 100) : 0,
-          currency: dominantCurrency,
-          p25: percentile(sorted, 0.25),
-          p50: percentile(sorted, 0.5),
-          p75: percentile(sorted, 0.75),
-        };
-      })
-      .sort((a, b) => b.count - a.count);
+    // Aggregation (currency separation + percentile math) lives in a
+    // pure, unit-tested module — see matcher/salaryStats.ts.
+    return summarizeSalaries(rows);
   },
 });
-
-function percentile(sorted: number[], p: number): number | null {
-  if (sorted.length === 0) return null;
-  const idx = Math.floor((sorted.length - 1) * p);
-  return Math.round(sorted[idx]);
-}
-
-function pickDominantCurrency(counts: Map<string, number>): string {
-  let best = "USD";
-  let max = 0;
-  for (const [cur, n] of counts) {
-    if (n > max) {
-      max = n;
-      best = cur;
-    }
-  }
-  return best;
-}
 
 // ---------------------------------------------------------------------
 // ATS scan history
@@ -293,12 +227,14 @@ export const getATSScansByListing = query({
 // ---------------------------------------------------------------------
 
 export const _getOwnedCV = internalQuery({
-  args: { cvId: v.id("cvs") },
+  args: { cvId: v.id("cvs"), userId: v.id("users") },
   handler: async (ctx, args) => {
     // We can't use requireOwnedDoc here because internalQuery has no
-    // auth context. The caller (action) has already established userId
-    // via getAuthUserId — we just read by id and check ownership.
+    // auth context. The caller (action) passes the userId it established
+    // via getAuthUserId — we read by id AND enforce ownership so one user
+    // can't run an ATS scan against another user's CV (IDOR / data leak).
     const cv = await ctx.db.get(args.cvId);
+    if (!cv || cv.userId !== args.userId) return null;
     return cv;
   },
 });

@@ -46,21 +46,25 @@ export function parseNumberID(s: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** "Rp 1,2 jt" / "Rp 1,5 m" — short-form currency for compact UIs
- *  (job cards, stat tiles). Falls back to full IDR < 1 jt. */
+/** "Rp 1,2 jt" / "Rp 1,5 m" / "Rp 5,0 rb" — short-form currency for
+ *  compact UIs (job cards, stat tiles). Falls back to full IDR below
+ *  1 rb. */
 export function formatShortIDR(v: NumInput): string {
   const n = toNum(v);
   if (n === null) return "—";
   const abs = Math.abs(n);
   const sign = n < 0 ? "-" : "";
-  if (abs >= 1_000_000_000) {
-    return `${sign}Rp ${(abs / 1_000_000_000).toFixed(1).replace(".", ",")} m`;
-  }
-  if (abs >= 1_000_000) {
-    return `${sign}Rp ${(abs / 1_000_000).toFixed(1).replace(".", ",")} jt`;
-  }
-  if (abs >= 1_000) {
-    return `${sign}Rp ${(abs / 1_000).toFixed(1).replace(".", ",")} rb`;
+  // Descending units. The 0.99995 margin promotes values that would
+  // round up to the next unit (e.g. 999_999 → "1,0 jt", not "1000,0 rb").
+  const units: Array<[number, string]> = [
+    [1_000_000_000, "m"],
+    [1_000_000, "jt"],
+    [1_000, "rb"],
+  ];
+  for (const [div, suffix] of units) {
+    if (abs >= div * 0.99995) {
+      return `${sign}Rp ${(abs / div).toFixed(1).replace(".", ",")} ${suffix}`;
+    }
   }
   return formatIDR(n);
 }

@@ -67,9 +67,21 @@ export function applyCalibratedProbabilities(
   });
 }
 
-/** Stable composite key for (from, to) edge stat lookup. */
+/**
+ * Stable composite key for (from, to) edge stat lookup — used to match
+ * calibrated `nodeOutcomeStats` against curated edges in memory.
+ *
+ * Joins the two slugs with a literal "|" so distinct pairs can never
+ * collide by bare concatenation (e.g. ("a","bc") vs ("ab","c")). "|"
+ * never appears in kebab-case slugs. Producer and consumer both call
+ * this function, so the delimiter only has to be self-consistent.
+ *
+ * (Was previously a raw 0x01 control byte — invisible in editors and
+ * grep, which made the calibration loop look broken on inspection.
+ * Keep this a visible character.)
+ */
 export function edgeKey(fromSlug: string, toSlug: string): string {
-  return `${fromSlug}${toSlug}`;
+  return `${fromSlug}|${toSlug}`;
 }
 
 export interface RankedPath {
