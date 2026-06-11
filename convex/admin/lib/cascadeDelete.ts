@@ -28,6 +28,7 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
     "aiSettings",
     "atsScans",
     "quickFillBatches",
+    "aiUserModelOverrides",
   ] as const;
 
   for (const table of owned) {
@@ -37,6 +38,36 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
       .collect();
     for (const r of rows) await ctx.db.delete(r._id);
   }
+
+  // Engine tables carry userId but lack a bare `by_user` index — delete via
+  // their compound indexes so account erasure is complete (GDPR). truthAtoms
+  // can also pin a proof blob in _storage; delete that first.
+  const atoms = await ctx.db
+    .query("truthAtoms")
+    .withIndex("by_user_cv", (q) => q.eq("userId", userId))
+    .collect();
+  for (const atom of atoms) {
+    if (atom.proofStorageId) {
+      try {
+        await ctx.storage.delete(atom.proofStorageId);
+      } catch {
+        /* blob may already be gone */
+      }
+    }
+    await ctx.db.delete(atom._id);
+  }
+
+  const outcomes = await ctx.db
+    .query("outcomeEvents")
+    .withIndex("by_user_time", (q) => q.eq("userId", userId))
+    .collect();
+  for (const o of outcomes) await ctx.db.delete(o._id);
+
+  const quests = await ctx.db
+    .query("careerQuests")
+    .withIndex("by_user_status", (q) => q.eq("userId", userId))
+    .collect();
+  for (const quest of quests) await ctx.db.delete(quest._id);
 
   const userFiles = await ctx.db
     .query("files")

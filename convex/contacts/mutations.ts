@@ -2,6 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
 import { makeBulkDelete } from "../_shared/bulkDelete";
+import { requireLen, capLen } from "../_shared/validate";
 
 export const createContact = mutation({
   args: {
@@ -26,16 +27,16 @@ export const createContact = mutation({
     const userId = await requireUser(ctx);
     return await ctx.db.insert("contacts", {
       userId,
-      name: args.name.trim(),
+      name: requireLen("Nama", args.name, 200),
       role: args.role,
-      company: args.company,
-      position: args.position,
-      email: args.email,
-      phone: args.phone,
-      linkedinUrl: args.linkedinUrl,
-      notes: args.notes,
-      avatarEmoji: args.avatarEmoji,
-      avatarHue: args.avatarHue,
+      company: capLen("Perusahaan", args.company, 200),
+      position: capLen("Posisi", args.position, 200),
+      email: capLen("Email", args.email, 320),
+      phone: capLen("Telepon", args.phone, 50),
+      linkedinUrl: capLen("LinkedIn", args.linkedinUrl, 500),
+      notes: capLen("Catatan", args.notes, 2000),
+      avatarEmoji: capLen("Emoji", args.avatarEmoji, 16),
+      avatarHue: capLen("Warna", args.avatarHue, 32),
       favorite: args.favorite ?? false,
       lastInteraction: Date.now(),
     });
@@ -68,9 +69,17 @@ export const updateContact = mutation({
     const { contactId, ...rest } = args;
     await requireOwnedDoc(ctx, contactId, "Kontak");
     const patch: Record<string, unknown> = {};
-    for (const [k, val] of Object.entries(rest)) {
-      if (val !== undefined) patch[k] = val;
-    }
+    if (rest.name !== undefined) patch.name = requireLen("Nama", rest.name, 200);
+    if (rest.role !== undefined) patch.role = rest.role;
+    if (rest.company !== undefined) patch.company = capLen("Perusahaan", rest.company, 200);
+    if (rest.position !== undefined) patch.position = capLen("Posisi", rest.position, 200);
+    if (rest.email !== undefined) patch.email = capLen("Email", rest.email, 320);
+    if (rest.phone !== undefined) patch.phone = capLen("Telepon", rest.phone, 50);
+    if (rest.linkedinUrl !== undefined) patch.linkedinUrl = capLen("LinkedIn", rest.linkedinUrl, 500);
+    if (rest.notes !== undefined) patch.notes = capLen("Catatan", rest.notes, 2000);
+    if (rest.avatarEmoji !== undefined) patch.avatarEmoji = capLen("Emoji", rest.avatarEmoji, 16);
+    if (rest.avatarHue !== undefined) patch.avatarHue = capLen("Warna", rest.avatarHue, 32);
+    if (rest.favorite !== undefined) patch.favorite = rest.favorite;
     await ctx.db.patch(contactId, patch);
   },
 });

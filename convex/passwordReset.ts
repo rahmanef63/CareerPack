@@ -86,14 +86,23 @@ async function verifySecret(secret: string, stored: string): Promise<boolean> {
  * only HMAC outputs — without the server secret they can't precompute
  * a rainbow table mapping `hash → token`. Same single-pass speed.
  *
- * Falls back to a deploy-time derived secret if `PASSWORD_RESET_HMAC_SECRET`
- * is unset (legacy deploys). The fallback is stable across the process
- * lifetime so the same token always hashes to the same value during the
- * (TTL 30m) reset window.
+ * Key selection is FAIL-CLOSED: prefer the dedicated
+ * `PASSWORD_RESET_HMAC_SECRET`; otherwise derive a stable, high-entropy
+ * key from `JWT_PRIVATE_KEY` (required by the auth system, so present in
+ * every real deploy) with a domain-separation prefix. We never fall back
+ * to a committed constant — a public secret would let anyone precompute
+ * token hashes, defeating the whole point of the HMAC. If neither secret
+ * exists the environment is misconfigured, so throw rather than mint
+ * guessable tokens.
  */
-const HMAC_SECRET_FALLBACK = "careerpack-default-reset-hmac-key-do-not-rely-on-this";
 function hmacKey(): string {
-  return process.env.PASSWORD_RESET_HMAC_SECRET ?? HMAC_SECRET_FALLBACK;
+  const dedicated = process.env.PASSWORD_RESET_HMAC_SECRET;
+  if (dedicated) return dedicated;
+  const jwt = process.env.JWT_PRIVATE_KEY;
+  if (jwt) return `pwreset-hmac:${jwt}`;
+  throw new Error(
+    "Konfigurasi server tidak lengkap (PASSWORD_RESET_HMAC_SECRET / JWT_PRIVATE_KEY).",
+  );
 }
 
 async function hmacToken(rawToken: string): Promise<string> {

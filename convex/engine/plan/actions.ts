@@ -2,42 +2,19 @@ import { v, ConvexError } from "convex/values";
 import { action, type ActionCtx } from "../../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { sanitizeAIInput, wrapUserInput } from "../../_shared/sanitize";
-import { optionalEnv } from "../../_shared/env";
-import { resolveProviderBaseUrl } from "../../_shared/aiProviders";
+import { resolveAI as resolveAIShared } from "../../_shared/aiResolve";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../../_shared/fetchWithTimeout";
 import { recordError } from "../../_shared/errorSink";
 import { withIdempotency } from "../../_shared/idempotency";
 import { internal } from "../../_generated/api";
 import { ALLOWED_ACTION_TYPES, validatePlan } from "./lib";
 
-interface AIConfig {
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-}
-
-async function resolveAI(ctx: ActionCtx, fallbackModel: string): Promise<AIConfig> {
-  const userId = await getAuthUserId(ctx);
-  if (userId) {
-    const cfg = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
-    if (cfg) {
-      return {
-        baseUrl: resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined),
-        apiKey: cfg.apiKey,
-        model: cfg.model,
-      };
-    }
-  }
-  const baseUrl = optionalEnv("CONVEX_OPENAI_BASE_URL");
-  const apiKey = optionalEnv("CONVEX_OPENAI_API_KEY");
-  if (!baseUrl || !apiKey) {
+async function resolveAI(ctx: ActionCtx, fallbackModel: string) {
+  const cfg = await resolveAIShared(ctx, fallbackModel);
+  if (!cfg) {
     throw new ConvexError("AI gateway belum dikonfigurasi.");
   }
-  return {
-    baseUrl: baseUrl.replace(/\/+$/, ""),
-    apiKey,
-    model: fallbackModel,
-  };
+  return cfg;
 }
 
 /**
@@ -130,11 +107,14 @@ Rules:
       try {
         parsed = JSON.parse(raw);
       } catch {
+        // 200 but unusable body — don't charge the user for a non-result.
+        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
         throw new ConvexError("AI mengembalikan JSON tidak valid.");
       }
 
       const plan = validatePlan(parsed as Parameters<typeof validatePlan>[0]);
       if (!plan) {
+        await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
         throw new ConvexError(
           "AI tidak menghasilkan plan yang valid. Coba pertajam intent kamu.",
         );

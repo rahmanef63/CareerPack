@@ -40,15 +40,29 @@ export const createQuest = mutation({
     if (args.actions.length === 0) {
       throw new Error("Plan butuh minimal satu action");
     }
+    // Mirror engine/plan/lib.ts validatePlan bounds — createQuest is a
+    // directly-callable mutation that bypasses the compile action's
+    // validator, so re-enforce them here to keep junk out of the DB.
+    const etaRaw = Number(args.etaMonths);
+    const etaMonths = Number.isFinite(etaRaw)
+      ? Math.max(1, Math.min(60, Math.round(etaRaw)))
+      : 12;
+    const actions = args.actions.slice(0, 12);
+    const seenIds = new Set<string>();
+    for (const a of actions) {
+      if (seenIds.has(a.id)) throw new Error("Action id duplikat");
+      seenIds.add(a.id);
+    }
     return await ctx.db.insert("careerQuests", {
       userId,
       title,
       intent,
-      etaMonths: args.etaMonths,
+      etaMonths,
       targetNodeSlug: args.targetNodeSlug,
       status: "active",
-      actions: args.actions.map((a) => ({
+      actions: actions.map((a) => ({
         ...a,
+        label: a.label.trim().slice(0, 200),
         completed: false,
       })),
       createdAt: Date.now(),

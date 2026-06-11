@@ -64,13 +64,15 @@ export const saveFile = mutation({
     }
     assertAllowedFile(fileType, args.fileSize);
 
+    const tenantId = userId.toString();
+
+    // Dedup only within the caller's own tenant — never return another
+    // tenant's row id for a shared storageId.
     const existing = await ctx.db
       .query("files")
       .withIndex("by_storage", (q) => q.eq("storageId", storageId))
       .first();
-    if (existing) return existing._id;
-
-    const tenantId = userId.toString();
+    if (existing && existing.tenantId === tenantId) return existing._id;
 
     return await ctx.db.insert("files", {
       storageId,

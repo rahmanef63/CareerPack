@@ -4,8 +4,7 @@ import { v, ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
-import { optionalEnv } from "../_shared/env";
-import { resolveProviderBaseUrl } from "../_shared/aiProviders";
+import { resolveAI as resolveAIShared } from "../_shared/aiResolve";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 import { withIdempotency } from "../_shared/idempotency";
@@ -24,36 +23,14 @@ async function requireQuota(ctx: ActionCtx): Promise<void> {
   await ctx.runMutation(internal.cv.mutations._checkTranslateQuota, { userId });
 }
 
-interface ResolvedAI {
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-}
-
-async function resolveAI(ctx: ActionCtx, fallbackModel: string): Promise<ResolvedAI> {
-  const userId = await getAuthUserId(ctx);
-  if (userId) {
-    const cfg = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
-    if (cfg) {
-      return {
-        baseUrl: resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined),
-        apiKey: cfg.apiKey,
-        model: cfg.model,
-      };
-    }
-  }
-  const baseUrl = optionalEnv("CONVEX_OPENAI_BASE_URL");
-  const apiKey = optionalEnv("CONVEX_OPENAI_API_KEY");
-  if (!baseUrl || !apiKey) {
+async function resolveAI(ctx: ActionCtx, fallbackModel: string) {
+  const cfg = await resolveAIShared(ctx, fallbackModel);
+  if (!cfg) {
     throw new ConvexError(
       "Layanan terjemahan AI belum dikonfigurasi untuk akun ini. Atur API key di Setelan → AI, atau hubungi admin.",
     );
   }
-  return {
-    baseUrl: baseUrl.replace(/\/+$/, ""),
-    apiKey,
-    model: fallbackModel,
-  };
+  return cfg;
 }
 
 const LANGUAGE_NAMES: Record<string, string> = {

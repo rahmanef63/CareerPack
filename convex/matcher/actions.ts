@@ -3,8 +3,7 @@ import { v, ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
-import { optionalEnv } from "../_shared/env";
-import { resolveProviderBaseUrl } from "../_shared/aiProviders";
+import { resolveAI, type ResolvedAI } from "../_shared/aiResolve";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
@@ -37,34 +36,6 @@ export const _checkATSQuota = internalMutation({
     await enforceRateLimit(ctx, userId, AI_RATE_LIMITS["ai:day"]);
   },
 });
-
-interface ResolvedAI {
-  baseUrl: string;
-  apiKey: string;
-  model: string;
-}
-
-async function resolveAI(ctx: ActionCtx, fallbackModel: string): Promise<ResolvedAI | null> {
-  const userId = await getAuthUserId(ctx);
-  if (userId) {
-    const cfg = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
-    if (cfg) {
-      return {
-        baseUrl: resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined),
-        apiKey: cfg.apiKey,
-        model: cfg.model,
-      };
-    }
-  }
-  const baseUrl = optionalEnv("CONVEX_OPENAI_BASE_URL");
-  const apiKey = optionalEnv("CONVEX_OPENAI_API_KEY");
-  if (!baseUrl || !apiKey) return null;
-  return {
-    baseUrl: baseUrl.replace(/\/+$/, ""),
-    apiKey,
-    model: fallbackModel,
-  };
-}
 
 interface ExtractedJD {
   keywords: string[];

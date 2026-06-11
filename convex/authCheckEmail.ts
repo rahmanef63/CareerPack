@@ -69,7 +69,7 @@ export const _ipGatedCheckEmail = internalMutation({
     const normalized = email.trim().toLowerCase();
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), normalized))
+      .withIndex("email", (q) => q.eq("email", normalized))
       .first();
     return { rateLimited: false as const, exists: !!user };
   },

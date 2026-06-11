@@ -2,6 +2,7 @@ import { mutation, internalMutation, type MutationCtx } from "../_generated/serv
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
+import { assertOwnedStorages } from "../files/ownership";
 import type { Id } from "../_generated/dataModel";
 
 /**
@@ -133,7 +134,11 @@ export const updateCV = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    await requireOwnedDoc(ctx, args.cvId, "CV");
+    const cv = await requireOwnedDoc(ctx, args.cvId, "CV");
+    const avatarStorageId = args.updates.personalInfo?.avatarStorageId;
+    if (avatarStorageId) {
+      await assertOwnedStorages(ctx, [avatarStorageId], cv.userId);
+    }
     await ctx.db.patch(args.cvId, args.updates);
     return args.cvId;
   },

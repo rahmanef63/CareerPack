@@ -2,6 +2,7 @@ import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
 import { makeBulkDelete } from "../_shared/bulkDelete";
+import { assertOwnedStorages } from "../files/ownership";
 import { portfolioMediaValidator, portfolioLinkValidator } from "./schema";
 
 const CATEGORY_WHITELIST = new Set([
@@ -188,6 +189,11 @@ export const createPortfolioItem = mutation({
   handler: async (ctx, args) => {
     const userId = await requireUser(ctx);
     const payload = buildPayload(args);
+    await assertOwnedStorages(
+      ctx,
+      [payload.coverStorageId, ...(payload.media ?? []).map((m) => m.storageId)],
+      userId,
+    );
     return await ctx.db.insert("portfolioItems", { userId, ...payload });
   },
 });
@@ -218,7 +224,12 @@ export const updatePortfolioItem = mutation({
     sortOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    await requireOwnedDoc(ctx, args.itemId, "Portofolio");
+    const item = await requireOwnedDoc(ctx, args.itemId, "Portofolio");
+    await assertOwnedStorages(
+      ctx,
+      [args.coverStorageId, ...(args.media ?? []).map((m) => m.storageId)],
+      item.userId,
+    );
 
     // Build a partial patch: only apply fields explicitly passed in.
     const patch: Record<string, unknown> = {};

@@ -12,11 +12,12 @@ export const AI_RATE_LIMITS: Record<string, RateLimitRule> = {
   "ai:day": { key: "ai:day", windowMs: 24 * 60 * 60 * 1000, max: 100 },
 };
 
-export const LOGIN_RATE_LIMIT: RateLimitRule = {
-  key: "login",
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-};
+// NOTE: login throttling is enforced per-IP at the HTTP edge
+// (convex/authCheckEmail.ts loginCheckIpEvents), not via this bucket —
+// the @convex-dev/auth signIn password path runs over WebSocket and can't
+// hook this helper. A user-scoped LOGIN_RATE_LIMIT constant used to live
+// here but was never wired, so it was removed to avoid implying coverage
+// that didn't exist.
 
 export async function enforceRateLimit(
   ctx: MutationCtx,

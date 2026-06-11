@@ -4,8 +4,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireUser } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
-import { resolveProviderBaseUrl } from "../_shared/aiProviders";
-import { requireEnv } from "../_shared/env";
+import { resolveAI } from "../_shared/aiResolve";
 import { parseJsonOrThrow, coerceJobShape } from "../_shared/aiOutput";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 
@@ -504,9 +503,9 @@ export const addUserJob = mutation({
 });
 
 // ---------------------------------------------------------------------------
-// AI plumbing — minimal duplicate of ai/actions.ts callAI. Kept inline
-// rather than extracted to _shared so matcher can evolve its prompts
-// independently. Promote to _shared/aiCall when a third caller appears.
+// AI plumbing — credential resolution shares _shared/aiResolve (so admin
+// global key + per-user model override apply here too); the prompt/call
+// layer stays inline so matcher can evolve its prompts independently.
 // ---------------------------------------------------------------------------
 
 interface AIConfig {
@@ -516,22 +515,11 @@ interface AIConfig {
 }
 
 async function resolveAIConfig(ctx: ActionCtx): Promise<AIConfig> {
-  const userId = await getAuthUserId(ctx);
-  if (userId) {
-    const cfg = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
-    if (cfg) {
-      return {
-        baseUrl: resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined),
-        apiKey: cfg.apiKey,
-        model: cfg.model,
-      };
-    }
+  const cfg = await resolveAI(ctx, "gpt-4.1-nano");
+  if (!cfg) {
+    throw new Error("AI gateway belum dikonfigurasi.");
   }
-  return {
-    baseUrl: requireEnv("CONVEX_OPENAI_BASE_URL").replace(/\/+$/, ""),
-    apiKey: requireEnv("CONVEX_OPENAI_API_KEY"),
-    model: "gpt-4.1-nano",
-  };
+  return cfg;
 }
 
 async function callAI(cfg: AIConfig, body: Record<string, unknown>) {

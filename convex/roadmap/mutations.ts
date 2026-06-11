@@ -136,7 +136,7 @@ export const seedRoadmap = mutation({
         };
       });
       const done = merged.filter((s) => s.status === "completed").length;
-      const progress = Math.round((done / merged.length) * 100);
+      const progress = merged.length === 0 ? 0 : Math.round((done / merged.length) * 100);
       await ctx.db.patch(existing._id, {
         skills: merged,
         progress,
@@ -196,7 +196,10 @@ export const updateSkillProgress = mutation({
     if (!touched) throw new Error("Skill tidak ditemukan");
 
     const completedSkills = updatedSkills.filter((s) => s.status === "completed").length;
-    const progress = Math.round((completedSkills / updatedSkills.length) * 100);
+    const progress =
+      updatedSkills.length === 0
+        ? 0
+        : Math.round((completedSkills / updatedSkills.length) * 100);
 
     await ctx.db.patch(roadmap._id, {
       skills: updatedSkills,

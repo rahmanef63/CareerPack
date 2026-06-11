@@ -56,6 +56,16 @@ const HTML_ALLOWED_TAGS = new Set([
   "a", "span",
 ]);
 
+// Attributes kept on allowlisted tags. Everything else (incl. every on*
+// handler and `style`) is dropped during the tag-rebuild in step 4, so a
+// handler cannot survive regardless of how it is separated from the
+// previous attribute (`<a href="x"/onmouseover="…">`, quote-adjacent, etc).
+const HTML_ALLOWED_ATTRS = new Set([
+  "href", "target", "rel", "title", "class", "lang", "dir",
+]);
+
+const DANGEROUS_PROTO = /^(?:javascript|vbscript|data|file):/i;
+
 export function sanitizeHtml(input: unknown): string {
   let s = trimSafe(input, MAX_HTML_LEN);
   if (!s) return "";
@@ -89,10 +99,37 @@ export function sanitizeHtml(input: unknown): string {
     },
   );
 
-  // 4. Drop every tag NOT in the allowlist (preserve text content).
-  s = s.replace(/<\/?\s*([a-zA-Z][a-zA-Z0-9-]*)\b[^>]*>/g, (m, tag: string) => {
-    return HTML_ALLOWED_TAGS.has(tag.toLowerCase()) ? m : "";
-  });
+  // 4. Drop every tag NOT in the allowlist (preserve text content). For
+  //    kept tags, REBUILD from an attribute allowlist (HTML_ALLOWED_ATTRS)
+  //    rather than trusting step 2's on*= stripper — that stripper requires
+  //    whitespace before `on`, so `/`-separated or quote-adjacent handlers
+  //    slipped through and re-rendered verbatim. Rebuilding drops any
+  //    attribute not on the allowlist no matter the separator, and
+  //    re-checks href for dangerous protocols (incl. unquoted values that
+  //    step 3's quoted-only regex misses).
+  s = s.replace(
+    /<(\/?)\s*([a-zA-Z][a-zA-Z0-9-]*)\b([^>]*)>/g,
+    (_m, slash: string, tag: string, attrs: string) => {
+      const name = tag.toLowerCase();
+      if (!HTML_ALLOWED_TAGS.has(name)) return "";
+      if (slash) return `</${name}>`;
+      const kept: string[] = [];
+      const attrRe = /([a-zA-Z][a-zA-Z0-9:-]*)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/g;
+      let a: RegExpExecArray | null;
+      while ((a = attrRe.exec(attrs)) !== null) {
+        const an = a[1].toLowerCase();
+        if (!HTML_ALLOWED_ATTRS.has(an)) continue;
+        let raw = a[2];
+        if (an === "href") {
+          const inner = raw.replace(/^["']|["']$/g, "").trim();
+          if (DANGEROUS_PROTO.test(inner)) raw = `"#"`;
+          else if (!/^["']/.test(raw)) raw = `"${raw}"`;
+        }
+        kept.push(`${an}=${raw}`);
+      }
+      return kept.length ? `<${name} ${kept.join(" ")}>` : `<${name}>`;
+    },
+  );
 
   // 5. Force <a target="_blank" rel="noopener noreferrer"> when href is
   //    external — defence against window.opener attacks.
