@@ -78,6 +78,7 @@ export function QuestionBank({
                 <Button
                   variant="ghost"
                   size="sm"
+                  aria-label={favorites.has(question.id) ? "Hapus dari favorit" : "Tambah ke favorit"}
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleFavorite(question.id);

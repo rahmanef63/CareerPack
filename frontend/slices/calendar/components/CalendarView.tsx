@@ -32,6 +32,16 @@ import {
   ResponsiveDialogTitle,
 } from "@/shared/components/ui/responsive-dialog";
 import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+} from "@/shared/components/ui/responsive-alert-dialog";
+import {
   ResponsiveSelect,
   ResponsiveSelectContent,
   ResponsiveSelectItem,
@@ -167,6 +177,8 @@ export function CalendarView() {
     [create, update, editing],
   );
 
+  const [pendingDelete, setPendingDelete] = useState<AgendaItem | null>(null);
+
   const handleDelete = useCallback(
     async (id: string) => {
       try {
@@ -178,6 +190,10 @@ export function CalendarView() {
     },
     [remove],
   );
+
+  const requestDelete = useCallback((item: AgendaItem) => {
+    setPendingDelete(item);
+  }, []);
 
   const goToToday = useCallback(() => {
     if (!todayKey) return;
@@ -295,7 +311,7 @@ export function CalendarView() {
                       key={it.id}
                       item={it}
                       onEdit={openEdit}
-                      onDelete={handleDelete}
+                      onDelete={requestDelete}
                     />
                   ))}
                 </ul>
@@ -322,7 +338,7 @@ export function CalendarView() {
                       item={it}
                       compact
                       onEdit={openEdit}
-                      onDelete={handleDelete}
+                      onDelete={requestDelete}
                     />
                   ))}
                 </ul>
@@ -342,6 +358,36 @@ export function CalendarView() {
         initial={editing}
         onSubmit={handleSubmit}
       />
+
+      <ResponsiveAlertDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => !o && setPendingDelete(null)}
+      >
+        <ResponsiveAlertDialogContent>
+          <ResponsiveAlertDialogHeader>
+            <ResponsiveAlertDialogTitle>Hapus agenda ini?</ResponsiveAlertDialogTitle>
+            <ResponsiveAlertDialogDescription>
+              {pendingDelete
+                ? `"${pendingDelete.title}" akan dihapus, termasuk pengingatnya. Tindakan ini tidak bisa dibatalkan.`
+                : ""}
+            </ResponsiveAlertDialogDescription>
+          </ResponsiveAlertDialogHeader>
+          <ResponsiveAlertDialogFooter>
+            <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
+            <ResponsiveAlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                const target = pendingDelete;
+                setPendingDelete(null);
+                if (target) void handleDelete(target.id);
+              }}
+            >
+              Hapus
+            </ResponsiveAlertDialogAction>
+          </ResponsiveAlertDialogFooter>
+        </ResponsiveAlertDialogContent>
+      </ResponsiveAlertDialog>
     </PageContainer>
   );
 }
@@ -396,7 +442,7 @@ interface AgendaRowProps {
   item: AgendaItem;
   compact?: boolean;
   onEdit: (item: AgendaItem) => void;
-  onDelete: (id: string) => void;
+  onDelete: (item: AgendaItem) => void;
 }
 
 function AgendaRow({ item, compact, onEdit, onDelete }: AgendaRowProps) {
@@ -461,24 +507,24 @@ function AgendaRow({ item, compact, onEdit, onDelete }: AgendaRowProps) {
           </>
         )}
       </button>
-      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
+      <div className="flex flex-col gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => onEdit(item)}
-          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+          className="h-9 w-9 text-muted-foreground hover:text-foreground"
           aria-label={`Edit agenda ${item.title}`}
         >
-          <Pencil className="w-3.5 h-3.5" />
+          <Pencil className="w-4 h-4" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onDelete(item.id)}
-          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+          onClick={() => onDelete(item)}
+          className="h-9 w-9 text-muted-foreground hover:text-destructive"
           aria-label={`Hapus agenda ${item.title}`}
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-4 h-4" />
         </Button>
       </div>
     </li>

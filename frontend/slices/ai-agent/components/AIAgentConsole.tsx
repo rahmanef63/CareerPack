@@ -14,6 +14,7 @@ import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { notify } from "@/shared/lib/notify";
 import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
 import { ALL_SKILLS } from "@/shared/lib/sliceRegistry";
@@ -57,7 +58,12 @@ export function AIAgentConsole({
   const { sessions, setSessions, activeId, setActiveId, deleteSession } =
     useSessionSync();
   const [input, setInput] = useState("");
-  const [thinking, setThinking] = useState(false);
+  // Track WHICH session has an in-flight request, not just a global bool —
+  // otherwise the spinner renders under whatever session is on screen when
+  // you switch mid-request. `thinking` (derived) keeps the single-flight
+  // guard + composer-disable behaviour for the active view.
+  const [thinkingId, setThinkingId] = useState<string | null>(null);
+  const thinking = thinkingId !== null;
   const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false);
   const chatAction = useAction(api.ai.actions.chat);
   const isMobile = useIsMobile();
@@ -166,102 +172,109 @@ export function AIAgentConsole({
         ),
       );
       setInput("");
-      setThinking(true);
+      setThinkingId(activeSession.id);
 
-      const slashActions = extractSlashActions(text);
-
-      // Serialise manifest skills for the backend so it can build
-      // OpenAI tools and let the model emit tool_calls (Vercel AI SDK
-      // / OpenAI function-calling style). Drops `argsFromText` (a
-      // function — non-serialisable) and flattens the args record
-      // into an array.
-      const availableSkills = ALL_SKILLS.map((s) => ({
-        id: s.id,
-        description: `${s.label}: ${s.description}`,
-        kind: s.kind,
-        args: s.args
-          ? Object.entries(s.args).map(([name, field]) => ({
-              name,
-              type: field.type,
-              required: field.required ?? false,
-              description:
-                field.label +
-                (field.example ? ` (contoh: ${field.example})` : ""),
-            }))
-          : [],
-      }));
-
-      let assistantText: string;
-      let assistantProgress: AIProgress | undefined;
-      let toolActions: AgentAction[] = [];
+      // finally guarantees the thinking state always clears — even if a
+      // non-chatAction step (skill serialise, state projection) throws —
+      // so the composer can't get stuck disabled forever.
       try {
-        const result = await chatAction({
-          messages: history,
-          sessionId: activeSession.id,
-          view: currentView,
-          availableSkills,
-        });
-        assistantText = result.text;
-        toolActions = (result.toolCalls ?? []).map(
-          (tc) =>
-            ({
-              type: tc.skillId,
-              payload: tc.args,
-            }) as unknown as AgentAction,
-        );
-        assistantProgress = {
-          steps: result.progress.steps.map((s) => ({
-            id: s.id,
-            type: s.type as StepType,
-            status: s.status as StepStatus,
-            label: s.label,
-            detail: s.detail,
-            durationMs: s.durationMs,
-            error: s.error,
-          })),
-          totalDurationMs: result.progress.totalDurationMs,
-          isComplete: result.progress.isComplete,
-        };
-      } catch (err) {
-        const reason = err instanceof Error ? err.message : String(err);
-        const fallback = runAgent(text);
-        assistantText = `⚠️ AI gateway error: ${reason}\n\n${fallback.text}`;
-        assistantProgress = {
-          steps: [
-            {
-              id: "client-fallback",
-              type: "inference",
-              status: "error",
-              label: "Generate respons",
-              durationMs: 0,
-              error: reason,
-            },
-          ],
-          totalDurationMs: 0,
-          isComplete: true,
-        };
-      }
+        const slashActions = extractSlashActions(text);
 
-      const assistantMsg: Message = {
-        id: `a-${Date.now()}`,
-        role: "assistant",
-        text: assistantText,
-        actions: [...slashActions, ...toolActions],
-        progress: assistantProgress,
-        ts: Date.now(),
-      };
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === activeSession.id
-            ? {
-                ...s,
-                messages: [...s.messages, assistantMsg],
-                updatedAt: Date.now(),
-              }
-            : s,
-        ),
-      );
-      setThinking(false);
+        // Serialise manifest skills for the backend so it can build
+        // OpenAI tools and let the model emit tool_calls (Vercel AI SDK
+        // / OpenAI function-calling style). Drops `argsFromText` (a
+        // function — non-serialisable) and flattens the args record
+        // into an array.
+        const availableSkills = ALL_SKILLS.map((s) => ({
+          id: s.id,
+          description: `${s.label}: ${s.description}`,
+          kind: s.kind,
+          args: s.args
+            ? Object.entries(s.args).map(([name, field]) => ({
+                name,
+                type: field.type,
+                required: field.required ?? false,
+                description:
+                  field.label +
+                  (field.example ? ` (contoh: ${field.example})` : ""),
+              }))
+            : [],
+        }));
+
+        let assistantText: string;
+        let assistantProgress: AIProgress | undefined;
+        let toolActions: AgentAction[] = [];
+        try {
+          const result = await chatAction({
+            messages: history,
+            sessionId: activeSession.id,
+            view: currentView,
+            availableSkills,
+          });
+          assistantText = result.text;
+          toolActions = (result.toolCalls ?? []).map(
+            (tc) =>
+              ({
+                type: tc.skillId,
+                payload: tc.args,
+              }) as unknown as AgentAction,
+          );
+          assistantProgress = {
+            steps: result.progress.steps.map((s) => ({
+              id: s.id,
+              type: s.type as StepType,
+              status: s.status as StepStatus,
+              label: s.label,
+              detail: s.detail,
+              durationMs: s.durationMs,
+              error: s.error,
+            })),
+            totalDurationMs: result.progress.totalDurationMs,
+            isComplete: result.progress.isComplete,
+          };
+        } catch (err) {
+          const reason = err instanceof Error ? err.message : String(err);
+          notify.fromError(err, "Gangguan layanan AI");
+          const fallback = runAgent(text);
+          assistantText = `⚠️ Layanan AI sedang terganggu — menampilkan respons cadangan.\n\n${fallback.text}`;
+          assistantProgress = {
+            steps: [
+              {
+                id: "client-fallback",
+                type: "inference",
+                status: "error",
+                label: "Generate respons",
+                durationMs: 0,
+                error: reason,
+              },
+            ],
+            totalDurationMs: 0,
+            isComplete: true,
+          };
+        }
+
+        const assistantMsg: Message = {
+          id: `a-${Date.now()}`,
+          role: "assistant",
+          text: assistantText,
+          actions: [...slashActions, ...toolActions],
+          progress: assistantProgress,
+          ts: Date.now(),
+        };
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === activeSession.id
+              ? {
+                  ...s,
+                  messages: [...s.messages, assistantMsg],
+                  updatedAt: Date.now(),
+                }
+              : s,
+          ),
+        );
+      } finally {
+        setThinkingId(null);
+      }
     },
     [activeSession, input, thinking, setSessions, chatAction, currentView],
   );
@@ -375,7 +388,7 @@ export function AIAgentConsole({
                     </div>
                   </div>
                 )}
-                {thinking && <ThinkingProgress />}
+                {thinkingId === activeSession?.id && <ThinkingProgress />}
               </div>
             </div>
 

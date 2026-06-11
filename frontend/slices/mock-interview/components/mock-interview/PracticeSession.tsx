@@ -91,6 +91,10 @@ export function PracticeSession({
     );
   }
 
+  // Defensive: the hook clamps the index, but guard anyway so a transient
+  // empty/stale state can never crash on `currentQuestion.*`.
+  if (!currentQuestion) return null;
+
   return (
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">

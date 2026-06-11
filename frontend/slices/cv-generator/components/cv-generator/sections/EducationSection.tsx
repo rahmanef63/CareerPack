@@ -30,7 +30,7 @@ export function EducationSection({
     >
       <div className="space-y-6">
         {cvData.education.map((edu, idx) => (
-          <div key={edu.id} className="p-4 border border-border rounded-lg bg-muted/50/50">
+          <div key={edu.id} className="p-4 border border-border rounded-lg bg-muted/50">
             <div className="flex justify-between items-start mb-4">
               <h4 className="font-medium text-foreground">Pendidikan #{idx + 1}</h4>
               <Button
@@ -44,33 +44,33 @@ export function EducationSection({
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Institusi</Label>
-                <Input placeholder="Nama Universitas/Sekolah" value={edu.institution}
+                <Label htmlFor={`edu-${edu.id}-institution`}>Institusi</Label>
+                <Input id={`edu-${edu.id}-institution`} placeholder="Nama Universitas/Sekolah" value={edu.institution}
                   onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Gelar</Label>
-                <Input placeholder="S1, S2, D3, dll" value={edu.degree}
+                <Label htmlFor={`edu-${edu.id}-degree`}>Gelar</Label>
+                <Input id={`edu-${edu.id}-degree`} placeholder="S1, S2, D3, dll" value={edu.degree}
                   onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Bidang Studi</Label>
-                <Input placeholder="Teknik Informatika" value={edu.fieldOfStudy}
+                <Label htmlFor={`edu-${edu.id}-fieldOfStudy`}>Bidang Studi</Label>
+                <Input id={`edu-${edu.id}-fieldOfStudy`} placeholder="Teknik Informatika" value={edu.fieldOfStudy}
                   onChange={(e) => updateEducation(edu.id, 'fieldOfStudy', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>IPK (Opsional)</Label>
-                <Input placeholder="3.5/4.0" value={edu.gpa || ''}
+                <Label htmlFor={`edu-${edu.id}-gpa`}>IPK (Opsional)</Label>
+                <Input id={`edu-${edu.id}-gpa`} placeholder="3.5/4.0" value={edu.gpa || ''}
                   onChange={(e) => updateEducation(edu.id, 'gpa', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Tanggal Mulai</Label>
-                <Input type="month" value={edu.startDate}
+                <Label htmlFor={`edu-${edu.id}-startDate`}>Tanggal Mulai</Label>
+                <Input id={`edu-${edu.id}-startDate`} type="month" value={edu.startDate}
                   onChange={(e) => updateEducation(edu.id, 'startDate', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Tanggal Selesai</Label>
-                <Input type="month" value={edu.endDate}
+                <Label htmlFor={`edu-${edu.id}-endDate`}>Tanggal Selesai</Label>
+                <Input id={`edu-${edu.id}-endDate`} type="month" value={edu.endDate}
                   onChange={(e) => updateEducation(edu.id, 'endDate', e.target.value)} />
               </div>
             </div>

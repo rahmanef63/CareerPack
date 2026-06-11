@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import { withMutationToast } from "@/shared/lib/notify";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoContactsOverlay } from "@/shared/hooks/useDemoOverlay";
 import type { ContactFormValues, ContactId } from "../types";
@@ -55,18 +56,30 @@ export function useNetworking() {
     [updateMutation],
   );
 
+  // These are fire-and-forget from icon buttons — toast on failure and
+  // swallow so a rejected mutation can't surface as an unhandled rejection.
   const remove = useCallback(
-    (id: ContactId) => removeMutation({ contactId: id }),
+    (id: ContactId) =>
+      withMutationToast(() => removeMutation({ contactId: id }), {
+        success: "Kontak dihapus",
+        error: "Gagal menghapus kontak",
+      }).catch(() => {}),
     [removeMutation],
   );
 
   const toggleFavorite = useCallback(
-    (id: ContactId) => toggleFavoriteMutation({ contactId: id }),
+    (id: ContactId) =>
+      withMutationToast(() => toggleFavoriteMutation({ contactId: id }), {
+        error: "Gagal memperbarui favorit",
+      }).catch(() => {}),
     [toggleFavoriteMutation],
   );
 
   const bumpInteraction = useCallback(
-    (id: ContactId) => bumpInteractionMutation({ contactId: id }),
+    (id: ContactId) =>
+      withMutationToast(() => bumpInteractionMutation({ contactId: id }), {
+        error: "Gagal memperbarui interaksi",
+      }).catch(() => {}),
     [bumpInteractionMutation],
   );
 

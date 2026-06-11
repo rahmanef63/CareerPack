@@ -388,7 +388,7 @@ export function AIConfigPanel() {
           <Wand2 className="w-4 h-4 mr-2" />
           {testing ? "Menguji…" : "Tes Koneksi"}
         </Button>
-        <Button onClick={onSave} disabled={saving || (!dirty && !current)}>
+        <Button onClick={onSave} disabled={saving || !dirty}>
           {saving ? "Menyimpan…" : "Simpan"}
         </Button>
       </div>

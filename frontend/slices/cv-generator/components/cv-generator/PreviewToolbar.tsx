@@ -31,7 +31,7 @@ export function PreviewToolbar({
         className,
       )}
       role="toolbar"
-      aria-label="Layout preview"
+      aria-label="Pratinjau tata letak"
     >
       <div
         role="radiogroup"

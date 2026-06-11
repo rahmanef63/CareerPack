@@ -215,8 +215,10 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
               <p className="text-xs text-muted-foreground">
                 Minimum 3 skill. Matcher ATS pakai ini untuk hitung % cocok.
               </p>
+              <Label htmlFor="ow-skills">Keahlian</Label>
               <div className="flex gap-2">
                 <Input
+                  id="ow-skills"
                   value={skillsInput}
                   onChange={(e) => setSkillsInput(e.target.value)}
                   onKeyDown={(e) => {

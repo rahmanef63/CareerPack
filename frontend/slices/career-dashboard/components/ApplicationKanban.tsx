@@ -80,7 +80,7 @@ export function ApplicationKanban({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
         {COLUMN_ORDER.map((s) => (
           <Skeleton key={s} className="h-64 rounded-xl" />
         ))}
@@ -89,7 +89,7 @@ export function ApplicationKanban({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
       {COLUMN_ORDER.map((status) => {
         const meta = STATUS_META[status];
         const cards = applications.filter((a) => a.status === status);
@@ -117,7 +117,7 @@ export function ApplicationKanban({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-6 w-6 p-0"
+                  className="h-8 w-8 p-0"
                   onClick={onAdd}
                   aria-label="Tambah lamaran"
                 >

@@ -42,7 +42,7 @@ export function ThemePresetPicker() {
         )}
         {isReady && items.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            Registri preset tidak tersedia. Pastikan <code>/r/registry.json</code> ter-serve.
+            Registri preset tidak tersedia. Pastikan /r/registry.json ter-serve.
           </p>
         )}
         {items.length > 0 && (
@@ -68,6 +68,7 @@ export function ThemePresetPicker() {
                         : "border-border hover:border-muted-foreground",
                     )}
                     aria-pressed={selected}
+                    aria-label={`Tema ${item.title}`}
                   >
                     <div
                       className="flex h-16 items-center justify-center rounded-md border"

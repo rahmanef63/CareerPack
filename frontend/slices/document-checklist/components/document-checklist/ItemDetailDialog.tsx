@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { CheckCircle2, FileText, Download } from "lucide-react";
 import {
   ResponsiveDialog as Dialog,
@@ -26,8 +27,37 @@ interface Props {
 export function ItemDetailDialog({
   selectedItem, onClose, onToggle, onUpdate,
 }: Props) {
+  // `selectedItem` is a one-time snapshot from the parent that the reactive
+  // query never re-syncs. Binding the inputs straight to it froze the
+  // displayed value and fired a mutation per keystroke. Hold edits locally,
+  // seeded when a new item opens, and flush to the server on blur/close.
+  const [notes, setNotes] = useState("");
+  const [dueDate, setDueDate] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setNotes(selectedItem?.notes ?? "");
+    setDueDate(selectedItem?.dueDate || undefined);
+    // Seed only when a DIFFERENT item opens. Depending on notes/dueDate
+    // would re-seed on every reactive update and clobber in-progress edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItem?.id]);
+
+  const flushNotes = () => {
+    if (selectedItem && notes !== (selectedItem.notes ?? "")) {
+      onUpdate(selectedItem.id, { notes });
+    }
+  };
+
   return (
-    <Dialog open={!!selectedItem} onOpenChange={onClose}>
+    <Dialog
+      open={!!selectedItem}
+      onOpenChange={(open) => {
+        if (!open) {
+          flushNotes();
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="max-w-lg" aria-describedby={undefined}>
         {selectedItem && (
           <>
@@ -64,20 +94,25 @@ export function ItemDetailDialog({
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Tenggat Waktu (Opsional)</Label>
+                  <Label htmlFor="checklist-duedate">Tenggat Waktu (Opsional)</Label>
                   <DatePicker
-                    value={selectedItem.dueDate || undefined}
-                    onChange={(v) => onUpdate(selectedItem.id, { dueDate: v })}
+                    value={dueDate}
+                    onChange={(v) => {
+                      setDueDate(v);
+                      onUpdate(selectedItem.id, { dueDate: v });
+                    }}
                     placeholder="Pilih tenggat"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Catatan</Label>
+                  <Label htmlFor="checklist-notes">Catatan</Label>
                   <Textarea
+                    id="checklist-notes"
                     placeholder="Tambahkan catatan tentang dokumen ini..."
-                    value={selectedItem.notes || ""}
-                    onChange={(e) => onUpdate(selectedItem.id, { notes: e.target.value })}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    onBlur={flushNotes}
                   />
                 </div>
               </div>

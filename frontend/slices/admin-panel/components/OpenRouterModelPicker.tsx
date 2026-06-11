@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAction } from "convex/react";
 import { Check, Loader2, RefreshCw } from "lucide-react";
 
@@ -51,23 +51,32 @@ export function OpenRouterModelPicker({ value, onChange, inputId }: OpenRouterMo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  // Guard against unmount + out-of-order responses: each load() takes a
+  // sequence number and only the latest one (on a still-mounted picker)
+  // writes state, so a slow first fetch can't clobber a newer Refresh.
+  const mountedRef = useRef(true);
+  const loadSeqRef = useRef(0);
+  useEffect(() => () => { mountedRef.current = false; }, []);
+
+  const load = useCallback(async () => {
+    const seq = ++loadSeqRef.current;
     setLoading(true);
     setError(null);
     try {
       const data = (await fetchModels({})) as OpenRouterModel[];
+      if (!mountedRef.current || seq !== loadSeqRef.current) return;
       setModels(data);
     } catch (err) {
+      if (!mountedRef.current || seq !== loadSeqRef.current) return;
       setError(err instanceof Error ? err.message : "Gagal memuat daftar model");
     } finally {
-      setLoading(false);
+      if (mountedRef.current && seq === loadSeqRef.current) setLoading(false);
     }
-  };
+  }, [fetchModels]);
 
   useEffect(() => {
     void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [load]);
 
   const knownSet = useMemo(() => new Set((models ?? []).map((m) => m.id)), [models]);
   const trimmed = value.trim();

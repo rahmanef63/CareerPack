@@ -1,9 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { Code, Trash2, Trophy, Sparkles } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
+import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+} from "@/shared/components/ui/responsive-alert-dialog";
 import { cn } from "@/shared/lib/utils";
 
 export interface SavedRoadmapCard {
@@ -52,6 +63,8 @@ export function SavedRoadmapsGrid({
   domainLabels,
   progressBySlug,
 }: Props) {
+  const [pendingRemove, setPendingRemove] = useState<SavedRoadmapCard | null>(null);
+
   if (loading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -82,6 +95,7 @@ export function SavedRoadmapsGrid({
   }
 
   return (
+    <>
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
       {saved.map((cat) => {
         const Icon = iconMap[cat.icon] ?? Code;
@@ -102,15 +116,17 @@ export function SavedRoadmapsGrid({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onRemove(cat.slug);
+                setPendingRemove(cat);
               }}
               aria-label={`Hapus ${cat.name} dari skill saya`}
               className={cn(
-                "absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all",
-                isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+                "absolute top-1 right-1 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all",
+                isActive
+                  ? "opacity-100"
+                  : "opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
               )}
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
 
             {/* Active badge — top-left ribbon */}
@@ -176,5 +192,36 @@ export function SavedRoadmapsGrid({
         );
       })}
     </div>
+
+    <ResponsiveAlertDialog
+      open={pendingRemove !== null}
+      onOpenChange={(o) => !o && setPendingRemove(null)}
+    >
+      <ResponsiveAlertDialogContent>
+        <ResponsiveAlertDialogHeader>
+          <ResponsiveAlertDialogTitle>Hapus skill ini dari daftar?</ResponsiveAlertDialogTitle>
+          <ResponsiveAlertDialogDescription>
+            {pendingRemove
+              ? `"${pendingRemove.name}" akan dihapus dari skill tersimpan. Progres yang sudah dicatat untuk skill ini ikut hilang.`
+              : ""}
+          </ResponsiveAlertDialogDescription>
+        </ResponsiveAlertDialogHeader>
+        <ResponsiveAlertDialogFooter>
+          <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
+          <ResponsiveAlertDialogAction
+            variant="destructive"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = pendingRemove;
+              setPendingRemove(null);
+              if (target) onRemove(target.slug);
+            }}
+          >
+            Hapus
+          </ResponsiveAlertDialogAction>
+        </ResponsiveAlertDialogFooter>
+      </ResponsiveAlertDialogContent>
+    </ResponsiveAlertDialog>
+    </>
   );
 }

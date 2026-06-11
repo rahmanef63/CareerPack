@@ -47,11 +47,13 @@ export function SkillsSection({
             onDragEnd={skillDrag.onDragEnd}
             className="flex items-center gap-3 p-3 border border-border rounded-lg bg-muted/40"
           >
-            <span className="cursor-grab active:cursor-grabbing text-muted-foreground" aria-label="Drag handle">
+            <span className="cursor-grab active:cursor-grabbing text-muted-foreground" aria-label="Pegangan untuk mengurutkan">
               <GripVertical className="w-4 h-4" />
             </span>
             <div className="flex-1 grid sm:grid-cols-3 gap-3">
               <Input
+                id={`skill-${skill.id}-name`}
+                aria-label="Nama skill"
                 placeholder="Nama skill (contoh: JavaScript)"
                 value={skill.name}
                 onChange={(e) => updateSkill(skill.id, 'name', e.target.value)}
@@ -60,7 +62,7 @@ export function SkillsSection({
                 value={skill.category}
                 onValueChange={(v) => updateSkill(skill.id, 'category', v)}
               >
-                <ResponsiveSelectTrigger />
+                <ResponsiveSelectTrigger aria-label="Kategori skill" />
                 <ResponsiveSelectContent drawerTitle="Kategori skill">
                   <ResponsiveSelectItem value="technical">Teknis</ResponsiveSelectItem>
                   <ResponsiveSelectItem value="soft">Soft Skill</ResponsiveSelectItem>
@@ -72,7 +74,7 @@ export function SkillsSection({
                 value={String(skill.proficiency)}
                 onValueChange={(v) => updateSkill(skill.id, 'proficiency', parseInt(v))}
               >
-                <ResponsiveSelectTrigger />
+                <ResponsiveSelectTrigger aria-label="Tingkat keahlian" />
                 <ResponsiveSelectContent drawerTitle="Tingkat keahlian">
                   <ResponsiveSelectItem value="1">Pemula</ResponsiveSelectItem>
                   <ResponsiveSelectItem value="2">Dasar</ResponsiveSelectItem>

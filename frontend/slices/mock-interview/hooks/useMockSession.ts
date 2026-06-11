@@ -66,7 +66,17 @@ export function useMockSession() {
     [selectedCategory],
   );
 
-  const currentQuestion = filteredQuestions[currentQuestionIndex];
+  // Changing the category re-filters to a shorter list; reset the cursor so
+  // currentQuestionIndex can't dangle past the new length.
+  useEffect(() => {
+    setCurrentQuestionIndex(0);
+  }, [selectedCategory]);
+
+  // Clamp synchronously too — the reset effect runs after this render, so
+  // without the fallback there is a one-render window where the index is
+  // stale and `currentQuestion` would be undefined (→ crash in consumers).
+  const currentQuestion =
+    filteredQuestions[currentQuestionIndex] ?? filteredQuestions[0];
 
   const categories = useMemo(
     () => [...new Set(indonesianInterviewQuestions.map((q) => q.category))],

@@ -82,7 +82,7 @@ export function ContactCard({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 shrink-0"
+              className="h-9 w-9 shrink-0"
               onClick={onToggleFavorite}
               aria-label={c.favorite ? "Lepas favorit" : "Jadikan favorit"}
             >
@@ -122,7 +122,7 @@ export function ContactCard({
               asChild
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-9 w-9"
               onClick={() => onInteract("email")}
               aria-label="Kirim email"
             >
@@ -136,7 +136,7 @@ export function ContactCard({
               asChild
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-9 w-9"
               onClick={() => onInteract("phone")}
               aria-label="Telepon"
             >
@@ -150,7 +150,7 @@ export function ContactCard({
               asChild
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-9 w-9"
               onClick={() => onInteract("linkedin")}
               aria-label="LinkedIn"
             >
@@ -170,7 +170,7 @@ export function ContactCard({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive"
+              className="h-9 w-9 text-destructive"
               aria-label="Hapus kontak"
             >
               <Trash2 className="h-3.5 w-3.5" />

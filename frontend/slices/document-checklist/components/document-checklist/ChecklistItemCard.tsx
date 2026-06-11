@@ -25,14 +25,23 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
           ? "border-success/30 bg-success/10"
           : item.required
             ? "border-border bg-card hover:border-brand"
-            : "border-border bg-muted/50/50 hover:border-border",
+            : "border-border bg-muted/50 hover:border-border",
       )}
       onClick={() => onSelect(item)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          if (e.key === " ") e.preventDefault();
+          onSelect(item);
+        }
+      }}
     >
       <Button
         type="button"
         variant="ghost"
         size="icon"
+        aria-label={item.completed ? "Tandai belum selesai" : "Tandai selesai"}
         onClick={(e) => {
           e.stopPropagation();
           onToggle(item.id);

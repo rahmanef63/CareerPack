@@ -30,7 +30,7 @@ export function CertificationsSection({
     >
       <div className="space-y-4">
         {cvData.certifications.map((cert, idx) => (
-          <div key={cert.id} className="p-4 border border-border rounded-lg bg-muted/50/50">
+          <div key={cert.id} className="p-4 border border-border rounded-lg bg-muted/50">
             <div className="flex justify-between items-start mb-4">
               <h4 className="font-medium text-foreground">Sertifikasi #{idx + 1}</h4>
               <Button
@@ -44,23 +44,23 @@ export function CertificationsSection({
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Nama Sertifikasi</Label>
-                <Input placeholder="AWS Certified Developer" value={cert.name}
+                <Label htmlFor={`cert-${cert.id}-name`}>Nama Sertifikasi</Label>
+                <Input id={`cert-${cert.id}-name`} placeholder="AWS Certified Developer" value={cert.name}
                   onChange={(e) => updateCertification(cert.id, 'name', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Organisasi Penerbit</Label>
-                <Input placeholder="Amazon Web Services" value={cert.issuer}
+                <Label htmlFor={`cert-${cert.id}-issuer`}>Organisasi Penerbit</Label>
+                <Input id={`cert-${cert.id}-issuer`} placeholder="Amazon Web Services" value={cert.issuer}
                   onChange={(e) => updateCertification(cert.id, 'issuer', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Tanggal Diperoleh</Label>
-                <Input type="month" value={cert.date}
+                <Label htmlFor={`cert-${cert.id}-date`}>Tanggal Diperoleh</Label>
+                <Input id={`cert-${cert.id}-date`} type="month" value={cert.date}
                   onChange={(e) => updateCertification(cert.id, 'date', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Tanggal Kadaluarsa (Opsional)</Label>
-                <Input type="month" value={cert.expiryDate || ''}
+                <Label htmlFor={`cert-${cert.id}-expiryDate`}>Tanggal Kadaluarsa (Opsional)</Label>
+                <Input id={`cert-${cert.id}-expiryDate`} type="month" value={cert.expiryDate || ''}
                   onChange={(e) => updateCertification(cert.id, 'expiryDate', e.target.value)} />
               </div>
             </div>

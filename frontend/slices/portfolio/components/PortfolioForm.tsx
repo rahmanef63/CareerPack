@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { notify } from "@/shared/lib/notify";
 
 import { Button } from "@/shared/components/ui/button";
@@ -55,8 +55,13 @@ export function PortfolioForm({
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"basic" | "media" | "links" | "detail">("basic");
 
+  // Seed only on the closed→open transition. Depending on `baseValues`
+  // would re-seed (clobbering in-progress edits) whenever the reactive
+  // `initialItem` updates while the dialog is open.
+  const prevOpenRef = useRef(false);
   useEffect(() => {
-    if (open) setValues(baseValues);
+    if (open && !prevOpenRef.current) setValues(baseValues);
+    prevOpenRef.current = open;
   }, [open, baseValues]);
 
   const reset = () => setValues(DEFAULT_FORM);

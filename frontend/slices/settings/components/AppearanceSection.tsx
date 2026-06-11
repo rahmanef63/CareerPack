@@ -129,8 +129,8 @@ function LocaleCard() {
           Memilih <strong>en-US</strong> mengganti format tanggal &amp; angka
           (mis. <span translate="no">{formatDate(sample)}</span> ·{" "}
           <span translate="no">{formatCurrency(1500000)}</span>). Konten teks
-          tetap Bahasa Indonesia — gunakan fitur translate browser
-          (kanan-klik → Translate) untuk versi Inggris penuh.
+          tetap Bahasa Indonesia — gunakan fitur Terjemahkan browser
+          (kanan-klik → Terjemahkan) untuk versi Inggris penuh.
         </p>
       </CardContent>
     </Card>

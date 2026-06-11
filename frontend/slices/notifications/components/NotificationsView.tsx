@@ -186,18 +186,25 @@ function NotificationRow({ n, onRead, onDismiss }: NotificationRowProps) {
           e.stopPropagation();
           onDismiss();
         }}
-        className="absolute right-1 top-1 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+        className="absolute right-1 top-1 h-9 w-9 opacity-60 transition-opacity hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-100 lg:opacity-0"
         aria-label="Hapus notifikasi"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-4 w-4" />
       </Button>
     </div>
   );
 }
 
 export function NotificationsView() {
-  const { notifications, unreadCount, markRead, markAllRead, dismiss, dismissAll } =
-    useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    markRead,
+    markAllRead,
+    dismiss,
+    dismissAll,
+  } = useNotifications();
   const [filter, setFilter] = useState<NotificationFilter>("all");
 
   const filtered = useMemo(() => {
@@ -317,7 +324,17 @@ export function NotificationsView() {
         </TabsList>
 
         <TabsContent value={filter} className="mt-4 space-y-5">
-          {groups.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-[68px] animate-pulse rounded-lg bg-muted/40"
+                  aria-hidden
+                />
+              ))}
+            </div>
+          ) : groups.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
               <BellOff className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
               <p className="text-sm font-medium text-foreground">

@@ -29,7 +29,9 @@ export function SalaryInsightsCard() {
   if (visible.length === 0) return null;
 
   // Compute global max for proportional bar widths across categories.
+  // Guard against all-zero data → division by zero → NaN/Infinity widths.
   const globalMax = Math.max(...visible.map((b) => b.p75 ?? b.p50 ?? 0));
+  const denom = globalMax > 0 ? globalMax : 1;
 
   return (
     <section className="rounded-xl border border-border bg-card p-5">
@@ -56,9 +58,9 @@ export function SalaryInsightsCard() {
           const p25 = b.p25 ?? b.p50 ?? 0;
           const p50 = b.p50 ?? 0;
           const p75 = b.p75 ?? p50;
-          const left = (p25 / globalMax) * 100;
-          const right = (p75 / globalMax) * 100;
-          const median = (p50 / globalMax) * 100;
+          const left = (p25 / denom) * 100;
+          const right = (p75 / denom) * 100;
+          const median = (p50 / denom) * 100;
           return (
             <li key={b.category} className="space-y-1">
               <div className="flex flex-wrap items-center gap-2 text-xs">

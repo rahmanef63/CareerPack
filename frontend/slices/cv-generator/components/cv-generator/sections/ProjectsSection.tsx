@@ -31,7 +31,7 @@ export function ProjectsSection({
     >
       <div className="space-y-4">
         {cvData.projects.map((proj, idx) => (
-          <div key={proj.id} className="p-4 border border-border rounded-lg bg-muted/50/50">
+          <div key={proj.id} className="p-4 border border-border rounded-lg bg-muted/50">
             <div className="flex justify-between items-start mb-4">
               <h4 className="font-medium text-foreground">Proyek #{idx + 1}</h4>
               <Button
@@ -45,21 +45,22 @@ export function ProjectsSection({
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Nama Proyek</Label>
-                <Input placeholder="Website E-commerce" value={proj.name}
+                <Label htmlFor={`proj-${proj.id}-name`}>Nama Proyek</Label>
+                <Input id={`proj-${proj.id}-name`} placeholder="Website E-commerce" value={proj.name}
                   onChange={(e) => updateProject(proj.id, 'name', e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Deskripsi</Label>
+                <Label htmlFor={`proj-${proj.id}-description`}>Deskripsi</Label>
                 <Textarea
+                  id={`proj-${proj.id}-description`}
                   placeholder="Jelaskan proyek Anda, peran Anda, dan teknologi yang digunakan..."
                   value={proj.description}
                   onChange={(e) => updateProject(proj.id, 'description', e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Link Proyek (Opsional)</Label>
-                <Input placeholder="https://github.com/username/project" value={proj.link || ''}
+                <Label htmlFor={`proj-${proj.id}-link`}>Link Proyek (Opsional)</Label>
+                <Input id={`proj-${proj.id}-link`} placeholder="https://github.com/username/project" value={proj.link || ''}
                   onChange={(e) => updateProject(proj.id, 'link', e.target.value)} />
               </div>
             </div>

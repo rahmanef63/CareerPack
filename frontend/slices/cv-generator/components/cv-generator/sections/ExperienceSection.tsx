@@ -53,7 +53,7 @@ export function ExperienceSection({
             >
               <div className="flex justify-between items-start mb-4 gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="cursor-grab active:cursor-grabbing text-muted-foreground" aria-label="Drag handle">
+                  <span className="cursor-grab active:cursor-grabbing text-muted-foreground" aria-label="Pegangan untuk mengurutkan">
                     <GripVertical className="w-4 h-4" />
                   </span>
                   <h4 className="font-medium text-foreground truncate">Pengalaman #{idx + 1}</h4>
@@ -72,31 +72,32 @@ export function ExperienceSection({
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Perusahaan</Label>
-                  <Input placeholder="Nama Perusahaan" value={exp.company}
+                  <Label htmlFor={`exp-${exp.id}-company`}>Perusahaan</Label>
+                  <Input id={`exp-${exp.id}-company`} placeholder="Nama Perusahaan" value={exp.company}
                     onChange={(e) => updateExperience(exp.id, 'company', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Jabatan</Label>
-                  <Input placeholder="Posisi Pekerjaan" value={exp.position}
+                  <Label htmlFor={`exp-${exp.id}-position`}>Jabatan</Label>
+                  <Input id={`exp-${exp.id}-position`} placeholder="Posisi Pekerjaan" value={exp.position}
                     onChange={(e) => updateExperience(exp.id, 'position', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tanggal Mulai</Label>
-                  <Input type="month" value={exp.startDate}
+                  <Label htmlFor={`exp-${exp.id}-startDate`}>Tanggal Mulai</Label>
+                  <Input id={`exp-${exp.id}-startDate`} type="month" value={exp.startDate}
                     onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tanggal Selesai</Label>
-                  <Input type="month" value={exp.endDate}
+                  <Label htmlFor={`exp-${exp.id}-endDate`}>Tanggal Selesai</Label>
+                  <Input id={`exp-${exp.id}-endDate`} type="month" value={exp.endDate}
                     onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)} />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label>Deskripsi</Label>
+                    <Label htmlFor={`exp-${exp.id}-description`}>Deskripsi</Label>
                     <CharCounter value={exp.description} recommendedMax={500} />
                   </div>
                   <Textarea
+                    id={`exp-${exp.id}-description`}
                     placeholder="Jelaskan tanggung jawab dan pencapaian Anda..."
                     value={exp.description}
                     onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}

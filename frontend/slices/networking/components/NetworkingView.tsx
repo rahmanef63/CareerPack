@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Plus, Sparkles, Users } from "lucide-react";
-import { notify } from "@/shared/lib/notify";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
@@ -130,16 +129,9 @@ export function NetworkingView() {
               key={c._id}
               contact={c}
               variant="carousel"
-              onToggleFavorite={async () => {
-                await toggleFavorite(c._id);
-              }}
-              onDelete={async () => {
-                await remove(c._id);
-                notify.success("Kontak dihapus");
-              }}
-              onInteract={async () => {
-                await bumpInteraction(c._id);
-              }}
+              onToggleFavorite={() => toggleFavorite(c._id)}
+              onDelete={() => remove(c._id)}
+              onInteract={() => bumpInteraction(c._id)}
             />
           ))}
         </ResponsiveCarousel>
@@ -210,16 +202,9 @@ export function NetworkingView() {
                   <ContactCard
                     key={c._id}
                     contact={c}
-                    onToggleFavorite={async () => {
-                      await toggleFavorite(c._id);
-                    }}
-                    onDelete={async () => {
-                      await remove(c._id);
-                      notify.success("Kontak dihapus");
-                    }}
-                    onInteract={async () => {
-                      await bumpInteraction(c._id);
-                    }}
+                    onToggleFavorite={() => toggleFavorite(c._id)}
+                    onDelete={() => remove(c._id)}
+                    onInteract={() => bumpInteraction(c._id)}
                   />
                 ))}
               </div>
