@@ -1,6 +1,17 @@
 # Database Backup — Recipe Final
 
-**Status:** Recipe finalized. Script tersedia di `backend/convex-self-hosted/backup.sh` — siap dideploy ke VPS host. Action items di bawah masih perlu dieksekusi manual (provider snapshot toggle + cron install + 1× recovery test) karena akses VPS bukan di repo.
+**Status:** ✅ **Layer 2 (cron tar) DEPLOYED 2026-06-11.** Script terpasang di
+`/opt/careerpack/backup.sh` (VPS), root crontab `0 3 * * *` dengan
+`VOLUME_NAME=careerpack-convex-8gdbpk_data` di-pin eksplisit, log di
+`/var/log/careerpack-backup.log`. Arsip pertama terverifikasi:
+`convex-20260611-0946.tar.gz` (121 MB, berisi `db.sqlite3` + `storage/files/*.blob`).
+Sisa action items: provider snapshot toggle + 1× recovery test.
+
+> ⚠️ **VOLUME_NAME wajib di-pin di cron.** Auto-detect versi lama
+> (`grep 'convex|...' | head -1`) terbukti berbahaya di host multi-project
+> (30+ volume convex) — akan mem-backup volume project lain. Script sudah
+> diperbaiki untuk fail-loud kecuali match tepat satu, tapi tetap pin
+> eksplisit di crontab.
 
 Convex self-hosted di Dokploy menyimpan **semua data user + uploaded files** di satu Docker named volume (`data` di prod, `convex_data` di dev parity). Tanpa backup, single Dokploy redeploy dengan volume rename / corruption / accidental delete = total data loss.
 
@@ -139,7 +150,8 @@ Backup ke external storage = tahan terhadap VPS provider outage / data center fa
 
 - [x] Recipe finalized — script committed di `backend/convex-self-hosted/backup.sh`
 - [ ] Aktifkan Provider auto-snapshot (Layer 1) — 1 click di dashboard VPS
-- [ ] Deploy `backup.sh` + install cron — SSH ke host, 5 menit (langkah di atas)
+- [x] Deploy `backup.sh` + install cron — **done 2026-06-11** (root crontab,
+      `VOLUME_NAME=careerpack-convex-8gdbpk_data`, arsip pertama 121 MB terverifikasi)
 - [ ] Test recovery procedure sekali — restore ke staging volume + verify Convex jalan
 - [ ] Document path-to-restore di `docs/launch-runbook.md`
 - [ ] Schedule re-evaluation untuk off-VPS backup sebelum public launch

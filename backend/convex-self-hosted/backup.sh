@@ -32,8 +32,20 @@ RETENTION_DAYS="${RETENTION_DAYS:-14}"
 BACKUP_PASSPHRASE_FILE="${BACKUP_PASSPHRASE_FILE:-}"
 
 if [[ -z "$VOLUME_NAME" ]]; then
-  # Auto-detect: first volume whose name contains "convex" or "data".
-  VOLUME_NAME="$(docker volume ls --format '{{.Name}}' | grep -iE 'convex|careerpack.*data' | head -1 || true)"
+  # Auto-detect: volumes whose name contains "careerpack". The old broad
+  # pattern (`convex|careerpack.*data` + head -1) matched OTHER projects'
+  # volumes first on a multi-project Dokploy host (30+ convex volumes,
+  # alphabetical order) and would have backed up the wrong data —
+  # discovered 2026-06-11. Refuse to guess unless the match is exactly
+  # one; pin VOLUME_NAME in the crontab line instead.
+  MATCHES="$(docker volume ls --format '{{.Name}}' | grep -i 'careerpack' || true)"
+  if [[ "$(printf '%s\n' "$MATCHES" | grep -c . || true)" -ne 1 ]]; then
+    echo "[backup] FAIL: expected exactly 1 careerpack volume, got:" >&2
+    printf '%s\n' "$MATCHES" >&2
+    echo "[backup] Set VOLUME_NAME explicitly (e.g. in the crontab line)." >&2
+    exit 2
+  fi
+  VOLUME_NAME="$MATCHES"
 fi
 
 if [[ -z "$VOLUME_NAME" ]]; then
