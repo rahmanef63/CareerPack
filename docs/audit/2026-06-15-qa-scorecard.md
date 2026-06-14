@@ -4,62 +4,66 @@
 > menilai; "Builder alter ego" mengerjakan backlog per batch; skor diukur ulang
 > tiap putaran. Push ke prod DITAHAN; kerja di branch `qa/loop-to-100`.
 
-**Skor saat ini: 86 / 100** · baseline 83 · iterasi 2 selesai
+**Skor saat ini: 89 / 100** · baseline 83 · iterasi 3 selesai · **batch-4 jalan → target ~92**
 
-> ⚠️ **Plafon jujur:** dimensi **ops** mentok ~80 karena 3 item **butuh
-> tanganmu, bukan kode** — restore drill, provider auto-snapshot, Google OAuth
-> Console. Plus arsitektur (4-SSOT route/nav) butuh keputusanmu (medium-risk).
-> Artinya **100 autonom tidak tercapai secara matematis**; plafon realistis
-> autonom ~92–94. Sisanya nunggu aksi manualmu (lihat "Out-of-code" di bawah).
+> ⚠️ **Plafon jujur (dikonfirmasi QA via source):** ceiling autonom = **~92–93**.
+> Sisanya ke 100 **butuh tanganmu, bukan kode**:
+> - **ops** (80, capped): restore drill, provider auto-snapshot, Google OAuth Console.
+> - **arsitektur** (78): keputusan konsolidasi 4-SSOT route/nav (medium-risk; QA sengaja
+>   TIDAK auto-include karena restructure routing butuh sign-off-mu).
 
 ## Riwayat skor
 
 | Iterasi | Tanggal | Skor | Catatan |
 |---|---|---|---|
-| 0 (baseline) | 2026-06-15 | **83** | Audit 9-agent. Headline: fix XSS "C2" masih bisa ditembus (`>`-in-attr). |
-| 1 | 2026-06-15 | **85** (+2) | Batch-1 (6 fix verified) → commit `dfd8639`. QA nemu residual XSS baru + klaim auto-deploy palsu di dev/README. |
-| 2 | 2026-06-15 | **86** (+1) | Batch-2 (7 fix verified): residual XSS scheme, IP-spoof, Resend webhook, resetPassword DoS, PBKDF2 tests, actionUrl, docs → commit `bc9fda3`. Naik +1 karena dimensi carried (arsitektur/ux/perf/ops) jadi penahan utama; QA nemu open-redirect `//` baru. |
+| 0 (baseline) | 2026-06-15 | **83** | Audit 9-agent. Headline: fix XSS "C2" masih bisa ditembus. |
+| 1 | 2026-06-15 | **85** (+2) | Batch-1 (6 fix) → `dfd8639`. |
+| 2 | 2026-06-15 | **86** (+1) | Batch-2 (7 fix) → `bc9fda3`. Dimensi carried jadi penahan. |
+| 3 | 2026-06-15 | **89** (+3) | Batch-3 (8 fix) → `ab67dcb`. ux+perf akhirnya disentuh → lompatan terbesar. |
 
-## Scorecard per dimensi (post batch-2)
+## Scorecard per dimensi (post batch-3)
 
 | Dimensi | Base | Kini | Bobot | Penahan utama |
 |---|---|---|---|---|
-| Security | 82 | **90** | 20% | open-redirect `//` (batch-3), resetPassword throttle (butuh httpAction), publicLocationShow. |
-| Convex backend | 82 | **88** | 19% | validasi createOrUpdateProfile/createApplication/updateCV, ConvexError vs plain Error, aggregator scaling. |
+| Security | 82 | **92** | 20% | edge open-redirect interior-tab, verifySecret empty-salt, plain-Error 2 action, publicLocationShow. |
+| Convex backend | 82 | **93** | 19% | ConvexError 2 action inline, createNotification client-callable, toggleResource guard, email index. |
 | Frontend (React) | 88 | 91 | 15% | (carry) flush debounce unmount, AISettings dirty, effect deps. |
-| UX / a11y / i18n | 82 | 82 | 12% | (carry → batch-3) keyboard-a11y card/header, kontras `text-warning`, mock-interview dead buttons. |
-| Performance | 82 | 82 | 10% | (carry → batch-3) calibrator `.take()` non-time-ordered, salary window, listChatSessions. |
-| Testing / DX | 82 | **90** | 9% | coverage-gate include sempit (batch-3), aiResolve test (batch-3). |
-| **Ops / reliability** | 74 | 80 | 9% | **restore drill + provider snapshot (BUTUH AKSIMU)**, dok restore beda. |
-| Arsitektur | 78 | 78 | 6% | (carry) 4 SSOT route/nav tumpang-tindih (medium-risk, butuh keputusan). |
+| UX / a11y / i18n | 82 | **87** | 12% | mock-interview dead buttons + fake "Sedang merekam", sisa prose `text-warning` kontras. |
+| Performance | 82 | **87** | 10% | listChatSessions over-fetch, CV preview re-render. |
+| Testing / DX | 82 | **92** | 9% | coverage gak di pre-push, .tsx 0/0 coverage, dev.md §8 stale. |
+| **Ops / reliability** | 74 | 80 | 9% | **restore drill + snapshot + OAuth (BUTUH AKSIMU)**. |
+| Arsitektur | 78 | 78 | 6% | (carry) 4-SSOT route/nav (butuh keputusanmu). |
 
-## Batch-2 — landed & verified (commit `bc9fda3`)
+## Batch-3 — landed & verified (commit `ab67dcb`)
 
-7/7 done, 7/7 verified. Gate: typecheck + lint + **363 test** ijo. Residual XSS scheme ditutup, IP-spoof XFF, Resend webhook unsigned-reject, resetPassword DoS amplifier dihapus, PBKDF2 di-extract+test (byte-identik), actionUrl allowlist, doc dev/README. Orchestrator fix 1 type-narrowing (`BufferSource`) match idiom `passwordReset.ts`.
+8/8 done, 8/8 verified. Gate: typecheck + lint + **414 test** + build compile (Windows-symlink only). Open-redirect `//`, validasi caps (profile/applications/cv via SSOT `_shared/validate.ts`), ConvexError dari guard+rateLimit, coverage-gate dilebarkan, calibrator time-index `by_time`, aiResolve test, keyboard-a11y 4 komponen, kontras `--warning-text` WCAG. Orchestrator fix `calibrator.test.ts` (withIndex typing yang vitest gak nangkep).
 
-## Batch-3 — dikerjakan sekarang (8 item)
+## Batch-4 — dikerjakan sekarang (6 item, semua autonom)
 
-QA-pilih (6) + augmentasi ux (2) buat gerakin dimensi penahan:
+1. **Edge open-redirect interior-whitespace** + dedup 2 sanitizer jadi 1 modul — security.
+2. **ConvexError di 4 cek quota/auth inline action** (ai/actions, matcher/external) — convex.
+3. **`createNotification` → internalMutation** (matiin self-insert klien) — convex.
+4. **Hapus afordans mock-interview palsu** (tombol mati + "Sedang merekam" bohong) — ux.
+5. **Migrasi sisa prose `text-warning` → `text-warning-text`** (WCAG) — ux.
+6. **`listChatSessions` denormalize messageCount+preview** (stop baca messages[] penuh) — performance.
 
-1. **Open-redirect `//` & `/\`** di `sanitizeUrl` + `sanitizeActionUrl` — security HIGH.
-2. **Validasi caps** `createOrUpdateProfile` + `createApplication` + `updateCV` — convex HIGH.
-3. **ConvexError (bukan plain Error)** dari guard + rate limiter — convex (UX/i18n).
-4. **Lebarkan coverage-gate include** ke dir yang ada test — testing HIGH.
-5. **Calibrator prefer-recent + salary window honesty** — performance.
-6. **Test `aiResolve.ts`** (4 jalur kredensial) — testing.
-7. **Generalisir keyboard-a11y** (SectionCard/RoadmapNode/QuestionBank/PBSection) — ux. [augment]
-8. **Gelapkan token `--warning` text** (WCAG 1.4.3) — ux. [augment]
+→ Estimasi QA: security→94, convex→94-95, ux→90, perf→89-90, testing→93 ⇒ **overall ~92**.
 
-## Backlog tersisa (20) — kandidat batch berikut
+## Sisa setelah batch-4 — BUTUH KEPUTUSAN/AKSIMU
 
-Security: resetPassword throttle (httpAction), publicLocationShow, crypto empty-salt edge. Convex: aggregator/cleanup/digest unbounded collect, engine aggregates, toggleResource guard, email index. Frontend: flush debounce unmount, AISettings dirty, effect deps, Date.now ids. UX: mock-interview dead buttons + fake "Sedang merekam". Perf: listChatSessions over-fetch, CV preview re-render. Arsitektur: 4 SSOT route/nav. Docs: dev.md §8 stale count, test flake robustness.
+**Out-of-code (ops, ~2 poin overall):**
+- [ ] Restore drill: restore arsip tar ke volume staging + verifikasi Convex jalan.
+- [ ] Provider auto-snapshot: toggle di dashboard VPS.
+- [ ] Google OAuth: set env + OAuth client di Google Console (`docs/auth.md` §1b).
 
-**Out-of-code (BUTUH TANGANMU — nahan skor):** restore drill (ops), provider auto-snapshot (ops), Google OAuth Console (auth). Ini plafon ke 100.
+**Keputusan arsitektur (~0.2-0.4 poin overall):**
+- [ ] Setujui konsolidasi 4-SSOT route/nav? Autonom bisa dikerjain TAPI medium-risk
+  (nyentuh routing semua halaman dashboard). Aku tunggu sign-off-mu sebelum eksekusi.
 
 ## Protokol loop
 
-Builder per batch di `qa/loop-to-100`, tiap fix verify adversarial → gate penuh → commit lokal (TANPA push) → QA ukur ulang → batch berikut. Sampai plafon autonom (~92-94) atau kamu kerjain out-of-code.
+Builder per batch di `qa/loop-to-100`, verify adversarial → gate penuh → commit lokal (TANPA push) → QA ukur ulang. **Loop berhenti di plafon autonom (~92)** lalu handoff jujur ke kamu.
 
 ## Log progres
 
-- **2026-06-15** — Baseline **83** → batch-1 (`dfd8639`) → **85** → batch-2 (`bc9fda3`) → **86**. Batch-3 (8 item) dilempar ke Builder. Plafon autonom ~92-94 karena out-of-code ops items.
+- **2026-06-15** — **83** → batch-1 `dfd8639` → **85** → batch-2 `bc9fda3` → **86** → batch-3 `ab67dcb` → **89**. Batch-4 (6 item) jalan → target ~92, lalu stop + handoff (out-of-code + keputusan arsitektur).
