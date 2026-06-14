@@ -65,6 +65,64 @@ describe("sanitizeHtml — XSS bypass regression (2026-06-11)", () => {
   });
 });
 
+describe("sanitizeHtml — `>` inside quoted attribute bypass regression (2026-06-15)", () => {
+  // A `>` inside an allowlisted quoted attribute value used to terminate every
+  // tag-boundary regex early (naive [^>]), leaving a trailing on*= handler
+  // verbatim. Cover a `>` inside EACH allowlisted attribute, with both a
+  // whitespace-separated and a quote-fused handler (the fused variant is the
+  // one the on*= stripper missed).
+  for (const attr of ["title", "class", "rel", "target", "lang", "dir"]) {
+    it(`strips an onmouseover fused to a quoted '>' in ${attr}=`, () => {
+      const out = sanitizeHtml(
+        `<a ${attr}="x>"onmouseover="alert(document.cookie)">hover</a>`,
+      );
+      expect(out.toLowerCase()).not.toContain("onmouseover");
+      expect(out.toLowerCase()).not.toContain("alert");
+      expect(out).toContain("hover");
+    });
+
+    it(`strips an onmouseover after a whitespace-separated quoted '>' in ${attr}=`, () => {
+      const out = sanitizeHtml(
+        `<a ${attr}="x>" onmouseover="alert(1)">hover</a>`,
+      );
+      expect(out.toLowerCase()).not.toContain("onmouseover");
+      expect(out).toContain("hover");
+    });
+  }
+
+  it("strips an on-handler when the quoted attribute value contains two '>' chars", () => {
+    const out = sanitizeHtml(
+      '<a title="x>>"onmouseover="alert(1)">hover</a>',
+    );
+    expect(out.toLowerCase()).not.toContain("onmouseover");
+    expect(out).toContain("hover");
+  });
+
+  it("handles single-quoted attribute values containing '>' too", () => {
+    const out = sanitizeHtml(
+      "<a title='x>'onmouseover='alert(1)'>hover</a>",
+    );
+    expect(out.toLowerCase()).not.toContain("onmouseover");
+    expect(out).toContain("hover");
+  });
+
+  it("still neutralises a javascript: href on a tag whose title hides a '>'", () => {
+    const out = sanitizeHtml(
+      '<a title="x>" href="javascript:alert(1)">go</a>',
+    );
+    expect(out.toLowerCase()).not.toContain("javascript:");
+    expect(out).toContain("go");
+  });
+
+  it("strips a disallowed-tag on-handler smuggled behind a quoted '>'", () => {
+    const out = sanitizeHtml(
+      '<span title="x>"onmouseover="alert(1)">caption</span>',
+    );
+    expect(out.toLowerCase()).not.toContain("onmouseover");
+    expect(out).toContain("caption");
+  });
+});
+
 describe("sanitizeUrl", () => {
   it("rejects javascript: / data: / file: schemes", () => {
     expect(sanitizeUrl("javascript:alert(1)")).toBe("");

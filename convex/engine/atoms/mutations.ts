@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
 import { requireUser } from "../../_shared/auth";
+import { assertOwnedStorages } from "../../files/ownership";
 import { sanitizeAIInput } from "../../_shared/sanitize";
 import {
   ATOM_TYPES,
@@ -33,6 +34,14 @@ export const add = mutation({
     // Ownership check on the parent CV.
     const cv = await ctx.db.get(args.cvId);
     if (!cv || cv.userId !== userId) throw new Error("CV tidak ditemukan");
+
+    // The parent-CV check does not cover the proof blob: storage ids become
+    // client-known after upload, so a caller could pin another tenant's blob
+    // (read IDOR once a getUrl path lands + cross-tenant deletion on account
+    // erasure via cascadeDelete). Enforce blob ownership at write time.
+    if (args.proofStorageId) {
+      await assertOwnedStorages(ctx, [args.proofStorageId], userId);
+    }
 
     const claim = sanitizeAIInput(args.claim).trim();
     if (claim.length === 0) throw new Error("Klaim tidak boleh kosong");
@@ -87,6 +96,13 @@ export const supersede = mutation({
     }
     if (old.supersededBy !== undefined) {
       throw new Error("Atom sudah digantikan");
+    }
+
+    // The new revision carries the same proof blob forward. `add` now enforces
+    // blob ownership at write time, but re-verify so legacy atoms (attested
+    // before that check landed) cannot launder a foreign blob into a fresh row.
+    if (old.proofStorageId) {
+      await assertOwnedStorages(ctx, [old.proofStorageId], userId);
     }
 
     const claim = sanitizeAIInput(args.claim).trim();

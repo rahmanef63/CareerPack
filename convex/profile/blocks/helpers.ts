@@ -66,49 +66,75 @@ const HTML_ALLOWED_ATTRS = new Set([
 
 const DANGEROUS_PROTO = /^(?:javascript|vbscript|data|file):/i;
 
+// Attribute-aware "tag body" sub-pattern: the run of characters between a
+// tag name and the tag's real closing `>`. A naive `[^>]*` stops at the FIRST
+// `>`, but a `>` can legally live inside a quoted attribute value
+// (`<a title="x>"…>`), so that early stop left the trailing markup — incl.
+// an `on*=` handler — verbatim (stored XSS). This pattern consumes whole
+// quoted strings (which may contain `>`) before any bare char, so matching
+// only ends at a `>` that is OUTSIDE quotes.
+const TAG_BODY = `(?:"[^"]*"|'[^']*'|[^>"'])*`;
+
+// Strip every on*=… handler. Matches when the handler is preceded by the tag
+// start, whitespace, a quote, or a `/` — covering whitespace-separated,
+// quote-adjacent (`"onclick=`), and `/`-separated (`/onclick=`) variants that
+// a bare `\s+on` lookbehind would miss. The leading delimiter is preserved.
+const ON_HANDLER_RE = /(^|[\s"'/])on[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi;
+
+const DANGEROUS_URL_ATTR_RE =
+  /\b(href|src|formaction|poster|action|xlink:href)\s*=\s*("[^"]*"|'[^']*')/gi;
+
+function stripOnHandlers(s: string): string {
+  return s.replace(ON_HANDLER_RE, "$1");
+}
+
+function neutralizeDangerousUrls(s: string): string {
+  return s.replace(DANGEROUS_URL_ATTR_RE, (m, attr: string, val: string) => {
+    const inner = val.slice(1, -1).trim().toLowerCase();
+    if (
+      inner.startsWith("javascript:") ||
+      inner.startsWith("vbscript:") ||
+      inner.startsWith("data:") ||
+      inner.startsWith("file:")
+    ) {
+      return `${attr}="#"`;
+    }
+    return m;
+  });
+}
+
 export function sanitizeHtml(input: unknown): string {
   let s = trimSafe(input, MAX_HTML_LEN);
   if (!s) return "";
 
   // 1. Drop block-content of the strip-list (incl. children) so nested
-  //    tricks like <script><script>x</script></script> still die.
+  //    tricks like <script><script>x</script></script> still die. Tag bodies
+  //    use the attribute-aware TAG_BODY so a `>` inside a quoted attribute
+  //    can't truncate the open-tag match early.
   for (const tag of HTML_STRIP_TAGS) {
-    const open = new RegExp(`<\\s*${tag}\\b[^>]*>[\\s\\S]*?<\\s*/\\s*${tag}\\s*>`, "gi");
+    const open = new RegExp(`<\\s*${tag}\\b${TAG_BODY}>[\\s\\S]*?<\\s*/\\s*${tag}\\s*>`, "gi");
     s = s.replace(open, "");
-    const self = new RegExp(`<\\s*${tag}\\b[^>]*/?>`, "gi");
+    const self = new RegExp(`<\\s*${tag}\\b${TAG_BODY}/?>`, "gi");
     s = s.replace(self, "");
   }
 
-  // 2. Strip every on*=… attribute.
-  s = s.replace(/\s+on[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  // 2. Strip every on*=… attribute (any delimiter).
+  s = stripOnHandlers(s);
 
   // 3. Strip dangerous protocols on href/src/formaction/poster/action/xlink:href.
-  s = s.replace(
-    /\b(href|src|formaction|poster|action|xlink:href)\s*=\s*("[^"]*"|'[^']*')/gi,
-    (m, attr, val: string) => {
-      const inner = val.slice(1, -1).trim().toLowerCase();
-      if (
-        inner.startsWith("javascript:") ||
-        inner.startsWith("vbscript:") ||
-        inner.startsWith("data:") ||
-        inner.startsWith("file:")
-      ) {
-        return `${attr}="#"`;
-      }
-      return m;
-    },
-  );
+  s = neutralizeDangerousUrls(s);
 
   // 4. Drop every tag NOT in the allowlist (preserve text content). For
   //    kept tags, REBUILD from an attribute allowlist (HTML_ALLOWED_ATTRS)
   //    rather than trusting step 2's on*= stripper — that stripper requires
-  //    whitespace before `on`, so `/`-separated or quote-adjacent handlers
-  //    slipped through and re-rendered verbatim. Rebuilding drops any
-  //    attribute not on the allowlist no matter the separator, and
+  //    a delimiter before `on`, so handlers fused to a quoted value
+  //    containing `>` slipped through and re-rendered verbatim. Rebuilding
+  //    drops any attribute not on the allowlist no matter the separator, and
   //    re-checks href for dangerous protocols (incl. unquoted values that
-  //    step 3's quoted-only regex misses).
+  //    step 3's quoted-only regex misses). The tag matcher uses the
+  //    attribute-aware TAG_BODY so a quoted `>` no longer ends the tag early.
   s = s.replace(
-    /<(\/?)\s*([a-zA-Z][a-zA-Z0-9-]*)\b([^>]*)>/g,
+    new RegExp(`<(/?)\\s*([a-zA-Z][a-zA-Z0-9-]*)\\b(${TAG_BODY})>`, "g"),
     (_m, slash: string, tag: string, attrs: string) => {
       const name = tag.toLowerCase();
       if (!HTML_ALLOWED_TAGS.has(name)) return "";
@@ -131,9 +157,15 @@ export function sanitizeHtml(input: unknown): string {
     },
   );
 
-  // 5. Force <a target="_blank" rel="noopener noreferrer"> when href is
+  // 5. Defensive final pass — re-strip any on*= handler and re-neutralise any
+  //    dangerous-protocol URL that a quoted `>` may have shielded from the
+  //    earlier passes (belt-and-braces alongside the attribute-aware rebuild).
+  s = stripOnHandlers(s);
+  s = neutralizeDangerousUrls(s);
+
+  // 6. Force <a target="_blank" rel="noopener noreferrer"> when href is
   //    external — defence against window.opener attacks.
-  s = s.replace(/<a\b([^>]*)>/gi, (m, attrs: string) => {
+  s = s.replace(new RegExp(`<a\\b(${TAG_BODY})>`, "gi"), (m, attrs: string) => {
     if (!/href\s*=/.test(attrs)) return m;
     let out = attrs;
     if (!/\btarget\s*=/.test(out)) out += ` target="_blank"`;

@@ -25,7 +25,6 @@ import type {
   ParagraphPayload,
   SocialPayload,
   SocialPlatform,
-  HtmlPayload,
   DividerPayload,
 } from "../blocks/types";
 
@@ -90,8 +89,11 @@ export function BlockRenderer({ block }: BlockRendererProps) {
       return <EmbedBlock payload={block.payload as EmbedPayload} />;
     case "divider":
       return <DividerBlock payload={block.payload as DividerPayload} />;
-    case "html":
-      return <HtmlBlock payload={block.payload as HtmlPayload} />;
+    // `html` blocks are intentionally NOT rendered here. This component
+    // runs on the MAIN app origin, where dangerouslySetInnerHTML of
+    // user markup would be an account-takeover XSS sink. User HTML blocks
+    // are rendered only inside the sandboxed template iframe (see
+    // templateHydrator/manualBlocks.ts). Do not add an `html` case.
     default:
       return null;
   }
@@ -300,16 +302,4 @@ function DividerBlock({ payload }: { payload: DividerPayload }) {
     );
   }
   return <hr className="border-border" />;
-}
-
-function HtmlBlock({ payload }: { payload: HtmlPayload }) {
-  // Server already sanitised. We render via dangerouslySetInnerHTML —
-  // the prose-* utilities give consistent typography for headings/lists/
-  // links inside the user's markup.
-  return (
-    <div
-      className="prose prose-sm max-w-none dark:prose-invert prose-a:text-brand"
-      dangerouslySetInnerHTML={{ __html: payload.content }}
-    />
-  );
 }

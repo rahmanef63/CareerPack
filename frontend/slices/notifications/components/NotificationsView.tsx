@@ -13,7 +13,6 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { notify } from "@/shared/lib/notify";
 import { formatDateShort } from "@/shared/lib/formatDate";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
@@ -222,9 +221,8 @@ export function NotificationsView() {
     IMPORTANT_TYPES.includes(n.type as NotificationType),
   ).length;
 
-  const handleMarkAll = async () => {
-    await markAllRead();
-    notify.success("Semua notifikasi ditandai sudah dibaca");
+  const handleMarkAll = () => {
+    void markAllRead();
   };
 
   return (
@@ -279,9 +277,8 @@ export function NotificationsView() {
                     </ResponsiveAlertDialogCancel>
                     <ResponsiveAlertDialogAction
                       variant="destructive"
-                      onClick={async () => {
-                        await dismissAll();
-                        notify.success("Semua notifikasi dibersihkan");
+                      onClick={() => {
+                        void dismissAll();
                       }}
                     >
                       Ya, hapus
@@ -369,10 +366,8 @@ export function NotificationsView() {
                     <NotificationRow
                       key={n._id}
                       n={n}
-                      onRead={() => markRead(n._id)}
-                      onDismiss={async () => {
-                        await dismiss(n._id);
-                      }}
+                      onRead={() => void markRead(n._id)}
+                      onDismiss={() => void dismiss(n._id)}
                     />
                   ))}
                 </div>

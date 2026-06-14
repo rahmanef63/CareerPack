@@ -86,12 +86,17 @@ export function TemplateLayout({
           }
         | null;
       if (!data || typeof data.type !== "string") return;
-      if (
-        iframeRef.current &&
-        event.source !== iframeRef.current.contentWindow
-      ) {
-        return;
-      }
+      // Pin to OUR iframe only. The template runs in a sandboxed
+      // srcDoc without allow-same-origin, so its origin is the opaque
+      // string "null" and the only trustworthy discriminator is the
+      // source window handle. Reject anything we can't match to the
+      // current iframe's contentWindow (covers the pre-mount window ===
+      // null gap and any other frame on the page). Also require the
+      // opaque "null" origin so a same-origin frame can't impersonate
+      // it even with a stolen window reference.
+      const iframeWin = iframeRef.current?.contentWindow ?? null;
+      if (!iframeWin || event.source !== iframeWin) return;
+      if (event.origin !== "null") return;
       if (data.type === "cp-resize" && typeof data.h === "number") {
         const clamped = Math.max(400, Math.min(20000, Math.round(data.h)));
         setIframeHeight((prev) => (prev === clamped ? prev : clamped));

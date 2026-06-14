@@ -41,7 +41,10 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
 
   // Engine tables carry userId but lack a bare `by_user` index — delete via
   // their compound indexes so account erasure is complete (GDPR). truthAtoms
-  // can also pin a proof blob in _storage; delete that first.
+  // can also pin a proof blob in _storage; delete that first. Blob ownership is
+  // enforced at write time (atoms.add/supersede call assertOwnedStorages), so a
+  // pinned proofStorageId always belongs to this user — no cross-tenant blob is
+  // deleted here.
   const atoms = await ctx.db
     .query("truthAtoms")
     .withIndex("by_user_cv", (q) => q.eq("userId", userId))

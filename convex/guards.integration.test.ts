@@ -181,6 +181,125 @@ describe("matcher ATS scan cannot read another user's CV (IDOR guard)", () => {
   });
 });
 
+describe("truthAtoms proof blob cannot pin another tenant's storage (IDOR guard)", () => {
+  // Minimal owned CV so atoms.add passes its parent-CV ownership check.
+  async function insertCV(t: Tester, userId: Id<"users">): Promise<Id<"cvs">> {
+    return t.run((ctx) =>
+      ctx.db.insert("cvs", {
+        userId,
+        title: "CV",
+        template: "modern",
+        personalInfo: {
+          fullName: "X",
+          email: "x@x.com",
+          phone: "",
+          location: "",
+          summary: "",
+        },
+        experience: [],
+        education: [],
+        skills: [],
+        certifications: [],
+        languages: [],
+        projects: [],
+        isDefault: true,
+      }),
+    );
+  }
+
+  // Mint a real _storage blob and register a files row owned by `ownerTenant`.
+  async function uploadOwnedBlob(
+    t: Tester,
+    ownerTenant: Id<"users">,
+  ): Promise<Id<"_storage">> {
+    return t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(
+        new Blob(["proof"], { type: "application/pdf" }),
+      );
+      await ctx.db.insert("files", {
+        storageId,
+        fileName: "proof.pdf",
+        fileType: "application/pdf",
+        fileSize: 5,
+        uploadedBy: ownerTenant,
+        tenantId: ownerTenant.toString(),
+        createdAt: Date.now(),
+      });
+      return storageId;
+    });
+  }
+
+  it("rejects an atom whose proofStorageId belongs to another user", async () => {
+    const t = setup();
+    const alice = await insertUser(t, { email: "alice@x.com" });
+    const bob = await insertUser(t, { email: "bob@x.com" });
+
+    const aliceCv = await insertCV(t, alice);
+    // Bob uploads a proof; its storageId is server-minted but becomes
+    // client-known after upload — the exact value an attacker could replay.
+    const bobBlob = await uploadOwnedBlob(t, bob);
+
+    await expect(
+      t.withIdentity(identity(alice)).mutation(api.engine.atoms.mutations.add, {
+        cvId: aliceCv,
+        claim: "Saya punya sertifikat ini",
+        type: "certification",
+        proofStorageId: bobBlob,
+      }),
+    ).rejects.toThrow("Berkas tidak ditemukan");
+  });
+
+  it("accepts an atom whose proofStorageId the caller owns", async () => {
+    const t = setup();
+    const alice = await insertUser(t, { email: "alice2@x.com" });
+    const aliceCv = await insertCV(t, alice);
+    const aliceBlob = await uploadOwnedBlob(t, alice);
+
+    const atomId = await t
+      .withIdentity(identity(alice))
+      .mutation(api.engine.atoms.mutations.add, {
+        cvId: aliceCv,
+        claim: "Saya punya sertifikat ini",
+        type: "certification",
+        proofStorageId: aliceBlob,
+      });
+
+    const stored = await t.run((ctx) => ctx.db.get(atomId));
+    expect(stored?.proofStorageId).toBe(aliceBlob);
+  });
+
+  it("supersede rejects a legacy atom carrying a foreign proof blob", async () => {
+    const t = setup();
+    const alice = await insertUser(t, { email: "alice3@x.com" });
+    const bob = await insertUser(t, { email: "bob3@x.com" });
+    const aliceCv = await insertCV(t, alice);
+    const bobBlob = await uploadOwnedBlob(t, bob);
+
+    // Simulate a row attested before write-time ownership enforcement: insert
+    // an Alice atom directly with Bob's blob, bypassing atoms.add.
+    const legacyAtom = await t.run((ctx) =>
+      ctx.db.insert("truthAtoms", {
+        userId: alice,
+        cvId: aliceCv,
+        claim: "klaim lama",
+        type: "certification",
+        proofStorageId: bobBlob,
+        hash: "legacyhash",
+        attestedAt: Date.now(),
+      }),
+    );
+
+    await expect(
+      t
+        .withIdentity(identity(alice))
+        .mutation(api.engine.atoms.mutations.supersede, {
+          atomId: legacyAtom,
+          claim: "klaim baru",
+        }),
+    ).rejects.toThrow("Berkas tidak ditemukan");
+  });
+});
+
 describe("enforceRateLimit against a live transaction", () => {
   it("permits the configured budget then throws on overflow", async () => {
     const t = setup();
