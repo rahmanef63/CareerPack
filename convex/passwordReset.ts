@@ -22,11 +22,6 @@ function hex(bytes: Uint8Array): string {
     .join("");
 }
 
-function bytesFromHex(s: string): Uint8Array {
-  const pairs = s.match(/.{2}/g) ?? [];
-  return new Uint8Array(pairs.map((b) => parseInt(b, 16)));
-}
-
 // URL-safe base64 (no padding) — RFC 4648 §5
 function toBase64Url(bytes: Uint8Array): string {
   let binary = "";
@@ -61,20 +56,6 @@ async function hashSecret(secret: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const derived = await pbkdf2Derive(secret, salt);
   return `pbkdf2v2_${hex(salt)}_${hex(derived)}`;
-}
-
-async function verifySecret(secret: string, stored: string): Promise<boolean> {
-  const parts = stored.split("_");
-  if (parts[0] !== "pbkdf2v2" || parts.length !== 3) return false;
-  const salt = bytesFromHex(parts[1]);
-  const expected = parts[2];
-  const derived = hex(await pbkdf2Derive(secret, salt));
-  if (derived.length !== expected.length) return false;
-  let diff = 0;
-  for (let i = 0; i < derived.length; i++) {
-    diff |= derived.charCodeAt(i) ^ expected.charCodeAt(i);
-  }
-  return diff === 0;
 }
 
 /**
@@ -243,10 +224,12 @@ const CORS_HEADERS: Record<string, string> = {
  * unsupported method returns 405. OPTIONS preflight returns 204 with
  * permissive CORS — endpoint is anti-enumeration safe.
  *
- * IP extraction: prefer `x-forwarded-for` (first hop = client IP behind
- * trusted proxy / CDN), fallback to `x-real-ip`, fallback to "unknown".
- * Hashed before storage so privacy-conscious users don't end up with raw
- * IPs persisted server-side.
+ * IP extraction (see `_shared/clientIp.ts`): prefer edge-overwritten
+ * single-value headers (`cf-connecting-ip`, then `x-real-ip`), else the
+ * RIGHT-most `x-forwarded-for` hop appended by the trusted proxy (the
+ * leftmost is client-spoofable), fallback to "unknown". Hashed before
+ * storage so privacy-conscious users don't end up with raw IPs persisted
+ * server-side.
  */
 export const handleRequestReset = httpAction(async (ctx, request) => {
   if (request.method === "OPTIONS") {
@@ -331,11 +314,30 @@ export const resetPassword = mutation({
 
     const now = Date.now();
 
-    // HMAC-deterministic hash → exact-match `by_hash` lookup. Constant-
-    // time string compare gates against accidental hash truncation /
-    // race-window collisions. Legacy `pbkdf2v2_*` rows from before the
-    // HMAC switch still verify via `verifySecret` linear-scan fallback —
-    // the 30m TTL pruner clears them within a day of deploy.
+    // HMAC-deterministic hash → exact-match `by_hash` lookup (O(log N)),
+    // the ONLY lookup path. Every minted token is `hmacv1_*` (see
+    // `doRequestReset` → `hmacToken`), so this index hit covers all live
+    // tokens. Constant-time string compare gates against accidental hash
+    // truncation / race-window collisions.
+    //
+    // The previous `pbkdf2v2_*` linear-scan fallback was REMOVED: it ran
+    // `ctx.db.query(...).collect()` over the whole table and PBKDF2-100k'd
+    // every non-expired legacy row on a miss — an on-demand O(N) read +
+    // CPU-amplified DoS lever, reachable with junk tokens straight from
+    // the unauthenticated reset page. Legacy `pbkdf2v2_*` rows minted
+    // before the HMAC switch expire within the 30m TTL and are dropped by
+    // the daily `prune-append-only-tables` cron, so nothing relies on the
+    // fallback anymore. A genuinely valid legacy token would now miss; the
+    // user simply re-requests a reset link and gets a fresh `hmacv1_*` one.
+    //
+    // NOTE: this mutation is called directly from the client reset page and
+    // has no IP/email gate (mutations don't see the request IP). A
+    // per-caller throttle belongs at an IP-bearing layer — mirror
+    // `_ipGatedRequestReset` / `handleRequestReset` by routing this through
+    // an httpAction wrapper if abuse is observed. Deliberately NOT added
+    // here to avoid changing the mutation contract; the unbounded scan
+    // (the real amplifier) is gone, so each junk attempt is now a single
+    // bounded index lookup + one HMAC, not a full-table PBKDF2 sweep.
     const expectedHash = await hmacToken(args.token);
     const directHit = await ctx.db
       .query("passwordResetTokens")
@@ -350,17 +352,6 @@ export const resetPassword = mutation({
       constantTimeEq(directHit.tokenHash, expectedHash)
     ) {
       match = directHit;
-    } else {
-      const legacy = await ctx.db.query("passwordResetTokens").collect();
-      for (const c of legacy) {
-        if (c.usedAt) continue;
-        if (c.expiresAt <= now) continue;
-        if (!c.tokenHash.startsWith("pbkdf2v2_")) continue;
-        if (await verifySecret(args.token, c.tokenHash)) {
-          match = c;
-          break;
-        }
-      }
     }
 
     if (!match) throw new Error("Token tidak valid atau sudah kedaluwarsa");

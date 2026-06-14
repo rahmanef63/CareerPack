@@ -1,6 +1,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
+import { sanitizeActionUrl } from "../_shared/url";
 
 export const createNotification = mutation({
   args: {
@@ -12,13 +13,20 @@ export const createNotification = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await requireUser(ctx);
+    // actionUrl is rendered verbatim as a Link href in NotificationsView, so
+    // pass it through the URL allowlist (http(s)/relative/anchor only) before
+    // storing. Anything else (javascript:/data:/file:/…) is dropped — not
+    // stored — to close the open-redirect / javascript: href vector.
+    const safeActionUrl = args.actionUrl
+      ? sanitizeActionUrl(args.actionUrl) || undefined
+      : undefined;
     return await ctx.db.insert("notifications", {
       userId,
       type: args.type,
       title: args.title,
       message: args.message,
       read: false,
-      actionUrl: args.actionUrl,
+      actionUrl: safeActionUrl,
       scheduledFor: args.scheduledFor,
     });
   },

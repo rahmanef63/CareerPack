@@ -11,9 +11,11 @@ export const observabilityTables = {
     timestamp: v.number(),
   }).index("by_time", ["timestamp"]),
 
-  // Email delivery events from the Resend webhook. One row per event;
-  // `verified` flags whether the Svix signature checked out (false =
-  // RESEND_WEBHOOK_SECRET unset or signature mismatch — treat as advisory).
+  // Email delivery events from the Resend webhook. One row per event.
+  // Unsigned / failed-signature events are rejected (401) and NOT persisted
+  // by default; `verified` is therefore normally true. A row with
+  // `verified: false` only appears during a rollout grace period
+  // (RESEND_WEBHOOK_ACCEPT_UNVERIFIED opt-in) and is advisory.
   // Recipients that opted out of non-transactional mail (welcome,
   // digests, marketing). Password reset + security alerts ignore this
   // list (sent with `alwaysSend: true`).

@@ -31,7 +31,7 @@ frontend/       Next.js 15 App Router, slices/<feature>, shared/*
 convex/         Schema + functions (auth, cv, applications, roadmaps, …)
 backend/        Docker stack Convex self-hosted (opsional)
 docs/           Dokumentasi komplit (architecture, backend, per-feature)
-.github/        CI (typecheck/lint/test/build) + auto-deploy Convex
+.github/        CI workflows (workflow_dispatch-only sejak 2026-05-14)
 ```
 
 ## Root Scripts
@@ -45,6 +45,10 @@ Paling sering dipakai:
 - `pnpm backend:deploy` — push Convex ke self-hosted prod
 
 Full list: [docs/development.md §3](./docs/development.md).
+
+## CI & Gating
+
+GitHub Actions `workflow_dispatch`-only (manual) sejak 2026-05-14 — tidak ada deploy/CI otomatis saat push/PR. Gerbang otomatis nyata = pre-push hook lokal (`scripts/pre-push.sh`): `pnpm typecheck` + `pnpm exec vitest run`, lalu `pnpm backend:deploy` kalau `convex/**` berubah. Detail: [docs/deployment.md](./docs/deployment.md) + [CLAUDE.md](./CLAUDE.md).
 
 ## License
 

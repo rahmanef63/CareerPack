@@ -139,7 +139,16 @@ Tambah test: co-locate file `*.test.ts` dekat source. Global setup tidak perlu â
 
 ## 9. CI
 
-`.github/workflows/ci.yml` jalankan di PR + push main:
+**Gating otomatis = pre-push hook lokal, BUKAN GitHub Actions.** Sejak
+2026-05-14 semua workflow (`ci.yml`, `convex-deploy.yml`) `workflow_dispatch`-only
+(manual) untuk hemat biaya â€” tidak ada lagi trigger push/PR. Gerbang otomatis
+nyata adalah `scripts/pre-push.sh` (via `simple-git-hooks`): jalankan
+`pnpm typecheck` + `pnpm exec vitest run` tiap push, lalu kalau push range
+menyentuh `convex/**` ia menjalankan `pnpm backend:deploy` SEBELUM push landing.
+Bypass: `SKIP_PUSH_CHECKS=1` (skip gate) / `SKIP_CONVEX_DEPLOY=1` (skip deploy).
+Detail di [CLAUDE.md](../CLAUDE.md) bagian Commands + [deployment.md](./deployment.md).
+
+`.github/workflows/ci.yml` (jalan manual via **Actions â†’ Run workflow**):
 
 1. `pnpm install --frozen-lockfile`
 2. `pnpm typecheck`
@@ -147,7 +156,7 @@ Tambah test: co-locate file `*.test.ts` dekat source. Global setup tidak perlu â
 4. `pnpm test`
 5. `pnpm build` (dengan dummy `NEXT_PUBLIC_CONVEX_URL`)
 
-`.github/workflows/convex-deploy.yml` auto-push Convex ke prod saat `convex/**` berubah di main. Butuh secret `CONVEX_SELF_HOSTED_URL` + `CONVEX_SELF_HOSTED_ADMIN_KEY`.
+`.github/workflows/convex-deploy.yml` push Convex ke prod â€” juga `workflow_dispatch`-only (manual), butuh secret `CONVEX_SELF_HOSTED_URL` + `CONVEX_SELF_HOSTED_ADMIN_KEY`.
 
 ## 10. Adding a Feature
 

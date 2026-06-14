@@ -13,6 +13,8 @@
 
 import { MAX_HTML_LEN, MAX_URL_LEN, type EmbedProvider } from "./types";
 
+const DANGEROUS_PROTO = /^(?:javascript|vbscript|data|file):/i;
+
 export function trimSafe(s: unknown, max: number): string {
   if (typeof s !== "string") return "";
   // Strip C0 control chars + DEL but preserve tabs/newlines/CR + the
@@ -20,18 +22,30 @@ export function trimSafe(s: unknown, max: number): string {
   return s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim().slice(0, max);
 }
 
+// Browsers strip C0 control whitespace (tab, newline, CR, form-feed,
+// vertical-tab) AND internal spaces out of a URL scheme at click/parse time
+// per the HTML/URL spec, so `java<TAB>script:`, `java<NEWLINE>script:`, and
+// `vb<TAB>script:` all resolve to live javascript:/vbscript: URLs. trimSafe
+// deliberately keeps tab/newline/CR for prose, so the scheme check must
+// collapse that whitespace itself before comparing against DANGEROUS_PROTO —
+// otherwise the literal-token comparison is trivially defeated.
+function dewhitespaceScheme(s: string): string {
+  // Only the candidate scheme prefix matters (everything up to and incl. the
+  // first ':'); collapse all whitespace there so a split scheme is exposed.
+  const colon = s.indexOf(":");
+  if (colon === -1) return s;
+  const prefix = s.slice(0, colon + 1).replace(/[\s\x00-\x1F]/g, "");
+  return prefix + s.slice(colon + 1);
+}
+
+function hasDangerousScheme(s: string): boolean {
+  return DANGEROUS_PROTO.test(dewhitespaceScheme(s));
+}
+
 export function sanitizeUrl(input: unknown, max: number = MAX_URL_LEN): string {
   const s = trimSafe(input, max);
   if (!s) return "";
-  const lower = s.toLowerCase();
-  if (
-    lower.startsWith("javascript:") ||
-    lower.startsWith("vbscript:") ||
-    lower.startsWith("data:") ||
-    lower.startsWith("file:")
-  ) {
-    return "";
-  }
+  if (hasDangerousScheme(s)) return "";
   if (s.startsWith("/") || s.startsWith("#")) return s;
   if (!/^https?:\/\//i.test(s)) return "";
   try {
@@ -64,8 +78,6 @@ const HTML_ALLOWED_ATTRS = new Set([
   "href", "target", "rel", "title", "class", "lang", "dir",
 ]);
 
-const DANGEROUS_PROTO = /^(?:javascript|vbscript|data|file):/i;
-
 // Attribute-aware "tag body" sub-pattern: the run of characters between a
 // tag name and the tag's real closing `>`. A naive `[^>]*` stops at the FIRST
 // `>`, but a `>` can legally live inside a quoted attribute value
@@ -90,13 +102,10 @@ function stripOnHandlers(s: string): string {
 
 function neutralizeDangerousUrls(s: string): string {
   return s.replace(DANGEROUS_URL_ATTR_RE, (m, attr: string, val: string) => {
-    const inner = val.slice(1, -1).trim().toLowerCase();
-    if (
-      inner.startsWith("javascript:") ||
-      inner.startsWith("vbscript:") ||
-      inner.startsWith("data:") ||
-      inner.startsWith("file:")
-    ) {
+    // hasDangerousScheme collapses tab/newline/CR (and any C0 ctrl + internal
+    // space) out of the scheme prefix first, so `java<TAB>script:` is caught.
+    const inner = val.slice(1, -1).trim();
+    if (hasDangerousScheme(inner)) {
       return `${attr}="#"`;
     }
     return m;
@@ -148,7 +157,9 @@ export function sanitizeHtml(input: unknown): string {
         let raw = a[2];
         if (an === "href") {
           const inner = raw.replace(/^["']|["']$/g, "").trim();
-          if (DANGEROUS_PROTO.test(inner)) raw = `"#"`;
+          // De-whitespace the scheme prefix before testing so a tab/newline-
+          // split `java<TAB>script:` href is rejected, not just the literal.
+          if (hasDangerousScheme(inner)) raw = `"#"`;
           else if (!/^["']/.test(raw)) raw = `"${raw}"`;
         }
         kept.push(`${an}=${raw}`);

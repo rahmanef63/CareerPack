@@ -12,13 +12,55 @@ describe("extractClientIp", () => {
     expect(extractClientIp(h({}))).toBe("unknown");
   });
 
-  it("prefers x-forwarded-for first hop", () => {
+  it("takes the RIGHT-most x-forwarded-for hop (trusted-proxy appended)", () => {
+    // Multi-hop chain: the genuine client IP is the last entry, appended
+    // by our trusted reverse proxy — NOT the leftmost client-claimed one.
     expect(
-      extractClientIp(h({ "x-forwarded-for": "203.0.113.1, 10.0.0.1" })),
+      extractClientIp(h({ "x-forwarded-for": "10.0.0.1, 203.0.113.1" })),
     ).toBe("203.0.113.1");
   });
 
-  it("falls through to x-real-ip when xff missing", () => {
+  it("ignores a spoofed leftmost x-forwarded-for value", () => {
+    // Attacker forges a leftmost entry per request to rotate rate-limit
+    // buckets. We must ignore it and use the proxy-appended right-most hop.
+    expect(
+      extractClientIp(
+        h({ "x-forwarded-for": "1.2.3.4, 5.6.7.8, 198.51.100.9" }),
+      ),
+    ).toBe("198.51.100.9");
+  });
+
+  it("cf-connecting-ip wins over x-forwarded-for (edge overwrites it)", () => {
+    expect(
+      extractClientIp(
+        h({
+          "cf-connecting-ip": "203.0.113.3",
+          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+        }),
+      ),
+    ).toBe("203.0.113.3");
+  });
+
+  it("x-real-ip wins over x-forwarded-for (edge overwrites it)", () => {
+    expect(
+      extractClientIp(
+        h({
+          "x-real-ip": "203.0.113.2",
+          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+        }),
+      ),
+    ).toBe("203.0.113.2");
+  });
+
+  it("prefers cf-connecting-ip over x-real-ip when both present", () => {
+    expect(
+      extractClientIp(
+        h({ "cf-connecting-ip": "203.0.113.3", "x-real-ip": "203.0.113.2" }),
+      ),
+    ).toBe("203.0.113.3");
+  });
+
+  it("falls through to x-real-ip when cf-connecting-ip missing", () => {
     expect(extractClientIp(h({ "x-real-ip": "203.0.113.2" }))).toBe(
       "203.0.113.2",
     );
@@ -30,39 +72,62 @@ describe("extractClientIp", () => {
     );
   });
 
-  it("ignores empty x-forwarded-for", () => {
+  it("ignores empty x-forwarded-for, falls through to x-real-ip", () => {
     expect(
       extractClientIp(h({ "x-forwarded-for": "", "x-real-ip": "203.0.113.4" })),
     ).toBe("203.0.113.4");
   });
 
-  it("ignores whitespace-only x-real-ip", () => {
+  it("ignores whitespace-only x-real-ip, falls through to cf-connecting-ip", () => {
     expect(
-      extractClientIp(h({ "x-real-ip": "   ", "cf-connecting-ip": "203.0.113.5" })),
+      extractClientIp(
+        h({ "x-real-ip": "   ", "cf-connecting-ip": "203.0.113.5" }),
+      ),
     ).toBe("203.0.113.5");
   });
 
-  it("trims xff first hop", () => {
+  it("trims the right-most xff hop", () => {
     expect(
-      extractClientIp(h({ "x-forwarded-for": "  203.0.113.6  , 10.0.0.1" })),
+      extractClientIp(h({ "x-forwarded-for": "10.0.0.1 ,  203.0.113.6  " })),
     ).toBe("203.0.113.6");
   });
 
-  it("returns IPv6 untouched", () => {
-    expect(
-      extractClientIp(h({ "x-forwarded-for": "2001:db8::1" })),
-    ).toBe("2001:db8::1");
+  it("single-entry x-forwarded-for returns that entry", () => {
+    expect(extractClientIp(h({ "x-forwarded-for": "203.0.113.1" }))).toBe(
+      "203.0.113.1",
+    );
   });
 
-  it("ignores empty xff segment + empty real-ip + falls through", () => {
+  it("returns IPv6 untouched", () => {
+    expect(extractClientIp(h({ "x-forwarded-for": "2001:db8::1" }))).toBe(
+      "2001:db8::1",
+    );
+  });
+
+  it("skips an implausible right-most hop and uses the next valid hop", () => {
+    // Trailing junk / empty segment must not become the bucket key.
     expect(
-      extractClientIp(
-        h({
-          "x-forwarded-for": ", , 10.0.0.1",
-          "cf-connecting-ip": "203.0.113.7",
-        }),
-      ),
-    ).toBe("203.0.113.7");
+      extractClientIp(h({ "x-forwarded-for": "203.0.113.1, not-an-ip" })),
+    ).toBe("203.0.113.1");
+  });
+
+  it("skips trailing empty segments and uses the last valid IP", () => {
+    expect(
+      extractClientIp(h({ "x-forwarded-for": "203.0.113.1, , " })),
+    ).toBe("203.0.113.1");
+  });
+
+  it("falls through to 'unknown' when xff holds no plausible IP", () => {
+    expect(extractClientIp(h({ "x-forwarded-for": "garbage, , junk" }))).toBe(
+      "unknown",
+    );
+  });
+
+  it("rejects out-of-range IPv4 octets as implausible", () => {
+    // 999.999.999.999 is forged junk; with no other header, fall to unknown.
+    expect(
+      extractClientIp(h({ "x-forwarded-for": "999.999.999.999" })),
+    ).toBe("unknown");
   });
 });
 

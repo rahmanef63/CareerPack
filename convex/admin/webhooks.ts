@@ -6,10 +6,16 @@ import { v } from "convex/values";
  * Resend webhook receiver.
  *
  * Resend signs payloads with Svix (`svix-id`, `svix-timestamp`,
- * `svix-signature` headers). We verify if `RESEND_WEBHOOK_SECRET` is
- * configured; otherwise we still accept + persist the event with
- * `verified: false` so traffic isn't dropped while the secret is being
- * rolled out. Treat unverified rows as advisory.
+ * `svix-signature` headers). This endpoint is unauthenticated and
+ * unthrottled, and dedups on the caller-supplied `svix-id` header — so an
+ * unverified row is attacker-writable. We therefore REJECT (HTTP 401) and
+ * persist NOTHING when `RESEND_WEBHOOK_SECRET` is unset or the signature
+ * fails. Only a valid Svix signature persists exactly one (idempotent) row.
+ *
+ * Rollout grace period: set `RESEND_WEBHOOK_ACCEPT_UNVERIFIED=1` to also
+ * persist unverified events (`verified: false`, advisory) while the signing
+ * secret is being wired up. This is OPT-IN — never the default — and should
+ * be unset once the secret is live.
  *
  * Setup (once, after deploy):
  *   1. Resend dashboard → Webhooks → Add → URL `https://api.careerpack.org/webhooks/resend`
@@ -33,6 +39,15 @@ export const handleResendWebhook = httpAction(async (ctx, request) => {
   }
 
   const verified = await verifySvixSignature(body, headers);
+
+  // Reject unsigned / failed-signature events outright: persist nothing.
+  // The endpoint is unauthenticated, unthrottled, and dedups on the
+  // attacker-controlled `svix-id` header, so accepting unverified rows by
+  // default is a table-bloat DoS vector. Opt back in only during a rollout
+  // grace period via RESEND_WEBHOOK_ACCEPT_UNVERIFIED (advisory rows).
+  if (!verified && !acceptUnverifiedEvents()) {
+    return new Response("invalid_signature", { status: 401 });
+  }
 
   if (!parsed || typeof parsed !== "object") {
     return new Response("missing_payload", { status: 400 });
@@ -118,6 +133,17 @@ function extractReason(data: Record<string, unknown>): string | undefined {
 }
 
 /**
+ * Rollout grace-period escape hatch. When `RESEND_WEBHOOK_ACCEPT_UNVERIFIED`
+ * is truthy ("1" / "true"), unverified events are still persisted (advisory)
+ * instead of being rejected with 401. OPT-IN — defaults to off, so the
+ * secure behaviour (drop unsigned events) holds unless explicitly relaxed.
+ */
+export function acceptUnverifiedEvents(): boolean {
+  const flag = process.env.RESEND_WEBHOOK_ACCEPT_UNVERIFIED;
+  return flag === "1" || flag === "true";
+}
+
+/**
  * Svix signature verification.
  *
  * Per https://docs.svix.com/receiving/verifying-payloads/how-manual,
@@ -127,7 +153,7 @@ function extractReason(data: Record<string, unknown>): string | undefined {
  *
  * Tolerates 5-minute timestamp drift.
  */
-async function verifySvixSignature(body: string, headers: Headers): Promise<boolean> {
+export async function verifySvixSignature(body: string, headers: Headers): Promise<boolean> {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
   if (!secret) return false;
 

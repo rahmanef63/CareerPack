@@ -135,3 +135,92 @@ describe("sanitizeUrl", () => {
     expect(sanitizeUrl("/dashboard")).toBe("/dashboard");
   });
 });
+
+describe("whitespace-split scheme bypass regression (2026-06-15)", () => {
+  // trimSafe preserves tab/newline/CR for prose, and browsers strip those out
+  // of a URL scheme at click time, so `java<TAB>script:` etc. used to defeat
+  // the literal-token protocol checks and render a live javascript: URL.
+  describe("sanitizeUrl rejects whitespace-split dangerous schemes", () => {
+    it("tab-split javascript:", () => {
+      expect(sanitizeUrl("java\tscript:alert(1)")).toBe("");
+    });
+    it("newline-split javascript:", () => {
+      expect(sanitizeUrl("java\nscript:alert(1)")).toBe("");
+    });
+    it("carriage-return-split javascript:", () => {
+      expect(sanitizeUrl("java\rscript:alert(1)")).toBe("");
+    });
+    it("tab-split vbscript:", () => {
+      expect(sanitizeUrl("vb\tscript:msgbox(1)")).toBe("");
+    });
+    it("mixed-case tab-split javascript:", () => {
+      expect(sanitizeUrl("Jav\tAsCriPt:alert(1)")).toBe("");
+    });
+    it("space-before-colon javascript :", () => {
+      expect(sanitizeUrl("javascript :alert(1)")).toBe("");
+    });
+    it("still allows a clean https URL", () => {
+      expect(sanitizeUrl("https://example.com/")).toBe("https://example.com/");
+    });
+    it("still allows a relative / href", () => {
+      expect(sanitizeUrl("/dashboard")).toBe("/dashboard");
+    });
+    it("does not mangle a legit port colon", () => {
+      expect(sanitizeUrl("https://example.com:8080/p")).toBe(
+        "https://example.com:8080/p",
+      );
+    });
+  });
+
+  describe("sanitizeHtml href with a whitespace-split scheme becomes #", () => {
+    it("tab-split scheme in href", () => {
+      const out = sanitizeHtml('<a href="java\tscript:alert(1)">x</a>');
+      expect(out.toLowerCase()).not.toContain("script:");
+      expect(out.toLowerCase()).not.toContain("alert");
+      expect(out).toContain('href="#"');
+      expect(out).toContain("x");
+    });
+
+    it("newline-split scheme in href", () => {
+      const out = sanitizeHtml('<a href="java\nscript:alert(1)">x</a>');
+      expect(out.toLowerCase()).not.toContain("script:");
+      expect(out.toLowerCase()).not.toContain("alert");
+      expect(out).toContain('href="#"');
+    });
+
+    it("carriage-return-split scheme in href", () => {
+      const out = sanitizeHtml('<a href="java\rscript:alert(1)">x</a>');
+      expect(out.toLowerCase()).not.toContain("script:");
+      expect(out.toLowerCase()).not.toContain("alert");
+      expect(out).toContain('href="#"');
+    });
+
+    it("tab-split vbscript in href", () => {
+      const out = sanitizeHtml('<a href="vb\tscript:msgbox(1)">x</a>');
+      expect(out.toLowerCase()).not.toContain("script:");
+      expect(out).toContain('href="#"');
+    });
+
+    it("mixed-case split scheme combined with an on-handler", () => {
+      const out = sanitizeHtml(
+        '<a href="Jav\tAsCriPt:alert(1)" onmouseover="evil()">x</a>',
+      );
+      expect(out.toLowerCase()).not.toContain("script:");
+      expect(out.toLowerCase()).not.toContain("onmouseover");
+      expect(out.toLowerCase()).not.toContain("alert");
+      expect(out).toContain('href="#"');
+      expect(out).toContain("x");
+    });
+
+    it("leaves a clean https href unchanged", () => {
+      const out = sanitizeHtml('<a href="https://ok.com">link</a>');
+      expect(out).toContain('href="https://ok.com"');
+      expect(out).toContain("link");
+    });
+
+    it("leaves a relative / href unchanged", () => {
+      const out = sanitizeHtml('<a href="/cv">cv</a>');
+      expect(out).toContain('href="/cv"');
+    });
+  });
+});

@@ -5,6 +5,7 @@ import Google from "@auth/core/providers/google";
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 import type { DataModel } from "./_generated/dataModel";
+import { hashSecret, verifySecret } from "./_shared/passwordCrypto";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
@@ -31,56 +32,11 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       // Use PBKDF2 (WebCrypto) instead of default Scrypt — Scrypt times out
       // behind Dokploy's reverse proxy (>60s) causing dropped WebSocket actions.
       // Iterations = 100k: OWASP 2023 minimum untuk PBKDF2-SHA256.
+      // Pure hash/verify logic lives in `_shared/passwordCrypto.ts` so it can
+      // be unit-tested; do not inline it back here.
       crypto: {
-        async hashSecret(password: string) {
-          const salt = crypto.getRandomValues(new Uint8Array(16));
-          const enc = new TextEncoder();
-          const km = await crypto.subtle.importKey(
-            "raw",
-            enc.encode(password),
-            "PBKDF2",
-            false,
-            ["deriveBits"],
-          );
-          const buf = await crypto.subtle.deriveBits(
-            { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
-            km,
-            256,
-          );
-          const hex = (a: Uint8Array) =>
-            Array.from(a).map((b) => b.toString(16).padStart(2, "0")).join("");
-          return `pbkdf2v2_${hex(salt)}_${hex(new Uint8Array(buf))}`;
-        },
-        async verifySecret(password: string, hash: string) {
-          const parts = hash.split("_");
-          // Support both v1 (10k iter, legacy) and v2 (100k iter)
-          if ((parts[0] !== "pbkdf2" && parts[0] !== "pbkdf2v2") || parts.length !== 3) return false;
-          const iterations = parts[0] === "pbkdf2v2" ? 100000 : 10000;
-          const salt = new Uint8Array(
-            parts[1].match(/.{2}/g)!.map((b) => parseInt(b, 16)),
-          );
-          const enc = new TextEncoder();
-          const km = await crypto.subtle.importKey(
-            "raw",
-            enc.encode(password),
-            "PBKDF2",
-            false,
-            ["deriveBits"],
-          );
-          const buf = await crypto.subtle.deriveBits(
-            { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
-            km,
-            256,
-          );
-          const hex = Array.from(new Uint8Array(buf))
-            .map((b) => b.toString(16).padStart(2, "0"))
-            .join("");
-          // Constant-time compare
-          if (hex.length !== parts[2].length) return false;
-          let diff = 0;
-          for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ parts[2].charCodeAt(i);
-          return diff === 0;
-        },
+        hashSecret,
+        verifySecret,
       },
     }),
     Anonymous,
