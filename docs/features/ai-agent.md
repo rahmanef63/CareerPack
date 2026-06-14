@@ -73,8 +73,7 @@ slice's manifest and exposes derived collections:
 
 | Export | Purpose |
 |---|---|
-| `SLICE_REGISTRY` | Ordered manifest array — single source of truth |
-| `NAV_PRIMARY` / `NAV_MORE` | Nav components read these instead of `navConfig.ts` |
+| `SLICE_REGISTRY` | Ordered manifest array — **AI skill catalog only** (routing/nav live in `dashboardRoutes.tsx` + `navConfig.ts`, NOT here) |
 | `ALL_SKILLS` | Flattened skill list (sent to chat action as `availableSkills`) |
 | `SKILLS_BY_ID` | O(1) lookup for `ApproveActionCard` |
 | `SKILLS_BY_SLASH` | O(1) lookup for slash popover |

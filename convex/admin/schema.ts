@@ -1,6 +1,12 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// Shape of a top-N ranking ({ value, count }) used across the super-admin
+// profile aggregates stored on the `adminStats` singleton.
+const topCountArray = v.array(
+  v.object({ value: v.string(), count: v.number() }),
+);
+
 export const observabilityTables = {
   errorLogs: defineTable({
     userId: v.optional(v.id("users")),
@@ -41,11 +47,14 @@ export const observabilityTables = {
     .index("by_to_time", ["to", "createdAt"])
     .index("by_event", ["eventId"]),
 
-  // Denormalized counters for admin dashboard (DashboardPanel + ChartsPanel).
-  // Recomputed hourly by `internal.admin.aggregator.recomputeAdminStats`.
-  // Singleton row keyed by `"global"`. Reading the doc is O(1) so the
-  // dashboard tick never table-scans `users`, `cvs`, `jobApplications`,
-  // `rateLimitEvents`, or `errorLogs` again.
+  // Denormalized counters for admin dashboard (DashboardPanel + ChartsPanel
+  // + super-admin analytics: overview / profile aggregates / feature adoption
+  // / signup trend). Recomputed hourly by
+  // `internal.admin.aggregator.recomputeAdminStats`. Singleton row keyed by
+  // `"global"`. Reading the doc is O(1) so the reactive dashboard queries
+  // never table-scan `users`, `userProfiles`, `files`, `cvs`,
+  // `jobApplications`, `chatConversations` (incl. its heavy `messages[]`),
+  // `rateLimitEvents`, or `errorLogs` again on every write tick.
   adminStats: defineTable({
     key: v.literal("global"),
     computedAt: v.number(),
@@ -80,6 +89,38 @@ export const observabilityTables = {
     totalErrors30d: v.number(),
     aiLast60s: v.number(),
     aiLast24h: v.number(),
+
+    // ---- super-admin analytics rollups (added 2026-06-15) ----
+    // All optional so the pre-existing singleton row (written before these
+    // fields existed) still validates on read; the reactive queries fall
+    // back to zero-shape until the next hourly cron backfills them.
+    signedUp7: v.optional(v.number()),
+    signedUp30: v.optional(v.number()),
+    profilesCount: v.optional(v.number()),
+    profileCompleteCount: v.optional(v.number()),
+    publicEnabledCount: v.optional(v.number()),
+    storageFiles: v.optional(v.number()),
+    storageBytes: v.optional(v.number()),
+    storageImageCount: v.optional(v.number()),
+    storagePdfCount: v.optional(v.number()),
+    topTargetRoles: v.optional(topCountArray),
+    topLocations: v.optional(topCountArray),
+    topExperience: v.optional(topCountArray),
+    topSkills: v.optional(topCountArray),
+    topInterests: v.optional(topCountArray),
+    featureAdoption: v.optional(
+      v.array(
+        v.object({
+          slice: v.string(),
+          users: v.number(),
+          pct: v.number(),
+          rows: v.number(),
+        }),
+      ),
+    ),
+    signupTrend30d: v.optional(
+      v.array(v.object({ date: v.string(), count: v.number() })),
+    ),
   }).index("by_key", ["key"]),
 
   roleAuditLogs: defineTable({

@@ -119,4 +119,28 @@ describe("malformed hashes return false without throwing", () => {
       verifySecret("password123", "pbkdf2v2_00112233445566778899aabbccddeeff_abcd"),
     ).resolves.toBe(false);
   });
+
+  it("crafted empty salt segment (pbkdf2v2__<derived>) — false, not a throw", async () => {
+    // Known prefix + exactly 3 parts, but the salt segment is empty, so the
+    // old `parts[1].match(/.{2}/g)!.map(...)` dereferenced null and threw a
+    // TypeError. The salt guard must short-circuit to false without throwing.
+    await expect(
+      verifySecret(
+        "password123",
+        "pbkdf2v2__00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+      ),
+    ).resolves.toBe(false);
+  });
+
+  it("odd-length / non-hex salt segment — false, not a throw", async () => {
+    // Odd-length salt also makes `.match(/.{2}/g)` drop the trailing nibble
+    // (or return null for length 1); a non-hex char yields NaN bytes. Both
+    // are malformed and must be rejected without throwing.
+    await expect(
+      verifySecret("password123", "pbkdf2v2_abc_ccdd"),
+    ).resolves.toBe(false);
+    await expect(
+      verifySecret("password123", "pbkdf2v2_zz_ccdd"),
+    ).resolves.toBe(false);
+  });
 });

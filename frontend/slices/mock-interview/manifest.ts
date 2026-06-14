@@ -15,19 +15,6 @@ export const mockInterviewManifest: SliceManifest = {
   description: "Sesi latihan wawancara dengan AI feedback",
   icon: MessageSquare,
 
-  route: {
-    slug: "interview",
-    component: () =>
-      import("./components/MockInterview").then((m) => ({ default: m.MockInterview })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 20,
-    href: "/dashboard/interview",
-    hue: "from-pink-400 to-pink-600",
-  },
-
   skills: [
     {
       id: "interview.list-sessions",

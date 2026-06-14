@@ -26,6 +26,7 @@ interface ProfileSnapshot {
   fullName: string;
   bio: string;
   targetRole: string;
+  location: string;
   skills: string[];
 }
 
@@ -118,6 +119,7 @@ export function AutoTab({
                   fullName: profileSnapshot.fullName,
                   bio: profileSnapshot.bio,
                   targetRole: profileSnapshot.targetRole,
+                  location: profileSnapshot.location,
                   skills: profileSnapshot.skills,
                 }}
               />

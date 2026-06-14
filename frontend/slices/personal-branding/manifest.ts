@@ -17,19 +17,6 @@ export const personalBrandingManifest: SliceManifest = {
   description: "Halaman publik personal + builder block",
   icon: Globe,
 
-  route: {
-    slug: "personal-branding",
-    component: () =>
-      import("./components/PersonalBrandingView").then((m) => ({ default: m.PersonalBrandingView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 80,
-    href: "/dashboard/personal-branding",
-    hue: "from-fuchsia-400 to-fuchsia-600",
-  },
-
   skills: [
     {
       id: "branding.get-status",

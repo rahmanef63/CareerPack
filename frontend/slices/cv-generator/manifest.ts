@@ -19,18 +19,6 @@ export const cvGeneratorManifest: SliceManifest = {
   description: "Buat dan kelola CV dengan template profesional",
   icon: FileText,
 
-  route: {
-    slug: "cv",
-    component: () =>
-      import("./components/CVGenerator").then((m) => ({ default: m.CVGenerator })),
-  },
-
-  nav: {
-    placement: "primary",
-    order: 20,
-    href: "/dashboard/cv",
-  },
-
   skills: [
     {
       id: "cv.list",

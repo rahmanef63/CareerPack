@@ -3,7 +3,7 @@ import type { api } from "../../../../convex/_generated/api";
 
 export type RoadmapRow = NonNullable<
   ReturnType<typeof useQuery<typeof api.admin.queries.listAllRoadmaps>>
->[number];
+>["rows"][number];
 
 export type SkillShape = RoadmapRow["skills"][number];
 

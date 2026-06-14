@@ -80,6 +80,14 @@ export async function verifySecret(
     return false;
   }
   const iterations = parts[0] === V2_PREFIX ? V2_ITERATIONS : V1_ITERATIONS;
+  // Guard the salt segment BEFORE the non-null assertion below: an empty
+  // (`pbkdf2v2__<derived>`) or odd-length / non-hex salt makes
+  // `.match(/.{2}/g)` return null, so `null!.map(...)` would throw a
+  // TypeError instead of honouring the "returns false for any malformed
+  // hash without throwing" contract. Require an even-length pure-hex salt.
+  if (parts[1].length === 0 || !/^(?:[0-9a-f]{2})+$/i.test(parts[1])) {
+    return false;
+  }
   const salt = new Uint8Array(
     parts[1].match(/.{2}/g)!.map((b) => parseInt(b, 16)),
   );

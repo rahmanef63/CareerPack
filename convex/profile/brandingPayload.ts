@@ -143,6 +143,15 @@ export interface BrandingToggles {
   showLanguages: boolean;
   showBio: boolean;
   showSkills: boolean;
+  /**
+   * Least-disclosure gate for the hero location line. Mirrors the other
+   * publicXShow toggles: when false (or omitted by a caller that hasn't
+   * opted in), `identity.location` is emitted empty so the hydrator hides
+   * it. Default below is `true` to preserve behaviour for callers that
+   * don't pass it — the public read path (getBySlug) passes the explicit
+   * `publicLocationShow` value.
+   */
+  showLocation: boolean;
 }
 
 export interface BrandingPayload {
@@ -319,6 +328,7 @@ export function buildBrandingPayload({
     showLanguages: toggles?.showLanguages ?? true,
     showBio: toggles?.showBio ?? true,
     showSkills: toggles?.showSkills ?? true,
+    showLocation: toggles?.showLocation ?? true,
   };
 
   // Sanitised availability + cta — drop entries that are missing the
@@ -337,7 +347,7 @@ export function buildBrandingPayload({
       name: profile.fullName || "",
       headline: profile.publicHeadline || "",
       targetRole: profile.targetRole || "",
-      location: profile.location || "",
+      location: t.showLocation ? profile.location || "" : "",
       avatarUrl: profile.avatarUrl,
       contact: {
         email: profile.contactEmail || "",

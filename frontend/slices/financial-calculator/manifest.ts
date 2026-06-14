@@ -14,19 +14,6 @@ export const financialCalculatorManifest: SliceManifest = {
   description: "Kelola variabel anggaran + simulasi finansial",
   icon: Wallet,
 
-  route: {
-    slug: "calculator",
-    component: () =>
-      import("./components/FinancialCalculator").then((m) => ({ default: m.FinancialCalculator })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 50,
-    href: "/dashboard/calculator",
-    hue: "from-amber-400 to-amber-600",
-  },
-
   skills: [
     {
       id: "financial.list-budget",

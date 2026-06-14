@@ -51,6 +51,7 @@ export interface FormState {
   bioShow: boolean;
   skillsShow: boolean;
   targetRoleShow: boolean;
+  locationShow: boolean;
   portfolioShow: boolean;
 
   // ---- contact ----------------------------------------------------

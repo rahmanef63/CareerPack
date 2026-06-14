@@ -609,9 +609,10 @@ export const getBySlug = query({
         fullName: profile.fullName,
         publicHeadline: profile.publicHeadline ?? "",
         targetRole: profile.publicTargetRoleShow ? profile.targetRole : "",
+        // Location/bio/skills toggles flow through the toggle override
+        // below; we still pass the raw data so the payload-builder decides.
+        // Location defaults HIDDEN (least-disclosure) — see showLocation.
         location: profile.location ?? "",
-        // Bio/skills toggles flow through the toggle override below;
-        // we still pass the raw data so the payload-builder can decide.
         bio: profile.bio ?? "",
         skills: profile.skills ?? [],
         avatarUrl,
@@ -639,6 +640,8 @@ export const getBySlug = query({
           DEFAULT_AUTO_TOGGLES.showLanguages,
         showBio: Boolean(profile.publicBioShow),
         showSkills: Boolean(profile.publicSkillsShow),
+        // Default hidden until the user opts in (privacy-positive).
+        showLocation: Boolean(profile.publicLocationShow),
       },
       availability: profile.publicAvailableForHire
         ? {
@@ -712,6 +715,7 @@ export const getMyPublicProfile = query({
       bioShow: Boolean(profile.publicBioShow),
       skillsShow: Boolean(profile.publicSkillsShow),
       targetRoleShow: Boolean(profile.publicTargetRoleShow),
+      locationShow: Boolean(profile.publicLocationShow),
       contactEmail: profile.publicContactEmail ?? "",
       linkedinUrl: profile.publicLinkedinUrl ?? "",
       portfolioUrl: profile.publicPortfolioUrl ?? "",

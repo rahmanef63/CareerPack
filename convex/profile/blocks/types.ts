@@ -169,4 +169,8 @@ export const MAX_TEXT_LEN = 2000;
 export const MAX_LABEL_LEN = 80;
 export const MAX_HEADING_LEN = 120;
 export const MAX_HTML_LEN = 5000;
-export const MAX_URL_LEN = 500;
+// URL cap is the cross-domain SSOT in `_shared/url` (also used by the
+// notifications sanitiser) — re-exported here so the literal `500` lives in
+// exactly one place and the two domain sanitisers cannot drift. Importing
+// from `_shared` is the allowed cross-domain path.
+export { MAX_URL_LEN } from "../../_shared/url";

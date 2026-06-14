@@ -14,19 +14,6 @@ export const skillRoadmapManifest: SliceManifest = {
   description: "Roadmap belajar untuk capai target karir",
   icon: MapIcon,
 
-  route: {
-    slug: "roadmap",
-    component: () =>
-      import("./components/SkillRoadmap").then((m) => ({ default: m.SkillRoadmap })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 30,
-    href: "/dashboard/roadmap",
-    hue: "from-sky-400 to-sky-600",
-  },
-
   skills: [
     {
       id: "roadmap.list",

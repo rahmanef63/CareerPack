@@ -31,24 +31,25 @@ import { helpManifest } from "@/slices/help/manifest";
 import { databaseManifest } from "@/slices/database/manifest";
 
 /**
- * Central slice manifest registry.
+ * Central slice manifest registry — AI skill catalog only.
  *
- * One import per slice. To onboard a new slice:
+ * One import per slice. To onboard a new slice's AI skills:
  * 1. Add `manifest.ts` in the slice folder.
  * 2. Export it via the slice's `index.ts` barrel.
  * 3. Add ONE line here: `import { fooManifest } from "@/slices/foo";`
  *    + an entry in the `SLICE_REGISTRY` array.
  *
- * Derived collections (NAV_PRIMARY, NAV_MORE, ALL_SKILLS, …) are
- * computed once at module load and exported for nav components, the
- * AI agent slash popover, the catch-all router, etc. No runtime cost
- * per render.
+ * Derived collections (ALL_SKILLS, SKILLS_BY_ID, SKILLS_BY_SLASH,
+ * SLASH_SKILLS) are computed once at module load and exported for the
+ * AI agent slash popover, approval cards, and the LLM system-prompt
+ * brief. No runtime cost per render.
  *
- * Phased migration (current state): only `settingsManifest` is here
- * yet. Existing nav still derives from `navConfig.ts`. As each slice
- * gains a manifest, this registry takes over and `navConfig.ts` will
- * be retired. Both can coexist during the transition — nav reads
- * `MORE_APPS` (legacy) and the AI agent reads `ALL_SKILLS` (new).
+ * Scope is the AI agent only. Routing and navigation do NOT read this
+ * registry — routing is owned by `DASHBOARD_VIEWS`
+ * (`shared/lib/dashboardRoutes.tsx`) and nav by `PRIMARY_NAV` /
+ * `MORE_APPS` (`shared/components/layout/navConfig.ts`). Every slice is
+ * still registered here (even skill-less ones) so the AI catalog has a
+ * complete, single source of truth.
  */
 export const SLICE_REGISTRY: ReadonlyArray<SliceManifest> = [
   settingsManifest,
@@ -75,23 +76,6 @@ export const SLICE_REGISTRY: ReadonlyArray<SliceManifest> = [
   helpManifest,
   databaseManifest,
 ];
-
-/* ────────────────────────────────────────────────────────────────
- * Derived: navigation
- * ────────────────────────────────────────────────────────────── */
-
-export const NAV_PRIMARY = SLICE_REGISTRY
-  .filter((s) => s.nav?.placement === "primary")
-  .sort((a, b) => (a.nav?.order ?? 0) - (b.nav?.order ?? 0));
-
-export const NAV_MORE = SLICE_REGISTRY
-  .filter((s) => s.nav?.placement === "more")
-  .sort((a, b) => (a.nav?.order ?? 0) - (b.nav?.order ?? 0));
-
-/** Resolve nav href for a slice, falling back to the convention. */
-export function navHref(slice: SliceManifest): string {
-  return slice.nav?.href ?? `/dashboard/${slice.id}`;
-}
 
 /* ────────────────────────────────────────────────────────────────
  * Derived: AI skill catalog

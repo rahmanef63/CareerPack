@@ -185,7 +185,7 @@ Both `app-sidebar.tsx` + `MoreDrawer.tsx` must consume
 - Adoption queries reference tables target lacks → trim
   `getFeatureAdoption` `Promise.all`.
 - Recharts color tokens `oklch(var(--brand))` — adjust to `hsl(var(--brand))` if target uses HSL theme.
-- `useVisibleMoreApps` shape mismatch when target uses `SLICE_REGISTRY` exclusively — read `NAV_MORE` instead.
+- `useVisibleMoreApps` reads `MORE_APPS` from `navConfig.ts` (the nav SSOT) — not from the slice registry, which is the AI skill catalog only.
 
 **Testing the port:**
 

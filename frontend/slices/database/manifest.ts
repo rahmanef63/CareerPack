@@ -8,24 +8,12 @@ import type { SliceManifest } from "@/shared/types/sliceManifest";
  * portfolio, applications, …) and are already covered by their
  * manifests; this slice intentionally exposes no skills of its own.
  *
- * Registered for nav + route only.
+ * Registered for AI-catalog completeness only — its route + nav live
+ * in `dashboardRoutes.tsx` and `navConfig.ts`.
  */
 export const databaseManifest: SliceManifest = {
   id: "database",
   label: "Database",
   description: "User data hub + bulk delete + Quick Fill",
   icon: Database,
-
-  route: {
-    slug: "database",
-    component: () =>
-      import("./components/DatabaseView").then((m) => ({ default: m.DatabaseView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 85,
-    href: "/dashboard/database",
-    hue: "from-indigo-400 to-indigo-600",
-  },
 };

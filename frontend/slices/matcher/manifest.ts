@@ -16,20 +16,6 @@ export const matcherManifest: SliceManifest = {
   description: "Cocokkan CV ke lowongan + scan ATS",
   icon: Compass,
 
-  route: {
-    slug: "matcher",
-    component: () =>
-      import("./components/MatcherView").then((m) => ({ default: m.MatcherView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 40,
-    href: "/dashboard/matcher",
-    hue: "from-cyan-400 to-cyan-600",
-    badge: "AI",
-  },
-
   skills: [
     {
       id: "matcher.list-jobs",

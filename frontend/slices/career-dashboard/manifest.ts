@@ -15,21 +15,6 @@ export const careerDashboardManifest: SliceManifest = {
   description: "Tracker lamaran kerja end-to-end",
   icon: Briefcase,
 
-  route: {
-    slug: "applications",
-    component: () =>
-      import("./components/CareerDashboard").then((m) => ({
-        default: m.CareerDashboard,
-      })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 10,
-    href: "/dashboard/applications",
-    hue: "from-violet-400 to-violet-600",
-  },
-
   skills: [
     {
       id: "applications.list",

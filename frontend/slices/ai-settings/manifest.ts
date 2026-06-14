@@ -13,20 +13,6 @@ export const aiSettingsManifest: SliceManifest = {
   description: "Konfigurasi provider AI per-user",
   icon: Settings2,
 
-  route: {
-    slug: "ai-settings",
-    component: () =>
-      import("@/shared/components/ai-settings/AISettingsPanel").then((m) => ({
-        default: () => m.AISettingsPanel({}),
-      })),
-  },
-
-  nav: {
-    placement: "hidden",
-    order: 0,
-    href: "/dashboard/ai-settings",
-  },
-
   skills: [
     {
       id: "ai.get-config",

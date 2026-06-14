@@ -12,19 +12,6 @@ export const libraryManifest: SliceManifest = {
   description: "Vault file + media yang user upload",
   icon: Library,
 
-  route: {
-    slug: "library",
-    component: () =>
-      import("./components/LibraryView").then((m) => ({ default: m.LibraryView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 75,
-    href: "/dashboard/library",
-    hue: "from-lime-400 to-lime-600",
-  },
-
   skills: [
     {
       id: "library.list-files",

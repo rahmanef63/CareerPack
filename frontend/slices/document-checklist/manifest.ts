@@ -12,21 +12,6 @@ export const documentChecklistManifest: SliceManifest = {
   description: "Status dokumen lamaran (CV, KTP, ijazah, dll)",
   icon: ListChecks,
 
-  route: {
-    slug: "checklist",
-    component: () =>
-      import("./components/DocumentChecklist").then((m) => ({
-        default: m.DocumentChecklist,
-      })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 20,
-    href: "/dashboard/checklist",
-    hue: "from-emerald-400 to-emerald-600",
-  },
-
   skills: [
     {
       id: "documents.list",

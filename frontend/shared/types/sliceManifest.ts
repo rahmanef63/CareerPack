@@ -1,70 +1,40 @@
-import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
 
 /**
- * Slice manifest — single source of truth per feature slice.
+ * Slice manifest — declarative AI-capability descriptor per feature
+ * slice.
  *
- * Replaces three parallel registries (navConfig, dashboardRoutes,
- * slash-command list) with one declarative file per slice. The central
- * `sliceRegistry` imports each slice's manifest and exposes derived
- * views: nav primary/more, route resolver, AI skill catalog.
+ * Scope is the AI agent ONLY. The central `sliceRegistry` imports each
+ * slice's manifest and derives the AI skill catalog (slash commands,
+ * approval-card meta, LLM system-prompt brief).
  *
- * To add a new slice: drop a `manifest.ts` in the slice folder, then
- * add ONE import line in `shared/lib/sliceRegistry.ts`. The new slice
- * automatically appears in nav (per `nav.placement`), is routable
- * (per `route`), and its AI skills become invokable.
+ * Routing and navigation are NOT driven by this manifest. Live routing
+ * is owned by `DASHBOARD_VIEWS` in `shared/lib/dashboardRoutes.tsx`
+ * (the `/dashboard/[[...slug]]` catch-all) and nav by `PRIMARY_NAV` /
+ * `MORE_APPS` in `shared/components/layout/navConfig.ts`. See CLAUDE.md
+ * "Adding a dashboard page" for the two edits that wire a new view.
+ *
+ * To expose AI skills for a slice: drop a `manifest.ts` in the slice
+ * folder, add ONE import line in `shared/lib/sliceRegistry.ts`, and the
+ * slice's `skills` become invokable by the agent.
  *
  * The slice may also export a `Capabilities` component that subscribes
  * to the aiActionBus and runs each declared skill via local hooks.
  * Mounting is centralized in `Providers.tsx`.
  */
 export interface SliceManifest {
-  /** Stable kebab-case ID. Doubles as nav id, route slug, and skill
-   *  prefix (e.g. id="settings" → skill "settings.update-phone"). */
+  /** Stable kebab-case ID. Doubles as the skill prefix
+   *  (e.g. id="settings" → skill "settings.update-phone"). */
   id: string;
-  /** Human-facing label (id locale). Used in nav + AI skill list. */
+  /** Human-facing label (id locale). Used in the AI skill list. */
   label: string;
-  /** One-line summary. Used in More-drawer tile + AI tooltip. */
+  /** One-line summary. Used in AI tooltips. */
   description: string;
-  /** Lucide icon for nav + AI skill chips. */
+  /** Lucide icon for AI skill chips. */
   icon: LucideIcon;
-
-  /** Routing — null/undefined means slice is non-routable (capability-only). */
-  route?: SliceRoute;
-
-  /** Navigation placement. */
-  nav?: SliceNav;
 
   /** AI capabilities exposed by this slice. Empty array = no AI skills. */
   skills?: SliceSkill[];
-}
-
-export interface SliceRoute {
-  /** First slash-segment under /dashboard/. Must match `id` for the
-   *  ResponsiveContainer's catch-all to resolve. */
-  slug: string;
-  /** Lazy-loaded React component for this route. */
-  component: () => Promise<{ default: ComponentType<unknown> }>;
-}
-
-export interface SliceNav {
-  /** Where this slice appears.
-   *  - "primary" — bottom nav tab (mobile) + sidebar primary (desktop). Max 4.
-   *  - "more" — More drawer (mobile) + secondary sidebar (desktop).
-   *  - "hidden" — registered but not shown (e.g. AI agent FAB, admin gates). */
-  placement: "primary" | "more" | "hidden";
-  /** Sort within placement, ascending. Lower = earlier. */
-  order: number;
-  /** Pathname. Default: `/dashboard/${id}`. Override only when slice owns
-   *  a non-standard URL (e.g. dashboard-home owns "/dashboard"). */
-  href?: string;
-  /** Tailwind gradient class for More-drawer tiles, e.g.
-   *  "from-emerald-400 to-emerald-600". */
-  hue?: string;
-  /** Optional badge ("AI", "Beta"). */
-  badge?: string;
-  /** Hide unless explicit gate (super-admin etc.). Server enforces too. */
-  superAdminOnly?: boolean;
 }
 
 export interface SliceSkill {

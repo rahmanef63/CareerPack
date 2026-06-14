@@ -229,15 +229,29 @@ export const toggleResource = mutation({
       .first();
     if (!roadmap) throw new Error("Roadmap tidak ditemukan");
 
+    // Track whether the target skill + resource actually exist so a bad
+    // skillId / resourceTitle throws instead of silently patching an
+    // unchanged array. Mirrors `updateSkillProgress`. NOTE: resource
+    // titles are not unique within a skill, so a double-toggle on two
+    // same-titled resources still flips both — fixing that needs a stable
+    // resource id in the schema and is out of scope here.
+    let skillFound = false;
+    let resourceFound = false;
     const updatedSkills = roadmap.skills.map((skill) => {
       if (skill.id !== skillId) return skill;
+      skillFound = true;
       return {
         ...skill,
-        resources: skill.resources.map((r) =>
-          r.title === resourceTitle ? { ...r, completed: args.completed } : r,
-        ),
+        resources: skill.resources.map((r) => {
+          if (r.title !== resourceTitle) return r;
+          resourceFound = true;
+          return { ...r, completed: args.completed };
+        }),
       };
     });
+
+    if (!skillFound) throw new Error("Skill tidak ditemukan");
+    if (!resourceFound) throw new Error("Resource tidak ditemukan");
 
     await ctx.db.patch(roadmap._id, { skills: updatedSkills });
   },

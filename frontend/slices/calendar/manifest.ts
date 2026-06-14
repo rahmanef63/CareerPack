@@ -16,18 +16,6 @@ export const calendarManifest: SliceManifest = {
   description: "Atur jadwal interview, pengingat belajar, dll",
   icon: Calendar,
 
-  route: {
-    slug: "calendar",
-    component: () =>
-      import("./components/CalendarView").then((m) => ({ default: m.CalendarView })),
-  },
-
-  nav: {
-    placement: "primary",
-    order: 30,
-    href: "/dashboard/calendar",
-  },
-
   skills: [
     {
       id: "calendar.list-events",

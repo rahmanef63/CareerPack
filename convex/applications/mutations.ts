@@ -5,6 +5,23 @@ import { assertShortText, capLen } from "../_shared/validate";
 import type { Id } from "../_generated/dataModel";
 
 /**
+ * Kanban status whitelist. Mirrors the canonical `ApplicationStatus`
+ * union (`@/shared/types`) — the backend can't import frontend types,
+ * so this set is kept in sync by hand. `accepted` is also accepted
+ * because the AI-agent capability (`CareerDashboardCapabilities`) emits
+ * it; rejecting it would break that live flow.
+ */
+const APPLICATION_STATUS_WHITELIST = new Set([
+  "applied",
+  "screening",
+  "interview",
+  "offer",
+  "rejected",
+  "withdrawn",
+  "accepted",
+]);
+
+/**
  * Cascade-clean FKs that point at this application. `calendarEvents`
  * keeps the event row but unsets `applicationId` so the user still
  * sees the booked slot in their agenda — they only lose the link
@@ -69,9 +86,15 @@ export const updateApplicationStatus = mutation({
   },
   handler: async (ctx, args) => {
     const application = await requireOwnedDoc(ctx, args.applicationId, "Lamaran");
+    const status = args.status.trim();
+    if (!APPLICATION_STATUS_WHITELIST.has(status)) {
+      throw new Error("Status tidak valid");
+    }
+    // Cap free-text like createApplication so a hostile client can't store
+    // unbounded notes that amplify admin-side aggregate scans.
     await ctx.db.patch(args.applicationId, {
-      status: args.status,
-      notes: args.notes || application.notes,
+      status,
+      notes: capLen("Catatan", args.notes, 600) ?? application.notes,
     });
   },
 });
@@ -85,10 +108,17 @@ export const addInterviewDate = mutation({
   },
   handler: async (ctx, args) => {
     const application = await requireOwnedDoc(ctx, args.applicationId, "Lamaran");
+    if (!Number.isFinite(args.date)) {
+      throw new Error("Tanggal wawancara tidak valid");
+    }
     await ctx.db.patch(args.applicationId, {
       interviewDates: [
         ...application.interviewDates,
-        { type: args.type, date: args.date, notes: args.notes },
+        {
+          type: assertShortText(args.type, 60, "Jenis wawancara"),
+          date: args.date,
+          notes: capLen("Catatan", args.notes, 600),
+        },
       ],
     });
   },

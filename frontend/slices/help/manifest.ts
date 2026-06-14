@@ -13,19 +13,6 @@ export const helpManifest: SliceManifest = {
   description: "FAQ, panduan fitur, shortcut, kirim feedback",
   icon: HelpCircle,
 
-  route: {
-    slug: "help",
-    component: () =>
-      import("./components/HelpView").then((m) => ({ default: m.HelpView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 95,
-    href: "/dashboard/help",
-    hue: "from-teal-400 to-teal-600",
-  },
-
   skills: [
     {
       id: "help.submit-feedback",

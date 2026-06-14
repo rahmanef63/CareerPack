@@ -3,6 +3,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import { v, ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { authError } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI as resolveAIShared } from "../_shared/aiResolve";
 import { recordError } from "../_shared/errorSink";
@@ -19,7 +20,7 @@ import { api } from "../_generated/api";
 
 async function requireQuota(ctx: ActionCtx): Promise<void> {
   const userId = await getAuthUserId(ctx);
-  if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+  if (!userId) throw authError("Tidak terautentikasi");
   await ctx.runMutation(internal.cv.mutations._checkTranslateQuota, { userId });
 }
 
@@ -59,7 +60,7 @@ export const translate = action({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+    if (!userId) throw authError("Tidak terautentikasi");
 
     return withIdempotency(ctx, userId, args.idempotencyKey, async () => {
       await requireQuota(ctx);
@@ -173,7 +174,7 @@ export const generateCoverLetter = action({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+    if (!userId) throw authError("Tidak terautentikasi");
 
     return withIdempotency(ctx, userId, args.idempotencyKey, () =>
       generateCoverLetterImpl(ctx, args, userId),
@@ -319,7 +320,7 @@ export const tailorCVForJob = action({
   },
   handler: async (ctx, args): Promise<TailorResult> => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+    if (!userId) throw authError("Tidak terautentikasi");
 
     return withIdempotency(ctx, userId, args.idempotencyKey, () =>
       tailorCVForJobImpl(ctx, args, userId),
@@ -522,7 +523,7 @@ export const rewriteFromLedger = action({
   handler: async (ctx, args): Promise<LedgerRewriteResult> => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+      throw authError("Tidak terautentikasi");
     }
     return withIdempotency(ctx, userId, args.idempotencyKey, () =>
       rewriteFromLedgerImpl(ctx, args, userId),

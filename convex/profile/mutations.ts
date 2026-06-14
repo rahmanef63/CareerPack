@@ -267,6 +267,7 @@ export const updateMyPublicProfile = mutation({
     bioShow: v.optional(v.boolean()),
     skillsShow: v.optional(v.boolean()),
     targetRoleShow: v.optional(v.boolean()),
+    locationShow: v.optional(v.boolean()),
     contactEmail: v.optional(v.string()),
     linkedinUrl: v.optional(v.string()),
     portfolioUrl: v.optional(v.string()),
@@ -407,6 +408,7 @@ export const updateMyPublicProfile = mutation({
     if (args.bioShow !== undefined) patch.publicBioShow = args.bioShow;
     if (args.skillsShow !== undefined) patch.publicSkillsShow = args.skillsShow;
     if (args.targetRoleShow !== undefined) patch.publicTargetRoleShow = args.targetRoleShow;
+    if (args.locationShow !== undefined) patch.publicLocationShow = args.locationShow;
     if (args.contactEmail !== undefined) patch.publicContactEmail = assertEmail(args.contactEmail);
     if (args.linkedinUrl !== undefined) patch.publicLinkedinUrl = assertUrl(args.linkedinUrl, "LinkedIn");
     if (args.portfolioUrl !== undefined) patch.publicPortfolioUrl = assertUrl(args.portfolioUrl, "Portfolio");

@@ -15,19 +15,6 @@ export const portfolioManifest: SliceManifest = {
   description: "Showcase project + sertifikasi + publikasi",
   icon: Folder,
 
-  route: {
-    slug: "portfolio",
-    component: () =>
-      import("./components/PortfolioView").then((m) => ({ default: m.PortfolioView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 70,
-    href: "/dashboard/portfolio",
-    hue: "from-orange-400 to-orange-600",
-  },
-
   skills: [
     {
       id: "portfolio.list",

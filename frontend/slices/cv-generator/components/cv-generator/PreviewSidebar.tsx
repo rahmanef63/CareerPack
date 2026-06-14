@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useDeferredValue } from "react";
 import {
   AlertCircle,
   Check,
@@ -36,8 +37,18 @@ interface Props {
  * that used to sit at the bottom of this column has been removed so
  * the sticky sidebar is shorter and the score card sits in the user's
  * eyeline next to the preview.
+ *
+ * Wrapped in `memo` and feeds the heavy `ScaledCVPreview` a
+ * `useDeferredValue(renderCV)`: the form sections + score cards read the
+ * live `cvData` so they update on every keystroke, while the expensive
+ * A4 template subtree re-renders at a deferred (low) priority. Typing
+ * stays responsive on mobile instead of blocking on a full template
+ * re-render per keystroke. Autosave is untouched (it still debounces the
+ * live `cvData` in the parent). The PDF export capture surface lives in
+ * `CVPreviewDialog` and keeps reading the live value, not this deferred
+ * one, so exports never lag behind the form.
  */
-export function PreviewSidebar({
+export const PreviewSidebar = memo(function PreviewSidebar({
   cvData,
   renderCV,
   photoUrl,
@@ -48,6 +59,9 @@ export function PreviewSidebar({
   layout,
   onLayoutChange,
 }: Props) {
+  // Defer only the snapshot that drives the heavy template. Form +
+  // score still read live `cvData` above this line.
+  const deferredRenderCV = useDeferredValue(renderCV);
   const score = computeScore(cvData);
   const profileTone = cvData.profile.name
     ? "bg-success/20 text-success"
@@ -84,7 +98,7 @@ export function PreviewSidebar({
             />
             <div className="rounded-lg border border-border bg-muted/20 overflow-hidden">
               <ScaledCVPreview
-                cv={renderCV}
+                cv={deferredRenderCV}
                 photoUrl={photoUrl}
                 compact
                 layout={layout}
@@ -147,7 +161,7 @@ export function PreviewSidebar({
       </div>
     </div>
   );
-}
+});
 
 function SidebarMetric({
   label,

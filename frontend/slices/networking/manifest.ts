@@ -12,21 +12,6 @@ export const networkingManifest: SliceManifest = {
   description: "Kontak profesional, recruiter, mentor",
   icon: Users,
 
-  route: {
-    slug: "networking",
-    component: () =>
-      import("./components/NetworkingView").then((m) => ({
-        default: m.NetworkingView,
-      })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 50,
-    href: "/dashboard/networking",
-    hue: "from-rose-400 to-rose-600",
-  },
-
   skills: [
     {
       id: "contacts.list",

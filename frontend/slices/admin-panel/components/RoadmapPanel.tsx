@@ -24,7 +24,9 @@ import type {
 } from "../types/roadmap";
 
 export function RoadmapPanel() {
-  const roadmaps = useQuery(api.admin.queries.listAllRoadmaps);
+  const roadmapData = useQuery(api.admin.queries.listAllRoadmaps);
+  const roadmaps = roadmapData?.rows;
+  const truncated = roadmapData?.truncated ?? false;
 
   const [selectedRoadmapId, setSelectedRoadmapId] = useState<Id<"skillRoadmaps"> | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -165,6 +167,12 @@ export function RoadmapPanel() {
           <CardDescription>
             Lihat dan kelola roadmap skill setiap pengguna. Klik &quot;Kelola Skills&quot; untuk tambah,
             edit, atau hapus skill.
+            {truncated && (
+              <span className="mt-1 block text-amber-600 dark:text-amber-400">
+                Menampilkan 200 roadmap terbaru. Sebagian roadmap lama tidak
+                ditampilkan.
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

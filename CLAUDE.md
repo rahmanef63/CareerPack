@@ -50,6 +50,8 @@ Three route groups under `frontend/app/`:
 
 `navConfig.ts` is the nav SSOT: `PRIMARY_NAV` (mobile BottomNav tabs + desktop sidebar primaries), `MORE_APPS` (MoreDrawer / sidebar secondaries), and `activeNavForPath()` for active-state matching.
 
+Routing and nav are **not** driven by slice manifests. The per-slice `manifest.ts` + `shared/lib/sliceRegistry.ts` registry is the **AI skill catalog only** (`SliceManifest.skills` → slash commands, approval-card meta, LLM brief). Manifests carry no route/nav fields — adding AI skills for a slice is a separate, independent edit from the two routing edits above.
+
 ### Slice pattern
 
 `frontend/slices/<kebab-name>/` — 22 feature slices (`admin-panel`, `ai-agent`, `ai-settings`, `auth`, `calendar`, `career-dashboard`, `cv-generator`, `dashboard-home`, `database`, `document-checklist`, `financial-calculator`, `help`, `hero`, `library`, `matcher`, `mock-interview`, `networking`, `notifications`, `personal-branding`, `portfolio`, `settings`, `skill-roadmap`). Each exports public API via `index.ts` barrel.

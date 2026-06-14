@@ -150,9 +150,11 @@ export const setUserAIModelOverride = mutation({
     const model = args.model.trim();
     if (!model) throw new Error("Model wajib");
 
+    // Exact-match via the authTables `email` index (O(log N)) instead of a
+    // full-table .filter() scan — same lookup path as passwordReset.ts.
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), email))
+      .withIndex("email", (q) => q.eq("email", email))
       .first();
     if (!user) throw new Error(`User dengan email ${email} tidak ditemukan`);
 

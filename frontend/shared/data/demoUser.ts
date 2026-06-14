@@ -545,6 +545,7 @@ export interface DemoPBSeed {
   bioShow: boolean;
   skillsShow: boolean;
   targetRoleShow: boolean;
+  locationShow: boolean;
   contactEmail: string;
   linkedinUrl: string;
   portfolioUrl: string;
@@ -573,6 +574,7 @@ export const DEMO_PB: DemoPBSeed = {
   bioShow: true,
   skillsShow: true,
   targetRoleShow: true,
+  locationShow: true,
   contactEmail: "rizky.demo@careerpack.id",
   linkedinUrl: "https://linkedin.com/in/rizky-demo",
   portfolioUrl: "https://rizky-demo.vercel.app",

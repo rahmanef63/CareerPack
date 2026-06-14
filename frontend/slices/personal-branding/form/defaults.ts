@@ -17,6 +17,7 @@ export const DEFAULT_FORM_STATE: FormState = {
   bioShow: false,
   skillsShow: false,
   targetRoleShow: false,
+  locationShow: false,
   portfolioShow: false,
 
   contactEmail: "",

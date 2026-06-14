@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, memo, useEffect, useMemo, useRef, useState } from "react";
 import type { CVData } from "../../types";
 import type { PreviewLayout } from "../../hooks/usePreviewControls";
 import { CVTemplateRenderer } from "./CVTemplateRenderer";
@@ -36,8 +36,14 @@ interface Props {
  *
  * Capture ref points at the un-scaled inner template so html2canvas
  * still rasterises at proper A4 DPI regardless of preview scale.
+ *
+ * Wrapped in `memo`: skips re-rendering the scaled A4 board (and the
+ * memoized `CVTemplateRenderer` beneath it) when `cv` keeps a stable
+ * reference. The live sidebar preview feeds a `useDeferredValue(cv)` so
+ * typing stays responsive while this heavy subtree updates deferred.
  */
-export const ScaledCVPreview = forwardRef<HTMLDivElement, Props>(
+export const ScaledCVPreview = memo(
+  forwardRef<HTMLDivElement, Props>(
   function ScaledCVPreview(
     { cv, photoUrl, compact = false, layout = "paginated" },
     captureRef,
@@ -151,4 +157,5 @@ export const ScaledCVPreview = forwardRef<HTMLDivElement, Props>(
       </div>
     );
   },
+  ),
 );

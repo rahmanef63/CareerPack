@@ -17,19 +17,6 @@ export const settingsManifest: SliceManifest = {
   description: "Profil pribadi, preferensi, integrasi",
   icon: SettingsIcon,
 
-  route: {
-    slug: "settings",
-    component: () =>
-      import("./components/SettingsView").then((m) => ({ default: m.SettingsView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 95,
-    href: "/dashboard/settings",
-    hue: "from-slate-500 to-slate-700",
-  },
-
   skills: [
     {
       id: "settings.update-phone",

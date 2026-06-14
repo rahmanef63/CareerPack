@@ -157,3 +157,113 @@ describe("createApplication input caps", () => {
     ).rejects.toThrow("Perusahaan mengandung karakter tidak valid");
   });
 });
+
+async function seedApp(
+  t: Tester,
+  userId: Id<"users">,
+): Promise<Id<"jobApplications">> {
+  const asUser = t.withIdentity(identity(userId));
+  return asUser.mutation(
+    api.applications.mutations.createApplication,
+    validAppArgs(),
+  );
+}
+
+describe("updateApplicationStatus caps", () => {
+  it("accepts a whitelisted status and caps notes", async () => {
+    const t = setup();
+    const userId = await insertUser(t);
+    const asUser = t.withIdentity(identity(userId));
+    const id = await seedApp(t, userId);
+
+    await asUser.mutation(api.applications.mutations.updateApplicationStatus, {
+      applicationId: id,
+      status: "interview",
+      notes: "  Jadwal minggu depan  ",
+    });
+
+    const stored = await t.run((ctx) => ctx.db.get(id));
+    expect(stored?.status).toBe("interview");
+    expect(stored?.notes).toBe("Jadwal minggu depan");
+  });
+
+  it("rejects a status outside the whitelist", async () => {
+    const t = setup();
+    const userId = await insertUser(t);
+    const asUser = t.withIdentity(identity(userId));
+    const id = await seedApp(t, userId);
+
+    await expect(
+      asUser.mutation(api.applications.mutations.updateApplicationStatus, {
+        applicationId: id,
+        status: "bogus",
+      }),
+    ).rejects.toThrow("Status tidak valid");
+  });
+
+  it("rejects over-long notes (>600)", async () => {
+    const t = setup();
+    const userId = await insertUser(t);
+    const asUser = t.withIdentity(identity(userId));
+    const id = await seedApp(t, userId);
+
+    await expect(
+      asUser.mutation(api.applications.mutations.updateApplicationStatus, {
+        applicationId: id,
+        status: "applied",
+        notes: "a".repeat(601),
+      }),
+    ).rejects.toThrow("Catatan maksimal 600 karakter");
+  });
+});
+
+describe("addInterviewDate caps", () => {
+  it("appends a trimmed interview entry", async () => {
+    const t = setup();
+    const userId = await insertUser(t);
+    const asUser = t.withIdentity(identity(userId));
+    const id = await seedApp(t, userId);
+
+    await asUser.mutation(api.applications.mutations.addInterviewDate, {
+      applicationId: id,
+      type: "  HR Screening  ",
+      date: 1_700_000_000_000,
+      notes: "Via Zoom",
+    });
+
+    const stored = await t.run((ctx) => ctx.db.get(id));
+    expect(stored?.interviewDates).toHaveLength(1);
+    expect(stored?.interviewDates[0].type).toBe("HR Screening");
+    expect(stored?.interviewDates[0].notes).toBe("Via Zoom");
+  });
+
+  it("rejects an over-long interview type (>60)", async () => {
+    const t = setup();
+    const userId = await insertUser(t);
+    const asUser = t.withIdentity(identity(userId));
+    const id = await seedApp(t, userId);
+
+    await expect(
+      asUser.mutation(api.applications.mutations.addInterviewDate, {
+        applicationId: id,
+        type: "a".repeat(61),
+        date: 1_700_000_000_000,
+      }),
+    ).rejects.toThrow("Jenis wawancara maksimal 60 karakter");
+  });
+
+  it("rejects a non-finite date", async () => {
+    const t = setup();
+    const userId = await insertUser(t);
+    const asUser = t.withIdentity(identity(userId));
+    const id = await seedApp(t, userId);
+
+    await expect(
+      asUser.mutation(api.applications.mutations.addInterviewDate, {
+        applicationId: id,
+        type: "Technical",
+        date: Number.POSITIVE_INFINITY,
+      }),
+    ).rejects.toThrow("Tanggal wawancara tidak valid");
+  });
+});

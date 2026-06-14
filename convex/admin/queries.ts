@@ -1,4 +1,5 @@
 import { query } from "../_generated/server";
+import type { QueryCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import {
@@ -11,27 +12,14 @@ import type { Doc } from "../_generated/dataModel";
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-const TOP_N = 20;
+// Cap for the role-gated management tables (`listUsersWithProfiles`,
+// `listAllRoadmaps`) — bounds the reactive read and surfaces a `truncated`
+// flag when more rows exist beyond the window.
+const MANAGEMENT_TABLE_LIMIT = 200;
 
 function clampPageSize(limit: number | undefined): number {
   if (!limit || limit <= 0) return DEFAULT_PAGE_SIZE;
   return Math.min(limit, MAX_PAGE_SIZE);
-}
-
-function countBy<T>(items: T[], key: (t: T) => string | null | undefined): Array<{ value: string; count: number }> {
-  const counts = new Map<string, number>();
-  for (const item of items) {
-    const k = key(item);
-    if (!k) continue;
-    const clean = k.trim();
-    if (!clean) continue;
-    counts.set(clean, (counts.get(clean) ?? 0) + 1);
-  }
-  return Array.from(counts.entries())
-    .map(([value, count]) => ({ value, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, TOP_N);
 }
 
 // --- Admin (role-gated) ---
@@ -351,43 +339,38 @@ export const amIAdmin = query({
   },
 });
 
+/**
+ * Reads the denormalized `adminStats` singleton (recomputed hourly by
+ * `internal.admin.aggregator.recomputeAdminStats`). Shared by the four
+ * super-admin analytics queries below so each becomes an O(1) doc read
+ * instead of a full-table `.collect()` that re-ran on every write while
+ * an operator watched the dashboard. Returns `null` when the cron has not
+ * yet populated the doc (fresh deploy) — callers render a zero-shape.
+ */
+async function readAdminStats(ctx: QueryCtx) {
+  return await ctx.db
+    .query("adminStats")
+    .withIndex("by_key", (q) => q.eq("key", "global"))
+    .first();
+}
+
+const EMPTY_TOP: Array<{ value: string; count: number }> = [];
+
 export const getOverview = query({
   args: {},
   handler: async (ctx) => {
     await requireSuperAdmin(ctx);
 
-    const now = Date.now();
-    const DAY = 24 * 60 * 60 * 1000;
-    const d7 = now - 7 * DAY;
-    const d30 = now - 30 * DAY;
-
-    const users = await ctx.db.query("users").collect();
-    const profiles = await ctx.db.query("userProfiles").collect();
-    const profilesByUser = new Map(profiles.map((p) => [p.userId, p]));
-
-    const totalUsers = users.length;
-    const signedUp7 = users.filter((u) => u._creationTime >= d7).length;
-    const signedUp30 = users.filter((u) => u._creationTime >= d30).length;
-
-    const profileComplete = profiles.filter(
-      (p) =>
-        p.fullName?.trim() &&
-        p.location?.trim() &&
-        p.targetRole?.trim() &&
-        p.experienceLevel?.trim(),
-    ).length;
-
-    const publicEnabled = profiles.filter((p) => p.publicEnabled).length;
-
-    const files = await ctx.db.query("files").collect();
-    const totalBytes = files.reduce((sum, f) => sum + f.fileSize, 0);
-    const imageCount = files.filter((f) => f.fileType.startsWith("image/")).length;
-    const pdfCount = files.filter((f) => f.fileType === "application/pdf").length;
+    const doc = await readAdminStats(ctx);
+    const totalUsers = doc?.totalUsers ?? 0;
+    const profilesCount = doc?.profilesCount ?? 0;
+    const profileComplete = doc?.profileCompleteCount ?? 0;
+    const publicEnabled = doc?.publicEnabledCount ?? 0;
 
     return {
       totalUsers,
-      signedUp7,
-      signedUp30,
+      signedUp7: doc?.signedUp7 ?? 0,
+      signedUp30: doc?.signedUp30 ?? 0,
       profileCompletePct:
         totalUsers === 0
           ? 0
@@ -398,14 +381,13 @@ export const getOverview = query({
           ? 0
           : Math.round((publicEnabled / totalUsers) * 100),
       storage: {
-        files: files.length,
-        totalBytes,
-        imageCount,
-        pdfCount,
+        files: doc?.storageFiles ?? 0,
+        totalBytes: doc?.storageBytes ?? 0,
+        imageCount: doc?.storageImageCount ?? 0,
+        pdfCount: doc?.storagePdfCount ?? 0,
       },
-      profilesCount: profiles.length,
-      profilesWithoutUser: profiles.filter((p) => !users.find((u) => u._id === p.userId)).length,
-      _probe: profilesByUser.size,
+      profilesCount,
+      computedAt: doc?.computedAt ?? null,
     };
   },
 });
@@ -415,28 +397,15 @@ export const getProfileAggregates = query({
   handler: async (ctx) => {
     await requireSuperAdmin(ctx);
 
-    const profiles = await ctx.db.query("userProfiles").collect();
-
-    const topTargetRoles = countBy(profiles, (p) => p.targetRole?.toLowerCase());
-    const topLocations = countBy(profiles, (p) => p.location?.toLowerCase());
-    const topExperience = countBy(profiles, (p) => p.experienceLevel?.toLowerCase());
-
-    const allSkills: string[] = [];
-    const allInterests: string[] = [];
-    for (const p of profiles) {
-      if (p.skills) for (const s of p.skills) allSkills.push(s.toLowerCase());
-      if (p.interests) for (const i of p.interests) allInterests.push(i.toLowerCase());
-    }
-    const topSkills = countBy(allSkills, (s) => s);
-    const topInterests = countBy(allInterests, (i) => i);
-
+    const doc = await readAdminStats(ctx);
     return {
-      topTargetRoles,
-      topLocations,
-      topExperience,
-      topSkills,
-      topInterests,
-      totalProfiles: profiles.length,
+      topTargetRoles: doc?.topTargetRoles ?? EMPTY_TOP,
+      topLocations: doc?.topLocations ?? EMPTY_TOP,
+      topExperience: doc?.topExperience ?? EMPTY_TOP,
+      topSkills: doc?.topSkills ?? EMPTY_TOP,
+      topInterests: doc?.topInterests ?? EMPTY_TOP,
+      totalProfiles: doc?.profilesCount ?? 0,
+      computedAt: doc?.computedAt ?? null,
     };
   },
 });
@@ -446,53 +415,13 @@ export const getFeatureAdoption = query({
   handler: async (ctx) => {
     await requireSuperAdmin(ctx);
 
-    const users = await ctx.db.query("users").collect();
-    const total = users.length || 1;
-
-    const [
-      cvs,
-      applications,
-      checklists,
-      roadmaps,
-      interviews,
-      plans,
-      goals,
-      budgetVars,
-      portfolios,
-      contacts,
-      chatSessions,
-    ] = await Promise.all([
-      ctx.db.query("cvs").collect(),
-      ctx.db.query("jobApplications").collect(),
-      ctx.db.query("documentChecklists").collect(),
-      ctx.db.query("skillRoadmaps").collect(),
-      ctx.db.query("mockInterviews").collect(),
-      ctx.db.query("financialPlans").collect(),
-      ctx.db.query("careerGoals").collect(),
-      ctx.db.query("budgetVariables").collect(),
-      ctx.db.query("portfolioItems").collect(),
-      ctx.db.query("contacts").collect(),
-      ctx.db.query("chatConversations").collect(),
-    ]);
-
-    const uniq = <T extends { userId: unknown }>(rows: T[]) =>
-      new Set(rows.map((r) => String(r.userId))).size;
-
+    const doc = await readAdminStats(ctx);
     return {
-      totalUsers: users.length,
-      adoption: [
-        { slice: "CV Generator", users: uniq(cvs), pct: Math.round((uniq(cvs) / total) * 100), rows: cvs.length },
-        { slice: "Lamaran", users: uniq(applications), pct: Math.round((uniq(applications) / total) * 100), rows: applications.length },
-        { slice: "Ceklis Dokumen", users: uniq(checklists), pct: Math.round((uniq(checklists) / total) * 100), rows: checklists.length },
-        { slice: "Roadmap Skill", users: uniq(roadmaps), pct: Math.round((uniq(roadmaps) / total) * 100), rows: roadmaps.length },
-        { slice: "Simulasi Wawancara", users: uniq(interviews), pct: Math.round((uniq(interviews) / total) * 100), rows: interviews.length },
-        { slice: "Kalkulator Keuangan", users: uniq(plans), pct: Math.round((uniq(plans) / total) * 100), rows: plans.length },
-        { slice: "Goal Karir", users: uniq(goals), pct: Math.round((uniq(goals) / total) * 100), rows: goals.length },
-        { slice: "Budget Envelopes", users: uniq(budgetVars), pct: Math.round((uniq(budgetVars) / total) * 100), rows: budgetVars.length },
-        { slice: "Portofolio", users: uniq(portfolios), pct: Math.round((uniq(portfolios) / total) * 100), rows: portfolios.length },
-        { slice: "Networking", users: uniq(contacts), pct: Math.round((uniq(contacts) / total) * 100), rows: contacts.length },
-        { slice: "AI Agent Chat", users: uniq(chatSessions), pct: Math.round((uniq(chatSessions) / total) * 100), rows: chatSessions.length },
-      ].sort((a, b) => b.pct - a.pct),
+      totalUsers: doc?.totalUsers ?? 0,
+      adoption:
+        doc?.featureAdoption ??
+        ([] as Array<{ slice: string; users: number; pct: number; rows: number }>),
+      computedAt: doc?.computedAt ?? null,
     };
   },
 });
@@ -502,27 +431,8 @@ export const getSignupTrend = query({
   handler: async (ctx) => {
     await requireSuperAdmin(ctx);
 
-    const DAYS = 30;
-    const now = Date.now();
-    const DAY = 24 * 60 * 60 * 1000;
-    const startMs = now - (DAYS - 1) * DAY;
-
-    const users = await ctx.db.query("users").collect();
-
-    const buckets = new Map<string, number>();
-    for (let i = 0; i < DAYS; i++) {
-      const d = new Date(startMs + i * DAY);
-      const key = d.toISOString().slice(0, 10);
-      buckets.set(key, 0);
-    }
-    for (const u of users) {
-      if (u._creationTime < startMs) continue;
-      const key = new Date(u._creationTime).toISOString().slice(0, 10);
-      if (buckets.has(key)) {
-        buckets.set(key, (buckets.get(key) ?? 0) + 1);
-      }
-    }
-    return Array.from(buckets.entries()).map(([date, count]) => ({ date, count }));
+    const doc = await readAdminStats(ctx);
+    return doc?.signupTrend30d ?? [];
   },
 });
 
@@ -534,32 +444,38 @@ export const listUsersWithProfiles = query({
     // requireAdmin's email-bypass branch.
     await requireAdmin(ctx);
 
+    // Bound to the most-recent N users. Profiles are resolved per-user via
+    // the `by_user` index (≤ N point lookups) instead of an unbounded
+    // `userProfiles.collect()` that grew with the whole user base on every
+    // reactive tick.
     const users = await ctx.db
       .query("users")
       .order("desc")
-      .take(200);
+      .take(MANAGEMENT_TABLE_LIMIT);
 
-    const profiles = await ctx.db.query("userProfiles").collect();
-    const byUser = new Map(profiles.map((p) => [String(p.userId), p]));
-
-    return users.map((u) => {
-      const p = byUser.get(String(u._id));
-      return {
-        userId: u._id,
-        email: u.email ?? "",
-        name: u.name ?? "",
-        createdAt: u._creationTime,
-        fullName: p?.fullName ?? "",
-        location: p?.location ?? "",
-        targetRole: p?.targetRole ?? "",
-        experienceLevel: p?.experienceLevel ?? "",
-        role: (p?.role ?? "user") as "admin" | "moderator" | "user",
-        skillsCount: p?.skills?.length ?? 0,
-        interestsCount: p?.interests?.length ?? 0,
-        publicEnabled: Boolean(p?.publicEnabled),
-        hasAvatar: Boolean(p?.avatarStorageId),
-      };
-    });
+    return await Promise.all(
+      users.map(async (u) => {
+        const p = await ctx.db
+          .query("userProfiles")
+          .withIndex("by_user", (q) => q.eq("userId", u._id))
+          .first();
+        return {
+          userId: u._id,
+          email: u.email ?? "",
+          name: u.name ?? "",
+          createdAt: u._creationTime,
+          fullName: p?.fullName ?? "",
+          location: p?.location ?? "",
+          targetRole: p?.targetRole ?? "",
+          experienceLevel: p?.experienceLevel ?? "",
+          role: (p?.role ?? "user") as "admin" | "moderator" | "user",
+          skillsCount: p?.skills?.length ?? 0,
+          interestsCount: p?.interests?.length ?? 0,
+          publicEnabled: Boolean(p?.publicEnabled),
+          hasAvatar: Boolean(p?.avatarStorageId),
+        };
+      }),
+    );
   },
 });
 
@@ -577,21 +493,34 @@ export const listAllRoadmaps = query({
   handler: async (ctx) => {
     await requireAdmin(ctx);
 
-    const roadmaps = await ctx.db.query("skillRoadmaps").order("desc").collect();
-    const users = await ctx.db.query("users").collect();
-    const emailMap = new Map(
-      users.map((u) => [String(u._id), (u as { email?: string }).email ?? ""]),
+    // Bound to the most-recent N roadmaps. Each row carries a `skills[]`
+    // array, so an unbounded `.collect()` here ballooned with the whole
+    // table on every reactive tick. We over-fetch by one to detect (and
+    // surface) truncation, then resolve owner emails per-roadmap via point
+    // lookups instead of a full `users.collect()`.
+    const fetched = await ctx.db
+      .query("skillRoadmaps")
+      .order("desc")
+      .take(MANAGEMENT_TABLE_LIMIT + 1);
+    const truncated = fetched.length > MANAGEMENT_TABLE_LIMIT;
+    const roadmaps = truncated ? fetched.slice(0, MANAGEMENT_TABLE_LIMIT) : fetched;
+
+    const rows = await Promise.all(
+      roadmaps.map(async (r) => {
+        const user = await ctx.db.get(r.userId);
+        return {
+          _id: r._id,
+          userId: r.userId,
+          userEmail: (user as { email?: string } | null)?.email ?? "",
+          careerPath: r.careerPath,
+          skillsCount: r.skills.length,
+          progress: r.progress,
+          createdAt: r._creationTime,
+          skills: r.skills,
+        };
+      }),
     );
 
-    return roadmaps.map((r) => ({
-      _id: r._id,
-      userId: r.userId,
-      userEmail: emailMap.get(String(r.userId)) ?? "",
-      careerPath: r.careerPath,
-      skillsCount: r.skills.length,
-      progress: r.progress,
-      createdAt: r._creationTime,
-      skills: r.skills,
-    }));
+    return { rows, truncated };
   },
 });

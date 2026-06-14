@@ -26,6 +26,11 @@ export const profileTables = {
     publicBioShow: v.optional(v.boolean()),
     publicSkillsShow: v.optional(v.boolean()),
     publicTargetRoleShow: v.optional(v.boolean()),
+    // Least-disclosure: location is only emitted into the public branding
+    // payload when this is explicitly true (default = hidden), mirroring
+    // every sibling public field. Existing profiles' locations stay hidden
+    // until the user opts in.
+    publicLocationShow: v.optional(v.boolean()),
     publicContactEmail: v.optional(v.string()),
     publicLinkedinUrl: v.optional(v.string()),
     publicPortfolioUrl: v.optional(v.string()),

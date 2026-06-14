@@ -4,30 +4,36 @@ Operational tasks that didn't fit in code commits but must be executed (or expli
 
 ## P1 — Backup / restore drill
 
-**Why**: a `docker volume prune --force` or corrupted Postgres datadir on the Dokploy host wipes every account, every CV, every saved application. Backups exist only if they're tested.
+**Why**: a `docker volume prune --force` or corrupted Convex data volume on the Dokploy host wipes every account, every CV, every saved application. Backups exist only if they're tested.
 
-**Drill** (do this within 7 days of launch, then monthly):
+**Canonical restore = untar the volume snapshot.** The deployed Layer-2 cron (`backend/convex-self-hosted/backup.sh`, root crontab `0 3 * * *`) produces a `tar.gz` of the Convex Docker volume — **this is the only backup format that actually exists in prod.** The full restore steps live in **[db-backup.md → Recovery Procedure → Dari local tar archive](./db-backup.md#recovery-procedure)**; do not improvise a different format under pressure. Outline:
 
 ```bash
-# 1. Export current state to a ZIP
-pnpm exec convex export --path /tmp/cp-snapshot.zip \
-  --env-file backend/convex-self-hosted/convex.env
+# 1. Stop the Convex backend container
+docker compose -f /path/to/dokploy/compose stop backend
 
-# 2. Move snapshot off-host (S3, Backblaze B2, or even a sync to laptop)
-rclone copy /tmp/cp-snapshot.zip <remote>:careerpack-backups/
+# 2. Wipe + restore the volume from the latest tar.gz (see db-backup.md for the
+#    exact one-liner; archive name = convex-YYYYMMDD-HHMM.tar.gz under
+#    /var/backups/careerpack, or .tar.gz.gpg if BACKUP_PASSPHRASE_FILE was set)
+docker run --rm -v <VOLUME_NAME>:/dest -v /var/backups/careerpack:/src alpine sh -c \
+  'rm -rf /dest/* && tar xzf /src/convex-YYYYMMDD-HHMM.tar.gz -C /dest'
 
-# 3. Spin up a staging Convex instance with a fresh volume, then:
-pnpm exec convex import --replace /tmp/cp-snapshot.zip \
-  --env-file backend/convex-self-hosted/convex.env  # against staging URL
-
-# 4. Verify by signing in as a known user on staging — every record present.
+# 3. Start container + verify
+docker compose -f /path/to/dokploy/compose start backend
+curl https://<your-convex-backend>/version
 ```
 
-Record the timestamp + SHA256 of the snapshot in this file each drill so audits can confirm freshness:
+**Drill** (do this within 7 days of launch, then monthly): restore the latest tar.gz onto a fresh staging volume per the steps above, then sign in as a known user on staging and confirm every record is present.
+
+> ⚠️ **A real restore drill is still pending.** It requires SSH/host access to the Dokploy VPS (out of code scope) — see the `_pending_` row below and the open action item in [db-backup.md](./db-backup.md#action-items).
+
+Record the timestamp + SHA256 of the restored archive in this file each drill so audits can confirm freshness:
 
 | Date | SHA256 | Restored to | Verified by |
 |---|---|---|---|
 | _pending_ | _pending_ | _pending_ | _pending_ |
+
+**Alternative (not the deployed path): `convex export` / `import`.** Convex CLI can emit a schema-aware snapshot ZIP (`convex export --path snapshot.zip`) and restore it with `convex import --replace`. This is more portable than the tar volume but is **not** what the cron produces, so it is **not** the primary restore route — it is listed as a deferred option in [db-backup.md → Alternatives Considered](./db-backup.md#alternatives-considered). Use it only if you have first taken an `export` snapshot in that same format; you cannot `convex import` the tar.gz the cron writes.
 
 ## P1 — File storage external (Backblaze B2 / Cloudflare R2)
 

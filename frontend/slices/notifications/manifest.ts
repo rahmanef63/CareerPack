@@ -13,19 +13,6 @@ export const notificationsManifest: SliceManifest = {
   description: "Inbox notifikasi reminder + sistem",
   icon: Bell,
 
-  route: {
-    slug: "notifications",
-    component: () =>
-      import("./components/NotificationsView").then((m) => ({ default: m.NotificationsView })),
-  },
-
-  nav: {
-    placement: "more",
-    order: 90,
-    href: "/dashboard/notifications",
-    hue: "from-yellow-400 to-yellow-600",
-  },
-
   skills: [
     {
       id: "notifications.list",

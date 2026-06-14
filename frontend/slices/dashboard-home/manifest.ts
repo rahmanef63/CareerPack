@@ -14,18 +14,6 @@ export const dashboardHomeManifest: SliceManifest = {
   description: "Halaman utama dashboard",
   icon: Home,
 
-  route: {
-    slug: "",
-    component: () =>
-      import("./components/DashboardHome").then((m) => ({ default: m.DashboardHome })),
-  },
-
-  nav: {
-    placement: "primary",
-    order: 10,
-    href: "/dashboard",
-  },
-
   skills: [
     {
       id: "dashboard.get-overview",

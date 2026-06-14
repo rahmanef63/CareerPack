@@ -152,8 +152,11 @@ Backup ke external storage = tahan terhadap VPS provider outage / data center fa
 - [ ] Aktifkan Provider auto-snapshot (Layer 1) — 1 click di dashboard VPS
 - [x] Deploy `backup.sh` + install cron — **done 2026-06-11** (root crontab,
       `VOLUME_NAME=careerpack-convex-8gdbpk_data`, arsip pertama 121 MB terverifikasi)
-- [ ] Test recovery procedure sekali — restore ke staging volume + verify Convex jalan
-- [ ] Document path-to-restore di `docs/launch-runbook.md`
+- [ ] Test recovery procedure sekali — restore ke staging volume + verify Convex
+      jalan. **Butuh SSH/host access ke VPS — out of code scope; masih `_pending_`.**
+- [x] Document path-to-restore di `docs/launch-runbook.md` — **done.** Runbook
+      P1 sekarang memakai jalur tar-volume ini sebagai prosedur kanonik (bukan
+      lagi `convex export/import`, yang tinggal jadi alternatif yang ditandai).
 - [ ] Schedule re-evaluation untuk off-VPS backup sebelum public launch
 
 ## See Also

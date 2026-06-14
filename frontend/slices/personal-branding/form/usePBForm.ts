@@ -50,6 +50,7 @@ interface ServerData {
   bioShow: boolean;
   skillsShow: boolean;
   targetRoleShow: boolean;
+  locationShow: boolean;
   contactEmail: string;
   linkedinUrl: string;
   portfolioUrl: string;
@@ -128,6 +129,7 @@ function seedFromServer(data: ServerData): FormState {
     bioShow: Boolean(data.bioShow),
     skillsShow: Boolean(data.skillsShow),
     targetRoleShow: Boolean(data.targetRoleShow),
+    locationShow: Boolean(data.locationShow),
     portfolioShow: Boolean(data.portfolioShow),
 
     contactEmail: data.contactEmail ?? "",
@@ -322,6 +324,7 @@ export function usePBForm(): PBForm {
             bioShow: state.bioShow,
             skillsShow: state.skillsShow,
             targetRoleShow: state.targetRoleShow,
+            locationShow: state.locationShow,
             contactEmail: state.contactEmail,
             linkedinUrl: state.linkedinUrl,
             portfolioUrl: state.portfolioUrl,
@@ -344,6 +347,7 @@ export function usePBForm(): PBForm {
             bioShow: state.bioShow,
             skillsShow: state.skillsShow,
             targetRoleShow: state.targetRoleShow,
+            locationShow: state.locationShow,
             contactEmail: state.contactEmail,
             linkedinUrl: state.linkedinUrl,
             portfolioUrl: state.portfolioUrl,

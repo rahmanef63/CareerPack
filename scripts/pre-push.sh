@@ -4,10 +4,11 @@
 # Wired via simple-git-hooks. Reads the standard pre-push stdin format
 # ("<local_ref> <local_sha> <remote_ref> <remote_sha>" per ref).
 #
-# Also runs the quality gate (pnpm typecheck + vitest run) before anything
-# else: GitHub Actions CI is workflow_dispatch-only since 2026-05-14, so this
-# hook is the last automated gate before code (and a possible Convex deploy)
-# reaches main.
+# Also runs the quality gate (pnpm typecheck + vitest run with coverage
+# thresholds) before anything else: GitHub Actions CI is workflow_dispatch-only
+# since 2026-05-14, so this hook is the last automated gate before code (and a
+# possible Convex deploy) reaches main. Coverage thresholds live in
+# vitest.config.ts and only trip under --coverage, hence `pnpm test:coverage`.
 #
 # Skips:
 #   - $SKIP_PUSH_CHECKS=1              (typecheck+test gate bypass, emergency)
@@ -33,9 +34,9 @@ else
     echo "[pre-push] Typecheck FAILED — aborting push. Fix and retry, or 'SKIP_PUSH_CHECKS=1 git push' to bypass." >&2
     exit 1
   fi
-  echo "[pre-push] Quality gate: vitest run…" >&2
-  if ! pnpm exec vitest run < /dev/null; then
-    echo "[pre-push] Tests FAILED — aborting push. Fix and retry, or 'SKIP_PUSH_CHECKS=1 git push' to bypass." >&2
+  echo "[pre-push] Quality gate: vitest run (with coverage thresholds)…" >&2
+  if ! pnpm test:coverage < /dev/null; then
+    echo "[pre-push] Tests/coverage FAILED — aborting push. Fix and retry, or 'SKIP_PUSH_CHECKS=1 git push' to bypass." >&2
     exit 1
   fi
   echo "[pre-push] Quality gate OK." >&2

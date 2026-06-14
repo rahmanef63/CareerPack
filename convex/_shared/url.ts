@@ -21,9 +21,17 @@
  * whitespace.
  */
 
-// Max length kept in sync with profile/blocks MAX_URL_LEN (no cross-domain
-// import — domains own their own constants).
-const MAX_ACTION_URL_LEN = 500;
+/**
+ * Canonical max length for any user-supplied URL across domains. This is the
+ * SINGLE source of truth — `profile/blocks/types.ts` re-exports it as
+ * `MAX_URL_LEN` instead of redeclaring the literal, so the cap can no longer
+ * drift between the notifications and personal-branding sanitisers. Importing
+ * from `_shared` is the allowed cross-domain path.
+ */
+export const MAX_URL_LEN = 500;
+
+// Domain-facing alias kept for the notification call sites' default param.
+const MAX_ACTION_URL_LEN = MAX_URL_LEN;
 
 const DANGEROUS_PROTO = /^(?:javascript|vbscript|data|file):/i;
 

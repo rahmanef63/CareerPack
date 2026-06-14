@@ -5,6 +5,7 @@ import {
   Camera,
   Eye,
   FileText,
+  MapPin,
   Tag,
   Wrench,
   FolderKanban,
@@ -23,7 +24,12 @@ import type { Bind, FieldKey, SectionOverrides } from "../form/types";
 interface ToggleSpec {
   key: Extract<
     FieldKey,
-    "avatarShow" | "bioShow" | "skillsShow" | "targetRoleShow" | "portfolioShow"
+    | "avatarShow"
+    | "bioShow"
+    | "skillsShow"
+    | "targetRoleShow"
+    | "locationShow"
+    | "portfolioShow"
   >;
   label: string;
   description: string;
@@ -42,6 +48,13 @@ const DEFAULT_TOGGLES: ReadonlyArray<ToggleSpec> = [
     label: "Target role",
     description: "Tag bawah nama, contoh: Frontend Engineer.",
     icon: Tag,
+  },
+  {
+    key: "locationShow",
+    label: "Lokasi",
+    description:
+      "Kota / negara dari Profil Saya di hero. Default mati demi privasi — aktifkan untuk menampilkannya.",
+    icon: MapPin,
   },
   {
     key: "bioShow",
@@ -69,6 +82,7 @@ export interface HeroProfileSnapshot {
   fullName: string;
   bio: string;
   targetRole: string;
+  location: string;
   skills: string[];
 }
 
@@ -104,6 +118,10 @@ function previewFor(
       return profile.targetRole
         ? { text: profile.targetRole, warning: false }
         : { text: "Target role kosong di Profil", warning: true };
+    case "locationShow":
+      return profile.location.trim()
+        ? { text: profile.location.trim(), warning: false }
+        : { text: "Lokasi kosong di Profil", warning: true };
     case "bioShow": {
       const bio = profile.bio.trim();
       if (!bio) return { text: "Bio kosong di Profil", warning: true };

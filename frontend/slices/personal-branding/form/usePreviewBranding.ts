@@ -125,7 +125,9 @@ export function usePreviewBranding(state: FormState):
         name: me.profile?.fullName || me.name || "",
         headline: state.headline,
         targetRole: state.targetRoleShow ? me.profile?.targetRole ?? "" : "",
-        location: me.profile?.location ?? "",
+        // Mirror the backend least-disclosure gate: location only shows
+        // when the user opts in (default hidden).
+        location: state.locationShow ? me.profile?.location ?? "" : "",
         avatarUrl: state.avatarShow ? me.avatarUrl ?? null : null,
         contact: { email: contactEmail, linkedin, portfolio: portfolioUrl },
       },
