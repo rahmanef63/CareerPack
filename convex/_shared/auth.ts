@@ -1,12 +1,24 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { ConvexError } from "convex/values";
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
+
+// Guards throw `ConvexError({ message })` rather than a plain `Error`. In
+// production Convex redacts an uncaught `Error` to a generic "Server Error",
+// which would strip these Indonesian messages before they reach the client.
+// A `ConvexError` with a structured `data` payload crosses the RPC boundary
+// intact, so `humanMessage` (frontend/shared/lib/notify.ts) can read
+// `err.data.message` un-redacted in prod. The string text is unchanged, so
+// callers that match on the message verbatim keep working.
+function authError(message: string): ConvexError<{ message: string }> {
+  return new ConvexError({ message });
+}
 
 export async function requireUser(
   ctx: QueryCtx | MutationCtx,
 ): Promise<Id<"users">> {
   const userId = await getAuthUserId(ctx);
-  if (!userId) throw new Error("Tidak terautentikasi");
+  if (!userId) throw authError("Tidak terautentikasi");
   return userId;
 }
 
@@ -29,9 +41,9 @@ export async function requireOwnedDoc<T extends OwnableTable>(
 ): Promise<Doc<T>> {
   const userId = await requireUser(ctx);
   const doc = (await ctx.db.get(docId)) as Doc<T> | null;
-  if (!doc) throw new Error(`${notFoundLabel} tidak ditemukan`);
+  if (!doc) throw authError(`${notFoundLabel} tidak ditemukan`);
   const ownerId = (doc as unknown as { userId: Id<"users"> }).userId;
-  if (ownerId !== userId) throw new Error(`${notFoundLabel} tidak ditemukan`);
+  if (ownerId !== userId) throw authError(`${notFoundLabel} tidak ditemukan`);
   return doc;
 }
 
@@ -71,7 +83,7 @@ export async function requireAdmin(
     .query("userProfiles")
     .withIndex("by_user", (q) => q.eq("userId", userId))
     .first();
-  if (profile?.role !== "admin") throw new Error("Bukan admin");
+  if (profile?.role !== "admin") throw authError("Bukan admin");
   return userId;
 }
 
@@ -84,10 +96,10 @@ export async function requireSuperAdmin(
   ctx: QueryCtx | MutationCtx,
 ): Promise<Id<"users">> {
   const userId = await requireUser(ctx);
-  if (!superAdminConfigured()) throw new Error("Tidak berwenang");
+  if (!superAdminConfigured()) throw authError("Tidak berwenang");
   const user = await ctx.db.get(userId);
   if (!user || user.email !== SUPER_ADMIN_EMAIL) {
-    throw new Error("Tidak berwenang");
+    throw authError("Tidak berwenang");
   }
   return userId;
 }

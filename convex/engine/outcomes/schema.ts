@@ -58,7 +58,12 @@ export const outcomesTables = {
     .index("by_user_time", ["userId", "occurredAt"])
     .index("by_user_kind", ["userId", "kind"])
     .index("by_target_kind", ["targetNodeSlug", "kind"])
-    .index("by_from_to", ["fromNodeSlug", "targetNodeSlug"]),
+    .index("by_from_to", ["fromNodeSlug", "targetNodeSlug"])
+    // Global time order — lets the daily calibrator range-scan the
+    // rolling window (occurredAt >= cutoff) in desc order and grab the
+    // most-recent N deterministically, instead of an arbitrary slice off
+    // the non-time-ordered `by_from_to` index.
+    .index("by_time", ["occurredAt"]),
 
   /**
    * Calibrated posteriors per (from, to) career-graph edge. Daily cron

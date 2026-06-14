@@ -59,6 +59,16 @@ export function QuestionBank({
               currentQuestionIndex === index && "border-brand bg-brand-muted",
             )}
             onClick={() => onSelect(index)}
+            role="button"
+            tabIndex={0}
+            aria-label={question.question}
+            onKeyDown={(e) => {
+              if ((e.target as HTMLElement).closest("button")) return;
+              if (e.key === "Enter" || e.key === " ") {
+                if (e.key === " ") e.preventDefault();
+                onSelect(index);
+              }
+            }}
           >
             <CardContent className="pt-6">
               <div className="flex items-start justify-between gap-4">

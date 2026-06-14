@@ -107,8 +107,8 @@ export function DocumentChecklist() {
                       <AlertCircle className="w-6 h-6 text-brand-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-warning">Penting untuk Kerja Luar Negeri</h4>
-                      <p className="text-warning mt-1">
+                      <h4 className="font-semibold text-warning-text">Penting untuk Kerja Luar Negeri</h4>
+                      <p className="text-warning-text mt-1">
                         Persyaratan bervariasi sesuai negara. Selalu periksa persyaratan spesifik negara tujuan Anda.
                         Beberapa dokumen mungkin memerlukan apostille atau legalisasi.
                       </p>

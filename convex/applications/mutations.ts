@@ -1,6 +1,7 @@
 import { mutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
+import { assertShortText, capLen } from "../_shared/validate";
 import type { Id } from "../_generated/dataModel";
 
 /**
@@ -41,17 +42,19 @@ export const createApplication = mutation({
       // on a foreign id, which is the same surface as a deleted row.
       await requireOwnedDoc(ctx, args.cvId, "CV");
     }
+    // Cap free-text so a hostile client can't store unbounded blobs that
+    // amplify admin-side aggregate scans. Control chars rejected.
     return await ctx.db.insert("jobApplications", {
       userId,
       cvId: args.cvId,
-      company: args.company,
-      position: args.position,
-      location: args.location,
-      salary: args.salary,
+      company: assertShortText(args.company, 120, "Perusahaan"),
+      position: assertShortText(args.position, 120, "Posisi"),
+      location: assertShortText(args.location, 120, "Lokasi"),
+      salary: capLen("Gaji", args.salary, 60),
       status: "applied",
       appliedDate: Date.now(),
-      source: args.source,
-      notes: args.notes,
+      source: assertShortText(args.source, 120, "Sumber"),
+      notes: capLen("Catatan", args.notes, 600),
       interviewDates: [],
       documents: [],
     });

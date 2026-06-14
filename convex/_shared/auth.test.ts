@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { ConvexError } from "convex/values";
 import type { QueryCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 
@@ -21,6 +22,24 @@ async function loadAuth(superAdminEmail?: string): Promise<AuthModule> {
 
 const uid = (s: string) => s as unknown as Id<"users">;
 const cvId = (s: string) => s as unknown as Id<"cvs">;
+
+// Guards must throw `ConvexError({ message })` (not a plain `Error`) so prod
+// Convex doesn't redact the Indonesian copy to "Server Error". Assert both the
+// error type AND the exact, unchanged message text the client reads via
+// `err.data.message`.
+async function expectConvexError(
+  p: Promise<unknown>,
+  message: string,
+): Promise<void> {
+  const err = await p.then(
+    () => {
+      throw new Error("expected the guard to reject, but it resolved");
+    },
+    (e: unknown) => e,
+  );
+  expect(err).toBeInstanceOf(ConvexError);
+  expect((err as ConvexError<{ message: string }>).data).toEqual({ message });
+}
 
 interface FakeCtxOpts {
   docs?: Record<string, Record<string, unknown> | null>;
@@ -50,10 +69,10 @@ describe("requireUser", () => {
     await expect(requireUser(makeCtx())).resolves.toBe(uid("u1"));
   });
 
-  it("throws the Indonesian unauth error when anonymous", async () => {
+  it("throws a ConvexError with the Indonesian unauth message when anonymous", async () => {
     const { requireUser } = await loadAuth();
     getAuthUserId.mockResolvedValue(null);
-    await expect(requireUser(makeCtx())).rejects.toThrow("Tidak terautentikasi");
+    await expectConvexError(requireUser(makeCtx()), "Tidak terautentikasi");
   });
 });
 
@@ -81,22 +100,24 @@ describe("requireOwnedDoc", () => {
     });
   });
 
-  it("throws not-found when the doc is missing", async () => {
+  it("throws a ConvexError not-found when the doc is missing", async () => {
     const { requireOwnedDoc } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
     const ctx = makeCtx({ docs: { d1: null } });
-    await expect(requireOwnedDoc(ctx, cvId("d1"), "CV")).rejects.toThrow(
+    await expectConvexError(
+      requireOwnedDoc(ctx, cvId("d1"), "CV"),
       "CV tidak ditemukan",
     );
   });
 
   // R6: a doc owned by someone else must be indistinguishable from a missing
   // one — same message, no "forbidden" vs "not-found" enumeration leak.
-  it("throws the SAME not-found error when owned by another user", async () => {
+  it("throws the SAME not-found ConvexError when owned by another user", async () => {
     const { requireOwnedDoc } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
     const ctx = makeCtx({ docs: { d1: { _id: "d1", userId: uid("u2") } } });
-    await expect(requireOwnedDoc(ctx, cvId("d1"), "CV")).rejects.toThrow(
+    await expectConvexError(
+      requireOwnedDoc(ctx, cvId("d1"), "CV"),
       "CV tidak ditemukan",
     );
   });
@@ -105,7 +126,8 @@ describe("requireOwnedDoc", () => {
     const { requireOwnedDoc } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
     const ctx = makeCtx({ docs: { d1: null } });
-    await expect(requireOwnedDoc(ctx, cvId("d1"))).rejects.toThrow(
+    await expectConvexError(
+      requireOwnedDoc(ctx, cvId("d1")),
       "Data tidak ditemukan",
     );
   });
@@ -123,15 +145,17 @@ describe("requireAdmin (no super-admin configured)", () => {
   it("rejects a non-admin role", async () => {
     const { requireAdmin } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
-    await expect(
+    await expectConvexError(
       requireAdmin(makeCtx({ profile: { role: "user" } })),
-    ).rejects.toThrow("Bukan admin");
+      "Bukan admin",
+    );
   });
 
   it("rejects when no profile exists", async () => {
     const { requireAdmin } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
-    await expect(requireAdmin(makeCtx({ profile: null }))).rejects.toThrow(
+    await expectConvexError(
+      requireAdmin(makeCtx({ profile: null })),
       "Bukan admin",
     );
   });
@@ -155,15 +179,15 @@ describe("requireAdmin (super-admin configured)", () => {
       docs: { u1: { email: "someone@else.com" } },
       profile: { role: "user" },
     });
-    await expect(requireAdmin(ctx)).rejects.toThrow("Bukan admin");
+    await expectConvexError(requireAdmin(ctx), "Bukan admin");
   });
 });
 
 describe("requireSuperAdmin", () => {
-  it("rejects with a generic error when no super-admin is configured", async () => {
+  it("rejects with a generic ConvexError when no super-admin is configured", async () => {
     const { requireSuperAdmin } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
-    await expect(requireSuperAdmin(makeCtx())).rejects.toThrow("Tidak berwenang");
+    await expectConvexError(requireSuperAdmin(makeCtx()), "Tidak berwenang");
   });
 
   it("passes for the configured super-admin email", async () => {
@@ -173,11 +197,11 @@ describe("requireSuperAdmin", () => {
     await expect(requireSuperAdmin(ctx)).resolves.toBe(uid("u1"));
   });
 
-  it("rejects a different email with the same generic error", async () => {
+  it("rejects a different email with the same generic ConvexError", async () => {
     const { requireSuperAdmin } = await loadAuth("boss@careerpack.org");
     getAuthUserId.mockResolvedValue(uid("u1"));
     const ctx = makeCtx({ docs: { u1: { email: "someone@else.com" } } });
-    await expect(requireSuperAdmin(ctx)).rejects.toThrow("Tidak berwenang");
+    await expectConvexError(requireSuperAdmin(ctx), "Tidak berwenang");
   });
 });
 

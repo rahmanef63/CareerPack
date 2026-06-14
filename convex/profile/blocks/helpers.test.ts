@@ -136,6 +136,45 @@ describe("sanitizeUrl", () => {
   });
 });
 
+describe("protocol-relative open-redirect regression (2026-06-15)", () => {
+  // `//evil.com`, `/\evil.com`, and `//\evil.com` all start with `/` so the
+  // old root-relative branch accepted them verbatim, but the browser resolves
+  // them OFF-origin (an open-redirect / phishing vector). Only a single `/`
+  // NOT followed by another `/` or a backslash is a true same-origin path.
+  describe("sanitizeUrl rejects off-origin slash variants", () => {
+    it("protocol-relative //evil.com", () => {
+      expect(sanitizeUrl("//evil.com")).toBe("");
+    });
+    it("protocol-relative with path //evil.com/phish", () => {
+      expect(sanitizeUrl("//evil.com/phish")).toBe("");
+    });
+    it("slash-backslash /\\evil.com", () => {
+      expect(sanitizeUrl("/\\evil.com")).toBe("");
+    });
+    it("slash-slash-backslash //\\evil.com", () => {
+      expect(sanitizeUrl("//\\evil.com")).toBe("");
+    });
+    it("three or more leading slashes ///evil.com", () => {
+      expect(sanitizeUrl("///evil.com")).toBe("");
+    });
+  });
+
+  describe("sanitizeUrl keeps legitimate same-origin + anchor + absolute", () => {
+    it("root-relative /dashboard", () => {
+      expect(sanitizeUrl("/dashboard")).toBe("/dashboard");
+    });
+    it("root-relative /r/foo", () => {
+      expect(sanitizeUrl("/r/foo")).toBe("/r/foo");
+    });
+    it("#anchor", () => {
+      expect(sanitizeUrl("#section")).toBe("#section");
+    });
+    it("absolute https:// unchanged", () => {
+      expect(sanitizeUrl("https://example.com/")).toBe("https://example.com/");
+    });
+  });
+});
+
 describe("whitespace-split scheme bypass regression (2026-06-15)", () => {
   // trimSafe preserves tab/newline/CR for prose, and browsers strip those out
   // of a URL scheme at click time, so `java<TAB>script:` etc. used to defeat

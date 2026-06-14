@@ -22,10 +22,12 @@ export function SalaryInsightsCard() {
   if (data === undefined) {
     return <Skeleton className="h-64 w-full rounded-xl" />;
   }
-  if (!data || data.length === 0) return null;
+  if (!data || data.categories.length === 0) return null;
 
   // Filter out buckets with no salary data — we'd render an empty bar.
-  const visible = data.filter((b) => b.p50 !== null && b.withSalaryCount > 0);
+  const visible = data.categories.filter(
+    (b) => b.p50 !== null && b.withSalaryCount > 0,
+  );
   if (visible.length === 0) return null;
 
   // Compute global max for proportional bar widths across categories.
@@ -42,8 +44,11 @@ export function SalaryInsightsCard() {
             Insight Gaji
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Median (p50) ± rentang p25-p75 dari lowongan terbaru. Hanya dari
-            lowongan yang mencantumkan gaji.
+            Median (p50) ± rentang p25-p75 dari{" "}
+            {data.capped
+              ? `${data.scannedCount} lowongan terbaru. Belum mencakup seluruh data historis.`
+              : "lowongan terbaru."}{" "}
+            Hanya dari lowongan yang mencantumkan gaji.
           </p>
         </div>
         <Badge variant="outline" className="text-[10px]">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { ChevronDown } from "lucide-react";
 import {
   Card,
@@ -54,6 +55,7 @@ export function PBSection({
   children,
 }: PBSectionProps) {
   const isOpen = activeId === sectionId;
+  const contentId = useId();
 
   function handleHeaderClick(e: React.MouseEvent<HTMLDivElement>) {
     // Don't toggle when the click started on an interactive element
@@ -63,11 +65,26 @@ export function PBSection({
     onToggle(sectionId);
   }
 
+  function handleHeaderKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    // Mirror the click guard — let nested controls handle their own keys.
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input, [role=switch]")) return;
+    if (e.key === "Enter" || e.key === " ") {
+      if (e.key === " ") e.preventDefault();
+      onToggle(sectionId);
+    }
+  }
+
   return (
     <Card className="overflow-hidden border-border">
       <CardHeader
         className="cursor-pointer bg-muted/40 px-4 py-3 transition-colors hover:bg-muted/60 sm:px-6"
         onClick={handleHeaderClick}
+        onKeyDown={handleHeaderKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -91,21 +108,18 @@ export function PBSection({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {right}
-            <button
-              type="button"
-              onClick={() => onToggle(sectionId)}
-              aria-expanded={isOpen}
-              aria-label={isOpen ? `Tutup ${title}` : `Buka ${title}`}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted"
+            <span
+              aria-hidden="true"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground"
             >
               <ChevronDown
                 className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
               />
-            </button>
+            </span>
           </div>
         </div>
       </CardHeader>
-      {isOpen && <CardContent className="px-4 pt-4 sm:px-6">{children}</CardContent>}
+      {isOpen && <CardContent id={contentId} className="px-4 pt-4 sm:px-6">{children}</CardContent>}
     </Card>
   );
 }

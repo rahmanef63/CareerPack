@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useId } from "react";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -16,6 +16,8 @@ interface SectionCardProps {
 }
 
 export function SectionCard({ title, icon: Icon, children, isOpen, onToggle, onAdd, addLabel }: SectionCardProps) {
+  const contentId = useId();
+
   const handleHeaderClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
@@ -24,11 +26,27 @@ export function SectionCard({ title, icon: Icon, children, isOpen, onToggle, onA
     onToggle();
   }, [onToggle]);
 
+  const handleHeaderKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
+      return;
+    }
+    if (e.key === "Enter" || e.key === " ") {
+      if (e.key === " ") e.preventDefault();
+      onToggle();
+    }
+  }, [onToggle]);
+
   return (
     <Card className="border-border overflow-hidden">
       <CardHeader
         className="bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
         onClick={handleHeaderClick}
+        onKeyDown={handleHeaderKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -53,7 +71,7 @@ export function SectionCard({ title, icon: Icon, children, isOpen, onToggle, onA
           </div>
         </div>
       </CardHeader>
-      {isOpen && <CardContent className="pt-6">{children}</CardContent>}
+      {isOpen && <CardContent id={contentId} className="pt-6">{children}</CardContent>}
     </Card>
   );
 }

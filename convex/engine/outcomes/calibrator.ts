@@ -3,6 +3,7 @@ import {
   bayesianPosterior,
   bucketSuccessRate,
   bucketTotal,
+  CALIB_MAX_EVENTS,
   CALIB_WINDOW_MS,
   DEFAULT_PRIOR_N,
   DEFAULT_PRIOR_P,
@@ -29,17 +30,22 @@ export const runCalibrator = internalMutation({
   handler: async (ctx) => {
     const cutoff = Date.now() - CALIB_WINDOW_MS;
 
+    // Deterministic recency: range-scan the global time index in DESC
+    // order, bounded to the rolling window. This returns the most-recent
+    // CALIB_MAX_EVENTS in-window events — never an arbitrary slice off a
+    // non-time-ordered index. The `occurredAt >= cutoff` bound makes the
+    // window a query predicate, so no stale rows enter the posterior.
     const events = await ctx.db
       .query("outcomeEvents")
-      .withIndex("by_from_to")
-      .take(10_000);
+      .withIndex("by_time", (q) => q.gte("occurredAt", cutoff))
+      .order("desc")
+      .take(CALIB_MAX_EVENTS);
 
     const buckets = new Map<string, EventCountBucket>();
     // "|" delimiter (never in kebab slugs) so the split below is exact.
     const key = (f: string, t: string) => `${f}|${t}`;
     for (const e of events) {
       if (!e.fromNodeSlug || !e.targetNodeSlug) continue;
-      if (e.occurredAt < cutoff) continue;
       const k = key(e.fromNodeSlug, e.targetNodeSlug);
       const b = buckets.get(k) ?? emptyBucket();
       switch (e.kind) {

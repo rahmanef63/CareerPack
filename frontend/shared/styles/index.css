@@ -48,8 +48,13 @@
        Kept as OKLCH for consistency with the rest of the palette. */
     --success: 0.70 0.17 152;               /* approx oklch of green */
     --success-foreground: 1.00 0 0;
-    --warning: 0.80 0.17 80;                /* amber */
-    --warning-foreground: 0.32 0 0;
+    --warning: 0.80 0.17 80;                /* amber — fills / borders / icons */
+    --warning-foreground: 0.32 0 0;         /* text drawn ON a --warning fill */
+    /* Readable amber for multi-line body copy on warning-tinted surfaces.
+       The bright --warning (L 0.80) only hits ~1.8:1 on bg-warning/10 — fails
+       WCAG 1.4.3. Darkened to L 0.52 → ~5.3:1 on bg-warning/10, ~5.6:1 on a
+       plain card. Use text-warning-text for prose; keep --warning for fills. */
+    --warning-text: 0.52 0.14 80;
     --info: 0.65 0.18 236;                  /* sky */
     --info-foreground: 1.00 0 0;
 
@@ -158,6 +163,9 @@
     --success-foreground: 1.00 0 0;
     --warning: 0.75 0.17 80;
     --warning-foreground: 1.00 0 0;
+    /* Readable amber on dark warning-tinted surfaces. Brightened to L 0.88
+       → ~6.5:1 on bg-warning/10, ~10:1 on a dark card (AA pass). */
+    --warning-text: 0.88 0.14 80;
     --info: 0.60 0.18 236;
     --info-foreground: 1.00 0 0;
 

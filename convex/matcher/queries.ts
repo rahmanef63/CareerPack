@@ -6,6 +6,14 @@ import { summarizeSalaries } from "./salaryStats";
 
 const MAX_LIST = 100;
 const MAX_SCAN_HISTORY = 50;
+/**
+ * Salary insights scan cap. Percentiles are computed over at most this
+ * many *most-recent* listings, so when the table exceeds it the result
+ * is a recent-window sample, not a population stat. `getSalaryInsights`
+ * surfaces `capped` when this bound is hit so the UI can label it
+ * honestly ("dari N lowongan terbaru") rather than implying full coverage.
+ */
+const MAX_SALARY_SCAN = 500;
 
 type JobListing = Doc<"jobListings">;
 type UserProfile = Doc<"userProfiles">;
@@ -147,8 +155,11 @@ export const getMatches = query({
 
 // ---------------------------------------------------------------------
 // Salary insights — aggregate jobListings by category. Cheap full-table
-// scan (cap 500 most-recent rows) since jobListings is bounded volume.
-// Returns p25/p50/p75 in original currency; UI renders bars.
+// scan (cap MAX_SALARY_SCAN most-recent rows) since jobListings is
+// bounded volume. Returns p25/p50/p75 in original currency; UI renders
+// bars. `capped` flags that the scan hit the cap, i.e. percentiles
+// describe the most-recent window rather than the full population — the
+// UI uses it to keep its "based on N" copy honest.
 // ---------------------------------------------------------------------
 
 export const getSalaryInsights = query({
@@ -158,11 +169,18 @@ export const getSalaryInsights = query({
       .query("jobListings")
       .withIndex("by_posted")
       .order("desc")
-      .take(500);
+      .take(MAX_SALARY_SCAN);
 
     // Aggregation (currency separation + percentile math) lives in a
     // pure, unit-tested module — see matcher/salaryStats.ts.
-    return summarizeSalaries(rows);
+    return {
+      categories: summarizeSalaries(rows),
+      // Total listings actually scanned (the percentile sample ceiling).
+      scannedCount: rows.length,
+      // True when we may have truncated older listings: stats are a
+      // recent-window sample, not the whole table.
+      capped: rows.length >= MAX_SALARY_SCAN,
+    };
   },
 });
 

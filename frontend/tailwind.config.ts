@@ -41,7 +41,11 @@ const config: Config = {
   			},
   			warning: {
   				DEFAULT: 'oklch(var(--warning) / <alpha-value>)',
-  				foreground: 'oklch(var(--warning-foreground) / <alpha-value>)'
+  				foreground: 'oklch(var(--warning-foreground) / <alpha-value>)',
+  				// Darker amber for readable body copy (text-warning-text). Keep
+  				// `warning` (DEFAULT) for fills/borders/icons — it fails WCAG as
+  				// multi-line text on warning-tinted surfaces.
+  				text: 'oklch(var(--warning-text) / <alpha-value>)'
   			},
   			info: {
   				DEFAULT: 'oklch(var(--info) / <alpha-value>)',

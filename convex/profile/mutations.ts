@@ -1,6 +1,7 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser } from "../_shared/auth";
+import { assertShortText, capStringArray } from "../_shared/validate";
 import {
   sanitizeBlocks,
   sanitizeHeaderBg,
@@ -61,24 +62,6 @@ function assertSlug(raw: string): string {
   return slug;
 }
 
-function containsControlChar(text: string): boolean {
-  for (let i = 0; i < text.length; i++) {
-    const code = text.charCodeAt(i);
-    if (code === 9 || code === 10 || code === 13) continue;
-    if (code < 32 || code === 127) return true;
-  }
-  return false;
-}
-
-function assertShortText(value: string, max: number, label: string): string {
-  const trimmed = value.trim();
-  if (trimmed.length > max) throw new Error(`${label} maksimal ${max} karakter`);
-  if (containsControlChar(trimmed)) {
-    throw new Error(`${label} mengandung karakter tidak valid`);
-  }
-  return trimmed;
-}
-
 function assertUrl(raw: string, label: string): string {
   const value = raw.trim();
   if (value.length === 0) return "";
@@ -105,6 +88,70 @@ function assertEmail(raw: string): string {
     throw new Error("Email kontak publik tidak valid");
   }
   return value;
+}
+
+/**
+ * Raw (pre-validation) profile fields. Every field is optional so the
+ * one helper serves both the partial `patchProfile` and the full-form
+ * `createOrUpdateProfile` — the Convex arg validators already enforce
+ * which fields are required at each entry point.
+ */
+type RawProfileFields = {
+  fullName?: string;
+  phone?: string;
+  location?: string;
+  targetRole?: string;
+  experienceLevel?: string;
+  bio?: string;
+  skills?: string[];
+  interests?: string[];
+};
+
+/**
+ * Canonical profile field validator — the SSOT shared by `patchProfile`
+ * and `createOrUpdateProfile` so caps never drift between the two write
+ * paths. Only validates+returns fields that were actually passed, so
+ * the same code can build a partial patch or a full insert. Caps:
+ * fullName/location/targetRole <=120, experienceLevel <=40, bio <=600,
+ * skills/interests <=50 entries each <=60 chars; control chars rejected.
+ */
+function validateProfileFields(args: RawProfileFields): Record<string, unknown> {
+  const patch: Record<string, unknown> = {};
+  if (args.fullName !== undefined) {
+    patch.fullName = assertShortText(args.fullName, 120, "Nama");
+  }
+  if (args.phone !== undefined) {
+    // Phone: digits / + / - / space / parens, 6-30 chars. Loose on
+    // purpose — Indonesian + international formats both allowed.
+    const v = args.phone.trim();
+    if (v.length > 0 && (v.length < 6 || v.length > 30 || !/^[+\d\s()-]+$/.test(v))) {
+      throw new Error("Nomor telepon tidak valid");
+    }
+    patch.phone = v.length === 0 ? undefined : v;
+  }
+  if (args.location !== undefined) patch.location = assertShortText(args.location, 120, "Lokasi");
+  if (args.targetRole !== undefined) patch.targetRole = assertShortText(args.targetRole, 120, "Target role");
+  if (args.experienceLevel !== undefined) patch.experienceLevel = assertShortText(args.experienceLevel, 40, "Level");
+  if (args.bio !== undefined) {
+    patch.bio = args.bio.trim().length === 0 ? undefined : assertShortText(args.bio, 600, "Bio");
+  }
+  if (args.skills !== undefined) {
+    patch.skills = capStringArray(args.skills, {
+      maxEntries: 50,
+      maxLen: 60,
+      field: "Skill",
+      entryField: "Skill",
+    });
+  }
+  if (args.interests !== undefined) {
+    patch.interests = capStringArray(args.interests, {
+      maxEntries: 50,
+      maxLen: 60,
+      field: "Minat",
+      entryField: "Minat",
+    });
+  }
+  return patch;
 }
 
 /**
@@ -138,33 +185,7 @@ export const patchProfile = mutation({
       throw new Error("Profil belum ada — selesaikan onboarding dulu");
     }
 
-    const patch: Record<string, unknown> = {};
-    if (args.fullName !== undefined) {
-      patch.fullName = assertShortText(args.fullName, 120, "Nama");
-    }
-    if (args.phone !== undefined) {
-      // Phone: digits / + / - / space / parens, 6-30 chars. Loose on
-      // purpose — Indonesian + international formats both allowed.
-      const v = args.phone.trim();
-      if (v.length > 0 && (v.length < 6 || v.length > 30 || !/^[+\d\s()-]+$/.test(v))) {
-        throw new Error("Nomor telepon tidak valid");
-      }
-      patch.phone = v.length === 0 ? undefined : v;
-    }
-    if (args.location !== undefined) patch.location = assertShortText(args.location, 120, "Lokasi");
-    if (args.targetRole !== undefined) patch.targetRole = assertShortText(args.targetRole, 120, "Target role");
-    if (args.experienceLevel !== undefined) patch.experienceLevel = assertShortText(args.experienceLevel, 40, "Level");
-    if (args.bio !== undefined) {
-      patch.bio = args.bio.trim().length === 0 ? undefined : assertShortText(args.bio, 600, "Bio");
-    }
-    if (args.skills !== undefined) {
-      if (args.skills.length > 50) throw new Error("Skill maksimal 50 entri");
-      patch.skills = args.skills.map((s) => assertShortText(s, 60, "Skill")).filter((s) => s.length > 0);
-    }
-    if (args.interests !== undefined) {
-      if (args.interests.length > 50) throw new Error("Minat maksimal 50 entri");
-      patch.interests = args.interests.map((s) => assertShortText(s, 60, "Minat")).filter((s) => s.length > 0);
-    }
+    const patch = validateProfileFields(args);
 
     if (Object.keys(patch).length === 0) {
       throw new Error("Tidak ada field yang diubah");
@@ -193,7 +214,10 @@ export const createOrUpdateProfile = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    const profileData = { userId, ...args };
+    // Same caps + control-char rejection as patchProfile. Spread the
+    // raw args first to keep the required-field types for db.insert, then
+    // overlay the validated (trimmed / capped) values so they win.
+    const profileData = { userId, ...args, ...validateProfileFields(args) };
 
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, profileData);

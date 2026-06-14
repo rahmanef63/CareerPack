@@ -1,3 +1,4 @@
+import { ConvexError } from "convex/values";
 import type { MutationCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 
@@ -38,9 +39,13 @@ export async function enforceRateLimit(
     const retrySec = Math.ceil(
       (recent[0].timestamp + rule.windowMs - now) / 1000,
     );
-    throw new Error(
-      `Rate limit tercapai (${rule.max}/${Math.round(rule.windowMs / 60000)}m). Coba lagi dalam ${retrySec}s.`,
-    );
+    // ConvexError (not plain Error): prod Convex redacts an uncaught Error to
+    // a generic "Server Error", which would drop this Indonesian quota copy
+    // before the client (humanMessage in notify.ts) can read it. The
+    // structured `data.message` payload survives the RPC boundary intact.
+    throw new ConvexError({
+      message: `Rate limit tercapai (${rule.max}/${Math.round(rule.windowMs / 60000)}m). Coba lagi dalam ${retrySec}s.`,
+    });
   }
 
   await ctx.db.insert("rateLimitEvents", {

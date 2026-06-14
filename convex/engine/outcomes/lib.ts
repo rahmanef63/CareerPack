@@ -40,6 +40,13 @@ export const MIN_COHORT_K = 5;
 /** Calibration look-back window in milliseconds (180 days). */
 export const CALIB_WINDOW_MS = 180 * 24 * 60 * 60 * 1000;
 
+/**
+ * Hard cap on events the calibrator pulls per run. Combined with a
+ * desc range-scan over the `by_time` index this yields the most-recent
+ * N *in-window* events deterministically — never an arbitrary slice.
+ */
+export const CALIB_MAX_EVENTS = 10_000;
+
 /** Default uniform prior when no curated seed edge exists. */
 export const DEFAULT_PRIOR_P = 0.1;
 export const DEFAULT_PRIOR_N = 10;

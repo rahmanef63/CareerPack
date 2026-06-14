@@ -46,6 +46,11 @@ export function sanitizeUrl(input: unknown, max: number = MAX_URL_LEN): string {
   const s = trimSafe(input, max);
   if (!s) return "";
   if (hasDangerousScheme(s)) return "";
+  // Protocol-relative (`//evil.com`) and slash-backslash (`/\evil.com`,
+  // which browsers normalise to `//evil.com`) values start with `/` but
+  // resolve OFF-origin — an open-redirect. Accept a root-relative value only
+  // when it is a single `/` NOT followed by another `/` or a backslash.
+  if (/^\/[/\\]/.test(s)) return "";
   if (s.startsWith("/") || s.startsWith("#")) return s;
   if (!/^https?:\/\//i.test(s)) return "";
   try {

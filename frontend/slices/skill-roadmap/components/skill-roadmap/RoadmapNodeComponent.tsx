@@ -55,6 +55,21 @@ export function RoadmapNodeComponent({
                 : 'border-border bg-card hover:border-brand hover:shadow-md'
         )}
         onClick={() => !isLocked && onSelect(node)}
+        role={isLocked ? undefined : "button"}
+        tabIndex={isLocked ? undefined : 0}
+        aria-label={isLocked ? undefined : node.title}
+        aria-disabled={isLocked || undefined}
+        onKeyDown={
+          isLocked
+            ? undefined
+            : (e) => {
+                if ((e.target as HTMLElement).closest("button")) return;
+                if (e.key === "Enter" || e.key === " ") {
+                  if (e.key === " ") e.preventDefault();
+                  onSelect(node);
+                }
+              }
+        }
       >
         <button
           onClick={(e) => !isLocked && onToggle(node.id, e)}
