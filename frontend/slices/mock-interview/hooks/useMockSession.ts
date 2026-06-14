@@ -37,8 +37,11 @@ export function useMockSession() {
   const updateAnswer = useMutation(api.mockInterview.mutations.updateInterviewAnswer);
   const analytics = useQuery(api.mockInterview.queries.getInterviewAnalytics);
   const interviewIdRef = useRef<Id<"mockInterviews"> | null>(null);
+  // Counts questions the user actually answered (non-empty), so the session
+  // result is a REAL completion rate — not a fabricated quality score.
+  const answeredCountRef = useRef(0);
   const historyLabel = analytics
-    ? `${analytics.completedSessions} sesi selesai · rata-rata ${analytics.avgScore}`
+    ? `${analytics.completedSessions} sesi selesai · rata-rata kelengkapan ${analytics.avgScore}%`
     : null;
 
   useEffect(() => {
@@ -118,6 +121,7 @@ export function useMockSession() {
         questionId: currentQuestion.id,
         answer,
       });
+      answeredCountRef.current += 1;
     } catch {
       // Non-fatal; completion will still land.
     }
@@ -130,16 +134,19 @@ export function useMockSession() {
       setShowAnswer(false);
       setUserAnswer("");
     } else {
-      const score = Math.floor(Math.random() * 30) + 70;
+      // Real completion rate (questions answered / total), NOT a random score.
+      const total = filteredQuestions.length;
+      const completion =
+        total > 0 ? Math.round((answeredCountRef.current / total) * 100) : 0;
       setSessionComplete(true);
-      setSessionScore(score);
+      setSessionScore(completion);
       const id = interviewIdRef.current;
       if (id && sessionStartedAt) {
         const durationSec = Math.round((Date.now() - sessionStartedAt) / 1000);
         try {
           await completeInterview({
             interviewId: id,
-            overallScore: score,
+            overallScore: completion,
             feedback: "Sesi selesai.",
             duration: durationSec,
           });
@@ -160,6 +167,7 @@ export function useMockSession() {
     setSessionStartedAt(null);
     setElapsedMs(0);
     interviewIdRef.current = null;
+    answeredCountRef.current = 0;
   };
 
   const toggleFavorite = (questionId: string) => {

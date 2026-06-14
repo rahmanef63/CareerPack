@@ -1,4 +1,4 @@
-import { Trophy, RotateCcw, Share2 } from "lucide-react";
+import { Trophy, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 
@@ -27,7 +27,7 @@ export function SessionCompleteCard({
           <div className="grid sm:grid-cols-3 gap-6 max-w-lg mx-auto mb-8">
             <div className="p-4 bg-brand-muted rounded-xl">
               <p className="text-3xl font-bold text-brand">{sessionScore}%</p>
-              <p className="text-sm text-brand">Skor Keseluruhan</p>
+              <p className="text-sm text-brand">Kelengkapan</p>
             </div>
             <div className="p-4 bg-success/10 rounded-xl">
               <p className="text-3xl font-bold text-success">{questionCount}</p>
@@ -43,10 +43,6 @@ export function SessionCompleteCard({
             <Button onClick={onReset} className="bg-brand hover:bg-brand">
               <RotateCcw className="w-4 h-4 mr-2" />
               Sesi Baru
-            </Button>
-            <Button variant="outline">
-              <Share2 className="w-4 h-4 mr-2" />
-              Bagikan Hasil
             </Button>
           </div>
         </CardContent>
