@@ -2,7 +2,7 @@ import { action, internalAction, internalMutation, mutation, type ActionCtx } fr
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { requireUser } from "../_shared/auth";
+import { authError, requireUser } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI } from "../_shared/aiResolve";
 import { parseJsonOrThrow, coerceJobShape } from "../_shared/aiOutput";
@@ -400,7 +400,7 @@ export const parseJobFromText = action({
   args: { text: v.string() },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Tidak terautentikasi");
+    if (!userId) throw authError("Tidak terautentikasi");
     await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
 
     const text = sanitizeAIInput(args.text, 8000);

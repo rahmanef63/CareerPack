@@ -12,54 +12,17 @@
  */
 
 import { MAX_HTML_LEN, MAX_URL_LEN, type EmbedProvider } from "./types";
+// Canonical sanitizer core lives in convex/_shared so this domain helper and
+// the notifications domain (`_shared/url.sanitizeActionUrl`) cannot drift.
+// Sharing via _shared is the allowed cross-domain path. Re-exported below so
+// the existing `from "./helpers"` import sites (blocks.ts, header.ts,
+// sanitize.ts) keep resolving unchanged.
+import { hasDangerousScheme, sanitizeUrlCore, trimSafe } from "../../_shared/url";
 
-const DANGEROUS_PROTO = /^(?:javascript|vbscript|data|file):/i;
-
-export function trimSafe(s: unknown, max: number): string {
-  if (typeof s !== "string") return "";
-  // Strip C0 control chars + DEL but preserve tabs/newlines/CR + the
-  // visible content. Block payloads include user prose.
-  return s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim().slice(0, max);
-}
-
-// Browsers strip C0 control whitespace (tab, newline, CR, form-feed,
-// vertical-tab) AND internal spaces out of a URL scheme at click/parse time
-// per the HTML/URL spec, so `java<TAB>script:`, `java<NEWLINE>script:`, and
-// `vb<TAB>script:` all resolve to live javascript:/vbscript: URLs. trimSafe
-// deliberately keeps tab/newline/CR for prose, so the scheme check must
-// collapse that whitespace itself before comparing against DANGEROUS_PROTO —
-// otherwise the literal-token comparison is trivially defeated.
-function dewhitespaceScheme(s: string): string {
-  // Only the candidate scheme prefix matters (everything up to and incl. the
-  // first ':'); collapse all whitespace there so a split scheme is exposed.
-  const colon = s.indexOf(":");
-  if (colon === -1) return s;
-  const prefix = s.slice(0, colon + 1).replace(/[\s\x00-\x1F]/g, "");
-  return prefix + s.slice(colon + 1);
-}
-
-function hasDangerousScheme(s: string): boolean {
-  return DANGEROUS_PROTO.test(dewhitespaceScheme(s));
-}
+export { trimSafe };
 
 export function sanitizeUrl(input: unknown, max: number = MAX_URL_LEN): string {
-  const s = trimSafe(input, max);
-  if (!s) return "";
-  if (hasDangerousScheme(s)) return "";
-  // Protocol-relative (`//evil.com`) and slash-backslash (`/\evil.com`,
-  // which browsers normalise to `//evil.com`) values start with `/` but
-  // resolve OFF-origin — an open-redirect. Accept a root-relative value only
-  // when it is a single `/` NOT followed by another `/` or a backslash.
-  if (/^\/[/\\]/.test(s)) return "";
-  if (s.startsWith("/") || s.startsWith("#")) return s;
-  if (!/^https?:\/\//i.test(s)) return "";
-  try {
-    const url = new URL(s);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
-    return url.toString();
-  } catch {
-    return "";
-  }
+  return sanitizeUrlCore(input, max);
 }
 
 const HTML_STRIP_TAGS = new Set([

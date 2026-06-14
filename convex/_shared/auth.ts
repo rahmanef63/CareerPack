@@ -10,7 +10,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 // intact, so `humanMessage` (frontend/shared/lib/notify.ts) can read
 // `err.data.message` un-redacted in prod. The string text is unchanged, so
 // callers that match on the message verbatim keep working.
-function authError(message: string): ConvexError<{ message: string }> {
+export function authError(message: string): ConvexError<{ message: string }> {
   return new ConvexError({ message });
 }
 

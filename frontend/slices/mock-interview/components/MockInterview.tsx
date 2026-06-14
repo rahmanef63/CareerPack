@@ -57,13 +57,11 @@ export function MockInterview() {
             filteredQuestions={s.filteredQuestions}
             currentQuestion={s.currentQuestion}
             currentQuestionIndex={s.currentQuestionIndex}
-            isRecording={s.isRecording}
             showAnswer={s.showAnswer}
             userAnswer={s.userAnswer}
             favorites={s.favorites}
             elapsedLabel={s.elapsedLabel}
             onStart={s.startSession}
-            onSetRecording={s.setIsRecording}
             onSetShowAnswer={s.setShowAnswer}
             onSetUserAnswer={s.setUserAnswer}
             onToggleFavorite={s.toggleFavorite}

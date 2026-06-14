@@ -216,8 +216,8 @@ export function AIConfigPanel() {
 
       <Alert className="border-warning/40 bg-warning/10">
         <ShieldAlert className="h-4 w-4 text-warning" />
-        <AlertTitle className="text-warning">Kunci ini dipakai semua user</AlertTitle>
-        <AlertDescription className="text-xs text-warning/90">
+        <AlertTitle className="text-warning-text">Kunci ini dipakai semua user</AlertTitle>
+        <AlertDescription className="text-xs text-warning-text">
           API key di sini di-share oleh semua user yang belum punya konfigurasi
           AI sendiri. Pastikan provider quota cukup atau set rate-limit di
           dashboard provider. Aktifkan untuk start, nonaktifkan untuk fallback ke env default.

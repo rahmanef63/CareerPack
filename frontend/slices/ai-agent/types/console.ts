@@ -19,6 +19,10 @@ export interface ChatSession {
   messages: Message[];
   createdAt: number;
   updatedAt: number;
+  /** Denormalized count from the server list query, used to render the
+   *  history rail without hydrating the full transcript. Absent on
+   *  locally-created sessions (fall back to `messages.length`). */
+  messageCount?: number;
 }
 
 export const STORAGE_KEY = "careerpack_ai_sessions";

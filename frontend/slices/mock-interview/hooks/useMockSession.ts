@@ -12,7 +12,6 @@ const FAV_KEY = "careerpack:mock-favorites";
 export function useMockSession() {
   const [activeTab, setActiveTab] = useState("practice");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [userAnswer, setUserAnswer] = useState("");
   const [sessionComplete, setSessionComplete] = useState(false);
@@ -180,7 +179,6 @@ export function useMockSession() {
   return {
     activeTab, setActiveTab,
     currentQuestionIndex, setCurrentQuestionIndex,
-    isRecording, setIsRecording,
     showAnswer, setShowAnswer,
     userAnswer, setUserAnswer,
     sessionComplete, sessionScore,

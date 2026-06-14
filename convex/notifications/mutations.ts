@@ -1,10 +1,19 @@
-import { mutation } from "../_generated/server";
+import { mutation, internalMutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireOwnedDoc } from "../_shared/auth";
 import { sanitizeActionUrl } from "../_shared/url";
 
-export const createNotification = mutation({
+// INTERNAL ONLY. Notifications are produced server-side (crons, actions, other
+// mutations) — never by the client. Exposing this publicly let any
+// authenticated user self-insert rows with an attacker-chosen type/title/
+// message (spoofing/abuse). Producers call it via
+// `ctx.runMutation(internal.notifications.mutations.createNotification, { userId, … })`.
+// `userId` is now an explicit arg because internal callers have no auth
+// session to derive it from (mirrors the direct insert in
+// `calendar/reminders.ts`, which already used `ev.userId`).
+export const createNotification = internalMutation({
   args: {
+    userId: v.id("users"),
     type: v.string(),
     title: v.string(),
     message: v.string(),
@@ -12,7 +21,6 @@ export const createNotification = mutation({
     scheduledFor: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await requireUser(ctx);
     // actionUrl is rendered verbatim as a Link href in NotificationsView, so
     // pass it through the URL allowlist (http(s)/relative/anchor only) before
     // storing. Anything else (javascript:/data:/file:/…) is dropped — not
@@ -21,7 +29,7 @@ export const createNotification = mutation({
       ? sanitizeActionUrl(args.actionUrl) || undefined
       : undefined;
     return await ctx.db.insert("notifications", {
-      userId,
+      userId: args.userId,
       type: args.type,
       title: args.title,
       message: args.message,

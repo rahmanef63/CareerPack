@@ -473,6 +473,7 @@ const MAX_SESSION_ID_LEN = 100;
 const MAX_TITLE_LEN = 200;
 const MAX_MESSAGE_LEN = 4000;
 const MAX_MESSAGES_PER_SESSION = 200;
+const MAX_PREVIEW_LEN = 160;
 const MAX_ACTIONS_PER_MSG = 10;
 const MAX_ACTION_TYPE = 60;
 const MAX_SESSIONS_PER_USER = 50;
@@ -557,6 +558,13 @@ export const upsertChatSession = mutation({
       return { id: msgId, role: m.role, content, timestamp: m.timestamp, actions };
     });
 
+    // Denormalize list-view metadata so `listChatSessions` never deserializes
+    // the full `messages` array. `content` is already capped above; slice again
+    // for the short preview.
+    const messageCount = messages.length;
+    const lastMessagePreview =
+      messages[messages.length - 1]?.content.slice(0, MAX_PREVIEW_LEN) ?? "";
+
     const existing = await ctx.db
       .query("chatConversations")
       .withIndex("by_user_session", (q) =>
@@ -568,6 +576,8 @@ export const upsertChatSession = mutation({
       await ctx.db.patch(existing._id, {
         title,
         messages,
+        messageCount,
+        lastMessagePreview,
         updatedAt: args.updatedAt,
       });
       return existing._id;
@@ -590,6 +600,8 @@ export const upsertChatSession = mutation({
       createdAt: args.createdAt,
       updatedAt: args.updatedAt,
       messages,
+      messageCount,
+      lastMessagePreview,
     });
   },
 });

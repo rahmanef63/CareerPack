@@ -250,7 +250,7 @@ function ExportPanel({
           <p className="text-sm font-medium">Aktifkan ekspor</p>
           <p className="text-xs text-muted-foreground">{hint}</p>
           {disabledNote && (
-            <p className="text-xs text-warning">{disabledNote}</p>
+            <p className="text-xs text-warning-text">{disabledNote}</p>
           )}
         </div>
         <Switch

@@ -58,7 +58,12 @@ export function HistoryRail({
                     {s.title || "Percakapan"}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
-                    {s.messages.length} pesan
+                    {/* Prefer the live transcript length once hydrated; fall
+                        back to the denormalized count for un-hydrated shells. */}
+                    {s.messages.length > 0
+                      ? s.messages.length
+                      : (s.messageCount ?? 0)}{" "}
+                    pesan
                   </p>
                 </div>
                 <button

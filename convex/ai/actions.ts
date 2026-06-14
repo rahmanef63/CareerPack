@@ -2,6 +2,7 @@ import { action, type ActionCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { authError } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI, type ResolvedAI } from "../_shared/aiResolve";
 import { parseJsonOrThrow, coerceProfileShape } from "../_shared/aiOutput";
@@ -11,7 +12,7 @@ import { SKILL_HANDLERS } from "./skillHandlers";
 
 async function requireQuota(ctx: ActionCtx): Promise<void> {
   const userId = await getAuthUserId(ctx);
-  if (!userId) throw new Error("Tidak terautentikasi");
+  if (!userId) throw authError("Tidak terautentikasi");
   await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
 }
 

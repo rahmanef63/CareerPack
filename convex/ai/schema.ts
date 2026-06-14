@@ -17,6 +17,13 @@ export const aiTables = {
         status: v.optional(v.string()),
       }))),
     })),
+    // Denormalized list-view metadata so `listChatSessions` never has to
+    // deserialize the (up to 200 × 4000-char) `messages` array just to show a
+    // count + preview. Written by `upsertChatSession`. Optional so legacy rows
+    // written before this field existed don't fail validation — the list query
+    // falls back to 0 / "" for those until the next upsert backfills them.
+    messageCount: v.optional(v.number()),
+    lastMessagePreview: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

@@ -43,7 +43,7 @@ Backend domain: `convex/notifications/`. Tabel: `notifications`. Cron: `convex/n
 | `useNotifications.markAllRead` | `api.notifications.mutations.markAllNotificationsAsRead` | Bulk patch |
 | `useNotifications.remove` | `api.notifications.mutations.deleteNotification` | Hard delete owned doc |
 | `useNotifications.clearAll` | `api.notifications.mutations.deleteAllNotifications` | Bulk wipe inbox |
-| (slice lain) | `api.notifications.mutations.createNotification` | Push notif (deadline / interview / system / tip) |
+| (server-side, internal) | `internal.notifications.mutations.createNotification` | Push notif (deadline / interview / system / tip). **Internal-only** — produced by crons/actions/mutations via `ctx.runMutation(internal…, { userId, … })`, never the client. |
 | (cron) | `api.notifications.digest.runWeeklyDigest` | Weekly job-match digest (opt-in via `userProfiles.digestEnabled`) |
 
 Schema (`convex/notifications/schema.ts`):
@@ -96,7 +96,7 @@ notifications: defineTable({
 
 - Push notification (PWA / Web Push API) — service worker sudah siap.
 - Group by type instead of date (filter sub-toggle).
-- Toast integration — panggil `createNotification` dari slice lain + auto pop toast realtime.
+- Toast integration — produksi notif server-side via `internal.notifications.mutations.createNotification` + auto pop toast realtime.
 - Slack / email digest preferences di Settings.
 - Slice manifest: `notifications.list`, `notifications.markRead` skills.
 
@@ -192,7 +192,7 @@ crons.weekly("weekly-digest", { dayOfWeek: "monday", hourUTC: 1, minuteUTC: 0 },
 - Relative time tokens: "Baru saja", "Xm", "Xj", "Xh"
 - Actions: "Tandai semua dibaca", "Bersihkan"
 
-**Integration points** — slice lain push notif via `createNotification`. Examples:
+**Integration points** — server-side producers push notif via `internal.notifications.mutations.createNotification` (internal-only; pass explicit `userId`). Examples:
 - Job application status change (`career-dashboard`)
 - Interview reminder pre-deadline (`calendar` cron)
 - Roadmap milestone unlocked (`skill-roadmap`)

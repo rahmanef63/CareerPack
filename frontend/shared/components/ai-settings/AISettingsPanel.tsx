@@ -190,8 +190,8 @@ export function AISettingsPanel({ embedded = false }: AISettingsPanelProps = {})
 
       <Alert className="border-warning/40 bg-warning/10">
         <ShieldAlert className="h-4 w-4 text-warning" />
-        <AlertTitle className="text-warning">Jaga kerahasiaan API key</AlertTitle>
-        <AlertDescription className="text-xs text-warning/90">
+        <AlertTitle className="text-warning-text">Jaga kerahasiaan API key</AlertTitle>
+        <AlertDescription className="text-xs text-warning-text">
           Kunci ini memberikan akses ke akun provider (OpenAI, Groq, dll.) atas
           nama Anda. Jangan share screenshot atau paste ke chat publik. Kami
           simpan terenkripsi di backend — tapi yang ada di layar bisa bocor.

@@ -113,6 +113,9 @@ export function useSessionSync() {
         messages: [],
         createdAt: s.createdAt,
         updatedAt: s.updatedAt,
+        // Denormalized metadata lets the history rail show the real count
+        // before the transcript hydrates via getChatSession.
+        messageCount: s.messageCount,
       }));
       setSessions(shells);
       setActiveId(shells[0].id);

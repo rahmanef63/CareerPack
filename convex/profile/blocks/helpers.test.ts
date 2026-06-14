@@ -159,6 +159,25 @@ describe("protocol-relative open-redirect regression (2026-06-15)", () => {
     });
   });
 
+  describe("sanitizeUrl rejects interior-whitespace slash-pair variants", () => {
+    // trimSafe keeps interior tab/newline/CR/space, and the browser collapses
+    // interior whitespace out of a URL at parse time, so a slash + whitespace
+    // + slash candidate resolves to a protocol-relative `//evil.com`. The
+    // slash-pair guard tests a de-whitespaced copy to reject these too.
+    it("slash + TAB + slash /<TAB>/evil.com", () => {
+      expect(sanitizeUrl("/\t/evil.com")).toBe("");
+    });
+    it("slash + newline + slash /<LF>/evil.com", () => {
+      expect(sanitizeUrl("/\n/evil.com")).toBe("");
+    });
+    it("slash + space + slash / /evil.com", () => {
+      expect(sanitizeUrl("/ /evil.com")).toBe("");
+    });
+    it("slash + TAB + backslash /<TAB>\\evil.com", () => {
+      expect(sanitizeUrl("/\t\\evil.com")).toBe("");
+    });
+  });
+
   describe("sanitizeUrl keeps legitimate same-origin + anchor + absolute", () => {
     it("root-relative /dashboard", () => {
       expect(sanitizeUrl("/dashboard")).toBe("/dashboard");

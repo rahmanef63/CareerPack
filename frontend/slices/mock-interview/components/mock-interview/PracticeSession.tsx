@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  MessageSquare, Pause, Mic, Video, CheckCircle2,
-  Lightbulb, ChevronRight, Star, Clock, Save, Share2, RotateCcw, Play, Info,
+  MessageSquare, CheckCircle2,
+  Lightbulb, ChevronRight, Star, Clock, RotateCcw, Play, Info,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
@@ -26,13 +26,11 @@ interface Props {
   }>;
   currentQuestion: Props["filteredQuestions"][number];
   currentQuestionIndex: number;
-  isRecording: boolean;
   showAnswer: boolean;
   userAnswer: string;
   favorites: Set<string>;
   elapsedLabel: string;
   onStart: () => void;
-  onSetRecording: (v: boolean) => void;
   onSetShowAnswer: (v: boolean) => void;
   onSetUserAnswer: (v: string) => void;
   onToggleFavorite: (id: string) => void;
@@ -42,9 +40,9 @@ interface Props {
 
 export function PracticeSession({
   sessionStartedAt, isStarting, filteredQuestions, currentQuestion,
-  currentQuestionIndex, isRecording, showAnswer, userAnswer,
+  currentQuestionIndex, showAnswer, userAnswer,
   favorites, elapsedLabel,
-  onStart, onSetRecording, onSetShowAnswer, onSetUserAnswer,
+  onStart, onSetShowAnswer, onSetUserAnswer,
   onToggleFavorite, onNext, onReset,
 }: Props) {
   if (!sessionStartedAt) {
@@ -147,48 +145,24 @@ export function PracticeSession({
               {currentQuestion.question}
             </h3>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-4">
-                <Button
-                  variant={isRecording ? "destructive" : "default"}
-                  size="lg"
-                  onClick={() => onSetRecording(!isRecording)}
-                  className={cn(
-                    "rounded-full px-8",
-                    !isRecording && "bg-brand hover:bg-brand",
-                  )}
-                >
-                  {isRecording ? (
-                    <>
-                      <Pause className="w-5 h-5 mr-2" />
-                      Berhenti Rekam
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="w-5 h-5 mr-2" />
-                      Mulai Rekam
-                    </>
-                  )}
-                </Button>
-                <Button variant="outline" size="lg" className="rounded-full">
-                  <Video className="w-5 h-5 mr-2" />
-                  Aktifkan Kamera
-                </Button>
-              </div>
-
-              {isRecording && (
-                <div className="flex items-center justify-center gap-2 text-destructive animate-pulse">
-                  <div className="w-3 h-3 rounded-full bg-destructive" />
-                  Sedang merekam...
-                </div>
-              )}
-
+            <div className="space-y-2">
+              <label
+                htmlFor="mock-answer"
+                className="text-sm font-medium text-foreground"
+              >
+                Tulis jawaban Anda
+              </label>
               <Textarea
-                placeholder="Atau ketik jawaban Anda di sini..."
+                id="mock-answer"
+                placeholder="Ketik jawaban Anda di sini..."
                 value={userAnswer}
                 onChange={(e) => onSetUserAnswer(e.target.value)}
                 className="min-h-[120px]"
               />
+              <p className="text-xs text-muted-foreground">
+                Jawaban tersimpan otomatis saat Anda lanjut ke pertanyaan
+                berikutnya.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -282,14 +256,6 @@ export function PracticeSession({
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
-                <Save className="w-4 h-4 mr-2" />
-                Simpan Sesi
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Share2 className="w-4 h-4 mr-2" />
-                Bagikan ke Mentor
-              </Button>
               <Button
                 variant="outline"
                 className="w-full justify-start"

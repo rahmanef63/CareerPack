@@ -239,14 +239,18 @@ export const listChatSessions = query({
       .withIndex("by_user_updated", (q) => q.eq("userId", userId))
       .order("desc")
       .collect();
+    // List view returns metadata only — never the full `messages` array.
+    // `messageCount` / `lastMessagePreview` are denormalized by
+    // `upsertChatSession`; fall back to 0 / "" for legacy rows written before
+    // those fields existed (next upsert backfills them).
     return sessions.map((s) => ({
       _id: s._id,
       sessionId: s.sessionId,
       title: s.title,
       createdAt: s.createdAt,
       updatedAt: s.updatedAt,
-      messageCount: s.messages.length,
-      preview: s.messages[s.messages.length - 1]?.content.slice(0, 160) ?? "",
+      messageCount: s.messageCount ?? 0,
+      lastMessagePreview: s.lastMessagePreview ?? "",
     }));
   },
 });
