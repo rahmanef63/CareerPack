@@ -57,13 +57,16 @@ Gate di HEAD: typecheck (frontend+convex) ✅ · lint 0-warning ✅ · **vitest 
 | 3 | **Off-VPS DR** (opsional) — copy backup ke storage terpisah (R2/B2/S3). Keputusan biaya/risiko, ditunda by-design sampai pre-launch. | +0.2 |
 | 4 | **Google OAuth Console** — client ID/secret + authorized origin/redirect. Config akun Google-mu. | <+0.1 |
 
-## 🟡 Sisa autonom — KOSMETIK (QA: gak layak satu batch, gak gerakin skor)
+## 🟢 Sisa autonom KOSMETIK — SUDAH DIBERESKAN (batch-7, commit `44785a1`)
 
-- matcher/actions.ts + engine/plan/actions.ts masih "Sesi Anda berakhir" (vs "Tidak terautentikasi") — string nit.
-- `console.ts` newSession() pakai `Math.random` session-id (string, bukan _id) — anti-pattern, aman.
-- komentar `useSessionSync` bilang "drawer close" padahal mount-cleanup — komentar doang.
-- aggregator chatConversations cron memory (off reactive path, bounded hourly).
-- arsitektur: restructure 4-SSOT routing PENUH (dead-code-nya udah dibersihin → 87; restructure = keputusan desainmu, medium-risk).
+Skor tertimbang gak gerak (cosmetic), tapi **semua temuan autonom kini tertutup**:
+- ✅ matcher/actions.ts + engine/plan/actions.ts → `authError("Tidak terautentikasi")` (konsisten).
+- ✅ `console.ts` newSession() → `crypto.randomUUID()` (collision-proof).
+- ✅ komentar `useSessionSync` dikoreksi.
+
+**Yang BUKAN autonom (sengaja ditinggal):**
+- aggregator chatConversations cron memory (off reactive path, bounded hourly; gak ada primitif streaming Convex buat ini).
+- arsitektur: restructure 4-SSOT routing PENUH (dead-code udah dibersihin → 87; restructure = keputusan desainmu, medium-risk).
 
 ## Cara lanjut
 - **Review:** `git log --oneline main..qa/loop-to-100` (**7 fix + 6 scorecard commit**).
@@ -73,4 +76,4 @@ Gate di HEAD: typecheck (frontend+convex) ✅ · lint 0-warning ✅ · **vitest 
 > ⚠️ **Deploy note (batch-5):** lokasi profil publik existing jadi **tersembunyi** sampai user opt-in `publicLocationShow`. Backfill `true` kalau mau kembaliin visibilitas lama.
 
 ## Log
-- **2026-06-15** — **83 → 85 → 86 → 89 → 91 → 92.78** (7 batch). Loop berhenti: QA konfirmasi plafon autonom (`worthwhileAutonomousRemains=false`). 100 butuh 4 item server/console di atas. Branch `qa/loop-to-100`, push ditahan.
+- **2026-06-15** — **83 → 85 → 86 → 89 → 91 → 92.78** (7 batch fix). Batch-7 (`44785a1`) menutup ekor kosmetik terakhir → **0 temuan autonom tersisa** (skor tetap 92.78 — cosmetic). Loop berhenti: QA konfirmasi plafon autonom (`worthwhileAutonomousRemains=false`). 100 butuh 4 item server/console di atas + opsional keputusan restructure routing. Branch `qa/loop-to-100`, push ditahan.
