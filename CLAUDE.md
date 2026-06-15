@@ -44,13 +44,24 @@ Three route groups under `frontend/app/`:
 2. `(dashboard)/` — auth-guarded layout. All dashboard pages resolve through a **catch-all** `dashboard/[[...slug]]/page.tsx` that looks the first slug segment up in `DASHBOARD_VIEWS`.
 3. `admin/page.tsx` — role-guarded (`state.user?.role === "admin"`).
 
-**Adding a dashboard page = two edits, nothing else:**
-1. Register the view in `frontend/shared/lib/dashboardRoutes.tsx` (`DASHBOARD_VIEWS` map). Lazy-load via `next/dynamic` — do not bypass.
-2. Add an entry in `frontend/shared/components/layout/navConfig.ts`. The `href` must match the slug key in `DASHBOARD_VIEWS`.
+**Adding a dashboard page = ONE edit** (consolidated 2026-06-15): add an entry to the
+registry in `frontend/shared/lib/dashboardRegistry.ts` — `{ slug, view (lazy via
+next/dynamic), nav?: { placement: "primary" | "more", label, icon, hue?, badge?,
+superAdminOnly? } }`. Everything is **derived** from this one list:
+- `DASHBOARD_VIEWS` (catch-all `/dashboard/[[...slug]]` router — slug `""` = home),
+- `PRIMARY_NAV` (mobile BottomNav tabs + desktop sidebar primaries),
+- `MORE_APPS` (MoreDrawer / sidebar secondaries — registry order = display order),
+- `activeNavForPath()` / `labelForPath()` (active-state matching).
 
-`navConfig.ts` is the nav SSOT: `PRIMARY_NAV` (mobile BottomNav tabs + desktop sidebar primaries), `MORE_APPS` (MoreDrawer / sidebar secondaries), and `activeNavForPath()` for active-state matching.
+So routing and nav can no longer drift. `dashboardRoutes.tsx` and
+`navConfig.ts` are now thin **re-export shims** over the registry (kept for
+import-path stability) — do NOT add route/nav data there. Omit `nav` for a
+route-only slug (e.g. the `ai-settings` legacy alias). A `dashboardRegistry.test.ts`
+pins the derived maps against expected values. `routes.ts` (`ROUTES.dashboard.*`)
+stays separate — typed redirect targets for RouteGuard/useAuth; keep its paths in
+sync if you add one those consume.
 
-Routing and nav are **not** driven by slice manifests. The per-slice `manifest.ts` + `shared/lib/sliceRegistry.ts` registry is the **AI skill catalog only** (`SliceManifest.skills` → slash commands, approval-card meta, LLM brief). Manifests carry no route/nav fields — adding AI skills for a slice is a separate, independent edit from the two routing edits above.
+Routing and nav are **not** driven by slice manifests. The per-slice `manifest.ts` + `shared/lib/sliceRegistry.ts` registry is the **AI skill catalog only** (`SliceManifest.skills` → slash commands, approval-card meta, LLM brief). Manifests carry no route/nav fields — adding AI skills for a slice is a separate, independent edit from the registry edit above.
 
 ### Slice pattern
 

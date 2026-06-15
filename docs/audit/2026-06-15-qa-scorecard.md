@@ -14,6 +14,13 @@
 > bukan re-score formal — gak worth satu workflow buat ini). Sisa human-gated tinggal:
 > provider snapshot (1 klik panel Hostinger), OAuth (opsional), off-VPS DR (opsional).
 
+> **Update 2026-06-15 (arsitektur — atas keputusan owner):** ✅ **Konsolidasi 4-SSOT
+> routing DONE** (`16eb350`). Satu registry `dashboardRegistry.ts` → `DASHBOARD_VIEWS`
+> + `PRIMARY_NAV` + `MORE_APPS` semua derived; `dashboardRoutes.tsx`/`navConfig.ts` jadi
+> shim; +9 test ekuivalensi (byte-equivalent, behavior tak berubah); "two edits → ONE
+> edit" + CLAUDE.md diupdate. Gate ijo (typecheck/lint/**472 test**/build SSG 14/14).
+> Estimasi arsitektur 78 → **~92**, overall **~93.6**.
+
 ## Riwayat skor
 
 | Iter | Skor | Commit fix | Inti |
