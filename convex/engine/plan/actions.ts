@@ -8,6 +8,7 @@ import { recordError } from "../../_shared/errorSink";
 import { withIdempotency } from "../../_shared/idempotency";
 import { internal } from "../../_generated/api";
 import { ALLOWED_ACTION_TYPES, validatePlan } from "./lib";
+import { authError } from "../../_shared/auth";
 
 async function resolveAI(ctx: ActionCtx, fallbackModel: string) {
   const cfg = await resolveAIShared(ctx, fallbackModel);
@@ -34,7 +35,7 @@ export const compile = action({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new ConvexError("Sesi Anda berakhir. Silakan login.");
+    if (!userId) throw authError("Tidak terautentikasi");
     return withIdempotency(ctx, userId, args.idempotencyKey, async () => {
       await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
 

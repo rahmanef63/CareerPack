@@ -200,7 +200,7 @@ export function useSessionSync() {
   }, [sessions, upsertSession]);
 
   // Mount-only: flush every queued transcript write when the console
-  // unmounts (route change / drawer close), so the final AI turn that
+  // unmounts (route change / app teardown), so the final AI turn that
   // landed inside the debounce window is persisted instead of dropped.
   // Depends on nothing render-scoped, so it never re-runs mid-session.
   useEffect(() => {

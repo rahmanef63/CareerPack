@@ -9,6 +9,7 @@ import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 import { withIdempotency } from "../_shared/idempotency";
 import { fallbackExtractKeywords, scoreATS } from "./atsScore";
+import { authError } from "../_shared/auth";
 import type { JDForScoring, CVForScoring } from "./atsScore";
 import type { Id } from "../_generated/dataModel";
 
@@ -171,7 +172,7 @@ export const scanCV = action({
   }> => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      throw new ConvexError("Sesi Anda berakhir. Silakan login ulang.");
+      throw authError("Tidak terautentikasi");
     }
 
     return withIdempotency(ctx, userId, args.idempotencyKey, () =>

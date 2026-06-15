@@ -41,7 +41,7 @@ export const WELCOME: Message = {
 export function newSession(): ChatSession {
   const now = Date.now();
   return {
-    id: `s-${now}-${Math.random().toString(36).slice(2, 8)}`,
+    id: `s-${crypto.randomUUID()}`,
     title: "Percakapan baru",
     messages: [WELCOME],
     createdAt: now,
