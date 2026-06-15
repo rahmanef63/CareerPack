@@ -25,13 +25,13 @@ curl https://<your-convex-backend>/version
 
 **Drill** (do this within 7 days of launch, then monthly): restore the latest tar.gz onto a fresh staging volume per the steps above, then sign in as a known user on staging and confirm every record is present.
 
-> ⚠️ **A real restore drill is still pending.** It requires SSH/host access to the Dokploy VPS (out of code scope) — see the `_pending_` row below and the open action item in [db-backup.md](./db-backup.md#action-items).
+> ✅ **Restore drill DONE 2026-06-15 (PASS).** Latest cron archive restored to a throwaway volume via `ssh vpsku` — restored size == live exactly (229.3M); a temp Convex backend booted clean from it (migration v124 up-to-date, listening 3210/3211); teardown verified, live volume untouched. Audit row below + [db-backup.md](./db-backup.md#action-items). Re-run monthly.
 
 Record the timestamp + SHA256 of the restored archive in this file each drill so audits can confirm freshness:
 
 | Date | SHA256 | Restored to | Verified by |
 |---|---|---|---|
-| _pending_ | _pending_ | _pending_ | _pending_ |
+| 2026-06-15 | `327344b5c804a3b0c0061374180c5ecc11c3f3d99a178c48c057eb3d96ace92f` (convex-20260615-0300.tar.gz, 120.7M) | throwaway volume + temp backend (live untouched) | automated drill via `ssh vpsku` — restored == live (229.3M), backend booted clean (3210/3211) |
 
 **Alternative (not the deployed path): `convex export` / `import`.** Convex CLI can emit a schema-aware snapshot ZIP (`convex export --path snapshot.zip`) and restore it with `convex import --replace`. This is more portable than the tar volume but is **not** what the cron produces, so it is **not** the primary restore route — it is listed as a deferred option in [db-backup.md → Alternatives Considered](./db-backup.md#alternatives-considered). Use it only if you have first taken an `export` snapshot in that same format; you cannot `convex import` the tar.gz the cron writes.
 
@@ -93,7 +93,7 @@ pnpm dlx playwright install chromium
 - [ ] TLS cert auto-renewing (Dokploy / certbot)
 - [ ] `CONVEX_SELF_HOSTED_ADMIN_KEY` rotated post-handover
 - [ ] `ADMIN_BOOTSTRAP_EMAILS` set to your real email so first-login auto-promotes
-- [ ] Backup drill completed (table above)
+- [x] Backup drill completed (table above) — 2026-06-15 PASS
 - [ ] File storage either external OR risk explicitly accepted
 - [ ] Service worker cache version bumped (`frontend/public/sw.js`)
 - [ ] Lighthouse mobile score ≥ 85 on landing page

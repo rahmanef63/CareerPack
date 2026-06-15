@@ -176,7 +176,7 @@ When auditing, flag risks **within the existing stack** (missing backups, weak i
 - [docs/backend.md](./docs/backend.md) — every Convex module + schema
 - [docs/auth.md](./docs/auth.md) — provider rationale + route guard patterns
 - [docs/development.md](./docs/development.md) — env matrix, dev-loop options (self-hosted Docker vs Convex cloud)
-- [docs/db-backup.md](./docs/db-backup.md) — Convex volume backup (Layer-2 cron tar DEPLOYED 2026-06-11; provider snapshot + recovery test pending)
+- [docs/db-backup.md](./docs/db-backup.md) — Convex volume backup (Layer-2 cron tar DEPLOYED 2026-06-11; recovery drill PASS 2026-06-15; provider snapshot pending)
 - [docs/features/](./docs/features/) — per-slice deep dives (one file per slice)
 - [.claude/skills/slice-refactor/SKILL.md](./.claude/skills/slice-refactor/SKILL.md) — file-length thresholds, canonical slice layout (flat vs complex-slice variant), refactor protocol, DRY rules, iframe-template caveats
 - [.claude/skills/slice-new/SKILL.md](./.claude/skills/slice-new/SKILL.md) — scaffolding a fresh slice + dual SSOT registration

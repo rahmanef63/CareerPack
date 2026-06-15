@@ -6,7 +6,13 @@
 > yang layak (sisa cuma kosmetik / butuh akses server+console kamu). Semua aman
 > & ke-commit di branch `qa/loop-to-100`; **push DITAHAN**.
 
-**SKOR FINAL TERVERIFIKASI: 92.78 / 100 (≈ 93)** · baseline **83** · **+9.78** · 7 batch fix, semua gate-green
+**SKOR FINAL TERVERIFIKASI: 93.38 / 100 (≈ 93)** · baseline **83** · **+10.38** · gate-green (472 test)
+
+> **Capstone verified 2026-06-15** (re-score after restore drill + restructure + cosmetic):
+> security 95 · convex 96 · frontend 94 · performance 94 · **testing 96** · ux 90 ·
+> **ops 88** (restore drill done) · **architecture 88** (routing SSOT consolidated) →
+> **overall 93.38**. Remaining gap to 100 = owner/console (provider snapshot, OAuth) +
+> one large optional autonomous item (25 components > 350-line refactor trigger).
 
 > **Update 2026-06-15 (ops):** ✅ **Restore drill DONE & PASS** (`c2d0190`, detail di
 > `db-backup.md`) — backup terbukti restorable + bootable. Ini nutup item ops #1.
