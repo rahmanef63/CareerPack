@@ -7,6 +7,23 @@
 `convex-20260611-0946.tar.gz` (121 MB, berisi `db.sqlite3` + `storage/files/*.blob`).
 Sisa action items: provider snapshot toggle + 1× recovery test.
 
+> **Update 2026-06-15 (keputusan owner):**
+> - **Off-VPS DR via shared hosting (`153.92.9.241`) → DITOLAK.** Sebagian TOS shared
+>   hosting larang dipakai murni sebagai remote backup (risiko suspend) + kuota/inode
+>   terbatas. Off-disk DR dialihkan ke **provider auto-snapshot VPS Hostinger (built-in,
+>   = Layer 1)**. Kalau nanti perlu off-site tahan-bencana: Cloudflare R2 — **WAJIB
+>   enkripsi GPG dulu** (arsip berisi data user + secret).
+> - **Recovery test (restore drill): ✅ PASS 2026-06-15.** Arsip `convex-20260615-0300.tar.gz`
+>   (120.7MB, fresh dari cron) di-restore ke volume throwaway via `ssh vpsku`: (1) ukuran
+>   restored = live PERSIS (229.3M = 229.3M), struktur lengkap (`db.sqlite3` 136MB +
+>   `credentials/` + `storage/`); (2) boot test — instance Convex temporer (image pinned
+>   sama, `--network none`, tanpa port, di volume restored) **BOOT BERSIH**: log "db metadata
+>   version up to date at 124 → Migration complete → backend listening on 0.0.0.0:3210 (+3211)".
+>   Backup TERBUKTI restorable + bootable. Throwaway container+volume dibongkar; live
+>   `careerpack-convex-8gdbpk_data` tak pernah disentuh.
+> - Arsip on-disk saat ini **belum terenkripsi** — OK untuk on-VPS; kalau dikirim
+>   off-site, set `BACKUP_PASSPHRASE_FILE` (backup.sh sudah support GPG AES-256).
+
 > ⚠️ **VOLUME_NAME wajib di-pin di cron.** Auto-detect versi lama
 > (`grep 'convex|...' | head -1`) terbukti berbahaya di host multi-project
 > (30+ volume convex) — akan mem-backup volume project lain. Script sudah
@@ -152,8 +169,11 @@ Backup ke external storage = tahan terhadap VPS provider outage / data center fa
 - [ ] Aktifkan Provider auto-snapshot (Layer 1) — 1 click di dashboard VPS
 - [x] Deploy `backup.sh` + install cron — **done 2026-06-11** (root crontab,
       `VOLUME_NAME=careerpack-convex-8gdbpk_data`, arsip pertama 121 MB terverifikasi)
-- [ ] Test recovery procedure sekali — restore ke staging volume + verify Convex
-      jalan. **Butuh SSH/host access ke VPS — out of code scope; masih `_pending_`.**
+- [x] Test recovery procedure sekali — **✅ done 2026-06-15 (PASS)**. Restore
+      `convex-20260615-0300.tar.gz` ke volume throwaway via `ssh vpsku`: ukuran =
+      live persis (229.3M), + instance Convex temporer boot bersih dari volume
+      restored (migration v124 up-to-date, listening 3210/3211). Live tak disentuh.
+      Detail di blok "Update 2026-06-15" di atas.
 - [x] Document path-to-restore di `docs/launch-runbook.md` — **done.** Runbook
       P1 sekarang memakai jalur tar-volume ini sebagai prosedur kanonik (bukan
       lagi `convex export/import`, yang tinggal jadi alternatif yang ditandai).
