@@ -145,7 +145,7 @@ export function AIAgentConsole({
       if (!text || thinking || !activeSession) return;
 
       const userMsg: Message = {
-        id: `u-${Date.now()}`,
+        id: `u-${crypto.randomUUID()}`,
         role: "user",
         text,
         ts: Date.now(),
@@ -254,7 +254,7 @@ export function AIAgentConsole({
         }
 
         const assistantMsg: Message = {
-          id: `a-${Date.now()}`,
+          id: `a-${crypto.randomUUID()}`,
           role: "assistant",
           text: assistantText,
           actions: [...slashActions, ...toolActions],

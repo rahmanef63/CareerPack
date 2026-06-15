@@ -1,12 +1,12 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser } from "../_shared/auth";
+import { MAX_URL_LEN } from "../_shared/url";
 
 const MAX_PATH_LEN = 100;
 const MAX_ID_LEN = 100;
 const MAX_NAME_LEN = 200;
 const MAX_CATEGORY_LEN = 60;
-const MAX_URL_LEN = 500;
 const MAX_TITLE_LEN = 200;
 const MAX_SKILLS = 100;
 const MAX_RESOURCES = 20;

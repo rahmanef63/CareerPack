@@ -135,7 +135,7 @@ export function useCVHandlers(
   }, [setCvData, setFormat]);
 
   const addEducation = () => {
-    const e: Education = { id: Date.now().toString(), institution: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '' };
+    const e: Education = { id: crypto.randomUUID(), institution: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '' };
     setCvData(prev => ({ ...prev, education: [...prev.education, e] }));
   };
   const updateEducation = useCallback((id: string, field: string, value: string) => {
@@ -149,7 +149,7 @@ export function useCVHandlers(
   };
 
   const addExperience = () => {
-    const e: Experience = { id: Date.now().toString(), company: '', position: '', startDate: '', endDate: '', description: '', achievements: [] };
+    const e: Experience = { id: crypto.randomUUID(), company: '', position: '', startDate: '', endDate: '', description: '', achievements: [] };
     setCvData(prev => ({ ...prev, experience: [...prev.experience, e] }));
   };
   const updateExperience = useCallback((id: string, field: string, value: string) => {
@@ -163,7 +163,7 @@ export function useCVHandlers(
   };
 
   const addSkill = () => {
-    const s: Skill = { id: Date.now().toString(), name: '', category: 'technical', proficiency: 3 };
+    const s: Skill = { id: crypto.randomUUID(), name: '', category: 'technical', proficiency: 3 };
     setCvData(prev => ({ ...prev, skills: [...prev.skills, s] }));
   };
   const updateSkill = useCallback((id: string, field: string, value: string | number) => {
@@ -177,7 +177,7 @@ export function useCVHandlers(
   };
 
   const addCertification = () => {
-    const c: Certification = { id: Date.now().toString(), name: '', issuer: '', date: '' };
+    const c: Certification = { id: crypto.randomUUID(), name: '', issuer: '', date: '' };
     setCvData(prev => ({ ...prev, certifications: [...prev.certifications, c] }));
   };
   const updateCertification = useCallback((id: string, field: string, value: string) => {
@@ -191,7 +191,7 @@ export function useCVHandlers(
   };
 
   const addProject = () => {
-    const p: Project = { id: Date.now().toString(), name: '', description: '', technologies: [] };
+    const p: Project = { id: crypto.randomUUID(), name: '', description: '', technologies: [] };
     setCvData(prev => ({ ...prev, projects: [...prev.projects, p] }));
   };
   const updateProject = useCallback((id: string, field: string, value: string) => {

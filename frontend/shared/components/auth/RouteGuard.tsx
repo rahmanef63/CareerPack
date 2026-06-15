@@ -72,11 +72,26 @@ export function RouteGuard({
   const { state } = useAuth();
   const result = evaluate(state, mode, requiredRole, redirectTo);
 
+  // Depend on the primitive evaluation inputs (not the fresh `result`
+  // object, which changes identity every render) and recompute the
+  // redirect target inside the effect so it fires only when inputs move.
+  const role = state.user?.role;
   useEffect(() => {
-    if (result && !result.pass) {
-      router.replace(result.target);
+    const r = evaluate(state, mode, requiredRole, redirectTo);
+    if (r && !r.pass) {
+      router.replace(r.target);
     }
-  }, [result, router]);
+    // `state` is excluded — we depend on its primitive fields below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    state.isLoading,
+    state.isAuthenticated,
+    role,
+    mode,
+    requiredRole,
+    redirectTo,
+    router,
+  ]);
 
   if (!result || !result.pass) return <LoadingScreen />;
   return <>{children}</>;

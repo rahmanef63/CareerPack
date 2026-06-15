@@ -96,19 +96,33 @@ export function useCareerReach(opts: {
       .sort((a, b) => a.role.localeCompare(b.role));
   }, [nodes]);
 
-  return {
-    nodes,
-    groupedByRole,
-    isLoadingNodes: nodesRaw === undefined,
-    startSlug,
-    endSlug,
-    budgetMonths,
-    setStartSlug,
-    setEndSlug,
-    setBudgetMonths,
-    reach,
-    isComputing: !!startSlug && !!endSlug && reach === undefined,
-  };
+  // Memoise the returned object so consumers can safely depend on its
+  // identity in effects without re-running every render. Setters from
+  // useState are already stable; nodes/groupedByRole are memoised above.
+  return useMemo(
+    () => ({
+      nodes,
+      groupedByRole,
+      isLoadingNodes: nodesRaw === undefined,
+      startSlug,
+      endSlug,
+      budgetMonths,
+      setStartSlug,
+      setEndSlug,
+      setBudgetMonths,
+      reach,
+      isComputing: !!startSlug && !!endSlug && reach === undefined,
+    }),
+    [
+      nodes,
+      groupedByRole,
+      nodesRaw,
+      startSlug,
+      endSlug,
+      budgetMonths,
+      reach,
+    ],
+  );
 }
 
 function seniorityOrder(s: string): number {

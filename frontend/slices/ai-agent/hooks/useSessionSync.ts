@@ -39,7 +39,13 @@ export function useSessionSync() {
 
   const hydratedRef = useRef(false);
   const migratedRef = useRef(false);
-  const pendingUpserts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  // Each entry keeps the live timer plus the bound upsert for that
+  // session, so a still-pending transcript write can be flushed (not just
+  // cancelled) when the console closes — otherwise the last AI turn that
+  // landed inside the debounce window is dropped.
+  const pendingUpserts = useRef<
+    Map<string, { timer: ReturnType<typeof setTimeout>; run: () => void }>
+  >(new Map());
 
   useEffect(() => {
     if (serverSessions === undefined) return;
@@ -160,8 +166,10 @@ export function useSessionSync() {
     for (const s of sessions) {
       if (s.messages.length === 0) continue;
       const existing = pendingUpserts.current.get(s.id);
-      if (existing) clearTimeout(existing);
-      const t = setTimeout(() => {
+      if (existing) clearTimeout(existing.timer);
+      // Capture this session's write so the timer and the unmount flush
+      // persist the same snapshot.
+      const run = () => {
         upsertSession({
           sessionId: s.id,
           title: s.title || "Percakapan",
@@ -182,17 +190,35 @@ export function useSessionSync() {
           console.error("[chat-sync] debounced upsert failed", e);
           return null;
         });
+      };
+      const t = setTimeout(() => {
         pendingUpserts.current.delete(s.id);
+        run();
       }, 400);
-      pendingUpserts.current.set(s.id, t);
+      pendingUpserts.current.set(s.id, { timer: t, run });
     }
   }, [sessions, upsertSession]);
+
+  // Mount-only: flush every queued transcript write when the console
+  // unmounts (route change / drawer close), so the final AI turn that
+  // landed inside the debounce window is persisted instead of dropped.
+  // Depends on nothing render-scoped, so it never re-runs mid-session.
+  useEffect(() => {
+    const timers = pendingUpserts.current;
+    return () => {
+      for (const { timer, run } of timers.values()) {
+        clearTimeout(timer);
+        run();
+      }
+      timers.clear();
+    };
+  }, []);
 
   const deleteSession = useCallback(
     (id: string) => {
       const pending = pendingUpserts.current.get(id);
       if (pending) {
-        clearTimeout(pending);
+        clearTimeout(pending.timer);
         pendingUpserts.current.delete(id);
       }
       deleteSessionMutation({ sessionId: id }).catch(() => null);

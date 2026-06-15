@@ -26,6 +26,9 @@ export function useFinancialPlan() {
   const savePlan = useMutation(api.financial.mutations.createOrUpdateFinancialPlan);
   const incomeHydrated = useRef(false);
   const planDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Latest plan-write closure, refreshed each debounce cycle, so the
+  // unmount flush can fire the queued plan write with up-to-date values.
+  const pendingPlanWrite = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (plan === undefined) return;
@@ -52,7 +55,12 @@ export function useFinancialPlan() {
   }, [variables, seedDefaults]);
 
   const [localValues, setLocalValues] = useState<Record<string, number>>({});
-  const debounceTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  // Each entry keeps the live timer plus the latest value queued for that
+  // variable, so a still-pending slider write can be flushed (not just
+  // cancelled) when the view unmounts mid-drag.
+  const debounceTimers = useRef<
+    Map<string, { timer: ReturnType<typeof setTimeout>; value: number }>
+  >(new Map());
 
   useEffect(() => {
     if (!variables) return;
@@ -68,13 +76,33 @@ export function useFinancialPlan() {
   const handleSliderChange = (id: string, value: number) => {
     setLocalValues((prev) => ({ ...prev, [id]: value }));
     const existing = debounceTimers.current.get(id);
-    if (existing) clearTimeout(existing);
+    if (existing) clearTimeout(existing.timer);
     const t = setTimeout(() => {
       updateVariable({ id: id as Id<"budgetVariables">, value }).catch(() => {});
       debounceTimers.current.delete(id);
     }, 400);
-    debounceTimers.current.set(id, t);
+    debounceTimers.current.set(id, { timer: t, value });
   };
+
+  // Mount-only: on unmount (route change / nav away mid-drag) flush every
+  // queued slider write with its last value, then the queued plan write,
+  // instead of dropping them. Refs are stable so this never re-runs.
+  useEffect(() => {
+    const sliderTimers = debounceTimers.current;
+    return () => {
+      for (const [id, { timer, value }] of sliderTimers) {
+        clearTimeout(timer);
+        updateVariable({ id: id as Id<"budgetVariables">, value }).catch(() => {});
+      }
+      sliderTimers.clear();
+      if (planDebounce.current) {
+        clearTimeout(planDebounce.current);
+        planDebounce.current = null;
+        pendingPlanWrite.current?.();
+        pendingPlanWrite.current = null;
+      }
+    };
+  }, [updateVariable]);
 
   const sortedVars: BudgetVar[] = useMemo(
     () => (variables ? [...variables].sort((a, b) => a.order - b.order) : []),
@@ -90,7 +118,9 @@ export function useFinancialPlan() {
   useEffect(() => {
     if (plan === undefined || !incomeHydrated.current) return;
     if (planDebounce.current) clearTimeout(planDebounce.current);
-    planDebounce.current = setTimeout(() => {
+    // Build the write once, capture it for the unmount flush, and reuse
+    // it when the timer fires so both paths persist identical values.
+    const writePlan = () => {
       const valueOf = (v: BudgetVar) =>
         v._id in localValues ? localValues[v._id] : v.value;
       const bucketize = (kind: string) =>
@@ -110,6 +140,12 @@ export function useFinancialPlan() {
         },
         timeline: 12,
       }).catch(() => {});
+    };
+    pendingPlanWrite.current = writePlan;
+    planDebounce.current = setTimeout(() => {
+      pendingPlanWrite.current = null;
+      planDebounce.current = null;
+      writePlan();
     }, 800);
     return () => {
       if (planDebounce.current) clearTimeout(planDebounce.current);

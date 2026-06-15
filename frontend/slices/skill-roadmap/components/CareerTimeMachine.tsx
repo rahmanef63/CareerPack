@@ -82,20 +82,21 @@ export function CareerTimeMachine() {
   //   ?skill=<name> → toast "Fokus skill: X"
   const sp = useSearchParams();
   const appliedRef = useRef(false);
+  const { isLoadingNodes, nodes, setEndSlug } = r;
   useEffect(() => {
     if (appliedRef.current) return;
-    if (r.isLoadingNodes) return;
+    if (isLoadingNodes) return;
     const node = sp?.get("node");
     const skill = sp?.get("skill");
-    if (node && r.nodes.some((n) => n.slug === node)) {
-      r.setEndSlug(node);
+    if (node && nodes.some((n) => n.slug === node)) {
+      setEndSlug(node);
       appliedRef.current = true;
     }
     if (skill) {
       notify.info(`Fokus skill: ${skill}`);
       appliedRef.current = true;
     }
-  }, [sp, r]);
+  }, [sp, isLoadingNodes, nodes, setEndSlug]);
 
   return (
     <div className="space-y-4">
