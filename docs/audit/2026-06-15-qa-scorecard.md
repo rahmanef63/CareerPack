@@ -8,6 +8,12 @@
 
 **SKOR FINAL TERVERIFIKASI: 92.78 / 100 (≈ 93)** · baseline **83** · **+9.78** · 7 batch fix, semua gate-green
 
+> **Update 2026-06-15 (ops):** ✅ **Restore drill DONE & PASS** (`c2d0190`, detail di
+> `db-backup.md`) — backup terbukti restorable + bootable. Ini nutup item ops #1.
+> Estimasi ops 83 → **~87**, overall **~93.2** (estimasi sesuai gain yang QA patok;
+> bukan re-score formal — gak worth satu workflow buat ini). Sisa human-gated tinggal:
+> provider snapshot (1 klik panel Hostinger), OAuth (opsional), off-VPS DR (opsional).
+
 ## Riwayat skor
 
 | Iter | Skor | Commit fix | Inti |
