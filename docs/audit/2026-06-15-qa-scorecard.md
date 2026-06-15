@@ -1,68 +1,71 @@
 # CareerPack — QA Scorecard (loop ke 100/100) — FINAL
 
-> **Loop selesai.** "QA alter ego" (review + adversarial re-verify multi-agent) menilai;
-> "Builder alter ego" mengerjakan backlog per batch; skor diukur ulang tiap putaran.
-> Berhenti di **plafon autonom** (dikonfirmasi QA: `loopShouldStop=true`). Semua kerja
-> di branch `qa/loop-to-100`; **push ke prod DITAHAN** — kamu yang review & merge.
+> **Loop berhenti.** Mentok di **dua** batas sekaligus: (1) plafon autonom nyata
+> (sisa kerja butuh tanganmu), dan (2) **session usage limit** (reset 08:10
+> Asia/Makassar) — re-QA putaran terakhir (rescore-5) gagal jalan karena limit.
+> Semua kerja aman & ke-commit di branch `qa/loop-to-100`; **push DITAHAN**.
 
-**SKOR FINAL: 91 / 100** · baseline **83** · **+8** · 4 iterasi, 7 fix-commit, semua terverifikasi adversarial
+**SKOR: ~92 / 100** · baseline **83** · **+9** · 5 batch fix, semua gate-green
+_(angka 92 = ESTIMASI dari hasil verifier batch-5 yang sudah selesai; rescore-5 formal keblok limit — 91 adalah angka terverifikasi terakhir, batch-5 nambah ~+1)._
 
 ## Riwayat skor
 
-| Iterasi | Skor | Commit fix | Isi |
+| Iter | Skor | Commit fix | Inti |
 |---|---|---|---|
-| 0 baseline | **83** | — | Audit 9-agent. Headline: fix XSS "C2" ternyata masih bisa ditembus. |
-| 1 | **85** (+2) | `dfd8639` | XSS `>`-in-attr, 2 sink main-origin, IDOR proofStorageId, toast notifikasi, script ops, deployment.md. |
-| 2 | **86** (+1) | `bc9fda3` | residual XSS scheme, IP-spoof XFF, Resend webhook, resetPassword DoS, PBKDF2 tests, actionUrl. |
-| 3 | **89** (+3) | `ab67dcb` | open-redirect `//`, validasi caps, ConvexError, coverage-gate, calibrator index, aiResolve test, keyboard-a11y, kontras WCAG. |
-| 4 | **91** (+2) | `86bd7e3`, `3c95d8c` | edge open-redirect + sanitizer dedup, ConvexError inline, createNotification internalMutation, mock-interview honesty (fake recording + **random score**), prose kontras, listChatSessions denormalize. |
+| 0 | **83** | — | Audit 9-agent. |
+| 1 | **85** | `dfd8639` | XSS attr, sinks, IDOR, toast, ops, docs. |
+| 2 | **86** | `bc9fda3` | residual XSS scheme, IP-spoof, webhook, resetPassword, PBKDF2, actionUrl. |
+| 3 | **89** | `ab67dcb` | open-redirect, validasi, ConvexError, coverage, calibrator, aiResolve, a11y, kontras. |
+| 4 | **91** | `86bd7e3`, `3c95d8c` | sanitizer dedup, internalMutation, mock-interview honesty. |
+| 5 | **~92** (est) | `e5d87f1` | CV-preview memo, admin-analytics O(1), coverage-gate enforce, validasi convex, security hardening, **arsitektur dead-code cleanup**, restore-docs. |
 
-## Scorecard final per dimensi
+## Scorecard per dimensi (post batch-5; * = estimasi, rescore-5 keblok limit)
 
-| Dimensi | Base | **Final** | Bobot | Catatan |
-|---|---|---|---|---|
-| Security | 82 | **95** | 20% | XSS (semua kelas), IDOR, IP-spoof, webhook, open-redirect ditutup + diverifikasi. Sisa: 3 item low. |
-| Convex backend | 82 | **95** | 19% | Validasi SSOT, ConvexError konsisten, internalMutation, ownership lengkap. Sisa: low. |
-| Frontend (React) | 88 | 91 | 15% | (carry) flush debounce unmount, AISettings dirty, effect deps. |
-| UX / a11y / i18n | 82 | **90+** | 12% | keyboard-a11y, kontras WCAG, mock-interview jujur. Sisa: low. |
-| Performance | 82 | **91** | 10% | calibrator deterministic, listChatSessions ramping, salary honest. Sisa: CV preview memo. |
-| Testing / DX | 82 | **94** | 9% | +130 test (447 total), PBKDF2+aiResolve di-test, coverage-gate dilebarkan. |
-| **Ops / reliability** | 74 | **80** | 9% | **CAPPED — butuh aksimu** (lihat punch-list). |
-| Arsitektur | 78 | **78** | 6% | **butuh keputusanmu** (4-SSOT routing). |
+| Dimensi | Base | Kini | Bobot |
+|---|---|---|---|
+| Security | 82 | **95** | 20% |
+| Convex backend | 82 | **95** | 19% |
+| Frontend (React) | 88 | 91 | 15% |
+| Performance | 82 | **~94** * | 10% |
+| UX / a11y / i18n | 82 | 90 | 12% |
+| Testing / DX | 82 | **~95** * | 9% |
+| **Ops / reliability** | 74 | **~82** * | 9% |
+| Arsitektur | 78 | **~87** * | 6% |
 
-Gate tiap batch: `pnpm typecheck` + `pnpm lint` + `pnpm exec vitest run` (**447 ijo**) + `next build` (compile + SSG 14/14; gagal cuma di copy standalone karena symlink Windows — lolos di Linux/Dokploy).
+Batch-5 verifier: **6/7 hold**; #3 (coverage-gate) benar kecuali angka doc salah → aku fix ke 40 file/463 test. Arsitektur cleanup terbukti **zero runtime consumer** + live routing byte-unchanged + tsc ijo.
+
+## Batch-5 — landed & verified (commit `e5d87f1`, 58 file)
+
+1. ✅ [perf] CV live-preview memo (React.memo + useDeferredValue; export baca LIVE).
+2. ✅ [perf/convex] Analytics super-admin baca adminStats O(1); chatConversations lepas dari reactive path; tabel besar di-bound + flag truncated.
+3. ✅ [testing] Pre-push jalanin `test:coverage` (threshold beneran nge-gate push) + doc count 40/463.
+4. ✅ [convex] Caps app-status/interview-date, toggleResource guard, email index, string auth kanonik.
+5. ✅ [security] `verifySecret` empty-salt guard, **`publicLocationShow`** toggle (location default HIDDEN), dedup `MAX_URL_LEN`.
+6. ✅ [arsitektur] Hapus field manifest route/nav mati + `NAV_PRIMARY`/`NAV_MORE`; docstring + CLAUDE.md jujur (manifest = AI skill catalog only).
+7. ✅ [ops] Rekonsiliasi prosedur restore (tar-volume kanonik).
+
+> ⚠️ **Behavior change batch-5:** profil publik yang sudah ada → lokasinya **tersembunyi** sampai user opt-in `publicLocationShow` (privacy-positive). Kalau mau kembaliin visibilitas lama, backfill `publicLocationShow: true`.
 
 ---
 
-## 🔴 PUNCH-LIST UNTUK KAMU — jarak 91 → ~95 (butuh tangan/keputusan manusia)
+## 🔴 Jarak ~92 → 100 = HANYA yang butuh KAMU (gak bisa autonom)
 
-QA konfirmasi ini **tidak bisa autonom**. Estimasi gain dari QA:
+1. **[ops] Restore drill** — restore backup ke staging, pastiin data utuh (butuh SSH prod + judgment). ~+0.5
+2. **[ops] Provider auto-snapshot** — toggle di dashboard VPS (billing/akunmu). ~+0.3
+3. **[security] Google OAuth Console** — OAuth client + redirect URI prod (akun Google-mu). ~+0-1
+4. **[arsitektur] Keputusan restructure 4-SSOT routing** — konsolidasi penuh ATAU terima duplikasi. Dead-code-nya udah aku bersihin; restructure penuh = keputusan desainmu (medium-risk, nyentuh routing semua halaman). ~+0.3-0.5
 
-1. **[ops] Restore drill** (~+0.3-0.5 overall). Ambil backup volume Convex, **restore beneran** ke environment buang, pastikan data balik utuh. Backup cron udah jalan (`docs/db-backup.md`), tapi backup yang belum pernah di-restore = belum terbukti. → butuh SSH ke prod + spin staging + judgment "data benar".
-2. **[ops] Provider auto-snapshot** (~+0.2-0.3 overall). Aktifkan snapshot otomatis di dashboard VPS (backup level-infra, independen dari tar cron). → aksi billing/console pakai akunmu.
-3. **[security] Google OAuth Console** (~+0-1 overall). Selesaikan OAuth client + redirect URI prod + consent screen di Google Cloud Console (doc 2026-06-11 udah ada). → kredensial Google-mu, additive (auth sekarang udah aman).
-4. **[arsitektur] Keputusan 4-SSOT routing** (~+0.25-0.5 overall). Putusin: konsolidasi `DASHBOARD_VIEWS` + `navConfig` + catch-all + admin-guard jadi satu sumber, ATAU terima duplikasi secara formal. Bisa dieksekusi autonom TAPI medium-risk (nyentuh routing semua halaman) — **butuh arahanmu dulu**. Ini lever tunggal terbesar (arsitektur dimensi terendah).
+## 🟡 Sisa autonom — TRIVIAL (sub-0.3 poin, gak layak 1 batch penuh)
 
----
-
-## 🟡 SISA AUTONOM (low/medium — diminishing returns, buat sesi lain kalau mau)
-
-QA `remainingAutonomous` (semua in-stack, gak nahan plafon banyak):
-- [perf] Memoize CV live-preview (React.memo + useDeferredValue) — re-render tiap ketik. (M)
-- [perf] Harden 6 query super-admin analytics (unbounded `.collect()`, termasuk chatConversations dgn messages[]) → index/take/aggregator. (M)
-- [testing] Enforce coverage di pre-push (`--coverage`) — sekarang threshold cuma kepicu di `test:coverage` manual. (S)
-- [convex] Caps di `updateApplicationStatus`/`addInterviewDate`, `toggleResource` touched-guard, by_email index. (S-M)
-- [security] `verifySecret` empty-salt TypeError guard; `publicLocationShow` toggle privasi; dedup literal 500 URL cap. (S)
-- [ux] Satu string auth Indonesia kanonik ("Tidak terautentikasi" vs "Sesi Anda berakhir"). (S)
-- [perf] Render/buang `lastMessagePreview` (disimpan tapi belum dipakai UI). (S)
-- [docs] `development.md` §8 "3 file, 18 test" → 38 file / 447 test. (S)
+- matcher/actions.ts + engine/plan/actions.ts masih "Sesi Anda berakhir" (cv udah kanonik) — kosmetik.
+- roadmap/mutations.ts punya `MAX_URL_LEN` sendiri (domain lain) — kosmetik.
+- aggregator chatConversations cron memory (acceptable; Convex gak punya column projection).
+- `.tsx` 0/0 coverage (limitasi v8/rolldown import-type, pre-existing).
 
 ## Cara lanjut
-
-- **Review branch:** `git log --oneline main..qa/loop-to-100` (7 fix + 5 scorecard commit).
-- **Merge kalau oke** → lalu push (push memicu auto-deploy Convex via pre-push hook — itu kenapa aku tahan).
-- **Atau** minta aku eksekusi item sisa-autonom tertentu / keputusan arsitektur kalau kamu udah pilih arah.
+- Review: `git log --oneline main..qa/loop-to-100` (**6 fix + 5 scorecard commit**).
+- Merge kalau oke → push (push = auto-deploy Convex prod via pre-push hook; sengaja aku tahan).
+- Atau pas limit reset (08:10) & kamu mau: minta aku jalanin rescore-5 formal buat angka presisi, atau kerjain restructure routing begitu kamu pilih arah.
 
 ## Log
-
-- **2026-06-15** — **83 → 85 → 86 → 89 → 91** (4 iterasi). Loop berhenti di plafon autonom (QA `loopShouldStop=true`). 100 butuh 4 item human-gated di punch-list. Branch `qa/loop-to-100`, push ditahan.
+- **2026-06-15** — **83 → 85 → 86 → 89 → 91 → ~92** (5 batch). Loop berhenti: plafon autonom + session limit (reset 08:10). 100 butuh 4 item human-gated di atas. Branch `qa/loop-to-100`, push ditahan.
