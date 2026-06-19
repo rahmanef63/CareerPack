@@ -95,4 +95,5 @@ Skor tertimbang gak gerak (cosmetic), tapi **semua temuan autonom kini tertutup*
 > ⚠️ **Deploy note (batch-5):** lokasi profil publik existing jadi **tersembunyi** sampai user opt-in `publicLocationShow`. Backfill `true` kalau mau kembaliin visibilitas lama.
 
 ## Log
+- **2026-06-19** — **Ponytail sweep** (`417d254`): audit over-engineering repo-wide (8 agent) → sweep (4 agent, verify-then-cut, 0 skip) → **−535 baris mati + 4 dep nganggur**. Gate ijo (472 test). Kosmetik/maintainability — headline tetap **93.38**. Detail: [docs/progress/2026-06-19-ponytail-sweep.md](../progress/2026-06-19-ponytail-sweep.md).
 - **2026-06-15** — **83 → 85 → 86 → 89 → 91 → 92.78** (7 batch fix). Batch-7 (`44785a1`) menutup ekor kosmetik terakhir → **0 temuan autonom tersisa** (skor tetap 92.78 — cosmetic). Loop berhenti: QA konfirmasi plafon autonom (`worthwhileAutonomousRemains=false`). 100 butuh 4 item server/console di atas + opsional keputusan restructure routing. Branch `qa/loop-to-100`, push ditahan.
