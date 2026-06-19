@@ -4,9 +4,7 @@
  */
 
 export * from './base-entity';
-export * from './api';
 export * from './common';
 export * from './auth';
 export * from './agent';
-export * from './chat';
 export * from './roadmap';

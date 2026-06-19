@@ -8,7 +8,6 @@ import { Label } from "@/shared/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/shared/components/ui/select";
-import { genId } from "../../lib/template";
 import { DIFFICULTY_OPTIONS, RESOURCE_TYPES, type TemplateNode } from "../../types/template";
 
 interface NodeEditorProps {
@@ -139,7 +138,7 @@ export function NodeEditor({ node, allNodes, onChange, onRemove }: NodeEditorPro
                 type="button"
                 onClick={() => onChange({
                   ...node,
-                  resources: [...node.resources, { id: genId(), title: "", type: "video", url: "", free: true }],
+                  resources: [...node.resources, { id: crypto.randomUUID(), title: "", type: "video", url: "", free: true }],
                 })}
                 className="text-xs text-brand flex items-center gap-1 hover:underline"
               >

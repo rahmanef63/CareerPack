@@ -15,7 +15,7 @@
  *   EMAIL_REPLY_TO  — optional; defaults to address part of EMAIL_FROM
  */
 
-import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
+import type { ActionCtx } from "../_generated/server";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "./fetchWithTimeout";
 
 const RESEND_API = "https://api.resend.com/emails";
@@ -407,8 +407,3 @@ function escapeHtml(s: string): string {
 function stripHtml(s: string): string {
   return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
-
-// re-exports for the typecheck — these helpers are intended for use only
-// within `_shared/email.ts`. Exporting the function types in case future
-// callers need them.
-export type { QueryCtx, MutationCtx };

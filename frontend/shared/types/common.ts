@@ -34,9 +34,6 @@ export type ResourceType = 'video' | 'article' | 'course' | 'book' | 'practice' 
 // Chat roles
 export type ChatRole = 'user' | 'assistant' | 'system';
 
-// Market trends
-export type DemandTrend = 'increasing' | 'stable' | 'decreasing';
-
 // AI providers
 export type AIProvider = 'zai' | 'openai' | 'custom';
 
@@ -53,12 +50,6 @@ export interface AIConfig {
 /**
  * Common value objects
  */
-export interface SalaryRange {
-    min: number;
-    max: number;
-    median: number;
-}
-
 export interface DateRange {
     startDate: string;
     endDate?: string;

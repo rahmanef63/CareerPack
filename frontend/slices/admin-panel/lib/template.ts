@@ -5,10 +5,6 @@ import {
   type LinkIssue, type AuditableTemplate,
 } from "../types/template";
 
-export function genId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2);
-}
-
 /**
  * Heuristic URL checker — runs entirely client-side, no network calls.
  * Catches the common rot patterns the seed JSON accumulated:

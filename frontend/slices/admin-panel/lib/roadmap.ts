@@ -1,12 +1,8 @@
 import type { SkillDraft, SkillShape } from "../types/roadmap";
 
-export function genId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2);
-}
-
 export function blankSkill(): SkillDraft {
   return {
-    id: genId(),
+    id: crypto.randomUUID(),
     name: "",
     category: "",
     level: "beginner",

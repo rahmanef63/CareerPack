@@ -167,10 +167,7 @@ export function parseSentryDsn(dsn: string): ParsedDsn | null {
 
 function randomEventId(): string {
   // Sentry expects a 32-char hex string (UUID without dashes).
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  return crypto.randomUUID().replace(/-/g, "");
 }
 
 interface SentryFrame {

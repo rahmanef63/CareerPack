@@ -35,8 +35,6 @@ import {
  * resource a 30-line task instead of a 130-line copy-paste.
  */
 
-type FunctionRef = FunctionReference<"query"> | FunctionReference<"mutation">;
-
 type ImportMode = "array" | "object";
 
 export interface DefineResourceConfig<T extends { _id: string }> {
@@ -216,7 +214,3 @@ function unwrapImport(
   if (typeof obj[key] === "object" && obj[key] !== null) return obj[key];
   return parsed;
 }
-
-// Keep `FunctionRef` union exported for any future opt-in helpers
-// without enabling lint warnings about unused types.
-export type { FunctionRef };
