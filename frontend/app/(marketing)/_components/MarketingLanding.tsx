@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { HeroSection } from "@/slices/hero";
+import { HeroSection, FeaturesSection } from "@/slices/hero";
 import { useAuth } from "@/shared/hooks/useAuth";
 
 /**
@@ -24,5 +24,10 @@ export function MarketingLanding() {
     }
   }, [state.isLoading, state.isAuthenticated, router]);
 
-  return <HeroSection onGetStarted={() => router.push("/login")} />;
+  return (
+    <>
+      <HeroSection onGetStarted={() => router.push("/login")} />
+      <FeaturesSection />
+    </>
+  );
 }
