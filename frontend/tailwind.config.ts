@@ -97,6 +97,29 @@ const config: Config = {
   				'800': '#075985',
   				'900': '#0c4a6e'
   			},
+  			// Fixed (non-theme-reactive) warm-paper palette for the public
+  			// marketing landing page ONLY — deliberately outside the oklch
+  			// brand-* token system so ThemePresetProvider customization
+  			// (which only governs the authenticated app shell) can't drift
+  			// the landing page's identity. Do not use landing-* outside
+  			// frontend/slices/hero/sections/**.
+  			landing: {
+  				paper: '#f8f3ea',
+  				'paper-2': '#fffaf1',
+  				ink: '#0e1d33',
+  				muted: '#5c6678',
+  				line: '#e7ddd0',
+  				blue: '#1857d9',
+  				'blue-2': '#2f74ff',
+  				green: '#2f7652',
+  				mint: '#e8f4eb',
+  				terra: '#b95c38',
+  				'terra-soft': '#f3dfd4',
+  				gold: '#efa64a',
+  				violet: '#7b56d9',
+  				pink: '#d94d7f',
+  				card: '#fffdf8'
+  			},
   			chart: {
   				'1': 'oklch(var(--chart-1) / <alpha-value>)',
   				'2': 'oklch(var(--chart-2) / <alpha-value>)',
