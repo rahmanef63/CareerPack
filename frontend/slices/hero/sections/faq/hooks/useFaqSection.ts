@@ -27,7 +27,7 @@ export interface UseFaqSectionResult {
 export function useFaqSection(): UseFaqSectionResult {
   const entries: FaqEntry[] = FAQ_ITEMS.map((item, index) => ({
     item,
-    value: `faq-${index}`,
+    value: item.id,
     chipLabel: String(index + 1),
   }));
 

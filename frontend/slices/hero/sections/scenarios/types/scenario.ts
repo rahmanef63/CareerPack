@@ -27,8 +27,6 @@ export interface Scenario {
   steps: [ScenarioStep, ScenarioStep, ScenarioStep, ScenarioStep];
   /** Closing box — worded as an aspiration/expectation, never a guarantee. */
   hasil: string;
-  /** Short illustrative flavor quote — not a real user testimonial. */
-  quote: string;
 }
 
 /** Visual/semantic tone for the repeated Situasi / Tantangan / Hasil boxes. */

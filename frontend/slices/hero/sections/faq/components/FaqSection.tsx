@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { ArrowRight } from "lucide-react";
 
 import { Accordion } from "@/shared/components/ui/accordion";
@@ -13,6 +15,12 @@ import { useFaqSection } from "../hooks/useFaqSection";
 export function FaqSection() {
   const sectionRef = useScrollReveal<HTMLElement>();
   const { entries, topics, supportHref, revealDelay } = useFaqSection();
+  const [openValue, setOpenValue] = useState<string | undefined>(undefined);
+
+  function handleTopicClick(faqItemId: string) {
+    setOpenValue(faqItemId);
+    document.getElementById(faqItemId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 
   return (
     <section ref={sectionRef} className="bg-muted py-20 sm:py-28">
@@ -65,7 +73,11 @@ export function FaqSection() {
               </p>
               <ul className="mt-4">
                 {topics.map((topic) => (
-                  <FaqTopicRow key={topic.id} topic={topic} />
+                  <FaqTopicRow
+                    key={topic.id}
+                    topic={topic}
+                    onClick={() => handleTopicClick(topic.faqItemId)}
+                  />
                 ))}
               </ul>
             </div>
@@ -77,7 +89,7 @@ export function FaqSection() {
               className="animate-on-scroll rounded-2xl border border-border bg-card p-8 opacity-0"
               style={revealDelay(1)}
             >
-              <Accordion type="single" collapsible>
+              <Accordion type="single" collapsible value={openValue} onValueChange={setOpenValue}>
                 {entries.map((entry) => (
                   <FaqAccordionItem key={entry.value} entry={entry} />
                 ))}

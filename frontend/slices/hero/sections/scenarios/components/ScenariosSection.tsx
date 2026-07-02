@@ -1,11 +1,11 @@
 "use client";
 
 import { Info } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
 import { useScrollReveal } from "@/slices/hero/hooks/useScrollReveal";
-import { SCENARIO_GRID } from "../config/scenarioVisuals";
+import { useTabSwitcher } from "@/slices/hero/hooks/useTabSwitcher";
 import { useScenarios } from "../hooks/useScenarios";
 import { ScenarioCard } from "./ScenarioCard";
+import { ScenarioTabs } from "./ScenarioTabs";
 
 /**
  * Illustrative usage scenarios — successor to the old TestimonialsSection.
@@ -17,6 +17,7 @@ import { ScenarioCard } from "./ScenarioCard";
 export function ScenariosSection() {
   const sectionRef = useScrollReveal<HTMLElement>();
   const scenarios = useScenarios();
+  const { activeIndex, activeItem: activeScenario, setActiveIndex } = useTabSwitcher(scenarios);
 
   return (
     <section ref={sectionRef} className="border-t border-border bg-background py-20">
@@ -52,10 +53,10 @@ export function ScenariosSection() {
           </div>
         </div>
 
-        <div className={cn("mt-12 grid gap-6", SCENARIO_GRID.columns)}>
-          {scenarios.map((scenario) => (
-            <ScenarioCard key={scenario.id} scenario={scenario} />
-          ))}
+        <ScenarioTabs scenarios={scenarios} activeIndex={activeIndex} onSelect={setActiveIndex} />
+
+        <div key={activeScenario.id} className="mx-auto mt-8 max-w-2xl animate-reveal-up">
+          <ScenarioCard scenario={activeScenario} />
         </div>
       </div>
     </section>

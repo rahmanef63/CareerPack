@@ -1,4 +1,3 @@
-import { Quote } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
 import type { ScenarioViewModel } from "../hooks/useScenarios";
@@ -15,10 +14,7 @@ export function ScenarioCard({ scenario }: ScenarioCardProps) {
   const avatarIconTextClassName = chipIconTextClassName(scenario.avatarClassName);
 
   return (
-    <div
-      className="animate-on-scroll opacity-0 rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-      style={{ animationDelay: `${scenario.cardDelaySeconds}s` }}
-    >
+    <div className="rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
       <div className="flex items-start gap-3">
         <span
           className={cn(
@@ -38,11 +34,6 @@ export function ScenarioCard({ scenario }: ScenarioCardProps) {
           </h3>
         </div>
       </div>
-
-      <p className="mt-4 flex gap-2 text-sm italic leading-relaxed text-muted-foreground">
-        <Quote className="h-4 w-4 shrink-0 text-border" aria-hidden />
-        <span>&ldquo;{scenario.quote}&rdquo;</span>
-      </p>
 
       <div className="mt-4 flex flex-col gap-3">
         <ScenarioInfoBox tone="situasi" label="Situasi" text={scenario.situasi} />

@@ -13,7 +13,7 @@ interface FaqAccordionItemProps {
 /** One accordion row, prefixed with a small circular numbered chip (local list index). */
 export function FaqAccordionItem({ entry }: FaqAccordionItemProps) {
   return (
-    <AccordionItem value={entry.value} className="border-border">
+    <AccordionItem id={entry.value} value={entry.value} className="border-border">
       <AccordionTrigger className="-mx-3 rounded-lg px-3 text-left text-foreground transition-colors duration-150 hover:bg-background/50 hover:no-underline [&_svg]:text-muted-foreground">
         <span className="flex items-center gap-4">
           <span

@@ -19,9 +19,9 @@ import {
 import type { ScenarioInfoBoxTone } from "../types/scenario";
 
 /**
- * Presentation config per scenario id — icons, avatar color, and stagger
- * timing. Kept separate from `constants/scenarios.ts` so content edits
- * never touch layout/visual concerns and vice versa.
+ * Presentation config per scenario id — icons and avatar color. Kept
+ * separate from `constants/scenarios.ts` so content edits never touch
+ * layout/visual concerns and vice versa.
  */
 export interface ScenarioVisualConfig {
   /** Persona avatar-chip icon. */
@@ -32,8 +32,6 @@ export interface ScenarioVisualConfig {
   accentTextClassName: string;
   /** One icon per journey step, in the same order as `Scenario.steps`. */
   stepIcons: [LucideIcon, LucideIcon, LucideIcon, LucideIcon];
-  /** Base scroll-reveal delay (seconds) for this card's own stagger group. */
-  cardDelaySeconds: number;
 }
 
 export const SCENARIO_VISUALS: Record<string, ScenarioVisualConfig> = {
@@ -42,21 +40,18 @@ export const SCENARIO_VISUALS: Record<string, ScenarioVisualConfig> = {
     avatarClassName: "bg-info",
     accentTextClassName: "text-info",
     stepIcons: [UserRoundPlus, BookOpen, MessagesSquare, Send],
-    cardDelaySeconds: 0.1,
   },
   "career-switcher": {
     personaIcon: Repeat2,
     avatarClassName: "bg-primary",
     accentTextClassName: "text-primary",
     stepIcons: [Map, Sparkles, UserCog, Search],
-    cardDelaySeconds: 0.2,
   },
   "active-seeker": {
     personaIcon: Target,
     avatarClassName: "bg-warning",
     accentTextClassName: "text-warning-text",
     stepIcons: [FileCheck, MessagesSquare, Search, Bell],
-    cardDelaySeconds: 0.3,
   },
 };
 
@@ -81,12 +76,11 @@ export const SCENARIO_TONE_STYLES: Record<ScenarioInfoBoxTone, ScenarioToneStyle
   hasil: {
     icon: Sparkles,
     boxClassName: "border-border bg-success/15",
-    labelClassName: "text-success",
+    labelClassName: "text-success-foreground",
   },
 };
 
 /** Grid layout numbers — not content, so they live here rather than constants. */
 export const SCENARIO_GRID = {
-  columns: "grid-cols-1 md:grid-cols-3",
   stepColumns: "grid-cols-4",
 } as const;

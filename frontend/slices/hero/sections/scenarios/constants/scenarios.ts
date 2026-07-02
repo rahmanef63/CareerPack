@@ -25,8 +25,6 @@ export const SCENARIOS: Scenario[] = [
     ],
     hasil:
       "Diharapkan lebih siap melamar dengan CV yang terstruktur rapi dan bekal dasar menghadapi wawancara pertama.",
-    quote:
-      "Pakai template CV builder untuk menyusun CV yang terstruktur rapi agar lebih mudah terbaca sistem screening ATS.",
   },
   {
     id: "career-switcher",
@@ -44,8 +42,6 @@ export const SCENARIOS: Scenario[] = [
     ],
     hasil:
       "Diharapkan profil lebih relevan dengan bidang baru dan lebih percaya diri melamar ke peluang lintas karir.",
-    quote:
-      "Latihan wawancara dengan asisten AI untuk membangun kepercayaan diri sebelum pindah jalur karir ke bidang baru.",
   },
   {
     id: "active-seeker",
@@ -63,7 +59,5 @@ export const SCENARIOS: Scenario[] = [
     ],
     hasil:
       "Diharapkan lamaran lebih terorganisir dengan CV yang tajam dan persiapan wawancara yang matang di setiap kesempatan.",
-    quote:
-      "Pakai tracker lamaran untuk memantau banyak lamaran sekaligus dan tahu mana yang perlu di-follow up.",
   },
 ];

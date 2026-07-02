@@ -1,7 +1,10 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import type { AtsMechanismPoint, ProofCardContent } from "../types/proof.types";
 import { ATS_SCORE_CAPTION, ATS_SCORE_VALUE } from "../constants/proof.constants";
 import { ATS_DONUT_CONFIG } from "../config/proof.config";
+import { useCountUp } from "../hooks/useCountUp";
 import { ProofCardShell } from "./ProofCardShell";
 
 interface ProofAtsScoreCardProps {
@@ -11,21 +14,29 @@ interface ProofAtsScoreCardProps {
 }
 
 /** Proof card #2 — a conic-gradient donut showing an explicitly-labeled
- * example score, plus the mechanism (not outcome) bullets behind it. */
+ * example score, plus the mechanism (not outcome) bullets behind it. The
+ * donut sweep + numeric label count up from 0 to ATS_SCORE_VALUE together
+ * once the card scrolls into view (see hooks/useCountUp). */
 export function ProofAtsScoreCard({ content, points, style }: ProofAtsScoreCardProps) {
+  const { ref: donutRef, value } = useCountUp<HTMLDivElement>(ATS_SCORE_VALUE);
+
   const donutStyle: CSSProperties = {
-    background: `conic-gradient(${ATS_DONUT_CONFIG.filledColor} ${ATS_SCORE_VALUE * 3.6}deg, ${ATS_DONUT_CONFIG.trackColor} 0deg)`,
+    background: `conic-gradient(${ATS_DONUT_CONFIG.filledColor} ${value * 3.6}deg, ${ATS_DONUT_CONFIG.trackColor} 0deg)`,
   };
 
   return (
     <ProofCardShell title={content.title} description={content.description} style={style}>
       <div className="flex flex-col items-center gap-1.5">
-        <div className={`relative flex items-center justify-center rounded-full ${ATS_DONUT_CONFIG.sizeClassName}`} style={donutStyle}>
+        <div
+          ref={donutRef}
+          className={`relative flex items-center justify-center rounded-full ${ATS_DONUT_CONFIG.sizeClassName}`}
+          style={donutStyle}
+        >
           <div
             className="absolute flex items-center justify-center rounded-full bg-card"
             style={{ inset: `${ATS_DONUT_CONFIG.holeInsetPercent}%` }}
           >
-            <span className="font-display text-xl font-semibold text-foreground">{ATS_SCORE_VALUE}%</span>
+            <span className="font-display text-xl font-semibold text-foreground">{Math.round(value)}%</span>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">{ATS_SCORE_CAPTION}</p>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useScrollReveal } from "@/slices/hero/hooks/useScrollReveal";
+import { useTabSwitcher } from "@/slices/hero/hooks/useTabSwitcher";
 import { ToolkitCategoryCard } from "./ToolkitCategoryCard";
+import { ToolkitCategoryTabs } from "./ToolkitCategoryTabs";
 import { TrustStripCell } from "./TrustStripCell";
 import { useToolkitCategories } from "../hooks/useToolkitCategories";
 import { useTrustStrip } from "../hooks/useTrustStrip";
@@ -10,12 +12,14 @@ import { useTrustStrip } from "../hooks/useTrustStrip";
  * Landing "Toolkit" section — replaces the old flat 12-item feature grid
  * with 4 categories (Persiapan / Melamar / Berkembang / Karier Jangka
  * Panjang), sourced from the real dashboard nav registry so labels never
- * drift from the actual app.
+ * drift from the actual app. Categories switch via a tab row instead of
+ * rendering all 4 full-detail cards simultaneously.
  */
 export function ToolkitSection() {
   const sectionRef = useScrollReveal<HTMLElement>();
   const { categories, revealDelay } = useToolkitCategories();
   const trustStrip = useTrustStrip();
+  const { activeIndex, activeItem: activeCategory, setActiveIndex } = useTabSwitcher(categories);
 
   return (
     <section
@@ -41,14 +45,14 @@ export function ToolkitSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {categories.map((category, index) => (
-            <ToolkitCategoryCard
-              key={category.id}
-              category={category}
-              style={revealDelay(index)}
-            />
-          ))}
+        <ToolkitCategoryTabs
+          categories={categories}
+          activeIndex={activeIndex}
+          onSelect={setActiveIndex}
+        />
+
+        <div key={activeCategory.id} className="mt-6 animate-reveal-up">
+          <ToolkitCategoryCard category={activeCategory} />
         </div>
 
         <div

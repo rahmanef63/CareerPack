@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { cn } from "@/shared/lib/utils";
 import { chipIconTextClassName } from "../../../lib/chipContrast";
 import { ToolkitFeatureRow } from "./ToolkitFeatureRow";
@@ -6,19 +5,17 @@ import type { ToolkitCategory } from "../types/toolkit.types";
 
 interface ToolkitCategoryCardProps {
   category: ToolkitCategory;
-  style?: CSSProperties;
 }
 
 /** One of the 4 toolkit category cards: icon + title + tagline, feature rows, tinted tip. */
-export function ToolkitCategoryCard({ category, style }: ToolkitCategoryCardProps) {
+export function ToolkitCategoryCard({ category }: ToolkitCategoryCardProps) {
   const Icon = category.icon;
   return (
     <div
       className={cn(
-        "animate-on-scroll opacity-0 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
         category.hoverBorderClassName
       )}
-      style={style}
     >
       <div>
         <span
