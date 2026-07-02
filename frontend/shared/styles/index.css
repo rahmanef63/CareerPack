@@ -47,7 +47,9 @@
     /* Domain semantic tones — CareerPack-specific, not in tweakcn registry.
        Kept as OKLCH for consistency with the rest of the palette. */
     --success: 0.70 0.17 152;               /* approx oklch of green */
-    --success-foreground: 1.00 0 0;
+    /* text drawn ON a --success fill. White (1.00) only hit ~2.49:1 here —
+       fails WCAG 4.5:1. Darkened to L 0.25 → ~6.4:1 on bg-success. */
+    --success-foreground: 0.25 0 0;
     --warning: 0.80 0.17 80;                /* amber — fills / borders / icons */
     --warning-foreground: 0.32 0 0;         /* text drawn ON a --warning fill */
     /* Readable amber for multi-line body copy on warning-tinted surfaces.
@@ -56,7 +58,9 @@
        plain card. Use text-warning-text for prose; keep --warning for fills. */
     --warning-text: 0.52 0.14 80;
     --info: 0.65 0.18 236;                  /* sky */
-    --info-foreground: 1.00 0 0;
+    /* text drawn ON a --info fill. White (1.00) only hit ~3.03:1 here —
+       fails WCAG 4.5:1. Darkened to L 0.20 → ~5.95:1 on bg-info. */
+    --info-foreground: 0.20 0 0;
 
     --border: 0.92 0.008 80;               /* warm hairline (hue 80) */
     --input: 0.93 0.01 264.53;
@@ -86,28 +90,6 @@
     --brand-to: 0.42 0.18 265.64;
     --brand-muted: 0.95 0.03 236.82;
     --brand-muted-foreground: 0.38 0.14 265.52;
-
-    /* Landing (marketing page) "warm paper" palette — same OKLCH + alpha-value
-       convention as every other token above so bg-landing-x/20 opacity
-       modifiers work, but its own family (not aliased to brand/*) so the
-       runtime ThemePresetProvider can't drift the landing page's identity.
-       Values below computed from the original fixed hex design via a
-       standard sRGB->OKLab->OKLCH conversion. */
-    --landing-paper: 0.9656 0.0131 82.40;
-    --landing-paper-2: 0.9865 0.0130 82.40;
-    --landing-ink: 0.2302 0.0476 257.89;
-    --landing-muted: 0.5084 0.0312 262.22;
-    --landing-line: 0.9020 0.0207 74.65;
-    --landing-blue: 0.5047 0.2089 262.39;
-    --landing-blue-2: 0.5978 0.2186 262.20;
-    --landing-green: 0.5104 0.0921 158.41;
-    --landing-mint: 0.9557 0.0174 153.56;
-    --landing-terra: 0.5804 0.1303 41.11;
-    --landing-terra-soft: 0.9168 0.0266 50.85;
-    --landing-gold: 0.7795 0.1367 69.42;
-    --landing-violet: 0.5607 0.1915 292.09;
-    --landing-pink: 0.6233 0.1797 1.82;
-    --landing-card: 0.9942 0.0069 88.64;
 
     /* Radius scale */
     --radius-sm: calc(var(--radius) - 4px);
@@ -182,14 +164,18 @@
     --destructive-foreground: 1.00 0 0;
 
     --success: 0.65 0.17 152;
-    --success-foreground: 1.00 0 0;
+    /* --success stays a mid-tone green in dark mode too, so white text (1.00)
+       only hit ~3.01:1 — mirror :root's dark value instead (~5.3:1). */
+    --success-foreground: 0.25 0 0;
     --warning: 0.75 0.17 80;
-    --warning-foreground: 1.00 0 0;
+    --warning-foreground: 0.32 0 0;         /* text drawn ON a --warning fill; --warning stays bright amber in dark mode too, so white text (1.00) only hit ~2.26:1 — mirror :root's dark value instead */
     /* Readable amber on dark warning-tinted surfaces. Brightened to L 0.88
        → ~6.5:1 on bg-warning/10, ~10:1 on a dark card (AA pass). */
     --warning-text: 0.88 0.14 80;
     --info: 0.60 0.18 236;
-    --info-foreground: 1.00 0 0;
+    /* --info stays a mid-tone blue in dark mode too, so white text (1.00)
+       only hit ~3.65:1 — mirror :root's dark value instead (~4.93:1). */
+    --info-foreground: 0.20 0 0;
 
     --border: 0.37 0 0;
     --input: 0.37 0 0;
@@ -216,33 +202,6 @@
     --brand-to: 0.49 0.22 264.38;
     --brand-muted: 0.38 0.14 265.52;
     --brand-muted-foreground: 0.88 0.06 254.13;
-
-    /* Landing dark variant — same hue family as the light values above
-       ("warm paper by lamplight"), lightness inverted. Neutrals keep the
-       ~75-80deg warm hue undertone instead of going true gray/black.
-       Accent L (blue/green/terra/violet) is kept close to its light-mode
-       counterpart, NOT brightened — every section relies on a
-       text-white-on-accent contract (icon chips, badges, buttons, cards),
-       and raising L past ~0.60 drops white-text contrast below the 4.5:1
-       WCAG minimum. At these L values contrast vs white text is ~4.5-6.2:1
-       (pass) and contrast vs the dark --landing-paper background is still
-       ~3.1-4.3:1, clearing the 3:1 non-text/UI-component minimum so the
-       accents still pop against the dark page. */
-    --landing-paper: 0.1650 0.0180 75;
-    --landing-paper-2: 0.1950 0.0200 75;
-    --landing-ink: 0.9300 0.0150 80;
-    --landing-muted: 0.6800 0.0200 260;
-    --landing-line: 0.2800 0.0200 75;
-    --landing-blue: 0.5047 0.1900 262;
-    --landing-blue-2: 0.7400 0.1900 262;
-    --landing-green: 0.5104 0.1100 158;
-    --landing-mint: 0.2200 0.0400 158;
-    --landing-terra: 0.5804 0.1300 41;
-    --landing-terra-soft: 0.2600 0.0350 45;
-    --landing-gold: 0.7800 0.1400 69;
-    --landing-violet: 0.5607 0.1700 292;
-    --landing-pink: 0.7200 0.1600 2;
-    --landing-card: 0.2100 0.0220 78;
 
     --letter-spacing: 0em;
     --shadow-color: 0 0% 0%;

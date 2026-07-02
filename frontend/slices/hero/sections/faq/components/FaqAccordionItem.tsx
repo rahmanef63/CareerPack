@@ -13,11 +13,11 @@ interface FaqAccordionItemProps {
 /** One accordion row, prefixed with a small circular numbered chip (local list index). */
 export function FaqAccordionItem({ entry }: FaqAccordionItemProps) {
   return (
-    <AccordionItem value={entry.value} className="border-landing-line">
-      <AccordionTrigger className="-mx-3 rounded-lg px-3 text-left text-landing-ink transition-colors duration-150 hover:bg-landing-paper/50 hover:no-underline [&_svg]:text-landing-muted">
+    <AccordionItem value={entry.value} className="border-border">
+      <AccordionTrigger className="-mx-3 rounded-lg px-3 text-left text-foreground transition-colors duration-150 hover:bg-background/50 hover:no-underline [&_svg]:text-muted-foreground">
         <span className="flex items-center gap-4">
           <span
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-landing-blue/10 text-xs font-semibold text-landing-blue"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
             aria-hidden="true"
           >
             {entry.chipLabel}
@@ -25,7 +25,7 @@ export function FaqAccordionItem({ entry }: FaqAccordionItemProps) {
           <span className="font-medium">{entry.item.question}</span>
         </span>
       </AccordionTrigger>
-      <AccordionContent className="pl-11 text-landing-muted">
+      <AccordionContent className="pl-11 text-muted-foreground">
         {entry.item.answer}
       </AccordionContent>
     </AccordionItem>

@@ -10,7 +10,7 @@ import {
 export function DocumentPreview() {
   return (
     <StepPreviewCard>
-      <Badge className="border-transparent bg-landing-terra-soft font-normal text-landing-terra">
+      <Badge className="border-transparent bg-warning/15 font-normal text-warning-text">
         {DOCUMENT_EXAMPLE_ATS_SCORE}
       </Badge>
 
@@ -18,12 +18,12 @@ export function DocumentPreview() {
         {DOCUMENT_SKELETON_LINES.map((line) => (
           <div
             key={line.widthClassName}
-            className={`h-2.5 rounded-full bg-landing-line ${line.widthClassName}`}
+            className={`h-2.5 rounded-full bg-border ${line.widthClassName}`}
           />
         ))}
       </div>
 
-      <p className="mt-4 text-sm text-landing-muted">{DOCUMENT_SUPPORT_LINE}</p>
+      <p className="mt-4 text-sm text-muted-foreground">{DOCUMENT_SUPPORT_LINE}</p>
     </StepPreviewCard>
   );
 }

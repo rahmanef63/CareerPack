@@ -12,12 +12,12 @@ interface ProofHighlightCardProps {
 export function ProofHighlightCard({ features }: ProofHighlightCardProps) {
   return (
     <div
-      className="animate-on-scroll flex flex-col gap-6 rounded-2xl bg-landing-blue p-8 text-white opacity-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      className="animate-on-scroll flex flex-col gap-6 rounded-2xl bg-primary p-8 text-white opacity-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       style={{ animationDelay: "0.2s" }}
     >
       <div className="flex flex-col gap-2">
         <h3 className="font-display text-2xl font-semibold leading-tight">{HIGHLIGHT_HEADLINE}</h3>
-        <p className="text-sm text-white/75">{HIGHLIGHT_SUBTEXT}</p>
+        <p className="text-xl font-bold text-white">{HIGHLIGHT_SUBTEXT}</p>
       </div>
 
       <div className="flex flex-col gap-3 border-t border-white/20 pt-6">
@@ -28,7 +28,7 @@ export function ProofHighlightCard({ features }: ProofHighlightCardProps) {
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
                 <Icon className="h-4 w-4" />
               </span>
-              <span className="text-sm font-medium">{feature.label}</span>
+              <span className="text-xl font-bold">{feature.label}</span>
             </div>
           );
         })}

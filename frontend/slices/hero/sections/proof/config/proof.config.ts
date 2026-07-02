@@ -35,13 +35,13 @@ export const FREE_TIER_ICON: LucideIcon = Gift;
  * Donut chart config for the "ats" card. Built with a plain div +
  * conic-gradient inline style (no chart lib) per the section brief.
  * Inline `style` can't reference a Tailwind class, so these reference the
- * same CSS custom properties the landing-* Tailwind tokens resolve to
- * (see shared/styles/index.css) — stays in sync with light/dark mode
- * automatically instead of freezing the light-mode color.
+ * same CSS custom properties the app's `primary`/`border` Tailwind tokens
+ * resolve to (see shared/styles/index.css) — stays in sync with light/dark
+ * mode automatically instead of freezing the light-mode color.
  */
 export const ATS_DONUT_CONFIG = {
-  filledColor: "oklch(var(--landing-blue))",
-  trackColor: "oklch(var(--landing-line))",
+  filledColor: "oklch(var(--primary))",
+  trackColor: "oklch(var(--border))",
   sizeClassName: "h-28 w-28",
   /** Inset (percent, all sides) of the inner cutout that turns the filled
    * circle into a ring/donut. */
@@ -55,18 +55,18 @@ export const CHAT_BUBBLE_STYLES: Record<
   { alignClassName: string; bubbleClassName: string }
 > = {
   user: {
-    // text-white (not a landing-* token) is intentional here, same as the
-    // rest of this section's colored chips/badges/buttons: white-on-accent
-    // needs to stay constant regardless of light/dark mode, exactly like
-    // the app's own --brand-foreground stays pure white in both :root and
-    // .dark (see shared/styles/index.css) — it's the accent color itself,
-    // not this text, that carries the theme-reactive identity.
+    // text-white is intentional here, same as the rest of this section's
+    // colored chips/badges/buttons: white-on-accent needs to stay constant
+    // regardless of light/dark mode, exactly like the app's own
+    // --primary-foreground stays pure white in both :root and .dark (see
+    // shared/styles/index.css) — it's bg-primary that carries the
+    // theme-reactive identity, not this text.
     alignClassName: "justify-end",
-    bubbleClassName: "bg-landing-blue text-white",
+    bubbleClassName: "bg-primary text-white",
   },
   assistant: {
     alignClassName: "justify-start",
-    bubbleClassName: "bg-landing-paper text-landing-ink border border-landing-line",
+    bubbleClassName: "bg-background text-foreground border border-border",
   },
 };
 

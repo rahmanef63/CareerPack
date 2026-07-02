@@ -9,14 +9,14 @@ import {
 export function TrackingPreview() {
   return (
     <StepPreviewCard>
-      <p className="text-sm font-medium text-landing-ink">Lamaran Saya</p>
+      <p className="text-sm font-medium text-foreground">Lamaran Saya</p>
 
-      <div className="mt-3 flex items-center justify-between rounded-xl border border-landing-line bg-landing-paper-2 px-3 py-2">
+      <div className="mt-3 flex items-center justify-between rounded-xl border border-border bg-muted px-3 py-2">
         <div>
-          <p className="text-sm text-landing-ink">{APPLICATION_EXAMPLE.role}</p>
-          <p className="text-xs text-landing-muted">{APPLICATION_EXAMPLE.company}</p>
+          <p className="text-sm text-foreground">{APPLICATION_EXAMPLE.role}</p>
+          <p className="text-xs text-muted-foreground">{APPLICATION_EXAMPLE.company}</p>
         </div>
-        <Badge className="border-transparent bg-landing-green font-normal text-white">
+        <Badge className="border-transparent bg-success font-normal text-success-foreground">
           {APPLICATION_EXAMPLE.status}
         </Badge>
       </div>
@@ -26,7 +26,7 @@ export function TrackingPreview() {
           <span
             key={index}
             className={`h-1.5 flex-1 rounded-full ${
-              stage.filled ? "bg-landing-blue" : "bg-landing-line"
+              stage.filled ? "bg-primary" : "bg-border"
             }`}
           />
         ))}

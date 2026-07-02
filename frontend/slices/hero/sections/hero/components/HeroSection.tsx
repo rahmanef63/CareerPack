@@ -39,7 +39,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
   const EyebrowIcon = EYEBROW_ICON;
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-landing-paper">
+    <section ref={sectionRef} className="relative overflow-hidden bg-background">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left column */}
@@ -48,25 +48,25 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               className="animate-on-scroll flex items-center gap-2 opacity-0"
               style={{ animationDelay: revealDelay(0) }}
             >
-              <EyebrowIcon className="h-5 w-5 text-landing-terra" aria-hidden />
-              <span className="text-sm font-semibold uppercase tracking-widest text-landing-terra">
+              <EyebrowIcon className="h-5 w-5 text-warning" aria-hidden />
+              <span className="text-sm font-semibold uppercase tracking-widest text-warning-text">
                 {EYEBROW_TEXT}
               </span>
             </div>
 
             <h1
-              className="animate-on-scroll font-display text-5xl font-extrabold leading-[0.96] tracking-tight text-landing-ink opacity-0 sm:text-6xl lg:text-7xl"
+              className="animate-on-scroll font-display text-5xl font-extrabold leading-[0.96] tracking-tight text-foreground opacity-0 sm:text-6xl lg:text-7xl"
               style={{ animationDelay: revealDelay(1) }}
             >
               {HEADLINE_PREFIX}
               <span className="relative inline-block">
                 <span className="relative z-10">{HEADLINE_HIGHLIGHT}</span>
-                <span aria-hidden className="absolute inset-x-0 bottom-1 -z-0 h-[0.3em] -rotate-1 bg-landing-blue/25" />
+                <span aria-hidden className="absolute inset-x-0 bottom-1 -z-0 h-[0.3em] -rotate-1 bg-primary/25" />
               </span>
             </h1>
 
             <p
-              className="animate-on-scroll max-w-xl text-lg leading-relaxed text-landing-muted opacity-0 sm:text-xl"
+              className="animate-on-scroll max-w-xl text-lg leading-relaxed text-muted-foreground opacity-0 sm:text-xl"
               style={{ animationDelay: revealDelay(2) }}
             >
               {LEAD_PARAGRAPH}
@@ -79,7 +79,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               <Button
                 size="lg"
                 onClick={onGetStarted}
-                className="rounded-xl bg-landing-blue text-white hover:bg-landing-blue/90"
+                className="rounded-xl bg-primary text-white hover:bg-primary/90"
               >
                 {CTA_PRIMARY_LABEL}
                 <ArrowRight className="ml-1 h-5 w-5" aria-hidden />
@@ -95,8 +95,8 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               style={{ animationDelay: revealDelay(4) }}
             >
               {TRUST_POINTS.map((point) => (
-                <div key={point.id} className="flex items-center gap-2 text-sm text-landing-muted">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-landing-green" aria-hidden />
+                <div key={point.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-success" aria-hidden />
                   {point.label}
                 </div>
               ))}
@@ -106,13 +106,13 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               className="animate-on-scroll opacity-0"
               style={{ animationDelay: revealDelay(5) }}
             >
-              <p className="text-xs font-bold uppercase tracking-widest text-landing-terra">
+              <p className="text-xs font-bold uppercase tracking-widest text-warning-text">
                 {MINI_STEPS_LABEL}
               </p>
               <div className="relative mt-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
                 <div
                   aria-hidden
-                  className="absolute inset-x-0 top-6 z-0 hidden border-t border-dashed border-landing-line sm:block"
+                  className="absolute inset-x-0 top-6 z-0 hidden border-t border-dashed border-border sm:block"
                 />
                 {miniSteps.map((step) => (
                   <MiniStepCard key={step.id} step={step} />

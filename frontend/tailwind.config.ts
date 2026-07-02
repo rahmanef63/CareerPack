@@ -97,33 +97,6 @@ const config: Config = {
   				'800': '#075985',
   				'900': '#0c4a6e'
   			},
-  			// Warm-paper palette for the public marketing landing page —
-  			// same oklch(var(--x) / <alpha-value>) CSS-variable convention as
-  			// every other token on this page (see shared/styles/index.css),
-  			// so bg-landing-x/20 opacity modifiers work AND both a light
-  			// (:root) and dark (.dark) value exist — no more hardcoded hex,
-  			// the landing page now follows the theme's light/dark switch.
-  			// Own family (not aliased to brand/*) so ThemePresetProvider
-  			// preset switching can't drift the landing page's identity —
-  			// only the light/dark toggle affects it. Do not use landing-*
-  			// outside frontend/slices/hero/sections/**.
-  			landing: {
-  				paper: 'oklch(var(--landing-paper) / <alpha-value>)',
-  				'paper-2': 'oklch(var(--landing-paper-2) / <alpha-value>)',
-  				ink: 'oklch(var(--landing-ink) / <alpha-value>)',
-  				muted: 'oklch(var(--landing-muted) / <alpha-value>)',
-  				line: 'oklch(var(--landing-line) / <alpha-value>)',
-  				blue: 'oklch(var(--landing-blue) / <alpha-value>)',
-  				'blue-2': 'oklch(var(--landing-blue-2) / <alpha-value>)',
-  				green: 'oklch(var(--landing-green) / <alpha-value>)',
-  				mint: 'oklch(var(--landing-mint) / <alpha-value>)',
-  				terra: 'oklch(var(--landing-terra) / <alpha-value>)',
-  				'terra-soft': 'oklch(var(--landing-terra-soft) / <alpha-value>)',
-  				gold: 'oklch(var(--landing-gold) / <alpha-value>)',
-  				violet: 'oklch(var(--landing-violet) / <alpha-value>)',
-  				pink: 'oklch(var(--landing-pink) / <alpha-value>)',
-  				card: 'oklch(var(--landing-card) / <alpha-value>)'
-  			},
   			chart: {
   				'1': 'oklch(var(--chart-1) / <alpha-value>)',
   				'2': 'oklch(var(--chart-2) / <alpha-value>)',

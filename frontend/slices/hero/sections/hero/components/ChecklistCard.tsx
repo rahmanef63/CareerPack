@@ -12,19 +12,19 @@ interface ChecklistCardProps {
 export function ChecklistCard({ className, items }: ChecklistCardProps) {
   return (
     <div
-      className={`rounded-2xl border border-landing-line bg-landing-card p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${className}`}
+      className={`rounded-2xl border border-border bg-card p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${className}`}
     >
-      <p className="font-display text-xl text-landing-ink">{CHECKLIST_CARD_TITLE}</p>
+      <p className="font-display text-xl text-foreground">{CHECKLIST_CARD_TITLE}</p>
 
       <ul className="mt-4 space-y-3">
         {items.map((item) => (
           <li key={item.id} className="flex items-start gap-2.5 text-sm">
             {item.done ? (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-landing-blue" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
             ) : (
-              <Circle className="mt-0.5 h-4 w-4 shrink-0 text-landing-muted" aria-hidden />
+              <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             )}
-            <span className={item.done ? "text-landing-ink" : "text-landing-muted"}>{item.label}</span>
+            <span className={item.done ? "text-foreground" : "text-muted-foreground"}>{item.label}</span>
           </li>
         ))}
       </ul>

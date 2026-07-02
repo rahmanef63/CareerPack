@@ -28,7 +28,7 @@ export function ScenarioInfoBox({ tone, label, text }: ScenarioInfoBoxProps) {
         <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
         {label}
       </p>
-      <p className="text-sm leading-relaxed text-landing-ink/80">{text}</p>
+      <p className="text-sm leading-relaxed text-foreground/80">{text}</p>
     </div>
   );
 }

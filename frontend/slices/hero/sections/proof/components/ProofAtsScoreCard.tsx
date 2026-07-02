@@ -22,19 +22,19 @@ export function ProofAtsScoreCard({ content, points, style }: ProofAtsScoreCardP
       <div className="flex flex-col items-center gap-1.5">
         <div className={`relative flex items-center justify-center rounded-full ${ATS_DONUT_CONFIG.sizeClassName}`} style={donutStyle}>
           <div
-            className="absolute flex items-center justify-center rounded-full bg-landing-card"
+            className="absolute flex items-center justify-center rounded-full bg-card"
             style={{ inset: `${ATS_DONUT_CONFIG.holeInsetPercent}%` }}
           >
-            <span className="font-display text-xl font-semibold text-landing-ink">{ATS_SCORE_VALUE}%</span>
+            <span className="font-display text-xl font-semibold text-foreground">{ATS_SCORE_VALUE}%</span>
           </div>
         </div>
-        <p className="text-xs text-landing-muted">{ATS_SCORE_CAPTION}</p>
+        <p className="text-xs text-muted-foreground">{ATS_SCORE_CAPTION}</p>
       </div>
 
       <ul className="flex flex-col gap-2">
         {points.map((point) => (
-          <li key={point.id} className="flex items-start gap-2 text-sm text-landing-muted">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-landing-blue" />
+          <li key={point.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
             {point.text}
           </li>
         ))}

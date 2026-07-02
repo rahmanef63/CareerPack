@@ -16,13 +16,13 @@ export function ProofFreeTierCard({ content, items, style }: ProofFreeTierCardPr
 
   return (
     <ProofCardShell title={content.title} description={content.description} style={style}>
-      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-landing-terra-soft text-landing-terra">
+      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning/15 text-warning">
         <GiftIcon className="h-4 w-4" />
       </span>
       <ul className="flex flex-col gap-2">
         {items.map((item) => (
-          <li key={item.id} className="flex items-start gap-2 text-sm text-landing-ink">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-landing-green" />
+          <li key={item.id} className="flex items-start gap-2 text-sm text-foreground">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
             {item.label}
           </li>
         ))}

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/shared/lib/utils";
+import { chipIconTextClassName } from "../../../lib/chipContrast";
 import { ToolkitFeatureRow } from "./ToolkitFeatureRow";
 import type { ToolkitCategory } from "../types/toolkit.types";
 
@@ -14,7 +15,7 @@ export function ToolkitCategoryCard({ category, style }: ToolkitCategoryCardProp
   return (
     <div
       className={cn(
-        "animate-on-scroll opacity-0 flex flex-col gap-5 rounded-2xl border border-landing-line bg-landing-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "animate-on-scroll opacity-0 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
         category.hoverBorderClassName
       )}
       style={style}
@@ -22,19 +23,20 @@ export function ToolkitCategoryCard({ category, style }: ToolkitCategoryCardProp
       <div>
         <span
           className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-sm",
+            "flex h-11 w-11 items-center justify-center rounded-xl shadow-sm",
+            chipIconTextClassName(category.chipClassName),
             category.chipClassName
           )}
         >
           <Icon className="h-5 w-5" aria-hidden />
         </span>
-        <h3 className="mt-4 font-display text-xl font-semibold text-landing-ink">
+        <h3 className="mt-4 font-display text-xl font-semibold text-foreground">
           {category.title}
         </h3>
-        <p className="mt-1 text-sm text-landing-muted">{category.tagline}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{category.tagline}</p>
       </div>
 
-      <div className="flex flex-col gap-4 border-t border-landing-line pt-5">
+      <div className="flex flex-col gap-4 border-t border-border pt-5">
         {category.features.map((feature) => (
           <ToolkitFeatureRow
             key={feature.id}

@@ -6,16 +6,16 @@ import { INTERVIEW_EXAMPLE } from "../../constants/process.constants";
 export function InterviewPreview() {
   return (
     <StepPreviewCard>
-      <Badge className="border-transparent bg-landing-violet font-normal text-white">
+      <Badge className="border-transparent bg-info font-normal text-info-foreground">
         AI
       </Badge>
 
-      <blockquote className="mt-4 rounded-xl border border-landing-line bg-landing-paper-2 p-3 text-sm italic text-landing-ink">
+      <blockquote className="mt-4 rounded-xl border border-border bg-muted p-3 text-sm italic text-foreground">
         &ldquo;{INTERVIEW_EXAMPLE.question}&rdquo;
       </blockquote>
 
-      <p className="mt-3 text-sm text-landing-muted">
-        <span className="font-medium text-landing-ink">{INTERVIEW_EXAMPLE.feedbackLabel}</span>{" "}
+      <p className="mt-3 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">{INTERVIEW_EXAMPLE.feedbackLabel}</span>{" "}
         {INTERVIEW_EXAMPLE.feedback}
       </p>
     </StepPreviewCard>

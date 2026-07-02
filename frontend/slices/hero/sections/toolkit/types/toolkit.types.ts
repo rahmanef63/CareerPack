@@ -35,11 +35,11 @@ export interface ToolkitCategoryContent {
 /** Presentation-only accent classes for one category, keyed by id. */
 export interface ToolkitCategoryAccent {
   icon: LucideIcon;
-  /** Category + per-feature icon chip, e.g. "bg-landing-blue". */
+  /** Category + per-feature icon chip, e.g. "bg-primary". */
   chipClassName: string;
-  /** Tinted tip-box background + text, e.g. "bg-landing-blue/10 text-landing-blue". */
+  /** Tinted tip-box background + text, e.g. "bg-primary/10 text-primary". */
   tipClassName: string;
-  /** Card border-hover accent, e.g. "hover:border-landing-blue". Must be a
+  /** Card border-hover accent, e.g. "hover:border-primary". Must be a
    * full literal string here (and nowhere derived at runtime) so Tailwind's
    * JIT scanner can find it. */
   hoverBorderClassName: string;

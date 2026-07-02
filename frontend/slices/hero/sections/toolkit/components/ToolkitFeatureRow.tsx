@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
+import { chipIconTextClassName } from "../../../lib/chipContrast";
 import type { ToolkitFeature } from "../types/toolkit.types";
 
 interface ToolkitFeatureRowProps {
@@ -16,14 +17,16 @@ interface ToolkitFeatureRowProps {
  */
 export function ToolkitFeatureRow({ feature, chipClassName }: ToolkitFeatureRowProps) {
   const Icon = feature.icon;
+  const chipTextClassName = chipIconTextClassName(chipClassName);
   return (
     <Link
       href={feature.href}
-      className="group flex items-start gap-3 rounded-lg -m-1 p-1 transition-colors duration-150 hover:bg-landing-paper"
+      className="group flex items-start gap-3 rounded-lg -m-1 p-1 transition-colors duration-150 hover:bg-background"
     >
       <span
         className={cn(
-          "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white",
+          "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+          chipTextClassName,
           chipClassName
         )}
       >
@@ -31,14 +34,15 @@ export function ToolkitFeatureRow({ feature, chipClassName }: ToolkitFeatureRowP
       </span>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-sm font-medium text-landing-ink group-hover:underline">
+          <span className="text-sm font-medium text-foreground group-hover:underline">
             {feature.label}
           </span>
           {feature.badge && (
             <Badge
               variant="secondary"
               className={cn(
-                "h-auto shrink-0 border-transparent px-1.5 py-0 text-[9px] font-bold text-white",
+                "h-auto shrink-0 border-transparent px-1.5 py-0 text-[9px] font-bold",
+                chipTextClassName,
                 chipClassName
               )}
             >
@@ -46,7 +50,7 @@ export function ToolkitFeatureRow({ feature, chipClassName }: ToolkitFeatureRowP
             </Badge>
           )}
         </div>
-        <p className="mt-0.5 text-xs leading-relaxed text-landing-muted">{feature.description}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{feature.description}</p>
       </div>
     </Link>
   );

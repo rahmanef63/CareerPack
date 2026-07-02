@@ -26,9 +26,9 @@ export function DeskCollage() {
       <ResumeMockCard className={DESK_COLLAGE_LAYOUT.resumeCard} sections={resumeSections} />
 
       <div
-        className={`flex flex-col items-center justify-center rounded-full border-2 border-dashed border-landing-blue bg-landing-paper-2 text-center shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${DESK_COLLAGE_LAYOUT.stampBadge}`}
+        className={`flex flex-col items-center justify-center rounded-full border-2 border-dashed border-primary bg-muted text-center shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${DESK_COLLAGE_LAYOUT.stampBadge}`}
       >
-        <p className="px-3 text-[10px] font-bold uppercase leading-tight tracking-wide text-landing-blue">
+        <p className="px-3 text-[10px] font-bold uppercase leading-tight tracking-wide text-primary">
           {STAMP_TEXT}
         </p>
       </div>
@@ -36,7 +36,7 @@ export function DeskCollage() {
       <StickyNote
         text={STICKY_NOTE_1_TEXT}
         className={DESK_COLLAGE_LAYOUT.stickyNote1}
-        bgClassName="bg-landing-mint"
+        bgClassName="bg-success/15"
       />
 
       <ChecklistCard className={DESK_COLLAGE_LAYOUT.checklistCard} items={CHECKLIST_ITEMS} />
@@ -44,9 +44,9 @@ export function DeskCollage() {
       <div
         className={`overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${DESK_COLLAGE_LAYOUT.polaroid}`}
       >
-        <div className="aspect-[4/3] w-full rounded-t-xl bg-gradient-to-br from-landing-ink to-landing-terra-soft shadow-xl" />
-        <div className="rounded-b-xl border border-t-0 border-landing-line bg-landing-card px-3 py-2">
-          <p className="font-display text-sm text-landing-ink">{POLAROID_CAPTION}</p>
+        <div className="aspect-[4/3] w-full rounded-t-xl bg-gradient-to-br from-foreground to-warning/15 shadow-xl" />
+        <div className="rounded-b-xl border border-t-0 border-border bg-card px-3 py-2">
+          <p className="font-display text-sm text-foreground">{POLAROID_CAPTION}</p>
         </div>
       </div>
 
@@ -55,8 +55,8 @@ export function DeskCollage() {
       <StickyNote
         text={STICKY_NOTE_2_TEXT}
         className={DESK_COLLAGE_LAYOUT.stickyNote2}
-        bgClassName="bg-landing-terra"
-        textClassName="text-landing-paper-2 not-italic font-semibold"
+        bgClassName="bg-warning"
+        textClassName="text-warning-foreground not-italic font-semibold"
       />
     </div>
   );

@@ -23,30 +23,30 @@ export function ProcessSection() {
   const steps = useProcessSteps();
 
   return (
-    <section ref={sectionRef} className="bg-landing-paper py-20 sm:py-28">
+    <section ref={sectionRef} className="bg-background py-20 sm:py-28">
       <div className="mx-auto grid max-w-6xl gap-16 px-4 sm:px-6 lg:grid-cols-[0.75fr_1.25fr] lg:px-8">
         <div>
           <span
-            className="animate-on-scroll inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-landing-blue opacity-0"
+            className="animate-on-scroll inline-flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-primary opacity-0"
             style={{ animationDelay: "0.1s" }}
           >
             Cara Kerja
           </span>
           <h2
-            className="animate-on-scroll mt-4 font-display text-3xl font-semibold text-landing-ink opacity-0 sm:text-4xl"
+            className="animate-on-scroll mt-4 font-display text-3xl font-semibold text-foreground opacity-0 sm:text-4xl"
             style={{ animationDelay: "0.2s" }}
           >
             Dari Profil Kosong Sampai Tawaran Diterima
           </h2>
           <p
-            className="animate-on-scroll mt-4 text-landing-muted opacity-0"
+            className="animate-on-scroll mt-4 text-muted-foreground opacity-0"
             style={{ animationDelay: "0.3s" }}
           >
             Tidak perlu pindah-pindah alat — empat langkah ini sudah mencakup
             seluruh perjalanan pencarian kerja Anda.
           </p>
           <p
-            className="animate-on-scroll mt-6 font-display text-lg italic text-landing-blue opacity-0"
+            className="animate-on-scroll mt-6 font-display text-lg italic text-primary opacity-0"
             style={{ animationDelay: "0.4s" }}
           >
             4 langkah. Satu tujuan: karir impianmu.
@@ -56,7 +56,7 @@ export function ProcessSection() {
         <div className="relative flex flex-col gap-12">
           <div
             aria-hidden
-            className="absolute bottom-7 left-7 top-7 z-0 border-l-2 border-dashed border-landing-line"
+            className="absolute bottom-7 left-7 top-7 z-0 border-l-2 border-dashed border-border"
           />
 
           {steps.map((step, index) => {
@@ -70,8 +70,8 @@ export function ProcessSection() {
                 <StepDot id={step.id} colorClassName={step.dotColorClassName} />
                 <div className="flex-1 pt-2 sm:grid sm:grid-cols-2 sm:items-start sm:gap-6">
                   <div>
-                    <h3 className="font-medium text-landing-ink">{step.title}</h3>
-                    <p className="mt-1 text-sm text-landing-muted">{step.description}</p>
+                    <h3 className="font-medium text-foreground">{step.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
                   </div>
                   <div className="mt-4 sm:mt-0">
                     <Preview />

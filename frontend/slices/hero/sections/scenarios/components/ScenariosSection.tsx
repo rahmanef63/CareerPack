@@ -19,20 +19,20 @@ export function ScenariosSection() {
   const scenarios = useScenarios();
 
   return (
-    <section ref={sectionRef} className="border-t border-landing-line bg-landing-paper py-20">
+    <section ref={sectionRef} className="border-t border-border bg-background py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="animate-on-scroll opacity-0 text-sm font-semibold uppercase tracking-widest text-landing-blue">
+          <span className="animate-on-scroll opacity-0 text-sm font-semibold uppercase tracking-widest text-primary">
             Skenario Penggunaan
           </span>
           <h2
-            className="animate-on-scroll opacity-0 mt-3 font-display text-3xl font-semibold tracking-tight text-landing-ink sm:text-4xl"
+            className="animate-on-scroll opacity-0 mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
             style={{ animationDelay: "0.1s" }}
           >
             Skenario Penggunaan CareerPack
           </h2>
           <p
-            className="animate-on-scroll opacity-0 mt-3 text-sm leading-relaxed text-landing-muted"
+            className="animate-on-scroll opacity-0 mt-3 text-sm leading-relaxed text-muted-foreground"
             style={{ animationDelay: "0.2s" }}
           >
             Tiga situasi umum yang menggambarkan cara CareerPack dipakai, dari lulus kuliah sampai proses lamaran
@@ -40,10 +40,10 @@ export function ScenariosSection() {
           </p>
 
           <div
-            className="animate-on-scroll opacity-0 mt-5 flex items-start gap-2 rounded-xl border border-landing-line bg-landing-paper-2 px-4 py-3 text-left text-xs leading-relaxed text-landing-muted"
+            className="animate-on-scroll opacity-0 mt-5 flex items-start gap-2 rounded-xl border border-border bg-muted px-4 py-3 text-left text-xs leading-relaxed text-muted-foreground"
             style={{ animationDelay: "0.3s" }}
           >
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-landing-blue" aria-hidden />
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
             <span>
               Skenario di bawah ini adalah ilustrasi, bukan testimoni atau kutipan pengguna sungguhan — CareerPack
               masih tahap awal dan belum punya data pengguna terverifikasi. Persona sengaja tidak diberi nama, dan

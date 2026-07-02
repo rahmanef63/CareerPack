@@ -26,7 +26,7 @@ import type { ScenarioInfoBoxTone } from "../types/scenario";
 export interface ScenarioVisualConfig {
   /** Persona avatar-chip icon. */
   personaIcon: LucideIcon;
-  /** Avatar chip background — a fixed landing-* token per persona. */
+  /** Avatar chip background — one of the app's real theme tokens per persona. */
   avatarClassName: string;
   /** Persona accent used to tint the category badge + step-flow icons. */
   accentTextClassName: string;
@@ -39,22 +39,22 @@ export interface ScenarioVisualConfig {
 export const SCENARIO_VISUALS: Record<string, ScenarioVisualConfig> = {
   "fresh-graduate": {
     personaIcon: GraduationCap,
-    avatarClassName: "bg-landing-violet",
-    accentTextClassName: "text-landing-violet",
+    avatarClassName: "bg-info",
+    accentTextClassName: "text-info",
     stepIcons: [UserRoundPlus, BookOpen, MessagesSquare, Send],
     cardDelaySeconds: 0.1,
   },
   "career-switcher": {
     personaIcon: Repeat2,
-    avatarClassName: "bg-landing-blue",
-    accentTextClassName: "text-landing-blue",
+    avatarClassName: "bg-primary",
+    accentTextClassName: "text-primary",
     stepIcons: [Map, Sparkles, UserCog, Search],
     cardDelaySeconds: 0.2,
   },
   "active-seeker": {
     personaIcon: Target,
-    avatarClassName: "bg-landing-terra",
-    accentTextClassName: "text-landing-terra",
+    avatarClassName: "bg-warning",
+    accentTextClassName: "text-warning-text",
     stepIcons: [FileCheck, MessagesSquare, Search, Bell],
     cardDelaySeconds: 0.3,
   },
@@ -70,18 +70,18 @@ export interface ScenarioToneStyle {
 export const SCENARIO_TONE_STYLES: Record<ScenarioInfoBoxTone, ScenarioToneStyle> = {
   situasi: {
     icon: Compass,
-    boxClassName: "border-landing-line bg-landing-paper-2",
-    labelClassName: "text-landing-blue",
+    boxClassName: "border-border bg-muted",
+    labelClassName: "text-primary",
   },
   tantangan: {
     icon: TriangleAlert,
-    boxClassName: "border-landing-terra-soft/60 bg-landing-terra-soft/30",
-    labelClassName: "text-landing-terra",
+    boxClassName: "border-warning/60 bg-warning/30",
+    labelClassName: "text-warning-text",
   },
   hasil: {
     icon: Sparkles,
-    boxClassName: "border-landing-line bg-landing-mint",
-    labelClassName: "text-landing-green",
+    boxClassName: "border-border bg-success/15",
+    labelClassName: "text-success",
   },
 };
 

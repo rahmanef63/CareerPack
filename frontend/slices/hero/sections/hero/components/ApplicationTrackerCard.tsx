@@ -15,16 +15,16 @@ interface ApplicationTrackerCardProps {
 export function ApplicationTrackerCard({ className, rows }: ApplicationTrackerCardProps) {
   return (
     <div
-      className={`rounded-2xl border border-landing-line bg-landing-card p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${className}`}
+      className={`rounded-2xl border border-border bg-card p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${className}`}
     >
-      <p className="font-display text-xl text-landing-ink">{TRACKER_CARD_TITLE}</p>
+      <p className="font-display text-xl text-foreground">{TRACKER_CARD_TITLE}</p>
 
       <div className="mt-4 space-y-3">
         {rows.map((row) => (
           <div key={row.id} className="flex items-center justify-between gap-3 text-sm">
             <div className="min-w-0">
-              <p className="truncate font-medium text-landing-ink">{row.role}</p>
-              <p className="truncate text-xs text-landing-muted">{row.company}</p>
+              <p className="truncate font-medium text-foreground">{row.role}</p>
+              <p className="truncate text-xs text-muted-foreground">{row.company}</p>
             </div>
             <Badge variant="outline" className={row.badgeClassName}>
               {row.status}

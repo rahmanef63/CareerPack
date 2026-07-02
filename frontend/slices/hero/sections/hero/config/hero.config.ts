@@ -8,10 +8,10 @@ export const EYEBROW_ICON: LucideIcon = CircleDot;
 
 /** Icon + accent color per mini step-card, keyed by MINI_STEPS[].id. */
 export const MINI_STEP_VISUALS: Record<string, { icon: LucideIcon; bgClassName: string }> = {
-  profile: { icon: Sparkles, bgClassName: "bg-landing-blue" },
-  interview: { icon: MessageCircle, bgClassName: "bg-landing-green" },
-  applications: { icon: Briefcase, bgClassName: "bg-landing-terra" },
-  offer: { icon: Flag, bgClassName: "bg-landing-violet" },
+  profile: { icon: Sparkles, bgClassName: "bg-primary" },
+  interview: { icon: MessageCircle, bgClassName: "bg-success" },
+  applications: { icon: Briefcase, bgClassName: "bg-warning" },
+  offer: { icon: Flag, bgClassName: "bg-info" },
 };
 
 /** Fake text-line bar widths per resume mini-section, keyed by RESUME_SECTIONS[].id. */
@@ -23,9 +23,9 @@ export const RESUME_SECTION_LINE_WIDTHS: Record<string, string[]> = {
 
 /** Badge color per application status category (green/amber/gray). */
 export const APPLICATION_STATUS_BADGE: Record<ApplicationStatus, string> = {
-  Interview: "border-landing-green/30 bg-landing-mint text-landing-green",
-  Ditinjau: "border-landing-gold/40 bg-landing-gold/15 text-landing-gold",
-  Tersimpan: "border-landing-line bg-landing-line/40 text-landing-muted",
+  Interview: "border-success/30 bg-success/15 text-foreground",
+  Ditinjau: "border-warning/40 bg-warning/15 text-warning-text",
+  Tersimpan: "border-border bg-border/40 text-muted-foreground",
 };
 
 /** Staggered fade-in delay step (seconds) applied per left-column block, in order. */

@@ -19,29 +19,29 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
   const { benefits, revealDelay } = useCtaContent();
 
   return (
-    <section ref={sectionRef} className="bg-landing-paper py-20 sm:py-28">
+    <section ref={sectionRef} className="bg-background py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
-          className={`grid gap-12 rounded-3xl bg-gradient-to-br from-landing-paper-2 to-landing-terra-soft p-10 lg:p-14 ${CTA_LAYOUT.gridColsClassName}`}
+          className={`grid gap-12 rounded-3xl bg-gradient-to-br from-muted to-warning/15 p-10 lg:p-14 ${CTA_LAYOUT.gridColsClassName}`}
         >
           {/* LEFT — framing copy + primary CTA */}
           <div>
             <span
-              className="animate-on-scroll inline-block text-xs font-semibold uppercase tracking-widest text-landing-blue opacity-0"
+              className="animate-on-scroll inline-block text-xs font-semibold uppercase tracking-widest text-warning-text opacity-0"
               style={revealDelay(0)}
             >
               {CTA_EYEBROW}
             </span>
 
             <h2
-              className="animate-on-scroll mt-4 font-display text-3xl font-semibold tracking-tight text-landing-ink opacity-0 sm:text-4xl"
+              className="animate-on-scroll mt-4 font-display text-3xl font-semibold tracking-tight text-foreground opacity-0 sm:text-4xl"
               style={revealDelay(1)}
             >
               {CTA_HEADING}
             </h2>
 
             <p
-              className="animate-on-scroll mt-4 max-w-md text-landing-muted opacity-0"
+              className="animate-on-scroll mt-4 max-w-md text-muted-foreground opacity-0"
               style={revealDelay(2)}
             >
               {CTA_LEAD}
@@ -51,7 +51,7 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
               <Button
                 size="lg"
                 onClick={onGetStarted}
-                className="bg-landing-blue text-white hover:bg-landing-blue/90"
+                className="bg-primary text-white hover:bg-primary/90"
               >
                 {CTA_BUTTON_LABEL}
                 <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
@@ -61,7 +61,7 @@ export function CtaSection({ onGetStarted }: CtaSectionProps) {
 
           {/* RIGHT — benefits card */}
           <div
-            className="animate-on-scroll rounded-2xl border border-landing-line bg-landing-card p-6 opacity-0"
+            className="animate-on-scroll rounded-2xl border border-border bg-card p-6 opacity-0"
             style={revealDelay(2)}
           >
             <div className="flex flex-col gap-5">

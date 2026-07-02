@@ -26,18 +26,18 @@ export function ProofSection() {
   const { highlightFeatures, featureGridItems, supportChatBubbles, cardsById } = useProofContent();
 
   return (
-    <section ref={sectionRef} className="relative border-t border-landing-line bg-landing-paper-2 py-20">
+    <section ref={sectionRef} className="relative border-t border-border bg-muted py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className={cn("grid grid-cols-1 gap-4", PROOF_LAYOUT.gridColsClassName)}>
           <div className="flex flex-col gap-8 lg:row-span-2">
             <div className="animate-on-scroll flex flex-col gap-4 opacity-0">
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-landing-line bg-landing-paper-2 px-3 py-1 text-xs font-medium uppercase tracking-wide text-landing-muted">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {PROOF_EYEBROW}
               </span>
-              <h2 className="font-display text-3xl font-semibold leading-tight text-landing-ink sm:text-4xl">
+              <h2 className="font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
                 {PROOF_HEADING}
               </h2>
-              <p className="text-base text-landing-muted">{PROOF_LEAD}</p>
+              <p className="text-base text-muted-foreground">{PROOF_LEAD}</p>
             </div>
 
             <ProofHighlightCard features={highlightFeatures} />

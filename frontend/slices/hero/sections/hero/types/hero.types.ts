@@ -17,7 +17,7 @@ export interface MiniStepContent {
 export interface MiniStepVisual {
   id: string;
   icon: LucideIcon;
-  /** Tailwind background class for the icon chip, e.g. "bg-landing-blue". */
+  /** Tailwind background class for the icon chip, e.g. "bg-primary". */
   bgClassName: string;
 }
 

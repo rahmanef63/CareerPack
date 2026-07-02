@@ -20,22 +20,22 @@ export function ToolkitSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative border-t border-landing-line bg-landing-paper-2 py-20"
+      className="relative border-t border-border bg-muted py-20"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="animate-on-scroll opacity-0 mb-12 max-w-2xl">
-          <div className="mb-4 flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-landing-muted">
-            <span className="inline-flex items-center gap-2 text-landing-blue">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-landing-blue">
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-landing-blue" />
+          <div className="mb-4 flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            <span className="inline-flex items-center gap-2 text-primary">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-primary">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-primary" />
               </span>
               Fitur CareerPack
             </span>
           </div>
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-landing-ink sm:text-4xl">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Toolkit Lengkap untuk Setiap Langkah Karier Anda
           </h2>
-          <p className="mt-3 text-sm text-landing-muted">
+          <p className="mt-3 text-sm text-muted-foreground">
             Dari menyiapkan dokumen, melamar, mengasah skill, sampai menjaga relasi jangka panjang —
             setiap alat yang Anda butuhkan sudah tersedia begitu Anda masuk.
           </p>
@@ -52,15 +52,15 @@ export function ToolkitSection() {
         </div>
 
         <div
-          className="animate-on-scroll opacity-0 mt-4 rounded-2xl border border-landing-line bg-landing-card p-6"
+          className="animate-on-scroll opacity-0 mt-4 rounded-2xl border border-border bg-card p-6"
           style={revealDelay(categories.length)}
         >
           <div className="grid grid-cols-1 items-center gap-5 lg:grid-cols-5">
             <div>
-              <h3 className="font-display text-xl font-semibold text-landing-ink">
+              <h3 className="font-display text-xl font-semibold text-foreground">
                 Satu Platform, Semua Kebutuhan Karier
               </h3>
-              <p className="mt-1 text-sm text-landing-muted">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Tidak perlu berpindah aplikasi — semua tahap karier Anda ada di satu tempat.
               </p>
             </div>
