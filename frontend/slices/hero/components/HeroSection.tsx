@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowRight, Play, Sparkles, Target,
+  ArrowRight, Play, Target,
   TrendingUp, Users, CheckCircle
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
 import { BrandMark } from '@/shared/components/brand/Logo';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { notify } from '@/shared/lib/notify';
@@ -69,59 +68,49 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
   ];
 
   return (
-    <div ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Background Elements — theme-aware so dark mode doesn't flash white */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-muted via-background to-brand-muted" />
-      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/30 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand/20 rounded-full blur-3xl" />
-
-      {/* Grid Pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage:
-            `linear-gradient(oklch(var(--brand)) 1px, transparent 1px), linear-gradient(90deg, oklch(var(--brand)) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-        }}
-      />
+    <div ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden bg-background">
+      {/* Dossier margin rules — replaces blurred blob glows */}
+      <div aria-hidden className="absolute inset-y-0 left-[6%] hidden w-px bg-border lg:block" />
+      <div aria-hidden className="absolute inset-y-0 left-[8%] hidden w-px bg-border/40 lg:block" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
-            <div className="animate-on-scroll opacity-0">
-              <Badge 
-                variant="secondary" 
-                className="bg-brand-muted text-brand hover:bg-brand/30 px-4 py-1.5 text-sm font-medium"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Perjalanan Karir Anda Dimulai di Sini
-              </Badge>
+            <div className="animate-on-scroll opacity-0 flex flex-wrap items-center gap-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              <span className="inline-flex items-center gap-2 text-brand">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-brand text-[10px]">01</span>
+                Dokumen Karir Anda
+              </span>
+              <span className="h-px w-8 bg-border" />
+              <span>Lokal &amp; Luar Negeri</span>
             </div>
 
             <div className="animate-on-scroll opacity-0" style={{ animationDelay: '0.1s' }}>
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05]">
-                <span className="text-foreground">Semua yang Anda Butuhkan</span>
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05] text-foreground">
+                Semua yang Anda Butuhkan
                 <br />
-                <span className="brand-gradient-text">
-                  Untuk Karir Impian
+                Untuk{' '}
+                <span className="relative inline-block whitespace-nowrap">
+                  <span className="relative z-10">Karir Impian</span>
+                  <span aria-hidden className="absolute inset-x-0 bottom-1 -z-0 h-[0.32em] -rotate-1 bg-brand/25" />
                 </span>
               </h1>
             </div>
 
             <div className="animate-on-scroll opacity-0" style={{ animationDelay: '0.2s' }}>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
-                Dari pembuatan CV hingga persiapan wawancara, ceklis dokumen hingga roadmap skill — 
+                Dari pembuatan CV hingga persiapan wawancara, ceklis dokumen hingga roadmap skill —
                 starter pack lengkap untuk kesuksesan karir Anda, baik lokal maupun luar negeri.
               </p>
             </div>
 
             <div className="animate-on-scroll opacity-0" style={{ animationDelay: '0.3s' }}>
               <div className="flex flex-wrap gap-4">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   onClick={onGetStarted}
-                  className="bg-brand hover:bg-brand text-brand-foreground px-8 py-6 text-lg font-semibold rounded-xl shadow-lg shadow-cta hover:shadow-cta transition-all duration-300"
+                  className="bg-brand hover:bg-brand text-brand-foreground px-8 py-6 text-lg font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   Mulai Gratis
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -131,7 +120,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                   variant="outline"
                   onClick={handleDemo}
                   disabled={isDemoLoading}
-                  className="border-border hover:bg-muted/50 px-8 py-6 text-lg font-semibold rounded-xl"
+                  className="border-border hover:bg-muted/50 px-8 py-6 text-lg font-semibold rounded-lg"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   {isDemoLoading ? 'Memulai sesi demo…' : 'Lihat Demo'}
@@ -140,49 +129,43 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
             </div>
 
             <div className="animate-on-scroll opacity-0" style={{ animationDelay: '0.4s' }}>
-              <div className="flex flex-wrap gap-4 pt-4">
+              <ul className="space-y-2 border-t border-border/60 pt-4 font-mono text-xs">
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
                   return (
-                    <div 
-                      key={index}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-brand-muted flex items-center justify-center">
-                        <Icon className="w-3.5 h-3.5 text-brand" />
-                      </div>
-                      {feature.text}
-                    </div>
+                    <li key={index} className="flex items-baseline gap-2">
+                      <span className="text-foreground">{feature.text}</span>
+                      <span className="-translate-y-[3px] flex-1 border-b border-dotted border-border" />
+                      <Icon className="h-3.5 w-3.5 shrink-0 text-brand" />
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
 
             <div className="animate-on-scroll opacity-0" style={{ animationDelay: '0.5s' }}>
-              <div className="flex items-center gap-6 pt-4">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div 
-                      key={i}
-                      className="w-10 h-10 rounded-full border-2 border-card bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground text-xs font-bold"
-                    >
-                      {String.fromCharCode(64 + i)}
-                    </div>
-                  ))}
+              <div className="flex items-center gap-4 pt-2">
+                <div className="flex h-14 w-14 shrink-0 -rotate-6 items-center justify-center rounded-full border-2 border-dashed border-brand/60 text-center font-mono text-[9px] font-bold uppercase leading-tight text-brand">
+                  10rb+
+                  <br />
+                  Terverifikasi
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">10,000+ Pencari Kerja</p>
-                  <p className="text-xs text-muted-foreground">Percaya pada CareerPack</p>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Dipercaya pencari kerja di seluruh Indonesia
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Right Content - Visual */}
+          {/* Right Content — stacked document sheets */}
           <div className="relative hidden lg:block">
-            <div className="relative">
-              {/* Main Card */}
-              <div className="bg-card rounded-3xl shadow-2xl p-8 border border-border animate-float">
+            <div className="relative mx-auto max-w-sm">
+              {/* Back sheets peeking out */}
+              <div className="absolute inset-0 rotate-3 translate-x-3 translate-y-3 rounded-2xl border border-border bg-muted" />
+              <div className="absolute inset-0 -rotate-2 -translate-x-2 translate-y-5 rounded-2xl border border-border bg-brand-muted" />
+
+              {/* Top sheet */}
+              <div className="relative bg-card rounded-2xl shadow-md p-8 border border-border animate-slide-up">
                 <div className="flex items-center gap-4 mb-6">
                   <div
                     className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-from to-brand-to flex items-center justify-center text-brand-foreground"
@@ -242,29 +225,12 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                 </div>
               </div>
 
-              {/* Floating Elements */}
-              <div className="absolute -top-6 -right-6 bg-card rounded-2xl shadow-lg p-4 border border-border animate-pulse-glow">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Tawaran Diterima!</p>
-                    <p className="text-xs text-muted-foreground">Tech Corp Ltd.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-4 bg-card rounded-2xl shadow-lg p-4 border border-border">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-brand-muted flex items-center justify-center">
-                    <Target className="w-5 h-5 text-brand" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Target Tercapai</p>
-                    <p className="text-xs text-muted-foreground">10 lamaran minggu ini</p>
-                  </div>
-                </div>
+              {/* Ink-stamp badge — replaces the old floating pulse card */}
+              <div className="absolute -right-6 -top-6 flex h-20 w-20 -rotate-12 flex-col items-center justify-center rounded-full border-2 border-dashed border-success bg-card font-mono text-[9px] font-bold uppercase leading-tight text-success shadow-sm">
+                Tawaran
+                <br />
+                Diterima
+                <CheckCircle className="mt-1 h-3.5 w-3.5" />
               </div>
             </div>
           </div>
