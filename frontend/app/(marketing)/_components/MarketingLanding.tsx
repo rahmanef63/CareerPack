@@ -2,7 +2,15 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { HeroSection, FeaturesSection } from "@/slices/hero";
+import {
+  HeroSection,
+  FeaturesSection,
+  HowItWorksSection,
+  StatsSection,
+  TestimonialsSection,
+  FaqSection,
+  FinalCtaSection,
+} from "@/slices/hero";
 import { useAuth } from "@/shared/hooks/useAuth";
 
 /**
@@ -28,6 +36,11 @@ export function MarketingLanding() {
     <>
       <HeroSection onGetStarted={() => router.push("/login")} />
       <FeaturesSection />
+      <HowItWorksSection />
+      <StatsSection />
+      <TestimonialsSection />
+      <FaqSection />
+      <FinalCtaSection onGetStarted={() => router.push("/login")} />
     </>
   );
 }
