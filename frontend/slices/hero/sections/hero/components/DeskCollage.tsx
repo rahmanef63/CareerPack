@@ -26,7 +26,7 @@ export function DeskCollage() {
       <ResumeMockCard className={DESK_COLLAGE_LAYOUT.resumeCard} sections={resumeSections} />
 
       <div
-        className={`flex flex-col items-center justify-center rounded-full border-2 border-dashed border-landing-blue bg-landing-paper-2 text-center shadow-xl ${DESK_COLLAGE_LAYOUT.stampBadge}`}
+        className={`flex flex-col items-center justify-center rounded-full border-2 border-dashed border-landing-blue bg-landing-paper-2 text-center shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${DESK_COLLAGE_LAYOUT.stampBadge}`}
       >
         <p className="px-3 text-[10px] font-bold uppercase leading-tight tracking-wide text-landing-blue">
           {STAMP_TEXT}
@@ -41,7 +41,9 @@ export function DeskCollage() {
 
       <ChecklistCard className={DESK_COLLAGE_LAYOUT.checklistCard} items={CHECKLIST_ITEMS} />
 
-      <div className={`overflow-hidden rounded-xl ${DESK_COLLAGE_LAYOUT.polaroid}`}>
+      <div
+        className={`overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${DESK_COLLAGE_LAYOUT.polaroid}`}
+      >
         <div className="aspect-[4/3] w-full rounded-t-xl bg-gradient-to-br from-landing-ink to-landing-terra-soft shadow-xl" />
         <div className="rounded-b-xl border border-t-0 border-landing-line bg-landing-card px-3 py-2">
           <p className="font-display text-sm text-landing-ink">{POLAROID_CAPTION}</p>

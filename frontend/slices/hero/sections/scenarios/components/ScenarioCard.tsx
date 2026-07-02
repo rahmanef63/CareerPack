@@ -14,7 +14,7 @@ export function ScenarioCard({ scenario }: ScenarioCardProps) {
 
   return (
     <div
-      className="animate-on-scroll opacity-0 rounded-2xl border border-landing-line bg-landing-card p-6"
+      className="animate-on-scroll opacity-0 rounded-2xl border border-landing-line bg-landing-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
       style={{ animationDelay: `${scenario.cardDelaySeconds}s` }}
     >
       <div className="flex items-start gap-3">

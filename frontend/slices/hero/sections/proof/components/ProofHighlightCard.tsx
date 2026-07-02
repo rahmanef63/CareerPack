@@ -11,7 +11,10 @@ interface ProofHighlightCardProps {
  * plain feature callouts — no invented numbers. */
 export function ProofHighlightCard({ features }: ProofHighlightCardProps) {
   return (
-    <div className="animate-on-scroll flex flex-col gap-6 rounded-2xl bg-landing-blue p-8 text-white opacity-0" style={{ animationDelay: "0.2s" }}>
+    <div
+      className="animate-on-scroll flex flex-col gap-6 rounded-2xl bg-landing-blue p-8 text-white opacity-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      style={{ animationDelay: "0.2s" }}
+    >
       <div className="flex flex-col gap-2">
         <h3 className="font-display text-2xl font-semibold leading-tight">{HIGHLIGHT_HEADLINE}</h3>
         <p className="text-sm text-white/75">{HIGHLIGHT_SUBTEXT}</p>

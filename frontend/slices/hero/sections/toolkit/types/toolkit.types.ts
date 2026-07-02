@@ -39,6 +39,10 @@ export interface ToolkitCategoryAccent {
   chipClassName: string;
   /** Tinted tip-box background + text, e.g. "bg-landing-blue/10 text-landing-blue". */
   tipClassName: string;
+  /** Card border-hover accent, e.g. "hover:border-landing-blue". Must be a
+   * full literal string here (and nowhere derived at runtime) so Tailwind's
+   * JIT scanner can find it. */
+  hoverBorderClassName: string;
 }
 
 /** One feature row after merging registry data (label/icon/href/badge) + authored copy. */
@@ -60,6 +64,7 @@ export interface ToolkitCategory {
   icon: LucideIcon;
   chipClassName: string;
   tipClassName: string;
+  hoverBorderClassName: string;
   features: ToolkitFeature[];
 }
 

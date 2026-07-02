@@ -34,13 +34,14 @@ export const FREE_TIER_ICON: LucideIcon = Gift;
 /**
  * Donut chart config for the "ats" card. Built with a plain div +
  * conic-gradient inline style (no chart lib) per the section brief.
- * `filledColor` must stay in sync with the `landing.blue` token in
- * tailwind.config.ts — inline `style` can't reference a Tailwind class,
- * only a literal color value.
+ * Inline `style` can't reference a Tailwind class, so these reference the
+ * same CSS custom properties the landing-* Tailwind tokens resolve to
+ * (see shared/styles/index.css) — stays in sync with light/dark mode
+ * automatically instead of freezing the light-mode color.
  */
 export const ATS_DONUT_CONFIG = {
-  filledColor: "#1857d9",
-  trackColor: "#e7ddd0",
+  filledColor: "oklch(var(--landing-blue))",
+  trackColor: "oklch(var(--landing-line))",
   sizeClassName: "h-28 w-28",
   /** Inset (percent, all sides) of the inner cutout that turns the filled
    * circle into a ring/donut. */
@@ -54,6 +55,12 @@ export const CHAT_BUBBLE_STYLES: Record<
   { alignClassName: string; bubbleClassName: string }
 > = {
   user: {
+    // text-white (not a landing-* token) is intentional here, same as the
+    // rest of this section's colored chips/badges/buttons: white-on-accent
+    // needs to stay constant regardless of light/dark mode, exactly like
+    // the app's own --brand-foreground stays pure white in both :root and
+    // .dark (see shared/styles/index.css) — it's the accent color itself,
+    // not this text, that carries the theme-reactive identity.
     alignClassName: "justify-end",
     bubbleClassName: "bg-landing-blue text-white",
   },

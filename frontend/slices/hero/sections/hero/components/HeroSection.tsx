@@ -79,7 +79,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               <Button
                 size="lg"
                 onClick={onGetStarted}
-                className="rounded-xl bg-landing-blue text-white hover:bg-landing-blue"
+                className="rounded-xl bg-landing-blue text-white hover:bg-landing-blue/90"
               >
                 {CTA_PRIMARY_LABEL}
                 <ArrowRight className="ml-1 h-5 w-5" aria-hidden />

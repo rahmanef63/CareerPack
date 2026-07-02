@@ -9,7 +9,9 @@ interface ResumeMockCardProps {
 /** Desk collage card (a) — a resume mock illustrating the CV-generator feature. */
 export function ResumeMockCard({ className, sections }: ResumeMockCardProps) {
   return (
-    <div className={`rounded-2xl border border-landing-line bg-landing-card p-6 shadow-xl ${className}`}>
+    <div
+      className={`rounded-2xl border border-landing-line bg-landing-card p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40 ${className}`}
+    >
       <p className="font-display text-xl text-landing-ink">{RESUME_CARD_NAME}</p>
       <p className="text-sm text-landing-muted">{RESUME_CARD_ROLE}</p>
 

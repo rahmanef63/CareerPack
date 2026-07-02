@@ -14,7 +14,7 @@ interface FaqAccordionItemProps {
 export function FaqAccordionItem({ entry }: FaqAccordionItemProps) {
   return (
     <AccordionItem value={entry.value} className="border-landing-line">
-      <AccordionTrigger className="text-left text-landing-ink hover:no-underline [&_svg]:text-landing-muted">
+      <AccordionTrigger className="-mx-3 rounded-lg px-3 text-left text-landing-ink transition-colors duration-150 hover:bg-landing-paper/50 hover:no-underline [&_svg]:text-landing-muted">
         <span className="flex items-center gap-4">
           <span
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-landing-blue/10 text-xs font-semibold text-landing-blue"

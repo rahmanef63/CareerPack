@@ -13,7 +13,10 @@ export function ToolkitCategoryCard({ category, style }: ToolkitCategoryCardProp
   const Icon = category.icon;
   return (
     <div
-      className="animate-on-scroll opacity-0 flex flex-col gap-5 rounded-2xl border border-landing-line bg-landing-card p-6"
+      className={cn(
+        "animate-on-scroll opacity-0 flex flex-col gap-5 rounded-2xl border border-landing-line bg-landing-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        category.hoverBorderClassName
+      )}
       style={style}
     >
       <div>

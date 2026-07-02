@@ -11,8 +11,7 @@ export const MINI_STEP_VISUALS: Record<string, { icon: LucideIcon; bgClassName: 
   profile: { icon: Sparkles, bgClassName: "bg-landing-blue" },
   interview: { icon: MessageCircle, bgClassName: "bg-landing-green" },
   applications: { icon: Briefcase, bgClassName: "bg-landing-terra" },
-  // 4th distinct shade not in the token list — one-off arbitrary value per design brief.
-  offer: { icon: Flag, bgClassName: "bg-[#27573b]" },
+  offer: { icon: Flag, bgClassName: "bg-landing-violet" },
 };
 
 /** Fake text-line bar widths per resume mini-section, keyed by RESUME_SECTIONS[].id. */

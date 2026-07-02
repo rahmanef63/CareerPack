@@ -18,9 +18,9 @@ export function ProofFeatureGridCard({ content, items, style }: ProofFeatureGrid
           return (
             <div
               key={item.id}
-              className="flex flex-col items-start gap-2 rounded-xl bg-landing-paper p-4"
+              className="group flex flex-col items-start gap-2 rounded-xl border border-transparent bg-landing-paper p-4 transition-colors duration-200 hover:border-landing-blue/30"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-landing-blue text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-landing-blue text-white transition-transform duration-150 group-hover:scale-110">
                 <Icon className="h-4 w-4" />
               </span>
               <span className="text-sm font-medium text-landing-ink">{item.label}</span>

@@ -19,7 +19,7 @@ export function ToolkitFeatureRow({ feature, chipClassName }: ToolkitFeatureRowP
   return (
     <Link
       href={feature.href}
-      className="group flex items-start gap-3 rounded-lg -m-1 p-1 transition-colors hover:bg-landing-paper"
+      className="group flex items-start gap-3 rounded-lg -m-1 p-1 transition-colors duration-150 hover:bg-landing-paper"
     >
       <span
         className={cn(

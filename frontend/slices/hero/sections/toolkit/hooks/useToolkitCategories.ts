@@ -70,6 +70,7 @@ export function useToolkitCategories(): UseToolkitCategoriesResult {
       icon: accent.icon,
       chipClassName: accent.chipClassName,
       tipClassName: accent.tipClassName,
+      hoverBorderClassName: accent.hoverBorderClassName,
       features,
     };
   });

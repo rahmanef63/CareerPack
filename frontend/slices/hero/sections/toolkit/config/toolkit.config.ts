@@ -27,21 +27,25 @@ export const TOOLKIT_CATEGORY_ACCENTS: Record<
     icon: Target,
     chipClassName: "bg-landing-blue",
     tipClassName: "bg-landing-blue/10 text-landing-blue",
+    hoverBorderClassName: "hover:border-landing-blue",
   },
   melamar: {
     icon: Send,
     chipClassName: "bg-landing-green",
     tipClassName: "bg-landing-green/10 text-landing-green",
+    hoverBorderClassName: "hover:border-landing-green",
   },
   berkembang: {
     icon: TrendingUp,
     chipClassName: "bg-landing-violet",
     tipClassName: "bg-landing-violet/10 text-landing-violet",
+    hoverBorderClassName: "hover:border-landing-violet",
   },
   "karier-jangka-panjang": {
     icon: Milestone,
     chipClassName: "bg-landing-terra",
     tipClassName: "bg-landing-terra/10 text-landing-terra",
+    hoverBorderClassName: "hover:border-landing-terra",
   },
 };
 

@@ -16,7 +16,7 @@ export function ProofCardShell({ title, description, children, className, style 
   return (
     <div
       className={cn(
-        "animate-on-scroll flex flex-col gap-4 rounded-2xl border border-landing-line bg-landing-card p-6 opacity-0",
+        "animate-on-scroll flex flex-col gap-4 rounded-2xl border border-landing-line bg-landing-card p-6 opacity-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
         className
       )}
       style={style}

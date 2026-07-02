@@ -15,7 +15,7 @@ export function StepPreviewCard({ children, className }: StepPreviewCardProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-landing-line bg-landing-card p-5 shadow-sm",
+        "rounded-2xl border border-landing-line bg-landing-card p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
         className
       )}
     >

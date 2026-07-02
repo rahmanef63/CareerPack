@@ -12,7 +12,7 @@ export function StickyNote({ text, className, bgClassName, textClassName }: Stic
   return (
     <div
       className={cn(
-        "rounded-xl border border-landing-line p-4 shadow-lg",
+        "rounded-xl border border-landing-line p-4 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-2xl hover:z-40",
         bgClassName,
         className
       )}

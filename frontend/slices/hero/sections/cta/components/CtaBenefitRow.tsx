@@ -10,8 +10,8 @@ export function CtaBenefitRow({ benefit }: CtaBenefitRowProps) {
   const Icon = benefit.icon;
 
   return (
-    <div className="flex items-start gap-3">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-landing-blue/10 text-landing-blue">
+    <div className="group flex items-start gap-3 transition-transform duration-200 hover:translate-x-1">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-landing-blue/10 text-landing-blue transition-transform duration-200 group-hover:scale-110">
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
       <div>
