@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen";
 import type { AuthState } from "@/shared/types/auth";
 import type { UserRole } from "@/shared/types/common";
 import { ROUTES } from "@/shared/lib/routes";
+
+/** Grace window before bouncing an "auth"/"role" route to /login on a
+ *  Convex auth drop — a flaky connection (VPN, bad Wi-Fi) makes Convex's
+ *  own AuthenticationManager give up reauth and briefly report
+ *  isAuthenticated=false before it reconnects with the stored token.
+ *  Without this, RouteGuard bounced the user to /login and back on every
+ *  WebSocket hiccup, which read as the page "refreshing itself". */
+const REAUTH_GRACE_MS = 2500;
 
 export type GuardMode = "auth" | "guest" | "role";
 
@@ -76,11 +84,26 @@ export function RouteGuard({
   // object, which changes identity every render) and recompute the
   // redirect target inside the effect so it fires only when inputs move.
   const role = state.user?.role;
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   useEffect(() => {
     const r = evaluate(state, mode, requiredRole, redirectTo);
-    if (r && !r.pass) {
+    if (!r || r.pass) return;
+
+    // "guest" mode (e.g. /login) has nothing to preserve — bounce right away.
+    if (mode === "guest") {
       router.replace(r.target);
+      return;
     }
+
+    // "auth"/"role": don't bounce on the first sign of trouble — wait out
+    // REAUTH_GRACE_MS and re-check, so a transient reconnect can self-heal.
+    const timer = setTimeout(() => {
+      const recheck = evaluate(stateRef.current, mode, requiredRole, redirectTo);
+      if (recheck && !recheck.pass) router.replace(recheck.target);
+    }, REAUTH_GRACE_MS);
+    return () => clearTimeout(timer);
     // `state` is excluded — we depend on its primitive fields below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
