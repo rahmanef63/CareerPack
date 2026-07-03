@@ -84,8 +84,11 @@ const SECURITY_HEADERS = [
       "font-src 'self' data: https://fonts.gstatic.com",
       // Enumerate connect-src to the Convex deploy origin + WS upgrade.
       // `https:`/`wss:` were too broad — defeated CSP exfil-control if
-      // XSS ever landed.
-      `connect-src 'self' ${CONVEX.http} ${CONVEX.ws} ${CONVEX_WILDCARDS_HTTP} ${CONVEX_WILDCARDS_WS}`,
+      // XSS ever landed. GA4 (script-src allows googletagmanager.com to
+      // load gtag.js) beacons to google-analytics.com, falling back to
+      // google.com/g/collect when the former is blocked (ad blockers) —
+      // both were missing here, so every hit was silently CSP-blocked.
+      `connect-src 'self' ${CONVEX.http} ${CONVEX.ws} ${CONVEX_WILDCARDS_HTTP} ${CONVEX_WILDCARDS_WS} https://www.google-analytics.com https://www.google.com`,
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
