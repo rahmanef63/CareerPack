@@ -63,8 +63,15 @@ export const ScaledCVPreview = memo(
         const padX =
           parseFloat(cs.paddingLeft || "0") + parseFloat(cs.paddingRight || "0");
         const avail = Math.max(0, outer.clientWidth - padX - 4);
-        setScale(Math.min(AUTO_FIT_MAX, avail / A4_WIDTH_PX));
-        setInnerHeight(inner.offsetHeight);
+        const h = inner.offsetHeight;
+        // Compact = sidebar thumbnail: fit width AND a viewport-height budget
+        // so a tall/2-page CV shows in FULL (just smaller) instead of being
+        // clipped or forcing a nested scrollbar (the "tercrop" complaint).
+        // The dialog (non-compact) fits width only — it has its own scroll.
+        const heightScale =
+          compact && h > 0 ? Math.max(240, window.innerHeight * 0.6) / h : Infinity;
+        setScale(Math.min(AUTO_FIT_MAX, avail / A4_WIDTH_PX, heightScale));
+        setInnerHeight(h);
       };
 
       measure();
@@ -72,11 +79,14 @@ export const ScaledCVPreview = memo(
       const innerObs = new ResizeObserver(measure);
       outerObs.observe(outer);
       innerObs.observe(inner);
+      // Height budget depends on the viewport, which ResizeObserver misses.
+      window.addEventListener("resize", measure);
       return () => {
         outerObs.disconnect();
         innerObs.disconnect();
+        window.removeEventListener("resize", measure);
       };
-    }, []);
+    }, [compact]);
 
     const showBreaks = layout === "paginated";
     const breakLines = useMemo(() => {
@@ -101,14 +111,13 @@ export const ScaledCVPreview = memo(
           maxWidth: "100%",
           height: innerHeight ? innerHeight * scale + 32 : undefined,
           minHeight: compact ? (innerHeight ? undefined : 180) : 420,
-          // Compact = sidebar thumbnail. Cap its height and let it scroll
-          // internally so a 2-page CV isn't clipped by the sticky sidebar
-          // (max-h) with no way to reach the bottom — the "ter potong"
-          // complaint. Full-height reading stays in the fullscreen dialog
-          // (non-compact), which keeps overflowY hidden + its own scroll.
-          maxHeight: compact ? "60vh" : undefined,
+          // `height` already equals the scaled content height, and compact
+          // additionally fits a viewport-height budget (see measure()), so
+          // the whole CV is visible with overflow hidden — no crop, no
+          // internal scrollbar. transform:scale shrinks visually but not in
+          // layout, so overflow:hidden clips only the empty layout tail.
           overflowX: "hidden",
-          overflowY: compact ? "auto" : "hidden",
+          overflowY: "hidden",
         }}
       >
         <div

@@ -45,11 +45,56 @@ export async function exportCVToPDF({
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '') || 'cv';
 
+  // Fonts must be resolved before capture: html2canvas re-measures glyph
+  // metrics in its clone, and a fallback face swapping mid-capture shifts
+  // every text run. document.fonts.ready settles once web fonts are live.
+  if (typeof document !== 'undefined' && document.fonts?.ready) {
+    try {
+      await document.fonts.ready;
+    } catch {
+      /* fonts.ready never rejects in practice; ignore just in case */
+    }
+  }
+
+  // The capture node lives INSIDE ScaledCVPreview's `transform: scale(s)`
+  // wrapper (transformOrigin: top center) — and, mid-swipe, a second
+  // `transform: translateX(...)` wrapper in the dialog. html2canvas paints
+  // text glyphs at the natural font size but positions every box/line from
+  // the *scaled* getBoundingClientRect, so at any scale < 1 the lines pile
+  // onto each other ("tumpang tindih"). The on-screen preview looks fine
+  // because the browser scales text + layout together. Fix: capture at the
+  // natural, untransformed box (offsetWidth/offsetHeight ignore ancestor
+  // transforms) and strip the transforms off the clone's ancestors in
+  // onclone — html2canvas-pro re-reads the crop bounds from the *cloned*
+  // node AFTER onclone runs, so the un-scaled clone drives both layout and
+  // crop position. scale:3 stays for print DPI.
+  const naturalWidth = node.offsetWidth || 794;
+  const naturalHeight = node.offsetHeight;
+
   const canvas = await html2canvas(node, {
     scale: 3,
     useCORS: true,
     backgroundColor: '#ffffff',
     logging: false,
+    width: naturalWidth,
+    height: naturalHeight,
+    windowWidth: 794,
+    windowHeight: naturalHeight,
+    onclone: (_doc: Document, clonedNode: HTMLElement) => {
+      // Walk the clone's ancestor chain up to <html>, neutralising the
+      // preview's scale/translate transforms and any clipping so the cloned
+      // subtree lays out 1:1 at natural A4 width.
+      let el: HTMLElement | null = clonedNode;
+      while (el) {
+        el.style.transform = 'none';
+        el.style.overflow = 'visible';
+        el.style.overflowWrap = 'normal';
+        el.style.wordBreak = 'normal';
+        el.style.maxHeight = 'none';
+        el.style.maxWidth = 'none';
+        el = el.parentElement;
+      }
+    },
   });
 
   // 0.96 — a CV is high-contrast text; lower JPEG quality adds visible
