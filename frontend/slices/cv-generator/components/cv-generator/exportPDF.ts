@@ -52,16 +52,20 @@ export async function exportCVToPDF({
     logging: false,
   });
 
-  const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  // 0.96 — a CV is high-contrast text; lower JPEG quality adds visible
+  // ringing/halo around glyphs that isn't in the on-screen preview.
+  const imgData = canvas.toDataURL('image/jpeg', 0.96);
   const imgW = A4_WIDTH_MM;
   const imgH = (canvas.height * imgW) / canvas.width;
 
-  if (layout === "long") {
-    // Single-page PDF whose height matches the content exactly. Min
-    // bound at A4 height so very short CVs don't end up as awkward
-    // post-it slips; max bound at 5000 mm so we don't generate a 50 m
-    // monstrosity if the user pastes a novel.
-    const pageH = Math.max(A4_HEIGHT_MM, Math.min(imgH, 5000));
+  // Max single-page height (mm) — beyond this we paginate instead so a
+  // very long CV isn't silently clipped (previously pageH was clamped to
+  // 5000 but the image was still drawn at its full imgH, cutting the tail).
+  const LONG_MAX_MM = 5000;
+  if (layout === "long" && imgH <= LONG_MAX_MM) {
+    // Single-page PDF whose height matches the content exactly. Min bound at
+    // A4 height so very short CVs don't end up as awkward post-it slips.
+    const pageH = Math.max(A4_HEIGHT_MM, imgH);
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',

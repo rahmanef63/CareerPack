@@ -80,12 +80,21 @@ export function usePreviewBranding(state: FormState):
     //   undefined → follow global state.portfolioShow
     //   true      → always shown (overrides global off)
     //   false     → never shown (overrides global on)
-    const visiblePortfolio = (portfolio ?? []).filter((p) => {
-      const flag = (p as { brandingShow?: boolean }).brandingShow;
-      if (flag === true) return true;
-      if (flag === false) return false;
-      return state.portfolioShow;
-    });
+    const visiblePortfolio = (portfolio ?? [])
+      .filter((p) => {
+        const flag = (p as { brandingShow?: boolean }).brandingShow;
+        if (flag === true) return true;
+        if (flag === false) return false;
+        return state.portfolioShow;
+      })
+      // Match the PUBLISHED page order (convex/profile/queries.ts): featured
+      // cards first, then newest date first. Preview previously kept raw
+      // creation order, so the live page and the preview showed a different
+      // first tile / card order.
+      .sort((a, b) => {
+        if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1;
+        return (b.date ?? "").localeCompare(a.date ?? "");
+      });
     const projects: BrandingPayload["projects"] = [
       ...visiblePortfolio.map((p) => ({
         id: p._id as unknown as string,

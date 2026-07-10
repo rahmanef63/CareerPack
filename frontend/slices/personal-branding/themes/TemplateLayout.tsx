@@ -43,6 +43,15 @@ export function TemplateLayout({
   const [showMoreList, setShowMoreList] = useState<ShowMoreList | null>(null);
   const [floatingNavItems, setFloatingNavItems] = useState<FloatingNavItem[]>([]);
 
+  // usePreviewBranding returns a NEW branding object on every keystroke.
+  // Debounce it so the iframe srcDoc (below) only rebuilds when typing
+  // pauses (~300ms) instead of blank-flashing a full reload per character.
+  const [debouncedBranding, setDebouncedBranding] = useState(branding);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedBranding(branding), 300);
+    return () => clearTimeout(t);
+  }, [branding]);
+
   useEffect(() => {
     let cancelled = false;
     const cached = TEMPLATE_HTML_CACHE.get(templateKey);
@@ -127,11 +136,14 @@ export function TemplateLayout({
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  // Reset height + floating-nav when template/branding key changes.
+  // Reset height + floating-nav ONLY on an actual template swap — not on
+  // every branding keystroke (that nulled the height and collapsed the
+  // iframe to the fallback, causing the tall→short jump). Branding edits
+  // keep the last height; the iframe re-posts cp-resize after it reloads.
   useEffect(() => {
     setIframeHeight(null);
     setFloatingNavItems([]);
-  }, [templateKey, branding]);
+  }, [templateKey]);
 
   function gotoSection(id: string) {
     const win = iframeRef.current?.contentWindow;
@@ -143,8 +155,8 @@ export function TemplateLayout({
   // copy with the user's real data and hide empty sections.
   const hydratedHtml = useMemo(() => {
     if (!html) return html;
-    return injectBrandingIntoHtml(html, branding);
-  }, [html, branding]);
+    return injectBrandingIntoHtml(html, debouncedBranding);
+  }, [html, debouncedBranding]);
 
   return (
     <div className="relative w-full" style={{ minHeight: "calc(100vh - 64px)" }}>
@@ -161,7 +173,10 @@ export function TemplateLayout({
       {hydratedHtml && (
         <iframe
           ref={iframeRef}
-          key={`${templateKey}:${branding?.identity.name ?? ""}`}
+          // Key on templateKey only. Including identity.name here forced a
+          // full iframe remount every time the user typed their name; srcDoc
+          // updates already reload content when the debounced branding lands.
+          key={templateKey}
           srcDoc={hydratedHtml}
           title={`Template ${templateKey} untuk ${displayName}`}
           loading="eager"

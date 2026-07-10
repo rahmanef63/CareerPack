@@ -19,6 +19,47 @@ Modes active: caveman (terse), ponytail (lazy/minimal), ultracode (multi-agent w
 | ship | fixes | applied + verified 11 fixes, cleanup, shipped `d0bba38` | typecheck+472 tests+lint pass; BUILD_ID fix verified |
 | loop 1 | feature | deterministic CV PDF export (rAF-gated, no 50ms race) | typecheck+test+lint pass; `CVGenerator.tsx` |
 | loop 2 | feature | unread-notification bell + live badge (header + sidebar nav + mobile MoreDrawer tile) | gate pass; new `useUnreadNotifications` hook; not visually verified |
+| cv/pb | investigate | 4-agent trace of CV preview + personal-branding "weirdness" | root causes found (see below) |
+| cv/pb | fix | PB preview flicker (debounce + stable key + reset-on-template-only), portfolio order, CV export quality | gate pass; frontend-only shipped |
+
+## CV preview + Personal-branding "weirdness" (multi-agent trace)
+
+**CV preview — root:** what you see in the live preview isn't what survives save/export.
+**Personal branding — root:** the in-app preview and the published `/[slug]` page run two
+different code paths that disagree, and the preview iframe rebuilt its whole `srcDoc` on
+every keystroke.
+
+### Fixed + shipped (frontend-only)
+- **PB preview iframe flicker (HIGH)** — `TemplateLayout.tsx`: (1) debounce the branding fed
+  to the iframe `srcDoc` (~300ms) so it rebuilds on typing pause, not per keystroke; (2) reset
+  iframe height only on an actual template swap (was keyed on the per-keystroke `branding`
+  object → collapse/jump); (3) drop `identity.name` from the iframe React `key` (was forcing a
+  full remount while typing the name).
+- **PB portfolio card order** — `usePreviewBranding.ts`: sort visible portfolio featured-first
+  then date-desc to match the published page (preview kept raw creation order).
+- **CV export quality** — `exportPDF.ts`: JPEG 0.92→0.96 (less glyph ringing); `long` layout
+  now paginates instead of silently clipping content past the 5000 mm clamp.
+
+### Flagged — NOT auto-applied (need backend deploy or visual QA)
+- **CV accent color reverts on reload (HIGH)** — `convex/cv/schema.ts` displayPrefs omits
+  `accentColor` so it's stripped on save. Fix is a coupled frontend+backend change (schema +
+  mutation validator + `useCV` merge/payload); shipping the frontend half alone would make
+  Convex's strict validator **reject every CV save**. Apply + `pnpm backend:deploy` TOGETHER
+  after the admin-key rotation.
+- **CV export blur tracks window width (MED)** — capture node sits inside the preview's
+  `transform:scale()`; effective DPI is 3×scale. Fix: html2canvas `onclone` clears ancestor
+  transforms, or render an off-screen 794px node. Needs a real export eyeballed.
+- **CV export: cross-origin photos blank in PDF (MED)** — `useCORS` with no fallback; inline
+  photos as data: URIs before capture. Needs visual QA (could regress working same-origin photos).
+- **CV multi-page PDF slices text/photo across A4 breaks (MED, L)** — raster paginated with no
+  break-avoidance; needs content-aware pagination. Bigger change, visual QA.
+- **PB preview shows RICHEST CV, published shows NEWEST CV (HIGH)** — `getBySlug` vs
+  `usePreviewBranding` pick different CVs. Fix: one shared `pickPrimaryCv()` (convex + frontend →
+  needs deploy).
+- **PB sparse profiles fall back to a legacy layout when published** (`app/[slug]/page.tsx`
+  renders legacy `ProfileView` when `blocks` empty) — a product decision on which renderer wins.
+- **PB "Tombol sosial" toggle is a no-op in Auto mode**, and the **Preview dialog's Mobile
+  viewport is missing the floating bottom nav** — both MED, need coordinated changes + QA.
 
 ## Baseline
 
