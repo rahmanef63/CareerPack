@@ -65,15 +65,23 @@ is cut over. The `.zip` is retained. Migration remains fully reversible.
 
 ## Remaining — needs YOU (I stopped at the outward-facing boundary)
 
+> **CORRECTION (2026-07-10, later):** the REAL prod deployment is
+> **`savory-oyster-802`**, NOT `compassionate-vole-664` (that was the dev
+> deployment used for first staging). Steps A/B below were originally written
+> against the dev URL — use `savory-oyster-802` everywhere. The frontend app
+> STAYS on Dokploy; only the Convex backend moves to cloud. The Dockerfile
+> `NEXT_PUBLIC_CONVEX_URL` default is now `savory-oyster-802.convex.cloud`.
+
 - **A. Google Console** — add Authorized redirect URI
-  `https://compassionate-vole-664.convex.site/api/auth/callback/google` to the
-  existing OAuth client (keep the self-hosted URI for rollback). Same client
-  (creds already copied) — no new client.
-- **B. Prod cutover (Dokploy)** — set the frontend build env
-  `NEXT_PUBLIC_CONVEX_URL=https://compassionate-vole-664.convex.cloud` (the
+  `https://savory-oyster-802.convex.site/api/auth/callback/google` to the
+  OAuth client whose ID is set in savory's `AUTH_GOOGLE_ID` (client
+  `1083300253422-…`). Keep the self-hosted URI for rollback.
+- **B. Prod cutover (Dokploy)** — set the frontend **build arg**
+  `NEXT_PUBLIC_CONVEX_URL=https://savory-oyster-802.convex.cloud` (the
   `.convex.cloud` host, NOT `.convex.site`) and **rebuild** (NEXT_PUBLIC_* is
-  build-time). This is the on/off switch. Rollback = flip it back to the
-  self-hosted URL + rebuild.
+  build-time — a runtime env change does nothing). This is the on/off switch.
+  Rollback = flip it back + rebuild. The Dockerfile default now points here,
+  so removing the Dokploy override and rebuilding also works.
 - **C. Dev-vs-prod cloud** — this staged onto the **dev** deployment. For real prod
   I recommend provisioning a dedicated **prod** cloud deployment (`convex deploy` +
   `convex import --prod` + `convex env set --prod`) so a stray `convex dev` can't
