@@ -40,7 +40,13 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       },
     }),
     Anonymous,
-    Google,
+    // Google OAuth registers ONLY when both creds are set — otherwise a
+    // "Continue with Google" click 500s on the callback. Deploys that never
+    // set these keep Password + Anonymous untouched. env is read at
+    // module-eval, so changing the creds needs a backend redeploy/restart.
+    ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
+      ? [Google]
+      : []),
   ],
 });
 
