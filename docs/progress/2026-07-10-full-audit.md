@@ -21,6 +21,8 @@ Modes active: caveman (terse), ponytail (lazy/minimal), ultracode (multi-agent w
 | loop 2 | feature | unread-notification bell + live badge (header + sidebar nav + mobile MoreDrawer tile) | gate pass; new `useUnreadNotifications` hook; not visually verified |
 | cv/pb | investigate | 4-agent trace of CV preview + personal-branding "weirdness" | root causes found (see below) |
 | cv/pb | fix | PB preview flicker (debounce + stable key + reset-on-template-only), portfolio order, CV export quality | gate pass; frontend-only shipped |
+| loop 3 | feature | offline banner — ALREADY EXISTS (`OfflineBanner` + `useOnlineStatus`, mounted) | skipped, no duplicate |
+| loop 4 | feature | graceful "Versi baru tersedia" toast w/ Muat-ulang action (UpdateChecker no longer silently reloads) | gate pass; `UpdateChecker.tsx` |
 
 ## CV preview + Personal-branding "weirdness" (multi-agent trace)
 

@@ -2,37 +2,33 @@
 
 import { useEffect, useRef } from "react";
 import { forceFreshReload } from "@/shared/lib/staleBundle";
+import { notify } from "@/shared/lib/notify";
 
-/** sessionStorage key — last auto-reload timestamp (ms). */
-const RELOAD_GUARD_KEY = "_car_update_reload_at";
-/** Don't auto-reload again within this window — defeats reload loops
- *  if the new bundle still mismatches (server bug, broken deploy). */
-const GUARD_WINDOW_MS = 90 * 1000;
 /** Periodic background check cadence. */
 const POLL_INTERVAL_MS = 5 * 60 * 1000;
 /** Skip a check if we polled within this window (focus debounce). */
 const FOCUS_DEBOUNCE_MS = 30 * 1000;
 
 /**
- * Silent auto-update. Compares the build ID frozen into the client
- * bundle (build-time inject via `next.config.ts` env) against the
- * live build ID served by `/api/build-id`. On mismatch, calls
- * `forceFreshReload()` which purges SW + Cache Storage and reloads
- * with a cache-buster — so the new bundle actually loads instead of
- * the browser re-serving the same stale chunks.
+ * New-version detector. Compares the build ID frozen into the client
+ * bundle (build-time inject via `next.config.ts`) against the live build
+ * ID served by `/api/build-id`.
  *
- * No toast. No "Refresh" button. The user just gets a fresh app.
+ * On a real mismatch it surfaces a DISMISSIBLE toast with a "Muat ulang"
+ * action — it no longer silently reloads, so a fresh deploy never yanks
+ * a user out of a half-written CV. `forceFreshReload()` (SW unregister +
+ * Cache Storage purge + cache-busted reload) runs only when the user
+ * clicks the action.
  *
- * Anti-loop: sessionStorage timestamp ensures we never auto-reload
- * twice within ~90s. If the post-reload client STILL detects a
- * mismatch (shouldn't happen, but e.g. server returns "unknown" or
- * the freshly fetched bundle is also stale), we silently skip — no
- * spam, no loop.
+ * Prompted once per detected build ID (a later deploy re-prompts). The
+ * toast shares a stable sonner id (via `notify.action`) so repeated polls
+ * refresh it in place rather than stacking copies. No auto-reload means
+ * no reload loop, so the old sessionStorage loop-guard is gone.
  */
 export function UpdateChecker() {
   const localBuildId = process.env.NEXT_PUBLIC_BUILD_ID ?? "unknown";
   const lastPolledAt = useRef(0);
-  const reloading = useRef(false);
+  const promptedFor = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -40,27 +36,15 @@ export function UpdateChecker() {
 
     let stopped = false;
 
-    const tryAutoReload = async () => {
-      if (reloading.current) return;
-      // Loop guard.
-      try {
-        const last = parseInt(
-          window.sessionStorage.getItem(RELOAD_GUARD_KEY) ?? "0",
-          10,
-        );
-        if (Number.isFinite(last) && Date.now() - last < GUARD_WINDOW_MS) {
-          return;
-        }
-        window.sessionStorage.setItem(RELOAD_GUARD_KEY, String(Date.now()));
-      } catch {
-        // sessionStorage unavailable (private mode) — fall through; risk
-        // of one extra reload is acceptable, the SW unregister itself is
-        // idempotent.
-      }
-      reloading.current = true;
-      // forceFreshReload: SW unregister + caches.delete(*) + location.replace
-      // with `?_v=...`. Total budget capped at ~3s by withTimeout.
-      await forceFreshReload();
+    const promptUpdate = () => {
+      notify.action("Versi baru tersedia", {
+        description: "Muat ulang untuk memakai versi terbaru aplikasi.",
+        actionLabel: "Muat ulang",
+        onAction: () => {
+          void forceFreshReload();
+        },
+        duration: Infinity,
+      });
     };
 
     const check = async () => {
@@ -72,7 +56,12 @@ export function UpdateChecker() {
         if (stopped) return;
         if (!j.buildId || j.buildId === "unknown") return;
         if (j.buildId === localBuildId) return;
-        await tryAutoReload();
+        // Prompt once per new build; a subsequent deploy (different id)
+        // re-prompts so a user who dismissed an old one still learns of
+        // the next release.
+        if (promptedFor.current === j.buildId) return;
+        promptedFor.current = j.buildId;
+        promptUpdate();
       } catch {
         // Network blip — ignore.
       }
