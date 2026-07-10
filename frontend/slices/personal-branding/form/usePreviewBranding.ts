@@ -23,13 +23,10 @@ export function usePreviewBranding(state: FormState):
 
   const defaultCv = useMemo(() => {
     if (!cvs || cvs.length === 0) return null;
-    const ranked = [...cvs].sort((a, b) => {
-      const aRich = a.experience.length + a.skills.length + a.education.length;
-      const bRich = b.experience.length + b.skills.length + b.education.length;
-      if (aRich !== bRich) return bRich - aRich;
-      return b._creationTime - a._creationTime;
-    });
-    return ranked[0];
+    // Mirror getProfileBySlug (`.order("desc").first()`): newest CV wins.
+    // Was ranking by richness, which made the editor preview show a
+    // different CV than the published page for users with 2+ CVs.
+    return [...cvs].sort((a, b) => b._creationTime - a._creationTime)[0];
   }, [cvs]);
 
   return useMemo(() => {

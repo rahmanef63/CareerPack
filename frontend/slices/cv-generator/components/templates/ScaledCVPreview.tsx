@@ -101,8 +101,14 @@ export const ScaledCVPreview = memo(
           maxWidth: "100%",
           height: innerHeight ? innerHeight * scale + 32 : undefined,
           minHeight: compact ? (innerHeight ? undefined : 180) : 420,
+          // Compact = sidebar thumbnail. Cap its height and let it scroll
+          // internally so a 2-page CV isn't clipped by the sticky sidebar
+          // (max-h) with no way to reach the bottom — the "ter potong"
+          // complaint. Full-height reading stays in the fullscreen dialog
+          // (non-compact), which keeps overflowY hidden + its own scroll.
+          maxHeight: compact ? "60vh" : undefined,
           overflowX: "hidden",
-          overflowY: "hidden",
+          overflowY: compact ? "auto" : "hidden",
         }}
       >
         <div

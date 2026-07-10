@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "convex/react";
 import {
   Code2, Download, Eye, Globe2, Sparkles, Wrench, Zap,
@@ -49,6 +49,16 @@ export function PersonalBrandingView() {
   const [view, setView] = useState<TopView>(
     () => (form.state.mode === "custom" ? "custom" : "auto"),
   );
+  // The lazy initializer above runs before the server state hydrates
+  // (mode is still the "auto" default), so a saved custom-mode user
+  // would land on the Otomatis tab with their block builder hidden.
+  // Sync once, when serverState first arrives.
+  const modeSyncedRef = useRef(false);
+  useEffect(() => {
+    if (modeSyncedRef.current || !form.serverState) return;
+    modeSyncedRef.current = true;
+    setView(form.serverState.mode === "custom" ? "custom" : "auto");
+  }, [form.serverState]);
   const [activeSection, setActiveSection] = useState<string | null>("identity");
   function toggleSection(id: string) {
     setActiveSection((prev) => (prev === id ? null : id));

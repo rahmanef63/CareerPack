@@ -342,7 +342,12 @@ export function usePBForm(): PBForm {
         } else {
           await update({
             enabled: finalEnabled,
-            slug: slugTrimmed,
+            // Empty slug: send undefined so the mutation skips assertSlug
+            // ("" would fail the 3-30 char check and reject the whole
+            // patch). Publish stays gated by canEnable + the server's
+            // enabled→hasSlug check, so "Simpan Draft" persists toggles
+            // /theme/headline before a URL is chosen.
+            slug: slugTrimmed || undefined,
             headline: state.headline,
             bioShow: state.bioShow,
             skillsShow: state.skillsShow,

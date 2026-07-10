@@ -204,3 +204,23 @@ SSRF deny-list and shape guard live in the repo but not on the running backend.
 - Skills: `/ponytail:ponytail-audit` intent ran as the audit's cleanup dimension
   (found + removed 5 dead wrappers, 3 unused deps, 1 stale doc). `/goal` is not an
   available skill in this environment — skipped.
+
+## Follow-up: CV preview clip + Personal Branding config (user report)
+
+- **CV "Lihat CV" cut off**: sidebar mini-preview was clipped by the sticky
+  container `max-h` for 2-page CVs (dialog fine — own scroll). Made the compact
+  preview a self-bounded scrollable thumbnail (`maxHeight:60vh`, `overflowY:auto`).
+  `ScaledCVPreview.tsx`.
+- **Personal Branding misconfig** (subagent traced all 3 render paths; 3 safe
+  frontend-only fixes applied):
+  1. `usePBForm` sent `slug:""` on "Simpan Draft" → mutation `assertSlug("")` threw
+     → nothing persisted for pre-publish users. Now `slug: slugTrimmed || undefined`.
+  2. `usePreviewBranding` picked the *richest* CV while the live page picks the
+     *newest* → preview ≠ published. Now both use newest (`_creationTime` desc).
+  3. Saved custom-mode users landed on the Otomatis tab (lazy init ran pre-hydrate)
+     → block builder hidden. Added one-shot `serverState.mode` sync.
+- **Deferred (flagged, not applied)**: (4) hidden bio/skills/CV data still ship in
+  the public `/[slug]` payload even when toggled off — real privacy leak, but the
+  fix is in `convex/profile/brandingPayload.ts` (needs coordinated Convex deploy).
+  (5) near-empty auto profiles render legacy `ProfileView` live vs template in
+  preview — needs maintainer decision on dropping the legacy path.
