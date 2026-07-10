@@ -6,7 +6,10 @@ node_modules
 .gitignore
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
 .vscode
 .idea
 *.log

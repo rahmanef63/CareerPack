@@ -20,12 +20,14 @@ FROM node:${NODE_VERSION} AS builder
 RUN corepack enable && corepack prepare pnpm@10.24.0 --activate
 WORKDIR /app
 
-# Default = prod Convex Cloud deployment (savory-oyster-802). Dokploy MAY
-# still override this with a --build-arg; if so, keep that arg in sync with
-# this URL (or remove it and rely on this default). NEXT_PUBLIC_* is baked
-# at build time, so changing where the app connects needs a REBUILD.
-ARG NEXT_PUBLIC_CONVEX_URL=https://savory-oyster-802.convex.cloud
-ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
+# Convex Cloud PROD deployment. HARDCODED as a plain ENV (not an overridable
+# ARG) on purpose: a stray Dokploy build-arg kept pinning the frontend to the
+# old dev deployment (compassionate-vole-664), which uses a different Google
+# OAuth client and broke login with redirect_uri_mismatch. A plain ENV cannot
+# be overridden by --build-arg, so every build now bakes the correct URL.
+# NEXT_PUBLIC_* is inlined at build time — to change which Convex backend the
+# app talks to, edit THIS line and rebuild (a runtime env change does nothing).
+ENV NEXT_PUBLIC_CONVEX_URL=https://savory-oyster-802.convex.cloud
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
