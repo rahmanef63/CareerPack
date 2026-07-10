@@ -36,6 +36,10 @@ export function CVGenerator() {
   const [isExporting, setIsExporting] = useState(false);
   const [format, setFormat] = useState<CVFormat>('national');
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Set when an export is requested while the preview is still closed — the
+  // export runs from an effect once the dialog node actually mounts (below),
+  // instead of racing a fixed setTimeout that silently no-ops on slow devices.
+  const [pendingExport, setPendingExport] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>('personal');
 
   const avatarStorageId = cvData.profile.avatarStorageId;
@@ -226,12 +230,39 @@ export function CVGenerator() {
 
   const handleExportClick = () => {
     if (!previewOpen) {
+      // Open the preview and defer the export to the effect below, which
+      // fires the moment the dialog node is actually in the DOM.
       setPreviewOpen(true);
-      setTimeout(() => { void handleExport(); }, 50);
+      setPendingExport(true);
       return;
     }
     void handleExport();
   };
+
+  // Deterministic deferred export: once the preview is open AND the CV node has
+  // mounted, run the export. rAF polls until the node exists (any device speed),
+  // bounded to ~1s so a dialog that never renders doesn't loop forever.
+  useEffect(() => {
+    if (!previewOpen || !pendingExport) return;
+    let raf = 0;
+    let tries = 0;
+    const run = () => {
+      if (cvPreviewRef.current) {
+        setPendingExport(false);
+        void handleExport();
+        return;
+      }
+      if (tries++ > 60) {
+        setPendingExport(false);
+        notify.info("Buka tampilan CV dulu, lalu ekspor");
+        return;
+      }
+      raf = requestAnimationFrame(run);
+    };
+    raf = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewOpen, pendingExport]);
 
   return (
     <PageContainer size="lg">

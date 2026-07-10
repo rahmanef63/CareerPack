@@ -16,6 +16,8 @@ Modes active: caveman (terse), ponytail (lazy/minimal), ultracode (multi-agent w
 | +1 | verify | read `sw.js` + `pwa.ts` | SW-reinstall loop DISPROVEN; found stale CACHE string bug |
 | +1 | orchestrate | launched audit workflow (6 investigators) + FAQ workflow (3 phases) | running background |
 | +7min | FAQ | 20 FAQs generated + scored + weak ones rewritten | done → `docs/faq-market-investor.md`; only #14 market-size was weak (3→revised), rest 4–5 |
+| ship | fixes | applied + verified 11 fixes, cleanup, shipped `d0bba38` | typecheck+472 tests+lint pass; BUILD_ID fix verified |
+| loop 1 | feature | deterministic CV PDF export (rAF-gated, no 50ms race) | typecheck+test+lint pass; `CVGenerator.tsx` |
 
 ## Baseline
 
@@ -130,7 +132,31 @@ navigating, killing the landing→dashboard→spinner→login bounce.
 - **Pin `CONVEX_SELF_HOSTED_IMAGE`** to a digest in Dokploy (compose default is `:latest`).
 - **audit-bp score: 68 → ~85** once the key rotation + admin-gate land (SSRF already fixed).
 
+## Ship result
+
+- Commit `d0bba38` pushed to `main` (`6684704..d0bba38`).
+- Pre-push quality gate (typecheck + 472 vitest) **PASSED**.
+- BUILD_ID fix **verified end-to-end**: after a fresh build, `.next/BUILD_ID`,
+  the client chunk, and the memo file all read the same id (`bmreiwep4`).
+- Frontend ships via Dokploy webhook → self-refresh fix goes live.
+
+### ⚠ Convex backend deploy BLOCKED (pre-existing, not from this change)
+
+Pre-push `pnpm backend:deploy` failed: `BadAdminKey: admin key was invalid for
+this instance` at `http://127.0.0.1:3210` (+ a `self-signed certificate` error).
+The self-hosted admin key in `backend/convex-self-hosted/convex.env` is out of
+sync with the running backend — the same desync the audit flagged. Pushed with
+`SKIP_CONVEX_DEPLOY=1` (sanctioned bypass) since my convex changes (SSRF guard,
+AI shape guard) are additive hardening with no frontend contract dependency.
+
+**To deploy the backend hardening:** run `/rotate-admin-key` (syncs the key across
+container + Dokploy + local env), then `pnpm backend:deploy`. Until then, the
+SSRF deny-list and shape guard live in the repo but not on the running backend.
+
 ## Deliverables
 
 - 20 market+investor FAQs → `docs/faq-market-investor.md` (only #14 market-size scored <4, rewritten).
 - This activity log.
+- Skills: `/ponytail:ponytail-audit` intent ran as the audit's cleanup dimension
+  (found + removed 5 dead wrappers, 3 unused deps, 1 stale doc). `/goal` is not an
+  available skill in this environment — skipped.
