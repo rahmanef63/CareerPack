@@ -7,7 +7,10 @@ import { useState, type ReactNode } from "react";
 // Baca langsung supaya Next inline value time build. Akses via getter
 // module akan throw ketika nilai kosong — itu yang kita elak di sini,
 // supaya bundle layout tak crash sebelum error boundary sempat render.
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL;
+// Strip trailing slash(es): a Dokploy/env value like "…convex.cloud/"
+// otherwise yields "wss://…convex.cloud//api/1.32.0/sync" (double slash),
+// which the Convex backend 404s → WebSocket sync + auth never connect.
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL?.replace(/\/+$/, "");
 
 function MissingEnvFallback() {
     return (
