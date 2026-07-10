@@ -35,6 +35,10 @@ async function readBuildId(): Promise<string> {
   // from project root — same relative path. process.cwd() handles both.
   const candidates = [
     path.join(process.cwd(), ".next", "BUILD_ID"),
+    // Standalone container: server.js chdir's to /app/frontend so the line
+    // above normally hits, but if cwd is ever /app this catches the real
+    // /app/frontend/.next/BUILD_ID instead of falling through to the env.
+    path.join(process.cwd(), "frontend", ".next", "BUILD_ID"),
     // Fallback for monorepo / unusual cwd layouts.
     path.join(process.cwd(), "..", ".next", "BUILD_ID"),
   ];

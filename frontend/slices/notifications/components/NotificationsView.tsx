@@ -16,6 +16,7 @@ import {
 import { formatDateShort } from "@/shared/lib/formatDate";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
+import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import {
@@ -226,7 +227,7 @@ export function NotificationsView() {
   };
 
   return (
-    <div className="space-y-4">
+    <PageContainer size="lg" className="space-y-4">
       <ResponsivePageHeader
         title="Notifikasi"
         description={
@@ -376,6 +377,6 @@ export function NotificationsView() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

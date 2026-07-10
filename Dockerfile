@@ -25,11 +25,19 @@ ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Stable, deterministic build id shared by ALL Next compiler passes so the
+# client-baked NEXT_PUBLIC_BUILD_ID == the on-disk .next/BUILD_ID that
+# /api/build-id serves (else UpdateChecker force-reloads every focus — the
+# self-refresh bug). Dokploy MAY pass --build-arg BUILD_ID=$(git rev-parse
+# --short HEAD) for a commit-accurate id; if not, one `date` value is computed
+# once here and exported to the whole build so every pass reads the same id.
+ARG BUILD_ID=""
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
 COPY . .
 
-RUN pnpm --filter careerpack-frontend build
+RUN NEXT_PUBLIC_BUILD_ID="${BUILD_ID:-b$(date +%s)}" pnpm --filter careerpack-frontend build
 
 # ---------- runner ----------
 FROM node:${NODE_VERSION} AS runner

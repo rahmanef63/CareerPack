@@ -230,12 +230,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    // Push the user back to the marketing landing immediately so the
-    // dashboard route doesn't flash an unauth empty-state during the
-    // signOut round-trip. middleware would eventually redirect, but
-    // explicit nav is faster + keeps the URL clean.
-    router.push(ROUTES.marketing.landing);
+    // Sign out FIRST, then navigate. Navigating while still authenticated let
+    // MarketingLanding's "authenticated → /dashboard" redirect grab the window
+    // and bounce landing→dashboard→spinner→login on every logout. RouteGuard's
+    // hasPassedRef keeps the dashboard rendered through the signOut round-trip,
+    // so there's no unauth empty-state flash to race against anymore.
     await signOut();
+    router.replace(ROUTES.marketing.landing);
   };
 
   const updateUser = async (updates: Partial<AuthUser>) => {

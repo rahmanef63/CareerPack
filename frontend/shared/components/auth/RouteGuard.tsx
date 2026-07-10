@@ -87,6 +87,15 @@ export function RouteGuard({
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  // Once an auth/role route has actually rendered its content, remember it.
+  // A transient Convex WS auth drop flips isAuthenticated false for a beat;
+  // without this we'd swap the whole page for a spinner (perceived as a
+  // self-refresh) even though the grace timer will self-heal the reconnect.
+  const hasPassedRef = useRef(false);
+  if (result?.pass && (mode === "auth" || mode === "role")) {
+    hasPassedRef.current = true;
+  }
+
   useEffect(() => {
     const r = evaluate(state, mode, requiredRole, redirectTo);
     if (!r || r.pass) return;
@@ -116,6 +125,12 @@ export function RouteGuard({
     router,
   ]);
 
-  if (!result || !result.pass) return <LoadingScreen />;
-  return <>{children}</>;
+  if (result?.pass) return <>{children}</>;
+  // Keep rendering already-shown protected content through a transient auth
+  // drop; the grace-timer effect above only redirects on a real, settled
+  // logout. Spinner shows only before the route has ever passed.
+  if ((mode === "auth" || mode === "role") && hasPassedRef.current) {
+    return <>{children}</>;
+  }
+  return <LoadingScreen />;
 }

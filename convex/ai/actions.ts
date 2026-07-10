@@ -10,6 +10,18 @@ import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
 import { SKILL_HANDLERS } from "./skillHandlers";
 
+/** Pull the assistant text out of an OpenAI-shaped response, or throw a
+ *  clean Indonesian error if the provider returned an unexpected shape
+ *  (e.g. an error payload). Avoids a raw TypeError leaking to the client. */
+function aiContent(data: unknown): string {
+  const content = (data as { choices?: { message?: { content?: unknown } }[] })
+    ?.choices?.[0]?.message?.content;
+  if (typeof content !== "string" || content.trim() === "") {
+    throw new Error("Respons AI tidak valid. Coba lagi sebentar lagi.");
+  }
+  return content;
+}
+
 async function requireQuota(ctx: ActionCtx): Promise<void> {
   const userId = await getAuthUserId(ctx);
   if (!userId) throw authError("Tidak terautentikasi");
@@ -68,7 +80,7 @@ export const generateCareerAdvice = action({
       max_tokens: 500,
       temperature: 0.7,
     });
-    return data.choices[0].message.content;
+    return aiContent(data);
   },
 });
 
@@ -106,7 +118,7 @@ export const generateInterviewQuestions = action({
     });
 
     try {
-      return JSON.parse(data.choices[0].message.content);
+      return JSON.parse(aiContent(data));
     } catch {
       return {
         questions: [
@@ -153,7 +165,7 @@ export const evaluateInterviewAnswer = action({
     });
 
     try {
-      return JSON.parse(data.choices[0].message.content);
+      return JSON.parse(aiContent(data));
     } catch {
       return {
         score: 7,

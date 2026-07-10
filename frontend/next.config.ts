@@ -1,5 +1,7 @@
 import path from "path"
 import { fileURLToPath } from "url"
+import { readFileSync, writeFileSync } from "fs"
+import { tmpdir } from "os"
 import type { NextConfig } from "next"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -149,7 +151,39 @@ const TEMPLATE_HEADERS = [
 // at runtime via `/api/build-id`. The UpdateChecker on the client polls
 // the runtime endpoint and compares to its frozen value; mismatch =
 // the user's tab is on an older deploy → toast prompts a refresh.
-const BUILD_ID = process.env.GITHUB_SHA?.slice(0, 12) || `b${Date.now().toString(36)}`;
+// BUILD_ID must be IDENTICAL across every next.config re-evaluation. Next
+// re-requires this file in separate compiler passes (build orchestrator /
+// generateBuildId, server bundle, client DefinePlugin) — a bare `Date.now()`
+// froze a DIFFERENT millisecond in each, so the client-baked
+// NEXT_PUBLIC_BUILD_ID could NEVER equal the on-disk `.next/BUILD_ID` that
+// `/api/build-id` serves. UpdateChecker read that as "new deploy" and
+// force-reloaded on every focus/interval — the "refresh sendiri" bug.
+//
+// Prefer an injected build-time env (Dockerfile sets it once for the whole
+// build → all passes agree, race-free). Otherwise memoize the first computed
+// value to a shared temp file so separate passes read back the same id.
+// ponytail: the write-then-read across passes has a tiny race, but the worst
+// case is ONE stray reload, not a loop — the Dockerfile env removes it in prod.
+function resolveBuildId(): string {
+  const injected =
+    process.env.NEXT_PUBLIC_BUILD_ID?.trim() || process.env.GITHUB_SHA?.slice(0, 12);
+  if (injected) return injected;
+  const memo = path.join(tmpdir(), "careerpack-build-id");
+  try {
+    const cached = readFileSync(memo, "utf8").trim();
+    if (cached) return cached;
+  } catch {
+    /* first pass — create it below */
+  }
+  const fresh = `b${Date.now().toString(36)}`;
+  try {
+    writeFileSync(memo, fresh);
+  } catch {
+    /* read-only fs — fall through; Dockerfile env covers the prod path */
+  }
+  return fresh;
+}
+const BUILD_ID = resolveBuildId();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,

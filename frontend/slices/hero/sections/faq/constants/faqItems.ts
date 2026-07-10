@@ -72,4 +72,34 @@ export const FAQ_ITEMS: FaqItem[] = [
     answer:
       "Ada. Notifikasi mengingatkan jadwal di kalender dan pembaruan penting lainnya, jadi Anda tidak melewatkan tenggat waktu.",
   },
+  {
+    id: "ats-scanner",
+    question: "Bagaimana cara tahu CV saya lolos ATS untuk lowongan tertentu?",
+    answer:
+      "Di Pencocok Lowongan ada ATS Scanner: tempel CV dan deskripsi lowongan, lalu Anda dapat skor 0–100 beserta kata kunci yang hilang dan masalah format yang perlu diperbaiki. Ini alat diagnosis — bukan janji pasti lolos — tapi Anda tahu persis apa yang harus dibenahi sebelum mengirim.",
+  },
+  {
+    id: "mock-interview",
+    question: "Bagaimana simulasi wawancara AI menilai jawaban saya?",
+    answer:
+      "Pilih peran dan tingkat kesulitan, AI membuat pertanyaan, lalu tiap jawaban dievaluasi dengan rubrik STAR (Situation, Task, Action, Result) plus skor akhir dan umpan balik terperinci. Kalau kuota AI habis, simulasi tetap jalan memakai bank pertanyaan wawancara berbahasa Indonesia yang sudah dikurasi.",
+  },
+  {
+    id: "pelacak-lamaran",
+    question: "Bisa melacak banyak lamaran sekaligus?",
+    answer:
+      "Bisa. Pelacak Lamaran punya tampilan tabel maupun Kanban dengan pipeline applied → screening → interview → offer/ditolak/diterima, plus filter, pencarian, catatan, dan tanggal wawancara — jadi puluhan lamaran tetap rapi dalam satu papan.",
+  },
+  {
+    id: "ai-persetujuan",
+    question: "Apakah asisten AI bisa mengubah data saya tanpa izin?",
+    answer:
+      "Tidak. Aksi AI yang hanya membaca data berjalan langsung, tetapi setiap aksi yang menulis atau mengubah data (CV, lamaran, kontak, jadwal, ceklis) wajib Anda setujui dulu lewat kartu konfirmasi sebelum dieksekusi.",
+  },
+  {
+    id: "kuota-ai",
+    question: "Ada batasan pemakaian fitur AI?",
+    answer:
+      "Ada batas pemakaian wajar: maksimal 10 permintaan AI per menit dan 100 per hari per akun. Kalau tercapai, banyak fitur tetap bisa dipakai dalam mode non-AI. Ini guardrail pemakaian wajar, bukan paywall.",
+  },
 ];

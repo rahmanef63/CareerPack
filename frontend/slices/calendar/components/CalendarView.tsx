@@ -416,7 +416,7 @@ function FilterChips({ filter, setFilter, counts }: FilterChipsProps) {
             className={cn(
               "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
               active
-                ? "border-brand bg-brand text-white"
+                ? "border-brand bg-brand text-brand-foreground"
                 : "border-border bg-card hover:bg-muted",
             )}
           >
@@ -425,7 +425,7 @@ function FilterChips({ filter, setFilter, counts }: FilterChipsProps) {
               <span
                 className={cn(
                   "rounded-full px-1.5 text-[10px] tabular-nums",
-                  active ? "bg-white/25" : "bg-muted-foreground/15",
+                  active ? "bg-brand-foreground/25" : "bg-muted-foreground/15",
                 )}
               >
                 {n}
