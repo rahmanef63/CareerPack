@@ -19,6 +19,10 @@ import {
 import { BrandMark } from "../brand/Logo";
 import { PRIMARY_NAV, activeNavForPath } from "./navConfig";
 import { useVisibleMoreApps } from "@/shared/hooks/useVisibleMoreApps";
+import {
+  useUnreadNotifications,
+  formatUnreadBadge,
+} from "@/shared/hooks/useUnreadNotifications";
 import { InstallSidebarButton } from "@/shared/components/pwa/InstallSidebarButton";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -34,6 +38,9 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
   const pathname = usePathname();
   const active = activeNavForPath(pathname);
   const visibleMore = useVisibleMoreApps();
+  // Live unread-count badge for the notifications nav item, injected
+  // over its (empty) static registry badge via the existing `badge` prop.
+  const unreadBadge = formatUnreadBadge(useUnreadNotifications());
 
   const mainItems: NavMainItem[] = PRIMARY_NAV.map((n) => ({
     id: n.id,
@@ -68,7 +75,7 @@ export function AppSidebar({ onAITap, aiActive, ...props }: AppSidebarProps) {
       title: m.label,
       url: m.href,
       icon: m.icon,
-      badge: m.badge,
+      badge: m.id === "notifications" ? unreadBadge ?? m.badge : m.badge,
     }));
 
   return (

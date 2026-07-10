@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Bell,
   LogOut,
   Sparkles,
   User as UserIcon,
@@ -31,6 +33,11 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
 import { useAuth } from "@/shared/hooks/useAuth";
+import {
+  useUnreadNotifications,
+  formatUnreadBadge,
+} from "@/shared/hooks/useUnreadNotifications";
+import { ROUTES } from "@/shared/lib/routes";
 import { labelForPath } from "./navConfig";
 
 interface SiteHeaderProps {
@@ -46,6 +53,8 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
   const router = useRouter();
   const { state, logout } = useAuth();
   const user = state.user;
+  const unreadCount = useUnreadNotifications();
+  const unreadBadge = formatUnreadBadge(unreadCount);
   const label = labelForPath(pathname) ?? "Dashboard";
   const initials = (user?.name || "U").slice(0, 1).toUpperCase();
   // OS-aware shortcut label. Default "Ctrl K" SSR-safe (majority users),
@@ -141,6 +150,32 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
           aria-label="Buka Asisten AI"
         >
           <Sparkles className="w-4 h-4 text-brand" />
+        </Button>
+        {/* Unread-notification bell — links to the notifications page,
+            live count badge (capped "9+") sourced from the shared
+            useUnreadNotifications hook (same Convex subscription). */}
+        <Button
+          asChild
+          variant="outline"
+          size="icon"
+          className="relative"
+          aria-label={
+            unreadCount > 0
+              ? `Notifikasi, ${unreadCount} belum dibaca`
+              : "Notifikasi"
+          }
+        >
+          <Link href={ROUTES.dashboard.notifications}>
+            <Bell className="w-4 h-4" />
+            {unreadBadge && (
+              <span
+                aria-hidden
+                className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+              >
+                {unreadBadge}
+              </span>
+            )}
+          </Link>
         </Button>
         <UserMenu
           initials={initials}

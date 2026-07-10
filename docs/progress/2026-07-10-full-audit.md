@@ -18,6 +18,7 @@ Modes active: caveman (terse), ponytail (lazy/minimal), ultracode (multi-agent w
 | +7min | FAQ | 20 FAQs generated + scored + weak ones rewritten | done → `docs/faq-market-investor.md`; only #14 market-size was weak (3→revised), rest 4–5 |
 | ship | fixes | applied + verified 11 fixes, cleanup, shipped `d0bba38` | typecheck+472 tests+lint pass; BUILD_ID fix verified |
 | loop 1 | feature | deterministic CV PDF export (rAF-gated, no 50ms race) | typecheck+test+lint pass; `CVGenerator.tsx` |
+| loop 2 | feature | unread-notification bell + live badge (header + sidebar nav + mobile MoreDrawer tile) | gate pass; new `useUnreadNotifications` hook; not visually verified |
 
 ## Baseline
 

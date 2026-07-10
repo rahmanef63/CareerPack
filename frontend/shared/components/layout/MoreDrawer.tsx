@@ -24,6 +24,10 @@ import { cn } from "@/shared/lib/utils";
 import { useHapticPress } from "../interactions/MicroInteractions";
 import { type MoreAppTile } from "./navConfig";
 import { useVisibleMoreApps } from "@/shared/hooks/useVisibleMoreApps";
+import {
+  useUnreadNotifications,
+  formatUnreadBadge,
+} from "@/shared/hooks/useUnreadNotifications";
 import { usePWAInstall } from "@/shared/hooks/usePWAInstall";
 import { useAuth } from "@/shared/hooks/useAuth";
 
@@ -39,15 +43,27 @@ interface MoreDrawerProps {
 export function MoreDrawer({ open, onOpenChange }: MoreDrawerProps) {
   const router = useRouter();
   const visibleMore = useVisibleMoreApps();
+  const unreadBadge = formatUnreadBadge(useUnreadNotifications());
   const [query, setQuery] = useState("");
+  // Inject the live unread count onto the notifications tile via its
+  // existing `badge` prop (rendered as the corner badge on the icon).
+  const tiles = useMemo(
+    () =>
+      unreadBadge
+        ? visibleMore.map((m) =>
+            m.id === "notifications" ? { ...m, badge: unreadBadge } : m,
+          )
+        : visibleMore,
+    [visibleMore, unreadBadge],
+  );
   const filteredMore = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return visibleMore;
-    return visibleMore.filter(
+    if (!q) return tiles;
+    return tiles.filter(
       (m) =>
         m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q),
     );
-  }, [visibleMore, query]);
+  }, [tiles, query]);
 
   return (
     // vaul Drawer — the user can swipe the sheet down from the handle
