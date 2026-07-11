@@ -44,6 +44,7 @@
     "cmdk": "^1.1.1",
     "convex": "^1.31.7",
     "date-fns": "^4.1.0",
+    "geoip-lite": "^2.0.3",
     "html2canvas-pro": "^2.0.2",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.562.0",
@@ -64,6 +65,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@types/geoip-lite": "^1.4.4",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

@@ -61,6 +61,7 @@ export const pruneAppendOnlyTables = internalMutation({
       loginCheckIpEvents: 0,
       aiIdempotency: 0,
       passwordResetTokens: 0,
+      pageviewRateLimits: 0,
     };
 
     // errorLogs > 90 days — uses by_time index for cheap range query.
@@ -130,6 +131,20 @@ export const pruneAppendOnlyTables = internalMutation({
       const batch = stale.slice(0, PRUNE_BATCH_MAX);
       for (const r of batch) await ctx.db.delete(r._id);
       stats.passwordResetTokens = batch.length;
+    }
+
+    // pageviewRateLimits > 1 day — the analytics beacon's per-IP
+    // fixed-window counter (window is 60s). A row whose `resetAt` is a day
+    // old means that IP hasn't returned since; drop it so the table stays
+    // O(recently-active IPs). by_reset gives a cheap range scan.
+    {
+      const cutoff = now - DAY;
+      const stale = await ctx.db
+        .query("pageviewRateLimits")
+        .withIndex("by_reset", (q) => q.lt("resetAt", cutoff))
+        .take(PRUNE_BATCH_MAX);
+      for (const r of stale) await ctx.db.delete(r._id);
+      stats.pageviewRateLimits = stale.length;
     }
 
     return stats;

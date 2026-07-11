@@ -24,6 +24,7 @@ import { engineTables } from "./engine/schema";
 import { graphTables } from "./engine/graph/schema";
 import { outcomesTables } from "./engine/outcomes/schema";
 import { planTables } from "./engine/plan/schema";
+import { pageviewTables } from "./pageviews/schema";
 
 // Auth-adjacent table — kept inline here so it lives next to the
 // passwordReset.ts module which owns the writes. (passwordReset.ts is
@@ -96,4 +97,5 @@ export default defineSchema({
   ...graphTables,
   ...outcomesTables,
   ...planTables,
+  ...pageviewTables,
 });

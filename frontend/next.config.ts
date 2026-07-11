@@ -189,6 +189,16 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, ".."),
+  // geoip-lite loads its .dat data files from disk at runtime; the
+  // standalone output tracer can't see those fs reads, so include them
+  // explicitly for the analytics beacon route or the Dokploy image ships
+  // without them (geo silently empty — all geo fields are optional, so the
+  // beacon still records path/referrer/session). Glob is relative to this
+  // (frontend) project dir; the tracer follows the pnpm symlink into the
+  // hoisted store under outputFileTracingRoot (repo root).
+  outputFileTracingIncludes: {
+    "/api/analytics": ["./node_modules/geoip-lite/data/**"],
+  },
   transpilePackages: ["rahman-shared"],
   generateBuildId: async () => BUILD_ID,
   env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },

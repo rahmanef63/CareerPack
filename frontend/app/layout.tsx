@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
+import { Suspense } from "react"
 import Script from "next/script"
+import { AnalyticsBeacon } from "@/shared/components/AnalyticsBeacon"
 import {
   DM_Sans,
   Fira_Code,
@@ -232,6 +234,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
       </head>
       <body>
+        {/* Cookieless visitor beacon — self-gates off /dashboard, /admin,
+            /api. Suspense keeps it from forcing the tree dynamic. */}
+        <Suspense fallback={null}>
+          <AnalyticsBeacon />
+        </Suspense>
         <Providers>{children}</Providers>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-P1B124M70R"
