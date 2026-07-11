@@ -81,6 +81,10 @@ export const ScaledCVPreview = memo(
       innerObs.observe(inner);
       // Height budget depends on the viewport, which ResizeObserver misses.
       window.addEventListener("resize", measure);
+      // Re-measure once fonts settle — the first measure() can run before web
+      // fonts load, reading a short height; without this the box would size to
+      // the pre-swap height until some unrelated resize nudged it.
+      document.fonts?.ready.then(measure).catch(() => {});
       return () => {
         outerObs.disconnect();
         innerObs.disconnect();
@@ -104,20 +108,19 @@ export const ScaledCVPreview = memo(
         className="flex justify-center bg-neutral-100 dark:bg-neutral-800 rounded-md px-2 py-4"
         style={{
           // Scaled inner element keeps 794 px layout width via flexShrink:0;
-          // overflow:hidden lets it sit visually clipped to the available
-          // container width without producing a horizontal scrollbar on
-          // the CV page (the scale factor already shrinks it to fit).
+          // overflowX:hidden clips the 794 px width to the container without a
+          // horizontal scrollbar (the scale factor already shrinks it to fit).
           width: "100%",
           maxWidth: "100%",
-          height: innerHeight ? innerHeight * scale + 32 : undefined,
+          // No explicit height + no vertical clip: the outer box grows to the
+          // inner's collapsed margin-box (see marginBottom below), so the whole
+          // CV is always visible. The previous approach set an exact
+          // `innerHeight*scale` height with overflowY:hidden, which chopped the
+          // bottom off whenever `innerHeight` was measured before fonts/photos
+          // settled (the "tercrop" bug). A stale measure now only leaves a
+          // brief empty band that ResizeObserver heals — never a crop.
           minHeight: compact ? (innerHeight ? undefined : 180) : 420,
-          // `height` already equals the scaled content height, and compact
-          // additionally fits a viewport-height budget (see measure()), so
-          // the whole CV is visible with overflow hidden — no crop, no
-          // internal scrollbar. transform:scale shrinks visually but not in
-          // layout, so overflow:hidden clips only the empty layout tail.
           overflowX: "hidden",
-          overflowY: "hidden",
         }}
       >
         <div
@@ -130,6 +133,11 @@ export const ScaledCVPreview = memo(
             wordBreak: "break-word",
             overflowWrap: "anywhere",
             position: "relative",
+            // transform:scale shrinks paint but not layout, leaving an empty
+            // tail of innerHeight*(1-scale) below the visual content. Pull the
+            // flow up by exactly that so the box hugs the scaled content — no
+            // clip required, so under-measurement can't crop.
+            marginBottom: innerHeight ? -(innerHeight * (1 - scale)) : 0,
           }}
         >
           <div ref={innerRef}>
