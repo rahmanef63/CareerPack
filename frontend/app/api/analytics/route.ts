@@ -23,7 +23,6 @@ async function lookupGeo(ip: string): Promise<_Geo> {
   try { return _geoip?.lookup(ip) ?? null; } catch { return null; }
 }
 
-export const runtime = "nodejs"; // geoip-lite reads its .dat data files via fs
 export const dynamic = "force-dynamic"; // never statically cache a beacon POST
 
 const CONVEX_URL =
