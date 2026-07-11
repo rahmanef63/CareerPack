@@ -11,14 +11,8 @@ import {
   FolderKanban,
   Share2,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Switch } from "@/shared/components/ui/switch";
+import { SectionShell } from "./SectionShell";
 import type { Bind, FieldKey, SectionOverrides } from "../form/types";
 
 interface ToggleSpec {
@@ -88,9 +82,6 @@ export interface HeroProfileSnapshot {
 
 export interface HeroTogglesCardProps extends SectionOverrides {
   bind: Bind;
-  /** Override the toggle spec list — useful for opensource derivatives
-   *  that want to hide a toggle or rename copy. */
-  toggles?: ReadonlyArray<ToggleSpec>;
   noCard?: boolean;
   /** Profile data fed in from the parent — used to render an inline
    *  "Akan tampil: …" preview line under each toggle so users see
@@ -143,7 +134,6 @@ function previewFor(
 
 export function HeroTogglesCard({
   bind,
-  toggles = DEFAULT_TOGGLES,
   title = "Tampilkan di hero",
   description = "Saklar opt-in untuk tiap kolom. Hanya yang dicentang yang dibagikan publik.",
   className,
@@ -155,7 +145,7 @@ export function HeroTogglesCard({
 
   const fields = (
     <div className="space-y-2">
-      {toggles.map((t) => {
+      {DEFAULT_TOGGLES.map((t) => {
         const Icon = t.icon;
         const field = bind(t.key);
         const preview = previewFor(t.key, profile);
@@ -227,12 +217,8 @@ export function HeroTogglesCard({
   if (noCard) return fields;
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>{fields}</CardContent>
-    </Card>
+    <SectionShell title={title} description={description} className={className}>
+      {fields}
+    </SectionShell>
   );
 }

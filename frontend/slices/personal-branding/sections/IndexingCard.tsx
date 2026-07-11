@@ -1,14 +1,8 @@
 "use client";
 
 import { ShieldCheck } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Switch } from "@/shared/components/ui/switch";
+import { SectionShell } from "./SectionShell";
 import type { Bind, SectionOverrides } from "../form/types";
 
 export interface IndexingCardProps extends SectionOverrides {
@@ -45,15 +39,13 @@ export function IndexingCard({
   if (noCard) return fields;
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ShieldCheck className="h-4 w-4 text-brand" />
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>{fields}</CardContent>
-    </Card>
+    <SectionShell
+      title={title}
+      description={description}
+      className={className}
+      icon={<ShieldCheck className="h-4 w-4 text-brand" />}
+    >
+      {fields}
+    </SectionShell>
   );
 }

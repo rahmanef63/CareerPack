@@ -5,15 +5,7 @@ import {
   Download as DownloadIcon,
   ExternalLink,
   Mail,
-  MousePointerClick,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -28,7 +20,6 @@ import type { Bind, CtaType } from "../form/types";
 
 export interface CtaCardProps {
   bind: Bind;
-  noCard?: boolean;
 }
 
 const TYPE_OPTIONS: ReadonlyArray<{
@@ -76,7 +67,7 @@ const TYPE_ICON: Record<CtaType, typeof Mail> = {
  * Stronger than just listing contact links because it says exactly
  * what action the user wants the visitor to take.
  */
-export function CtaCard({ bind, noCard = false }: CtaCardProps) {
+export function CtaCard({ bind }: CtaCardProps) {
   const label = bind("ctaLabel");
   const url = bind("ctaUrl");
   const type = bind("ctaType");
@@ -164,22 +155,5 @@ export function CtaCard({ bind, noCard = false }: CtaCardProps) {
     </div>
   );
 
-  if (noCard) return fields;
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle as="h3" className="flex items-center gap-2 text-base">
-          <MousePointerClick className="h-4 w-4 text-brand" />
-          Tombol utama (CTA)
-        </CardTitle>
-        <CardDescription>
-          Satu aksi paling penting yang Anda mau pengunjung lakukan.
-          Rendered sebagai tombol primer di hero halaman publik.
-          Kosongkan jika belum mau pasang.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>{fields}</CardContent>
-    </Card>
-  );
+  return fields;
 }

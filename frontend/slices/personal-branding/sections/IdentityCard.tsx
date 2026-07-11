@@ -2,13 +2,6 @@
 
 import Link from "next/link";
 import { AlertCircle, ExternalLink, Globe } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Switch } from "@/shared/components/ui/switch";
@@ -19,6 +12,7 @@ import {
   FIELD_LIMITS,
   SLUG_HINT_DEFAULT,
 } from "../form/defaults";
+import { SectionShell } from "./SectionShell";
 import type {
   Bind,
   SectionOverrides,
@@ -146,15 +140,13 @@ export function IdentityCard({
   if (noCard) return fields;
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Globe className="h-4 w-4 text-brand" />
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>{fields}</CardContent>
-    </Card>
+    <SectionShell
+      title={title}
+      description={description}
+      className={className}
+      icon={<Globe className="h-4 w-4 text-brand" />}
+    >
+      {fields}
+    </SectionShell>
   );
 }

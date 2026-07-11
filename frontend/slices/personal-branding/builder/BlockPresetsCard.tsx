@@ -10,13 +10,9 @@ import {
 } from "@/shared/components/ui/card";
 import { notify } from "@/shared/lib/notify";
 import { BLOCK_PRESETS, type BlockPresetDef } from "./blockPresets";
+import { newBlockId } from "./blockDefaults";
 import type { Block } from "../blocks/types";
 import type { Bind } from "../form/types";
-
-function newId(suffix: number): string {
-  const r = Math.random().toString(36).slice(2, 8);
-  return `b-${Date.now().toString(36)}-${suffix}-${r}`;
-}
 
 /**
  * Manual mode "Preset Blok" tab — gallery of pre-configured block
@@ -30,9 +26,9 @@ export function BlockPresetsCard({ bind }: { bind: Bind }) {
 
   function insertPreset(preset: BlockPresetDef) {
     const previous = blocks.value;
-    const additions: Block[] = preset.blocks.map((b, idx) =>
+    const additions: Block[] = preset.blocks.map((b) =>
       ({
-        id: newId(idx),
+        id: newBlockId(),
         type: b.type,
         payload: b.payload,
         ...(b.hidden ? { hidden: true } : {}),

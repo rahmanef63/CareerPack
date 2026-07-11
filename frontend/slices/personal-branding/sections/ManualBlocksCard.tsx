@@ -1,16 +1,10 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import type { BlockType } from "../blocks/types";
 import { AddBlockMenu } from "../builder/AddBlockMenu";
 import { BlockList } from "../builder/BlockList";
 import { makeBlock } from "../builder/blockDefaults";
+import { SectionShell } from "./SectionShell";
 import type { Bind, SectionOverrides } from "../form/types";
 
 export interface ManualBlocksCardProps extends SectionOverrides {
@@ -35,15 +29,14 @@ export function ManualBlocksCard({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <BlockList blocks={blocks.value} onChange={blocks.onChange} />
-        <AddBlockMenu onPick={handleAdd} />
-      </CardContent>
-    </Card>
+    <SectionShell
+      title={title}
+      description={description}
+      className={className}
+      contentClassName="space-y-3"
+    >
+      <BlockList blocks={blocks.value} onChange={blocks.onChange} />
+      <AddBlockMenu onPick={handleAdd} />
+    </SectionShell>
   );
 }

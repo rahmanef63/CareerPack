@@ -1,21 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { ArrowDown, ArrowUp, Eye, EyeOff, Layers } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
+import { ArrowDown, ArrowUp, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { DEFAULT_SECTION_ORDER } from "../form/defaults";
 import type { Bind } from "../form/types";
 
 export interface SectionLayoutCardProps {
   bind: Bind;
-  noCard?: boolean;
 }
 
 /**
@@ -29,7 +21,7 @@ export interface SectionLayoutCardProps {
  * through `bioShow / skillsShow`. `contact` is always shown when at
  * least one channel is filled (no toggle).
  */
-export function SectionLayoutCard({ bind, noCard = false }: SectionLayoutCardProps) {
+export function SectionLayoutCard({ bind }: SectionLayoutCardProps) {
   const order = bind("sectionOrder");
   const autoToggles = bind("autoToggles");
   const bioShow = bind("bioShow");
@@ -196,55 +188,22 @@ export function SectionLayoutCard({ bind, noCard = false }: SectionLayoutCardPro
     </ol>
   );
 
-  if (noCard) {
-    return (
-      <div className="space-y-3">
-        {isCustomOrder && (
-          <div className="flex justify-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={reset}
-              className="text-xs"
-            >
-              Reset urutan
-            </Button>
-          </div>
-        )}
-        {fields}
-      </div>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <CardTitle as="h3" className="flex items-center gap-2 text-base">
-              <Layers className="h-4 w-4 text-brand" />
-              Section halaman publik
-            </CardTitle>
-            <CardDescription>
-              Atur urutan + show/hide tiap section. Pengalaman, Pendidikan,
-              Sertifikasi, dll diambil otomatis dari CV — toggle di sini.
-            </CardDescription>
-          </div>
-          {isCustomOrder && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={reset}
-              className="text-xs"
-            >
-              Reset urutan
-            </Button>
-          )}
+    <div className="space-y-3">
+      {isCustomOrder && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={reset}
+            className="text-xs"
+          >
+            Reset urutan
+          </Button>
         </div>
-      </CardHeader>
-      <CardContent>{fields}</CardContent>
-    </Card>
+      )}
+      {fields}
+    </div>
   );
 }

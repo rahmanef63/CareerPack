@@ -45,8 +45,6 @@ export interface ExportCardProps extends SectionOverrides {
   slugTrimmed: string;
   /** User-data snapshot used to render the AI Prompt body. */
   profile: ExportProfileSnapshot;
-  /** Origin override for snippets. Defaults to careerpack.org. */
-  origin?: string;
   /** When set, render only one of the three formats (used by the
    *  top-level HTML / Embed tabs that promote a single sub-tab). */
   only?: "html" | "embed" | "prompt";
@@ -59,7 +57,6 @@ export function ExportCard({
   state,
   slugTrimmed,
   profile,
-  origin = DEFAULT_ORIGIN,
   title = "Bagikan & Ekspor",
   description = "Tiga format ringkas untuk pakai data profil di luar CareerPack — masing-masing toggle independen.",
   className,
@@ -70,8 +67,8 @@ export function ExportCard({
   const prompt = bind("promptExport");
 
   const publicUrl = slugTrimmed
-    ? `${origin}/${slugTrimmed}`
-    : `${origin}/<slug-anda>`;
+    ? `${DEFAULT_ORIGIN}/${slugTrimmed}`
+    : `${DEFAULT_ORIGIN}/<slug-anda>`;
   const slugReady = Boolean(slugTrimmed);
 
   const htmlSnippet = useMemo(

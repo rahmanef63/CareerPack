@@ -1,16 +1,10 @@
 "use client";
 
 import { Mail } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { FIELD_LIMITS } from "../form/defaults";
+import { SectionShell } from "./SectionShell";
 import type { Bind, SectionOverrides } from "../form/types";
 
 export interface ContactCardProps extends SectionOverrides {
@@ -77,15 +71,13 @@ export function ContactCard({
   if (noCard) return fields;
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Mail className="h-4 w-4 text-brand" />
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>{fields}</CardContent>
-    </Card>
+    <SectionShell
+      title={title}
+      description={description}
+      className={className}
+      icon={<Mail className="h-4 w-4 text-brand" />}
+    >
+      {fields}
+    </SectionShell>
   );
 }

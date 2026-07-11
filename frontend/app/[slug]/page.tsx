@@ -11,7 +11,7 @@ import { BrandMark } from "@/shared/components/brand/Logo";
 import { ParangPattern } from "@/shared/components/decor/ParangPattern";
 import { Reveal } from "@/shared/components/motion/Reveal";
 import { cn } from "@/shared/lib/utils";
-import { PersonalBrandingPage, type BrandingPayload } from "@/slices/personal-branding/themes";
+import { PersonalBrandingPage } from "@/slices/personal-branding/themes";
 import type {
   Block as PBBlock,
   HeaderBg as PBHeaderBg,
@@ -71,27 +71,7 @@ export interface PublicPortfolioItem {
   coverUrl: string | null;
 }
 
-async function fetchPublicProfile(slug: string): Promise<{
-  slug: string;
-  displayName: string;
-  headline: string;
-  targetRole: string;
-  bio: string;
-  skills: string[];
-  contactEmail: string;
-  linkedinUrl: string;
-  portfolioUrl: string;
-  allowIndex: boolean;
-  avatarUrl: string | null;
-  portfolio: PublicPortfolioItem[];
-  theme: string;
-  mode?: string;
-  headerBg: { kind: string; value: string } | null;
-  accent: string | null;
-  blocks: ReadonlyArray<{ id: string; type: string; payload: unknown }>;
-  branding?: BrandingPayload;
-  updatedAt: number;
-} | null> {
+async function fetchPublicProfile(slug: string) {
   if (!CONVEX_URL) return null;
   const client = new ConvexHttpClient(CONVEX_URL);
   try {
@@ -169,6 +149,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const profile = await fetchPublicProfile(slug);
   if (!profile) notFound();
   const personJsonLd = buildPersonJsonLd(profile);
+  const jsonLdScript = personJsonLd && (
+    <script
+      type="application/ld+json"
+      // Server-rendered, sanitised by buildPersonJsonLd. Safe.
+      dangerouslySetInnerHTML={{ __html: personJsonLd }}
+    />
+  );
   // When the user has authored blocks via the Personal Branding builder,
   // render through the theme dispatcher so visitors see their custom
   // page. Otherwise fall back to the legacy auto-rendered ProfileView
@@ -179,13 +166,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   if (hasCustomBlocks) {
     return (
       <>
-        {personJsonLd && (
-          <script
-            type="application/ld+json"
-            // Server-rendered, sanitised by buildPersonJsonLd. Safe.
-            dangerouslySetInnerHTML={{ __html: personJsonLd }}
-          />
-        )}
+        {jsonLdScript}
         <PersonalBrandingPage
           profile={{
             slug: profile.slug,
@@ -207,12 +188,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   }
   return (
     <>
-      {personJsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: personJsonLd }}
-        />
-      )}
+      {jsonLdScript}
       <ProfileView profile={profile} />
     </>
   );
@@ -420,16 +396,10 @@ function PortfolioTile({
   const span = item.featured ? "md:col-span-4" : "md:col-span-2";
   const height = item.featured ? "h-56 sm:h-64" : "h-44";
   const categoryLabel = CATEGORY_LABELS[item.category] ?? item.category;
-  const formattedDate = (() => {
-    try {
-      return new Date(item.date).toLocaleDateString("id-ID", {
-        month: "short",
-        year: "numeric",
-      });
-    } catch {
-      return item.date;
-    }
-  })();
+  const formattedDate = new Date(item.date).toLocaleDateString("id-ID", {
+    month: "short",
+    year: "numeric",
+  });
 
   const Inner = (
     <article

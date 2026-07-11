@@ -12,8 +12,7 @@ import { MANUAL_TEMPLATE_URL, type ProfileShape } from "./types";
 import { TemplateLayout } from "./TemplateLayout";
 import { BrandFooter } from "./BrandFooter";
 
-export { MANUAL_TEMPLATE_URL } from "./types";
-export type { BrandingPayload, ProfileShape } from "./types";
+export type { BrandingPayload } from "./types";
 
 /**
  * Public-page renderer dispatcher. Only template-v1/v2/v3 are

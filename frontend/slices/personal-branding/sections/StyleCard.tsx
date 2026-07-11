@@ -56,7 +56,6 @@ const HEX_RE = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/;
 
 export interface StyleCardProps {
   bind: Bind;
-  noCard?: boolean;
 }
 
 /**
@@ -67,7 +66,7 @@ export interface StyleCardProps {
  * pick up `--cp-primary` + `--cp-radius` through a universal-selector
  * override layer the hydrator injects.
  */
-export function StyleCard({ bind, noCard = false }: StyleCardProps) {
+export function StyleCard({ bind }: StyleCardProps) {
   const style = bind("style");
   const value: PublicStyle = style.value ?? {};
 
@@ -236,8 +235,6 @@ export function StyleCard({ bind, noCard = false }: StyleCardProps) {
       </div>
     </div>
   );
-
-  if (noCard) return fields;
 
   return (
     <Card>

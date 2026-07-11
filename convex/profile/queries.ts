@@ -9,6 +9,7 @@ import {
   type AutoPortfolioItem,
 } from "./autoBlocks";
 import { buildBrandingPayload } from "./brandingPayload";
+import { assertSlug } from "./slug";
 
 // ---------------------------------------------------------------------
 // Current user / private profile
@@ -333,89 +334,6 @@ export const getUserStats = query({
 // Public profile (/[slug])
 // ---------------------------------------------------------------------
 
-const SLUG_MIN = 3;
-const SLUG_MAX = 30;
-const SLUG_REGEX = /^[a-z][a-z0-9-]+[a-z0-9]$/;
-
-const RESERVED_SLUGS = new Set<string>([
-  "_next",
-  "api",
-  "r",
-  "static",
-  "assets",
-  "public",
-  "icon",
-  "apple-icon",
-  "apple-touch-icon",
-  "favicon",
-  "manifest",
-  "robots",
-  "sitemap",
-  "well-known",
-  "login",
-  "logout",
-  "signin",
-  "signup",
-  "register",
-  "forgot-password",
-  "reset-password",
-  "verify",
-  "auth",
-  "dashboard",
-  "admin",
-  "settings",
-  "help",
-  "profile",
-  "account",
-  "terms",
-  "privacy",
-  "cookies",
-  "legal",
-  "about",
-  "contact",
-  "pricing",
-  "home",
-  "docs",
-  "blog",
-  "faq",
-  "support",
-  "careers",
-  "press",
-  "root",
-  "null",
-  "undefined",
-  "error",
-  "404",
-  "500",
-  "status",
-  "careerpack",
-  "anthropic",
-  "claude",
-]);
-
-function normalizeSlug(raw: string): string {
-  return raw.trim().toLowerCase();
-}
-
-function assertSlug(raw: string): string {
-  const slug = normalizeSlug(raw);
-  if (slug.length < SLUG_MIN || slug.length > SLUG_MAX) {
-    throw new Error(`Slug harus ${SLUG_MIN}-${SLUG_MAX} karakter`);
-  }
-  if (!SLUG_REGEX.test(slug)) {
-    throw new Error(
-      "Slug hanya boleh huruf kecil, angka, dan tanda '-'. Harus diawali huruf, diakhiri huruf/angka.",
-    );
-  }
-  if (RESERVED_SLUGS.has(slug)) {
-    throw new Error("Slug ini dipakai sistem, pilih yang lain");
-  }
-  if (slug.includes("--")) {
-    throw new Error("Slug tidak boleh mengandung '--' berurutan");
-  }
-  return slug;
-}
-
 export const isSlugAvailable = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -524,6 +442,17 @@ export const getBySlug = query({
       });
     }
 
+    // Pull the user's primary CV once (newest first) — reused by both
+    // the auto-block builder and the branding payload below. Newest
+    // first because without `.order("desc")` Convex returns the oldest
+    // doc, which on a fresh account is the seeded demo CV and overrides
+    // anything imported via Quick Fill. Cheap — single doc.
+    const cvDoc = await ctx.db
+      .query("cvs")
+      .withIndex("by_user", (q) => q.eq("userId", profile.userId))
+      .order("desc")
+      .first();
+
     // Resolve final block list. Auto mode rebuilds from the user's
     // CV / Portofolio data on every read so the page stays in sync
     // when those source feeds change. Custom mode returns the
@@ -534,14 +463,6 @@ export const getBySlug = query({
       blocks = (profile.publicBlocks ?? []).filter((b) => !b.hidden);
     } else {
       // ---- Auto: pull CV + portfolio + apply toggles ----
-      // Newest first — without `.order("desc")` Convex returns the
-      // oldest doc, which on a fresh account is the seeded demo CV
-      // and overrides anything imported via Quick Fill.
-      const cv = await ctx.db
-        .query("cvs")
-        .withIndex("by_user", (q) => q.eq("userId", profile.userId))
-        .order("desc")
-        .first();
       const portfolioRows = await ctx.db
         .query("portfolioItems")
         .withIndex("by_user", (q) => q.eq("userId", profile.userId))
@@ -587,21 +508,12 @@ export const getBySlug = query({
           publicPortfolioUrl: profile.publicPortfolioUrl ?? undefined,
           publicContactEmail: profile.publicContactEmail ?? undefined,
         },
-        cv: (cv as AutoCVInput | null) ?? null,
+        cv: (cvDoc as AutoCVInput | null) ?? null,
         portfolio: portfolioWithUrl,
         toggles,
         publicPortfolioShow: Boolean(profile.publicPortfolioShow),
       });
     }
-
-    // Pull the user's primary CV (newest first) so dynamic templates
-    // can populate hero / about / skills / projects / experience from
-    // real CV data instead of mock content. Cheap — single doc.
-    const cvDoc = await ctx.db
-      .query("cvs")
-      .withIndex("by_user", (q) => q.eq("userId", profile.userId))
-      .order("desc")
-      .first();
 
     const ctaType = profile.publicCtaType ?? "link";
     const branding = buildBrandingPayload({

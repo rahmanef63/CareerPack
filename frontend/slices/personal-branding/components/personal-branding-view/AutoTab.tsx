@@ -99,7 +99,7 @@ export function AutoTab({
               activeId={activeSection}
               onToggle={toggleSection}
             >
-              <ThemeCard bind={form.bind} noCard />
+              <ThemeCard bind={form.bind} />
             </PBSection>
           </div>
           <div id="pb-section-hero-toggles" className="rounded-xl transition-shadow">
@@ -135,7 +135,7 @@ export function AutoTab({
               activeId={activeSection}
               onToggle={toggleSection}
             >
-              <AvailabilityCard bind={form.bind} noCard />
+              <AvailabilityCard bind={form.bind} />
             </PBSection>
           </div>
           <div id="pb-section-cta" className="rounded-xl transition-shadow">
@@ -148,7 +148,7 @@ export function AutoTab({
               activeId={activeSection}
               onToggle={toggleSection}
             >
-              <CtaCard bind={form.bind} noCard />
+              <CtaCard bind={form.bind} />
             </PBSection>
           </div>
           <div id="pb-section-layout" className="rounded-xl transition-shadow">
@@ -161,7 +161,7 @@ export function AutoTab({
               activeId={activeSection}
               onToggle={toggleSection}
             >
-              <SectionLayoutCard bind={form.bind} noCard />
+              <SectionLayoutCard bind={form.bind} />
             </PBSection>
           </div>
           <div id="pb-section-contact" className="rounded-xl transition-shadow">

@@ -59,10 +59,6 @@ export interface HeaderBg {
   value: string;
 }
 
-export function isTemplateTheme(theme: string): theme is TemplateTheme {
-  return (TEMPLATE_THEMES as readonly string[]).includes(theme);
-}
-
 export const TEMPLATE_URLS: Record<TemplateTheme, string> = {
   "template-v1": "/personal-branding/templates/v1.html",
   "template-v2": "/personal-branding/templates/v2.html",

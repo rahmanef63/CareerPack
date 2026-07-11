@@ -7,10 +7,7 @@ import {
   sanitizeHeaderBg,
   sanitizeAccent,
 } from "./blocks";
-
-const SLUG_MIN = 3;
-const SLUG_MAX = 30;
-const SLUG_REGEX = /^[a-z][a-z0-9-]+[a-z0-9]$/;
+import { assertSlug } from "./slug";
 
 const HEADLINE_MAX = 120;
 const EMAIL_MAX = 120;
@@ -28,39 +25,6 @@ const ALLOWED_SECTIONS = new Set([
   "projects",
   "contact",
 ]);
-
-const RESERVED_SLUGS = new Set<string>([
-  "_next", "api", "r", "static", "assets", "public",
-  "icon", "apple-icon", "apple-touch-icon", "favicon",
-  "manifest", "robots", "sitemap", "well-known",
-  "login", "logout", "signin", "signup", "register",
-  "forgot-password", "reset-password", "verify", "auth",
-  "dashboard", "admin", "settings", "help", "profile",
-  "account", "terms", "privacy", "cookies", "legal",
-  "about", "contact", "pricing", "home", "docs", "blog",
-  "faq", "support", "careers", "press", "root", "null",
-  "undefined", "error", "404", "500", "status",
-  "careerpack", "anthropic", "claude",
-]);
-
-function assertSlug(raw: string): string {
-  const slug = raw.trim().toLowerCase();
-  if (slug.length < SLUG_MIN || slug.length > SLUG_MAX) {
-    throw new Error(`Slug harus ${SLUG_MIN}-${SLUG_MAX} karakter`);
-  }
-  if (!SLUG_REGEX.test(slug)) {
-    throw new Error(
-      "Slug hanya boleh huruf kecil, angka, dan tanda '-'. Harus diawali huruf, diakhiri huruf/angka.",
-    );
-  }
-  if (RESERVED_SLUGS.has(slug)) {
-    throw new Error("Slug ini dipakai sistem, pilih yang lain");
-  }
-  if (slug.includes("--")) {
-    throw new Error("Slug tidak boleh mengandung '--' berurutan");
-  }
-  return slug;
-}
 
 function assertUrl(raw: string, label: string): string {
   const value = raw.trim();

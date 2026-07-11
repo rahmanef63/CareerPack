@@ -11,19 +11,10 @@ import type { SlugValidation } from "./types";
 
 const SLUG_REGEX = /^[a-z][a-z0-9-]+[a-z0-9]$/;
 
-export interface ValidateSlugOpts {
-  reservedSlugs?: ReadonlySet<string>;
-  min?: number;
-  max?: number;
-}
-
-export function validateSlug(
-  raw: string,
-  opts: ValidateSlugOpts = {},
-): SlugValidation {
-  const reserved = opts.reservedSlugs ?? DEFAULT_RESERVED_SLUGS;
-  const min = opts.min ?? FIELD_LIMITS.slugMin;
-  const max = opts.max ?? FIELD_LIMITS.slugMax;
+export function validateSlug(raw: string): SlugValidation {
+  const reserved = DEFAULT_RESERVED_SLUGS;
+  const min = FIELD_LIMITS.slugMin;
+  const max = FIELD_LIMITS.slugMax;
   const slug = raw.trim().toLowerCase();
   if (slug.length === 0) return { ok: true };
   if (slug.length < min) return { ok: false, message: `Minimal ${min} karakter.` };

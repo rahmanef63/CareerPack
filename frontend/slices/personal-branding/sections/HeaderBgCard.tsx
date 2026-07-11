@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { HeaderBgPicker } from "../builder/HeaderBgPicker";
+import { SectionShell } from "./SectionShell";
 import type { Bind, SectionOverrides } from "../form/types";
 
 export interface HeaderBgCardProps extends SectionOverrides {
@@ -22,14 +16,8 @@ export function HeaderBgCard({
 }: HeaderBgCardProps) {
   const headerBg = bind("headerBg");
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <HeaderBgPicker value={headerBg.value} onChange={headerBg.onChange} />
-      </CardContent>
-    </Card>
+    <SectionShell title={title} description={description} className={className}>
+      <HeaderBgPicker value={headerBg.value} onChange={headerBg.onChange} />
+    </SectionShell>
   );
 }
