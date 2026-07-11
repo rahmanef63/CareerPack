@@ -780,6 +780,9 @@
       margin-top: auto;
       padding-bottom: 34px;
     }
+    /* Real skill cards render just a heading (no icon / description),
+       so drop the mock card's reserved height to avoid giant empty cells. */
+    .service.skill-card:not(:has(p)) { min-height: 0; padding-bottom: 34px; }
 
     /* ===== TOOLS GRID (new — cross-ported from v1, restyled editorial) ===== */
     .tools-section { background: linear-gradient(180deg, #fbf8f1, #f5eee2); border-block: 1px solid rgba(231, 220, 207, .74); }

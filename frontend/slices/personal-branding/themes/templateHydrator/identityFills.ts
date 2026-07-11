@@ -21,10 +21,30 @@ fill(document, 'contact-portfolio', ct.portfolio);
 
 if (!id.avatarUrl) {
   var avatars = document.querySelectorAll('[data-cp="avatar"]');
+  var collapsedGrids = [];
   for (var ai = 0; ai < avatars.length; ai++) {
     var av = avatars[ai];
-    var wrap = av.closest('[data-cp-avatar-wrap]') || av;
+    // Hide the WHOLE hero visual column (glow / ring / float-card
+    // siblings included) so a missing avatar can't leave an empty
+    // glowing void. Templates without a dedicated visual column
+    // (e.g. the centered manual hero) fall back to the avatar wrapper.
+    var visual = av.closest('.hero-visual');
+    var wrap = visual || av.closest('[data-cp-avatar-wrap]') || av;
     wrap.style.display = 'none';
+    // If that column sat inside a multi-column hero grid, collapse the
+    // grid to a single column so no empty half remains beside the text.
+    var grid = wrap.closest('.hero-grid');
+    if (grid && collapsedGrids.indexOf(grid) === -1) {
+      grid.setAttribute('data-cp-no-visual', '1');
+      collapsedGrids.push(grid);
+    }
+  }
+  if (collapsedGrids.length) {
+    var noVisualStyle = document.createElement('style');
+    noVisualStyle.setAttribute('data-cp-style', 'no-visual');
+    noVisualStyle.textContent =
+      '.hero-grid[data-cp-no-visual]{grid-template-columns:minmax(0,1fr)!important}';
+    document.head.appendChild(noVisualStyle);
   }
 }
 

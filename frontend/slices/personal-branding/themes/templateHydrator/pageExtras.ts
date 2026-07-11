@@ -71,37 +71,51 @@ try {
         ctaBtn.setAttribute('rel', 'noopener noreferrer');
       }
       ctaBtn.textContent = ctaData.label;
-      ctaBtn.style.cssText = [
-        'display:inline-flex',
-        'align-items:center',
-        'gap:8px',
-        'margin:20px 0 0',
-        'padding:12px 24px',
-        'border-radius:999px',
-        // Indigo-500 — readable on both light + dark hero backgrounds
-        'background:#6366f1',
-        'color:#ffffff',
-        'font:inherit',
-        'font-weight:600',
-        'font-size:14px',
-        'line-height:1',
-        'text-decoration:none',
-        'box-shadow:0 12px 30px -10px rgba(99,102,241,.55)',
-        'transition:transform .15s ease, box-shadow .15s ease, background .15s ease',
-      ].join(';');
-      ctaBtn.addEventListener('mouseenter', function() {
-        ctaBtn.style.transform = 'translateY(-1px)';
-        ctaBtn.style.background = '#4f46e5';
-      });
-      ctaBtn.addEventListener('mouseleave', function() {
-        ctaBtn.style.transform = '';
-        ctaBtn.style.background = '#6366f1';
-      });
-      var afterTarget = heroHeader.parentNode || document.body;
-      if (heroHeader.nextSibling) {
-        afterTarget.insertBefore(ctaBtn, heroHeader.nextSibling);
+      // Adopt the template's OWN themed button so the CTA matches the
+      // palette (purple / gold / cream) instead of a hardcoded indigo
+      // that clashes on non-indigo themes. Filled primary when the
+      // template ships one, else its base outlined button, else the
+      // injected accent fallback style below.
+      if (document.querySelector('.btn-primary')) {
+        ctaBtn.className = 'btn btn-primary';
+      } else if (document.querySelector('.btn')) {
+        ctaBtn.className = 'btn';
+      }
+      if (!document.querySelector('[data-cp-style="primary-cta"]')) {
+        var ctaStyle = document.createElement('style');
+        ctaStyle.setAttribute('data-cp-style', 'primary-cta');
+        ctaStyle.textContent =
+          '[data-cp-primary-cta]:not(.btn){' +
+            'display:inline-flex;align-items:center;gap:8px;margin-top:6px;' +
+            'padding:12px 24px;border-radius:999px;' +
+            'background:var(--cp-primary, var(--accent, var(--gold, var(--purple, #6366f1))));' +
+            'color:var(--cp-primary-fg,#fff);font:inherit;font-weight:600;' +
+            'font-size:14px;line-height:1;text-decoration:none;' +
+            'box-shadow:0 12px 30px -12px rgba(0,0,0,.5);' +
+            'transition:filter .15s ease, transform .15s ease;' +
+          '}' +
+          '[data-cp-primary-cta]:not(.btn):hover{filter:brightness(1.08);transform:translateY(-1px)}';
+        document.head.appendChild(ctaStyle);
+      }
+      // Placement: drop into the template's native CTA row when one
+      // exists so the button sits beside the other hero actions;
+      // otherwise slot it after the template's own hero action link, or
+      // fall back to right after the hero heading.
+      var ctaRow = document.querySelector('.hero-cta, .hero-actions');
+      var nativeAction = document.querySelector('.hero-action');
+      if (ctaRow) {
+        ctaRow.appendChild(ctaBtn);
+      } else if (nativeAction && nativeAction.parentNode) {
+        nativeAction.parentNode.insertBefore(ctaBtn, nativeAction.nextSibling);
+      } else if (heroHeader.hasAttribute && heroHeader.hasAttribute('data-cp-hero')) {
+        heroHeader.appendChild(ctaBtn);
       } else {
-        afterTarget.appendChild(ctaBtn);
+        var afterTarget = heroHeader.parentNode || document.body;
+        if (heroHeader.nextSibling) {
+          afterTarget.insertBefore(ctaBtn, heroHeader.nextSibling);
+        } else {
+          afterTarget.appendChild(ctaBtn);
+        }
       }
     }
   }
