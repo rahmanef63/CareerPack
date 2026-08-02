@@ -1,0 +1,21 @@
+/**
+ * Personal Branding block schema + per-type sanitizers.
+ *
+ * Used at the convex layer (profile/mutations.ts validates writes,
+ * profile/queries.ts reshapes for the public page) and at the frontend
+ * (slices/personal-branding/* + the public render at app/[slug]/page.tsx
+ * import the same types so editor + renderer stay in sync).
+ *
+ * Implementation lives in `blocks/<area>.ts`. This file is the stable
+ * re-export aggregator so callers can keep importing from
+ * `convex/profile/blocks`.
+ */
+
+export * from "./blocks/types";
+export {
+  trimSafe, sanitizeUrl, sanitizeHtml, parseEmbedUrl,
+} from "./blocks/helpers";
+export { sanitizeBlock, sanitizeBlocks } from "./blocks/sanitize";
+export {
+  HEADER_GRADIENT_PRESETS, sanitizeHeaderBg, sanitizeAccent,
+} from "./blocks/header";

@@ -1,0 +1,256 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Bell,
+  LogOut,
+  Sparkles,
+  User as UserIcon,
+  Shield,
+  Search,
+} from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/shared/components/ui/breadcrumb";
+import { Button } from "@/shared/components/ui/button";
+import { Separator } from "@/shared/components/ui/separator";
+import { SidebarTrigger } from "@/shared/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
+import { useAuth } from "@/shared/hooks/useAuth";
+import {
+  useUnreadNotifications,
+  formatUnreadBadge,
+} from "@/shared/hooks/useUnreadNotifications";
+import { ROUTES } from "@/shared/lib/routes";
+import { labelForPath } from "./navConfig";
+
+interface SiteHeaderProps {
+  onAITap: () => void;
+}
+
+/**
+ * Top bar untuk area dashboard — pola shadcn `dashboard-01`:
+ * SidebarTrigger + Breadcrumb + spacer + actions (theme, AI, user menu).
+ */
+export function SiteHeader({ onAITap }: SiteHeaderProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { state, logout } = useAuth();
+  const user = state.user;
+  const unreadCount = useUnreadNotifications();
+  const unreadBadge = formatUnreadBadge(unreadCount);
+  const label = labelForPath(pathname) ?? "Dashboard";
+  const initials = (user?.name || "U").slice(0, 1).toUpperCase();
+  // OS-aware shortcut label. Default "Ctrl K" SSR-safe (majority users),
+  // swap to ⌘K post-mount on Mac. No hydration mismatch — value updates
+  // after first paint via useEffect.
+  const [shortcutLabel, setShortcutLabel] = useState("Ctrl K");
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)) {
+      setShortcutLabel("⌘K");
+    }
+  }, []);
+
+  return (
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background/80 backdrop-blur px-3 lg:px-4">
+      <SidebarTrigger className="-ml-1" aria-label="Lipat / buka sidebar" />
+      <Separator orientation="vertical" className="mr-2 h-4" />
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem className="hidden sm:block">
+            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+          {pathname !== "/dashboard" && (
+            <>
+              <BreadcrumbSeparator className="hidden sm:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{label}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          )}
+          {pathname === "/dashboard" && (
+            <BreadcrumbItem className="sm:hidden">
+              <BreadcrumbPage>{label}</BreadcrumbPage>
+            </BreadcrumbItem>
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* Keep every control here on Button's `default` size. Search and
+          Asisten AI were size="sm" (h-8) between theme/bell/avatar, which are
+          size="icon" (h-9) — a 4px stagger across five adjacent outlined
+          pills, on every dashboard page. */}
+      <div className="ml-auto flex items-center gap-1.5">
+        {/* Search trigger — opens CommandPalette via custom event so
+            we don't have to lift its open-state into React context.
+            Cmd/Ctrl+K still works globally. The visible button helps
+            users who don't know the shortcut (most users). */}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            window.dispatchEvent(new CustomEvent("careerpack:open-palette"))
+          }
+          aria-label="Cari fitur atau halaman"
+          className="hidden gap-2 text-muted-foreground sm:inline-flex sm:min-w-[14rem] sm:justify-between"
+        >
+          <span className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            <span>Cari fitur, halaman, aksi…</span>
+          </span>
+          <kbd className="hidden rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono lg:inline">
+            {shortcutLabel}
+          </kbd>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() =>
+            window.dispatchEvent(new CustomEvent("careerpack:open-palette"))
+          }
+          className="sm:hidden"
+          aria-label="Cari"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+        {/* Unified theme controller — mode tabs + preset palette in
+            one Popover (replaces the previous two-button setup). */}
+        <ThemePresetSwitcher />
+        <Button
+          type="button"
+          onClick={onAITap}
+          variant="outline"
+          className="gap-1.5 hidden sm:inline-flex"
+          aria-label="Buka Asisten AI"
+        >
+          <Sparkles className="w-4 h-4 text-brand" />
+          <span>Asisten AI</span>
+        </Button>
+        <Button
+          type="button"
+          onClick={onAITap}
+          size="icon"
+          variant="outline"
+          className="sm:hidden"
+          aria-label="Buka Asisten AI"
+        >
+          <Sparkles className="w-4 h-4 text-brand" />
+        </Button>
+        {/* Unread-notification bell — links to the notifications page,
+            live count badge (capped "9+") sourced from the shared
+            useUnreadNotifications hook (same Convex subscription). */}
+        <Button
+          asChild
+          variant="outline"
+          size="icon"
+          className="relative"
+          aria-label={
+            unreadCount > 0
+              ? `Notifikasi, ${unreadCount} belum dibaca`
+              : "Notifikasi"
+          }
+        >
+          <Link href={ROUTES.dashboard.notifications}>
+            <Bell className="w-4 h-4" />
+            {unreadBadge && (
+              <span
+                aria-hidden
+                className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+              >
+                {unreadBadge}
+              </span>
+            )}
+          </Link>
+        </Button>
+        <UserMenu
+          initials={initials}
+          name={user?.name}
+          email={user?.email}
+          avatar={user?.avatar}
+          role={user?.role}
+          onLogout={() => {
+            logout();
+            router.push("/");
+          }}
+          onSettings={() => router.push("/dashboard/settings")}
+          onAdmin={() => router.push("/admin")}
+        />
+      </div>
+    </header>
+  );
+}
+
+interface UserMenuProps {
+  initials: string;
+  name?: string;
+  email?: string;
+  avatar?: string;
+  role?: string;
+  onLogout: () => void;
+  onSettings: () => void;
+  onAdmin: () => void;
+}
+
+function UserMenu({
+  initials,
+  name,
+  email,
+  avatar,
+  role,
+  onLogout,
+  onSettings,
+  onAdmin,
+}: UserMenuProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Menu akun" className="rounded-full">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={avatar} alt={name ?? "Pengguna"} />
+            <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground text-xs font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-medium">{name ?? "Pengguna"}</p>
+            <p className="text-xs text-muted-foreground truncate">{email}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onSettings}>
+          <UserIcon className="w-4 h-4 mr-2" /> Profil &amp; Tampilan
+        </DropdownMenuItem>
+        {role === "admin" && (
+          <DropdownMenuItem onSelect={onAdmin}>
+            <Shield className="w-4 h-4 mr-2" /> Admin Dashboard
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onLogout} className="text-destructive focus:text-destructive">
+          <LogOut className="w-4 h-4 mr-2" /> Keluar
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

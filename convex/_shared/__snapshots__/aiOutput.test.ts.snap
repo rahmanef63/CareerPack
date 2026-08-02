@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`coerceJobShape > handles full snapshot of realistic AI reply 1`] = `
+{
+  "applyUrl": "https://gotocompany.com/careers/123",
+  "company": "GoTo",
+  "currency": "IDR",
+  "description": "Build payment infra.",
+  "employmentType": "full-time",
+  "location": "Jakarta, Indonesia",
+  "requiredSkills": [
+    "Go",
+    "PostgreSQL",
+    "Kafka",
+  ],
+  "salaryMax": 14000000,
+  "salaryMin": 8000000,
+  "seniority": "junior",
+  "title": "Junior Backend Engineer",
+  "workMode": "hybrid",
+}
+`;

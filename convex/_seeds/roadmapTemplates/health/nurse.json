@@ -1,0 +1,300 @@
+{
+  "title": "Perawat",
+  "slug": "nurse",
+  "domain": "health",
+  "icon": "Stethoscope",
+  "color": "bg-blue-400",
+  "description": "Kembangkan kompetensi klinis dan profesional sebagai perawat di fasilitas kesehatan Indonesia.",
+  "tags": [
+    "keperawatan",
+    "klinis",
+    "UKOM",
+    "STR",
+    "patient-care"
+  ],
+  "order": 41,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "per-1",
+      "title": "Anatomi, Fisiologi & Patofisiologi Dasar",
+      "description": "Kuasai fondasi ilmu biomedis yang mendasari praktik keperawatan klinis.",
+      "difficulty": "beginner",
+      "estimatedHours": 30,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "per-r1",
+          "title": "Anatomi & Fisiologi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r2",
+          "title": "Human Anatomy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/anatomy",
+          "free": false
+        },
+        {
+          "id": "per-r3",
+          "title": "Kedokteran Dasar - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/",
+          "free": false
+        },
+        {
+          "id": "per-r4",
+          "title": "Gray's Anatomy for Students Review",
+          "type": "book",
+          "url": "https://www.elsevier.com/books/grays-anatomy-for-students/mitchell/978-0-7020-7707-4",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "per-2",
+      "title": "Konsep Dasar Keperawatan",
+      "description": "Pelajari teori keperawatan, proses keperawatan, dan model keperawatan profesional.",
+      "difficulty": "beginner",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "per-1"
+      ],
+      "parentId": "per-1",
+      "category": "Keperawatan",
+      "resources": [
+        {
+          "id": "per-r5",
+          "title": "Teori Keperawatan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r6",
+          "title": "Nursing Theory & Practice - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nursing-theory",
+          "free": false
+        },
+        {
+          "id": "per-r7",
+          "title": "Panduan Keperawatan - PPNI",
+          "type": "documentation",
+          "url": "https://www.inna-ppni.or.id/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "per-3",
+      "title": "Keperawatan Dasar (KDM)",
+      "description": "Kuasai kebutuhan dasar manusia: mobilitas, nutrisi, eliminasi, kebersihan, dan tidur.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "per-2"
+      ],
+      "parentId": "per-2",
+      "category": "Klinis",
+      "resources": [
+        {
+          "id": "per-r8",
+          "title": "Keperawatan Dasar - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r9",
+          "title": "Fundamentals of Nursing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/fundamentals-nursing",
+          "free": false
+        },
+        {
+          "id": "per-r10",
+          "title": "SOP Keperawatan - PPNI",
+          "type": "documentation",
+          "url": "https://www.inna-ppni.or.id/sop",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "per-4",
+      "title": "Farmakologi untuk Perawat",
+      "description": "Pahami prinsip farmakologi, klasifikasi obat, dan prinsip 6 benar pemberian obat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "per-2"
+      ],
+      "category": "Klinis",
+      "resources": [
+        {
+          "id": "per-r11",
+          "title": "Farmakologi Keperawatan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r12",
+          "title": "Nursing Pharmacology - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/pharmacology-nursing",
+          "free": false
+        },
+        {
+          "id": "per-r13",
+          "title": "MIMS Indonesia - Referensi Obat",
+          "type": "documentation",
+          "url": "https://mims.com/indonesia",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "per-5",
+      "title": "Keperawatan Medikal Bedah",
+      "description": "Asuhan keperawatan pada pasien dewasa: kardiovaskuler, respirasi, digestif, dan sistem lainnya.",
+      "difficulty": "intermediate",
+      "estimatedHours": 35,
+      "prerequisites": [
+        "per-3",
+        "per-4"
+      ],
+      "category": "Spesialisasi",
+      "resources": [
+        {
+          "id": "per-r14",
+          "title": "Keperawatan Medikal Bedah - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r15",
+          "title": "Medical-Surgical Nursing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/medical-surgical-nursing",
+          "free": false
+        },
+        {
+          "id": "per-r16",
+          "title": "NANDA Nursing Diagnosis",
+          "type": "documentation",
+          "url": "https://nanda.org/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "per-6",
+      "title": "Persiapan UKOM & STR Perawat",
+      "description": "Persiapkan Uji Kompetensi (UKOM) Ners dan proses pengurusan Surat Tanda Registrasi (STR).",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "per-5"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "per-r17",
+          "title": "UKOM Keperawatan - LPUK-NAKES",
+          "type": "documentation",
+          "url": "https://lpuk-nakes.org/",
+          "free": true
+        },
+        {
+          "id": "per-r18",
+          "title": "Soal UKOM Keperawatan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r19",
+          "title": "STR Online - KTKI",
+          "type": "documentation",
+          "url": "https://ktki.kemkes.go.id/registrasi/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "per-7",
+      "title": "Keperawatan Komunitas & Kesehatan Masyarakat",
+      "description": "Asuhan keperawatan di komunitas: Posyandu, Puskesmas, dan program kesehatan masyarakat.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "per-5"
+      ],
+      "category": "Spesialisasi",
+      "resources": [
+        {
+          "id": "per-r20",
+          "title": "Keperawatan Komunitas - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r21",
+          "title": "Community Health Nursing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/community-health-nursing",
+          "free": false
+        },
+        {
+          "id": "per-r22",
+          "title": "BPJS Kesehatan - Panduan Faskes",
+          "type": "documentation",
+          "url": "https://bpjs-kesehatan.go.id/bpjs/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "per-8",
+      "title": "Etika & Hukum Keperawatan",
+      "description": "Pahami kode etik perawat, tanggung jawab hukum, dan perlindungan hak pasien.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "per-3"
+      ],
+      "category": "Profesionalisme",
+      "resources": [
+        {
+          "id": "per-r23",
+          "title": "Kode Etik Keperawatan - PPNI",
+          "type": "documentation",
+          "url": "https://www.inna-ppni.or.id/kode-etik/",
+          "free": true
+        },
+        {
+          "id": "per-r24",
+          "title": "Etika Keperawatan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "per-r25",
+          "title": "Nursing Ethics - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nursing-ethics",
+          "free": false
+        }
+      ]
+    }
+  ]
+}

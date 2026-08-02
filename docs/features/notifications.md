@@ -1,0 +1,218 @@
+# Notifikasi
+
+> **Portability tier:** M — slice + 1 Convex domain + cron digest action
+>
+> **Recent changes (2026-05-20):**
+> - Unread state: bare brand-color dot → "Baru" pill badge (uppercase
+>   text + inner dot). Pairs color with non-color indicator → WCAG 1.4.1
+>   safe.
+> - Empty state: added secondary CTA `<Link href="/dashboard/settings#notifications">Atur preferensi notifikasi</Link>` so users have a next-action when no notifications.
+> - Tab spread fix: `TabsList variant="pills"` now `justify-start`
+>   (was `justify-between` — tabs spread to viewport edges).
+> - Message body: `break-words [overflow-wrap:anywhere]` so paste of
+>   space-stripped text wraps gracefully.
+
+## Tujuan
+
+Inbox notifikasi in-app — deadline dokumen, reminder interview, update lamaran, tips AI, weekly job digest. Filter tabs + grouped by date + dismiss.
+
+## Route & Entry
+
+- URL: `/dashboard/notifications`
+- Slice: `frontend/slices/notifications/`
+- Komponen utama: `NotificationsView.tsx`
+
+## Struktur Slice
+
+```
+notifications/
+├─ index.ts
+├─ components/NotificationsView.tsx  Page — header + filter tabs + date-grouped rows + clear-all alert
+├─ hooks/useNotifications.ts         Convex CRUD wrappers + unread count helper
+└─ types/index.ts                    NotificationDoc, NotificationFilter, NotificationType, NotificationGroup, IMPORTANT_TYPES
+```
+
+## Data Flow
+
+Backend domain: `convex/notifications/`. Tabel: `notifications`. Cron: `convex/notifications/digest.ts` (mingguan, opt-in).
+
+| Hook / method | Convex op | Purpose |
+|---|---|---|
+| `useNotifications.list` | `api.notifications.queries.getUserNotifications` | Last 50, desc by createdAt |
+| `useNotifications.markRead` | `api.notifications.mutations.markNotificationAsRead` | Patch single `read: true` |
+| `useNotifications.markAllRead` | `api.notifications.mutations.markAllNotificationsAsRead` | Bulk patch |
+| `useNotifications.remove` | `api.notifications.mutations.deleteNotification` | Hard delete owned doc |
+| `useNotifications.clearAll` | `api.notifications.mutations.deleteAllNotifications` | Bulk wipe inbox |
+| (server-side, internal) | `internal.notifications.mutations.createNotification` | Push notif (deadline / interview / system / tip). **Internal-only** — produced by crons/actions/mutations via `ctx.runMutation(internal…, { userId, … })`, never the client. |
+| (cron) | `api.notifications.digest.runWeeklyDigest` | Weekly job-match digest (opt-in via `userProfiles.digestEnabled`) |
+
+Schema (`convex/notifications/schema.ts`):
+
+```ts
+notifications: defineTable({
+  userId: v.id("users"),
+  type: v.string(),                // "deadline" | "interview" | "application" | "system" | "tip"
+  title: v.string(),
+  message: v.string(),
+  read: v.boolean(),
+  actionUrl: v.optional(v.string()),
+  scheduledFor: v.optional(v.number()),
+})
+  .index("by_user", ["userId"])
+  .index("by_user_read", ["userId", "read"]),
+```
+
+`IMPORTANT_TYPES = ["deadline", "interview"]` (in slice `types/index.ts`) drives the "Penting" filter tab.
+
+## State Lokal
+
+- Filter tab (`NotificationFilter`: all / unread / important)
+- Date grouping memo: Hari ini / Kemarin / Minggu ini / Lebih lama (skip empty groups)
+- AlertDialog state untuk konfirmasi "Bersihkan"
+
+## Dependensi
+
+- `@/shared/components/ui/responsive-page-header`
+- `@/shared/components/ui/responsive-alert-dialog`
+- `@/shared/components/ui/tabs` (pills variant)
+- `@/shared/hooks/useAuth`
+- `@/shared/hooks/useDemoOverlay` — `useDemoNotificationsOverlay`
+- `@/shared/lib/formatDate` — `formatDateShort`
+- `@/shared/lib/notify`, `@/shared/lib/utils` (`cn`)
+- shadcn: `badge`, `button`
+- `next/link` — action navigation
+- `sonner` — toast on action
+
+## Catatan Desain
+
+- **Hard delete on dismiss** — no archive / trash. User butuh recovery → tambah `archivedAt` field + "Recently deleted" view.
+- **Relative time format**: `<1m = "Baru saja"`, `<60m = Xm`, `<24h = Xj`, `<7d = Xh`, sisanya format tanggal singkat (`formatDateShort`).
+- **`actionUrl`** boleh full URL atau pathname Next.js — dipakai via `<Link>` yang handle keduanya. Klik row dengan `actionUrl` auto-mark-read sebelum navigate.
+- **Weekly digest cron** — `digest.ts` jalan tiap Senin (registered di `convex/crons.ts`). Read user CV + matcher result → kirim email + insert notification. Opt-in via `userProfiles.digestEnabled`. `lastDigestSentAt` cegah double-send saat retry.
+- **Scheduled notifications** — `scheduledFor` field ada di schema, belum dipakai (siap untuk reminder pre-deadline).
+- Manifest belum ada — slice bukan AI bus subscriber.
+
+## Extending
+
+- Push notification (PWA / Web Push API) — service worker sudah siap.
+- Group by type instead of date (filter sub-toggle).
+- Toast integration — produksi notif server-side via `internal.notifications.mutations.createNotification` + auto pop toast realtime.
+- Slack / email digest preferences di Settings.
+- Slice manifest: `notifications.list`, `notifications.markRead` skills.
+
+---
+
+## Portabilitas
+
+**Tier:** M
+
+**Files untuk dicopy:**
+
+```
+# Slice
+frontend/slices/notifications/
+
+# Shared deps
+frontend/shared/components/ui/responsive-page-header.tsx
+frontend/shared/components/ui/responsive-alert-dialog.tsx
+frontend/shared/hooks/useAuth.tsx
+frontend/shared/hooks/useDemoOverlay.ts
+frontend/shared/lib/formatDate.ts
+frontend/shared/lib/notify.ts
+frontend/shared/lib/utils.ts
+
+# Backend
+convex/notifications/                                                   # schema + queries + mutations + digest
+```
+
+**cp commands:**
+
+```bash
+SRC=~/projects/CareerPack
+DST=~/projects/<target>
+
+# Slice
+mkdir -p "$DST/frontend/slices"
+cp -r "$SRC/frontend/slices/notifications" "$DST/frontend/slices/"
+
+# Shared deps
+mkdir -p "$DST/frontend/shared/components/ui"
+mkdir -p "$DST/frontend/shared/hooks"
+mkdir -p "$DST/frontend/shared/lib"
+
+cp "$SRC/frontend/shared/components/ui/responsive-page-header.tsx"     "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/components/ui/responsive-alert-dialog.tsx"    "$DST/frontend/shared/components/ui/"
+cp "$SRC/frontend/shared/hooks/useAuth.tsx"                            "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/hooks/useDemoOverlay.ts"                      "$DST/frontend/shared/hooks/"
+cp "$SRC/frontend/shared/lib/formatDate.ts"                            "$DST/frontend/shared/lib/"
+cp "$SRC/frontend/shared/lib/notify.ts"                                "$DST/frontend/shared/lib/"
+
+# Backend
+cp -r "$SRC/convex/notifications" "$DST/convex/"
+```
+
+**Schema additions** — copy `notifications` table from `convex/notifications/schema.ts`. Indexes: `by_user`, `by_user_read`.
+
+If digest enabled: target `userProfiles` schema must have `digestEnabled?: v.boolean()` + `lastDigestSentAt?: v.number()` (lihat `settings.md` untuk full profile schema).
+
+**Convex api.d.ts**:
+
+```ts
+import type * as notifications_digest    from "../notifications/digest.js";
+import type * as notifications_mutations from "../notifications/mutations.js";
+import type * as notifications_queries   from "../notifications/queries.js";
+
+declare const fullApi: ApiFromModules<{
+  // ...
+  "notifications/digest":    typeof notifications_digest;
+  "notifications/mutations": typeof notifications_mutations;
+  "notifications/queries":   typeof notifications_queries;
+}>;
+```
+
+**npm deps** — none specific.
+
+**Env vars** — none specific. Digest action mungkin pakai email transport (SMTP / Resend) — config hidup di `_shared/email.ts` kalau slice email ported (di luar scope ini).
+
+**Manifest + binder wiring** — N/A (slice tidak punya manifest).
+
+**Nav registration** — `dashboardRoutes.tsx` + `navConfig.ts` (see `_porting-guide.md` §4). Slug `notifications` (label "Notifikasi", icon `Bell`, hue `from-yellow-400 to-yellow-600`, placement `MORE_APPS`).
+
+**Cron registration** — kalau target pakai weekly digest, append entry di `convex/crons.ts`:
+
+```ts
+import { internal } from "./_generated/api";
+crons.weekly("weekly-digest", { dayOfWeek: "monday", hourUTC: 1, minuteUTC: 0 },
+  internal.notifications.digest.runWeeklyDigest);
+```
+
+**i18n** — Indonesian:
+- Tab labels: "Semua" / "Belum dibaca" / "Penting"
+- Date groups: "Hari ini" / "Kemarin" / "Minggu ini" / "Lebih lama"
+- Relative time tokens: "Baru saja", "Xm", "Xj", "Xh"
+- Actions: "Tandai semua dibaca", "Bersihkan"
+
+**Integration points** — server-side producers push notif via `internal.notifications.mutations.createNotification` (internal-only; pass explicit `userId`). Examples:
+- Job application status change (`career-dashboard`)
+- Interview reminder pre-deadline (`calendar` cron)
+- Roadmap milestone unlocked (`skill-roadmap`)
+- AI tip after CV scan (`matcher`)
+
+**Common breakage after port:**
+
+- **`actionUrl` external URL crash** — `<Link>` Next.js handle full URL OK tapi prefetch fail di server log. Kalau noisy, swap ke `<a href>` untuk URL absolut.
+- **Date groups kosong padahal ada data** — `formatDateShort` butuh `id-ID` locale. Pastikan target Node ≥ 16 dengan ICU full.
+- **Digest cron tidak jalan** — entry di `convex/crons.ts` lupa diappend.
+- **Demo overlay konflik** — `useDemoNotificationsOverlay` injection palsu di state. Kalau target tidak pakai demo system, stub hook return `null`.
+- **`IMPORTANT_TYPES` filter empty** — slice lain insert dengan `type` strings yang tidak match (`"important"` ≠ `"deadline"`). Konsisten pakai enum.
+
+**Testing the port:**
+
+1. Navigate `/dashboard/notifications` → empty state atau row list
+2. Insert test notif via Convex dashboard → realtime muncul di UI
+3. Klik row dengan `actionUrl` → navigate + auto-mark-read
+4. Klik "Tandai semua dibaca" → unread count → 0
+5. Klik "Bersihkan" → ResponsiveAlertDialog confirm → semua row gone
+6. Reload → state persist
+
+Run `_porting-guide.md` §9 checklist.

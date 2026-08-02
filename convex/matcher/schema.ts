@@ -1,0 +1,85 @@
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export const matcherTables = {
+  jobListings: defineTable({
+    title: v.string(),
+    company: v.string(),
+    location: v.string(),
+    workMode: v.string(),
+    employmentType: v.string(),
+    seniority: v.string(),
+    salaryMin: v.optional(v.number()),
+    salaryMax: v.optional(v.number()),
+    currency: v.optional(v.string()),
+    description: v.string(),
+    requiredSkills: v.array(v.string()),
+    postedAt: v.number(),
+    applyUrl: v.optional(v.string()),
+    companyLogo: v.optional(v.string()),
+    /** AI-extracted keyword cache. Populated lazily by the ATS scan
+     *  action (`api.matcher.actions.extractKeywords`). Re-extraction
+     *  happens when `extractedKeywordsAt` is older than the row's
+     *  `_creationTime` (i.e. the listing was edited) — but description
+     *  changes rarely so this is essentially a one-shot per listing. */
+    extractedKeywords: v.optional(v.array(v.string())),
+    extractedKeywordsAt: v.optional(v.number()),
+    /** Provenance: `seed` (built-in fixtures), `remoteok`, `user-paste`,
+     *  …. Lets us prune stale fetched rows without touching curated seed
+     *  rows, and tag UI badges per source. */
+    source: v.optional(v.string()),
+    /** Stable per-source ID for dedupe on re-fetch. Format prefix:
+     *  `<source>:<id>` e.g. `remoteok:123456`. NULL for legacy seed rows. */
+    externalId: v.optional(v.string()),
+    /** User who pasted this listing (only when source="user-paste"). */
+    addedBy: v.optional(v.id("users")),
+    /** Functional bidang/category — derived from feed URL (WWR) or tag
+     *  inference (RemoteOK). One of: engineering, design, support,
+     *  product, marketing, data. UI renders as a colored pill badge so
+     *  users can scan listings by domain at a glance. */
+    category: v.optional(v.string()),
+  })
+    .index("by_posted", ["postedAt"])
+    .index("by_workMode", ["workMode", "postedAt"])
+    .index("by_external", ["externalId"])
+    .index("by_source_posted", ["source", "postedAt"])
+    /** "Lowongan Saya" — the user's own pastes. Without it the mineOnly
+     *  branch had to window the whole table by postedAt first and filter
+     *  addedBy after, so a user's rows vanished once 100 newer pastes
+     *  existed platform-wide. */
+    .index("by_addedBy_posted", ["addedBy", "postedAt"]),
+
+  /** History of ATS scans. Captures the FULL result (score breakdown,
+   *  matched + missing keywords, format issues, recommendations) so the
+   *  user can see progress over time without re-running the AI call.
+   *
+   *  Linked to `cvs` (cvId) and optionally a `jobListings` row when the
+   *  scan was triggered from a listing. `rawJobText` snapshots the JD
+   *  content used at scan time so re-opening the scan shows the same
+   *  context even if the underlying listing was later edited. */
+  atsScans: defineTable({
+    userId: v.id("users"),
+    cvId: v.id("cvs"),
+    jobListingId: v.optional(v.id("jobListings")),
+    jobTitle: v.string(),
+    jobCompany: v.optional(v.string()),
+    rawJobText: v.string(),
+    score: v.number(),
+    grade: v.string(),
+    breakdown: v.object({
+      keywordCoverage: v.number(),
+      hardSkills: v.number(),
+      experienceFit: v.number(),
+      sectionCompleteness: v.number(),
+      parseability: v.number(),
+    }),
+    matchedKeywords: v.array(v.string()),
+    missingKeywords: v.array(v.string()),
+    formatIssues: v.array(v.string()),
+    recommendations: v.array(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_cv", ["userId", "cvId"])
+    .index("by_user_listing", ["userId", "jobListingId"]),
+};

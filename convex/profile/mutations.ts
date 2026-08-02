@@ -1,0 +1,612 @@
+import { mutation, internalMutation } from "../_generated/server";
+import { v } from "convex/values";
+import { requireUser, authError } from "../_shared/auth";
+import { assertShortText, capStringArray } from "../_shared/validate";
+import { enforceRateLimit } from "../_shared/rateLimit";
+import { MCP_WRITE_LIMIT, MCP_WRITE_DAILY_LIMIT } from "../mcp/data/limits";
+import { cascadeDeleteUser } from "../admin/lib/cascadeDelete";
+import { ensureNotLastAdmin } from "../admin/lib/userOps";
+import {
+  sanitizeBlocks,
+  sanitizeHeaderBg,
+  sanitizeAccent,
+} from "./blocks";
+import { assertSlug } from "./slug";
+
+const HEADLINE_MAX = 120;
+const EMAIL_MAX = 120;
+const URL_MAX = 300;
+const AVAILABILITY_NOTE_MAX = 80;
+const CTA_LABEL_MAX = 40;
+
+const ALLOWED_SECTIONS = new Set([
+  "about",
+  "skills",
+  "experience",
+  "education",
+  "certifications",
+  "languages",
+  "projects",
+  "contact",
+]);
+
+function assertUrl(raw: string, label: string): string {
+  const value = raw.trim();
+  if (value.length === 0) return "";
+  if (value.length > URL_MAX) throw new Error(`${label} terlalu panjang`);
+  if (!/^https?:\/\//i.test(value)) {
+    throw new Error(`${label} harus diawali http:// atau https://`);
+  }
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error(`${label} harus http atau https`);
+    }
+    return url.toString();
+  } catch {
+    throw new Error(`${label} bukan URL valid`);
+  }
+}
+
+function assertEmail(raw: string): string {
+  const value = raw.trim();
+  if (value.length === 0) return "";
+  if (value.length > EMAIL_MAX) throw new Error("Email terlalu panjang");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    throw new Error("Email kontak publik tidak valid");
+  }
+  return value;
+}
+
+/**
+ * Raw (pre-validation) profile fields. Every field is optional so the
+ * one helper serves both the partial `patchProfile` and the full-form
+ * `createOrUpdateProfile` — the Convex arg validators already enforce
+ * which fields are required at each entry point.
+ */
+type RawProfileFields = {
+  fullName?: string;
+  phone?: string;
+  location?: string;
+  targetRole?: string;
+  experienceLevel?: string;
+  bio?: string;
+  skills?: string[];
+  interests?: string[];
+};
+
+/**
+ * Canonical profile field validator — the SSOT shared by `patchProfile`
+ * and `createOrUpdateProfile` so caps never drift between the two write
+ * paths. Only validates+returns fields that were actually passed, so
+ * the same code can build a partial patch or a full insert. Caps:
+ * fullName/location/targetRole <=120, experienceLevel <=40, bio <=600,
+ * skills/interests <=50 entries each <=60 chars; control chars rejected.
+ */
+function validateProfileFields(args: RawProfileFields): Record<string, unknown> {
+  const patch: Record<string, unknown> = {};
+  if (args.fullName !== undefined) {
+    patch.fullName = assertShortText(args.fullName, 120, "Nama");
+  }
+  if (args.phone !== undefined) {
+    // Phone: digits / + / - / space / parens, 6-30 chars. Loose on
+    // purpose — Indonesian + international formats both allowed.
+    const v = args.phone.trim();
+    if (v.length > 0 && (v.length < 6 || v.length > 30 || !/^[+\d\s()-]+$/.test(v))) {
+      throw new Error("Nomor telepon tidak valid");
+    }
+    patch.phone = v.length === 0 ? undefined : v;
+  }
+  if (args.location !== undefined) patch.location = assertShortText(args.location, 120, "Lokasi");
+  if (args.targetRole !== undefined) patch.targetRole = assertShortText(args.targetRole, 120, "Target role");
+  if (args.experienceLevel !== undefined) patch.experienceLevel = assertShortText(args.experienceLevel, 40, "Level");
+  if (args.bio !== undefined) {
+    patch.bio = args.bio.trim().length === 0 ? undefined : assertShortText(args.bio, 600, "Bio");
+  }
+  if (args.skills !== undefined) {
+    patch.skills = capStringArray(args.skills, {
+      maxEntries: 50,
+      maxLen: 60,
+      field: "Skill",
+      entryField: "Skill",
+    });
+  }
+  if (args.interests !== undefined) {
+    patch.interests = capStringArray(args.interests, {
+      maxEntries: 50,
+      maxLen: 60,
+      field: "Minat",
+      entryField: "Minat",
+    });
+  }
+  return patch;
+}
+
+/**
+ * Partial profile patch — for surgical updates from the AI agent and
+ * other capability hooks that change one or two fields without
+ * needing the user to re-confirm the entire form. Validates each
+ * field independently and only writes fields that were passed.
+ *
+ * Fails (clearly) if no profile exists yet — the AI shouldn't be
+ * invoking these on first-run users; they go through the full
+ * onboarding flow first.
+ */
+export const patchProfile = mutation({
+  args: {
+    fullName: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
+    targetRole: v.optional(v.string()),
+    experienceLevel: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    skills: v.optional(v.array(v.string())),
+    interests: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const existing = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!existing) {
+      throw new Error("Profil belum ada — selesaikan onboarding dulu");
+    }
+
+    const patch = validateProfileFields(args);
+
+    if (Object.keys(patch).length === 0) {
+      throw new Error("Tidak ada field yang diubah");
+    }
+    await ctx.db.patch(existing._id, patch);
+    return existing._id;
+  },
+});
+
+/**
+ * Same patch as `patchProfile`, for the MCP server. It cannot reuse the
+ * public mutation: an MCP request carries no @convex-dev/auth session, so
+ * `requireUser(ctx)` throws — the user is resolved from the bearer token in
+ * convex/mcp/auth.ts and arrives here as an explicit argument. It lives in
+ * this file rather than convex/mcp/data/profile.ts so it shares
+ * `validateProfileFields`; the caps above are the SSOT precisely so a second
+ * write path cannot drift from the first.
+ */
+export const _patchProfileFor = internalMutation({
+  args: {
+    userId: v.id("users"),
+    fullName: v.optional(v.string()),
+    location: v.optional(v.string()),
+    targetRole: v.optional(v.string()),
+    experienceLevel: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    skills: v.optional(v.array(v.string())),
+    interests: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, args.userId, MCP_WRITE_LIMIT);
+    await enforceRateLimit(ctx, args.userId, MCP_WRITE_DAILY_LIMIT);
+
+    const existing = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+    if (!existing) {
+      throw new Error("Profil belum ada — selesaikan onboarding dulu");
+    }
+
+    const { userId: _userId, ...fields } = args;
+    const patch = validateProfileFields(fields);
+    if (Object.keys(patch).length === 0) {
+      throw new Error("Tidak ada field yang diubah");
+    }
+    await ctx.db.patch(existing._id, patch);
+    return patch;
+  },
+});
+
+export const createOrUpdateProfile = mutation({
+  args: {
+    fullName: v.string(),
+    phone: v.optional(v.string()),
+    location: v.string(),
+    targetRole: v.string(),
+    experienceLevel: v.string(),
+    skills: v.array(v.string()),
+    interests: v.array(v.string()),
+    bio: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+
+    const existingProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    // Same caps + control-char rejection as patchProfile. Spread the
+    // raw args first to keep the required-field types for db.insert, then
+    // overlay the validated (trimmed / capped) values so they win.
+    const profileData = { userId, ...args, ...validateProfileFields(args) };
+
+    if (existingProfile) {
+      await ctx.db.patch(existingProfile._id, profileData);
+      return existingProfile._id;
+    }
+    return await ctx.db.insert("userProfiles", profileData);
+  },
+});
+
+export const updateAvatar = mutation({
+  args: {
+    storageId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+
+    if (args.storageId !== undefined) {
+      const record = await ctx.db
+        .query("files")
+        .withIndex("by_storage", (q) => q.eq("storageId", args.storageId!))
+        .first();
+      if (!record || record.tenantId !== userId.toString()) {
+        throw new Error("File tidak ditemukan");
+      }
+    }
+
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile) {
+      throw new Error("Isi profil dulu lalu coba lagi");
+    }
+
+    await ctx.db.patch(profile._id, {
+      avatarStorageId: args.storageId,
+    });
+  },
+});
+
+export const updateMyPublicProfile = mutation({
+  args: {
+    enabled: v.optional(v.boolean()),
+    slug: v.optional(v.string()),
+    headline: v.optional(v.string()),
+    bioShow: v.optional(v.boolean()),
+    skillsShow: v.optional(v.boolean()),
+    targetRoleShow: v.optional(v.boolean()),
+    locationShow: v.optional(v.boolean()),
+    contactEmail: v.optional(v.string()),
+    linkedinUrl: v.optional(v.string()),
+    portfolioUrl: v.optional(v.string()),
+    allowIndex: v.optional(v.boolean()),
+    avatarShow: v.optional(v.boolean()),
+    portfolioShow: v.optional(v.boolean()),
+    /* ----- Personal Branding builder ------------------------------ */
+    mode: v.optional(v.union(v.literal("auto"), v.literal("custom"))),
+    autoToggles: v.optional(
+      v.object({
+        showExperience: v.optional(v.boolean()),
+        showEducation: v.optional(v.boolean()),
+        showCertifications: v.optional(v.boolean()),
+        showProjects: v.optional(v.boolean()),
+        showSocial: v.optional(v.boolean()),
+        showLanguages: v.optional(v.boolean()),
+      }),
+    ),
+    availableForHire: v.optional(v.boolean()),
+    availabilityNote: v.optional(v.string()),
+    ctaLabel: v.optional(v.string()),
+    ctaUrl: v.optional(v.string()),
+    ctaType: v.optional(
+      v.union(
+        v.literal("link"),
+        v.literal("email"),
+        v.literal("calendly"),
+        v.literal("download"),
+      ),
+    ),
+    sectionOrder: v.optional(v.array(v.string())),
+    theme: v.optional(
+      v.union(
+        v.literal("linktree"),
+        v.literal("bento"),
+        v.literal("magazine"),
+        v.literal("template-v1"),
+        v.literal("template-v2"),
+        v.literal("template-v3"),
+      ),
+    ),
+    headerBg: v.optional(
+      v.object({
+        kind: v.union(
+          v.literal("gradient"),
+          v.literal("solid"),
+          v.literal("image"),
+          v.literal("none"),
+        ),
+        value: v.string(),
+      }),
+    ),
+    accent: v.optional(v.string()),
+    style: v.optional(
+      v.object({
+        primary: v.optional(v.string()),
+        font: v.optional(
+          v.union(
+            v.literal("sans"),
+            v.literal("serif"),
+            v.literal("mono"),
+          ),
+        ),
+        radius: v.optional(
+          v.union(
+            v.literal("none"),
+            v.literal("sm"),
+            v.literal("md"),
+            v.literal("lg"),
+            v.literal("full"),
+          ),
+        ),
+        density: v.optional(
+          v.union(
+            v.literal("compact"),
+            v.literal("normal"),
+            v.literal("spacious"),
+          ),
+        ),
+      }),
+    ),
+    /* Share & Export opt-ins (see profile/schema.ts). */
+    htmlExport: v.optional(v.boolean()),
+    embedExport: v.optional(v.boolean()),
+    promptExport: v.optional(v.boolean()),
+    blocks: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          type: v.string(),
+          hidden: v.optional(v.boolean()),
+          payload: v.any(),
+          style: v.optional(v.any()),
+        }),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile) {
+      throw new Error("Profil belum dibuat — lengkapi profil dulu di Pengaturan");
+    }
+
+    const patch: Record<string, unknown> = {};
+
+    if (args.slug !== undefined) {
+      const slug = assertSlug(args.slug);
+      const collision = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_public_slug", (q) => q.eq("publicSlug", slug))
+        .first();
+      if (collision && collision.userId !== userId) {
+        throw new Error("Slug sudah dipakai, pilih yang lain");
+      }
+      patch.publicSlug = slug;
+    }
+
+    if (args.enabled !== undefined) {
+      if (args.enabled) {
+        const hasSlug =
+          args.slug !== undefined
+            ? Boolean(args.slug.trim())
+            : Boolean(profile.publicSlug);
+        if (!hasSlug) {
+          throw new Error("Tetapkan slug sebelum mengaktifkan profil publik");
+        }
+      }
+      patch.publicEnabled = args.enabled;
+    }
+
+    if (args.headline !== undefined) {
+      patch.publicHeadline = assertShortText(args.headline, HEADLINE_MAX, "Headline");
+    }
+    if (args.bioShow !== undefined) patch.publicBioShow = args.bioShow;
+    if (args.skillsShow !== undefined) patch.publicSkillsShow = args.skillsShow;
+    if (args.targetRoleShow !== undefined) patch.publicTargetRoleShow = args.targetRoleShow;
+    if (args.locationShow !== undefined) patch.publicLocationShow = args.locationShow;
+    if (args.contactEmail !== undefined) patch.publicContactEmail = assertEmail(args.contactEmail);
+    if (args.linkedinUrl !== undefined) patch.publicLinkedinUrl = assertUrl(args.linkedinUrl, "LinkedIn");
+    if (args.portfolioUrl !== undefined) patch.publicPortfolioUrl = assertUrl(args.portfolioUrl, "Portfolio");
+    if (args.allowIndex !== undefined) patch.publicAllowIndex = args.allowIndex;
+    if (args.avatarShow !== undefined) patch.publicAvatarShow = args.avatarShow;
+    if (args.portfolioShow !== undefined) patch.publicPortfolioShow = args.portfolioShow;
+
+    if (args.mode !== undefined) patch.publicMode = args.mode;
+    if (args.autoToggles !== undefined) patch.publicAutoToggles = args.autoToggles;
+    if (args.theme !== undefined) patch.publicTheme = args.theme;
+    if (args.headerBg !== undefined) {
+      const cleaned = sanitizeHeaderBg(args.headerBg);
+      if (!cleaned) throw new Error("Header background tidak valid");
+      patch.publicHeaderBg = cleaned;
+    }
+    if (args.accent !== undefined) {
+      if (args.accent === "") {
+        patch.publicAccent = undefined;
+      } else {
+        const cleaned = sanitizeAccent(args.accent);
+        if (!cleaned) throw new Error("Aksen warna harus format hex #rrggbb");
+        patch.publicAccent = cleaned;
+      }
+    }
+    if (args.style !== undefined) {
+      // Whitelist + sanitize — primary color must be hex, the rest are
+      // already constrained by the validator literals.
+      const HEX_RE = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/;
+      const cleaned: Record<string, string> = {};
+      if (args.style.primary && HEX_RE.test(args.style.primary)) {
+        cleaned.primary = args.style.primary.toLowerCase();
+      }
+      if (args.style.font) cleaned.font = args.style.font;
+      if (args.style.radius) cleaned.radius = args.style.radius;
+      if (args.style.density) cleaned.density = args.style.density;
+      patch.publicStyle = Object.keys(cleaned).length > 0 ? cleaned : undefined;
+    }
+    if (args.htmlExport !== undefined) patch.publicHtmlExport = args.htmlExport;
+    if (args.embedExport !== undefined) patch.publicEmbedExport = args.embedExport;
+    if (args.promptExport !== undefined) patch.publicPromptExport = args.promptExport;
+    if (args.blocks !== undefined) {
+      patch.publicBlocks = sanitizeBlocks(args.blocks);
+    }
+
+    if (args.availableForHire !== undefined) {
+      patch.publicAvailableForHire = args.availableForHire;
+    }
+    if (args.availabilityNote !== undefined) {
+      patch.publicAvailabilityNote = assertShortText(
+        args.availabilityNote,
+        AVAILABILITY_NOTE_MAX,
+        "Catatan ketersediaan",
+      );
+    }
+    if (args.ctaLabel !== undefined) {
+      patch.publicCtaLabel = assertShortText(
+        args.ctaLabel,
+        CTA_LABEL_MAX,
+        "Label CTA",
+      );
+    }
+    if (args.ctaUrl !== undefined) {
+      const raw = args.ctaUrl.trim();
+      if (raw.length === 0) {
+        patch.publicCtaUrl = "";
+      } else if (raw.length > URL_MAX) {
+        throw new Error("URL CTA terlalu panjang");
+      } else if (raw.startsWith("mailto:")) {
+        // Accept mailto: as-is for type=email — assertEmail validates
+        // the address part. Strip the prefix before sending in.
+        const addr = raw.slice("mailto:".length);
+        if (assertEmail(addr).length === 0) {
+          throw new Error("Alamat email pada CTA tidak valid");
+        }
+        patch.publicCtaUrl = `mailto:${addr.trim()}`;
+      } else {
+        patch.publicCtaUrl = assertUrl(raw, "URL CTA");
+      }
+    }
+    if (args.ctaType !== undefined) patch.publicCtaType = args.ctaType;
+    if (args.sectionOrder !== undefined) {
+      const seen = new Set<string>();
+      const cleaned: string[] = [];
+      for (const s of args.sectionOrder) {
+        const k = s.trim();
+        if (!ALLOWED_SECTIONS.has(k)) continue;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        cleaned.push(k);
+      }
+      patch.publicSectionOrder = cleaned;
+    }
+
+    await ctx.db.patch(profile._id, patch);
+    return { ok: true as const };
+  },
+});
+
+/**
+ * Opt user in/out of the weekly job digest email. Stored on userProfiles
+ * so the cron sweep can filter by `digestEnabled === true`. Resets
+ * `lastDigestSentAt` on opt-out so re-enrolling later doesn't skip
+ * the next sweep due to the 6-day idempotency guard.
+ */
+export const setDigestEnabled = mutation({
+  args: { enabled: v.boolean() },
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile) throw new Error("Profil belum dibuat. Lengkapi profil dulu.");
+    await ctx.db.patch(profile._id, {
+      digestEnabled: args.enabled,
+      lastDigestSentAt: args.enabled ? profile.lastDigestSentAt : undefined,
+    });
+    return { ok: true as const, enabled: args.enabled };
+  },
+});
+
+const LAST_ADMIN_MESSAGE =
+  "Anda satu-satunya admin. Tetapkan admin lain dulu sebelum menghapus akun.";
+
+/**
+ * Self-serve account erasure — the control the privacy policy promises.
+ *
+ * Takes NO `userId` on purpose: the caller's own id is the only thing it
+ * can ever delete, so there is no parameter to tamper with. Deleting
+ * *someone else* stays in `admin/mutations.deleteUser` behind requireAdmin.
+ *
+ * Reuses `cascadeDeleteUser`, so this erases exactly what the admin path
+ * erases (see its header for what is retained/anonymised on purpose).
+ */
+export const deleteMyAccount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    // ensureNotLastAdmin reads "no OTHER admin exists" as "you are the last
+    // admin" — correct behind requireAdmin, but here it would reject every
+    // ordinary user on a deployment that has no role=admin row at all. Ask it
+    // only when the caller really is one. It also throws a bare Error, which
+    // prod Convex redacts to "Server Error", so re-throw as ConvexError
+    // (see _shared/auth.ts authError) or the reason never reaches the toast.
+    if (profile?.role === "admin") {
+      try {
+        await ensureNotLastAdmin(ctx, userId, [userId], LAST_ADMIN_MESSAGE);
+      } catch (err) {
+        throw authError(err instanceof Error ? err.message : LAST_ADMIN_MESSAGE);
+      }
+    }
+    await cascadeDeleteUser(ctx, userId);
+    return { ok: true as const };
+  },
+});
+
+/**
+ * Heartbeat — updates `userProfiles.lastActiveAt` to Date.now().
+ *
+ * Called by the client from `useAuth` on app focus + on a 5-minute
+ * interval while the tab is foreground. Server-side throttle: only
+ * patches if the previous heartbeat is more than 4 min ago, so a
+ * frantic client cannot spam the row. No-op for unauthenticated
+ * sessions or users without a profile.
+ *
+ * Surfaced by `admin.queries.listAllUsers` for the active-users
+ * column. Replaces the previously-empty `lastActiveAt` field that
+ * was schema-declared but never written.
+ */
+export const heartbeat = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile) return { ok: false as const };
+
+    const now = Date.now();
+    const prev = profile.lastActiveAt ?? 0;
+    if (now - prev < 4 * 60 * 1000) return { ok: true as const, throttled: true };
+
+    await ctx.db.patch(profile._id, { lastActiveAt: now });
+    return { ok: true as const, throttled: false };
+  },
+});

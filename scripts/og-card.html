@@ -1,0 +1,181 @@
+<!doctype html>
+<!--
+  Source for frontend/public/og/og-card.jpg — the link-preview card.
+
+  It exists because the card it replaces (og-light.jpg) was a flat JPEG with no
+  source in the repo, so when its mockup rows went stale ("2 May 2024", CV dates)
+  nobody could fix them. Nothing here carries a date, a year, a metric, a version
+  or a named person, so re-rendering is only ever needed when the BRAND or the
+  PILLARS change — never because time passed. Keep it that way.
+
+  RE-RENDER (from a shell on this VPS; ~15s, no sudo):
+
+    cd /home/rahman/projects/CareerPack/scripts && python3 -m http.server 8899 &
+    # os-browser's /navigate rejects file:// (scheme_not_allowed), hence the server.
+    cd /home/rahman/projects/os-vps/os-browser
+    set -a; . ./.env; set +a                       # OS_BROWSER_SECRET
+    OS_BROWSER_WIDTH=1200 OS_BROWSER_HEIGHT=630 OS_BROWSER_PORT=4102 \
+      OS_BROWSER_PROFILE=/tmp/og-render node server.mjs & sleep 4
+    H="x-os-browser-secret: $OS_BROWSER_SECRET"
+    curl -fsS -H "$H" -H 'content-type: application/json' \
+      -d '{"url":"http://127.0.0.1:8899/og-card.html"}' http://127.0.0.1:4102/navigate
+    sleep 3                                        # /navigate returns at domcontentloaded; webfonts land after
+    curl -fsS -H "$H" 'http://127.0.0.1:4102/screenshot?type=jpeg&q=92' \
+      -o /home/rahman/projects/CareerPack/frontend/public/og/og-card.jpg
+    kill %1 %2
+
+  A THROWAWAY browser instance, not the live one on :4002: /screenshot captures
+  the viewport, the viewport is fixed at launch, and the live service is 1280x800
+  (which would letterbox the card and is shared with the os-vps Browser app).
+  OS_BROWSER_PROFILE must differ too — Chromium locks the persistent profile dir.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CareerPack — OG card source (1200x630)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- The two fonts app/layout.tsx preloads eagerly: Fraunces is `font-display`,
+     i.e. the exact face the landing hero uses, so the card and the page a
+     click later are set in the same type. -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* --brand / --brand-to from shared/styles/index.css, converted out of oklch. */
+    --brand: #3981f6;
+    --brand-deep: #1d3fad;
+    --ink: #ffffff;
+    --ink-soft: rgba(226, 236, 255, 0.66);
+    --panel: rgba(255, 255, 255, 0.06);
+    --panel-edge: rgba(255, 255, 255, 0.11);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    padding: 64px;
+    gap: 44px;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(900px 620px at 88% -12%, rgba(57, 129, 246, 0.30), transparent 62%),
+      radial-gradient(700px 500px at -8% 108%, rgba(29, 63, 173, 0.26), transparent 60%),
+      linear-gradient(150deg, #060b16 0%, #0a1226 52%, #05090f 100%);
+  }
+
+  /* Both columns are explicitly sized rather than fr-based: this file is
+     authored blind (nobody can see the render while editing it), so every box
+     has to resolve without depending on how its text happens to measure. */
+  .left  { width: 520px; display: flex; flex-direction: column; justify-content: space-between; }
+  .right { width: 508px; display: flex; flex-direction: column; gap: 14px; }
+
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .wordmark { font-size: 46px; font-weight: 700; letter-spacing: -0.025em; line-height: 1; }
+  .wordmark b { font-weight: 700; color: var(--brand); }
+
+  h1 {
+    margin: 0;
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-weight: 800;
+    font-size: 66px;
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+  }
+  /* Hard-wrapped: the balance point of this headline is a design decision, and
+     auto-wrap at 520px is a coin flip between "your" and "career" leading line 3. */
+  h1 .accent { color: var(--brand); }
+
+  .lede {
+    margin: 28px 0 0;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  .url { font-size: 26px; font-weight: 600; color: rgba(255, 255, 255, 0.55); letter-spacing: 0.005em; }
+
+  /* One row per pillar, `flex: 1` so the five of them divide the column height
+     exactly — no arithmetic to redo if a row's copy changes. */
+  .pillar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 22px;
+    border: 1px solid var(--panel-edge);
+    border-radius: 18px;
+    background: var(--panel);
+  }
+  .tile {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+  }
+  .tile svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pillar span { font-size: 27px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+</style>
+</head>
+<body>
+
+<div class="left">
+  <div class="brand">
+    <!-- brand/mark.svg, recoloured: its navy path is invisible on a navy card,
+         so it takes the white half of the wordmark's white/blue split. -->
+    <svg width="64" height="50" viewBox="0 0 675 527" fill-rule="nonzero" aria-hidden="true">
+      <path fill="#ffffff" d="M281 527L266 527L262 525L256 517L256 513L255 513L255 355L254 355L254 351L251 345L249 344L249 342L241 335L232 333L232 332L215 332L215 515L211 523L209 523L208 525L204 527L11 527L7 525L3 521L1 514L0 514L0 393L1 393L2 379L3 379L3 375L4 375L7 363L13 351L15 350L19 342L25 336L29 331L31 331L40 322L44 321L45 319L59 312L73 309L73 308L89 307L89 306L99 306L99 307L113 307L113 306L125 306L125 307L149 307L149 306L238 307L238 308L248 310L252 312L253 314L257 315L268 325L268 327L273 332L277 340L277 343L280 349L280 355L281 355ZM189 502L189 332L84 332L84 333L78 333L78 334L68 336L58 341L57 343L52 345L46 352L40 357L40 359L37 361L36 365L34 366L32 373L30 375L30 378L29 378L27 392L26 392L26 502Z"/>
+      <path fill="#3981f6" d="M650 502L650 121L580 121L580 120L575 120L569 117L564 112L561 106L561 103L560 103L560 25L436 25L436 186L450 189L452 191L455 191L461 194L465 198L467 198L470 202L472 202L477 207L477 209L484 216L491 230L493 243L494 243L494 502ZM662 527L481 527L481 526L476 525L471 520L470 515L469 515L469 245L468 245L467 238L463 230L461 229L461 227L450 217L442 213L438 213L438 212L436 212L436 514L435 514L435 517L433 521L425 527L281 527L281 502L411 502L411 212L270 212L270 213L265 213L265 214L256 216L244 222L242 225L240 225L229 236L229 238L226 240L226 242L224 243L220 251L217 264L216 264L216 269L215 269L215 307L190 307L189 306L190 262L191 262L191 257L192 257L192 253L196 245L196 242L202 230L204 229L206 224L209 222L209 220L224 205L226 205L228 202L230 202L234 198L242 195L244 193L247 193L255 189L271 187L271 186L411 186L411 14L414 8L419 3L426 1L426 0L574 0L574 1L581 2L591 7L618 34L618 36L635 52L635 54L654 72L654 74L666 85L666 87L668 88L668 90L670 91L672 95L673 102L674 102L674 110L675 110L675 118L674 118L674 249L675 249L675 257L674 257L674 351L675 351L675 355L674 355L674 390L675 390L675 400L674 400L674 495L675 496L674 496L674 516L668 524ZM640 96L640 94L630 85L630 83L612 65L585 38L585 95L586 96Z"/>
+    </svg>
+    <div class="wordmark">Career<b>Pack</b></div>
+  </div>
+
+  <div>
+    <h1>Everything you<br>need to build<br><span class="accent">your career.</span></h1>
+    <p class="lede">Built in Bahasa Indonesia —<br>one tap translates the whole app.</p>
+  </div>
+
+  <div class="url">careerpack.org</div>
+</div>
+
+<!-- The five pillars, in the order og:description names them, each one a
+     shipping dashboard route (cv, applications, roadmap, interview, ai). -->
+<div class="right">
+  <div class="pillar">
+    <div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="12" cy="13" r="2"/><path d="M8.5 19a3.5 3.5 0 0 1 7 0"/></svg></div>
+    <span>CV builder</span>
+  </div>
+  <div class="pillar">
+    <div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+    <span>Job application tracker</span>
+  </div>
+  <div class="pillar">
+    <div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6.5 21 4v13.5L15 20 9 17.5 3 20V6.5L9 4Z"/><path d="M9 4v13.5"/><path d="M15 6.5V20"/></svg></div>
+    <span>Skill roadmaps</span>
+  </div>
+  <div class="pillar">
+    <div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg></div>
+    <span>Mock interviews</span>
+  </div>
+  <div class="pillar">
+    <div class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 9.9 8.9 4 11l5.9 2.1L12 19l2.1-5.9L20 11l-5.9-2.1Z"/><path d="M5 3v3"/><path d="M3.5 4.5h3"/><path d="M18 17v3"/><path d="M16.5 18.5h3"/></svg></div>
+    <span>AI career assistant</span>
+  </div>
+</div>
+
+</body>
+</html>

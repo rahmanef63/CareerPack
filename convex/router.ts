@@ -1,0 +1,112 @@
+import { httpRouter } from "convex/server";
+import { handleResendWebhook } from "./admin/webhooks";
+import { handleUnsubscribeGet, handleUnsubscribePost } from "./admin/unsubscribes";
+import { handleRequestReset } from "./passwordReset";
+import { handleCheckEmail, handleSignInAttempt } from "./authCheckEmail";
+import { handleHealth } from "./health";
+import { handleMcp } from "./mcp/http";
+import {
+  authorizationServerMetadata,
+  protectedResourceMetadata,
+} from "./mcp/wellKnown";
+
+const http = httpRouter();
+
+http.route({
+  path: "/webhooks/resend",
+  method: "POST",
+  handler: handleResendWebhook,
+});
+
+http.route({
+  path: "/api/unsubscribe",
+  method: "GET",
+  handler: handleUnsubscribeGet,
+});
+
+http.route({
+  path: "/api/unsubscribe",
+  method: "POST",
+  handler: handleUnsubscribePost,
+});
+
+http.route({
+  path: "/api/password-reset/request",
+  method: "POST",
+  handler: handleRequestReset,
+});
+
+// CORS preflight — browsers send OPTIONS for cross-origin requests with
+// custom Content-Type (`application/json`). Same handler dispatches by
+// `request.method`.
+http.route({
+  path: "/api/password-reset/request",
+  method: "OPTIONS",
+  handler: handleRequestReset,
+});
+
+http.route({
+  path: "/api/auth/check-email",
+  method: "POST",
+  handler: handleCheckEmail,
+});
+http.route({
+  path: "/api/auth/check-email",
+  method: "OPTIONS",
+  handler: handleCheckEmail,
+});
+
+http.route({
+  path: "/api/auth/signin-attempt",
+  method: "POST",
+  handler: handleSignInAttempt,
+});
+http.route({
+  path: "/api/auth/signin-attempt",
+  method: "OPTIONS",
+  handler: handleSignInAttempt,
+});
+
+http.route({
+  path: "/api/health",
+  method: "GET",
+  handler: handleHealth,
+});
+
+// MCP server. Lives here and not on the Next.js app on purpose: these are
+// the SITE-origin routes (`*.convex.site`), and both the endpoint and its
+// discovery documents have to answer on the same host the MCP URL names —
+// a client's first probe never reaches careerpack.org.
+http.route({ path: "/mcp", method: "POST", handler: handleMcp });
+http.route({ path: "/mcp", method: "GET", handler: handleMcp });
+http.route({ path: "/mcp", method: "OPTIONS", handler: handleMcp });
+
+for (const method of ["GET", "OPTIONS"] as const) {
+  http.route({
+    path: "/.well-known/oauth-protected-resource",
+    method,
+    handler: protectedResourceMetadata,
+  });
+  // RFC 9728 §3.1 puts the resource's path after the well-known segment, so
+  // a client resolving metadata for `https://…/mcp` asks for this one. Claude
+  // probes it; ChatGPT probes the bare path. Serve both, same document.
+  http.route({
+    path: "/.well-known/oauth-protected-resource/mcp",
+    method,
+    handler: protectedResourceMetadata,
+  });
+  http.route({
+    path: "/.well-known/oauth-authorization-server",
+    method,
+    handler: authorizationServerMetadata,
+  });
+}
+
+// `/api/geo/country` used to live here and asked api.country.is to place the
+// visitor's IP. It moved to `frontend/app/api/geo/route.ts`, which answers from
+// the geoip-lite database already bundled with this app — same answer, no
+// visitor address sent to a third party the privacy policy does not name. It
+// could not stay on Convex: httpActions run in a V8 isolate with no
+// filesystem, so geoip-lite's .dat files never load there.
+
+export default http;

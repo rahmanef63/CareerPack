@@ -1,0 +1,301 @@
+{
+  "title": "Ahli Gizi & Nutrisi",
+  "slug": "nutritionist",
+  "domain": "health",
+  "icon": "Heart",
+  "color": "bg-lime-500",
+  "description": "Kembangkan kompetensi sebagai ahli gizi klinis, komunitas, atau konsultan nutrisi olahraga.",
+  "tags": [
+    "gizi",
+    "nutrisi",
+    "dietisien",
+    "UKOM-gizi",
+    "konseling-gizi"
+  ],
+  "order": 44,
+  "isPublic": true,
+  "isSystem": true,
+  "nodes": [
+    {
+      "id": "gizi-1",
+      "title": "Ilmu Gizi Dasar",
+      "description": "Pelajari zat gizi makro, mikro, metabolisme, dan angka kecukupan gizi Indonesia.",
+      "difficulty": "beginner",
+      "estimatedHours": 25,
+      "prerequisites": [],
+      "category": "Fondasi",
+      "resources": [
+        {
+          "id": "gizi-r1",
+          "title": "Ilmu Gizi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r2",
+          "title": "Nutrition Science - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nutrition-science",
+          "free": false
+        },
+        {
+          "id": "gizi-r3",
+          "title": "AKG Indonesia - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/akg/",
+          "free": true
+        },
+        {
+          "id": "gizi-r4",
+          "title": "Gizi Dasar - Ruangguru",
+          "type": "course",
+          "url": "https://ruangguru.com/",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "gizi-2",
+      "title": "Penilaian Status Gizi (Antropometri)",
+      "description": "Lakukan penilaian status gizi menggunakan antropometri: IMT, z-score, dan lingkar lengan.",
+      "difficulty": "beginner",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "gizi-1"
+      ],
+      "parentId": "gizi-1",
+      "category": "Assessment",
+      "resources": [
+        {
+          "id": "gizi-r5",
+          "title": "Antropometri Gizi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r6",
+          "title": "WHO Anthro Software (gratis)",
+          "type": "other",
+          "url": "https://www.who.int/tools/child-growth-standards/software",
+          "free": true
+        },
+        {
+          "id": "gizi-r7",
+          "title": "Nutritional Assessment - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/nutritional-assessment",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "gizi-3",
+      "title": "Gizi Klinis & Terapi Diet",
+      "description": "Berikan terapi diet untuk penyakit: DM, hipertensi, ginjal, dan kondisi klinis lainnya.",
+      "difficulty": "intermediate",
+      "estimatedHours": 30,
+      "prerequisites": [
+        "gizi-2"
+      ],
+      "parentId": "gizi-2",
+      "category": "Klinis",
+      "resources": [
+        {
+          "id": "gizi-r8",
+          "title": "Gizi Klinis - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r9",
+          "title": "Medical Nutrition Therapy - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/medical-nutrition-therapy",
+          "free": false
+        },
+        {
+          "id": "gizi-r10",
+          "title": "PGRS - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/pgrs/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gizi-4",
+      "title": "Penyelenggaraan Makanan Institusi",
+      "description": "Rencanakan dan kelola penyelenggaraan makanan di RS, sekolah, atau industri jasa boga.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "gizi-1"
+      ],
+      "category": "Manajemen",
+      "resources": [
+        {
+          "id": "gizi-r11",
+          "title": "Food Service Management - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/food-service-management",
+          "free": false
+        },
+        {
+          "id": "gizi-r12",
+          "title": "Manajemen Makanan - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r13",
+          "title": "PGRS Institusi - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/pgrs-institusi/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gizi-5",
+      "title": "Gizi Masyarakat & Promosi Kesehatan",
+      "description": "Program gizi berbasis komunitas: stunting, 1000 HPK, dan intervensi gizi masyarakat.",
+      "difficulty": "intermediate",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "gizi-2"
+      ],
+      "category": "Komunitas",
+      "resources": [
+        {
+          "id": "gizi-r14",
+          "title": "Gizi Masyarakat - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r15",
+          "title": "Stunting Prevention - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/stunting/",
+          "free": true
+        },
+        {
+          "id": "gizi-r16",
+          "title": "Public Health Nutrition - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/public-health-nutrition",
+          "free": false
+        }
+      ]
+    },
+    {
+      "id": "gizi-6",
+      "title": "Konseling Gizi",
+      "description": "Lakukan konseling gizi dengan teknik wawancara motivasional dan perubahan perilaku makan.",
+      "difficulty": "intermediate",
+      "estimatedHours": 15,
+      "prerequisites": [
+        "gizi-3"
+      ],
+      "parentId": "gizi-3",
+      "category": "Klinis",
+      "resources": [
+        {
+          "id": "gizi-r17",
+          "title": "Nutrition Counseling - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r18",
+          "title": "Motivational Interviewing - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/motivational-interviewing",
+          "free": false
+        },
+        {
+          "id": "gizi-r19",
+          "title": "Panduan Konseling Gizi - Kemenkes",
+          "type": "documentation",
+          "url": "https://kemkes.go.id/konseling-gizi/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gizi-7",
+      "title": "Gizi Olahraga & Sport Nutrition",
+      "description": "Rancang program nutrisi untuk atlet dan aktif fisik: fueling, recovery, dan suplemen berbasis bukti.",
+      "difficulty": "advanced",
+      "estimatedHours": 20,
+      "prerequisites": [
+        "gizi-3"
+      ],
+      "category": "Spesialisasi",
+      "resources": [
+        {
+          "id": "gizi-r20",
+          "title": "Sports Nutrition - Coursera",
+          "type": "course",
+          "url": "https://coursera.org/learn/sports-nutrition",
+          "free": false
+        },
+        {
+          "id": "gizi-r21",
+          "title": "Gizi Olahraga - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r22",
+          "title": "IOC Sport Nutrition Guide",
+          "type": "documentation",
+          "url": "https://olympics.com/athlete365/nutrition/",
+          "free": true
+        }
+      ]
+    },
+    {
+      "id": "gizi-8",
+      "title": "UKOM Gizi & Registrasi Ahli Gizi (RD)",
+      "description": "Persiapkan Uji Kompetensi Gizi dan proses registrasi sebagai Registered Dietitian.",
+      "difficulty": "intermediate",
+      "estimatedHours": 25,
+      "prerequisites": [
+        "gizi-5",
+        "gizi-6"
+      ],
+      "category": "Karir",
+      "resources": [
+        {
+          "id": "gizi-r23",
+          "title": "UKOM Gizi - Persagi",
+          "type": "documentation",
+          "url": "https://www.persagi.org/ukom/",
+          "free": true
+        },
+        {
+          "id": "gizi-r24",
+          "title": "Tryout UKOM Gizi - Kelas Terbuka",
+          "type": "video",
+          "url": "https://youtube.com/@KlasTerbuka",
+          "free": true
+        },
+        {
+          "id": "gizi-r25",
+          "title": "STR Gizi - KTKI",
+          "type": "documentation",
+          "url": "https://ktki.kemkes.go.id/registrasi/",
+          "free": true
+        }
+      ]
+    }
+  ]
+}

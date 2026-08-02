@@ -1,0 +1,39 @@
+/**
+ * Per-section sanitisers used by `quickFill` mutation. Each function
+ * takes raw `unknown`, returns a cleaned object ready for
+ * `ctx.db.insert/patch`, OR null if the input fails the minimum
+ * required-fields check.
+ *
+ * Implementation lives in `sanitize/<section>.ts`. This file is the
+ * stable re-export aggregator.
+ */
+
+export { sanitizeProfile, type SanitizedProfile } from "./sanitize/profile";
+export { sanitizeCV, type SanitizedCV, type CVDropCounts } from "./sanitize/cv";
+export {
+  sanitizePortfolioItem,
+  type SanitizedPortfolio,
+} from "./sanitize/portfolio";
+export { sanitizeGoal, type SanitizedGoal } from "./sanitize/goal";
+export {
+  sanitizeApplication,
+  type SanitizedApplication,
+} from "./sanitize/application";
+export { sanitizeContact, type SanitizedContact } from "./sanitize/contact";
+
+/** Lightweight payload-level shape check used by the orchestrator
+ *  before walking sections. */
+export function preflightPayload(raw: unknown): { ok: boolean; reason?: string } {
+  if (!raw) return { ok: false, reason: "Payload kosong" };
+  if (typeof raw !== "object") return { ok: false, reason: "Payload bukan objek JSON" };
+  return { ok: true };
+}
+
+export type {
+  QuickFillProfile,
+  QuickFillCV,
+  QuickFillPortfolioItem,
+  QuickFillGoal,
+  QuickFillApplication,
+  QuickFillContact,
+} from "./types";

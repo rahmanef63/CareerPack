@@ -1,0 +1,98 @@
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+import { BottomNav } from "@/shared/components/layout/BottomNav";
+import { MoreDrawer } from "@/shared/components/layout/MoreDrawer";
+import { MobileUserMenu } from "@/shared/components/layout/MobileUserMenu";
+import { ThemePresetSwitcher } from "@/shared/components/theme/ThemePresetSwitcher";
+import { BrandMark } from "@/shared/components/brand/Logo";
+import { PullToRefresh } from "@/shared/components/interactions/PullToRefresh";
+
+interface MobileContainerProps {
+  onAITap: () => void;
+  aiActive: boolean;
+  children: ReactNode;
+}
+
+/**
+ * Container untuk layar < lg. BottomNav 5-slot + AI FAB di tengah,
+ * More drawer sebagai app-launcher. Top bar slim berisi brand mark +
+ * theme/preset menu — ganti mode gelap-terang dan preset warna tanpa
+ * buka Pengaturan.
+ */
+export function MobileContainer({
+  onAITap,
+  aiActive,
+  children,
+}: MobileContainerProps) {
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  // Tells the document a bottom nav is on screen, so anything else pinned to
+  // the bottom edge can clear it — see the `[data-bottom-nav]` rule in
+  // index.css. TranslateHint is the reason: it is a Providers sibling, not a
+  // child of this container, so a CSS variable set here would never reach it.
+  // Marketing routes never mount this container and so never get the offset.
+  useEffect(() => {
+    document.documentElement.dataset.bottomNav = "1";
+    return () => {
+      delete document.documentElement.dataset.bottomNav;
+    };
+  }, []);
+
+  return (
+    <PullToRefresh>
+      <div className="flex min-h-svh flex-col bg-background text-foreground supports-[height:100dvh]:min-h-[100dvh] overscroll-y-contain">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
+        >
+          Lewati ke konten utama
+        </a>
+        <MobileTopBar />
+        <main
+          id="main-content"
+          className="flex-1 px-4"
+          style={{
+            paddingBottom: "calc(var(--nav-height) + var(--safe-bottom) + 1rem)",
+          }}
+        >
+          {children}
+        </main>
+        <BottomNav
+          onAITap={onAITap}
+          aiActive={aiActive}
+          onMoreTap={() => setMoreOpen(true)}
+        />
+        <MoreDrawer open={moreOpen} onOpenChange={setMoreOpen} />
+      </div>
+    </PullToRefresh>
+  );
+}
+
+function MobileTopBar() {
+  return (
+    <header
+      className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur"
+      style={{
+        // Status-bar safe area — iOS standalone PWA places the page
+        // directly under the time/signal row; without this, brand mark
+        // and avatar overlap the system clock.
+        paddingTop: "var(--safe-top)",
+        height: "calc(3rem + var(--safe-top))",
+      }}
+    >
+      <span className="flex items-center gap-2 text-sm font-semibold">
+        <BrandMark size={14} />
+        CareerPack
+      </span>
+      <div className="flex items-center gap-1">
+        {/* Single theme controller — opens a Popover with mode tabs
+            (Terang/Gelap/Sistem) sticky on top + preset palette
+            scrollable below. Replaces the two-button setup that
+            used to take up scarce mobile-header real estate. */}
+        <ThemePresetSwitcher size="mobile" />
+        <MobileUserMenu />
+      </div>
+    </header>
+  );
+}

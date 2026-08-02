@@ -1,0 +1,463 @@
+import { mutation, query, internalMutation } from "../_generated/server";
+import { v } from "convex/values";
+import { requireAdmin } from "../_shared/auth";
+import { defaultRoadmapTemplates } from "../_seeds/roadmapTemplates";
+import { DOCUMENT_SEED_BY_COUNTRY } from "../_seeds/documents";
+import { cascadeDeleteUser } from "./lib/cascadeDelete";
+import { ensureNotLastAdmin, applyRoleChange } from "./lib/userOps";
+import {
+  normalizeSkillInput, recalcProgress, mergeSkill, skillInputValidator,
+} from "./lib/skillOps";
+import {
+  validateTemplateMeta, templateInputFields,
+} from "./lib/templateOps";
+
+/** Re-exported so admin/cleanup.ts can keep its existing import. */
+export { cascadeDeleteUser };
+
+export const updateUserRole = mutation({
+  args: {
+    userId: v.id("users"),
+    role: v.union(
+      v.literal("admin"),
+      v.literal("moderator"),
+      v.literal("user"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const callerId = await requireAdmin(ctx);
+    if (args.role !== "admin") {
+      await ensureNotLastAdmin(
+        ctx, callerId, [args.userId],
+        "Tidak bisa menurunkan peran Anda sendiri: Anda satu-satunya admin. Tetapkan admin lain dulu.",
+      );
+    }
+    await applyRoleChange(ctx, callerId, args.userId, args.role);
+  },
+});
+
+export const deleteUser = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const callerId = await requireAdmin(ctx);
+    await ensureNotLastAdmin(
+      ctx, callerId, [args.userId],
+      "Tidak bisa menghapus akun Anda sendiri: Anda satu-satunya admin.",
+    );
+    await cascadeDeleteUser(ctx, args.userId);
+    return { ok: true as const };
+  },
+});
+
+export const bulkDeleteUsers = mutation({
+  args: { userIds: v.array(v.id("users")) },
+  handler: async (ctx, args) => {
+    const callerId = await requireAdmin(ctx);
+    const ids = args.userIds.slice(0, 100);
+    await ensureNotLastAdmin(
+      ctx, callerId, ids,
+      "Pilihan termasuk akun Anda dan Anda satu-satunya admin. Hapus diri sendiri tidak diizinkan.",
+    );
+    let deleted = 0;
+    for (const id of ids) {
+      await cascadeDeleteUser(ctx, id);
+      deleted++;
+    }
+    return { ok: true as const, deleted };
+  },
+});
+
+/**
+ * Stamps a user's country onto their profile so the admin users table can
+ * show where an account actually connects from — `userProfiles.location` is
+ * user-typed free text, routinely blank or aspirational.
+ *
+ * Internal, and takes `userId` + an already-resolved alpha-2 code, because a
+ * Convex mutation gets no request headers: only an httpAction can run
+ * `extractClientIp` and a geo lookup. The address itself never crosses this
+ * boundary. Lives here rather than in `profile/mutations.ts` because the
+ * admin table is the sole reader of the field.
+ *
+ * NOTHING CALLS THIS YET — wiring the first call site is what starts the
+ * retention, so the privacy page's "Data yang Kami Simpan" list must gain a
+ * country line in that same change.
+ *
+ * No-ops when the profile row is missing (inserting one needs
+ * fullName/location/targetRole/experienceLevel we don't have, and a
+ * half-built profile trips the onboarding gate) and when the country is
+ * unchanged — a geo lookup fires per page load, and an unconditional patch
+ * would rewrite the row (and re-run every reactive admin query) each time.
+ */
+export const recordUserCountry = internalMutation({
+  args: { userId: v.id("users"), country: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { userId, country }) => {
+    if (!/^[A-Z]{2}$/.test(country)) return null;
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+    if (!profile || profile.ipCountry === country) return null;
+    await ctx.db.patch(profile._id, { ipCountry: country });
+    return null;
+  },
+});
+
+// ---- Roadmap admin CRUD ----
+
+export const adminDeleteRoadmap = mutation({
+  args: { roadmapId: v.id("skillRoadmaps") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+    await ctx.db.delete(args.roadmapId);
+  },
+});
+
+export const adminUpdateCareerPath = mutation({
+  args: { roadmapId: v.id("skillRoadmaps"), careerPath: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const cp = args.careerPath.trim();
+    if (!cp || cp.length > 100) throw new Error("Career path 1-100 karakter");
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+    await ctx.db.patch(args.roadmapId, { careerPath: cp });
+  },
+});
+
+export const adminUpsertSkill = mutation({
+  args: {
+    roadmapId: v.id("skillRoadmaps"),
+    skill: skillInputValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const normalized = normalizeSkillInput(args.skill);
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+
+    const updatedSkills = mergeSkill(roadmap.skills, normalized, Date.now());
+    await ctx.db.patch(args.roadmapId, {
+      skills: updatedSkills,
+      progress: recalcProgress(updatedSkills),
+    });
+  },
+});
+
+export const adminRemoveSkill = mutation({
+  args: { roadmapId: v.id("skillRoadmaps"), skillId: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const roadmap = await ctx.db.get(args.roadmapId);
+    if (!roadmap) throw new Error("Roadmap tidak ditemukan");
+    const updated = roadmap.skills.filter((s) => s.id !== args.skillId);
+    await ctx.db.patch(args.roadmapId, {
+      skills: updated,
+      progress: recalcProgress(updated),
+    });
+  },
+});
+
+// ---- Roadmap Template admin CRUD ----
+// Validator + domain whitelist live in roadmap/schema.ts so the publish
+// mutation can reuse exactly the same shape (one source of truth).
+
+export const adminUpsertTemplate = mutation({
+  args: {
+    id: v.optional(v.id("roadmapTemplates")),
+    ...templateInputFields,
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const meta = validateTemplateMeta(args);
+
+    const payload = {
+      ...meta,
+      domain: args.domain,
+      nodes: args.nodes,
+      isPublic: args.isPublic,
+      isSystem: args.isSystem,
+      order: args.order,
+      ...(args.manifest ? { manifest: args.manifest } : {}),
+      ...(args.config ? { config: args.config } : {}),
+    };
+
+    if (args.id) {
+      const existing = await ctx.db.get(args.id);
+      if (!existing) throw new Error("Template tidak ditemukan");
+      await ctx.db.patch(args.id, payload);
+      return args.id;
+    }
+
+    const dup = await ctx.db
+      .query("roadmapTemplates")
+      .withIndex("by_slug", (q) => q.eq("slug", meta.slug))
+      .first();
+    if (dup) throw new Error(`Slug "${meta.slug}" sudah dipakai`);
+
+    return ctx.db.insert("roadmapTemplates", payload);
+  },
+});
+
+export const adminDeleteTemplate = mutation({
+  args: { id: v.id("roadmapTemplates") },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const tpl = await ctx.db.get(args.id);
+    if (!tpl) throw new Error("Template tidak ditemukan");
+    if (tpl.isSystem) throw new Error("Template sistem tidak bisa dihapus");
+    await ctx.db.delete(args.id);
+  },
+});
+
+export const adminToggleTemplatePublic = mutation({
+  args: { id: v.id("roadmapTemplates"), isPublic: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const tpl = await ctx.db.get(args.id);
+    if (!tpl) throw new Error("Template tidak ditemukan");
+    await ctx.db.patch(args.id, { isPublic: args.isPublic });
+  },
+});
+
+/**
+ * Bulk import templates from JSON. Mirrors `adminUpsertTemplate` validation
+ * but applies it per-row, collecting failures instead of aborting the whole
+ * batch. Looks up by `slug` (idempotent re-runs). When `overwrite=false`,
+ * existing slugs are skipped; when `overwrite=true`, full payload is patched.
+ */
+export const adminBulkUpsertTemplates = mutation({
+  args: {
+    templates: v.array(v.object(templateInputFields)),
+    overwrite: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    if (args.templates.length > 200) throw new Error("Maksimal 200 template per impor");
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors: Array<{ slug: string; message: string }> = [];
+
+    for (const raw of args.templates) {
+      try {
+        const meta = validateTemplateMeta(raw);
+        const payload = {
+          ...meta,
+          domain: raw.domain,
+          nodes: raw.nodes,
+          isPublic: raw.isPublic,
+          isSystem: raw.isSystem,
+          order: raw.order,
+          ...(raw.manifest ? { manifest: raw.manifest } : {}),
+          ...(raw.config ? { config: raw.config } : {}),
+        };
+
+        const existing = await ctx.db
+          .query("roadmapTemplates")
+          .withIndex("by_slug", (q) => q.eq("slug", meta.slug))
+          .first();
+
+        if (existing) {
+          if (args.overwrite) {
+            await ctx.db.patch(existing._id, payload);
+            updated++;
+          } else {
+            skipped++;
+          }
+        } else {
+          await ctx.db.insert("roadmapTemplates", payload);
+          inserted++;
+        }
+      } catch (err) {
+        errors.push({
+          slug: raw.slug || "(kosong)",
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    return { inserted, updated, skipped, failed: errors.length, errors };
+  },
+});
+
+/**
+ * Bulk-delete error log rows. Two modes:
+ *   - `olderThanMs`  → delete rows with `timestamp < now - olderThanMs`
+ *   - `source`       → delete all rows matching that source
+ * If both are passed, both filters are AND-combined. If neither is
+ * passed, deletes everything older than 30 days as a safety default.
+ *
+ * Capped at 1000 deletes per call so the mutation finishes within
+ * Convex's per-mutation budget. Returns `{ deleted, hasMore }`; admin
+ * can re-call to keep clearing.
+ */
+export const clearErrorLogs = mutation({
+  args: {
+    olderThanMs: v.optional(v.number()),
+    source: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const now = Date.now();
+    const cutoff = now - (args.olderThanMs ?? 30 * 24 * 60 * 60 * 1000);
+
+    const candidates = await ctx.db
+      .query("errorLogs")
+      .withIndex("by_time", (q) => q.lt("timestamp", cutoff))
+      .order("desc")
+      .take(1001);
+
+    const matching = args.source
+      ? candidates.filter((c) => c.source === args.source)
+      : candidates;
+
+    const toDelete = matching.slice(0, 1000);
+    for (const row of toDelete) {
+      await ctx.db.delete(row._id);
+    }
+    return { deleted: toDelete.length, hasMore: matching.length > 1000 };
+  },
+});
+
+export const adminSeedDefaultTemplates = mutation({
+  args: { overwrite: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    let inserted = 0;
+    let skipped = 0;
+
+    for (const tpl of defaultRoadmapTemplates) {
+      const existing = await ctx.db
+        .query("roadmapTemplates")
+        .withIndex("by_slug", (q) => q.eq("slug", tpl.slug))
+        .first();
+
+      if (existing) {
+        if (args.overwrite) {
+          await ctx.db.patch(existing._id, { ...tpl, isSystem: true });
+          inserted++;
+        } else {
+          skipped++;
+        }
+        continue;
+      }
+
+      await ctx.db.insert("roadmapTemplates", { ...tpl, isSystem: true });
+      inserted++;
+    }
+
+    return { inserted, skipped };
+  },
+});
+
+/**
+ * Bootstrap (or refresh) the per-country document templates from the
+ * in-repo seed catalog. Idempotent: matches by `country`, patches
+ * existing rows if seed content changed, inserts only missing rows.
+ * Admin-only.
+ */
+export const adminSeedDocumentTemplates = mutation({
+  args: { overwrite: v.optional(v.boolean()) },
+  returns: v.object({
+    inserted: v.number(),
+    updated: v.number(),
+    skipped: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    for (const country of DOCUMENT_SEED_BY_COUNTRY) {
+      const existing = await ctx.db
+        .query("documentTemplates")
+        .withIndex("by_country", (q) => q.eq("country", country.country))
+        .first();
+
+      if (existing) {
+        const sigOld = JSON.stringify({
+          documents: existing.documents,
+          description: existing.description,
+          flag: existing.flag,
+          countryLabel: existing.countryLabel,
+        });
+        const sigNew = JSON.stringify({
+          documents: country.documents,
+          description: country.description,
+          flag: country.flag,
+          countryLabel: country.countryLabel,
+        });
+        if (sigOld !== sigNew || args.overwrite) {
+          await ctx.db.patch(existing._id, {
+            country: country.country,
+            countryLabel: country.countryLabel,
+            flag: country.flag,
+            description: country.description,
+            documents: country.documents,
+            isSystem: true,
+          });
+          updated++;
+        } else {
+          skipped++;
+        }
+        continue;
+      }
+
+      await ctx.db.insert("documentTemplates", {
+        country: country.country,
+        countryLabel: country.countryLabel,
+        flag: country.flag,
+        description: country.description,
+        documents: country.documents,
+        isSystem: true,
+      });
+      inserted++;
+    }
+
+    return { inserted, updated, skipped };
+  },
+});
+
+/**
+ * Stats for the Admin Engine Seed panel — quick badge counts for
+ * each seeded catalog so the operator sees current population before
+ * deciding to re-run a seed.
+ */
+export const adminGetSeedStats = query({
+  args: {},
+  returns: v.object({
+    careerNodeCount: v.number(),
+    careerEdgeCount: v.number(),
+    documentTemplateCount: v.number(),
+    roadmapTemplateCount: v.number(),
+    expected: v.object({
+      careerNodes: v.number(),
+      documentTemplates: v.number(),
+    }),
+  }),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const [nodes, edges, docs, roadmaps] = await Promise.all([
+      ctx.db.query("careerNodes").collect(),
+      ctx.db.query("careerEdges").collect(),
+      ctx.db.query("documentTemplates").collect(),
+      ctx.db.query("roadmapTemplates").collect(),
+    ]);
+    return {
+      careerNodeCount: nodes.length,
+      careerEdgeCount: edges.length,
+      documentTemplateCount: docs.length,
+      roadmapTemplateCount: roadmaps.length,
+      expected: {
+        careerNodes: 29,
+        documentTemplates: DOCUMENT_SEED_BY_COUNTRY.length,
+      },
+    };
+  },
+});
