@@ -135,7 +135,7 @@ export const getProfileCompleteness = query({
         points: 20,
         done: !!cv,
         hint: "Buat atau import CV di CV Generator",
-        href: "/dashboard/cv-generator",
+        href: "/dashboard/cv",
       },
       {
         id: "portfolio",
@@ -285,7 +285,8 @@ export const _getCompactUserContext = internalQuery({
         Math.max(1, interviews.filter((i) => typeof i.overallScore === "number").length);
       lines.push(
         `Mock interview: ${completed} selesai dari ${interviews.length} sesi, terakhir role "${last.role}"${
-          Number.isFinite(avgScore) && avgScore > 0 ? `, skor rata-rata ${avgScore.toFixed(1)}/10` : ""
+          // overallScore is stored 0-100, not 0-10.
+          Number.isFinite(avgScore) && avgScore > 0 ? `, skor rata-rata ${Math.round(avgScore)}%` : ""
         }`,
       );
     }

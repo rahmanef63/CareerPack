@@ -100,7 +100,10 @@ export function GamificationPanel({ stats, domainLabel }: GamificationPanelProps
         <div className="grid grid-cols-3 gap-2">
           <StatPip icon={Trophy} label="Selesai" value={`${completed}/${total}`} accent={theme.accentText} />
           <StatPip icon={Sparkles} label="Total XP" value={xp.toLocaleString()} accent={theme.accentText} />
-          <StatPip icon={Star} label="Domain" value={String(stats.domains)} accent={theme.accentText} />
+          {/* Was "Domain": every skill in a roadmap is seeded with the same
+              category (the careerPath slug), so the distinct-domain count
+              could only ever read 0 or 1. Streak is a real number. */}
+          <StatPip icon={Star} label="Runtutan" value={`${stats.streak} hari`} accent={theme.accentText} />
         </div>
 
         {/* Achievements ribbon */}

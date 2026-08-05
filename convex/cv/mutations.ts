@@ -126,6 +126,7 @@ type CVUpdates = {
     showAge?: boolean;
     showGraduationYear?: boolean;
     templateId?: string;
+    accentColor?: string;
   };
 };
 
@@ -260,6 +261,7 @@ export const updateCV = mutation({
         showAge: v.optional(v.boolean()),
         showGraduationYear: v.optional(v.boolean()),
         templateId: v.optional(v.string()),
+        accentColor: v.optional(v.string()),
       })),
       experience: v.optional(v.array(v.object({
         id: v.string(),

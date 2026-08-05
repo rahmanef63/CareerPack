@@ -20,6 +20,7 @@ export interface DemoAgendaItem {
   location: string;
   type: DemoAgendaType;
   notes?: string;
+  reminderMinutes?: number;
 }
 
 interface AgendaHook {
@@ -40,6 +41,7 @@ function agendaFromSeed(s: DemoAgendaSeed, now: number): DemoAgendaItem {
     location: s.location,
     type: s.type,
     notes: s.notes,
+    reminderMinutes: s.reminderMinutes,
   };
 }
 
@@ -69,6 +71,9 @@ export function useDemoAgendaOverlay(): AgendaHook {
           location: input.location,
           type: input.type,
           notes: input.notes,
+          // Was dropped on the floor, so the Pengingat picker did nothing at
+          // all in demo mode.
+          reminderMinutes: input.reminderMinutes,
         },
       ]);
       notify.success("Tersimpan di mode demo (lokal)");
@@ -94,6 +99,9 @@ export function useDemoAgendaOverlay(): AgendaHook {
           if (patch.location !== undefined) next.location = patch.location;
           if (patch.type !== undefined) next.type = patch.type;
           if (patch.notes !== undefined) next.notes = patch.notes;
+          if (patch.reminderMinutes !== undefined) {
+            next.reminderMinutes = patch.reminderMinutes || undefined;
+          }
           if (patch.date !== undefined) {
             next.dateOffsetDays = Math.round(
               (new Date(patch.date).getTime() - Date.now()) / DAY,

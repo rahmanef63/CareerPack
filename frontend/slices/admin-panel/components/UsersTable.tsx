@@ -214,6 +214,17 @@ export function UsersTable() {
       align: "right",
     },
     {
+      id: "lastActiveAt",
+      header: "Aktif Terakhir",
+      accessor: (r) => r.lastActiveAt ?? 0,
+      cell: (r) => (
+        <span className="text-xs text-muted-foreground">
+          {r.lastActiveAt ? formatDate(r.lastActiveAt) : "—"}
+        </span>
+      ),
+      align: "right",
+    },
+    {
       id: "actions",
       header: "",
       accessor: () => "",

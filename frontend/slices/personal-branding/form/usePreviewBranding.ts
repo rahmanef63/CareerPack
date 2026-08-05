@@ -3,8 +3,36 @@
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import {
+  useDemoCVOverlay,
+  useDemoPortfolioOverlay,
+  useDemoProfileOverlay,
+  useIsDemo,
+} from "@/shared/hooks/useDemoOverlay";
 import type { BrandingPayload } from "../themes";
 import type { FormState } from "./types";
+
+/** The subset of a CV this preview reads, in the Convex doc's vocabulary.
+ *  Both the server doc and the demo overlay are normalised into it. */
+interface PreviewCv {
+  personalInfo?: { summary?: string };
+  skills?: Array<{ name?: string }>;
+  experience?: Array<{
+    company?: string; position?: string; startDate?: string;
+    endDate?: string; current?: boolean; description?: string;
+    achievements?: string[];
+  }>;
+  education?: Array<{
+    institution?: string; degree?: string; field?: string;
+    startDate?: string; endDate?: string; gpa?: string;
+  }>;
+  certifications?: Array<{ name?: string; issuer?: string; date?: string }>;
+  projects?: Array<{
+    name?: string; description?: string;
+    technologies?: string[]; link?: string;
+  }>;
+  languages?: Array<{ language?: string; proficiency?: string }>;
+}
 
 /**
  * Build the same `BrandingPayload` the iframe templates consume.
@@ -17,17 +45,61 @@ import type { FormState } from "./types";
 export function usePreviewBranding(state: FormState):
   | { branding: BrandingPayload }
   | undefined {
-  const me = useQuery(api.profile.queries.getCurrentUser);
-  const cvs = useQuery(api.cv.queries.getUserCVs);
-  const portfolio = useQuery(api.portfolio.queries.listPortfolio);
+  // A demo session keeps profile/CV/portfolio in localStorage overlays, so
+  // querying Convex here returned nothing and the preview rendered an empty
+  // "Nama Anda" card right next to a form full of demo data.
+  const isDemo = useIsDemo();
+  const serverMe = useQuery(api.profile.queries.getCurrentUser, isDemo ? "skip" : {});
+  const serverCvs = useQuery(api.cv.queries.getUserCVs, isDemo ? "skip" : {});
+  const serverPortfolio = useQuery(api.portfolio.queries.listPortfolio, isDemo ? "skip" : {});
+  const demoProfile = useDemoProfileOverlay();
+  const demoCV = useDemoCVOverlay();
+  const demoPortfolio = useDemoPortfolioOverlay();
 
-  const defaultCv = useMemo(() => {
-    if (!cvs || cvs.length === 0) return null;
+  const me = useMemo(() => {
+    if (!isDemo) return serverMe;
+    const p = demoProfile.profile;
+    return {
+      name: p.fullName,
+      avatarUrl: null,
+      profile: {
+        fullName: p.fullName,
+        bio: p.bio,
+        skills: p.skills,
+        targetRole: p.targetRole,
+        location: p.location,
+      },
+    };
+  }, [isDemo, serverMe, demoProfile.profile]);
+
+  const portfolio = isDemo ? demoPortfolio.items : serverPortfolio;
+
+  const defaultCv = useMemo<PreviewCv | null>(() => {
+    // The demo CV is the frontend `CVData` shape, which names a few fields
+    // differently from the Convex doc (fieldOfStudy vs field, profile.summary
+    // vs personalInfo.summary, and no languages at all) — normalise once here
+    // so the payload builder below stays single-path.
+    if (isDemo) {
+      const d = demoCV.cvData;
+      if (!d) return null;
+      return {
+        personalInfo: { summary: d.profile?.summary ?? "" },
+        skills: d.skills,
+        experience: d.experience.map((e) => ({ ...e, current: !e.endDate })),
+        education: d.education.map((e) => ({ ...e, field: e.fieldOfStudy })),
+        certifications: d.certifications,
+        projects: d.projects,
+        languages: [],
+      };
+    }
+    if (!serverCvs || serverCvs.length === 0) return null;
     // Mirror getProfileBySlug (`.order("desc").first()`): newest CV wins.
     // Was ranking by richness, which made the editor preview show a
     // different CV than the published page for users with 2+ CVs.
-    return [...cvs].sort((a, b) => b._creationTime - a._creationTime)[0];
-  }, [cvs]);
+    return [...serverCvs].sort(
+      (a, b) => b._creationTime - a._creationTime,
+    )[0] as PreviewCv;
+  }, [isDemo, demoCV.cvData, serverCvs]);
 
   return useMemo(() => {
     if (!me || !portfolio) return undefined;

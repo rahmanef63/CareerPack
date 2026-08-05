@@ -37,6 +37,9 @@ function initials(name: string): string {
 
 interface ContactCardProps {
   contact: Contact;
+  /** Rendered next to the favourite star. Optional so the carousel can omit
+   *  it without growing a second layout. */
+  editTrigger?: React.ReactNode;
   onToggleFavorite: () => void;
   onDelete: () => void;
   onInteract: (channel: "email" | "phone" | "linkedin") => void;
@@ -45,6 +48,7 @@ interface ContactCardProps {
 
 export function ContactCard({
   contact: c,
+  editTrigger,
   onToggleFavorite,
   onDelete,
   onInteract,
@@ -78,6 +82,7 @@ export function ContactCard({
             <h3 className="line-clamp-1 font-semibold text-foreground">
               {c.name}
             </h3>
+            {editTrigger}
             <Button
               type="button"
               variant="ghost"

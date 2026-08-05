@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { api } from "../../../../convex/_generated/api";
-import type { AgentAction } from "@/shared/types/agent";
 import {
-  type ChatSession, type Message, MIGRATION_DONE_KEY, STORAGE_KEY,
+  type ChatSession, type Message, type StoredAction,
+  MIGRATION_DONE_KEY, STORAGE_KEY,
   loadSessions, newSession,
 } from "../types/console";
 
@@ -143,7 +143,13 @@ export function useSessionSync() {
             text: m.content,
             ts: m.timestamp,
             actions: m.actions?.map(
-              (a) => ({ type: a.type, payload: a.payload }) as AgentAction,
+              (a) =>
+                ({
+                  type: a.type,
+                  payload: a.payload,
+                  // Dropping this on rehydrate is what re-armed resolved cards.
+                  status: a.status,
+                }) as StoredAction,
             ),
           }));
         if (s.messages.length === 0 && serverMsgs.length > 0) {
@@ -183,7 +189,9 @@ export function useSessionSync() {
             actions: m.actions?.map((a) => ({
               type: a.type,
               payload: a.payload,
-              status: "pending" as const,
+              // Was hardcoded "pending", which overwrote the resolution on
+              // every debounced write.
+              status: a.status ?? ("pending" as const),
             })),
           })),
         }).catch((e) => {

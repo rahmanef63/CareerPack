@@ -477,6 +477,10 @@ export const listUsersWithProfiles = query({
           interestsCount: p?.interests?.length ?? 0,
           publicEnabled: Boolean(p?.publicEnabled),
           hasAvatar: Boolean(p?.avatarStorageId),
+          // Written by the auth heartbeat every 5 min but never surfaced —
+          // the admin table could show when someone signed up and nothing
+          // about whether they still use the product.
+          lastActiveAt: p?.lastActiveAt ?? null,
         };
       }),
     );

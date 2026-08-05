@@ -10,6 +10,9 @@ import type { CVFormat } from "../constants";
 export function useCVHandlers(
   setCvData: Dispatch<SetStateAction<CVData>>,
   setFormat: Dispatch<SetStateAction<CVFormat>>,
+  /** Current form state — the AI-suggestion chips need to know whether the
+   *  field they target is already filled before claiming they applied one. */
+  cvData: CVData,
 ) {
   const handlePhotoUploaded = (result: { storageId: string }) => {
     // Storage source supersedes any prior URL — clear avatarUrl so
@@ -60,13 +63,19 @@ export function useCVHandlers(
     }));
   };
 
+  // These chips insert a canned starter line, and the `||` means they do
+  // nothing at all once the field has text — but they still toasted success,
+  // so the user was told a suggestion had been applied while nothing changed.
   const aiSuggestSummary = () => {
+    if (cvData.profile.summary.trim()) {
+      notify.info('Ringkasan sudah terisi — kosongkan dulu untuk memakai saran');
+      return;
+    }
     setCvData(prev => ({
       ...prev,
       profile: {
         ...prev.profile,
         summary:
-          prev.profile.summary ||
           'Profesional muda dengan etos kerja kuat, fokus pada problem solving dan kolaborasi tim. Berorientasi pada dampak terukur dan pengembangan diri berkelanjutan.',
       },
     }));
@@ -74,6 +83,10 @@ export function useCVHandlers(
   };
 
   const aiSuggestExperienceDesc = (id: string) => {
+    if (cvData.experience.find(e => e.id === id)?.description.trim()) {
+      notify.info('Deskripsi sudah terisi — kosongkan dulu untuk memakai saran');
+      return;
+    }
     setCvData(prev => ({
       ...prev,
       experience: prev.experience.map(e =>
@@ -81,7 +94,6 @@ export function useCVHandlers(
           ? {
               ...e,
               description:
-                e.description ||
                 'Memimpin inisiatif end-to-end yang menghasilkan peningkatan efisiensi 30%. Berkolaborasi lintas tim untuk mendelivery fitur tepat waktu dengan kualitas tinggi.',
             }
           : e,

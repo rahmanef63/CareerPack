@@ -22,17 +22,17 @@ interface ApplicationKanbanProps {
 }
 
 /**
- * Drag-drop kanban — five visible columns (skips "withdrawn" — rare,
- * showed as inline badge on the rejected card if present). Uses
- * native HTML5 drag events to avoid a react-dnd dependency.
+ * Drag-drop kanban. Uses native HTML5 drag events to avoid a react-dnd
+ * dependency.
+ *
+ * Derived from STATUS_META so it can never again fall behind the status
+ * vocabulary: this was a hand-written five-entry list, and the two statuses
+ * missing from it ("accepted", "withdrawn") rendered in no column at all —
+ * the card silently vanished while the counters kept counting it. The old
+ * doc comment here claimed withdrawn showed "as an inline badge on the
+ * rejected card"; no such badge ever existed.
  */
-const COLUMN_ORDER: ApplicationStatus[] = [
-  "applied",
-  "screening",
-  "interview",
-  "offer",
-  "rejected",
-];
+const COLUMN_ORDER = Object.keys(STATUS_META) as ApplicationStatus[];
 
 export function ApplicationKanban({
   applications,

@@ -59,15 +59,12 @@ export function ModelPicker({ spec, value, onChange, inputId }: ModelPickerProps
     }
   }, [fetchModels]);
 
-  // At most one automatic fetch per mount. `listOpenRouterModels` runs through
-  // `requireQuota`, so re-fetching every time the provider select bounces back
-  // to OpenRouter would spend the user's 10/min AI budget on a dropdown.
-  const autoLoaded = useRef(false);
-  useEffect(() => {
-    if (!live || autoLoaded.current) return;
-    autoLoaded.current = true;
-    void load();
-  }, [live, load]);
+  // No automatic fetch: `listOpenRouterModels` goes through `requireQuota`,
+  // so merely OPENING Setelan → AI spent one of the user's 10/min AI calls to
+  // populate a dropdown they may never touch. `slugStatus` degrades to
+  // "unverifiable" with a null catalog and the datalist still offers
+  // `spec.models`, so the only cost is that "✓ Slug valid" waits for the
+  // explicit "Muat ulang" click.
 
   // Kept in state across a provider switch but only consulted while the
   // catalog belongs to the selected provider — otherwise "✓ Slug valid" would

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useAction } from "convex/react";
 import { notify } from "@/shared/lib/notify";
 import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
@@ -89,8 +89,16 @@ function applyTranslations(cv: CVData, t: Record<string, string>): CVData {
 export function useCVTranslate(source: CVData) {
   const translateAction = useAction(api.cv.actions.translate);
   const [activeLang, setActiveLang] = useState<CVLangCode | null>(null);
-  const [translatedCV, setTranslatedCV] = useState<CVData | null>(null);
+  // Store the translation MAP, not the applied document. Keeping the applied
+  // snapshot froze the preview and the PDF on the CV as it looked at translate
+  // time — every edit made afterwards was invisible until the user reverted.
+  const [translations, setTranslations] = useState<Record<string, string> | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  const translatedCV = useMemo(
+    () => (translations ? applyTranslations(source, translations) : null),
+    [source, translations],
+  );
 
   const translate = useCallback(
     async (lang: CVLangCode) => {
@@ -114,8 +122,7 @@ export function useCVTranslate(source: CVData) {
           fields,
           idempotencyKey,
         });
-        const next = applyTranslations(source, translations);
-        setTranslatedCV(next);
+        setTranslations(translations);
         setActiveLang(lang);
         notify.success(`CV diterjemahkan ke ${lang.toUpperCase()}`);
       } catch (err) {
@@ -129,7 +136,7 @@ export function useCVTranslate(source: CVData) {
 
   const revert = useCallback(() => {
     setActiveLang(null);
-    setTranslatedCV(null);
+    setTranslations(null);
   }, []);
 
   return {

@@ -129,19 +129,20 @@ export default function DashboardTrendChart({
                 domain={[0, (dataMax: number) => Math.max(dataMax, 3)]}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
+              {/* Overlaid, not stacked: an interview is a lamaran that
+                  progressed, so stacking drew the same event twice and
+                  inflated the weekly total. */}
               <Area
                 dataKey="lamaran"
                 type="monotone"
                 stroke="var(--color-lamaran)"
                 fill="url(#fill-lamaran)"
-                stackId="a"
               />
               <Area
                 dataKey="wawancara"
                 type="monotone"
                 stroke="var(--color-wawancara)"
                 fill="url(#fill-wawancara)"
-                stackId="a"
               />
             </AreaChart>
           </ChartContainer>

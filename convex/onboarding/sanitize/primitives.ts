@@ -6,7 +6,11 @@
 
 export function asString(v: unknown, max = 500): string | null {
   if (typeof v !== "string") return null;
-  const t = v.replace(/[ -]/g, "").trim();
+  // The class below is LITERAL control characters (U+0000-U+001F, U+007F).
+  // Written with escapes on purpose: as raw bytes they render as nothing, so
+  // the line reads like the range [space-hyphen] and has twice been reported
+  // as "strips every space". It does not.
+  const t = v.replace(/[\x00-\x1F\x7F]/g, "").trim();
   if (!t) return null;
   return t.slice(0, max);
 }

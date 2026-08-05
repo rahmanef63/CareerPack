@@ -181,6 +181,18 @@ export function CVTemplateModern({ cv, photoUrl, accent }: Props) {
                     {exp.description && (
                       <p style={{ marginTop: "1mm", textAlign: "justify" }}>{exp.description}</p>
                     )}
+                    {/* This template rendered only the description, so every
+                        achievement bullet — including the ones the AI rewrite
+                        had just produced — vanished from preview and PDF the
+                        moment the user switched to it. `listStyle: "disc"` is
+                        load-bearing: Tailwind preflight strips list markers. */}
+                    {exp.achievements.length > 0 && (
+                      <ul style={{ marginTop: "1mm", paddingLeft: "5mm", listStyle: "disc" }}>
+                        {exp.achievements.map((a, i) => (
+                          <li key={i}>{a}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </div>

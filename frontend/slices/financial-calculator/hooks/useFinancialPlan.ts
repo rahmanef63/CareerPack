@@ -123,21 +123,34 @@ export function useFinancialPlan() {
     const writePlan = () => {
       const valueOf = (v: BudgetVar) =>
         v._id in localValues ? localValues[v._id] : v.value;
-      const bucketize = (kind: string) =>
-        sortedVars
-          .filter((v) => v.label.toLowerCase().includes(kind))
-          .reduce((s, v) => s + valueOf(v), 0);
+      // Bucket on `iconName`, a field the row actually carries, with every
+      // unmatched expense falling into `others` so the breakdown always sums
+      // to totalExpenses.
+      //
+      // This used to substring-match hardcoded Indonesian seed words against
+      // the label: "Tempat Tinggal/Sewa" matched BOTH "tempat" and "sewa" so
+      // housing double-counted, "Utilitas" matched none of listrik/air/internet
+      // so utilities was always 0, `others` was pinned to 0, and any renamed or
+      // user-created envelope dropped out of the plan entirely.
+      const expenses = {
+        housing: 0, food: 0, transportation: 0,
+        utilities: 0, entertainment: 0, others: 0,
+      };
+      const BUCKET_BY_ICON: Record<string, keyof typeof expenses> = {
+        Home: "housing",
+        Utensils: "food",
+        Car: "transportation",
+        Zap: "utilities",
+        Film: "entertainment",
+      };
+      for (const v of sortedVars) {
+        if (v.kind !== "expense") continue;
+        expenses[BUCKET_BY_ICON[v.iconName] ?? "others"] += valueOf(v);
+      }
       savePlan({
         type: "salary",
         targetSalary: monthlyIncome,
-        expenses: {
-          housing: bucketize("tempat") + bucketize("sewa") + bucketize("kos"),
-          food: bucketize("makan"),
-          transportation: bucketize("transport"),
-          utilities: bucketize("listrik") + bucketize("air") + bucketize("internet"),
-          entertainment: bucketize("hiburan"),
-          others: 0,
-        },
+        expenses,
         timeline: 12,
       }).catch(() => {});
     };

@@ -324,8 +324,11 @@ export function PortfolioView() {
       </Tabs>
 
       {/* Detail dialog */}
+      {/* Re-resolve from the live list: `detailItem` is a snapshot taken when
+          the card was clicked, so starring from inside the dialog updated the
+          grid behind it while the dialog itself stayed stale. */}
       <PortfolioDetailDialog
-        item={detailItem}
+        item={detailItem ? (items.find((i) => i._id === detailItem._id) ?? detailItem) : null}
         open={!!detailItem}
         onOpenChange={(o) => { if (!o) setDetailItem(null); }}
         onEdit={(item) => {

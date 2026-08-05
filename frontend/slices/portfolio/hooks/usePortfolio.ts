@@ -14,22 +14,28 @@ function valuesToPayload(values: PortfolioFormValues) {
     category: values.category,
     coverEmoji: values.coverEmoji || undefined,
     coverGradient: values.coverGradient || undefined,
-    media: values.media.length > 0 ? values.media.map((m) => ({
+    // Send the real values, empty or not. Collapsing empties to `undefined`
+    // here meant the update mutation read them as "field omitted, leave
+    // unchanged" — so media, links, outcomes, skills, collaborators, role,
+    // client and duration could be added but never removed. The backend
+    // already normalises an empty array/string back to `undefined` before
+    // storing (convex/portfolio/mutations.ts), so nothing downstream changes.
+    media: values.media.map((m) => ({
       storageId: m.storageId,
       kind: m.kind,
       caption: m.caption,
-    })) : undefined,
-    link: values.link.trim() || undefined,
-    links: values.links.length > 0 ? values.links : undefined,
+    })),
+    link: values.link.trim(),
+    links: values.links,
     techStack: values.techStack.filter((s) => s.trim().length > 0),
     date: values.date,
     featured: values.featured,
-    role: values.role.trim() || undefined,
-    client: values.client.trim() || undefined,
-    duration: values.duration.trim() || undefined,
-    outcomes: values.outcomes.length > 0 ? values.outcomes : undefined,
-    collaborators: values.collaborators.length > 0 ? values.collaborators : undefined,
-    skills: values.skills.length > 0 ? values.skills : undefined,
+    role: values.role.trim(),
+    client: values.client.trim(),
+    duration: values.duration.trim(),
+    outcomes: values.outcomes,
+    collaborators: values.collaborators,
+    skills: values.skills,
     brandingShow: values.brandingShow,
   };
 }
@@ -91,8 +97,14 @@ export function usePortfolio() {
   if (isDemo) {
     return {
       ...demo,
-      update: async () => undefined,
-      bulkRemove: async () => undefined,
+      // `update` and `bulkRemove` used to be hardcoded no-ops here while the
+      // caller still toasted success — a guest edited an item, saw "Portofolio
+      // diperbarui", and the card did not move. The overlay's own `update`
+      // and `remove` work fine, so just use them.
+      bulkRemove: async (ids: PortfolioItemId[]) => {
+        for (const id of ids) await demo.remove(id);
+      },
+      // Branding visibility genuinely has no demo surface to reflect it.
       toggleBranding: async () => undefined,
     };
   }

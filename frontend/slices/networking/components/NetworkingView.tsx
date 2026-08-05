@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Sparkles, Users } from "lucide-react";
+import { Pencil, Plus, Sparkles, Users } from "lucide-react";
 
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
@@ -18,17 +18,35 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import { useNetworking } from "../hooks/useNetworking";
-import type { ContactFilter, ContactRole } from "../types";
+import type { Contact, ContactFilter, ContactFormValues, ContactRole } from "../types";
 import { ROLE_LABELS } from "../constants";
 import { ContactCard } from "./ContactCard";
 import { ContactForm } from "./ContactForm";
 import { PageContainer } from '@/shared/components/layout/PageContainer';
+
+/** Contact doc → editable form values. */
+function contactToForm(c: Contact): ContactFormValues {
+  return {
+    name: c.name,
+    role: c.role as ContactRole,
+    company: c.company ?? "",
+    position: c.position ?? "",
+    email: c.email ?? "",
+    phone: c.phone ?? "",
+    linkedinUrl: c.linkedinUrl ?? "",
+    notes: c.notes ?? "",
+    avatarEmoji: c.avatarEmoji ?? "",
+    avatarHue: c.avatarHue ?? "",
+    favorite: Boolean(c.favorite),
+  };
+}
 
 export function NetworkingView() {
   const {
     contacts,
     isLoading,
     create,
+    update,
     remove,
     toggleFavorite,
     bumpInteraction,
@@ -207,6 +225,23 @@ export function NetworkingView() {
                   <ContactCard
                     key={c._id}
                     contact={c}
+                    editTrigger={
+                      <ContactForm
+                        initial={contactToForm(c)}
+                        onSubmit={async (v) => { await update(c._id, v); }}
+                        trigger={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 shrink-0"
+                            aria-label={`Ubah kontak ${c.name}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                    }
                     onToggleFavorite={() => toggleFavorite(c._id)}
                     onDelete={() => remove(c._id)}
                     onInteract={() => bumpInteraction(c._id)}

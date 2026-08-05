@@ -189,7 +189,10 @@ export function BudgetTab(props: Props) {
                     <Slider
                       value={[current]}
                       onValueChange={([value]) => handleSliderChange(v._id, value)}
-                      max={10000000}
+                      // Ceiling follows the row's own value — the form accepts
+                      // up to 1 miliar, so a fixed 10jt cap silently truncated
+                      // any larger envelope on the first drag.
+                      max={Math.max(10_000_000, Math.ceil(current / 1_000_000) * 1_000_000)}
                       step={100000}
                       className="w-full"
                     />

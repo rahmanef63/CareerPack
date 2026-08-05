@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { notify } from "@/shared/lib/notify";
+import { useIsDemo } from "@/shared/hooks/useDemoOverlay";
 import { useState, type ReactNode } from "react";
 import type {
   ColumnDef,
@@ -109,6 +110,10 @@ export function defineResource<T extends { _id: string }>(
   config: DefineResourceConfig<T>,
 ) {
   const ResourceTab = function ResourceTab() {
+    // Every tab here reads Convex directly, but a demo session keeps its data
+    // in localStorage overlays — so all six tabs render empty with the generic
+    // "belum ada data" copy, and Import writes rows the guest can never see.
+    const isDemo = useIsDemo();
     const data = useQuery(config.query) as ReadonlyArray<T> | undefined;
     const bulkDelete = useMutation(config.bulkDelete);
     const quickFill = useMutation(config.quickFill);
@@ -166,8 +171,12 @@ export function defineResource<T extends { _id: string }>(
               ids: ids as unknown as ReadonlyArray<T["_id"]>,
             })) as { deleted: number }
           }
-          onImport={handleImport}
-          emptyMessage={config.emptyMessage}
+          onImport={isDemo ? undefined : handleImport}
+          emptyMessage={
+            isDemo
+              ? "Mode demo menyimpan data di browser, bukan di server — halaman ini kosong. Daftar akun untuk memakai Data Saya."
+              : config.emptyMessage
+          }
           onRowClick={config.relatedDrawer ? setDrawerRow : undefined}
         />
         {config.relatedDrawer && (

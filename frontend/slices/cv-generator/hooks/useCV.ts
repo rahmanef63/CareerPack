@@ -15,12 +15,19 @@ function toTemplateId(value: string | undefined): CVTemplateId {
         : "classic";
 }
 
-function mergePrefs(raw: Doc<"cvs">["displayPrefs"]): CVDisplayPrefs {
+function mergePrefs(
+    raw: Doc<"cvs">["displayPrefs"],
+    // The row's own `template` column is what the AI sets when it creates a CV
+    // ("buat CV minimal"). Ignoring it here made every generated CV render as
+    // Classic regardless of what was asked for.
+    fallbackTemplate?: string,
+): CVDisplayPrefs {
     return {
         showPicture: raw?.showPicture ?? defaultDisplayPrefs.showPicture,
         showAge: raw?.showAge ?? defaultDisplayPrefs.showAge,
         showGraduationYear: raw?.showGraduationYear ?? defaultDisplayPrefs.showGraduationYear,
-        templateId: toTemplateId(raw?.templateId),
+        templateId: toTemplateId(raw?.templateId ?? fallbackTemplate),
+        accentColor: raw?.accentColor,
     };
 }
 
@@ -141,7 +148,7 @@ export function useCV() {
         })),
         certifications: activeCV.certifications || [],
         projects: activeCV.projects || [],
-        displayPrefs: mergePrefs(activeCV.displayPrefs),
+        displayPrefs: mergePrefs(activeCV.displayPrefs, activeCV.template),
     } : null;
 
     const saveCV = useCallback(async (data: CVData) => {
@@ -167,6 +174,9 @@ export function useCV() {
                     showAge: data.displayPrefs.showAge,
                     showGraduationYear: data.displayPrefs.showGraduationYear,
                     templateId: data.displayPrefs.templateId,
+                    // Was dropped here, so the accent picker moved the live
+                    // preview and then reverted on the next reload.
+                    accentColor: data.displayPrefs.accentColor,
                 },
                 experience: data.experience.map((e) => ({
                     id: e.id,

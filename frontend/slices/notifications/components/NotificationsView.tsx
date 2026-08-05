@@ -57,6 +57,7 @@ const TYPE_META: Record<
   application: { icon: FileText, tint: "bg-info/20 text-info" },
   system: { icon: Bell, tint: "bg-muted text-muted-foreground" },
   tip: { icon: Lightbulb, tint: "bg-success/20 text-success" },
+  reminder: { icon: Calendar, tint: "bg-warning/20 text-warning" },
   default: { icon: Bell, tint: "bg-muted text-muted-foreground" },
 };
 
@@ -271,7 +272,10 @@ export function NotificationsView() {
                       Hapus semua notifikasi?
                     </ResponsiveAlertDialogTitle>
                     <ResponsiveAlertDialogDescription>
-                      {notifications.length} notifikasi akan dihapus permanen.
+                      {/* The count was the loaded page, not the total the
+                          mutation deletes — under-reporting the blast radius
+                          of a destructive action. */}
+                      Semua notifikasi akan dihapus permanen.
                     </ResponsiveAlertDialogDescription>
                   </ResponsiveAlertDialogHeader>
                   <ResponsiveAlertDialogFooter>

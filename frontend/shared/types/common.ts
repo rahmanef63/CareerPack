@@ -19,7 +19,10 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type SkillDifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
 
 // Application status
-export type ApplicationStatus = 'applied' | 'screening' | 'interview' | 'offer' | 'rejected' | 'withdrawn';
+// `accepted` is emitted by the AI agent capability and whitelisted by the
+// backend (convex/applications/mutations.ts); leaving it out of the union is
+// what let accepted rows fall through every UI switch.
+export type ApplicationStatus = 'applied' | 'screening' | 'interview' | 'offer' | 'accepted' | 'rejected' | 'withdrawn';
 
 // Document categories
 export type DocumentCategory = 'local' | 'international';

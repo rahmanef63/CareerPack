@@ -5,9 +5,15 @@ import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
 import { cn } from "@/shared/lib/utils";
 import { ApproveActionCard } from "../ApproveActionCard";
 import { AIProgressDisplay } from "./AIProgressDisplay";
-import type { Message } from "../../types/console";
+import type { ActionStatus, Message } from "../../types/console";
 
-export function MessageBubble({ msg }: { msg: Message }) {
+interface MessageBubbleProps {
+  msg: Message;
+  /** Persists the user's decision so the card stays resolved across reloads. */
+  onActionResolved?: (messageId: string, index: number, status: ActionStatus) => void;
+}
+
+export function MessageBubble({ msg, onActionResolved }: MessageBubbleProps) {
   const isUser = msg.role === "user";
   return (
     <div className={cn("flex gap-2", isUser ? "justify-end" : "justify-start")}>
@@ -44,7 +50,14 @@ export function MessageBubble({ msg }: { msg: Message }) {
         {msg.actions && msg.actions.length > 0 && (
           <div className="space-y-2 w-full max-w-[85%]">
             {msg.actions.map((a, i) => (
-              <ApproveActionCard key={`${msg.id}-${i}`} action={a} />
+              <ApproveActionCard
+                key={`${msg.id}-${i}`}
+                action={a}
+                status={a.status}
+                onResolved={(applied) =>
+                  onActionResolved?.(msg.id, i, applied ? "approved" : "rejected")
+                }
+              />
             ))}
           </div>
         )}

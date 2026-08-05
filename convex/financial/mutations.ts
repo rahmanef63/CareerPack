@@ -89,7 +89,9 @@ export const createOrUpdateFinancialPlan = mutation({
     const timeline = args.timeline;
 
     const totalExpenses = Object.values(expenses).reduce((sum, exp) => sum + exp, 0);
-    const monthlyNet = targetSalary / 12 - totalExpenses;
+    // targetSalary is already monthly on every write path — the /12 here
+    // pinned readinessScore at 0 for everyone.
+    const monthlyNet = targetSalary - totalExpenses;
     const relocationTotal = relocationCosts
       ? Object.values(relocationCosts).reduce((sum, cost) => sum + cost, 0)
       : 0;

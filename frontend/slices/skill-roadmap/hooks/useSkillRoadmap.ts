@@ -42,6 +42,7 @@ export function useSkillRoadmap() {
   const seedRoadmap = useMutation(api.roadmap.mutations.seedRoadmap);
   const updateSkillProgress = useMutation(api.roadmap.mutations.updateSkillProgress);
   const removeSavedTemplate = useMutation(api.roadmap.saved.removeSavedTemplate);
+  const resetRoadmap = useMutation(api.roadmap.mutations.resetRoadmap);
 
   // Track which roadmap _id we've hydrated completedNodes from — only
   // re-snap the local set when the underlying doc identity changes.
@@ -49,6 +50,8 @@ export function useSkillRoadmap() {
   // In-flight seed slug — suppresses re-fire of the seed effect while
   // a seed is mid-flight (Convex roadmap update arrives async).
   const seedingSlug = useRef<string | null>(null);
+  // Deferred side effect for a switch awaiting confirmation (e.g. tab change).
+  const pendingAfter = useRef<(() => void) | null>(null);
 
   // Hydrate activeSlug once roadmap doc resolves
   useEffect(() => {
@@ -82,7 +85,13 @@ export function useSkillRoadmap() {
     if (!activeSlug) return [];
     if (dbTemplate === undefined) return [];
     if (dbTemplate) return buildTreeFromNodes(dbTemplate.nodes);
-    return generateFallbackNodes(activeSlug);
+    // `generateFallbackNodes` only defines frontend + backend and returns the
+    // FRONTEND tree for anything else. So an unpublished or deleted template
+    // silently showed the user a frontend roadmap under someone else's skill
+    // name. Render the existing "pilih skill" empty state instead.
+    return activeSlug === "frontend" || activeSlug === "backend"
+      ? generateFallbackNodes(activeSlug)
+      : [];
   }, [activeSlug, dbTemplate]);
 
   // First-time default: snap to Browse when user has no saved skills.
@@ -304,7 +313,49 @@ export function useSkillRoadmap() {
     return { [activeSlug]: roadmap.progress };
   }, [activeSlug, roadmap]);
 
-  const handleActivateSaved = (slug: string) => setActiveSlug(slug);
+  // Switching the active skill RESEEDS the single roadmap doc (see the seed
+  // effect above), which destroys the previous roadmap's completed nodes, XP
+  // and achievements. There is no undo and the saved-skills grid invites the
+  // click, so confirm first when there is progress to lose. Both entry points
+  // (saved card + browse) route through here.
+  const [pendingSlug, setPendingSlug] = useState<string | null>(null);
+
+  const requestActivate = (slug: string, after?: () => void) => {
+    const losing = activeSlug && activeSlug !== slug && completedNodes.size > 0;
+    if (losing) {
+      pendingAfter.current = after ?? null;
+      setPendingSlug(slug);
+      return;
+    }
+    setActiveSlug(slug);
+    after?.();
+  };
+
+  const confirmActivate = () => {
+    if (pendingSlug) setActiveSlug(pendingSlug);
+    setPendingSlug(null);
+    pendingAfter.current?.();
+    pendingAfter.current = null;
+  };
+
+  const cancelActivate = () => {
+    setPendingSlug(null);
+    pendingAfter.current = null;
+  };
+
+  // "<skillId>|<resourceTitle>" for each resource the user (or the AI skill)
+  // has marked done — the flag is already stored on the roadmap doc.
+  const completedResources = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of roadmap?.skills ?? []) {
+      for (const r of s.resources ?? []) {
+        if (r.completed) set.add(`${s.id}|${r.title}`);
+      }
+    }
+    return set;
+  }, [roadmap]);
+
+  const handleActivateSaved = (slug: string) => requestActivate(slug);
 
   const handleRemoveSaved = (slug: string) => {
     removeSavedTemplate({ slug })
@@ -312,14 +363,16 @@ export function useSkillRoadmap() {
       .catch((err: unknown) => notify.fromError(err, "Gagal menghapus"));
     if (activeSlug === slug) {
       const remaining = savedCards.filter((c) => c.slug !== slug);
+      // Removing the LAST saved skill left the roadmap doc pointing at the
+      // deleted slug, so it reappeared as active after a refresh.
+      if (!remaining[0]) resetRoadmap({}).catch(() => {});
       setActiveSlug(remaining[0]?.slug ?? null);
     }
   };
 
   const handleBrowseSelect = (slug: string) => {
     setSelectedBrowseSlug(slug);
-    setActiveSlug(slug);
-    setActiveTab("my");
+    requestActivate(slug, () => setActiveTab("my"));
   };
 
   return {
@@ -338,6 +391,8 @@ export function useSkillRoadmap() {
     templatesLoading, savedLoading,
     savedCards, progressBySlug,
     handleActivateSaved, handleRemoveSaved, handleBrowseSelect,
+    pendingSlug, confirmActivate, cancelActivate,
+    completedResources,
     toggleNodeCompletion,
   };
 }

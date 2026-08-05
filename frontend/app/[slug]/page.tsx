@@ -168,8 +168,12 @@ export default async function PublicProfilePage({ params }: PageProps) {
   // page. Otherwise fall back to the legacy auto-rendered ProfileView
   // (avatar + bio + skills + portfolio grid). This keeps existing
   // public profiles working while letting new ones go custom.
+  // `blocks` is only populated in custom mode. Gating on it alone meant an
+  // auto-mode user who picked a template got the legacy page on their live
+  // URL while the editor preview showed the template they chose.
   const hasCustomBlocks =
-    Array.isArray(profile.blocks) && profile.blocks.length > 0;
+    profile.mode === "auto" ||
+    (Array.isArray(profile.blocks) && profile.blocks.length > 0);
   if (hasCustomBlocks) {
     return (
       <>

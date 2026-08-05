@@ -1,5 +1,17 @@
 import { asDateMs, asString, optString } from "./primitives";
 
+/** Mirrors `APPLICATION_STATUS_WHITELIST` in convex/applications/mutations.ts.
+ *  An imported row carrying anything else ("Interview", "pending", …) renders
+ *  in no kanban column at all, so it is coerced rather than passed through. */
+const STATUSES = new Set([
+  "applied", "screening", "interview", "offer", "rejected", "withdrawn", "accepted",
+]);
+
+function pickStatus(raw: unknown): string {
+  const s = (asString(raw, 30) ?? "").toLowerCase();
+  return STATUSES.has(s) ? s : "applied";
+}
+
 export interface SanitizedApplication {
   company: string;
   position: string;
@@ -29,7 +41,7 @@ export function sanitizeApplication(raw: unknown): SanitizedApplication | null {
     company,
     position,
     location: asString(r.location, 200) ?? "",
-    status: asString(r.status, 30) ?? "applied",
+    status: pickStatus(r.status),
     appliedDate,
     source: asString(r.source, 60) ?? "manual",
     salary: optString(r.salary, 60),

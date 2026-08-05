@@ -10,11 +10,16 @@ export type NotificationType =
   | "interview"
   | "application"
   | "system"
-  | "tip";
+  | "tip"
+  // Written by the calendar reminder cron — the only production producer of
+  // an "important" notification. Missing here, it fell through to the default
+  // icon and never matched the Penting filter, which stayed permanently empty.
+  | "reminder";
 
 export const IMPORTANT_TYPES: ReadonlyArray<NotificationType> = [
   "deadline",
   "interview",
+  "reminder",
 ];
 
 export interface NotificationGroup {

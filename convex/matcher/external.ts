@@ -219,8 +219,13 @@ function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
   const location = decodeEntities(strField(raw, "location") ?? "Worldwide");
   const applyUrl = strField(raw, "apply_url") ?? strField(raw, "url");
   const companyLogo = strField(raw, "company_logo") ?? strField(raw, "logo");
-  const salaryMin = numField(raw, "salary_min");
-  const salaryMax = numField(raw, "salary_max");
+  // Feeds put anything in these fields — hourly rates, per-year figures with
+  // the currency stripped, plain typos. One row of "35" then became a
+  // "median" on the salary insight card. Keep only plausible monthly figures.
+  const plausible = (n: number | undefined) =>
+    n !== undefined && n >= 10_000 && n <= 1_000_000 ? n : undefined;
+  const salaryMin = plausible(numField(raw, "salary_min"));
+  const salaryMax = plausible(numField(raw, "salary_max"));
 
   const t = title.toLowerCase();
   const seniority = /\b(senior|lead|principal|staff)\b/.test(t)

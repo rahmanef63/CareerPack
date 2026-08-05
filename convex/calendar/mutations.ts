@@ -70,7 +70,14 @@ export const updateEvent = mutation({
     if (args.location !== undefined) patch.location = capLen("Lokasi", args.location, 300) ?? "";
     if (args.type !== undefined) patch.type = requireLen("Tipe", args.type, 50);
     if (args.notes !== undefined) patch.notes = capLen("Catatan", args.notes, 2000);
-    if (args.reminderMinutes !== undefined) patch.reminderMinutes = args.reminderMinutes;
+    // 0 is the wire value for "Tanpa pengingat". Without this branch the only
+    // way to express a clear was to omit the field, which the `!== undefined`
+    // guard reads as "leave unchanged" — so a reminder could never be removed
+    // and kept firing after the user turned it off.
+    if (args.reminderMinutes !== undefined) {
+      patch.reminderMinutes =
+        args.reminderMinutes === 0 ? undefined : args.reminderMinutes;
+    }
 
     // Reschedule clears the idempotency flag so the cron can re-fire.
     if (
@@ -181,7 +188,14 @@ export const mcpUpdateEvent = internalMutation({
     if (args.location !== undefined) patch.location = capLen("Lokasi", args.location, 300) ?? "";
     if (args.type !== undefined) patch.type = requireLen("Tipe", args.type, 50);
     if (args.notes !== undefined) patch.notes = capLen("Catatan", args.notes, 2000);
-    if (args.reminderMinutes !== undefined) patch.reminderMinutes = args.reminderMinutes;
+    // 0 is the wire value for "Tanpa pengingat". Without this branch the only
+    // way to express a clear was to omit the field, which the `!== undefined`
+    // guard reads as "leave unchanged" — so a reminder could never be removed
+    // and kept firing after the user turned it off.
+    if (args.reminderMinutes !== undefined) {
+      patch.reminderMinutes =
+        args.reminderMinutes === 0 ? undefined : args.reminderMinutes;
+    }
 
     // Reschedule clears the idempotency flag so the cron can re-fire.
     if (

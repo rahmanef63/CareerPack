@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, FileCheck2 } from "lucide-react";
+import { useLocalStorageState } from "@/shared/hooks/useLocalStorageState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Badge } from "@/shared/components/ui/badge";
@@ -29,7 +30,13 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
   // Collapsed by default — CV editor is the primary task, checklist is a
   // post-draft verification step. User expands when ready to audit.
   const [open, setOpen] = useState(false);
-  const [done, setDone] = useState<Record<string, boolean>>({});
+  // Persisted locally: this card is not backed by the Convex document
+  // checklist, so plain `useState` meant every tick was lost on navigation —
+  // the user re-audited the same list on every visit.
+  const [done, setDone] = useLocalStorageState<Record<string, boolean>>(
+    "careerpack:cv:doccheck",
+    {},
+  );
 
   const docs = format === "international"
     ? APP_DOCS.filter((d) => d.id !== "foto") // ATS no photo

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, X } from "lucide-react";
 
@@ -58,9 +58,13 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
   const [skillsInput, setSkillsInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const hydrated = useRef(false);
 
-  // Hydrate from profile on first render.
-  if (open && me?.profile && step === 0 && fullName === "" && me.profile.fullName) {
+  // Hydrate from profile once. Latching on `fullName === ""` re-fired the
+  // moment the user cleared the name field, snapping their edit back to the
+  // stored value mid-typing.
+  if (open && me?.profile && !hydrated.current && me.profile.fullName) {
+    hydrated.current = true;
     setFullName(me.profile.fullName);
     setTargetRole(me.profile.targetRole ?? "");
     setLocation(me.profile.location ?? "");
@@ -70,6 +74,7 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
 
   const reset = () => {
     setStep(0);
+    hydrated.current = false;
   };
 
   const handleAddSkill = () => {
@@ -93,8 +98,11 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
     try {
       await save({
         fullName: fullName.trim() || "Anonymous",
-        location: location.trim() || "—",
-        targetRole: targetRole.trim() || "—",
+        // Was `|| "—"`. That literal got stored as the user's target role and
+        // then rendered as their headline all over the dashboard.
+        // `assertShortText` accepts an empty string, so send it.
+        location: location.trim(),
+        targetRole: targetRole.trim(),
         experienceLevel: level,
         skills,
         interests: me?.profile?.interests ?? [],

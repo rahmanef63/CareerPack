@@ -388,6 +388,9 @@ export interface DemoAgendaSeed {
   location: string;
   type: DemoAgendaType;
   notes?: string;
+  /** Minutes before the event. Carried so the Pengingat picker is not a
+   *  no-op in a guest session. */
+  reminderMinutes?: number;
 }
 
 export const DEMO_AGENDA: ReadonlyArray<DemoAgendaSeed> = [

@@ -17,13 +17,17 @@ import type { SimpleRoadmapNode } from "../../types/builder";
 interface Props {
   selectedNode: SimpleRoadmapNode | null;
   completedNodes: Set<string>;
+  /** `"<skillId>|<resourceTitle>"` for each resource marked done. The
+   *  `roadmap.toggle-resource` AI skill wrote this flag to Convex from day
+   *  one and nothing ever rendered it, so the action looked like a no-op. */
+  completedResources: Set<string>;
   nodeIdToTitle: Map<string, string>;
   onClose: () => void;
   onToggle: (nodeId: string, e: React.MouseEvent) => void;
 }
 
 export function NodeDetailDialog({
-  selectedNode, completedNodes, nodeIdToTitle, onClose, onToggle,
+  selectedNode, completedNodes, completedResources, nodeIdToTitle, onClose, onToggle,
 }: Props) {
   return (
     <Dialog open={!!selectedNode} onOpenChange={onClose}>
@@ -74,6 +78,9 @@ export function NodeDetailDialog({
                 <div className="space-y-3">
                   {selectedNode.resources.map((resource) => {
                     const Icon = getResourceIcon(resource.type);
+                    const done = completedResources.has(
+                      `${selectedNode.id}|${resource.title}`,
+                    );
                     return (
                       <a
                         key={resource.id}
@@ -91,6 +98,11 @@ export function NodeDetailDialog({
                             <Badge variant="outline" className="text-xs capitalize">{resource.type}</Badge>
                             {resource.free && (
                               <Badge variant="secondary" className="text-xs bg-success/20 text-success-text">Gratis</Badge>
+                            )}
+                            {done && (
+                              <Badge variant="secondary" className="text-xs bg-success/20 text-success-text">
+                                Selesai
+                              </Badge>
                             )}
                           </div>
                         </div>

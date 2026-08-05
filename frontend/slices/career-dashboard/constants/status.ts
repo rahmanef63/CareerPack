@@ -13,6 +13,7 @@ export const STATUS_META: Record<
   screening: { label: "Screening", className: "bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning/80" },
   interview: { label: "Wawancara", className: "bg-accent text-brand dark:bg-accent dark:text-brand/80" },
   offer: { label: "Tawaran", className: "bg-success/20 text-success-text" },
+  accepted: { label: "Diterima", className: "bg-success/20 text-success-text" },
   rejected: { label: "Ditolak", className: "bg-destructive/20 text-destructive dark:bg-destructive/20 dark:text-destructive/80" },
   withdrawn: { label: "Ditarik", className: "bg-muted text-foreground dark:bg-muted dark:text-foreground" },
 };

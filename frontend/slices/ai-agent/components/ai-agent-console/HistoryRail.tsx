@@ -42,11 +42,21 @@ export function HistoryRail({
         <ul className="p-2 space-y-0.5">
           {sessions.map((s) => (
             <li key={s.id}>
-              <button
-                type="button"
+              {/* Not a <button>: it wraps the delete <button> below, and
+                  nested buttons are invalid HTML with undefined click
+                  behaviour across browsers. */}
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelect(s.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect(s.id);
+                  }
+                }}
                 className={cn(
-                  "w-full group flex items-start gap-2 p-2 rounded-md text-left transition-colors",
+                  "w-full group flex items-start gap-2 p-2 rounded-md text-left transition-colors cursor-pointer",
                   s.id === activeId
                     ? "bg-accent text-accent-foreground"
                     : "hover:bg-accent/60",
@@ -73,11 +83,13 @@ export function HistoryRail({
                     onDelete(s.id);
                   }}
                   aria-label={`Hapus percakapan ${s.title}`}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  // Hover-only meant it was permanently invisible on touch —
+                  // there was no way to delete a conversation on a phone.
+                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 transition-opacity"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
                 </button>
-              </button>
+              </div>
             </li>
           ))}
         </ul>

@@ -64,6 +64,14 @@ const TYPE_OPTIONS: ReadonlyArray<{ value: AgendaType; label: string }> = (
 
 type FilterType = AgendaType | "all";
 
+/** YYYY-MM-DD in the *local* zone. `toISOString()` is UTC and lands on the
+ *  previous day for UTC+7 between midnight and 07:00. */
+function localDateKey(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 export function CalendarView() {
   const [selected, setSelected] = useState<Date | undefined>(undefined);
   const [todayKey, setTodayKey] = useState<string>("");
@@ -76,7 +84,10 @@ export function CalendarView() {
   useEffect(() => {
     const now = new Date();
     setSelected(now);
-    setTodayKey(now.toISOString().slice(0, 10));
+    // Local calendar date, not UTC. `toISOString()` rolled back a day for
+    // every WIB user between 00:00 and 07:00, so "Jadwal Hari Ini" and the
+    // "Hari ini" button showed yesterday for the first seven hours.
+    setTodayKey(localDateKey(now));
     setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   }, []);
 
@@ -634,8 +645,12 @@ function AgendaFormDialog({
         time,
         location: location.trim() || "—",
         type,
-        notes: notes.trim() || undefined,
-        reminderMinutes,
+        // Send the cleared values explicitly. `undefined` means "field
+        // omitted, leave unchanged" to the update mutation, so picking
+        // "Tanpa pengingat" or emptying the notes saved successfully and
+        // changed nothing — the old reminder kept firing.
+        notes: notes.trim(),
+        reminderMinutes: reminderMinutes ?? 0,
       });
       onOpenChange(false);
     } finally {

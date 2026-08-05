@@ -1,11 +1,18 @@
 import type { AgentAction } from "@/shared/types/agent";
 import type { AIProgress } from "./progress";
 
+/** Whether the user has already acted on a proposed action. Persisted so an
+ *  approved card does not re-arm itself after a reload or a history switch —
+ *  clicking it again used to fire the mutation a second time. */
+export type ActionStatus = "pending" | "approved" | "rejected";
+
+export type StoredAction = AgentAction & { status?: ActionStatus };
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
   text: string;
-  actions?: AgentAction[];
+  actions?: StoredAction[];
   /** Server-measured agent run timeline. Only assistant messages
    *  carry it. Absent on legacy messages from before this field
    *  existed — UI must treat as optional. */

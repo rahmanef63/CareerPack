@@ -38,10 +38,24 @@ const filters: ReadonlyArray<FilterDef<Portfolio>> = [
     id: "category",
     label: "Kategori",
     accessor: (r) => r.category,
+    // Full vocabulary. This listed only the three legacy categories, so a
+    // portfolio item in any of the other twelve could not be filtered for.
     options: [
       { value: "project", label: "Proyek" },
+      { value: "design", label: "Desain" },
+      { value: "writing", label: "Tulisan" },
       { value: "certification", label: "Sertifikasi" },
       { value: "publication", label: "Publikasi" },
+      { value: "speaking", label: "Public Speaking" },
+      { value: "award", label: "Penghargaan" },
+      { value: "openSource", label: "Open Source" },
+      { value: "volunteer", label: "Volunteer" },
+      { value: "music", label: "Musik" },
+      { value: "photography", label: "Fotografi" },
+      { value: "video", label: "Video" },
+      { value: "research", label: "Riset" },
+      { value: "teaching", label: "Pengajaran" },
+      { value: "other", label: "Lainnya" },
     ],
   },
 ];

@@ -38,6 +38,10 @@ interface SeedRunResult {
  */
 export function EngineSeedPanel() {
   const stats = useQuery(api.admin.mutations.adminGetSeedStats, {});
+  // `engine.graph.mutations.seedDefaults` requires SUPER-admin while this
+  // panel renders for any role-admin, so the button was live for people it
+  // would only ever throw at.
+  const isSuper = useQuery(api.admin.queries.amISuperAdmin);
   const seedGraph = useMutation(api.engine.graph.mutations.seedDefaults);
   const seedDocs = useMutation(api.admin.mutations.adminSeedDocumentTemplates);
 
@@ -134,6 +138,8 @@ export function EngineSeedPanel() {
           description="29 node + 36 edge ID tech labor market. Dipakai oleh Career Time Machine di Skill Roadmap."
           buttonLabel="Seed Career Graph"
           running={graphRunning}
+          disabled={isSuper === false}
+          note={isSuper === false ? "Butuh akun super-admin untuk menjalankan." : null}
           onClick={handleSeedGraph}
           result={
             graphResult
@@ -235,6 +241,8 @@ interface SeedCardProps {
   running: boolean;
   onClick: () => void;
   result: string | null;
+  disabled?: boolean;
+  note?: string | null;
 }
 
 function SeedCard({
@@ -245,6 +253,8 @@ function SeedCard({
   running,
   onClick,
   result,
+  disabled,
+  note,
 }: SeedCardProps) {
   return (
     <Card>
@@ -259,7 +269,7 @@ function SeedCard({
         <Button
           type="button"
           onClick={onClick}
-          disabled={running}
+          disabled={running || disabled}
           className="w-full gap-2"
         >
           {running ? (
@@ -274,6 +284,9 @@ function SeedCard({
             </>
           )}
         </Button>
+        {note && (
+          <p className="text-[11px] text-muted-foreground">{note}</p>
+        )}
         {result && (
           <div className="rounded-md border border-emerald-300/50 bg-emerald-500/5 p-2 text-[11px] text-emerald-700 dark:text-emerald-400">
             ✓ {result}

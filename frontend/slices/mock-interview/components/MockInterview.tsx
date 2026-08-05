@@ -57,6 +57,7 @@ export function MockInterview() {
             filteredQuestions={s.filteredQuestions}
             currentQuestion={s.currentQuestion}
             currentQuestionIndex={s.currentQuestionIndex}
+            answeredCount={s.answeredCount}
             showAnswer={s.showAnswer}
             userAnswer={s.userAnswer}
             favorites={s.favorites}

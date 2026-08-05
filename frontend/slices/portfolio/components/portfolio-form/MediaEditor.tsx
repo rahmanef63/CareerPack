@@ -18,8 +18,14 @@ interface Props {
 export function MediaEditor({ media, onChange }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const handleUploaded = (storageId: string, kind: PortfolioMediaKind) => {
-    onChange([...media, { storageId, kind }]);
+  const handleUploaded = (
+    storageId: string,
+    kind: PortfolioMediaKind,
+    // Without the local preview URL a freshly uploaded image sat as a grey box
+    // labelled "image" until the form was saved and re-read from the server.
+    url?: string | null,
+  ) => {
+    onChange([...media, { storageId, kind, url }]);
   };
 
   const remove = (idx: number) => {
@@ -51,7 +57,7 @@ export function MediaEditor({ media, onChange }: Props) {
           accept="image/*"
           crop={{ aspect: 16 / 9 }}
           hint="Unggah baru — gambar (JPG/PNG/WebP)"
-          onUploaded={(r) => handleUploaded(r.storageId, "image")}
+          onUploaded={(r) => handleUploaded(r.storageId, "image", r.previewUrl)}
         />
         <Button
           type="button"

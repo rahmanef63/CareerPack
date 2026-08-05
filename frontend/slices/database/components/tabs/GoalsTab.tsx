@@ -46,7 +46,6 @@ const filters: ReadonlyArray<FilterDef<Goal>> = [
     options: [
       { value: "active", label: "Aktif" },
       { value: "completed", label: "Selesai" },
-      { value: "archived", label: "Diarsipkan" },
     ],
   },
 ];

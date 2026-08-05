@@ -26,7 +26,7 @@ export const financialCalculatorManifest: SliceManifest = {
       id: "financial.add-budget",
       label: "Tambah variabel anggaran",
       description:
-        "Tambah 1 baris variabel anggaran baru. kind WAJIB 'expense' (pengeluaran) atau 'savings' (tabungan). value dalam rupiah (angka). iconName = nama lucide-react icon (mis. 'Home', 'Car', 'PiggyBank'). color = nama warna pendek (mis. 'red', 'blue').",
+        "Tambah 1 baris variabel anggaran baru. kind WAJIB 'expense' (pengeluaran) atau 'savings' (tabungan). value dalam rupiah (angka). iconName = nama lucide-react icon (mis. 'Home', 'Car', 'PiggyBank'). color = hex #rrggbb (mis. '#ef4444').",
       kind: "compose",
       cta: "Tambah variabel",
       args: {

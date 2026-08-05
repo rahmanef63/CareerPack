@@ -14,11 +14,12 @@ import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { notify } from "@/shared/lib/notify";
+import { notify, humanMessage } from "@/shared/lib/notify";
+import { useIsDemo } from "@/shared/hooks/useDemoOverlay";
 import { runAgent, extractSlashActions } from "../lib/slashCommands";
 import { subscribe } from "@/shared/lib/aiActionBus";
 import { ALL_SKILLS } from "@/shared/lib/sliceRegistry";
-import { newSession, type Message } from "../types/console";
+import { newSession, type ActionStatus, type Message } from "../types/console";
 import type { AIProgress, StepStatus, StepType } from "../types/progress";
 import type { AgentAction } from "@/shared/types/agent";
 import { MessageBubble } from "./ai-agent-console/MessageBubble";
@@ -57,7 +58,32 @@ export function AIAgentConsole({
 }: AIAgentConsoleProps) {
   const { sessions, setSessions, activeId, setActiveId, deleteSession } =
     useSessionSync();
+  const isDemo = useIsDemo();
   const [input, setInput] = useState("");
+
+  // Write the approve/dismiss decision back into session state so the next
+  // debounced upsert persists it — otherwise the card re-arms on reload and a
+  // second click re-runs the mutation (duplicate applications, duplicate events).
+  const handleActionResolved = useCallback(
+    (messageId: string, index: number, status: ActionStatus) => {
+      setSessions((prev) =>
+        prev.map((s) => ({
+          ...s,
+          messages: s.messages.map((m) =>
+            m.id === messageId && m.actions
+              ? {
+                  ...m,
+                  actions: m.actions.map((a, i) =>
+                    i === index ? { ...a, status } : a,
+                  ),
+                }
+              : m,
+          ),
+        })),
+      );
+    },
+    [setSessions],
+  );
   // Track WHICH session has an in-flight request, not just a global bool —
   // otherwise the spinner renders under whatever session is on screen when
   // you switch mid-request. `thinking` (derived) keeps the single-flight
@@ -236,7 +262,13 @@ export function AIAgentConsole({
           const reason = err instanceof Error ? err.message : String(err);
           notify.fromError(err, "Gangguan layanan AI");
           const fallback = runAgent(text);
-          assistantText = `⚠️ Layanan AI sedang terganggu — menampilkan respons cadangan.\n\n${fallback.text}`;
+          // Quota and rate-limit refusals are actionable and self-inflicted —
+          // reporting them as "layanan sedang terganggu" sent users hunting a
+          // fault on our side. Reuse the humanised message the toast shows.
+          const human = humanMessage(err, "Gangguan layanan AI");
+          assistantText = /batas|rate limit|kuota|limit/i.test(human)
+            ? `⚠️ ${human}\n\n${fallback.text}`
+            : `⚠️ Layanan AI sedang terganggu — menampilkan respons cadangan.\n\n${fallback.text}`;
           assistantProgress = {
             steps: [
               {
@@ -348,12 +380,16 @@ export function AIAgentConsole({
                 <Plus className="w-4 h-4" />
               </Button>
               <QuotaChip />
-              <Badge
-                variant="secondary"
-                className="text-[10px] hidden lg:inline-flex"
-              >
-                Mode Demo
-              </Badge>
+              {/* Was unconditional — every paying account was told it was in
+                  demo mode. */}
+              {isDemo && (
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] hidden lg:inline-flex"
+                >
+                  Mode Demo
+                </Badge>
+              )}
             </div>
 
             {/* Scroll body — native overflow + min-h-0 makes flex-1
@@ -367,7 +403,11 @@ export function AIAgentConsole({
             >
               <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
                 {activeSession?.messages.map((m) => (
-                  <MessageBubble key={m.id} msg={m} />
+                  <MessageBubble
+                    key={m.id}
+                    msg={m}
+                    onActionResolved={handleActionResolved}
+                  />
                 ))}
                 {showQuickPrompts && (
                   <div className="pl-9">

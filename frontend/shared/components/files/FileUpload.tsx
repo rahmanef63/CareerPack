@@ -45,6 +45,10 @@ export interface FileUploadResult {
   fileType: string;
   fileSize: number;
   originalSize: number;
+  /** Local object URL for images, so a caller can render the thumbnail
+   *  immediately instead of waiting for a server-resolved URL on the next
+   *  query round-trip. Null for non-images. */
+  previewUrl?: string | null;
 }
 
 export interface FileUploadProps {
@@ -155,7 +159,7 @@ export function FileUpload({
           ? describeConversion(payload.originalSize, payload.fileSize)
           : `${payload.fileName} (${formatFileSize(payload.fileSize)})`;
       notify.success("File terunggah", { description: desc });
-      onUploaded?.(payload);
+      onUploaded?.({ ...payload, previewUrl });
     },
     [upload, onUploaded],
   );

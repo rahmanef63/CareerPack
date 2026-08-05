@@ -99,16 +99,14 @@ export const quickFill = mutation({
           const { _id: _omitId, _creationTime: _omitTs, ...rest } = existing;
           profileSnapshot = rest;
           profileWasInsert = false;
-          await ctx.db.patch(existing._id, {
-            fullName: cleaned.fullName,
-            location: cleaned.location,
-            targetRole: cleaned.targetRole,
-            phone: cleaned.phone,
-            bio: cleaned.bio,
-            experienceLevel: cleaned.experienceLevel,
-            skills: cleaned.skills,
-            interests: cleaned.interests,
-          });
+          // Patch `cleaned` directly — it only carries keys that were
+          // actually present. Listing the fields out passed `undefined` for
+          // the absent ones, and Convex reads an explicit `undefined` as
+          // "delete this field": it wiped the user's bio/skills and threw
+          // outright on `experienceLevel` (required in the schema), rolling
+          // back the whole import. The comment on SanitizedProfile already
+          // promised this behaviour; now the code matches it.
+          await ctx.db.patch(existing._id, cleaned);
         } else {
           profileSnapshot = null;
           profileWasInsert = true;

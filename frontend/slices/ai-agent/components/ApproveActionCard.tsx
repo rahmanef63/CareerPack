@@ -5,12 +5,17 @@ import { Check, X, Sparkles } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { notify } from "@/shared/lib/notify";
 import { publish } from "@/shared/lib/aiActionBus";
+import { useIsDemo } from "@/shared/hooks/useDemoOverlay";
 import { SKILLS_BY_ID } from "@/shared/lib/sliceRegistry";
 import { ACTION_META, type AgentAction } from "../lib/agentActions";
+import type { ActionStatus } from "../types/console";
 import { SuccessCheck } from "@/shared/components/interactions/MicroInteractions";
 
 interface ApproveActionCardProps {
   action: AgentAction;
+  /** Persisted decision from a previous visit. Without it the card came back
+   *  armed after a reload and a second click re-ran the mutation. */
+  status?: ActionStatus;
   onResolved?: (applied: boolean) => void;
 }
 
@@ -41,11 +46,26 @@ function resolveMeta(action: AgentAction): ResolvedMeta {
   };
 }
 
-export function ApproveActionCard({ action, onResolved }: ApproveActionCardProps) {
-  const [state, setState] = useState<"pending" | "applied" | "dismissed">("pending");
+export function ApproveActionCard({ action, status, onResolved }: ApproveActionCardProps) {
+  const [state, setState] = useState<"pending" | "applied" | "dismissed">(
+    status === "approved" ? "applied" : status === "rejected" ? "dismissed" : "pending",
+  );
   const meta = resolveMeta(action);
+  const isDemo = useIsDemo();
 
   const apply = () => {
+    // Single choke point for every AI mutation, so this one branch covers all
+    // 14 capability binders. A demo session is an anonymous-but-authenticated
+    // Convex user: the write SUCCEEDS server-side while every demo screen
+    // reads its localStorage overlay, so the user got a green toast and saw
+    // absolutely nothing change. Navigation is exempt — slash commands ride
+    // on `nav.go` and it touches no data.
+    if (isDemo && action.type !== "nav.go") {
+      setState("dismissed");
+      notify.info("Mode demo — tindakan AI tidak disimpan. Daftar akun untuk menjalankannya.");
+      onResolved?.(false);
+      return;
+    }
     publish(action);
     setState("applied");
     notify.success(`${meta.label} diterapkan`);

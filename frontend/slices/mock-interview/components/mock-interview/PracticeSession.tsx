@@ -27,6 +27,10 @@ interface Props {
   }>;
   currentQuestion: Props["filteredQuestions"][number];
   currentQuestionIndex: number;
+  /** Questions actually answered — `currentQuestionIndex` counts the ones
+   *  skipped past too, which contradicted the completion score on the
+   *  finish card. */
+  answeredCount: number;
   showAnswer: boolean;
   userAnswer: string;
   favorites: Set<string>;
@@ -41,7 +45,7 @@ interface Props {
 
 export function PracticeSession({
   sessionStartedAt, isStarting, filteredQuestions, currentQuestion,
-  currentQuestionIndex, showAnswer, userAnswer,
+  currentQuestionIndex, answeredCount, showAnswer, userAnswer,
   favorites, elapsedLabel,
   onStart, onSetShowAnswer, onSetUserAnswer,
   onToggleFavorite, onNext, onReset,
@@ -234,7 +238,7 @@ export function PracticeSession({
                   <span className="text-sm text-foreground">Dijawab</span>
                 </div>
                 <span className="font-semibold text-foreground">
-                  {currentQuestionIndex}
+                  {answeredCount}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">

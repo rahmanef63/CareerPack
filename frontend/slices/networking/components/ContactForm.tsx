@@ -31,11 +31,16 @@ import { AVATAR_HUES, DEFAULT_FORM, ROLE_LABELS } from "../constants";
 interface ContactFormProps {
   trigger: React.ReactNode;
   onSubmit: (values: ContactFormValues) => Promise<void> | void;
+  /** Present = edit an existing contact. `useNetworking.update` existed all
+   *  along but nothing in the UI ever called it, so a typo in a name was
+   *  permanent short of deleting and re-adding the contact. */
+  initial?: ContactFormValues;
 }
 
-export function ContactForm({ trigger, onSubmit }: ContactFormProps) {
+export function ContactForm({ trigger, onSubmit, initial }: ContactFormProps) {
+  const isEdit = initial !== undefined;
   const [open, setOpen] = useState(false);
-  const [values, setValues] = useState<ContactFormValues>(DEFAULT_FORM);
+  const [values, setValues] = useState<ContactFormValues>(initial ?? DEFAULT_FORM);
   const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -47,9 +52,11 @@ export function ContactForm({ trigger, onSubmit }: ContactFormProps) {
     setBusy(true);
     try {
       await onSubmit(values);
-      notify.success("Kontak tersimpan");
+      notify.success(isEdit ? "Kontak diperbarui" : "Kontak tersimpan");
       setOpen(false);
-      setValues(DEFAULT_FORM);
+      // Re-seed from `initial` on edit so reopening shows the saved values,
+      // not a blank form.
+      setValues(initial ?? DEFAULT_FORM);
     } catch (err) {
       notify.fromError(err, "Gagal menyimpan");
     } finally {
@@ -58,13 +65,23 @@ export function ContactForm({ trigger, onSubmit }: ContactFormProps) {
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={setOpen}>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o && initial) setValues(initial);
+      }}
+    >
       <ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger>
       <ResponsiveDialogContent className="sm:max-w-lg">
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Tambah Kontak</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>
+            {isEdit ? "Ubah Kontak" : "Tambah Kontak"}
+          </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Simpan info rekruter, mentor, atau rekan profesional.
+            {isEdit
+              ? "Perbarui info kontak ini."
+              : "Simpan info rekruter, mentor, atau rekan profesional."}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
 

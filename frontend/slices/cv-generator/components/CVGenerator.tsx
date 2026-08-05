@@ -78,7 +78,7 @@ export function CVGenerator() {
   // PDF output never disagrees with what the user is looking at.
   const previewCtrl = usePreviewControls();
 
-  const handlers = useCVHandlers(setCvData, setFormat);
+  const handlers = useCVHandlers(setCvData, setFormat, cvData);
 
   // Template swipe state — swipeDx tracks drag delta in px, reset on
   // commit/cancel. Threshold intentionally loose (70 px) so a flick
@@ -172,13 +172,31 @@ export function CVGenerator() {
   // "demo" sentinel so demo data still loads once.
   const resetBaseline = autosave.resetBaseline;
   useEffect(() => {
-    if (!remoteCVData) return;
+    if (!remoteCVData) {
+      // A brand-new account has no CV, so this used to return before ever
+      // setting `hydratedFromId` — which left autosave and the
+      // unsaved-changes guard permanently disarmed. The user could type an
+      // entire CV, navigate away, and lose all of it silently. `saveCV`
+      // already creates the row when `activeCVId` is null, so arm on a
+      // settled-empty query with a sentinel id.
+      if (!isCVLoading && hydratedFromId === null) setHydratedFromId("new");
+      return;
+    }
     const idStr = activeCVId ? String(activeCVId) : "demo";
+    // Adopt the real id the first save hands back without re-hydrating —
+    // re-running setCvData here would stomp keystrokes made since.
+    if (hydratedFromId === "new") {
+      setHydratedFromId(idStr);
+      return;
+    }
     if (hydratedFromId === idStr) return;
     setCvData(remoteCVData);
     setHydratedFromId(idStr);
     resetBaseline(remoteCVData);
-  }, [remoteCVData, activeCVId, hydratedFromId, resetBaseline]);
+    // Persisted display prefs decide the format; hardcoding 'national' in
+    // useState made the toggle disagree with the saved CV after a reload.
+    setFormat(remoteCVData.displayPrefs.showPicture ? "national" : "international");
+  }, [remoteCVData, activeCVId, hydratedFromId, isCVLoading, resetBaseline]);
 
   // beforeunload guard: warn the user if they close the tab with
   // unsaved edits AND the autosave failed (otherwise autosave handles

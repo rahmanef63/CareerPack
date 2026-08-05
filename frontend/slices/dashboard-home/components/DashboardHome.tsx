@@ -82,7 +82,9 @@ export function DashboardHome() {
 
   const stats = useMemo(() => {
     const interview = applications.filter((a) => a.status === "interview").length;
-    const offer = applications.filter((a) => a.status === "offer").length;
+    const offer = applications.filter(
+      (a) => a.status === "offer" || a.status === "accepted",
+    ).length;
     const applied = applications.filter((a) => a.status === "applied").length;
     const RESPONSE_MIN = 5;
     const responseRate =
@@ -338,7 +340,9 @@ function AgendaSection() {
   const upcomingAgenda = useMemo(
     () =>
       agenda
-        .filter((a) => a.date >= new Date().toISOString().slice(0, 10))
+        // en-CA formats as YYYY-MM-DD in the LOCAL zone; toISOString() is UTC
+        // and hid today's agenda before 07:00 WIB.
+        .filter((a) => a.date >= new Date().toLocaleDateString("en-CA"))
         .sort((a, b) =>
           a.date === b.date ? a.time.localeCompare(b.time) : a.date.localeCompare(b.date)
         )

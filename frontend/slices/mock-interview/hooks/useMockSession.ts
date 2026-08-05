@@ -27,7 +27,7 @@ export function useMockSession() {
       return new Set();
     }
   });
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, _setSelectedCategory] = useState<string | null>(null);
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [isStarting, setIsStarting] = useState(false);
@@ -90,6 +90,11 @@ export function useMockSession() {
     setIsStarting(true);
     setSessionStartedAt(Date.now());
     setElapsedMs(0);
+    // Start at the top. The index is shared with the Bank Soal browser, so
+    // clicking question 12 there and then "Mulai Sesi" began the session on
+    // the last question — one "Selanjutnya" and the user was told
+    // "Sesi Selesai! 8%".
+    setCurrentQuestionIndex(0);
     try {
       const id = await createMockInterview({
         type: selectedCategory ?? "general",
@@ -122,8 +127,10 @@ export function useMockSession() {
         answer,
       });
       answeredCountRef.current += 1;
-    } catch {
-      // Non-fatal; completion will still land.
+    } catch (err) {
+      // Was swallowed silently, which is how a mid-session category switch
+      // could drop every answer and still report a score.
+      notify.fromError(err, "Jawaban gagal tersimpan");
     }
   };
 
@@ -184,6 +191,18 @@ export function useMockSession() {
     });
   };
 
+  // Re-filtering mid-session swaps in questions the Convex row (a snapshot
+  // taken at start) has never heard of, so every later answer throws
+  // "Pertanyaan tidak ditemukan" and the saved score reads near 0. Lock the
+  // filter for the duration instead of losing the work.
+  const setSelectedCategory = (next: string | null) => {
+    if (sessionStartedAt) {
+      notify.info("Selesaikan atau reset sesi dulu sebelum ganti kategori");
+      return;
+    }
+    _setSelectedCategory(next);
+  };
+
   return {
     activeTab, setActiveTab,
     currentQuestionIndex, setCurrentQuestionIndex,
@@ -195,6 +214,7 @@ export function useMockSession() {
     sessionStartedAt, isStarting,
     elapsedLabel,
     filteredQuestions, currentQuestion, categories,
+    answeredCount: answeredCountRef.current,
     historyLabel,
     startSession, nextQuestion, resetSession,
   };

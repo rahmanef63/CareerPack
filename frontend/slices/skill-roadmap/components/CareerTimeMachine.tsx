@@ -61,12 +61,13 @@ function formatIDR(amount: number | undefined): string | null {
  * with skill-gap callout against the user's Truth Ledger atoms.
  */
 export function CareerTimeMachine() {
-  // Pull the user's "skill" atoms across all CVs so the engine can
-  // calculate skill-gap. We don't pick a CV — atoms are the union of
-  // skills the user has attested across their portfolio.
+  // Skill atoms for the user's MOST RECENT CV. The comment here used to
+  // claim a union across all CVs; the code took `cvIds[0]`, which on an
+  // insertion-ordered query is the OLDEST one — so the skill-gap was computed
+  // against a CV the user may have abandoned long ago.
   const cvsRaw = useQuery(api.cv.queries.getUserCVs);
-  const cvIds = (cvsRaw ?? []).map((c) => c._id);
-  const firstCvId = cvIds[0] ?? null;
+  const firstCvId =
+    [...(cvsRaw ?? [])].sort((a, b) => b._creationTime - a._creationTime)[0]?._id ?? null;
   const atomsRaw = useQuery(
     api.engine.atoms.queries.listByCv,
     firstCvId ? { cvId: firstCvId } : "skip",

@@ -18,7 +18,7 @@ const ROLE_LABEL: Record<"admin" | "moderator" | "user", string> = {
 type Row = NonNullable<ReturnType<typeof useQuery<typeof api.admin.queries.listRoleAuditLogs>>>[number];
 
 export function AuditLogPanel() {
-  const logs = useQuery(api.admin.queries.listRoleAuditLogs, { limit: 200 });
+  const logs = useQuery(api.admin.queries.listRoleAuditLogs, { limit: 100 });
 
   const columns: ReadonlyArray<ColumnDef<Row>> = [
     {
@@ -86,7 +86,7 @@ export function AuditLogPanel() {
           Riwayat Perubahan Peran
         </CardTitle>
         <CardDescription>
-          200 perubahan terakhir. Perubahan peran pengguna selalu dicatat untuk jejak audit.
+          100 perubahan terakhir. Perubahan peran pengguna selalu dicatat untuk jejak audit.
         </CardDescription>
       </CardHeader>
       <CardContent>

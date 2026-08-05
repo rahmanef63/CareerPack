@@ -30,6 +30,29 @@ interface DeleteBudgetPayload {
 
 const VALID_KIND = new Set(["expense", "savings"]);
 
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
+/** Models answer "merah"/"red" when asked for a colour, and the backend
+ *  `assertColor` only accepts #rrggbb — so every AI-created envelope threw
+ *  "Warna harus format hex #rrggbb". Translate the words people actually say
+ *  and fall back to slate rather than failing the whole action over a tint. */
+const COLOR_WORDS: Record<string, string> = {
+  merah: "#ef4444", red: "#ef4444",
+  biru: "#0ea5e9", blue: "#0ea5e9",
+  hijau: "#10b981", green: "#10b981",
+  kuning: "#eab308", yellow: "#eab308",
+  oranye: "#f59e0b", jingga: "#f59e0b", orange: "#f59e0b",
+  ungu: "#8b5cf6", purple: "#8b5cf6",
+  merahmuda: "#ec4899", pink: "#ec4899",
+  abu: "#64748b", "abu-abu": "#64748b", slate: "#64748b", grey: "#64748b", gray: "#64748b",
+};
+
+function toHex(raw: unknown): string {
+  const s = String(raw ?? "").trim();
+  if (HEX.test(s)) return s.toLowerCase();
+  return COLOR_WORDS[s.toLowerCase().replace(/\s+/g, "")] ?? "#64748b";
+}
+
 /**
  * Financial capability binder — wires manifest mutation/compose
  * skills to backend mutations. Query skill (`list-budget`) handled
@@ -67,7 +90,7 @@ export function FinancialCapabilities() {
             value,
             kind: rawKind as "expense" | "savings",
             iconName: String(p.iconName ?? "Wallet").trim() || "Wallet",
-            color: String(p.color ?? "slate").trim() || "slate",
+            color: toHex(p.color),
           });
           notify.success(`Variabel "${label}" ditambahkan`);
         } catch (err) {
@@ -105,7 +128,7 @@ export function FinancialCapabilities() {
           patch.kind = k as "expense" | "savings";
         }
         if (p.iconName !== undefined) patch.iconName = String(p.iconName).trim();
-        if (p.color !== undefined) patch.color = String(p.color).trim();
+        if (p.color !== undefined) patch.color = toHex(p.color);
 
         try {
           await updateVar(patch as Parameters<typeof updateVar>[0]);

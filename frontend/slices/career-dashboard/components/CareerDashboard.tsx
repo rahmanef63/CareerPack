@@ -53,7 +53,11 @@ export function CareerDashboard() {
     const total = applications.length;
     const applied = applications.filter((a) => a.status === "applied").length;
     const interview = applications.filter((a) => a.status === "interview").length;
-    const offer = applications.filter((a) => a.status === "offer").length;
+    // An accepted offer is still an offer won — excluding it made the tile
+    // tick back down the moment the user marked the good news.
+    const offer = applications.filter(
+      (a) => a.status === "offer" || a.status === "accepted",
+    ).length;
     const responseRate =
       total === 0
         ? 0

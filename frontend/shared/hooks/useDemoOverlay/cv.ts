@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { notify } from "@/shared/lib/notify";
 import { useLocalStorageState } from "../useLocalStorageState";
 import { DEMO_CV } from "@/shared/data/demoUser";
 import type { CVData } from "@/slices/cv-generator/types";
@@ -70,7 +69,9 @@ export function useDemoCVOverlay(): CVHook {
   const saveCV: CVHook["saveCV"] = useCallback(
     async (data) => {
       setCV(data);
-      notify.success("Tersimpan di mode demo (lokal)");
+      // No toast here: this runs on every autosave tick too, and CVGenerator
+      // already toasts on the explicit save. It used to fire a "Tersimpan di
+      // mode demo" popup every few keystrokes.
       return true;
     },
     [setCV],

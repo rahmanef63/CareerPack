@@ -14,26 +14,21 @@ export const seedDemoJobs = mutation({
   handler: async (ctx) => {
     await requireAdmin(ctx);
 
-    const sample = await ctx.db.query("jobListings").first();
-    if (sample) {
-      const existing = await ctx.db.query("jobListings").collect();
-      if (existing.length >= SEED_JOBS.length) return { seeded: 0 };
-      const existingKeys = new Set(
-        existing.map((j) => `${j.title}|${j.company}`),
-      );
-      let seeded = 0;
-      for (const j of SEED_JOBS) {
-        const key = `${j.title}|${j.company}`;
-        if (existingKeys.has(key)) continue;
-        // Tag provenance so `pruneOldJobs`' never-prune guard actually
-        // matches — SEED_JOBS rows carry no `source` of their own.
-        await ctx.db.insert("jobListings", { ...j, source: "seed" });
-        seeded++;
-      }
-      return { seeded };
-    }
+    // Scoped to seed rows only. This used to read the WHOLE table and bail
+    // when it held >= SEED_JOBS.length rows — the daily feed cron pushed the
+    // table past 8 long ago, so the button had become a permanent no-op and
+    // the curated Indonesian listings could never be loaded.
+    const existing = await ctx.db
+      .query("jobListings")
+      .withIndex("by_source_posted", (q) => q.eq("source", "seed"))
+      .collect();
+    const existingKeys = new Set(existing.map((j) => `${j.title}|${j.company}`));
+
     let seeded = 0;
     for (const j of SEED_JOBS) {
+      if (existingKeys.has(`${j.title}|${j.company}`)) continue;
+      // Tag provenance so `pruneOldJobs`' never-prune guard actually
+      // matches — SEED_JOBS rows carry no `source` of their own.
       await ctx.db.insert("jobListings", { ...j, source: "seed" });
       seeded++;
     }

@@ -9,6 +9,16 @@ import { Progress } from "@/shared/components/ui/progress";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
+import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+} from "@/shared/components/ui/responsive-alert-dialog";
 import { RoadmapBrowser } from "./RoadmapBrowser";
 import { CareerTimeMachine } from "./CareerTimeMachine";
 import { GamificationPanel } from "./GamificationPanel";
@@ -203,9 +213,35 @@ export function SkillRoadmap() {
         </TabsContent>
       </Tabs>
 
+      {/* Switching the active skill reseeds the single roadmap doc, which
+          throws away the current one's completed nodes and XP. */}
+      <ResponsiveAlertDialog
+        open={r.pendingSlug !== null}
+        onOpenChange={(o) => { if (!o) r.cancelActivate(); }}
+      >
+        <ResponsiveAlertDialogContent>
+          <ResponsiveAlertDialogHeader>
+            <ResponsiveAlertDialogTitle>Ganti skill aktif?</ResponsiveAlertDialogTitle>
+            <ResponsiveAlertDialogDescription>
+              Progres roadmap yang sedang aktif — topik selesai, XP, dan
+              pencapaian — akan hilang dan tidak bisa dikembalikan.
+            </ResponsiveAlertDialogDescription>
+          </ResponsiveAlertDialogHeader>
+          <ResponsiveAlertDialogFooter>
+            <ResponsiveAlertDialogCancel onClick={r.cancelActivate}>
+              Batal
+            </ResponsiveAlertDialogCancel>
+            <ResponsiveAlertDialogAction onClick={r.confirmActivate}>
+              Ganti skill
+            </ResponsiveAlertDialogAction>
+          </ResponsiveAlertDialogFooter>
+        </ResponsiveAlertDialogContent>
+      </ResponsiveAlertDialog>
+
       <NodeDetailDialog
         selectedNode={r.selectedNode}
         completedNodes={r.completedNodes}
+        completedResources={r.completedResources}
         nodeIdToTitle={r.nodeIdToTitle}
         onClose={() => r.setSelectedNode(null)}
         onToggle={r.toggleNodeCompletion}

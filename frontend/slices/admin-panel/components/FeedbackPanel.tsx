@@ -12,7 +12,7 @@ import { GUEST_LABEL } from "../constants/guest";
 type Row = NonNullable<ReturnType<typeof useQuery<typeof api.admin.queries.listFeedback>>>[number];
 
 export function FeedbackPanel() {
-  const items = useQuery(api.admin.queries.listFeedback, { limit: 200 });
+  const items = useQuery(api.admin.queries.listFeedback, { limit: 100 });
 
   const columns: ReadonlyArray<ColumnDef<Row>> = [
     {
@@ -67,7 +67,7 @@ export function FeedbackPanel() {
           Masukan Pengguna
         </CardTitle>
         <CardDescription>
-          200 masukan terakhir dari form Pusat Bantuan.
+          100 masukan terakhir dari form Pusat Bantuan.
         </CardDescription>
       </CardHeader>
       <CardContent>

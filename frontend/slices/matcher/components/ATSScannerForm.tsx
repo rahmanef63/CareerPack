@@ -94,7 +94,10 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
     }
   };
 
-  const noCV = cvs !== undefined && cvs.length === 0;
+  // A demo session's CV lives in localStorage, so the Convex query returns
+  // nothing and the user got an empty dropdown plus a disabled button with no
+  // explanation. Route it into the existing "belum ada CV" hint instead.
+  const noCV = state.isDemo || (cvs !== undefined && cvs.length === 0);
 
   return (
     <div className="space-y-5">
