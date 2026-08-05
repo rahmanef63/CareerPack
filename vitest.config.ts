@@ -1,6 +1,16 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // Same `@/*` → `frontend/*` alias tsconfig gives the app. Without it any
+  // test that (transitively) pulls a module using the alias dies with
+  // ERR_MODULE_NOT_FOUND, which quietly pushed slice tests toward relative
+  // imports the rest of the codebase does not use.
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./frontend", import.meta.url)),
+    },
+  },
   test: {
     globals: true,
     environment: "node",

@@ -538,6 +538,17 @@ export const indonesianCategoryLabels: Record<string, string> = {
   financial: 'Keuangan',
   health: 'Kesehatan',
   travel: 'Perjalanan',
+  // Vocabulary used by the per-country document templates
+  // (convex/_seeds/documents/*.ts). Without these the filter chips and
+  // item badges render blank for every imported document.
+  qualification: 'Kualifikasi',
+  language: 'Bahasa',
+  visa: 'Visa & Izin Tinggal',
+  employment: 'Ketenagakerjaan',
+  career: 'Karier',
+  legal: 'Legalitas',
+  insurance: 'Asuransi',
+  settlement: 'Menetap',
 };
 
 // Status Labels in Indonesian

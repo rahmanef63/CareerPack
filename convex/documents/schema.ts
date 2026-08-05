@@ -9,6 +9,9 @@ export const documentsTables = {
     documents: v.array(v.object({
       id: v.string(),
       name: v.string(),
+      /** Only country-template imports carry one — the static Indonesian
+       *  list gets its copy from the frontend seed data. */
+      description: v.optional(v.string()),
       category: v.string(),
       subcategory: v.optional(v.string()),
       required: v.boolean(),

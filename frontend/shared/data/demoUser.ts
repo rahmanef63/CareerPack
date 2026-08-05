@@ -520,18 +520,17 @@ export interface DemoChecklistEntry {
   expiryDate?: string;
 }
 
+// Ids MUST exist in `indonesianDocumentChecklist` — the overlay is keyed by
+// id, so a slug that matches nothing shows a guest a 0% checklist. Pinned by
+// demoUser.test.ts.
 export const DEMO_CHECKLIST_PROGRESS: ReadonlyArray<DemoChecklistEntry> = [
-  { id: "ktp", completed: true },
-  { id: "skck", completed: true, notes: "Diperbarui Maret. Berlaku 6 bulan.", expiryDate: "2026-09-01" },
-  { id: "ijazah-s1", completed: true, notes: "Sudah scan + legalisir." },
-  { id: "transkrip", completed: true },
-  { id: "cv-bahasa-indo", completed: true, notes: "Versi terbaru di CV Generator." },
-  { id: "cv-bahasa-inggris", completed: false, notes: "Translate dari draft Indonesia minggu ini." },
-  { id: "portofolio", completed: true },
-  { id: "npwp", completed: true },
-  { id: "rekening-koran", completed: false, notes: "Tarik 3 bulan terakhir BCA." },
-  { id: "passport", completed: false },
-  { id: "ielts", completed: true, notes: "IELTS 7.0 — masih berlaku 1 tahun." },
+  { id: "doc-1", completed: true }, // KTP
+  { id: "doc-2", completed: true }, // NPWP
+  { id: "doc-3", completed: true, notes: "Sudah scan + legalisir." }, // Ijazah & Transkrip
+  { id: "doc-4", completed: true, notes: "Diperbarui Maret. Berlaku 6 bulan.", expiryDate: "2026-09-01" }, // SKCK
+  { id: "doc-10", completed: false }, // Paspor
+  { id: "doc-11", completed: true, notes: "IELTS 7.0 — masih berlaku 1 tahun." }, // IELTS/TOEFL
+  { id: "doc-15", completed: false, notes: "Tarik 3 bulan terakhir BCA." }, // Rekening koran
 ];
 
 // ---------------------------------------------------------------------

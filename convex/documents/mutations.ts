@@ -66,7 +66,7 @@ export const seedDocumentChecklist = mutation({
 
     if (existing) {
       const prior = new Map(existing.documents.map((d) => [d.id, d]));
-      const merged = documents.map((doc) => {
+      const seeded = documents.map((doc) => {
         const old = prior.get(doc.id);
         if (!old) return doc;
         return {
@@ -76,12 +76,22 @@ export const seedDocumentChecklist = mutation({
           expiryDate: old.expiryDate,
         };
       });
+      // Additive — a country-template import lives in this same array, and
+      // this mutation re-runs on mount to backfill any missing static doc.
+      // Replacing would undo the import on the very next page load.
+      const seededIds = new Set(seeded.map((d) => d.id));
+      const merged = [
+        ...seeded,
+        ...existing.documents.filter((d) => !seededIds.has(d.id)),
+      ];
       const progress = Math.round(
         (merged.filter((d) => d.completed).length / merged.length) * 100,
       );
       await ctx.db.patch(existing._id, {
         type,
-        country,
+        // Keep the imported country — the frontend seed never sends one, and
+        // losing it would break the previous-country eviction on re-import.
+        country: country ?? existing.country,
         documents: merged,
         progress,
       });
@@ -205,41 +215,60 @@ async function applyCountryTemplate(
     (existing?.documents ?? []).map((d) => [d.id, d]),
   );
 
+  // The two checklist tabs filter on `category` being "local" | "international",
+  // while a template's own category ("visa", "language", …) is the axis the
+  // sidebar sub-filter uses. Without this shift the imported docs carry a
+  // vocabulary that matches neither tab and render nowhere.
+  const scope = template.country === "ID" ? "local" : "international";
+
   let preserved = 0;
   const documents = template.documents.map((td) => {
     const old = prior.get(td.id);
+    const base = {
+      id: td.id,
+      name: td.title,
+      description: td.description,
+      category: scope,
+      subcategory: td.subcategory ?? td.category,
+      required: td.required,
+    };
     if (old) {
       preserved++;
       return {
-        id: td.id,
-        name: td.title,
-        category: td.category,
-        subcategory: td.subcategory,
-        required: td.required,
+        ...base,
         completed: old.completed,
         notes: old.notes,
         expiryDate: old.expiryDate,
       };
     }
-    return {
-      id: td.id,
-      name: td.title,
-      category: td.category,
-      subcategory: td.subcategory,
-      required: td.required,
-      completed: false,
-      notes: "",
-    };
+    return { ...base, completed: false, notes: "" };
   });
 
-  const completedCount = documents.filter((d) => d.completed).length;
-  const progress = Math.round((completedCount / documents.length) * 100);
+  // Merge, never replace — the user's local Indonesian docs and their
+  // ticked-off progress live in this same array. Docs from a *previous*
+  // country import are dropped, so JP → KR swaps the destination paperwork
+  // instead of stacking two countries' worth of it.
+  const templateIds = new Set(documents.map((d) => d.id));
+  let kept = (existing?.documents ?? []).filter((d) => !templateIds.has(d.id));
+  const previousCountry = existing?.country;
+  if (previousCountry && previousCountry !== template.country) {
+    const previous = await ctx.db
+      .query("documentTemplates")
+      .withIndex("by_country", (q) => q.eq("country", previousCountry))
+      .first();
+    const previousIds = new Set((previous?.documents ?? []).map((d) => d.id));
+    kept = kept.filter((d) => !previousIds.has(d.id));
+  }
+  const merged = [...kept, ...documents];
+
+  const completedCount = merged.filter((d) => d.completed).length;
+  const progress = Math.round((completedCount / merged.length) * 100);
 
   if (existing) {
     await ctx.db.patch(existing._id, {
       type: "country-template",
       country: template.country,
-      documents,
+      documents: merged,
       progress,
     });
     return {
@@ -253,8 +282,8 @@ async function applyCountryTemplate(
     userId,
     type: "country-template",
     country: template.country,
-    documents,
-    progress: 0,
+    documents: merged,
+    progress,
   });
   return {
     checklistId,

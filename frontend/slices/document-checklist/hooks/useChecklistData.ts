@@ -7,6 +7,11 @@ import { indonesianDocumentChecklist } from "@/shared/data/indonesianData";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useDemoChecklistOverlay } from "@/shared/hooks/useDemoOverlay";
+import {
+  buildChecklistItems,
+  needsBaselineSeed,
+  type ChecklistOverlayEntry,
+} from "../lib/checklistItems";
 import type { ChecklistItem } from "../types";
 
 export function useChecklistData() {
@@ -14,9 +19,13 @@ export function useChecklistData() {
   const isAuthenticated = authState.isAuthenticated;
   const isDemo = authState.isDemo;
 
+  // Demo sessions are anonymous-but-authenticated, and the country import
+  // writes to Convex for them too — skipping the query here is what made an
+  // import invisible in a guest walkthrough. Their *toggles* still stay in
+  // localStorage via the overlay below.
   const checklist = useQuery(
     api.documents.queries.getUserDocumentChecklist,
-    isAuthenticated && !isDemo ? {} : "skip",
+    isAuthenticated ? {} : "skip",
   );
   const seedChecklist = useMutation(api.documents.mutations.seedDocumentChecklist);
   const updateDocumentStatus = useMutation(api.documents.mutations.updateDocumentStatus);
@@ -29,7 +38,12 @@ export function useChecklistData() {
   useEffect(() => {
     if (isDemo) return;
     if (checklist === undefined) return;
-    if (checklist !== null) return;
+    // Not just `checklist === null`: an account whose checklist was replaced
+    // by an older country import has a row but no baseline documents, and
+    // every one of its checkboxes throws "Dokumen tidak ditemukan" until the
+    // baseline is back. The seed mutation is additive, so this is safe to
+    // re-run against a row that already holds imported country docs.
+    if (!needsBaselineSeed(checklist?.documents ?? [])) return;
     if (seedAttempted.current) return;
     seedAttempted.current = true;
     seedChecklist({
@@ -46,35 +60,25 @@ export function useChecklistData() {
     });
   }, [checklist, seedChecklist, isDemo]);
 
-  const items = useMemo<ChecklistItem[]>(() => {
-    if (isDemo) {
-      return indonesianDocumentChecklist.map((tpl) => {
-        const sv = demoChecklist.progress[tpl.id];
-        return sv
-          ? {
-              ...tpl,
-              completed: !!sv.completed,
-              notes: sv.notes || undefined,
-              dueDate: sv.expiryDate,
-            }
-          : tpl;
-      });
+  const serverDocs = useMemo(() => checklist?.documents ?? [], [checklist]);
+
+  const overlay = useMemo<Record<string, ChecklistOverlayEntry>>(() => {
+    if (isDemo) return demoChecklist.progress;
+    const map: Record<string, ChecklistOverlayEntry> = {};
+    for (const d of serverDocs) {
+      map[d.id] = {
+        completed: d.completed,
+        notes: d.notes,
+        expiryDate: d.expiryDate,
+      };
     }
-    const serverById = new Map(
-      (checklist?.documents ?? []).map((d) => [d.id, d]),
-    );
-    return indonesianDocumentChecklist.map((tpl) => {
-      const sv = serverById.get(tpl.id);
-      return sv
-        ? {
-            ...tpl,
-            completed: sv.completed,
-            notes: sv.notes || undefined,
-            dueDate: sv.expiryDate,
-          }
-        : tpl;
-    });
-  }, [checklist, isDemo, demoChecklist.progress]);
+    return map;
+  }, [isDemo, demoChecklist.progress, serverDocs]);
+
+  const items = useMemo<ChecklistItem[]>(
+    () => buildChecklistItems(serverDocs, overlay),
+    [serverDocs, overlay],
+  );
 
   const toggleItem = (itemId: string) => {
     if (isDemo) {

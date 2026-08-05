@@ -11,7 +11,9 @@ export interface ChecklistItem {
     title: string;
     description: string;
     category: DocumentCategory;
-    subcategory: DocumentSubcategory;
+    /** Not `DocumentSubcategory` — country templates bring their own
+     *  vocabulary ("visa", "language", …) on this axis. */
+    subcategory: string;
     required: boolean;
     completed: boolean;
     dueDate?: string;
