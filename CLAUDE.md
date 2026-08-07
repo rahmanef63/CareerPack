@@ -20,10 +20,14 @@ All scripts run from repo root (pnpm workspace, `packageManager = pnpm@10.24.0`)
 | Convex one-shot sync (types only) | `pnpm backend:dev-sync` |
 | Convex deploy to prod | `pnpm backend:deploy` |
 | Regenerate self-hosted admin key | `pnpm backend:admin-key` |
+| Smoke-test production | `pnpm smoke` |
+| Wait for the Dokploy rebuild, then smoke-test | `pnpm smoke:watch` (run right after a push) |
 
 Pre-commit hook (`simple-git-hooks` + `lint-staged`) runs ESLint `--fix` on frontend TS and `tsc --noEmit` on `convex/**/*.ts`. Do not bypass with `--no-verify`.
 
 **Pre-push hook = quality gate + Convex auto-deploy.** `scripts/pre-push.sh` (wired via `simple-git-hooks`) first runs `pnpm typecheck` + `pnpm lint` + `pnpm test:coverage` + `pnpm build` on every push (bypass: `SKIP_PUSH_CHECKS=1`) — GitHub Actions CI is manual-only, so this gate is the last automated check before main. `pnpm build` is the only step that catches build-only breakage (top-level native imports, missing `serverExternalPackages`, route exports the current Next config rejects); typecheck and vitest are blind to all three, and Dokploy builds straight off a push to main. It then diffs the push range against `convex/**`; if anything changed it deploys before the push lands (fast path skips deploy when no Convex changes). Deploy is skipped when no target resolves at all (no deploy key, no CLI login, no self-hosted env) or when `SKIP_CONVEX_DEPLOY=1` is set. Push aborts if the gate or the deploy fails — fix and retry, or use the bypass vars for an emergency push.
+
+**Resolving to the self-hosted backend now ABORTS the push** (bypass: `ALLOW_NONPROD_CONVEX_DEPLOY=1`). It used to warn and proceed, which is how `convex/**` changes shipped a frontend built against backend code that was never deployed. The usual trigger is `pnpm backend:dev-sync` rewriting `.env.local` and dropping the `CONVEX_DEPLOYMENT` line, which drops the hook from tier 2 to tier 3 — if a push aborts this way, check that line first.
 
 **Which Convex deployment is production (audited 2026-07-30).** Three deployments are in play and they are easy to confuse:
 

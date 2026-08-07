@@ -141,7 +141,20 @@ export function useFileUpload() {
   const [progress, setProgress] = useState<number>(0);
 
   const upload = useCallback(
-    async (file: File): Promise<UploadResult> => {
+    async (
+      file: File,
+      opts?: {
+        /** Longest-edge cap in device px — see MAX_EDGE in imageConvert. */
+        maxEdge?: number;
+        /** Skip conversion: this app's own canvas already produced the
+         *  WebP (the crop path). Without it the crop output was decoded
+         *  and re-encoded a second time — quality 0.9 twice, 2x CPU, and
+         *  2x peak canvas for 3 of the 4 upload sites. Only ever set on
+         *  bytes we generated ourselves; every user-supplied byte must
+         *  still be re-encoded, because that is what strips EXIF/GPS. */
+        preConverted?: boolean;
+      },
+    ): Promise<UploadResult> => {
       const validation = validateFile(file);
       if (!validation.ok) {
         setError(validation.error);
@@ -160,8 +173,8 @@ export function useFileUpload() {
         // Convert raster images to WebP before upload. PDFs bypass this
         // step. Conversion throws (Indonesian) if the browser can't
         // decode or the file is >10 MB. Always re-encodes to strip EXIF.
-        if (isConvertibleImage(file.type)) {
-          toUpload = await convertImageToWebP(file);
+        if (!opts?.preConverted && isConvertibleImage(file.type)) {
+          toUpload = await convertImageToWebP(file, opts?.maxEdge);
         }
 
         const uploadUrl = await generateUploadUrl();

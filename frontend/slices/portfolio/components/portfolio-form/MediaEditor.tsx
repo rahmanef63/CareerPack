@@ -6,6 +6,7 @@ import { Trash2, Upload } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { FileUpload } from "@/shared/components/files/FileUpload";
+import { MAX_EDGE } from "@/shared/lib/imageConvert";
 import type { PortfolioMedia, PortfolioMediaKind } from "../../types";
 import { LibraryPicker } from "@/shared/components/files/LibraryPicker";
 import { PortfolioCoverPlaceholder } from "@/shared/components/illustrations/marketing";
@@ -56,6 +57,7 @@ export function MediaEditor({ media, onChange }: Props) {
           label=""
           accept="image/*"
           crop={{ aspect: 16 / 9 }}
+          maxEdge={MAX_EDGE.media}
           hint="Unggah baru — gambar (JPG/PNG/WebP)"
           onUploaded={(r) => handleUploaded(r.storageId, "image", r.previewUrl)}
         />

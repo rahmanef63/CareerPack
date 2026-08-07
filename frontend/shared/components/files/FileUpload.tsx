@@ -66,6 +66,12 @@ export interface FileUploadProps {
    * PDFs skip the crop step regardless.
    */
   crop?: boolean | { aspect?: number };
+  /**
+   * Longest-edge cap in device px for the stored image — pick from
+   * MAX_EDGE. Omit and the original resolution is kept, which is almost
+   * never what a display surface wants.
+   */
+  maxEdge?: number;
   disabled?: boolean;
   className?: string;
 }
@@ -94,6 +100,7 @@ export function FileUpload({
   label = "Unggah file",
   hint = "Tarik dan lepas, atau klik untuk pilih file. Gambar (JPG/PNG/WebP) dikonversi ke WebP otomatis (maks 10 MB). PDF maks 50 MB.",
   crop,
+  maxEdge,
   disabled = false,
   className,
 }: FileUploadProps) {
@@ -131,7 +138,10 @@ export function FileUpload({
   }, [cropSource]);
 
   const runUpload = useCallback(
-    async (file: File) => {
+    async (
+      file: File,
+      opts?: { preConverted?: boolean; reportedOriginalSize?: number },
+    ) => {
       const isImg = file.type.startsWith("image/");
       const previewUrl = isImg ? URL.createObjectURL(file) : null;
       setState({
@@ -142,7 +152,10 @@ export function FileUpload({
         fileSize: file.size,
       });
 
-      const result: UploadResult = await upload(file);
+      const result: UploadResult = await upload(file, {
+        maxEdge,
+        preConverted: opts?.preConverted,
+      });
       if (!result.ok) {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         setState({ kind: "idle" });
@@ -150,8 +163,16 @@ export function FileUpload({
         return;
       }
 
-      const { ok: _ok, ...payload } = result;
+      const { ok: _ok, ...raw } = result;
       void _ok;
+      // On the crop path `upload` sees a File this app already produced,
+      // so its own `originalSize` is the POST-crop size and the savings
+      // line would report nothing at the moment the biggest win lands.
+      // Report the byte count the user actually picked.
+      const payload = {
+        ...raw,
+        originalSize: opts?.reportedOriginalSize ?? raw.originalSize,
+      };
       setState({ kind: "done", previewUrl, result: payload });
 
       const desc =
@@ -161,7 +182,7 @@ export function FileUpload({
       notify.success("File terunggah", { description: desc });
       onUploaded?.({ ...payload, previewUrl });
     },
-    [upload, onUploaded],
+    [upload, onUploaded, maxEdge],
   );
 
   const handleFile = useCallback(
@@ -195,15 +216,26 @@ export function FileUpload({
   const confirmCrop = async () => {
     if (!cropSource || !cropPixels) return;
     try {
-      const cropped = await applyCropToImage(cropSource.file, {
-        x: cropPixels.x,
-        y: cropPixels.y,
-        width: cropPixels.width,
-        height: cropPixels.height,
-      });
+      const sourceBytes = cropSource.file.size;
+      // Crop and downscale in ONE decode/encode. The result is already
+      // WebP from this app's own canvas, so `preConverted` stops the
+      // uploader decoding and re-encoding it a second time.
+      const cropped = await applyCropToImage(
+        cropSource.file,
+        {
+          x: cropPixels.x,
+          y: cropPixels.y,
+          width: cropPixels.width,
+          height: cropPixels.height,
+        },
+        maxEdge,
+      );
       URL.revokeObjectURL(cropSource.url);
       setCropSource(null);
-      await runUpload(cropped);
+      await runUpload(cropped, {
+        preConverted: true,
+        reportedOriginalSize: sourceBytes,
+      });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Gagal memotong gambar";
       notify.error("Crop gagal", { description: msg });

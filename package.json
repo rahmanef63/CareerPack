@@ -21,6 +21,8 @@
     "backend:deploy": "pnpm exec convex deploy --yes --env-file backend/convex-self-hosted/convex.env",
     "backend:deploy-prod": "pnpm exec convex deploy --yes --env-file backend/convex-cloud/prod.env",
     "backend:admin-key": "docker exec -i $(docker ps --filter name=careerpack-convex --filter status=running --format '{{.Names}}' | grep backend | head -1) ./generate_admin_key.sh",
+    "smoke": "bash scripts/smoke-prod.sh",
+    "smoke:watch": "bash scripts/smoke-prod.sh --watch",
     "pwa:assets": "node scripts/generate-pwa-assets.mjs",
     "prepare": "simple-git-hooks"
   },

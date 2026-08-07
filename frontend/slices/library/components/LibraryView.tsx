@@ -9,6 +9,7 @@ import { api } from "../../../../convex/_generated/api";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Button } from "@/shared/components/ui/button";
 import { FileUpload } from "@/shared/components/files/FileUpload";
+import { MAX_EDGE } from "@/shared/lib/imageConvert";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -123,8 +124,12 @@ export function LibraryView() {
               File otomatis tersedia di Library setelah selesai upload. Bisa di-tag setelahnya.
             </ResponsiveDialogDescription>
           </ResponsiveDialogHeader>
+          {/* Loosest cap on purpose: LibraryPicker lets a stored blob become
+              a CV photo or a portfolio cover later, so library uploads have to
+              carry the largest downstream requirement, not this grid's size. */}
           <FileUpload
             label=""
+            maxEdge={MAX_EDGE.media}
             onUploaded={() => {
               notify.success("File terunggah");
               setShowUpload(false);

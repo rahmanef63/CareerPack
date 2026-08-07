@@ -15,6 +15,7 @@ import {
   ResponsiveDialogDescription,
 } from "@/shared/components/ui/responsive-dialog";
 import { FileUpload, type FileUploadResult } from "./FileUpload";
+import { MAX_EDGE } from "@/shared/lib/imageConvert";
 import { LibraryPicker } from "./LibraryPicker";
 
 interface PhotoPickerProps {
@@ -32,6 +33,9 @@ interface PhotoPickerProps {
   onClear: () => void;
   /** Forwarded to upload dialog (e.g. `4 / 6` for CV portrait). */
   cropAspect?: number;
+  /** Longest-edge cap for the stored image. Defaults to MAX_EDGE.cvPhoto,
+   *  which is sized for the PDF export rather than the on-screen preview. */
+  maxEdge?: number;
   /** Optional max-size hint, surfaced in the upload dialog text. */
   uploadHint?: string;
   /** Disable all interactions. */
@@ -62,6 +66,7 @@ export function PhotoPicker({
   onPickFromLibrary,
   onClear,
   cropAspect,
+  maxEdge,
   uploadHint,
   disabled,
   className,
@@ -232,6 +237,7 @@ export function PhotoPicker({
             label=""
             accept="image/*"
             crop={cropAspect ? { aspect: cropAspect } : true}
+            maxEdge={maxEdge ?? MAX_EDGE.cvPhoto}
             hint={uploadHint ?? "JPG/PNG/WebP, maks 10 MB."}
             onUploaded={(r) => {
               onUpload(r);

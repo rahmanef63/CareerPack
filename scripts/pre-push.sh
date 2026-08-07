@@ -151,14 +151,39 @@ fi
 
 if [[ "${TARGET_IS_PROD}" -eq 1 ]]; then
   echo "[pre-push] Convex deploy OK → ${DEPLOY_TARGET}. Proceeding with git push." >&2
-else
-  # Not an error: the deploy genuinely succeeded. But it hit a backend no user
-  # reaches, so saying only "OK" here is how convex/** changes silently failed
-  # to reach production for weeks. Do not soften this.
-  echo "" >&2
-  echo "[pre-push] ⚠️  Deployed to ${DEPLOY_TARGET}." >&2
-  echo "[pre-push] ⚠️  PRODUCTION Convex functions are UNCHANGED — the live app" >&2
-  echo "[pre-push] ⚠️  talks to Convex Cloud (see Dockerfile NEXT_PUBLIC_CONVEX_URL)." >&2
-  echo "[pre-push] ⚠️  Wire ${PROD_ENV_FILE} to fix — see the header of this script." >&2
-  echo "" >&2
+  exit 0
 fi
+
+# The deploy genuinely succeeded — but it hit a backend no user reaches, so
+# production still runs the OLD functions while the push about to happen makes
+# Dokploy rebuild the frontend against them. That mismatch is how convex/**
+# changes (including security fixes) silently failed to reach production for
+# weeks while every push reported success.
+#
+# This used to warn and proceed. It now ABORTS, because a warning printed in
+# the middle of a build log is not a control.
+#
+# Most common cause: `pnpm backend:dev-sync` rewrote .env.local and dropped the
+# CONVEX_DEPLOYMENT line, so the tier-2 check above stopped matching and this
+# fell through to the legacy self-hosted backend.
+echo "" >&2
+echo "[pre-push] ✖  Deployed to ${DEPLOY_TARGET} — PUSH ABORTED." >&2
+echo "[pre-push] ✖  Production Convex functions are UNCHANGED. The live app talks to" >&2
+echo "[pre-push] ✖  Convex Cloud (see Dockerfile NEXT_PUBLIC_CONVEX_URL), so pushing now" >&2
+echo "[pre-push] ✖  would ship a frontend built against backend code that is not deployed." >&2
+echo "" >&2
+echo "[pre-push]    Fix, cheapest first:" >&2
+echo "[pre-push]      1. Check .env.local still has a CONVEX_DEPLOYMENT line." >&2
+echo "[pre-push]         'pnpm backend:dev-sync' removes it. Restore it and push again." >&2
+echo "[pre-push]      2. Or wire ${PROD_ENV_FILE} with a CONVEX_DEPLOY_KEY" >&2
+echo "[pre-push]         from the Convex dashboard — that is tier 1 and cannot be clobbered." >&2
+echo "" >&2
+echo "[pre-push]    Deliberately targeting the self-hosted backend? Re-run with" >&2
+echo "[pre-push]    ALLOW_NONPROD_CONVEX_DEPLOY=1 git push" >&2
+echo "" >&2
+
+if [[ "${ALLOW_NONPROD_CONVEX_DEPLOY:-0}" == "1" ]]; then
+  echo "[pre-push] ALLOW_NONPROD_CONVEX_DEPLOY=1 — proceeding anyway." >&2
+  exit 0
+fi
+exit 1

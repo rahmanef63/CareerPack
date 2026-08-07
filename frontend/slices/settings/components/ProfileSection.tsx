@@ -21,6 +21,7 @@ import {
   ResponsiveSelectTrigger,
 } from "@/shared/components/ui/responsive-select";
 import { FileUpload } from "@/shared/components/files/FileUpload";
+import { MAX_EDGE } from "@/shared/lib/imageConvert";
 
 interface ProfileState {
   fullName: string;
@@ -239,6 +240,7 @@ export function ProfileSection() {
                 label=""
                 accept="image/*"
                 crop={{ aspect: 1 }}
+                maxEdge={MAX_EDGE.avatar}
                 hint="Pilih gambar (JPG/PNG/WebP, maks 10 MB). Otomatis dipotong persegi + dikonversi ke WebP."
                 onUploaded={handleAvatarUploaded}
               />

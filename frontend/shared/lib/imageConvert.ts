@@ -8,9 +8,13 @@
  * Quality 0.9 is visually lossless for photos and typically cuts size
  * 50-70 % versus JPEG at the same perceived quality.
  *
- * Resolution is ALWAYS preserved — we never downscale here. Cropping is
- * a separate step (applyCropToImage) that happens before conversion
- * when the caller opts in.
+ * Resolution is capped by the caller's `maxEdge` (see MAX_EDGE). Omit it
+ * and the original resolution is preserved. This used to have no cap at
+ * all, which meant a 4032x3024 phone photo was stored at 4032x3024 and
+ * served 1:1 into a 40px avatar — every `<Image>` rendering user content
+ * passes `unoptimized`, so upload is the ONLY place resolution can be
+ * capped. Cropping is a separate step (applyCropToImage) that happens
+ * before conversion when the caller opts in.
  *
  * **Privacy side-effect:** Canvas drawImage copies ONLY pixel data, not
  * metadata. GPS coordinates, camera serial, thumbnails, XMP, and other
@@ -24,6 +28,44 @@
 export const MAX_CONVERT_BYTES = 10 * 1024 * 1024; // 10 MB image cap
 export const MAX_DOC_BYTES = 50 * 1024 * 1024;     // 50 MB PDF cap
 export const WEBP_QUALITY = 0.9;
+
+/**
+ * Longest-edge caps per use-case, in device pixels. Each is the largest
+ * size that surface ever actually renders at, times a DPR headroom:
+ *
+ *   avatar  512  — public hero renders 128 CSS px; 128 x DPR 3 = 384
+ *   cvPhoto 768  — print, not screen: 40mm at html2canvas scale 3 = 454
+ *   media  1600  — portfolio detail asks for 720 CSS px at DPR 2 = 1440
+ *   ocrPage 1400 — not a display size: A4 at 1400px is ~169 DPI, over
+ *                  the ~150 DPI floor where text OCR starts failing
+ *
+ * The library picker lets a stored blob become a CV photo or a portfolio
+ * cover later, so library uploads take `media` — the loosest downstream
+ * cap — rather than their own grid's much smaller size.
+ */
+export const MAX_EDGE = {
+  avatar: 512,
+  cvPhoto: 768,
+  media: 1600,
+  ocrPage: 1400,
+} as const;
+
+/**
+ * Scale (w,h) so the longer edge is at most `maxEdge`. Never upscales,
+ * never returns a zero dimension (a canvas of width 0 throws on encode).
+ */
+export function fitWithin(
+  w: number,
+  h: number,
+  maxEdge?: number,
+): { w: number; h: number } {
+  const longest = Math.max(w, h);
+  if (!maxEdge || longest <= maxEdge) {
+    return { w: Math.round(w), h: Math.round(h) };
+  }
+  const k = maxEdge / longest;
+  return { w: Math.max(1, Math.round(w * k)), h: Math.max(1, Math.round(h * k)) };
+}
 
 /** Server-accepted MIMEs — matches convex/files.ts ALLOWED_*_TYPES.
  *  Client converts everything in CONVERTIBLE_IMAGE_TYPES to webp
@@ -77,7 +119,10 @@ async function loadBitmap(file: File): Promise<ImageBitmap> {
  *   - file larger than 10 MB (can't safely decode on mobile)
  *   - decode / encode failure
  */
-export async function convertImageToWebP(file: File): Promise<File> {
+export async function convertImageToWebP(
+  file: File,
+  maxEdge?: number,
+): Promise<File> {
   if (!isConvertibleImage(file.type)) {
     throw new Error(
       "Tipe gambar tidak didukung. Gunakan JPG, PNG, atau WebP.",
@@ -95,12 +140,16 @@ export async function convertImageToWebP(file: File): Promise<File> {
 
   const bitmap = await loadBitmap(file);
   try {
+    const { w, h } = fitWithin(bitmap.width, bitmap.height, maxEdge);
     const canvas = document.createElement("canvas");
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas tidak tersedia di browser ini");
-    ctx.drawImage(bitmap, 0, 0);
+    // Required, not cosmetic: a single-step 4032 -> 512 downscale is a
+    // 7.9x reduction, which aliases visibly at the browser default.
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(bitmap, 0, 0, w, h);
 
     const blob = await canvasToWebpBlob(canvas);
     return new File([blob], renameToWebp(file.name), {
@@ -120,6 +169,7 @@ export async function convertImageToWebP(file: File): Promise<File> {
 export async function applyCropToImage(
   file: File,
   pixelCrop: { x: number; y: number; width: number; height: number },
+  maxEdge?: number,
 ): Promise<File> {
   if (!isConvertibleImage(file.type)) {
     throw new Error("Tipe gambar tidak didukung untuk crop");
@@ -140,11 +190,15 @@ export async function applyCropToImage(
 
   const bitmap = await loadBitmap(file);
   try {
+    // `pixelCrop` stays in SOURCE coordinates — only the destination
+    // shrinks. Scaling the source rect would crop the wrong region.
+    const { w, h } = fitWithin(pixelCrop.width, pixelCrop.height, maxEdge);
     const canvas = document.createElement("canvas");
-    canvas.width = Math.round(pixelCrop.width);
-    canvas.height = Math.round(pixelCrop.height);
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas tidak tersedia di browser ini");
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(
       bitmap,
       pixelCrop.x,
@@ -153,8 +207,8 @@ export async function applyCropToImage(
       pixelCrop.height,
       0,
       0,
-      pixelCrop.width,
-      pixelCrop.height,
+      w,
+      h,
     );
     const blob = await canvasToWebpBlob(canvas);
     return new File([blob], renameToWebp(file.name), {
