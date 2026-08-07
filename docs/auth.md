@@ -40,7 +40,7 @@ Tanpa langkah ini, tombolnya gagal seketika (no client creds).
    https://site.<convex-backend-anda>/api/auth/callback/google
    ```
 3. Set 3 env var di **backend Convex produksi** — yaitu dashboard Convex Cloud
-   `savory-oyster-802` (bukan env Dokploy; itu backend self-hosted legacy):
+   `proficient-dove-151` (bukan env Dokploy; itu backend self-hosted legacy):
    - `AUTH_GOOGLE_ID` — Client ID
    - `AUTH_GOOGLE_SECRET` — Client secret
    - `SITE_URL` — URL frontend (mis. `https://careerpack.org`) — tujuan

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Snapshot the PRODUCTION Convex Cloud deployment (savory-oyster-802) to a ZIP.
+# Snapshot the PRODUCTION Convex Cloud deployment (proficient-dove-151) to a ZIP.
 #
 # Why this exists: the nightly tar cron on the VPS and the PASSED restore drill
 # in docs/db-backup.md both back up the *self-hosted* Docker volume, which has

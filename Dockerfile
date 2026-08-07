@@ -27,7 +27,7 @@ WORKDIR /app
 # be overridden by --build-arg, so every build now bakes the correct URL.
 # NEXT_PUBLIC_* is inlined at build time — to change which Convex backend the
 # app talks to, edit THIS line and rebuild (a runtime env change does nothing).
-ENV NEXT_PUBLIC_CONVEX_URL=https://savory-oyster-802.convex.cloud
+ENV NEXT_PUBLIC_CONVEX_URL=https://proficient-dove-151.convex.cloud
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 

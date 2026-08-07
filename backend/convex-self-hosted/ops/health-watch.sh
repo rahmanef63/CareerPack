@@ -18,7 +18,7 @@
 # Full postmortem: docs/progress/2026-06-11-vps-incident-and-hardening.md
 #
 # RETARGETED 2026-07-30. Production's backend is Convex **Cloud**
-# (savory-oyster-802); the self-hosted compose is idle and serves nobody. Until
+# (proficient-dove-151); the self-hosted compose is idle and serves nobody. Until
 # this change the probes still pointed at `api.careerpack.org` /
 # `site.careerpack.org`, so the watchdog was reporting on a backend no user
 # touches — the same class of mistake as the backup cron and the deploy hook,
@@ -32,9 +32,9 @@
 #   FRONTEND_URL     Frontend root, expect HTTP 200
 #                    (default https://careerpack.org)
 #   CONVEX_API_URL   Convex API origin; /version must return 200
-#                    (default https://savory-oyster-802.convex.cloud)
+#                    (default https://proficient-dove-151.convex.cloud)
 #   CONVEX_SITE_URL  Convex site origin; /api/health must return ok:true
-#                    (default https://savory-oyster-802.convex.site)
+#                    (default https://proficient-dove-151.convex.site)
 #   SELF_HOSTED      1 = also run the container probe, self-heal and volume
 #                    backup-freshness check. 0 (default) = Cloud backend, so
 #                    there is no container to inspect and no volume tar to age
@@ -61,8 +61,8 @@
 set -euo pipefail
 
 FRONTEND_URL="${FRONTEND_URL:-https://careerpack.org}"
-CONVEX_API_URL="${CONVEX_API_URL:-https://savory-oyster-802.convex.cloud}"
-CONVEX_SITE_URL="${CONVEX_SITE_URL:-https://savory-oyster-802.convex.site}"
+CONVEX_API_URL="${CONVEX_API_URL:-https://proficient-dove-151.convex.cloud}"
+CONVEX_SITE_URL="${CONVEX_SITE_URL:-https://proficient-dove-151.convex.site}"
 SELF_HOSTED="${SELF_HOSTED:-0}"
 BACKEND_CONTAINER="${BACKEND_CONTAINER:-careerpack-convex-backend}"
 COMPOSE_PROJECT="${COMPOSE_PROJECT:-careerpack-convex-8gdbpk}"

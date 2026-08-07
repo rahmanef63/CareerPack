@@ -1,6 +1,6 @@
 # Backend (Convex)
 
-Semua backend di `convex/`. **Produksi = Convex Cloud `savory-oyster-802`** (di-hardcode
+Semua backend di `convex/`. **Produksi = Convex Cloud `proficient-dove-151`** (di-hardcode
 sebagai `NEXT_PUBLIC_CONVEX_URL` di `Dockerfile`); deploy ke sana lewat
 `pnpm backend:deploy-prod`. Stack self-hosted di `backend/convex-self-hosted/` masih
 hidup tapi tidak melayani user — lihat tabel deployment di [CLAUDE.md](../CLAUDE.md).
@@ -171,7 +171,7 @@ login lagi sebagai user tersebut.
 
 ## 9. Deployment
 
-Produksi (Convex Cloud `savory-oyster-802`):
+Produksi (Convex Cloud `proficient-dove-151`):
 ```bash
 pnpm backend:deploy-prod   # convex deploy --env-file backend/convex-cloud/prod.env
 ```

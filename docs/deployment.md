@@ -4,7 +4,7 @@
 >
 > Doc ini menjelaskan stack **Dokploy + self-hosted Convex**. Frontend memang
 > masih di Dokploy — tapi **backend produksi sudah pindah ke Convex Cloud**:
-> `Dockerfile` men-hardcode `NEXT_PUBLIC_CONVEX_URL=https://savory-oyster-802.convex.cloud`.
+> `Dockerfile` men-hardcode `NEXT_PUBLIC_CONVEX_URL=https://proficient-dove-151.convex.cloud`.
 >
 > Konsekuensi yang harus diingat waktu baca sisa doc ini:
 >
@@ -103,7 +103,7 @@ Tanpa secret ini, dispatch manual `convex-deploy.yml` gagal.
 ### Convex
 
 ```bash
-# PRODUKSI (Convex Cloud savory-oyster-802)
+# PRODUKSI (Convex Cloud proficient-dove-151)
 pnpm backend:deploy-prod
 # Script: pnpm exec convex deploy --yes --env-file backend/convex-cloud/prod.env
 
@@ -139,9 +139,9 @@ idempotent, **tanpa secret**):
 
 1. `careerpack-frontend` — root frontend HTTP 200 (`FRONTEND_URL`)
 2. `careerpack-convex-api` — `/version` HTTP 200 (`CONVEX_API_URL`, default
-   `https://savory-oyster-802.convex.cloud`)
+   `https://proficient-dove-151.convex.cloud`)
 3. `careerpack-site-health` — `/api/health` body `ok:true` (`CONVEX_SITE_URL`,
-   default `https://savory-oyster-802.convex.site`)
+   default `https://proficient-dove-151.convex.site`)
 4. `careerpack-convex-container` — Docker health of `careerpack-convex-backend`.
    **Only when `SELF_HOSTED=1`.** Against Cloud there is no container, so this
    probe would fire "GONE" every tick and `compose up -d` would keep trying to
@@ -162,8 +162,8 @@ Both were retargeted on 2026-07-30. Until then every CareerPack backend probe
 pointed at `api./site.careerpack.org` — the self-hosted stack — so a Convex
 **Cloud** outage would have left the registry entirely green. The live registry
 now checks `careerpack.org`, `careerpack.org/api/health`,
-`savory-oyster-802.convex.cloud/version` and
-`savory-oyster-802.convex.site/api/health`, with the self-hosted pair demoted to
+`proficient-dove-151.convex.cloud/version` and
+`proficient-dove-151.convex.site/api/health`, with the self-hosted pair demoted to
 `careerpack-legacy-*`.
 
 **Self-heal:** kalau container backend **hilang** (kelas insiden 2026-06-11 —
@@ -296,7 +296,7 @@ produksi; email yang cocok naik jadi `role: "admin"` pada login berikutnya.
 # sudah ada belum? (list mencetak nama DAN nilai — jangan tempel outputnya ke mana pun)
 pnpm exec convex env list --env-file backend/convex-cloud/prod.env
 
-# set di PRODUKSI (Convex Cloud savory-oyster-802)
+# set di PRODUKSI (Convex Cloud proficient-dove-151)
 pnpm exec convex env set AI_CRED_SECRET "$(openssl rand -hex 32)" \
   --env-file backend/convex-cloud/prod.env
 ```

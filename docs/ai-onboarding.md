@@ -15,7 +15,7 @@ CVs, track job applications, pick skill roadmaps, practise interviews,
 plan relocation finances, and can publish a `careerpack.org/<slug>`
 personal-brand page. Stack: **Next.js 15 App Router** (frontend, deployed
 on **Dokploy**) + **Convex** (backend + blob storage + auth) — production
-backend is Convex **Cloud** `savory-oyster-802`; the self-hosted Docker
+backend is Convex **Cloud** `proficient-dove-151`; the self-hosted Docker
 stack is legacy. UI strings are Indonesian, enforced by **R8**.
 
 ---

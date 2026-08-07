@@ -8,7 +8,7 @@ Operational tasks that didn't fit in code commits but must be executed (or expli
 
 > ⚠️ **Everything in this section is about the SELF-HOSTED volume, which stopped
 > holding production data at the Convex Cloud cutover.** Production data lives in
-> Convex Cloud `savory-oyster-802` and is covered by a different backup:
+> Convex Cloud `proficient-dove-151` and is covered by a different backup:
 > [`scripts/backup-prod.sh`](../scripts/backup-prod.sh) (`convex export --prod
 > --include-file-storage`, `rahman` crontab `0 4 * * *` on the VPS, archives in
 > `~/backups/careerpack/`), whose **import drill PASSED 2026-07-30** — 54 tables,

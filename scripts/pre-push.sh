@@ -15,7 +15,7 @@
 # blind to all three, and Dokploy builds straight off a push to main.
 #
 # DEPLOY TARGET. Production's frontend talks to Convex CLOUD
-# (savory-oyster-802 — hardcoded in Dockerfile), NOT to the self-hosted Dokploy
+# (proficient-dove-151 — hardcoded in Dockerfile), NOT to the self-hosted Dokploy
 # backend. So the deploy target is resolved in that order:
 #
 #   1. backend/convex-cloud/prod.env       → CONVEX_DEPLOY_KEY, Cloud PROD  ✅
@@ -37,7 +37,7 @@
 # behaviour, not a bug here. Wire (1) anyway for CI, or for any machine without
 # an interactive `convex login`.
 #
-# To wire (1): Convex dashboard → savory-oyster-802 → Settings → Deploy keys →
+# To wire (1): Convex dashboard → proficient-dove-151 → Settings → Deploy keys →
 # "Generate production deploy key", then
 #   mkdir -p backend/convex-cloud
 #   printf 'CONVEX_DEPLOY_KEY=prod:…\n' > backend/convex-cloud/prod.env

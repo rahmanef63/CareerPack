@@ -29,7 +29,7 @@ Default `.env.local` mengarah ke prod self-hosted (`<your-convex-backend>`). Unt
 | `pnpm typecheck` | `tsc --noEmit` frontend + convex |
 | `pnpm backend:dev` | Convex dev watch mode (live push tiap file change) |
 | `pnpm backend:dev-sync` | Convex push sekali tanpa watch (untuk sync types) |
-| `pnpm backend:deploy-prod` | **Deploy ke produksi** — Convex Cloud `savory-oyster-802` (`--env-file backend/convex-cloud/prod.env`) |
+| `pnpm backend:deploy-prod` | **Deploy ke produksi** — Convex Cloud `proficient-dove-151` (`--env-file backend/convex-cloud/prod.env`) |
 | `pnpm backend:deploy` | Deploy ke stack self-hosted legacy — **bukan** produksi |
 | `pnpm backend:admin-key` | Generate admin key dari container self-hosted |
 

@@ -5,7 +5,7 @@
 > **Everything below protects the self-hosted Docker volume. Production data is
 > not in that volume.**
 >
-> Production's frontend talks to Convex **Cloud** `savory-oyster-802`
+> Production's frontend talks to Convex **Cloud** `proficient-dove-151`
 > (hardcoded as `NEXT_PUBLIC_CONVEX_URL` in `Dockerfile`). The nightly cron tar,
 > the 121 MB archives, and the PASSED restore drill all target
 > `careerpack-convex-8gdbpk_data` — the self-hosted volume, which serves nothing
@@ -44,9 +44,18 @@
 >
 >   The drill deployment was then wiped (`--replace-all` with an empty archive)
 >   and verified empty — 0 documents, 0 storage blobs, only the 52 table names
->   left. It holds no production PII. **The project itself still exists**; delete
->   it from the dashboard, or keep it as a standing target and re-run the drill
->   after any schema change that alters a table's shape.
+>   left.
+>
+>   ⛔ **`careerpack-restore-drill` IS PRODUCTION as of 2026-08-07 — do not delete
+>   it.** An earlier version of this paragraph told you to delete the project from
+>   the dashboard once the drill was done. That advice is now the single most
+>   destructive thing in this repo: production was migrated INTO this project, and
+>   `proficient-dove-151` is its prod deployment. The name is misleading and the
+>   project should be renamed in the dashboard; until it is, read this warning as
+>   load-bearing. Its `effervescent-hedgehog-352` dev deployment is what local
+>   `pnpm dev` binds to and holds no production data.
+>
+>   Future drills need a NEW throwaway project, not this one.
 >
 >   Repeat the drill with:
 >   ```bash
