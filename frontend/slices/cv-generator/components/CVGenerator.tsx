@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQuery } from 'convex/react';
 import { ChevronsDownUp, ChevronsUpDown, Download, Eye, Save } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { QuickFillButton } from '@/shared/components/onboarding';
+import { CVImportButton, QuickFillButton } from '@/shared/components/onboarding';
 import { api } from '../../../../convex/_generated/api';
 import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
@@ -315,6 +315,7 @@ export function CVGenerator() {
               {expandAll ? 'Tutup' : 'Buka'} semua
             </span>
           </Button>
+          <CVImportButton variant="outline" size="sm" />
           <QuickFillButton variant="outline" size="sm" />
           {/* h-8 to match the size="sm" buttons flanking it — the pill's own
               p-1 + py-1.5 measures 40px, so it stood 8px taller than every

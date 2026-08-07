@@ -83,7 +83,7 @@ type RawProfileFields = {
  * fullName/location/targetRole <=120, experienceLevel <=40, bio <=600,
  * skills/interests <=50 entries each <=60 chars; control chars rejected.
  */
-function validateProfileFields(args: RawProfileFields): Record<string, unknown> {
+export function validateProfileFields(args: RawProfileFields): Record<string, unknown> {
   const patch: Record<string, unknown> = {};
   if (args.fullName !== undefined) {
     patch.fullName = assertShortText(args.fullName, 120, "Nama");

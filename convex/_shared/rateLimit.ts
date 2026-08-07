@@ -14,6 +14,18 @@ export const AI_RATE_LIMITS: Record<string, RateLimitRule> = {
 };
 
 /**
+ * Bulk-write imports. `quickFill` shipped with no bucket at all behind only
+ * `requireUser`, so one account could drive unbounded multi-table writes; the
+ * CV import walks the same ground (profile patch + a whole `cvs` document per
+ * call) and gets a bound from day one. 20/h is far above any honest use — a
+ * human re-uploads a CV a handful of times while tuning it — and far below the
+ * rate at which a script could bloat the deployment.
+ */
+export const IMPORT_RATE_LIMITS: Record<string, RateLimitRule> = {
+  "import:merge": { key: "import:merge", windowMs: 60 * 60 * 1000, max: 20 },
+};
+
+/**
  * Ceiling across ALL users, on top of the per-user buckets above.
  *
  * Why this exists when a hard credit limit on the OpenRouter key would also

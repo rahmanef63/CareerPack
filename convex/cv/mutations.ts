@@ -144,7 +144,7 @@ function assertCount<T>(arr: T[], label: string): T[] {
  * control chars are rejected and oversize throws the shared Indonesian
  * messages. Mirrors the caps used by the profile + application mutations.
  */
-function validateCVUpdates(updates: CVUpdates): CVUpdates {
+export function validateCVUpdates(updates: CVUpdates): CVUpdates {
   const out: CVUpdates = { ...updates };
 
   if (updates.title !== undefined) {

@@ -1,3 +1,3 @@
 export { QuickFillButton } from "./QuickFillButton";
 export { QuickFillDialog } from "./QuickFillDialog";
-export { LinkedInImportButton } from "./LinkedInImportButton";
+export { CVImportButton } from "./cv-import/CVImportButton";

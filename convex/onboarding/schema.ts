@@ -31,6 +31,16 @@ export const onboardingTables = {
     applicationIds: v.array(v.id("jobApplications")),
     contactIds: v.array(v.id("contacts")),
 
+    // Pre-patch copies of CV documents this batch MERGED into. `cvIds`
+    // only ever holds rows the batch inserted, so without these an import
+    // that patched an existing CV would have nothing to roll back to.
+    cvSnapshots: v.optional(
+      v.array(v.object({ cvId: v.id("cvs"), doc: v.any() })),
+    ),
+    // Which import path produced the batch ("cv-import-pdf",
+    // "cv-import-ocr", …). Absent on every quickFill row.
+    source: v.optional(v.string()),
+
     warnings: v.array(v.string()),
     undone: v.boolean(),
     undoneAt: v.optional(v.number()),

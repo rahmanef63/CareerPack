@@ -348,6 +348,20 @@ export const undoBatch = mutation({
       }
     }
 
+    // CV revert — only the CV import ever merges into an existing row, so
+    // this list is empty for every quickFill batch. Same ownership
+    // discipline as safeDelete: a snapshot whose row has since been
+    // deleted or handed to nobody is skipped rather than resurrected.
+    for (const snap of batch.cvSnapshots ?? []) {
+      const doc = await ctx.db.get(snap.cvId);
+      if (!doc || doc.userId !== userId) continue;
+      type CVWithoutSystem = Omit<Doc<"cvs">, "_id" | "_creationTime">;
+      await ctx.db.replace(snap.cvId, {
+        ...(snap.doc as CVWithoutSystem),
+        userId,
+      });
+    }
+
     await ctx.db.patch(args.batchId, {
       undone: true,
       undoneAt: Date.now(),

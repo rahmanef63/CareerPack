@@ -23,7 +23,7 @@ import {
   ResponsiveSelectItem,
   ResponsiveSelectTrigger,
 } from "@/shared/components/ui/responsive-select";
-import { LinkedInImportButton, QuickFillButton } from "@/shared/components/onboarding";
+import { CVImportButton, QuickFillButton } from "@/shared/components/onboarding";
 import { cn } from "@/shared/lib/utils";
 import { notify } from "@/shared/lib/notify";
 
@@ -277,8 +277,8 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
                 </div>
                 <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4 text-center">
                   <Sparkles className="mx-auto mb-2 h-5 w-5 text-brand" />
-                  <p className="mb-3 text-xs font-medium">LinkedIn — upload PDF</p>
-                  <LinkedInImportButton variant="outline" size="sm" className="gap-1.5" />
+                  <p className="mb-3 text-xs font-medium">Punya CV? Unggah saja</p>
+                  <CVImportButton variant="outline" size="sm" className="gap-1.5" />
                 </div>
               </div>
               <p className="text-center text-xs text-muted-foreground">
