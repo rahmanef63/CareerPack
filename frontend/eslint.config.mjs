@@ -82,7 +82,11 @@ const sliceIsolation = ISOLATED_SLICES.map((slice) => {
 
 const eslintConfig = [
   {
-    ignores: [".next/**", "next-env.d.ts"],
+    // `public/**` holds static assets served verbatim, never source. It picked
+    // up the minified pdf.js worker that prebuild copies out of node_modules,
+    // and a vendored bundle produces thousands of warnings under a
+    // --max-warnings=0 gate.
+    ignores: [".next/**", "next-env.d.ts", "public/**"],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {

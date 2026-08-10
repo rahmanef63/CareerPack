@@ -3,10 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint . --max-warnings=0"
+    "dev": "next dev",
+    "lint": "eslint . --max-warnings=0",
+    "prebuild": "node ../scripts/copy-pdf-worker.mjs",
+    "predev": "node ../scripts/copy-pdf-worker.mjs",
+    "start": "next start"
   },
   "dependencies": {
     "@convex-dev/auth": "^0.0.90",

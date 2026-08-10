@@ -74,3 +74,6 @@ coverage
 # not relevant to public contributors.
 .claude/skills/si-coder/
 .harvest/
+
+# Copied from node_modules by scripts/copy-pdf-worker.mjs on prebuild/predev.
+frontend/public/pdf.worker.min.mjs

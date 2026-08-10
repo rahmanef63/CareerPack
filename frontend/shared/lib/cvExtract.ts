@@ -89,8 +89,13 @@ async function loadPdfjs() {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
   // Inline worker so we don't have to copy worker file into /public.
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc =
-      "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.7.284/legacy/build/pdf.worker.min.mjs";
+    // Same origin, copied out of node_modules by scripts/copy-pdf-worker.mjs.
+    // This was a jsdelivr URL, which the CSP blocks: script-src enumerates the
+    // allowed hosts and jsdelivr is not among them, and with no worker-src
+    // directive the browser falls back to script-src. Every PDF upload in
+    // production therefore produced zero text and fell through to the
+    // scanned-image branch.
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   }
   return pdfjs;
 }
