@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "convex/react";
 import {
-  Code2, Download, Eye, Globe2, Sparkles, Wrench, Zap,
+  Eye, Globe2, Sparkles, Wrench, Zap,
 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -30,7 +30,12 @@ import { PreviewDialog } from "./PreviewDialog";
 import { AutoTab } from "./personal-branding-view/AutoTab";
 import { ManualTab } from "./personal-branding-view/ManualTab";
 
-type TopView = "auto" | "custom" | "import" | "html" | "embed";
+/** Which editor is active. Doubles as the persisted `mode` field. */
+type EditorView = "auto" | "custom";
+/** Top level. Was five siblings — Otomatis, Manual, Impor, HTML, Embed — where
+ *  only the first two are authoring and the rest are export concerns. A
+ *  first-timer had to rank five unequal choices before touching anything. */
+type TopView = "edit" | "share";
 
 /**
  * Personal Branding builder — thin orchestrator.
@@ -46,7 +51,8 @@ export function PersonalBrandingView() {
   const form = usePBForm();
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewData = usePreviewBranding(form.state);
-  const [view, setView] = useState<TopView>(
+  const [topView, setTopView] = useState<TopView>("edit");
+  const [view, setView] = useState<EditorView>(
     () => (form.state.mode === "custom" ? "custom" : "auto"),
   );
   // The lazy initializer above runs before the server state hydrates
@@ -75,7 +81,9 @@ export function PersonalBrandingView() {
       const map: Record<string, string> = { "hero-toggles": "hero" };
       const target = map[detail.sectionKey] ?? detail.sectionKey;
       setActiveSection(target);
-      setView((prev) => (prev === "auto" || prev === "custom" ? prev : "auto"));
+      // The jump targets live in the editor, so leaving the user on Bagikan
+      // would scroll to a node that is not mounted.
+      setTopView("edit");
     }
     window.addEventListener("pb-jump", onJump);
     return () => window.removeEventListener("pb-jump", onJump);
@@ -122,13 +130,10 @@ export function PersonalBrandingView() {
     : "";
 
   function handleViewChange(next: string) {
-    const v = next as TopView;
+    const v = next as EditorView;
     setView(v);
-    if (v === "auto" || v === "custom") {
-      const modeBind = form.bind("mode");
-      const targetMode: Mode = v;
-      if (modeBind.value !== targetMode) modeBind.onChange(targetMode);
-    }
+    const modeBind = form.bind("mode");
+    if (modeBind.value !== (v as Mode)) modeBind.onChange(v as Mode);
   }
 
   return (
@@ -168,52 +173,80 @@ export function PersonalBrandingView() {
         enabled={Boolean(form.serverState?.enabled)}
       />
 
-      <Tabs value={view} onValueChange={handleViewChange}>
+      <Tabs value={topView} onValueChange={(v) => setTopView(v as TopView)}>
         <TabsList variant="pills">
-          <TabsTrigger value="auto" className="gap-1.5">
-            <Zap className="h-4 w-4" />
-            <span>Otomatis</span>
-            <Badge
-              variant="secondary"
-              className="ml-1 hidden bg-success/15 text-[10px] text-success-text sm:inline-flex"
-            >
-              Direkomendasikan
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="custom" className="gap-1.5">
+          <TabsTrigger value="edit" className="gap-1.5">
             <Wrench className="h-4 w-4" />
-            <span>Manual</span>
+            <span>Edit halaman</span>
           </TabsTrigger>
-          <TabsTrigger value="import" className="gap-1.5">
-            <Download className="h-4 w-4" />
-            <span>Impor</span>
-          </TabsTrigger>
-          <TabsTrigger value="html" className="gap-1.5">
-            <Code2 className="h-4 w-4" />
-            <span>HTML</span>
-          </TabsTrigger>
-          <TabsTrigger value="embed" className="gap-1.5">
+          <TabsTrigger value="share" className="gap-1.5">
             <Globe2 className="h-4 w-4" />
-            <span>Embed</span>
+            <span>Bagikan &amp; pasang</span>
           </TabsTrigger>
         </TabsList>
 
-        <AutoTab
-          form={form}
-          previewData={previewData}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          toggleSection={toggleSection}
-          profileSnapshot={profileSnapshot}
-        />
-
-        <ManualTab form={form} />
-
-        <TabsContent value="import" className="mt-4 space-y-4">
+        <TabsContent value="edit" className="mt-4 space-y-4">
+          {/* Import is an INPUT, not a sharing concern — it used to sit beside
+              HTML and Embed. For someone starting from nothing it is the
+              shortest path to a filled page, so it leads here. */}
           <ImportCard />
+
+          {/* Mode is a question about how you want to build, so it reads as one
+              rather than as two separate destinations. The labels say what each
+              does; "Otomatis" and "Manual" only mean something once you already
+              know the feature. */}
+          <Tabs value={view} onValueChange={handleViewChange}>
+            <TabsList variant="pills">
+              <TabsTrigger value="auto" className="gap-1.5">
+                <Zap className="h-4 w-4" />
+                <span>Susun otomatis dari CV</span>
+                <Badge
+                  variant="secondary"
+                  className="ml-1 hidden bg-success/15 text-[10px] text-success-text sm:inline-flex"
+                >
+                  Termudah
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="custom" className="gap-1.5">
+                <Wrench className="h-4 w-4" />
+                <span>Atur sendiri</span>
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Blocks are only rendered in "Atur sendiri" — the public query
+                drops them outright in auto mode. Someone who built a page,
+                switched modes, and saw it vanish got no explanation at all. */}
+            {view === "auto" && form.state.blocks.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-text">
+                <span>
+                  Kamu punya <strong>{form.state.blocks.length} blok</strong> yang
+                  disusun sendiri. Blok itu tidak ditampilkan selama mode
+                  &ldquo;Susun otomatis&rdquo; aktif.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleViewChange("custom")}
+                  className="shrink-0 rounded-md border border-warning/50 bg-background/70 px-2 py-1 font-medium hover:bg-background"
+                >
+                  Pakai blok saya
+                </button>
+              </div>
+            )}
+
+            <AutoTab
+              form={form}
+              previewData={previewData}
+              activeSection={activeSection}
+              setActiveSection={setActiveSection}
+              toggleSection={toggleSection}
+              profileSnapshot={profileSnapshot}
+            />
+
+            <ManualTab form={form} />
+          </Tabs>
         </TabsContent>
 
-        <TabsContent value="html" className="mt-4 space-y-4">
+        <TabsContent value="share" className="mt-4 space-y-4">
           <ExportCard
             bind={form.bind}
             state={form.state}
@@ -223,9 +256,6 @@ export function PersonalBrandingView() {
             title="Ekspor sebagai kartu HTML"
             description="Snippet HTML self-contained — tempel ke website mana pun (blog, portofolio sendiri, README)."
           />
-        </TabsContent>
-
-        <TabsContent value="embed" className="mt-4 space-y-4">
           <ExportCard
             bind={form.bind}
             state={form.state}

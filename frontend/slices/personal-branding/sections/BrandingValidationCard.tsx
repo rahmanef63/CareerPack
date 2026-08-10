@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, AlertCircle, Info, Rocket, Sparkles } from "lucide-react";
+import {
+  ArrowRight, CheckCircle2, AlertCircle, ChevronDown, Info, PartyPopper, Sparkles,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -71,6 +74,25 @@ function ActionLink({ row }: { row: ScoreRow }) {
   );
 }
 
+/** The one thing to do next, as a button sized to be the obvious target. */
+function NextStepAction({ row }: { row: ScoreRow }) {
+  const label = row.actionLabel ?? "Perbaiki";
+  const cls =
+    "inline-flex shrink-0 items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-xs font-medium text-brand-foreground hover:opacity-90";
+  if (!row.actionHref) return null;
+  return row.actionHref.startsWith("#") ? (
+    <button type="button" onClick={() => jumpToAnchor(row.actionHref!)} className={cls}>
+      {label}
+      <ArrowRight className="h-3.5 w-3.5" />
+    </button>
+  ) : (
+    <Link href={row.actionHref} className={cls}>
+      {label}
+      <ArrowRight className="h-3.5 w-3.5" />
+    </Link>
+  );
+}
+
 export interface BrandingValidationCardProps {
   branding: BrandingPayload | undefined;
 }
@@ -89,6 +111,10 @@ export interface BrandingValidationCardProps {
 export function BrandingValidationCard({
   branding,
 }: BrandingValidationCardProps) {
+  // Above the early return: hooks must run in the same order on every render,
+  // and `branding` is undefined for the first paint while the queries resolve.
+  const [showAll, setShowAll] = useState(false);
+
   if (!branding) {
     return (
       <Card>
@@ -105,120 +131,79 @@ export function BrandingValidationCard({
     );
   }
 
-  const { rows, score, grade, requiredMissing } = scoreBranding(branding);
-  const gradeColor =
-    score >= 75
-      ? "text-success-text"
-      : score >= 60
-        ? "text-warning-text"
-        : "text-destructive";
+  const { rows, score, grade } = scoreBranding(branding);
+  const done = rows.filter((r) => r.earned >= r.weight);
+  const todo = rows.filter((r) => r.earned < r.weight);
+  // `rows` is already ordered required -> recommended -> optional, so the first
+  // unfinished row IS the most important one. Showing one at a time is the
+  // whole point: the old card listed all 14 gaps at once with weights and a
+  // letter grade, which reads as a report card. A beginner does not need to be
+  // told everything that is wrong simultaneously — they need to know what to
+  // do next.
+  const next = todo[0];
+  const pct = rows.length > 0 ? Math.round((done.length / rows.length) * 100) : 0;
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <CardTitle as="h3" className="flex items-center gap-2 text-base">
+          <CardTitle as="h3" className="flex items-center gap-2 text-base">
+            {todo.length === 0 ? (
+              <PartyPopper className="h-4 w-4 text-success" />
+            ) : (
               <Sparkles className="h-4 w-4 text-brand" />
-              Validasi & Skor Kelengkapan
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Skor dipakai bersama untuk semua template (Purple Glass,
-              Editorial Cream, Premium Dark). Ikuti rekomendasi untuk
-              memaksimalkan kesan profesional.
-            </p>
-          </div>
-          <div className="text-right">
-            <div className={cn("text-2xl font-bold leading-none", gradeColor)}>
-              {score}
-              <span className="text-xs font-normal text-muted-foreground">/100</span>
-            </div>
-            <div
-              className={cn("mt-1 text-[11px] font-medium uppercase tracking-wide", gradeColor)}
-              title={`Skor ${score}/100 — tier ${grade}`}
-            >
-              {GRADE_LABEL[grade]}
-            </div>
-          </div>
+            )}
+            {todo.length === 0
+              ? "Halaman kamu sudah lengkap"
+              : `Halaman kamu ${done.length}/${rows.length} siap`}
+          </CardTitle>
+          <span
+            className="shrink-0 text-[11px] text-muted-foreground"
+            title={`Skor ${score}/100 — tier ${grade} (${GRADE_LABEL[grade]})`}
+          >
+            {score}/100
+          </span>
         </div>
-        <Progress value={score} className="mt-3 h-2" />
-        {score < 30 && (
-          <div className="mt-3 flex items-start gap-2 rounded-md border border-brand/30 bg-brand-muted/40 px-3 py-2 text-xs text-foreground">
-            <Rocket className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand" />
-            <div className="space-y-1.5">
-              <p>
-                <strong>Mulai di sini.</strong> 3 langkah sampai siap publish:
+        <Progress value={pct} className="mt-3 h-2" />
+
+        {next ? (
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-brand/30 bg-brand-muted/40 px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Berikutnya
               </p>
-              <ol className="ml-3 list-decimal space-y-0.5 text-[11px] text-muted-foreground">
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => jumpToAnchor("#pb-section-identity")}
-                    className="font-medium text-brand hover:underline"
-                  >
-                    Set URL & Headline
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => jumpToAnchor("#pb-section-hero-toggles")}
-                    className="font-medium text-brand hover:underline"
-                  >
-                    Aktifkan tampilan hero
-                  </button>{" "}
-                  (avatar, bio, skills)
-                </li>
-                <li>
-                  Klik <strong>Publikasikan</strong> di bawah / pojok kanan
-                </li>
-              </ol>
-            </div>
-          </div>
-        )}
-        {requiredMissing.length > 0 && (
-          <div className="mt-3 space-y-1.5 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-text">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <div>
-                <strong>{requiredMissing.length} field wajib</strong> belum
-                terpenuhi — klik untuk langsung ke field-nya.
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-1.5 pl-5">
-              {requiredMissing.map((r) =>
-                r.actionHref ? (
-                  r.actionHref.startsWith("#") ? (
-                    <button
-                      key={r.key}
-                      type="button"
-                      onClick={() => jumpToAnchor(r.actionHref!)}
-                      className="rounded-full border border-warning/40 bg-background/60 px-2 py-0.5 font-medium hover:bg-background"
-                    >
-                      {r.label}
-                    </button>
-                  ) : (
-                    <Link
-                      key={r.key}
-                      href={r.actionHref}
-                      className="rounded-full border border-warning/40 bg-background/60 px-2 py-0.5 font-medium hover:bg-background"
-                    >
-                      {r.label}
-                    </Link>
-                  )
-                ) : (
-                  <span
-                    key={r.key}
-                    className="rounded-full border border-warning/40 bg-background/60 px-2 py-0.5"
-                  >
-                    {r.label}
-                  </span>
-                ),
+              <p className="truncate text-sm font-medium text-foreground">
+                {next.label}
+              </p>
+              {next.hint && (
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {next.hint}
+                </p>
               )}
             </div>
+            <NextStepAction row={next} />
           </div>
+        ) : (
+          <p className="mt-3 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-xs text-success-text">
+            Semua bagian terisi. Tinggal publikasikan kalau belum.
+          </p>
+        )}
+
+        {todo.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setShowAll((v) => !v)}
+            aria-expanded={showAll}
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            {showAll ? "Sembunyikan" : `Lihat semua (${todo.length - 1} lagi)`}
+            <ChevronDown
+              className={cn("h-3.5 w-3.5 transition-transform", showAll && "rotate-180")}
+            />
+          </button>
         )}
       </CardHeader>
+      {showAll && (
       <CardContent>
         <ul className="grid gap-1.5 sm:grid-cols-2">
           {rows.map((r) => {
@@ -296,6 +281,7 @@ export function BrandingValidationCard({
           })}
         </ul>
       </CardContent>
+      )}
     </Card>
   );
 }
