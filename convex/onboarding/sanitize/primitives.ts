@@ -6,10 +6,16 @@
 
 export function asString(v: unknown, max = 500): string | null {
   if (typeof v !== "string") return null;
-  // The class below is LITERAL control characters (U+0000-U+001F, U+007F).
-  // Written with escapes on purpose: as raw bytes they render as nothing, so
-  // the line reads like the range [space-hyphen] and has twice been reported
-  // as "strips every space". It does not.
+  // Strips control characters. This shipped as `[ -]`, which is NOT a range:
+  // a trailing `-` in a character class is literal, so it meant "space or
+  // hyphen" and quietly deleted both from every imported string. Three
+  // production profiles still carry the damage — targetRole
+  // "AIProductBuilder/FullStackDeveloper", bio run into one word — and a
+  // spaceless targetRole scores 0 against every job title, which is what
+  // pinned the matcher at 30%.
+  //
+  // Keep the \x escapes. As raw bytes the intended class renders as nothing,
+  // which is exactly how the original was mistaken for correct.
   const t = v.replace(/[\x00-\x1F\x7F]/g, "").trim();
   if (!t) return null;
   return t.slice(0, max);

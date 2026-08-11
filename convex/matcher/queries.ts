@@ -18,6 +18,26 @@ const MAX_SALARY_SCAN = 500;
 type JobListing = Doc<"jobListings">;
 type UserProfile = Doc<"userProfiles">;
 
+/** Lowercase, drop punctuation and spacing, so "Node.js" / "node" /
+ *  "NodeJS" collapse to one token. Exact string equality made a profile's
+ *  "Node.js" miss a listing tagged "node" — different spellings of the same
+ *  skill were cancelling each other out. */
+function skillKey(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/** Split a role into words even when the stored value lost its spaces.
+ *  `[ -]` in the old import sanitiser deleted spaces, so real profiles hold
+ *  "AIProductBuilder/FullStackDeveloper" — one token that matches no job
+ *  title, zeroing the 40-point role component and pinning every score at 30. */
+function roleWords(role: string): string[] {
+  return role
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .split(/[^A-Za-z0-9]+/)
+    .map((w) => w.toLowerCase())
+    .filter((w) => w.length >= 3);
+}
+
 function scoreJob(profile: UserProfile | null, job: JobListing): number {
   if (!profile) return 0;
 
@@ -27,12 +47,18 @@ function scoreJob(profile: UserProfile | null, job: JobListing): number {
   const role = profile.targetRole?.toLowerCase() ?? "";
   const title = job.title.toLowerCase();
   if (role && title.includes(role)) score += 40;
-  else if (role && role.split(" ").some((w) => w && title.includes(w)))
-    score += 20;
+  else {
+    const words = roleWords(profile.targetRole ?? "");
+    const hits = words.filter((w) => title.includes(w)).length;
+    // Partial credit scales with how much of the role the title covers, so a
+    // "Full Stack Developer" looking at "Senior Full Stack Developer" is not
+    // scored the same as one glancing at "Developer Advocate".
+    if (hits > 0) score += Math.min(20 + (hits - 1) * 10, 40);
+  }
 
-  const userSkills = (profile.skills ?? []).map((s) => s.toLowerCase());
+  const userSkills = new Set((profile.skills ?? []).map(skillKey));
   const skillMatches = job.requiredSkills.filter((s) =>
-    userSkills.includes(s.toLowerCase()),
+    userSkills.has(skillKey(s)),
   ).length;
   score += Math.min(skillMatches * 10, 40);
 
