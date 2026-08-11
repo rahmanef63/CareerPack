@@ -34,6 +34,8 @@ export interface CVImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApplied?: () => void;
+  /** The CV the caller has on screen. Absent (onboarding) → newest. */
+  cvId?: string | null;
 }
 
 /**
@@ -46,9 +48,9 @@ export interface CVImportDialogProps {
  * Drawer one tick later. Anything held below this component would be lost on
  * both transitions, which on a phone means immediately.
  */
-export function CVImportDialog({ open, onOpenChange, onApplied }: CVImportDialogProps) {
+export function CVImportDialog({ open, onOpenChange, onApplied, cvId }: CVImportDialogProps) {
   const { logout } = useAuth();
-  const flow = useCvImportFlow({ onOpenChange, onApplied });
+  const flow = useCvImportFlow({ onOpenChange, onApplied, cvId });
 
   const {
     phase,

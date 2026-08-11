@@ -19,6 +19,7 @@ import {
   type Side,
 } from "@/shared/lib/cv-merge";
 import { extractCv, rasterizePdfPages } from "@/shared/lib/cvExtract";
+import { useFileUpload } from "@/shared/hooks/useFileUpload";
 import { notify } from "@/shared/lib/notify";
 
 /**
@@ -70,9 +71,15 @@ const stemOf = (name: string) => name.replace(/\.[^.]+$/, "");
 export interface UseCvImportFlowOptions {
   onOpenChange: (open: boolean) => void;
   onApplied?: () => void;
+  /** The CV the caller is editing; wins over the newest-first default. */
+  cvId?: string | null;
 }
 
-export function useCvImportFlow({ onOpenChange, onApplied }: UseCvImportFlowOptions) {
+export function useCvImportFlow({
+  onOpenChange,
+  onApplied,
+  cvId: presetCvId,
+}: UseCvImportFlowOptions) {
   const me = useQuery(api.profile.queries.getCurrentUser);
   const cvs = useQuery(api.cv.queries.getUserCVs);
   const aiSettings = useQuery(api.ai.queries.getMyAISettings);
@@ -103,7 +110,7 @@ export function useCvImportFlow({ onOpenChange, onApplied }: UseCvImportFlowOpti
   const [plan, setPlan] = useState<MergePlan | null>(null);
   const [decisions, setDecisions] = useState<Record<string, Side>>({});
   const [idx, setIdx] = useState(0);
-  const [targetCvId, setTargetCvId] = useState<string | null>(null);
+  const [targetCvId, setTargetCvId] = useState<string | null>(presetCvId ?? null);
   const [batchId, setBatchId] = useState<Id<"quickFillBatches"> | null>(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [confirmUndo, setConfirmUndo] = useState(false);
@@ -120,6 +127,7 @@ export function useCvImportFlow({ onOpenChange, onApplied }: UseCvImportFlowOpti
   /** The picked file, kept only so the OCR escalation can re-read it. Not
    *  state: nothing renders from it and re-rendering on a pick is pointless. */
   const fileRef = useRef<File | null>(null);
+  const { upload } = useFileUpload();
   const advanceRef = useRef<number | null>(null);
   /** Bumped by every reset. Extraction and parsing can take 15 seconds, and
    *  without this a run that finishes after the user closed the dialog would
@@ -184,9 +192,18 @@ export function useCvImportFlow({ onOpenChange, onApplied }: UseCvImportFlowOpti
   const buildPlanFrom = useCallback(
     (resume: ParsedResume, cvId: string | null, fileStem: string) => {
       const list = cvs ?? [];
+      // Default to the NEWEST, which is what `useCV` puts in the editor
+      // (it sorts by _creationTime desc). This used to prefer `isDefault` and
+      // fall back to `list[0]` — insertion order, i.e. the OLDEST — so for
+      // anyone with more than one CV the import landed in a row the editor was
+      // not showing and the page appeared to do nothing. Both production users
+      // with multiple CVs were hitting it; one has six.
+      const newestFirst = [...list].sort(
+        (a, b) => b._creationTime - a._creationTime,
+      );
       const doc = cvId
         ? list.find((cv) => cv._id === cvId)
-        : (list.find((cv) => cv.isDefault) ?? list[0]);
+        : newestFirst[0];
       const target: CurrentCV | null = doc
         ? {
             _id: doc._id,
@@ -258,14 +275,31 @@ export function useCvImportFlow({ onOpenChange, onApplied }: UseCvImportFlowOpti
     [buildPlanFrom, parseResume],
   );
 
+  /**
+   * Keep the CV in the content library so the next import can pick it instead
+   * of asking for the file again. Fire-and-forget: extraction is the job, and
+   * a storage hiccup must not block it. `fromLibrary` skips the round trip for
+   * a file that came out of the library to begin with.
+   */
+  const stashInLibrary = useCallback(
+    (file: File, fromLibrary: boolean) => {
+      if (fromLibrary || file.type !== "application/pdf") return;
+      void upload(file).catch(() => {
+        // Silent: the import still works, the file just is not reusable yet.
+      });
+    },
+    [upload],
+  );
+
   const handleFile = useCallback(
-    async (file: File) => {
+    async (file: File, fromLibrary = false) => {
       // Demo sessions read every screen from a localStorage overlay, so a
       // server write leaves the user staring at unchanged data. Gate here, at
       // the picker, before the upload and before any AI call is paid for.
       if (isDemo || !ready) return;
       const run = runRef.current;
       fileRef.current = file;
+      stashInLibrary(file, fromLibrary);
       setOcrOffer(false);
       setOcrRunning(false);
       setRawText("");
@@ -297,7 +331,7 @@ export function useCvImportFlow({ onOpenChange, onApplied }: UseCvImportFlowOpti
         if (run === runRef.current) setProgress(null);
       }
     },
-    [isDemo, ready, runParse],
+    [isDemo, ready, runParse, stashInLibrary],
   );
 
   /** Never automatic: rasterising the pages costs the user an AI call. */

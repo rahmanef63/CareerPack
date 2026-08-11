@@ -315,7 +315,7 @@ export function CVGenerator() {
               {expandAll ? 'Tutup' : 'Buka'} semua
             </span>
           </Button>
-          <CVImportButton variant="outline" size="sm" />
+          <CVImportButton variant="outline" size="sm" cvId={activeCVId} />
           <QuickFillButton variant="outline" size="sm" />
           {/* h-8 to match the size="sm" buttons flanking it — the pill's own
               p-1 + py-1.5 measures 40px, so it stood 8px taller than every

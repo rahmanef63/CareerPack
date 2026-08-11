@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { LibraryPicker } from "@/shared/components/files/LibraryPicker";
+import { notify } from "@/shared/lib/notify";
 import {
   AlertCircle,
   FileUp,
@@ -42,7 +44,8 @@ export interface UploadStepProps {
   rawText: string;
   onRawTextChange: (text: string) => void;
   onToggleManual: () => void;
-  onPickFile: (file: File) => void;
+  /** `fromLibrary` tells the flow not to re-upload a file it already has. */
+  onPickFile: (file: File, fromLibrary?: boolean) => void;
   onEscalateOcr: () => void;
   onParseText: () => void;
   /** Back to the picker — the only way out of `review-text` when the file
@@ -77,7 +80,30 @@ export function UploadStep({
   onSignUp,
 }: UploadStepProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const blocked = isDemo || !ready;
+
+  /** Re-use a PDF the user already uploaded instead of making them find the
+   *  file again. The library has held PDFs since it shipped; nothing was
+   *  wired to read them, so every import meant another upload of the same CV. */
+  async function pickFromLibrary(url: string | null, fileName: string) {
+    setLibraryOpen(false);
+    if (!url) {
+      notify.error("File ini tidak punya URL yang bisa dibaca.");
+      return;
+    }
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      onPickFile(
+        new File([blob], fileName, { type: blob.type || "application/pdf" }),
+        true,
+      );
+    } catch (err) {
+      notify.fromError(err, "Gagal membuka file dari Pustaka");
+    }
+  }
 
   if (phase === "extracting" || phase === "parsing") {
     return <Busy phase={phase} progress={progress} ocrRunning={ocrRunning} />;
@@ -164,10 +190,25 @@ export function UploadStep({
           <FileUp className="h-4 w-4" />
           {fileName ? "Ganti file" : "Pilih file CV"}
         </Button>
+        <button
+          type="button"
+          disabled={blocked}
+          onClick={() => setLibraryOpen(true)}
+          className="mt-2 block w-full text-xs font-medium text-brand hover:underline disabled:opacity-50"
+        >
+          atau pilih dari Pustaka Konten
+        </button>
         {fileName && (
           <p className="mt-2 truncate text-xs text-muted-foreground">{fileName}</p>
         )}
       </div>
+
+      <LibraryPicker
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        accept="pdf"
+        onPick={(f) => void pickFromLibrary(f.url, f.fileName)}
+      />
 
       {visionUnverified && (
         <Alert>

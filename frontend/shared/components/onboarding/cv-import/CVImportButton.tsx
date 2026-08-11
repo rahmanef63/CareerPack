@@ -11,6 +11,10 @@ export interface CVImportButtonProps {
   variant?: "default" | "outline" | "ghost" | "secondary";
   size?: "default" | "sm" | "lg";
   className?: string;
+  /** The CV the caller is editing. Without it the dialog picks one itself,
+   *  and "the one the importer picked" and "the one on screen" were different
+   *  rows for every user with more than one CV. */
+  cvId?: string | null;
   /** Fired after a successful write (and after an undo) so the parent can
    *  advance a wizard, close its own dialog, or refetch. */
   onApplied?: () => void;
@@ -29,6 +33,7 @@ export function CVImportButton({
   size = "default",
   className,
   onApplied,
+  cvId,
 }: CVImportButtonProps) {
   const [open, setOpen] = useState(false);
 
@@ -45,7 +50,12 @@ export function CVImportButton({
         <span>Impor dari CV</span>
       </Button>
 
-      <CVImportDialog open={open} onOpenChange={setOpen} onApplied={onApplied} />
+      <CVImportDialog
+        open={open}
+        onOpenChange={setOpen}
+        onApplied={onApplied}
+        cvId={cvId}
+      />
     </>
   );
 }
