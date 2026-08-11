@@ -32,7 +32,22 @@ function MissingEnvFallback() {
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
     const [convex] = useState(() => {
         if (!CONVEX_URL) return null;
-        const client = new ConvexReactClient(CONVEX_URL);
+        // `unsavedChangesWarning` defaults to TRUE in the browser (the Convex
+        // client only turns it off when `typeof window === "undefined"`). It
+        // registers a global beforeunload that fires on ANY dashboard route
+        // whenever a mutation or action has not been acked — with its own
+        // English string, "Are you sure you want to leave? Your changes may
+        // not be saved.", which appears nowhere in this repo and cannot be
+        // translated or reasoned about from here.
+        //
+        // The proxy problem below makes it worse: a request stranded by a
+        // closed socket stays "incomplete", so the dialog can fire long after
+        // the user finished. CVGenerator already owns a precise guard that
+        // only warns when autosave actually failed with unsaved edits, so this
+        // one only ever fires spuriously.
+        const client = new ConvexReactClient(CONVEX_URL, {
+            unsavedChangesWarning: false,
+        });
         const http = new ConvexHttpClient(CONVEX_URL);
         const origAction = client.action.bind(client);
         // Route auth:* actions via HTTP to avoid "Connection lost while action was in flight"

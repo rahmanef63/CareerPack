@@ -222,8 +222,13 @@ function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
   // Feeds put anything in these fields — hourly rates, per-year figures with
   // the currency stripped, plain typos. One row of "35" then became a
   // "median" on the salary insight card. Keep only plausible monthly figures.
+  // RemoteOK publishes a bare number with no unit, so the same field carries
+  // hourly rates (5, 35), monthly figures (2500) and annual ones. The floor
+  // only has to clear hourly; the previous 10_000 floor also threw away
+  // legitimate monthly USD salaries while leaving a 2_500_000 row — which is
+  // what produced the "USD 2.8jt" median in production.
   const plausible = (n: number | undefined) =>
-    n !== undefined && n >= 10_000 && n <= 1_000_000 ? n : undefined;
+    n !== undefined && n >= 1_000 && n <= 1_000_000 ? n : undefined;
   const salaryMin = plausible(numField(raw, "salary_min"));
   const salaryMax = plausible(numField(raw, "salary_max"));
 
@@ -262,18 +267,48 @@ function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
   };
 }
 
-/** Best-effort category inference from RemoteOK title + tags. WWR feeds
- *  carry category in the URL so they don't need this. Falls back to
- *  "engineering" for unknown tech roles since RemoteOK is mostly that. */
-function inferCategory(title: string, tagsLower: string[]): string {
+const CATEGORY_PATTERNS: ReadonlyArray<{ category: string; re: RegExp }> = [
+  { category: "engineering", re: /\b(engineer|developer|dev|programmer|backend|frontend|fullstack|full-stack|sre|devops|architect|java|python|golang|rust|node|react)\b/ },
+  { category: "design", re: /\b(designer|design|ux|ui|figma|illustrator|brand)\b/ },
+  { category: "support", re: /\b(support|customer|success|cs|helpdesk|escalation)\b/ },
+  { category: "product", re: /\b(product manager|product owner|pm|product)\b/ },
+  { category: "marketing", re: /\b(marketing|seo|growth|content|copywriter)\b/ },
+  { category: "data", re: /\b(data|analyst|analytics|ml|machine learning|scientist)\b/ },
+];
+
+/**
+ * Best-effort category for a RemoteOK listing. WWR feeds carry the category in
+ * the RSS URL and never reach this.
+ *
+ * Scored, not first-match-wins over a merged haystack. The old version glued
+ * the title and every tag into one string and tested `design` first, so a
+ * "Java Developer" carrying RemoteOK's stock `dev, design, docker` tag soup
+ * was filed under Design before "dev" or "java" was ever considered — real
+ * listings in production came out that way. The title is what a person reads
+ * on the card, so it outweighs the tags rather than being averaged with them.
+ */
+export function inferCategory(title: string, tagsLower: string[]): string {
   const t = title.toLowerCase();
-  const hay = `${t} ${tagsLower.join(" ")}`;
-  if (/\b(designer|design|ux|ui|figma)\b/.test(hay)) return "design";
-  if (/\b(support|customer|success|cs)\b/.test(hay)) return "support";
-  if (/\b(product manager|product owner|pm)\b/.test(hay)) return "product";
-  if (/\b(marketing|seo|growth|content)\b/.test(hay)) return "marketing";
-  if (/\b(data|analyst|analytics|ml|machine learning|scientist)\b/.test(hay)) return "data";
-  return "engineering";
+  let best = "engineering";
+  let bestScore = 0;
+  for (const { category, re } of CATEGORY_PATTERNS) {
+    if (re.test(t)) {
+      // The title said it. Nothing in the tags outranks that.
+      return category;
+    }
+    // Otherwise count how many tags agree. A RemoteOK listing carries a dozen
+    // loosely-related tags, so ONE hit is noise — "Procurement Specialist"
+    // arrived tagged `design` and was filed under Design on that alone. Two
+    // independent tags pointing the same way is a signal.
+    const hits = tagsLower.filter((tag) => re.test(tag)).length;
+    if (hits > bestScore) {
+      bestScore = hits;
+      best = category;
+    }
+  }
+  // RemoteOK is overwhelmingly engineering, so it doubles as the "unknown"
+  // bucket rather than guessing from a single stray tag.
+  return bestScore >= 2 ? best : "engineering";
 }
 
 export const _ingestExternalJobs = internalMutation({

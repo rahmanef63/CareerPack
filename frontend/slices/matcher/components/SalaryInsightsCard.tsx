@@ -24,16 +24,25 @@ export function SalaryInsightsCard() {
   }
   if (!data || data.categories.length === 0) return null;
 
-  // Filter out buckets with no salary data — we'd render an empty bar.
+  // A "median" needs a sample. At n=1 this rendered one scraped row as the
+  // market rate for a whole category — production had design showing a single
+  // listing as its p50. Below the floor the card renders nothing, which is the
+  // honest output when 43 of 3,388 listings carry a number at all.
   const visible = data.categories.filter(
-    (b) => b.p50 !== null && b.withSalaryCount > 0,
+    (b) => b.p50 !== null && b.withSalaryCount >= MIN_SAMPLE,
   );
   if (visible.length === 0) return null;
 
+  // Per currency: comparing a USD figure against an IDR one on a shared axis
+  // makes every bar meaningless.
   // Compute global max for proportional bar widths across categories.
   // Guard against all-zero data → division by zero → NaN/Infinity widths.
-  const globalMax = Math.max(...visible.map((b) => b.p75 ?? b.p50 ?? 0));
-  const denom = globalMax > 0 ? globalMax : 1;
+  const maxByCurrency = new Map<string, number>();
+  for (const b of visible) {
+    const v = b.p75 ?? b.p50 ?? 0;
+    maxByCurrency.set(b.currency, Math.max(maxByCurrency.get(b.currency) ?? 0, v));
+  }
+  const denomFor = (currency: string) => maxByCurrency.get(currency) || 1;
 
   return (
     <section className="rounded-xl border border-border bg-card p-5">
@@ -63,6 +72,7 @@ export function SalaryInsightsCard() {
           const p25 = b.p25 ?? b.p50 ?? 0;
           const p50 = b.p50 ?? 0;
           const p75 = b.p75 ?? p50;
+          const denom = denomFor(b.currency);
           const left = (p25 / denom) * 100;
           const right = (p75 / denom) * 100;
           const median = (p50 / denom) * 100;
@@ -100,6 +110,9 @@ export function SalaryInsightsCard() {
   );
 }
 
+/** Below this a "median" is one person's listing, not a market rate. */
+const MIN_SAMPLE = 5;
+
 function formatMoney(n: number, currency: string): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
   if (currency === "IDR") {
@@ -107,7 +120,7 @@ function formatMoney(n: number, currency: string): string {
       ? `IDR ${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}jt`
       : `IDR ${(n / 1_000).toFixed(0)}rb`;
   }
-  if (n >= 1_000_000) return `${currency} ${(n / 1_000_000).toFixed(1)}jt`;
-  if (n >= 1_000) return `${currency} ${(n / 1_000).toFixed(0)}k`;
-  return `${currency} ${n.toLocaleString()}`;
+  // "jt" is juta — Indonesian for million. Applying it to USD produced
+  // "USD 2.8jt" in production, which reads as neither currency.
+  return `${currency} ${n.toLocaleString("en-US")}`;
 }
