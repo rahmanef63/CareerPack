@@ -25,7 +25,7 @@ import { StatusBanner } from "../sections/StatusBanner";
 import {
   ExportCard, type ExportProfileSnapshot,
 } from "../sections/ExportCard";
-import { ImportCard } from "../sections/ImportCard";
+import { CVImportButton } from "@/shared/components/onboarding";
 import { PreviewDialog } from "./PreviewDialog";
 import { AutoTab } from "./personal-branding-view/AutoTab";
 import { ManualTab } from "./personal-branding-view/ManualTab";
@@ -188,8 +188,26 @@ export function PersonalBrandingView() {
         <TabsContent value="edit" className="mt-4 space-y-4">
           {/* Import is an INPUT, not a sharing concern — it used to sit beside
               HTML and Embed. For someone starting from nothing it is the
-              shortest path to a filled page, so it leads here. */}
-          <ImportCard />
+              shortest path to a filled page, so it leads here.
+              
+              This was <ImportCard/>, which ran `parseImportText` — a prompt
+              that only ever asks the model for a `profile` object. No
+              experience, no education, no certifications. It then applied it
+              with `scope: "profile"`. So importing a CV here filled the
+              profile and left the CV untouched, exactly as reported. The CV
+              importer is a strict superset: same paste-text path, but it
+              extracts the whole resume and merges it with conflict review and
+              undo. */}
+          <div className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm font-medium text-foreground">
+              Punya CV? Isi halaman ini dari sana
+            </p>
+            <p className="mb-3 mt-1 text-xs text-muted-foreground">
+              Unggah PDF atau tempel isinya — profil dan CV kamu terisi
+              sekaligus, dan kamu meninjau setiap perbedaan sebelum disimpan.
+            </p>
+            <CVImportButton variant="outline" size="sm" />
+          </div>
 
           {/* Mode is a question about how you want to build, so it reads as one
               rather than as two separate destinations. The labels say what each

@@ -45,7 +45,9 @@ const VALID_TEMPLATES = new Set(["modern", "classic", "minimal"]);
 
 /**
  * CV capability binder — wires manifest skills to backend mutations.
- * `cv.import-from-text` chains parseImportText action → quickFill
+ * `cv.import-from-text` chains parseImportText action → quickFill.
+ * It fills the PROFILE only: parseImportText's schema has no cv section and
+ * its coercer strips anything else the model returns.
  * mutation, mirroring the manual "Isi Cepat dengan AI" UX flow but
  * driven by the agent.
  */
@@ -173,8 +175,12 @@ export function CVCapabilities() {
         }
         try {
           notify.info("Memparsing teks…");
+          // `parseImportText` returns `{ profile }` and nothing else — its
+          // coercer drops the rest — so `scope: "all"` was a promise the
+          // payload could never keep. Every branch below except `profile`
+          // was dead: result.cv false, every count 0, on every run.
           const payload = await parseImportText({ text });
-          const result = await quickFill({ payload, scope: "all" });
+          const result = await quickFill({ payload, scope: "profile" });
           const parts: string[] = [];
           if (result.profile) parts.push("profil");
           if (result.cv) parts.push("CV");
@@ -187,8 +193,12 @@ export function CVCapabilities() {
             parts.push(`${result.contacts.added} kontak`);
           notify.success(
             parts.length > 0
-              ? `Isi cepat selesai: ${parts.join(", ")}`
+              ? `Profil terisi: ${parts.join(", ")}`
               : "Tidak ada data yang bisa diekstrak",
+            {
+              description:
+                "Riwayat kerja dan pendidikan tidak ikut — pakai \"Impor dari CV\" di halaman CV untuk itu.",
+            },
           );
           if (result.warnings.length > 0) {
             notify.info(result.warnings.slice(0, 2).join(" · "));

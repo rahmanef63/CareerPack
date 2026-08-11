@@ -780,6 +780,19 @@ export const testConnection = action({
  * skills). Other scopes still use the copy-paste flow until we can vet
  * larger prompts under the existing AI quota.
  */
+/**
+ * PROFILE-ONLY parser. The schema below asks for `profile` and nothing else,
+ * and `coerceProfileShape` drops every other key before returning — so no
+ * caller of this can ever populate a CV, however much resume text it is fed.
+ *
+ * That is deliberate, not an oversight to fix here: `quickFill`, the mutation
+ * this feeds, ALWAYS INSERTS a new `cvs` row. Teaching this path to emit CV
+ * content would mean every import mints another CV, which is already how one
+ * production account ended up with six.
+ *
+ * For "read a resume into the CV" use `api.ai.resume.parseResume` with
+ * `applyCvImport` — it merges into an existing CV with conflict review.
+ */
 export const parseImportText = action({
   args: { text: v.string() },
   handler: async (ctx, args) => {

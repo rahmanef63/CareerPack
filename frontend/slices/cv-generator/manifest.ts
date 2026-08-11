@@ -8,9 +8,12 @@ import type { SliceManifest } from "@/shared/types/sliceManifest";
  *
  * `cv.import-from-text` is the agent-facing wrapper around the
  * "Isi Cepat dengan AI" flow: paste raw resume / LinkedIn text → AI
- * parser action returns a structured QuickFill payload → quickFill
- * mutation hydrates profile + cv + portfolio + goals + applications +
- * contacts in one batch (undoable). The capability binder runs the
+ * parser action returns a PROFILE-ONLY payload → quickFill mutation
+ * hydrates the profile (undoable). It does NOT fill the CV, portfolio,
+ * goals, applications or contacts: parseImportText's schema has no such
+ * sections and coerceProfileShape discards anything else. Resume content
+ * belongs to the CV importer (parseResume + applyCvImport), which merges
+ * instead of inserting a duplicate CV. The capability binder runs the
  * full chain after user approves.
  */
 export const cvGeneratorManifest: SliceManifest = {
@@ -104,7 +107,7 @@ export const cvGeneratorManifest: SliceManifest = {
     },
     {
       id: "cv.import-from-text",
-      label: "Isi Cepat dari teks (resume/LinkedIn)",
+      label: "Isi profil dari teks (resume/LinkedIn)",
       description:
         "Parser AI yang ubah blok teks resume / profil LinkedIn jadi data terstruktur lalu hydrate profile + CV + portfolio + goals + lamaran + kontak sekaligus. Pakai saat user paste resume mentah dan minta 'isi otomatis' / 'import resume' / 'parse CV ini'. Min 40 karakter.",
       kind: "compose",
