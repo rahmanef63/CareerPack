@@ -65,6 +65,7 @@ import type * as admin_lib_cascadeDelete from "../admin/lib/cascadeDelete.js";
 import type * as admin_lib_skillOps from "../admin/lib/skillOps.js";
 import type * as admin_lib_templateOps from "../admin/lib/templateOps.js";
 import type * as admin_lib_userOps from "../admin/lib/userOps.js";
+import type * as admin_mergeAccounts from "../admin/mergeAccounts.js";
 import type * as admin_mutations from "../admin/mutations.js";
 import type * as admin_queries from "../admin/queries.js";
 import type * as admin_unsubscribes from "../admin/unsubscribes.js";
@@ -258,6 +259,7 @@ declare const fullApi: ApiFromModules<{
   "admin/lib/skillOps": typeof admin_lib_skillOps;
   "admin/lib/templateOps": typeof admin_lib_templateOps;
   "admin/lib/userOps": typeof admin_lib_userOps;
+  "admin/mergeAccounts": typeof admin_mergeAccounts;
   "admin/mutations": typeof admin_mutations;
   "admin/queries": typeof admin_queries;
   "admin/unsubscribes": typeof admin_unsubscribes;

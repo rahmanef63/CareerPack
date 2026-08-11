@@ -10,6 +10,7 @@ import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
 import { useCV } from '../hooks/useCV';
 import { useAutosave } from '../hooks/useAutosave';
+import { useCvDraft } from '../hooks/useCvDraft';
 import { usePreviewControls } from '../hooks/usePreviewControls';
 import { CV_TEMPLATES, initialCVData, type CVFormat } from '../constants';
 import { MagneticTabs, useDragReorder } from '@/shared/components/interactions/MicroInteractions';
@@ -171,6 +172,12 @@ export function CVGenerator() {
   // a page reload. Demo mode has no activeCVId, so we use the literal
   // "demo" sentinel so demo data still loads once.
   const resetBaseline = autosave.resetBaseline;
+  // Signature of the server row we last copied into the form. Compared
+  // remote-to-remote on purpose: comparing it against `cvData` would depend on
+  // both sides stringifying their keys in the same order, and a mismatch there
+  // is an infinite setCvData loop rather than a wrong value.
+  const adoptedRemoteSig = useRef<string | null>(null);
+  const autosaveDirty = autosave.dirty;
   useEffect(() => {
     if (!remoteCVData) {
       // A brand-new account has no CV, so this used to return before ever
@@ -189,14 +196,65 @@ export function CVGenerator() {
       setHydratedFromId(idStr);
       return;
     }
-    if (hydratedFromId === idStr) return;
+    const remoteSig = JSON.stringify(remoteCVData);
+    if (hydratedFromId === idStr) {
+      // Same CV, but the stored row changed under us — a CV import merged into
+      // it. This used to `return` unconditionally, so the form kept showing the
+      // pre-import copy and the next autosave wrote that copy straight back
+      // over the merge. Production CV k5713dn…4n86dfda lost an 11-skill and a
+      // 28-skill import that way on 11 Aug, which is why the import "did
+      // nothing": it landed, then the open editor undid it.
+      //
+      // Only when the form is clean. `dirty === false` means the form equals
+      // what was last saved, so adopting the server value cannot discard a
+      // keystroke — and when it is dirty this effect re-runs the moment the
+      // save settles and adopts then.
+      if (autosaveDirty || remoteSig === adoptedRemoteSig.current) return;
+      adoptedRemoteSig.current = remoteSig;
+      setCvData(remoteCVData);
+      resetBaseline(remoteCVData);
+      // Deliberately not touching `format` here: an import never writes
+      // displayPrefs, and re-deriving it would flip a toggle mid-session.
+      return;
+    }
+    adoptedRemoteSig.current = remoteSig;
     setCvData(remoteCVData);
     setHydratedFromId(idStr);
     resetBaseline(remoteCVData);
     // Persisted display prefs decide the format; hardcoding 'national' in
     // useState made the toggle disagree with the saved CV after a reload.
     setFormat(remoteCVData.displayPrefs.showPicture ? "national" : "international");
-  }, [remoteCVData, activeCVId, hydratedFromId, isCVLoading, resetBaseline]);
+  }, [remoteCVData, activeCVId, hydratedFromId, isCVLoading, resetBaseline, autosaveDirty]);
+
+  // Crash recovery. Only holds edits that never reached Convex — see the hook.
+  const draftCvId =
+    hydratedFromId && hydratedFromId !== "new" ? hydratedFromId : null;
+  const draft = useCvDraft({
+    cvId: draftCvId,
+    value: cvData,
+    dirty: autosave.dirty,
+    status: autosave.status,
+  });
+
+  // Offer it once per CV, as a toast rather than a banner: a restore the user
+  // ignores should cost them a corner of the screen, not a row of the editor.
+  const offeredDraftFor = useRef<string | null>(null);
+  const recoveredDraft = draft.recovered;
+  const dismissDraft = draft.dismiss;
+  useEffect(() => {
+    if (!recoveredDraft || !draftCvId) return;
+    if (offeredDraftFor.current === draftCvId) return;
+    offeredDraftFor.current = draftCvId;
+    notify.action("Ada perubahan CV yang belum tersimpan", {
+      description: "Dari sesi sebelumnya yang tertutup sebelum sempat menyimpan.",
+      actionLabel: "Pulihkan",
+      onAction: () => {
+        setCvData(recoveredDraft);
+        dismissDraft();
+      },
+      duration: 15000,
+    });
+  }, [recoveredDraft, draftCvId, dismissDraft]);
 
   // beforeunload guard: warn the user if they close the tab with
   // unsaved edits AND the autosave failed (otherwise autosave handles
