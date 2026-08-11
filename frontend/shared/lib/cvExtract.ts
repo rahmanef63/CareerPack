@@ -78,16 +78,23 @@ export function normalizeExtractedText(raw: string): string {
     .trim();
 }
 
+/** Served from public/ by scripts/copy-pdf-worker.mjs. pdf.js fetches a single
+ *  file on demand, so listing them costs nothing until a document needs one. */
+const PDF_ASSETS = {
+  standardFontDataUrl: "/standard_fonts/",
+  cMapUrl: "/cmaps/",
+  cMapPacked: true,
+} as const;
+
 /**
  * Lazy-load pdfjs-dist on first use. The legacy build is Node + browser
- * compatible with no top-level worker dependency, so it stays out of the
- * main bundle until somebody actually imports a CV.
+ * compatible, so it stays out of the main bundle until somebody actually
+ * imports a CV.
  */
 async function loadPdfjs() {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore — pdfjs-dist legacy build lacks DT for this entry point.
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  // Inline worker so we don't have to copy worker file into /public.
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
     // Same origin, copied out of node_modules by scripts/copy-pdf-worker.mjs.
     // This was a jsdelivr URL, which the CSP blocks: script-src enumerates the
@@ -115,7 +122,7 @@ async function readPdfText(
 ): Promise<{ text: string; pageCount: number }> {
   const arrayBuffer = await file.arrayBuffer();
   const pdfjs = await loadPdfjs();
-  const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  const doc = await pdfjs.getDocument({ data: arrayBuffer, ...PDF_ASSETS }).promise;
   const total = Math.min(doc.numPages, TEXT_MAX_PAGES);
   const pages: string[] = [];
   for (let p = 1; p <= total; p++) {
@@ -147,7 +154,7 @@ export async function rasterizePdfPages(
 ): Promise<string[]> {
   const arrayBuffer = await file.arrayBuffer();
   const pdfjs = await loadPdfjs();
-  const doc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  const doc = await pdfjs.getDocument({ data: arrayBuffer, ...PDF_ASSETS }).promise;
   const total = Math.min(doc.numPages, OCR_MAX_PAGES);
   const pages: string[] = [];
 

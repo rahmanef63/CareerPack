@@ -77,3 +77,5 @@ coverage
 
 # Copied from node_modules by scripts/copy-pdf-worker.mjs on prebuild/predev.
 frontend/public/pdf.worker.min.mjs
+frontend/public/standard_fonts/
+frontend/public/cmaps/

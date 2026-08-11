@@ -20,19 +20,19 @@
  * whatever pnpm resolved.
  */
 import { createRequire } from "node:module";
-import { copyFileSync, mkdirSync, statSync } from "node:fs";
+import { cpSync, copyFileSync, mkdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const dest = join(root, "frontend", "public", "pdf.worker.min.mjs");
+const publicDir = join(root, "frontend", "public");
 
-let src;
+let workerSrc;
 try {
   // Resolve through the package so this follows pnpm's actual layout rather
   // than a guessed node_modules path.
-  src = require.resolve("pdfjs-dist/legacy/build/pdf.worker.min.mjs", {
+  workerSrc = require.resolve("pdfjs-dist/legacy/build/pdf.worker.min.mjs", {
     paths: [join(root, "frontend")],
   });
 } catch {
@@ -41,9 +41,31 @@ try {
   );
   process.exit(1);
 }
+const pkgRoot = join(dirname(workerSrc), "..", "..");
 
-mkdirSync(dirname(dest), { recursive: true });
-copyFileSync(src, dest);
+mkdirSync(publicDir, { recursive: true });
+copyFileSync(workerSrc, join(publicDir, "pdf.worker.min.mjs"));
 console.log(
-  `[pdf-worker] ${(statSync(dest).size / 1024).toFixed(0)} KB -> frontend/public/pdf.worker.min.mjs`,
+  `[pdf-worker] ${(statSync(join(publicDir, "pdf.worker.min.mjs")).size / 1024).toFixed(0)} KB -> public/pdf.worker.min.mjs`,
 );
+
+/**
+ * Font + encoding data pdf.js fetches on demand.
+ *
+ * `standard_fonts/` covers the base-14 faces (Helvetica, Times, Courier…)
+ * that a PDF is allowed to reference WITHOUT embedding — plenty of generators
+ * do exactly that. `cmaps/` covers documents whose text uses a named character
+ * encoding rather than a simple one.
+ *
+ * Neither is bundled: pdf.js requests a single file only when a document
+ * actually needs it, so the cost is disk, not page weight. Without them
+ * pdf.js warns "Ensure that the standardFontDataUrl API parameter is
+ * provided" and falls back to substitutes — tolerable when we only want the
+ * text layer, but the OCR path RASTERISES pages and ships the image to a
+ * vision model, so a substituted font is a page of wrong glyphs.
+ */
+for (const dir of ["standard_fonts", "cmaps"]) {
+  const from = join(pkgRoot, dir);
+  cpSync(from, join(publicDir, dir), { recursive: true });
+  console.log(`[pdf-worker] ${dir}/ -> public/${dir}/`);
+}
