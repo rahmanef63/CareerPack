@@ -287,6 +287,21 @@ const CATEGORY_PATTERNS: ReadonlyArray<{ category: string; re: RegExp }> = [
  * listings in production came out that way. The title is what a person reads
  * on the card, so it outweighs the tags rather than being averaged with them.
  */
+/** Category plus whether the TITLE decided it. Only a title hit is strong
+ *  enough to overwrite a stored category — the tag heuristic below is a guess
+ *  with no ground truth behind it, and re-running it over the whole table
+ *  moved 56% of rows on nothing more than a threshold I picked. */
+export function inferCategoryDetailed(
+  title: string,
+  tagsLower: string[],
+): { category: string; fromTitle: boolean } {
+  const t = title.toLowerCase();
+  for (const { category, re } of CATEGORY_PATTERNS) {
+    if (re.test(t)) return { category, fromTitle: true };
+  }
+  return { category: inferCategory(title, tagsLower), fromTitle: false };
+}
+
 export function inferCategory(title: string, tagsLower: string[]): string {
   const t = title.toLowerCase();
   let best = "engineering";

@@ -1,7 +1,7 @@
-import { mutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "../_shared/auth";
-import { inferCategory } from "./external";
+import { inferCategoryDetailed } from "./external";
 import { SEED_JOBS } from "./seedJobs";
 
 /**
@@ -50,15 +50,18 @@ export const seedDemoJobs = mutation({
  * WWR rows are skipped: their category comes from the RSS feed URL, which is
  * ground truth, and re-inferring it would be a downgrade.
  */
-export const recategorizeJobs = mutation({
+export const recategorizeJobs = internalMutation({
   args: { dryRun: v.optional(v.boolean()) },
   returns: v.object({
     scanned: v.number(),
     changed: v.number(),
     samples: v.array(v.string()),
   }),
+  // internalMutation, not a public admin one: this is a one-off data repair
+  // run from the CLI, and there is no button for it. Internal functions are
+  // unreachable from any client, which is a stronger guarantee than
+  // `requireAdmin` and needs no session.
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
     const rows = await ctx.db
       .query("jobListings")
       .withIndex("by_source_posted", (q) => q.eq("source", "remoteok"))
@@ -70,11 +73,14 @@ export const recategorizeJobs = mutation({
       // For RemoteOK rows `requiredSkills` IS the raw tag array the feed
       // supplied (external.ts:259), so this re-scores off the same signal the
       // original inference saw.
-      const next = inferCategory(
+      const { category: next, fromTitle } = inferCategoryDetailed(
         row.title,
         (row.requiredSkills ?? []).map((t: string) => t.toLowerCase()),
       );
-      if (next === row.category) continue;
+      // Only rewrite when the title is decisive. The tag path is an unvalidated
+      // heuristic; running it over 2,809 rows moved 56% of them and collapsed
+      // 72% into engineering, which is a different wrong answer, not a fix.
+      if (!fromTitle || next === row.category) continue;
       changed++;
       if (samples.length < 10) {
         samples.push(`${row.title} :: ${row.category} -> ${next}`);
