@@ -26,10 +26,16 @@ export function LegalHeader() {
         <Link href="/" aria-label="CareerPack beranda" className="flex items-center">
           <Logo size={28} />
         </Link>
+        {/* The label used to be `hidden xs:inline`, and `xs` is not a screen in
+            tailwind.config.ts — only a borderRadius/shadow key. So it never
+            matched: the label was hidden at every width and this was a bare
+            arrow with no accessible name (axe: link-name, serious). Always
+            visible now, plus an aria-label so the name survives if someone
+            hides it again. */}
         <Button asChild variant="ghost" size="sm" className="gap-1.5">
-          <Link href="/">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden xs:inline">Kembali</span>
+          <Link href="/" aria-label="Kembali ke beranda">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span>Kembali</span>
           </Link>
         </Button>
       </div>

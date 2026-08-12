@@ -187,7 +187,7 @@ export default async function RoadmapIndexPage() {
             <nav aria-label="Jejak navigasi" className="mb-6">
               <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/" className="underline-offset-4 hover:text-foreground hover:underline">
+                  <Link href="/" className="inline-block py-1.5 underline-offset-4 hover:text-foreground hover:underline">
                     Beranda
                   </Link>
                 </li>
@@ -343,13 +343,13 @@ function RoadmapCardTile({ item }: { item: RoadmapCard }) {
               <Badge
                 key={tag}
                 variant="secondary"
-                className="rounded-full border border-brand/20 bg-brand-muted px-2.5 py-0.5 text-[11px] font-medium text-brand-muted-foreground"
+                className="rounded-full border border-brand/20 bg-brand-muted px-2.5 py-0.5 text-xs font-medium text-brand-muted-foreground"
               >
                 {tag}
               </Badge>
             ))}
             {item.tags.length > 4 && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px]">
+              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-xs">
                 +{item.tags.length - 4}
               </Badge>
             )}

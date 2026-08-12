@@ -46,7 +46,10 @@ export function AuthShell({
 
         <Card className="border-border shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">{title}</CardTitle>
+            {/* h1, not the CardTitle default h3: on /login, /forgot-password and
+                /reset-password this string IS the page heading, and those pages
+                shipped with no h1 at all. */}
+            <CardTitle as="h1" className="text-2xl">{title}</CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
           </CardHeader>
           <CardContent>{children}</CardContent>

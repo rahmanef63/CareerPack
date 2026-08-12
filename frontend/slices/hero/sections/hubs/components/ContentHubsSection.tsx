@@ -25,7 +25,7 @@ const CHIP =
   "inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-brand/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card";
 
 const HUB_LINK =
-  "mt-6 inline-flex items-center gap-2 text-sm font-medium text-foreground underline underline-offset-4 decoration-brand/50 hover:decoration-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card rounded-sm";
+  "mt-6 inline-flex items-center gap-2 text-sm font-medium text-foreground underline underline-offset-4 decoration-brand/50 hover:decoration-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card rounded-sm py-1.5";
 
 /**
  * Server Component. The two public content hubs, plus a direct link to each

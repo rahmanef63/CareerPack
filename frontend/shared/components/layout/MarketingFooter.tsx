@@ -16,7 +16,7 @@ export function MarketingFooter() {
             </p>
           </div>
           <div>
-            <h4 className="font-semibold text-foreground mb-3">Fitur</h4>
+            <h2 className="font-semibold text-foreground mb-3">Fitur</h2>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {/* Roadmap + dokumen point at the public hubs, not /login. This
                   footer is mounted on every public page, so those two links are
@@ -24,14 +24,14 @@ export function MarketingFooter() {
                   them to /login instead pointed a crawler at a `noindex,
                   nofollow` route and left the hubs reachable only via the
                   sitemap. The other two have no public surface yet. */}
-              <li><Link href="/login" className="hover:text-foreground">Pembuat CV</Link></li>
-              <li><Link href="/roadmap" className="hover:text-foreground">Roadmap Karir</Link></li>
-              <li><Link href="/dokumen" className="hover:text-foreground">Ceklis Dokumen</Link></li>
-              <li><Link href="/login" className="hover:text-foreground">Asisten AI</Link></li>
+              <li><Link href="/login" className="inline-block py-1 hover:text-foreground">Pembuat CV</Link></li>
+              <li><Link href="/roadmap" className="inline-block py-1 hover:text-foreground">Roadmap Karir</Link></li>
+              <li><Link href="/dokumen" className="inline-block py-1 hover:text-foreground">Ceklis Dokumen</Link></li>
+              <li><Link href="/login" className="inline-block py-1 hover:text-foreground">Asisten AI</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold text-foreground mb-3">Dukungan</h4>
+            <h2 className="font-semibold text-foreground mb-3">Dukungan</h2>
             {/* "Who built this" and "how do I reach you" are the two most
                 predictable questions from a visitor who has no account — and
                 until now both answers lived inside the dashboard, behind the
@@ -39,7 +39,7 @@ export function MarketingFooter() {
                 unreachable from the public side. */}
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="mailto:support@careerpack.org" className="hover:text-foreground">
+                <a href="mailto:support@careerpack.org" className="inline-block py-1 hover:text-foreground">
                   support@careerpack.org
                 </a>
               </li>
@@ -48,13 +48,13 @@ export function MarketingFooter() {
                   href="https://github.com/rahmanef63/CareerPack"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-foreground"
+                  className="inline-block py-1 hover:text-foreground"
                 >
                   GitHub
                 </a>
               </li>
-              <li><Link href="/privacy" className="hover:text-foreground">Kebijakan Privasi</Link></li>
-              <li><Link href="/terms" className="hover:text-foreground">Syarat Layanan</Link></li>
+              <li><Link href="/privacy" className="inline-block py-1 hover:text-foreground">Kebijakan Privasi</Link></li>
+              <li><Link href="/terms" className="inline-block py-1 hover:text-foreground">Syarat Layanan</Link></li>
             </ul>
           </div>
         </div>

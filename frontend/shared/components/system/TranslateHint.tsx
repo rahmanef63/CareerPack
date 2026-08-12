@@ -123,9 +123,9 @@ export function TranslateHint() {
         </div>
         <button
           type="button"
-          aria-label="Dismiss"
+          aria-label="Tutup"
           onClick={dismiss}
-          className="rounded-md p-1 text-muted-foreground hover:bg-muted"
+          className="grid size-11 place-items-center rounded-md text-muted-foreground hover:bg-muted"
         >
           <X className="size-4" aria-hidden />
         </button>

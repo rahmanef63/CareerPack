@@ -150,7 +150,7 @@ export function FloatingMobileNav({
               <button
                 type="button"
                 onClick={() => onSelect(item.id)}
-                className="flex w-full flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:bg-accent"
+                className="flex w-full flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:bg-accent"
               >
                 {icon ? (
                   <span

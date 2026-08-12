@@ -543,13 +543,13 @@ function PortfolioTile({
               <Badge
                 key={tech}
                 variant="secondary"
-                className="bg-brand-muted/60 text-[10px] text-brand-muted-foreground"
+                className="bg-brand-muted/60 text-xs text-brand-muted-foreground"
               >
                 {tech}
               </Badge>
             ))}
             {item.techStack.length > (item.featured ? 6 : 3) && (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="text-xs">
                 +{item.techStack.length - (item.featured ? 6 : 3)}
               </Badge>
             )}

@@ -13,11 +13,11 @@ export function BrandFooter({
         <span>
           © {new Date().getFullYear()} CareerPack ·{" "}
           <span className="font-medium text-foreground/80">{displayName}</span>
-          {slug && <span className="opacity-60"> /{slug}</span>}
+          {slug && <span className="text-muted-foreground"> /{slug}</span>}
         </span>
         <Link
           href="/"
-          className="flex items-center gap-1.5 font-medium text-brand underline-offset-4 hover:underline"
+          className="flex items-center gap-1.5 py-1.5 font-medium text-brand underline-offset-4 hover:underline"
         >
           <BrandMark size={12} />
           Buat halamanmu juga →

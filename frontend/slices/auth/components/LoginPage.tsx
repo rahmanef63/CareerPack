@@ -291,7 +291,7 @@ export function LoginPage() {
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                                                 aria-pressed={showPassword}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                                             >
                                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
@@ -301,7 +301,7 @@ export function LoginPage() {
                                     <div className="flex justify-end">
                                         <Link
                                             href="/forgot-password"
-                                            className="text-sm text-muted-foreground hover:text-foreground"
+                                            className="inline-block py-1.5 text-sm text-muted-foreground hover:text-foreground"
                                         >
                                             Lupa password?
                                         </Link>

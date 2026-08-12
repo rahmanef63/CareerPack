@@ -27,7 +27,7 @@
     --popover-foreground: 0.32 0 0;
 
     /* Primary — modern-minimal blue */
-    --primary: 0.62 0.19 259.81;
+    --primary: 0.56 0.19 259.81;
     --primary-foreground: 1.00 0 0;
 
     --secondary: 0.97 0.00 264.54;
@@ -100,10 +100,16 @@
     --sidebar-border: 0.93 0.01 264.53;
     --sidebar-ring: 0.62 0.19 259.81;
 
+    /* L 0.62 measured 3.72:1 on white (axe, live site) — WCAG AA needs 4.5
+       for normal text, and this token is both the brand text colour and the
+       primary button fill, so it failed in both directions. L 0.56 = #266ee1
+       = 4.79:1, the smallest step that clears AA and stays inside sRGB.
+       Light mode only: on the dark palette this sits on a dark background,
+       where darkening it would REDUCE contrast. */
     /* Brand family — aliased to primary / chart-4 / accent */
-    --brand: 0.62 0.19 259.81;
+    --brand: 0.56 0.19 259.81;
     --brand-foreground: 1.00 0 0;
-    --brand-from: 0.62 0.19 259.81;
+    --brand-from: 0.56 0.19 259.81;
     --brand-to: 0.42 0.18 265.64;
     --brand-muted: 0.95 0.03 236.82;
     --brand-muted-foreground: 0.38 0.14 265.52;
@@ -268,6 +274,21 @@
     font-size: max(16px, 1rem) !important;
     line-height: 1.4;
   }
+}
+
+/* Readability floor for the smallest type step.
+   `--font-scale` defaults to `compact` (0.92, see useUIPrefs), so `text-xs`
+   computed to 11.04 px out of the box — measured live on the header's
+   "Masuk" / "Mulai Gratis" buttons, the breadcrumbs and the "Terakhir
+   diperbarui" lines. Below ~12 px body-adjacent text stops being comfortably
+   legible on a phone.
+   Clamping the one step that falls through the floor keeps the compact
+   density everywhere else, which is why this is not a change to the default
+   scale: raising that would grow headings by 9% to fix a caption. Same
+   `max()` technique as the iOS rule above, and it still tracks the user's
+   choice — at `large` (1.1) the 13.2 px result wins over the 12 px floor. */
+.text-xs {
+  font-size: max(12px, 0.75rem);
 }
 
 /* Theme-swap transition — `html.theme-transition` class is added by the

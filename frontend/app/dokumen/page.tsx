@@ -114,7 +114,7 @@ export default async function DokumenIndexPage() {
             <nav aria-label="Remah roti" className="mb-6 text-xs text-muted-foreground">
               <ol className="flex flex-wrap items-center gap-1.5">
                 <li>
-                  <Link href="/" className="underline-offset-4 hover:underline">
+                  <Link href="/" className="inline-block py-1.5 underline-offset-4 hover:underline">
                     Beranda
                   </Link>
                 </li>

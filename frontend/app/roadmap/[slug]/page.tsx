@@ -282,13 +282,13 @@ export default async function RoadmapDetailPage({ params }: PageProps) {
             <nav aria-label="Jejak navigasi" className="mb-6">
               <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/" className="underline-offset-4 hover:text-foreground hover:underline">
+                  <Link href="/" className="inline-block py-1.5 underline-offset-4 hover:text-foreground hover:underline">
                     Beranda
                   </Link>
                 </li>
                 <li aria-hidden>/</li>
                 <li>
-                  <Link href="/roadmap" className="underline-offset-4 hover:text-foreground hover:underline">
+                  <Link href="/roadmap" className="inline-block py-1.5 underline-offset-4 hover:text-foreground hover:underline">
                     Roadmap
                   </Link>
                 </li>
@@ -462,7 +462,7 @@ function NodeCard({
           {node.title}
         </h3>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-[11px]", tone)}>
+          <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-xs", tone)}>
             {getDifficultyLabel(node.difficulty)}
           </Badge>
           {node.estimatedHours > 0 && (
@@ -515,7 +515,7 @@ function ResourceRow({ resource }: { resource: RoadmapResource }) {
       <Badge
         variant="outline"
         className={cn(
-          "shrink-0 rounded-full px-2 py-0 text-[10px] font-medium",
+          "shrink-0 rounded-full px-2 py-0 text-xs font-medium",
           resource.free
             ? "border-success/30 bg-success/10 text-success-text"
             : "border-border text-muted-foreground",
