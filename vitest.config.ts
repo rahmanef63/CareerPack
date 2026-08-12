@@ -14,7 +14,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["convex/**/*.test.ts", "frontend/{shared,slices}/**/*.test.{ts,tsx}"],
+    // `frontend/app/**` is in here because it was NOT, and a sitemap regression
+    // suite sat in frontend/app/ passing zero tests while reporting success.
+    include: [
+      "convex/**/*.test.ts",
+      "frontend/{shared,slices,app}/**/*.test.{ts,tsx}",
+    ],
     // 5s (the default) is not enough for the convex-test files. `convexTest()`
     // loads the ENTIRE convex function module graph before the first assertion,
     // and the suite runs on the production VPS — the same box serving every

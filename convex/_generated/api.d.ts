@@ -91,6 +91,7 @@ import type * as crons from "../crons.js";
 import type * as cv_actions from "../cv/actions.js";
 import type * as cv_mutations from "../cv/mutations.js";
 import type * as cv_queries from "../cv/queries.js";
+import type * as documents_countrySlug from "../documents/countrySlug.js";
 import type * as documents_mutations from "../documents/mutations.js";
 import type * as documents_queries from "../documents/queries.js";
 import type * as engine_atoms_lib from "../engine/atoms/lib.js";
@@ -285,6 +286,7 @@ declare const fullApi: ApiFromModules<{
   "cv/actions": typeof cv_actions;
   "cv/mutations": typeof cv_mutations;
   "cv/queries": typeof cv_queries;
+  "documents/countrySlug": typeof documents_countrySlug;
   "documents/mutations": typeof documents_mutations;
   "documents/queries": typeof documents_queries;
   "engine/atoms/lib": typeof engine_atoms_lib;

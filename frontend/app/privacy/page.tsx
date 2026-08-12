@@ -5,6 +5,12 @@ export const metadata: Metadata = {
   title: "Kebijakan Privasi",
   description:
     "Cara CareerPack mengumpulkan, menggunakan, dan melindungi data Anda.",
+  // Relative on purpose — `metadataBase` in the root layout resolves it to
+  // https://careerpack.org/privacy. Until 2026-08-12 no route on the site set
+  // `alternates.canonical` at all, so every page shipped with zero
+  // <link rel="canonical"> and any ?utm_* / trailing-slash variant was a
+  // separate URL as far as Google was concerned.
+  alternates: { canonical: "/privacy" },
 };
 
 const LAST_UPDATED = "2026-07-30";

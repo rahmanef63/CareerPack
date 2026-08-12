@@ -77,8 +77,9 @@ export const FIELD_LIMITS = {
   urlMax: 300,
 } as const;
 
-/** Reserved-slug blocklist mirrors convex/profile/mutations.ts. Kept
- *  here so the client can validate before the server roundtrip. */
+/** Reserved-slug blocklist mirrors RESERVED_SLUGS in convex/profile/slug.ts
+ *  (the server-side SSOT). Kept here so the client can validate before the
+ *  server roundtrip — keep the two lists in sync when either changes. */
 export const DEFAULT_RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "_next", "api", "r", "static", "assets", "public",
   "icon", "apple-icon", "apple-touch-icon", "favicon",
@@ -91,6 +92,9 @@ export const DEFAULT_RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "faq", "support", "careers", "press", "root", "null",
   "undefined", "error", "404", "500", "status",
   "careerpack", "anthropic", "claude",
+  // Public content hubs + AI-crawler manifest (2026-08-12). Static segments
+  // under app/ beat the dynamic [slug] route, so these must never be claimed.
+  "dokumen", "roadmap", "llms", "llms.txt",
 ]);
 
 export const SLUG_HINT_DEFAULT =

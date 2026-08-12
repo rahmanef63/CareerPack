@@ -18,9 +18,15 @@ export function MarketingFooter() {
           <div>
             <h4 className="font-semibold text-foreground mb-3">Fitur</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              {/* Roadmap + dokumen point at the public hubs, not /login. This
+                  footer is mounted on every public page, so those two links are
+                  the site-wide internal path into ~60 indexable pages; sending
+                  them to /login instead pointed a crawler at a `noindex,
+                  nofollow` route and left the hubs reachable only via the
+                  sitemap. The other two have no public surface yet. */}
               <li><Link href="/login" className="hover:text-foreground">Pembuat CV</Link></li>
-              <li><Link href="/login" className="hover:text-foreground">Roadmap Karir</Link></li>
-              <li><Link href="/login" className="hover:text-foreground">Ceklis Dokumen</Link></li>
+              <li><Link href="/roadmap" className="hover:text-foreground">Roadmap Karir</Link></li>
+              <li><Link href="/dokumen" className="hover:text-foreground">Ceklis Dokumen</Link></li>
               <li><Link href="/login" className="hover:text-foreground">Asisten AI</Link></li>
             </ul>
           </div>

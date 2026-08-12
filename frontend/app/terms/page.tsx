@@ -5,6 +5,8 @@ import { LegalHeader } from "@/shared/components/layout/LegalHeader";
 export const metadata: Metadata = {
   title: "Syarat Layanan",
   description: "Syarat penggunaan layanan CareerPack.",
+  // Relative — resolved against `metadataBase` in the root layout.
+  alternates: { canonical: "/terms" },
 };
 
 const LAST_UPDATED = "2026-07-30";

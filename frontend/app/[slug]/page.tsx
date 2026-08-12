@@ -102,6 +102,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // pass just the name so we don't render "Name · CareerPack · CareerPack".
     title: profile.displayName,
     description,
+    // Relative — `metadataBase` (root layout) resolves it to
+    // https://careerpack.org/<slug>. Built from `profile.slug`, the slug the
+    // backend actually resolved, not the raw param, so a case/alias variant of
+    // the URL still points at one canonical address.
+    //
+    // Deliberately NOT gated on `allowIndex`: a canonical is valid and useful
+    // on a noindex page too (it consolidates ?utm_* copies), and the robots
+    // block below is the only thing that decides indexability. Do not move
+    // this inside a conditional.
+    alternates: { canonical: `/${profile.slug}` },
     openGraph: {
       title: profile.displayName,
       description,

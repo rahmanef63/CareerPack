@@ -63,6 +63,18 @@ const RESERVED_SLUGS = new Set<string>([
   "careerpack",
   "anthropic",
   "claude",
+  // Public content hubs added 2026-08-12. Next.js gives a STATIC segment
+  // priority over the dynamic `app/[slug]`, so a profile on any of these
+  // slugs would render the hub instead — a silently unreachable profile.
+  // Reserve before the routes ship, not after someone claims one.
+  "dokumen",
+  "roadmap",
+  // AI-crawler manifest served at the root. "llms.txt" can never pass
+  // SLUG_REGEX (the dot is rejected) — listed anyway so the blocklist reads
+  // as the full set of root paths we own, not a set minus what the regex
+  // happens to catch today.
+  "llms",
+  "llms.txt",
 ]);
 
 function normalizeSlug(raw: string): string {
