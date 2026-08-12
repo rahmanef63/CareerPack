@@ -238,6 +238,12 @@ export default async function PublicProfilePage({ params }: PageProps) {
             branding: profile.branding,
           }}
           enableFloatingNav
+          // The same `ProfileView` the legacy path renders, handed to the
+          // template as its pre-load content. It is a Server Component tree,
+          // so it lands in the initial HTML — which is the only reason this
+          // URL has an <h1> and a body worth indexing. Without it the document
+          // was the BrandFooter and nothing else.
+          fallback={<ProfileView profile={profile} />}
         />
       </>
     );
