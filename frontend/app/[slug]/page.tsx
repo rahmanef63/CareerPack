@@ -48,6 +48,41 @@ export const revalidate = 60;
 export const dynamic = "force-static";
 export const dynamicParams = true;
 
+/**
+ * There must be NO `loading.tsx` in this route segment. It is not a style
+ * preference; it decides the HTTP status code of every unknown slug.
+ *
+ * A `loading.tsx` makes Next wrap the segment in a Suspense boundary and flush
+ * the fallback shell immediately. Flushing commits the status line — so by the
+ * time `notFound()` throws further down, the response has already promised
+ * **200 OK**. This route shipped with one, and the result was a soft 404 on
+ * careerpack.org: every unknown path returned 200 with a "Profil tidak
+ * ditemukan" body, 38 skeleton `shimmer` divs, and a
+ * `<template data-dgst="NEXT_HTTP_ERROR_FALLBACK;404">` marker that only the
+ * client understood. Crawlers do not run that client. Google treats a 200 as a
+ * real page, indexes it, and only later decides it was not one — spending
+ * crawl budget on every URL anyone ever guessed, and on a root catch-all that
+ * is every URL there is.
+ *
+ * Removing it costs the skeleton on a cold render only: `revalidate = 60`
+ * above means the second visitor within the window gets a cache hit either
+ * way. If a skeleton is wanted back, it has to go INSIDE the page, below the
+ * `notFound()` decision — a `<Suspense>` around the slow subtree, never a
+ * segment-level `loading.tsx`.
+ *
+ * Verified against the standalone server (`next start` refuses to run a
+ * standalone build, which is how this was mismeasured the first time):
+ *
+ *   /rahman             200  Cache-Control: s-maxage=60, stale-while-revalidate=…
+ *   /slug-palsu-xyz123  404  x-nextjs-cache: HIT, 7ms, no Convex round trip
+ *
+ * That cache HIT is checkpoint 5 above doing its job: enumeration is absorbed
+ * by the ISR layer instead of reaching Convex. It is not free — each distinct
+ * slug probed leaves ~44 KB of `.html`/`.rsc`/`.meta` in the server cache, and
+ * nothing bounds how many an attacker can mint. That is a pre-existing
+ * property of `force-static` on a visitor-controlled segment, unchanged here.
+ */
+
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL ?? "";
 
 interface PageProps {
