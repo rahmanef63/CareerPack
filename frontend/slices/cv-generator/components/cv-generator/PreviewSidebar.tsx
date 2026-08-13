@@ -65,7 +65,7 @@ export const PreviewSidebar = memo(function PreviewSidebar({
   const score = computeScore(cvData);
   const profileTone = cvData.profile.name
     ? "bg-success/20 text-success-text"
-    : "bg-warning/20 text-warning";
+    : "bg-warning/20 text-warning-text";
   const profileLabel = cvData.profile.name ? "Lengkap" : "Belum";
   return (
     <div className="min-w-0 lg:col-span-1">
@@ -120,7 +120,7 @@ export const PreviewSidebar = memo(function PreviewSidebar({
           </CardHeader>
           <CardContent className="space-y-3 p-3">
             <ProgressWalker value={score} label="Kelengkapan CV" />
-            <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
               <SidebarMetric
                 label="Info Pribadi"
                 badge={

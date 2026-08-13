@@ -29,7 +29,7 @@ export function NodeEditor({ node, allNodes, onChange, onRemove }: NodeEditorPro
         <div className="flex items-center gap-2 min-w-0">
           {expanded ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
           <span className="text-sm font-medium truncate">{node.title || "(tanpa judul)"}</span>
-          <Badge variant="outline" className="text-[10px] shrink-0">
+          <Badge variant="outline" className="text-xs shrink-0">
             {node.difficulty || "beginner"}
           </Badge>
         </div>

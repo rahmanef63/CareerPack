@@ -217,10 +217,10 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
     return (
       <Card className="border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle as="h2" className="flex items-center gap-2 text-base">
             <Compass className="h-4 w-4 text-brand" />
             Career Quest
-            <Badge variant="outline" className="ml-1 text-[10px]">
+            <Badge variant="outline" className="ml-1">
               plan compiler
             </Badge>
           </CardTitle>
@@ -271,7 +271,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle as="h2" className="flex items-center gap-2 text-base">
               <Compass className="h-4 w-4 text-brand" />
               <span className="truncate">{quest.title}</span>
             </CardTitle>
@@ -279,7 +279,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
               &ldquo;{quest.intent}&rdquo;
             </p>
           </div>
-          <Badge variant="outline" className="shrink-0 gap-1 text-[10px]">
+          <Badge variant="outline" className="shrink-0 gap-1">
             <Target className="h-3 w-3" />
             ETA {quest.etaMonths} bln
           </Badge>
@@ -287,13 +287,18 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
               {completedCount} / {quest.actions.length} aksi
             </span>
             <span className="tabular-nums">{progress}%</span>
           </div>
-          <Progress value={progress} className="h-1.5" />
+          <Progress
+            value={progress}
+            aria-label={`Progress misi: ${quest.title}`}
+            aria-valuetext={`${completedCount} dari ${quest.actions.length} aksi selesai`}
+            className="h-1.5"
+          />
         </div>
 
         <ul className="space-y-1.5">
@@ -330,7 +335,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
                   )}
                 >
                   {a.label}
-                  <Badge variant="outline" className="ml-1 text-[9px]">
+                  <Badge variant="outline" className="ml-1">
                     {TYPE_LABELS[a.type] ?? a.type}
                   </Badge>
                 </span>
@@ -338,7 +343,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
                   <button
                     type="button"
                     onClick={() => router.push(target)}
-                    className="shrink-0 rounded px-1.5 py-0.5 text-[10px] text-brand hover:bg-brand/10"
+                    className="shrink-0 rounded px-1.5 py-0.5 text-xs text-brand hover:bg-brand/10"
                     title={`Buka ${target}`}
                   >
                     <span className="flex items-center gap-0.5">
@@ -358,7 +363,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
             variant="ghost"
             size="sm"
             onClick={handleAbandon}
-            className="gap-1.5 text-[11px] text-muted-foreground"
+            className="gap-1.5 text-xs text-muted-foreground"
           >
             <Trash2 className="h-3 w-3" />
             Abandon
@@ -368,7 +373,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
               type="button"
               onClick={handleComplete}
               size="sm"
-              className="gap-1.5 bg-brand text-[11px] hover:bg-brand"
+              className="gap-1.5 bg-brand text-xs hover:bg-brand"
             >
               <Sparkles className="h-3 w-3" />
               Tandai selesai

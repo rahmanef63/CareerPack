@@ -73,7 +73,7 @@ export function WelcomeTipCard() {
     return (
       <div className="flex h-full flex-col justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-muted px-2 py-0.5 text-[10px] font-medium text-brand">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-muted px-2 py-0.5 text-xs font-medium text-brand-muted-foreground">
             <Download className="h-3 w-3" aria-hidden />
             Aplikasi CareerPack
           </div>
@@ -101,7 +101,7 @@ export function WelcomeTipCard() {
   return (
     <div className="flex h-full flex-col justify-between gap-3">
       <div>
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-muted px-2 py-0.5 text-[10px] font-medium text-brand">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-muted px-2 py-0.5 text-xs font-medium text-brand-muted-foreground">
           <Icon className="h-3 w-3" aria-hidden />
           Tips Minggu Ini
         </div>

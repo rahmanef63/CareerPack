@@ -59,10 +59,10 @@ function gradeColor(grade: string): string {
     case "C":
       return "text-warning-text bg-warning/10 border-warning/40";
     case "D":
-      return "text-destructive bg-destructive/5 border-destructive/30";
+      return "text-destructive-text bg-destructive/5 border-destructive/30";
     case "F":
     default:
-      return "text-destructive bg-destructive/15 border-destructive/50";
+      return "text-destructive-text bg-destructive/15 border-destructive/50";
   }
 }
 
@@ -143,7 +143,7 @@ export function ATSResultCard({
       </div>
 
       {/* Matched / missing chips */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-success-text">
             <CheckCircle2 className="h-4 w-4" />
@@ -179,7 +179,7 @@ export function ATSResultCard({
                 <Badge
                   key={k}
                   variant="outline"
-                  className="border-destructive/40 bg-destructive/10 text-destructive"
+                  className="border-destructive/40 bg-destructive/10 text-destructive-text"
                 >
                   {k}
                 </Badge>

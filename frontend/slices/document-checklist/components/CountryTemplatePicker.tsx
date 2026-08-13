@@ -188,7 +188,11 @@ export function CountryTemplatePicker() {
             </p>
           ) : (
             <>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_2fr_auto]">
+              {/* Single column inside the lg rail, paired again at xl where
+                  the rail is wide enough — the old 4-across track list was
+                  written for a full-width card and collapses into unusable
+                  slivers now that this sits beside the document list. */}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <FilterSelect
                   label="Benua"
                   placeholder="Semua benua"
@@ -203,46 +207,49 @@ export function CountryTemplatePicker() {
                   onChange={setLanguage}
                   options={languageOptions.map((l) => ({ value: l, label: l }))}
                 />
-                <CountryDropdown
-                  filtered={filtered}
-                  value={selectedCountry}
-                  onChange={setSelectedCountry}
-                />
+                <div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+                  <CountryDropdown
+                    filtered={filtered}
+                    value={selectedCountry}
+                    onChange={setSelectedCountry}
+                  />
+                </div>
+              </div>
+
+              {filtered.length === 0 && (
+                <p className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-center text-xs text-muted-foreground">
+                  Tidak ada negara cocok dengan filter saat ini.
+                </p>
+              )}
+
+              {/* Kept outside the empty branch on purpose: when a filter
+                  combo matches nothing, "Reset filter" is the only way out. */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                {filtered.length > 0 && (
+                  <Badge variant="outline" className="font-normal">
+                    {filtered.length} negara cocok
+                  </Badge>
+                )}
+                {selectedSummary && (
+                  <span className="flex items-center gap-1">
+                    <ScrollText className="h-3.5 w-3.5" />
+                    {selectedSummary.documentCount} dokumen ·{" "}
+                    {selectedSummary.requiredCount} wajib
+                  </span>
+                )}
                 {filtersActive && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={resetFilters}
-                    className="gap-1.5 self-end text-xs text-muted-foreground"
+                    className="ml-auto h-7 gap-1.5 px-2 text-xs text-muted-foreground"
                   >
                     <X className="h-3.5 w-3.5" />
                     Reset filter
                   </Button>
                 )}
               </div>
-
-              {filtered.length === 0 ? (
-                <p className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-center text-xs text-muted-foreground">
-                  Tidak ada negara cocok dengan filter saat ini.
-                </p>
-              ) : (
-                <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                  <Badge variant="outline" className="font-normal">
-                    {filtered.length} negara cocok
-                  </Badge>
-                  {selectedSummary && (
-                    <>
-                      <span className="hidden sm:inline">·</span>
-                      <span className="flex items-center gap-1">
-                        <ScrollText className="h-3 w-3" />
-                        {selectedSummary.documentCount} dokumen ·{" "}
-                        {selectedSummary.requiredCount} wajib
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
 
               {selectedSummary && (
                 <Button
@@ -285,7 +292,7 @@ function FilterSelect({
 }: FilterSelectProps) {
   return (
     <div className="space-y-1">
-      <label className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <label className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </label>
       <ResponsiveSelect value={value} onValueChange={onChange}>
@@ -312,7 +319,7 @@ interface CountryDropdownProps {
 function CountryDropdown({ filtered, value, onChange }: CountryDropdownProps) {
   return (
     <div className="space-y-1">
-      <label className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+      <label className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Negara
       </label>
       <ResponsiveSelect
@@ -332,7 +339,7 @@ function CountryDropdown({ filtered, value, onChange }: CountryDropdownProps) {
               <span className="inline-flex items-center gap-2">
                 <span>{t.flag ?? "🌐"}</span>
                 <span>{t.countryLabel}</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   · {t.documentCount} dok
                 </span>
               </span>
@@ -383,7 +390,7 @@ function TemplatePreviewDialog({ country, onClose }: PreviewDialogProps) {
             <span className="text-2xl">{template?.flag ?? "🌐"}</span>
             <span>{template?.countryLabel ?? "Template Negara"}</span>
             {template && (
-              <Badge variant="outline" className="ml-1 text-[10px]">
+              <Badge variant="outline" className="ml-1 text-xs">
                 {template.documents.length} dokumen
               </Badge>
             )}
@@ -406,20 +413,20 @@ function TemplatePreviewDialog({ country, onClose }: PreviewDialogProps) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="font-semibold">{d.title}</div>
                   {d.required ? (
-                    <Badge variant="destructive" className="shrink-0 text-[9px]">
+                    <Badge variant="destructive" className="shrink-0 text-xs">
                       Wajib
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="shrink-0 text-[9px]">
+                    <Badge variant="outline" className="shrink-0 text-xs">
                       Opsional
                     </Badge>
                   )}
                 </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {d.description}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <Badge variant="outline" className="text-[9px]">
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                  <Badge variant="outline" className="text-xs">
                     {d.category}
                   </Badge>
                   {d.issuingAuthority && (

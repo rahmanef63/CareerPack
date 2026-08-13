@@ -48,7 +48,7 @@ function AutoSaveIndicator({
 
   if (!canEnable) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <CloudOff className="h-3 w-3" />
         Auto-save off — set slug dulu
       </span>
@@ -56,7 +56,7 @@ function AutoSaveIndicator({
   }
   if (saving) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <Loader2 className="h-3 w-3 animate-spin" />
         Menyimpan…
       </span>
@@ -64,7 +64,7 @@ function AutoSaveIndicator({
   }
   if (autoSavePending) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <Loader2 className="h-3 w-3 animate-spin" />
         Auto-save…
       </span>
@@ -72,7 +72,7 @@ function AutoSaveIndicator({
   }
   if (lastSavedAt) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] text-success-text">
+      <span className="inline-flex items-center gap-1 text-xs text-success-text">
         <Check className="h-3 w-3" />
         Tersimpan otomatis · {formatRelative(lastSavedAt, now)}
       </span>

@@ -67,7 +67,7 @@ export function NextActionCard() {
       <CardContent className="space-y-3">
         <div className="flex items-start gap-2.5">
           <span
-            className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand"
+            className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-brand-muted text-brand-muted-foreground"
             aria-hidden
           >
             <Icon className="h-4 w-4" />

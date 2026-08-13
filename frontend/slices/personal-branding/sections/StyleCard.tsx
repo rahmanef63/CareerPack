@@ -109,7 +109,7 @@ export function StyleCard({ bind }: StyleCardProps) {
           <button
             type="button"
             onClick={() => clearKey("primary")}
-            className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:bg-muted"
+            className="rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-muted"
           >
             Default
           </button>
@@ -141,7 +141,7 @@ export function StyleCard({ bind }: StyleCardProps) {
             maxLength={7}
           />
           {!primaryValid && (
-            <span className="text-[10px] text-destructive">Format: #rrggbb</span>
+            <span className="text-xs text-destructive">Format: #rrggbb</span>
           )}
         </div>
       </div>
@@ -166,7 +166,7 @@ export function StyleCard({ bind }: StyleCardProps) {
                 )}
               >
                 <span className="block text-sm font-semibold">Aa</span>
-                <span className="block text-[10px] text-muted-foreground">
+                <span className="block text-xs text-muted-foreground">
                   {f.label}
                 </span>
               </button>
@@ -189,7 +189,7 @@ export function StyleCard({ bind }: StyleCardProps) {
                 onClick={() => update("radius", r.value)}
                 aria-pressed={active}
                 className={cn(
-                  "flex flex-col items-center gap-1 border p-2 text-[10px] transition-colors",
+                  "flex flex-col items-center gap-1 border p-2 text-xs transition-colors",
                   r.demo,
                   active
                     ? "border-brand bg-brand-muted/40 text-foreground"

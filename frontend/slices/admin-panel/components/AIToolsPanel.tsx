@@ -128,8 +128,8 @@ export function AIToolsPanel() {
             <CardDescription>
               Aksi terstruktur yang AI bisa kembalikan untuk user setujui.
               Tipe harus cocok dengan whitelist di backend (
-              <code className="text-[11px]">cv.fillExperience</code>,{" "}
-              <code className="text-[11px]">nav.go</code>, dll.). Nonaktifkan
+              <code className="text-xs">cv.fillExperience</code>,{" "}
+              <code className="text-xs">nav.go</code>, dll.). Nonaktifkan
               tool yang belum diimplementasi di frontend.
             </CardDescription>
           </div>
@@ -168,11 +168,11 @@ export function AIToolsPanel() {
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium">{t.label}</span>
-                      <Badge variant="secondary" className="font-mono text-[10px]">
+                      <Badge variant="secondary" className="font-mono text-xs">
                         {t.type}
                       </Badge>
                       {t.isSeed && (
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-xs">
                           default
                         </Badge>
                       )}
@@ -181,7 +181,7 @@ export function AIToolsPanel() {
                       {t.description}
                     </p>
                     {t.payloadSchema && (
-                      <code className="line-clamp-1 block text-[10px] text-muted-foreground">
+                      <code className="line-clamp-1 block text-xs text-muted-foreground">
                         {t.payloadSchema}
                       </code>
                     )}

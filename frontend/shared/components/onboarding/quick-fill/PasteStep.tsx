@@ -76,7 +76,7 @@ export function PasteStep({
                     <AlertCircle className="h-4 w-4 text-amber-500" />
                   )}
                   <span className="font-medium">{s.label}</span>
-                  <Badge variant="outline" className="text-[10px]">
+                  <Badge variant="outline" className="text-xs">
                     {s.count} item
                   </Badge>
                   {s.hint && (

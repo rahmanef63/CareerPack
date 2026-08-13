@@ -107,7 +107,7 @@ export function Composer({
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5 hidden sm:block">
+          <p className="text-xs text-muted-foreground mt-1.5 hidden sm:block">
             Enter kirim · Shift+Enter baris baru · / untuk perintah
           </p>
         </form>

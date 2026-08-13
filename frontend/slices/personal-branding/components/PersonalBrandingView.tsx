@@ -220,7 +220,7 @@ export function PersonalBrandingView() {
                 <span>Susun otomatis dari CV</span>
                 <Badge
                   variant="secondary"
-                  className="ml-1 hidden bg-success/15 text-[10px] text-success-text sm:inline-flex"
+                  className="ml-1 hidden bg-success/15 text-xs text-success-text sm:inline-flex"
                 >
                   Termudah
                 </Badge>

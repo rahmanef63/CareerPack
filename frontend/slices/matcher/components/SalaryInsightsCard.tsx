@@ -45,9 +45,10 @@ export function SalaryInsightsCard() {
   const denomFor = (currency: string) => maxByCurrency.get(currency) || 1;
 
   return (
-    <section className="rounded-xl border border-border bg-card p-5">
+    // p-4, not p-5: this card now lives in the ~18rem matcher rail.
+    <section className="rounded-xl border border-border bg-card p-4">
       <header className="mb-4 flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h3 className="flex items-center gap-2 text-base font-semibold">
             <TrendingUp className="h-4 w-4 text-brand" />
             Insight Gaji
@@ -60,7 +61,7 @@ export function SalaryInsightsCard() {
             Hanya dari lowongan yang mencantumkan gaji.
           </p>
         </div>
-        <Badge variant="outline" className="text-[10px]">
+        <Badge variant="outline" className="shrink-0 whitespace-nowrap">
           {visible.reduce((s, b) => s + b.withSalaryCount, 0)} sampel
         </Badge>
       </header>
@@ -78,8 +79,10 @@ export function SalaryInsightsCard() {
           const median = (p50 / denom) * 100;
           return (
             <li key={b.category} className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <Badge className={cn("border-0 text-[10px]", color)}>{label}</Badge>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                <Badge className={cn("max-w-full shrink-0 truncate border-0", color)}>
+                  {label}
+                </Badge>
                 <span className="font-medium tabular-nums text-foreground">
                   {formatMoney(p50, b.currency)}
                 </span>

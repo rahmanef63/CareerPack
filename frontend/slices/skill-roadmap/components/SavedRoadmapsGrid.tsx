@@ -115,7 +115,7 @@ export function SavedRoadmapsGrid({
               }}
               aria-label={`Hapus ${cat.name} dari skill saya`}
               className={cn(
-                "absolute top-1 right-1 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all",
+                "absolute top-1 right-1 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive-text hover:bg-destructive/10 transition-all",
                 isActive
                   ? "opacity-100"
                   : "opacity-100 lg:opacity-0 lg:group-hover:opacity-100",
@@ -126,7 +126,7 @@ export function SavedRoadmapsGrid({
 
             {/* Active badge — top-left ribbon */}
             {isActive && (
-              <span className="absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand text-brand-foreground">
+              <span className="absolute top-1.5 left-1.5 text-xs font-bold leading-none px-1.5 py-1 rounded-full bg-brand text-brand-foreground">
                 AKTIF
               </span>
             )}
@@ -149,14 +149,17 @@ export function SavedRoadmapsGrid({
               <span
                 className={cn(
                   "text-xs font-medium leading-tight",
-                  isActive ? "text-brand" : "text-foreground",
+                  // `text-brand` on `bg-brand-muted` is the one brand pair
+                  // that is not tuned for each other; `-muted-foreground`
+                  // is the token designed to sit on `-muted`.
+                  isActive ? "text-brand-muted-foreground" : "text-foreground",
                 )}
               >
                 {cat.name}
               </span>
               <div className="flex flex-col items-center gap-1">
                 {cat.nodeCount > 0 && (
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {cat.nodeCount} topik · {cat.totalHours}j
                   </span>
                 )}
@@ -164,21 +167,21 @@ export function SavedRoadmapsGrid({
                   <Badge
                     variant="secondary"
                     className={cn(
-                      "text-[10px] h-4 px-1.5",
+                      "h-5 px-1.5",
                       progress === 100
                         ? "bg-success/20 text-success-text"
-                        : "bg-brand/15 text-brand",
+                        : "bg-brand-muted text-brand-muted-foreground",
                     )}
                   >
                     {progress}%
                   </Badge>
                 )}
                 {!cat.isSystem && cat.authorName && (
-                  <Badge variant="outline" className="text-[9px] h-4 px-1 leading-none truncate max-w-full">
+                  <Badge variant="outline" className="h-5 px-1.5 leading-none truncate max-w-full">
                     by {cat.authorName}
                   </Badge>
                 )}
-                <Badge variant="outline" className="text-[9px] h-4 px-1 leading-none">
+                <Badge variant="outline" className="h-5 px-1.5 leading-none">
                   {domainLabels[cat.domain] ?? cat.domain}
                 </Badge>
               </div>

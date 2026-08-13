@@ -56,7 +56,7 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-lg bg-success/20 dark:bg-success/20 text-success dark:text-success/80 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-success/20 dark:bg-success/20 text-success-text dark:text-success-text/80 flex items-center justify-center flex-shrink-0">
               <FileCheck2 className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -94,7 +94,7 @@ export function DocChecklistInline({ format }: DocChecklistInlineProps) {
                   {d.label}
                 </span>
                 {d.required && !done[d.id] && (
-                  <Badge variant="secondary" className="text-[10px] bg-warning/20 text-warning">
+                  <Badge variant="secondary" className="text-xs bg-warning/20 text-warning-text">
                     wajib
                   </Badge>
                 )}

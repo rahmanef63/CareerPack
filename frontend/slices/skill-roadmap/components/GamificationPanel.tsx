@@ -14,11 +14,19 @@ const ACHIEVEMENT_ICON: Record<string, LucideIcon> = {
   Star, Sparkles, Zap, FlameKindling, ShieldCheck,
 };
 
+/**
+ * Tier tones ride semantic tokens, not raw amber/slate/yellow/fuchsia.
+ * The palette classes were pinned to one light-mode ramp: `text-slate-400`
+ * on `bg-slate-400/10` and `text-yellow-500` on `bg-yellow-500/10` both
+ * measured under 2:1 on a light card, and none of them tracked the active
+ * theme preset. Each `-text` token is the prose sibling of its fill and is
+ * held to AA in BOTH palettes.
+ */
 const TIER_RING: Record<string, string> = {
-  bronze:    "ring-amber-700/50 bg-amber-700/10 text-amber-600",
-  silver:    "ring-slate-400/50 bg-slate-400/10 text-slate-400",
-  gold:      "ring-yellow-500/50 bg-yellow-500/10 text-yellow-500",
-  legendary: "ring-fuchsia-500/60 bg-fuchsia-500/15 text-fuchsia-500 animate-pulse",
+  bronze:    "ring-warning/40 bg-warning/10 text-warning-text",
+  silver:    "ring-info/40 bg-info/10 text-info-text",
+  gold:      "ring-success/40 bg-success/10 text-success-text",
+  legendary: "ring-brand/50 bg-brand/10 text-brand animate-pulse",
 };
 
 interface GamificationPanelProps {
@@ -39,7 +47,7 @@ export function GamificationPanel({ stats, domainLabel }: GamificationPanelProps
   return (
     <Card className={cn("border-border overflow-hidden relative", theme.glow)}>
       {/* Decorative gradient stripe */}
-      <div className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", theme.primary)} />
+      <div className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", theme.primary)} aria-hidden />
 
       <CardContent className="pt-6 space-y-5">
         {/* Header row — class + level + streak */}
@@ -56,22 +64,32 @@ export function GamificationPanel({ stats, domainLabel }: GamificationPanelProps
                 Level {level} · {className}
               </span>
               {domainLabel && (
-                <Badge variant="outline" className="text-[10px] uppercase">
+                <Badge variant="outline" className="uppercase">
                   {theme.name}
                 </Badge>
               )}
             </div>
-            <h3 className="text-lg font-bold text-foreground mt-0.5">
+            {/* Not a heading: this is a live stat, and marking it up as one
+                put an <h3> between the page <h1> and the card headings. */}
+            <p className="text-lg font-bold text-foreground mt-0.5 tabular-nums">
               {xpInLevel.toLocaleString()} / {xpForLevel.toLocaleString()} XP
-            </h3>
+            </p>
             {/* Animated XP bar */}
-            <div className="relative mt-2 h-2.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="relative mt-2 h-2.5 rounded-full bg-muted overflow-hidden"
+              role="progressbar"
+              aria-label="Progres XP ke level berikutnya"
+              aria-valuenow={pctToNext}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
               <div
                 className={cn("absolute inset-y-0 left-0 bg-gradient-to-r transition-all duration-700 ease-out", theme.primary)}
                 style={{ width: `${pctToNext}%` }}
               />
               {/* Shimmer overlay — uses global @keyframes shimmer in App.css */}
               <div
+                aria-hidden
                 className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
                 style={{
                   backgroundSize: "200% 100%",
@@ -85,19 +103,19 @@ export function GamificationPanel({ stats, domainLabel }: GamificationPanelProps
           <div className={cn(
             "flex flex-col items-center justify-center px-4 py-2 rounded-xl border-2",
             streak > 0
-              ? "border-orange-500/50 bg-orange-500/10"
+              ? "border-warning/50 bg-warning/10"
               : "border-border bg-muted/40",
           )}>
-            <Flame className={cn("w-6 h-6", streak > 0 ? "text-orange-500" : "text-muted-foreground")} />
-            <span className={cn("text-lg font-bold leading-none mt-1", streak > 0 ? "text-orange-500" : "text-muted-foreground")}>
+            <Flame className={cn("w-6 h-6", streak > 0 ? "text-warning" : "text-muted-foreground")} aria-hidden />
+            <span className={cn("text-lg font-bold leading-none mt-1 tabular-nums", streak > 0 ? "text-warning-text" : "text-muted-foreground")}>
               {streak}
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Streak</span>
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">Streak</span>
           </div>
         </div>
 
         {/* Stat pips */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <StatPip icon={Trophy} label="Selesai" value={`${completed}/${total}`} accent={theme.accentText} />
           <StatPip icon={Sparkles} label="Total XP" value={xp.toLocaleString()} accent={theme.accentText} />
           {/* Was "Domain": every skill in a roadmap is seeded with the same
@@ -112,24 +130,24 @@ export function GamificationPanel({ stats, domainLabel }: GamificationPanelProps
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
               Pencapaian
             </div>
-            <div className="flex flex-wrap gap-2">
+            <ul className="flex flex-wrap gap-2">
               {achievements.map((a) => {
                 const Icon = ACHIEVEMENT_ICON[a.icon] ?? Trophy;
                 return (
-                  <div
+                  <li
                     key={a.id}
                     title={`${a.title} — ${a.description}`}
                     className={cn(
-                      "group flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ring-1 cursor-default",
+                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ring-1",
                       TIER_RING[a.tier],
                     )}
                   >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span className="text-[11px] font-semibold leading-none">{a.title}</span>
-                  </div>
+                    <Icon className="w-3.5 h-3.5" aria-hidden />
+                    <span className="text-xs font-semibold leading-none">{a.title}</span>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </div>
         )}
       </CardContent>
@@ -147,9 +165,9 @@ interface StatPipProps {
 function StatPip({ icon: Icon, label, value, accent }: StatPipProps) {
   return (
     <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/40 border border-border">
-      <Icon className={cn("w-4 h-4 shrink-0", accent)} />
+      <Icon className={cn("w-4 h-4 shrink-0", accent)} aria-hidden />
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground leading-tight">{label}</div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground leading-tight">{label}</div>
         <div className="text-sm font-bold text-foreground leading-tight tabular-nums">{value}</div>
       </div>
     </div>

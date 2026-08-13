@@ -122,7 +122,7 @@ export function ApplicationKanban({
           >
             <header className="flex items-center justify-between border-b border-border/60 px-3 py-2">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Badge className={cn("border-0 text-[10px] uppercase", meta.className)}>
+                <Badge className={cn("border-0 text-xs uppercase", meta.className)}>
                   {meta.label}
                 </Badge>
                 <span className="text-muted-foreground tabular-nums">{cards.length}</span>
@@ -172,7 +172,7 @@ export function ApplicationKanban({
                           <span className="line-clamp-1">{app.company}</span>
                         </p>
                         <div className="flex items-center justify-between gap-2 pt-1">
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             {formatShortDate(app.appliedDate)}
                           </span>
                           {app.link && (

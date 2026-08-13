@@ -80,7 +80,7 @@ function StepRow({ step, isLast }: { step: AIStep; isLast: boolean }) {
           <span className="text-xs font-medium">{step.label}</span>
           <span
             className={cn(
-              "inline-flex items-center gap-1 text-[10px]",
+              "inline-flex items-center gap-1 text-xs",
               styles.text,
             )}
           >
@@ -88,18 +88,18 @@ function StepRow({ step, isLast }: { step: AIStep; isLast: boolean }) {
             {styles.label}
           </span>
           {step.durationMs !== undefined && (
-            <span className="text-[10px] text-muted-foreground tabular-nums">
+            <span className="text-xs text-muted-foreground tabular-nums">
               {fmtMs(step.durationMs)}
             </span>
           )}
         </div>
         {step.detail && (
-          <p className="text-[11px] text-muted-foreground mt-0.5 break-words">
+          <p className="text-xs text-muted-foreground mt-0.5 break-words">
             {step.detail}
           </p>
         )}
         {step.error && (
-          <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 break-words">
+          <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5 break-words">
             {step.error}
           </p>
         )}
@@ -137,12 +137,12 @@ export function AIProgressDisplay({
                 : `${completed}/${total} langkah`}
             </span>
             {progress.isComplete && (
-              <span className="text-[10px] text-muted-foreground tabular-nums">
+              <span className="text-xs text-muted-foreground tabular-nums">
                 · {fmtMs(progress.totalDurationMs)}
               </span>
             )}
             {hasError && (
-              <span className="text-[10px] text-rose-600 dark:text-rose-400">
+              <span className="text-xs text-rose-600 dark:text-rose-400">
                 · ada error
               </span>
             )}

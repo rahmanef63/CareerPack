@@ -68,7 +68,7 @@ export function PortfolioDetailDialog({
           <ResponsiveDialogTitle className="flex items-center gap-2">
             {item.title}
             {item.featured && (
-              <Badge variant="secondary" className="bg-warning/20 text-warning">
+              <Badge variant="secondary" className="bg-warning/20 text-warning-text">
                 <Star className="mr-1 h-3 w-3 fill-current" />
                 Unggulan
               </Badge>
@@ -204,7 +204,7 @@ export function PortfolioDetailDialog({
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 rounded-md border border-border p-2 hover:border-brand"
                       >
-                        <Badge variant="secondary" className="text-[10px] uppercase">
+                        <Badge variant="secondary" className="text-xs uppercase">
                           {LINK_KIND_LABELS[l.kind as PortfolioLinkKind] ?? l.kind}
                         </Badge>
                         <span className="flex-1 truncate text-sm font-medium">{l.label}</span>
@@ -318,7 +318,7 @@ function MetaRow({
     <div className="flex items-start gap-2 rounded-md border border-border p-2">
       <Icon className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
       <div className="min-w-0">
-        <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
+        <p className="text-xs uppercase text-muted-foreground">{label}</p>
         <p className="truncate text-sm">{value}</p>
       </div>
     </div>
@@ -342,7 +342,7 @@ function ChipRow({
       </h4>
       <div className="mt-1 flex flex-wrap gap-1">
         {items.map((t) => (
-          <Badge key={t} variant="secondary" className="text-[10px]">
+          <Badge key={t} variant="secondary" className="text-xs">
             {t}
           </Badge>
         ))}

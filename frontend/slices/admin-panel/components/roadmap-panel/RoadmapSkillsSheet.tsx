@@ -132,10 +132,10 @@ export function RoadmapSkillsSheet({
                       <p className="text-sm font-medium truncate">{skill.name}</p>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span className="text-xs text-muted-foreground">{skill.category}</span>
-                        <Badge className={cn("border-transparent text-[10px] px-1.5 py-0", LEVEL_COLOR[skill.level] ?? "")}>
+                        <Badge className={cn("border-transparent text-xs px-1.5 py-0", LEVEL_COLOR[skill.level] ?? "")}>
                           {LEVEL_LABEL[skill.level] ?? skill.level}
                         </Badge>
-                        <Badge className={cn("border-transparent text-[10px] px-1.5 py-0", STATUS_COLOR[skill.status] ?? "")}>
+                        <Badge className={cn("border-transparent text-xs px-1.5 py-0", STATUS_COLOR[skill.status] ?? "")}>
                           {STATUS_LABEL[skill.status] ?? skill.status}
                         </Badge>
                         <span className="text-xs text-muted-foreground">{skill.estimatedHours}j</span>

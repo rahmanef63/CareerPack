@@ -69,7 +69,7 @@ export function ContainerChildrenEditor({
                 className="rounded-md border border-border bg-card"
               >
                 <div className="flex items-center gap-2 p-2">
-                  <span className="text-[10px] font-mono text-muted-foreground">
+                  <span className="text-xs font-mono text-muted-foreground">
                     {idx + 1}
                   </span>
                   <span className="flex-1 truncate text-xs font-medium">
@@ -101,7 +101,7 @@ export function ContainerChildrenEditor({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    className="h-7 w-7 text-destructive-text hover:bg-destructive/10 hover:text-destructive-text"
                     aria-label="Hapus"
                     onClick={() => deleteChild(child.id)}
                   >

@@ -23,15 +23,19 @@ export function RoadmapTable({ rows, selectedId, onSelect, domainLabels, iconMap
   return (
     <div className="rounded-xl border border-border bg-card overflow-x-auto">
       <table className="w-full text-sm">
+        <caption className="sr-only">
+          Daftar roadmap: nama, domain, jumlah topik, estimasi jam, komposisi
+          level, dan jumlah pengguna.
+        </caption>
         <thead className="bg-muted/50 text-muted-foreground text-xs uppercase tracking-wider">
           <tr>
-            <th className="text-left px-4 py-2.5 font-medium">Roadmap</th>
-            <th className="text-left px-3 py-2.5 font-medium hidden sm:table-cell">Domain</th>
-            <th className="text-right px-3 py-2.5 font-medium hidden md:table-cell">Topik</th>
-            <th className="text-right px-3 py-2.5 font-medium hidden md:table-cell">Jam</th>
-            <th className="text-left px-3 py-2.5 font-medium hidden lg:table-cell">Level</th>
-            <th className="text-right px-3 py-2.5 font-medium hidden lg:table-cell">Pengguna</th>
-            <th className="text-right px-3 py-2.5 font-medium">Aksi</th>
+            <th scope="col" className="text-left px-4 py-2.5 font-medium">Roadmap</th>
+            <th scope="col" className="text-left px-3 py-2.5 font-medium hidden sm:table-cell">Domain</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-medium hidden md:table-cell">Topik</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-medium hidden md:table-cell">Jam</th>
+            <th scope="col" className="text-left px-3 py-2.5 font-medium hidden lg:table-cell">Level</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-medium hidden lg:table-cell">Pengguna</th>
+            <th scope="col" className="text-right px-3 py-2.5 font-medium">Aksi</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -58,7 +62,7 @@ export function RoadmapTable({ rows, selectedId, onSelect, domainLabels, iconMap
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-medium text-foreground truncate">{cat.name}</span>
                         {!cat.isSystem && cat.authorName && (
-                          <Badge variant="outline" className="text-[9px] h-4 px-1 leading-none">
+                          <Badge variant="outline" className="h-5 px-1.5 leading-none">
                             by {cat.authorName}
                           </Badge>
                         )}
@@ -70,7 +74,7 @@ export function RoadmapTable({ rows, selectedId, onSelect, domainLabels, iconMap
                   </div>
                 </td>
                 <td className="px-3 py-3 hidden sm:table-cell">
-                  <Badge variant="secondary" className="text-[10px] uppercase">
+                  <Badge variant="secondary" className="uppercase">
                     {domainLabels[cat.domain] ?? cat.domain}
                   </Badge>
                 </td>
@@ -130,8 +134,11 @@ function DifficultyBar({ mix }: DifficultyBarProps) {
     { key: "a", value: mix.advanced, color: "bg-destructive/70" },
   ];
   return (
-    <div className="flex items-center gap-1.5 min-w-[120px]">
-      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden flex">
+    <div
+      className="flex items-center gap-1.5 min-w-[120px]"
+      title={`Pemula ${mix.beginner}, Menengah ${mix.intermediate}, Lanjutan ${mix.advanced}`}
+    >
+      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden flex" aria-hidden>
         {segs.map((s) => (
           <div
             key={s.key}
@@ -140,7 +147,7 @@ function DifficultyBar({ mix }: DifficultyBarProps) {
           />
         ))}
       </div>
-      <span className="text-[10px] text-muted-foreground tabular-nums">
+      <span className="text-xs text-muted-foreground tabular-nums">
         {mix.beginner}/{mix.intermediate}/{mix.advanced}
       </span>
     </div>

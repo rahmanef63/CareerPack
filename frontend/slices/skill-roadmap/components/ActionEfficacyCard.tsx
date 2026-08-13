@@ -35,7 +35,9 @@ const TYPE_LABELS: Record<string, string> = {
 function tone(rate: number): string {
   if (rate >= 0.7) return "text-success-text";
   if (rate >= 0.4) return "text-warning-text";
-  return "text-destructive";
+  // Prose sibling, matching the two above — `--destructive` is the fill tone
+  // and measures 3.72:1 as text.
+  return "text-destructive-text";
 }
 
 /**
@@ -56,10 +58,10 @@ export function ActionEfficacyCard() {
   return (
     <Card className="border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle as="h2" className="flex items-center gap-2 text-base">
           <Activity className="h-4 w-4 text-brand" />
           Efikasi Aksi
-          <Badge variant="outline" className="ml-1 text-[10px]">
+          <Badge variant="outline" className="ml-1">
             self-telemetry
           </Badge>
         </CardTitle>
@@ -83,7 +85,7 @@ export function ActionEfficacyCard() {
                   <Target className="h-3 w-3 text-muted-foreground" />
                   {TYPE_LABELS[r.type] ?? r.type}
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground tabular-nums">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
                   <span className="flex items-center gap-0.5">
                     <CheckCircle2 className="h-2.5 w-2.5" />
                     {r.completed}/{r.attempted}

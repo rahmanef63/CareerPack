@@ -81,7 +81,7 @@ export function BlockPresetsCard({ bind }: { bind: Bind }) {
                     {preset.description}
                   </p>
                 </div>
-                <p className="text-[10px] text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground/70">
                   {preset.blocks.length} blok ditambahkan
                 </p>
               </button>

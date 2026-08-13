@@ -244,7 +244,7 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
           <ResponsiveDialogTitle className="flex items-center gap-2">
             <WandSparkles className="h-5 w-5 text-brand" />
             Resume Tailor
-            <Badge variant="outline" className="ml-1 gap-1 text-[10px]">
+            <Badge variant="outline" className="ml-1 gap-1">
               <ShieldCheck className="h-3 w-3" /> Anti-halusinasi
             </Badge>
           </ResponsiveDialogTitle>
@@ -306,7 +306,7 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
                   size="sm"
                   onClick={handleSeed}
                   disabled={seeding}
-                  className="h-6 gap-1 px-2 text-[10px]"
+                  className="h-7 gap-1 px-2 text-xs"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Perbarui
@@ -336,7 +336,7 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
 
           {result && stats && (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-2.5 text-[11px]">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-card p-2.5 text-xs">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
                   <span>{stats.atomCount} fakta</span>
                   <span>·</span>
@@ -460,18 +460,18 @@ function RewriteRow({ rewrite, checked, blocked, onToggle }: RewriteRowProps) {
         />
         <div className="min-w-0 flex-1 space-y-1.5 text-xs leading-relaxed">
           <div className="flex flex-wrap items-center gap-1.5">
-            <Badge variant="outline" className="text-[9px]">
+            <Badge variant="outline">
               {rewrite.type}
             </Badge>
             {blocked ? (
-              <Badge variant="destructive" className="gap-1 text-[9px]">
+              <Badge variant="destructive" className="gap-1">
                 <AlertTriangle className="h-3 w-3" />
                 Ditolak validator
               </Badge>
             ) : (
               <Badge
                 variant="outline"
-                className="gap-1 border-success/50 text-[9px] text-success-text"
+                className="gap-1 border-success/50 text-success-text"
               >
                 <ShieldCheck className="h-3 w-3" />
                 Lolos validator
@@ -510,7 +510,7 @@ function RewriteRow({ rewrite, checked, blocked, onToggle }: RewriteRowProps) {
             {rewrite.rewritten}
           </div>
           {blocked && rewrite.violations.length > 0 && (
-            <ul className="space-y-0.5 rounded-md bg-destructive/5 px-2.5 py-1.5 text-[10px] text-destructive">
+            <ul className="space-y-0.5 rounded-md bg-destructive/5 px-2.5 py-1.5 text-xs text-destructive-text">
               {rewrite.violations.map((v, i) => (
                 <li key={i}>· {v}</li>
               ))}

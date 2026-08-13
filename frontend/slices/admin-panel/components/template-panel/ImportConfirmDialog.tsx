@@ -45,7 +45,7 @@ export function ImportConfirmDialog({
               <div key={t.slug} className="flex items-center justify-between gap-2">
                 <span className="font-mono truncate">{t.slug}</span>
                 <span className="text-muted-foreground truncate">{t.title}</span>
-                <Badge variant="outline" className="text-[10px] shrink-0">{t.nodes.length} node</Badge>
+                <Badge variant="outline" className="text-xs shrink-0">{t.nodes.length} node</Badge>
               </div>
             ))}
             {importDraft.length > 20 && (

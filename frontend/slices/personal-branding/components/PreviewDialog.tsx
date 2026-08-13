@@ -129,7 +129,7 @@ export function PreviewDialog({
         </ResponsiveDialogHeader>
         <div className="bg-muted/20">
           {mode === "template" && (
-            <p className="border-b border-border bg-warning/10 px-4 py-2 text-[11px] text-warning-text">
+            <p className="border-b border-border bg-warning/10 px-4 py-2 text-xs text-warning-text">
               💡 Mode <strong>Template</strong> — menampilkan konten contoh
               template (testimoni, metrik, lorem ipsum). Pakai untuk menilai
               desain sebelum mengisi data.

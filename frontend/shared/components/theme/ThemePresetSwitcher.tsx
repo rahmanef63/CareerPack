@@ -116,7 +116,7 @@ export function ThemePresetSwitcher({
             preset list below. shadow on overflow gives a subtle
             visual depth cue when content scrolls underneath. */}
         <div className="sticky top-0 z-20 shrink-0 border-b border-border bg-popover/95 px-3 py-2 backdrop-blur">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Mode Tampilan
           </p>
           <div
@@ -151,7 +151,7 @@ export function ThemePresetSwitcher({
         {/* Preset list header (also sticky just below the mode tabs
             visually so the count + reset action stay accessible). */}
         <div className="flex shrink-0 items-center justify-between border-b border-border px-3 py-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Preset Warna{" "}
             <span className="font-normal text-muted-foreground/70">
               ({presetCount})
@@ -163,7 +163,7 @@ export function ThemePresetSwitcher({
             onMouseEnter={() => preview(DEFAULT_PRESET_NAME)}
             onMouseLeave={() => restore()}
             className={cn(
-              "flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+              "flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
               presetName === DEFAULT_PRESET_NAME && "text-brand",
             )}
           >
@@ -180,7 +180,7 @@ export function ThemePresetSwitcher({
           )}
           {groups.map((grp) => (
             <div key={grp.id}>
-              <div className="sticky top-0 z-10 border-b border-border/30 bg-popover/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+              <div className="sticky top-0 z-10 border-b border-border/30 bg-popover/95 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
                 {grp.label}
               </div>
               {grp.items.map((p) => {

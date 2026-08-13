@@ -116,7 +116,7 @@ function AccentColorPicker({
         type="button"
         onClick={() => onChange(undefined)}
         aria-pressed={!current}
-        className={`h-8 rounded-md border px-2.5 text-[11px] transition-colors ${
+        className={`h-8 rounded-md border px-2.5 text-xs transition-colors ${
           !current
             ? "border-brand bg-brand-muted/30 text-foreground"
             : "border-border text-muted-foreground hover:text-foreground"
@@ -144,7 +144,7 @@ function AccentColorPicker({
           />
         );
       })}
-      <label className="ml-1 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <label className="ml-1 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
         <span>Custom:</span>
         <input
           type="color"

@@ -114,7 +114,7 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
             <Search className="h-4 w-4" />
             <span>Cari fitur, halaman, aksi…</span>
           </span>
-          <kbd className="hidden rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono lg:inline">
+          <kbd className="hidden rounded border bg-muted px-1.5 py-0.5 text-xs font-mono lg:inline">
             {shortcutLabel}
           </kbd>
         </Button>
@@ -172,7 +172,7 @@ export function SiteHeader({ onAITap }: SiteHeaderProps) {
             {unreadBadge && (
               <span
                 aria-hidden
-                className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground"
+                className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold leading-none text-destructive-foreground"
               >
                 {unreadBadge}
               </span>

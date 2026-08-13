@@ -86,7 +86,7 @@ export function ItemDetailDialog({
                   {indonesianCategoryLabels[selectedItem.subcategory]}
                 </Badge>
                 {selectedItem.required && (
-                  <Badge variant="secondary" className="bg-destructive/10 text-destructive">
+                  <Badge variant="secondary" className="bg-destructive/10 text-destructive-text">
                     Wajib
                   </Badge>
                 )}

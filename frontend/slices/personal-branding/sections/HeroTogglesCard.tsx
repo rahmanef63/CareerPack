@@ -165,8 +165,8 @@ export function HeroTogglesCard({
                   <p
                     className={
                       preview.warning
-                        ? "mt-1 inline-flex max-w-full items-start gap-1 text-[10px] text-warning-text"
-                        : "mt-1 inline-flex max-w-full items-start gap-1 text-[10px] text-success-text"
+                        ? "mt-1 inline-flex max-w-full items-start gap-1 text-xs text-warning-text"
+                        : "mt-1 inline-flex max-w-full items-start gap-1 text-xs text-success-text"
                     }
                   >
                     {preview.warning ? (

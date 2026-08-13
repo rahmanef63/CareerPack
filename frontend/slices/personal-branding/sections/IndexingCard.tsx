@@ -24,7 +24,7 @@ export function IndexingCard({
         <p className="text-sm font-medium">Izinkan mesin pencari (Google, dll.)</p>
         <p className="text-xs text-muted-foreground">
           Default mati → halaman publik pakai{" "}
-          <code className="font-mono text-[10px]">noindex</code>. Aktifkan
+          <code className="font-mono text-xs">noindex</code>. Aktifkan
           setelah Anda yakin tidak ada data sensitif.
         </p>
       </div>

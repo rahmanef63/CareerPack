@@ -187,7 +187,7 @@ export function UsersTable() {
       cell: (r) => (
         <Badge
           className={cn(
-            "border-transparent text-[10px]",
+            "border-transparent text-xs",
             ROLE_BADGE[r.role as Role] ?? ROLE_BADGE.user,
           )}
         >

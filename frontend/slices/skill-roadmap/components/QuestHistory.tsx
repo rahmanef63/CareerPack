@@ -51,10 +51,10 @@ export function QuestHistory() {
   return (
     <Card className="border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle as="h2" className="flex items-center gap-2 text-base">
           <History className="h-4 w-4 text-brand" />
           Riwayat Quest
-          <Badge variant="outline" className="ml-1 text-[10px]">
+          <Badge variant="outline" className="ml-1">
             {past.length}
           </Badge>
         </CardTitle>
@@ -93,14 +93,14 @@ export function QuestHistory() {
                     )}
                     <span className="truncate font-semibold">{q.title}</span>
                   </div>
-                  <p className="mt-0.5 line-clamp-1 text-[10px] italic text-muted-foreground">
+                  <p className="mt-0.5 line-clamp-1 text-xs italic text-muted-foreground">
                     &ldquo;{q.intent}&rdquo;
                   </p>
                 </div>
                 <Badge
                   variant="outline"
                   className={cn(
-                    "shrink-0 text-[9px]",
+                    "shrink-0 text-xs",
                     isCompleted
                       ? "border-success/50 text-success-text"
                       : "text-muted-foreground",
@@ -109,7 +109,7 @@ export function QuestHistory() {
                   {isCompleted ? "Selesai" : "Abandon"}
                 </Badge>
               </div>
-              <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
+              <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                 <span>{dateLabel}</span>
                 <span>·</span>
                 <span>

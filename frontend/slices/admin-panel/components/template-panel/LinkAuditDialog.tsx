@@ -48,9 +48,9 @@ export function LinkAuditDialog({ issues, onClose, onCopy, onCsv }: LinkAuditDia
               <tbody className="divide-y divide-border">
                 {issues.slice(0, 200).map((i, idx) => (
                   <tr key={`${i.templateId}-${i.nodeId}-${idx}`}>
-                    <td className="px-2 py-1.5 font-mono text-[11px]">{i.templateSlug}</td>
-                    <td className="px-2 py-1.5 font-mono text-[11px]">{i.nodeId}</td>
-                    <td className="px-2 py-1.5 font-mono text-[11px] max-w-[260px] truncate" title={i.url}>
+                    <td className="px-2 py-1.5 font-mono text-xs">{i.templateSlug}</td>
+                    <td className="px-2 py-1.5 font-mono text-xs">{i.nodeId}</td>
+                    <td className="px-2 py-1.5 font-mono text-xs max-w-[260px] truncate" title={i.url}>
                       {i.url || <span className="italic text-muted-foreground">(kosong)</span>}
                     </td>
                     <td className="px-2 py-1.5 text-destructive">{i.reason}</td>

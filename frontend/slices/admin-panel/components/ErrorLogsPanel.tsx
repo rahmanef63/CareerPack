@@ -218,7 +218,7 @@ export function ErrorLogsPanel() {
                           />
                         </div>
                         {l.stack && (
-                          <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/50 p-2 text-[10px] text-muted-foreground">
+                          <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/50 p-2 text-xs text-muted-foreground">
                             {l.stack}
                           </pre>
                         )}

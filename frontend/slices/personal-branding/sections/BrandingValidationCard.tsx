@@ -56,7 +56,7 @@ function ActionLink({ row }: { row: ScoreRow }) {
       <button
         type="button"
         onClick={() => jumpToAnchor(row.actionHref!)}
-        className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
+        className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
       >
         {row.actionLabel}
         <ArrowRight className="h-3 w-3" />
@@ -66,7 +66,7 @@ function ActionLink({ row }: { row: ScoreRow }) {
   return (
     <Link
       href={row.actionHref}
-      className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
+      className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
     >
       {row.actionLabel}
       <ArrowRight className="h-3 w-3" />
@@ -158,7 +158,7 @@ export function BrandingValidationCard({
               : `Halaman kamu ${done.length}/${rows.length} siap`}
           </CardTitle>
           <span
-            className="shrink-0 text-[11px] text-muted-foreground"
+            className="shrink-0 text-xs text-muted-foreground"
             title={`Skor ${score}/100 — tier ${grade} (${GRADE_LABEL[grade]})`}
           >
             {score}/100
@@ -169,14 +169,14 @@ export function BrandingValidationCard({
         {next ? (
           <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-brand/30 bg-brand-muted/40 px-3 py-2.5">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Berikutnya
               </p>
               <p className="truncate text-sm font-medium text-foreground">
                 {next.label}
               </p>
               {next.hint && (
-                <p className="truncate text-[11px] text-muted-foreground">
+                <p className="truncate text-xs text-muted-foreground">
                   {next.hint}
                 </p>
               )}
@@ -240,7 +240,7 @@ export function BrandingValidationCard({
                       {r.severity === "required" && (
                         <Badge
                           variant="outline"
-                          className="ml-1.5 h-4 border-destructive/40 px-1 py-0 text-[8px] uppercase text-destructive"
+                          className="ml-1.5 h-5 border-destructive/40 px-1.5 py-0 text-xs uppercase leading-none text-destructive"
                         >
                           wajib
                         </Badge>
@@ -248,7 +248,7 @@ export function BrandingValidationCard({
                     </span>
                     <span
                       className={cn(
-                        "shrink-0 truncate text-[10px]",
+                        "shrink-0 truncate text-xs",
                         tone === "ok"
                           ? "text-success-text"
                           : tone === "partial"
@@ -262,7 +262,7 @@ export function BrandingValidationCard({
                   {r.hint && (
                     <p
                       className={cn(
-                        "text-[10px]",
+                        "text-xs",
                         tone === "miss"
                           ? "text-muted-foreground"
                           : "text-warning-text",
@@ -271,7 +271,7 @@ export function BrandingValidationCard({
                       💡 {r.hint}
                     </p>
                   )}
-                  <p className="text-[10px] text-muted-foreground/70">
+                  <p className="text-xs text-muted-foreground/70">
                     Sumber: {r.source}
                   </p>
                   {tone !== "ok" && <ActionLink row={r} />}

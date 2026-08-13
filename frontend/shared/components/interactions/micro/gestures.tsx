@@ -57,7 +57,7 @@ export function LongPressMenu({
                 }}
                 className={cn(
                   "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent text-left",
-                  it.danger && "text-destructive hover:bg-destructive/10"
+                  it.danger && "text-destructive-text hover:bg-destructive/10"
                 )}
               >
                 {it.icon}

@@ -1,38 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Calendar as CalendarIcon,
-  Clock,
-  Download,
-  MapPin,
-  Pencil,
-  Plus,
-  StickyNote,
-  Trash2,
-} from "lucide-react";
-import { downloadIcs, eventsToIcs } from "../lib/ics";
+import { Calendar as CalendarIcon, Download, Plus } from "lucide-react";
 import { id as localeID } from "react-day-picker/locale";
+
 import { UltimateCalendar, type MarkedDate } from "@/shared/components/ui/ultimate-calendar";
-import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
-import { EmptyState } from "@/shared/components/feedback/EmptyState";
-import { NoEvents } from "@/shared/components/illustrations/empty";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
-import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-} from "@/shared/components/ui/responsive-dialog";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   ResponsiveAlertDialog,
   ResponsiveAlertDialogAction,
@@ -43,40 +20,37 @@ import {
   ResponsiveAlertDialogHeader,
   ResponsiveAlertDialogTitle,
 } from "@/shared/components/ui/responsive-alert-dialog";
-import {
-  ResponsiveSelect,
-  ResponsiveSelectContent,
-  ResponsiveSelectItem,
-  ResponsiveSelectTrigger,
-} from "@/shared/components/ui/responsive-select";
 import { notify } from "@/shared/lib/notify";
-import { formatMonthShort, formatWeekdayLong } from "@/shared/lib/formatDate";
-import { cn } from "@/shared/lib/utils";
-import { Skeleton } from "@/shared/components/ui/skeleton";
-import { useAgenda, type AgendaItem, type AgendaType } from "@/shared/hooks/useAgenda";
-import { getAgendaStyle, AGENDA_TYPE_STYLES } from "@/shared/lib/agendaStyles";
+import { formatWeekdayLong } from "@/shared/lib/formatDate";
+import { useAgenda, type AgendaItem } from "@/shared/hooks/useAgenda";
 
-const TYPE_OPTIONS: ReadonlyArray<{ value: AgendaType; label: string }> = (
-  Object.entries(AGENDA_TYPE_STYLES) as Array<
-    [AgendaType, { label: string; cls: string }]
-  >
-).map(([value, { label }]) => ({ value, label }));
+import { downloadIcs, eventsToIcs } from "../lib/ics";
+import { localDateKey, parseDateKey, startOfMonth } from "../lib/dateKeys";
+import type { FilterType } from "../constants/agendaTypes";
+import { AgendaRow } from "./AgendaRow";
+import { FilterChips } from "./FilterChips";
+import { MonthGrid } from "./MonthGrid";
+import { AgendaFormDialog, type AgendaFormInput } from "./AgendaFormDialog";
 
-type FilterType = AgendaType | "all";
-
-/** YYYY-MM-DD in the *local* zone. `toISOString()` is UTC and lands on the
- *  previous day for UTC+7 between midnight and 07:00. */
-function localDateKey(d: Date): string {
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-
+/**
+ * Kalender Karir.
+ *
+ * Two shapes, one data set:
+ * - `< lg` — compact month picker + the selected day's agenda + what's next.
+ *   Right for a phone, where a grid of event chips would be unreadable.
+ * - `≥ lg` — a real month grid with the events drawn inside the day cells,
+ *   plus the same day/upcoming rail beside it. The point of a calendar is
+ *   seeing the month's commitments without clicking each date.
+ *
+ * Both read `useAgenda()` — the slice makes no extra query for the grid.
+ */
 export function CalendarView() {
   const [selected, setSelected] = useState<Date | undefined>(undefined);
+  const [visibleMonth, setVisibleMonth] = useState<Date | undefined>(undefined);
   const [todayKey, setTodayKey] = useState<string>("");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AgendaItem | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<AgendaItem | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
   const [timeZone, setTimeZone] = useState<string | undefined>(undefined);
   const { items: agenda, isLoading, create, update, remove } = useAgenda();
@@ -84,6 +58,7 @@ export function CalendarView() {
   useEffect(() => {
     const now = new Date();
     setSelected(now);
+    setVisibleMonth(startOfMonth(now));
     // Local calendar date, not UTC. `toISOString()` rolled back a day for
     // every WIB user between 00:00 and 07:00, so "Jadwal Hari Ini" and the
     // "Hari ini" button showed yesterday for the first seven hours.
@@ -96,28 +71,33 @@ export function CalendarView() {
     [agenda, filter],
   );
 
-  const datesWithEvents = useMemo(
-    () => new Set(filtered.map((a) => a.date)),
-    [filtered],
-  );
-
-  // Marked-date dots for the calendar grid — one per unique date
-  // with at least one event; tinted by the highest-priority type.
-  const markedDates = useMemo<MarkedDate[]>(() => {
-    const seen = new Set<string>();
-    const out: MarkedDate[] = [];
+  /** date key → that day's events, sorted by time. Feeds the month grid,
+   *  the day panel and the picker's dots — one pass, one shape. */
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, AgendaItem[]>();
     for (const item of filtered) {
-      if (seen.has(item.date)) continue;
-      seen.add(item.date);
-      out.push({
-        date: new Date(item.date),
+      const bucket = map.get(item.date);
+      if (bucket) bucket.push(item);
+      else map.set(item.date, [item]);
+    }
+    for (const bucket of map.values()) {
+      bucket.sort((a, b) => a.time.localeCompare(b.time));
+    }
+    return map;
+  }, [filtered]);
+
+  // Marked-date dots for the compact picker — one per date that has at
+  // least one event after filtering.
+  const markedDates = useMemo<MarkedDate[]>(
+    () =>
+      Array.from(eventsByDate.entries()).map(([key, items]) => ({
+        date: parseDateKey(key),
         dot: true,
         color: "after:bg-brand",
-        label: item.title,
-      });
-    }
-    return out;
-  }, [filtered]);
+        label: items[0]?.title,
+      })),
+    [eventsByDate],
+  );
 
   // Pre-aggregate type counts for filter chip badges.
   const typeCounts = useMemo(() => {
@@ -127,14 +107,8 @@ export function CalendarView() {
     return m;
   }, [agenda]);
 
-  const selectedKey = selected ? selected.toISOString().slice(0, 10) : "";
-  const dayItems = useMemo(
-    () =>
-      filtered
-        .filter((a) => a.date === selectedKey)
-        .sort((a, b) => a.time.localeCompare(b.time)),
-    [filtered, selectedKey],
-  );
+  const selectedKey = selected ? localDateKey(selected) : "";
+  const dayItems = eventsByDate.get(selectedKey) ?? [];
 
   const upcoming = useMemo(
     () =>
@@ -151,19 +125,29 @@ export function CalendarView() {
     [filtered, todayKey],
   );
 
-  const offsetDate = useCallback(
-    (days: number): string => {
-      const base = todayKey ? new Date(todayKey) : new Date();
-      base.setDate(base.getDate() + days);
-      return base.toISOString().slice(0, 10);
-    },
-    [todayKey],
+  const selectDate = useCallback((date: Date) => {
+    setSelected(date);
+    setVisibleMonth(startOfMonth(date));
+  }, []);
+
+  const selectDateKey = useCallback(
+    (key: string) => selectDate(parseDateKey(key)),
+    [selectDate],
   );
 
   const openCreate = useCallback(() => {
     setEditing(null);
     setFormOpen(true);
   }, []);
+
+  const openCreateAt = useCallback(
+    (key: string) => {
+      selectDateKey(key);
+      setEditing(null);
+      setFormOpen(true);
+    },
+    [selectDateKey],
+  );
 
   const openEdit = useCallback((it: AgendaItem) => {
     setEditing(it);
@@ -178,7 +162,7 @@ export function CalendarView() {
           notify.success("Agenda diperbarui");
         } else {
           await create(input);
-          setSelected(new Date(input.date));
+          selectDateKey(input.date);
           notify.success("Agenda ditambahkan", {
             description: `${input.title} · ${input.date} ${input.time}`,
           });
@@ -187,10 +171,8 @@ export function CalendarView() {
         notify.fromError(err, editing ? "Gagal memperbarui" : "Gagal menambahkan");
       }
     },
-    [create, update, editing],
+    [create, update, editing, selectDateKey],
   );
-
-  const [pendingDelete, setPendingDelete] = useState<AgendaItem | null>(null);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -209,12 +191,11 @@ export function CalendarView() {
   }, []);
 
   const goToToday = useCallback(() => {
-    if (!todayKey) return;
-    setSelected(new Date(todayKey));
-  }, [todayKey]);
+    if (todayKey) selectDateKey(todayKey);
+  }, [todayKey, selectDateKey]);
 
   return (
-    <PageContainer size="lg" className="space-y-6">
+    <PageContainer size="xl" className="space-y-6">
       <ResponsivePageHeader
         title="Kalender Karir"
         description="Wawancara, tenggat lamaran, dan follow-up Anda"
@@ -229,14 +210,14 @@ export function CalendarView() {
                   return;
                 }
                 downloadIcs(
-                  `careerpack-agenda-${new Date().toISOString().slice(0, 10)}.ics`,
+                  `careerpack-agenda-${localDateKey(new Date())}.ics`,
                   eventsToIcs(agenda),
                 );
               }}
               disabled={isLoading || agenda.length === 0}
               aria-label="Ekspor agenda ke file ICS"
             >
-              <Download className="w-4 h-4 mr-1" /> Ekspor .ics
+              <Download className="mr-1 h-4 w-4" /> Ekspor .ics
             </Button>
             <Button
               size="sm"
@@ -244,7 +225,7 @@ export function CalendarView() {
               onClick={openCreate}
               aria-label="Tambah agenda baru"
             >
-              <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
+              <Plus className="mr-1 h-4 w-4" /> Tambah Agenda
             </Button>
           </div>
         }
@@ -252,50 +233,80 @@ export function CalendarView() {
 
       <FilterChips filter={filter} setFilter={setFilter} counts={typeCounts} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        <Card className="flex flex-col">
-          <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-brand" /> Pilih Tanggal
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToToday}
-              disabled={!todayKey || selectedKey === todayKey}
-              className="text-xs"
-            >
-              Hari ini
-            </Button>
-          </CardHeader>
-          <CardContent className="flex flex-1 items-center justify-center p-3 sm:p-5">
-            <UltimateCalendar
-              mode="single"
-              selected={selected}
-              onSelect={setSelected}
-              locale={localeID}
-              timeZone={timeZone}
-              captionLayout="dropdown"
-              accent="primary"
-              size="lg"
-              highlightToday
-              wrapperClassName="w-full max-w-full"
-              markedDates={markedDates}
-              modifiers={{
-                hasEvent: (date) =>
-                  datesWithEvents.has(date.toISOString().slice(0, 10)),
-              }}
-              modifiersClassNames={{
-                hasEvent: "font-bold text-brand",
-              }}
-            />
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        <div className="min-w-0">
+          {/* Desktop — the month itself, events drawn in the day cells. */}
+          <Card className="hidden lg:block">
+            <CardContent className="p-4 pt-4">
+              {visibleMonth ? (
+                <MonthGrid
+                  month={visibleMonth}
+                  todayKey={todayKey}
+                  selectedKey={selectedKey}
+                  eventsByDate={eventsByDate}
+                  onMonthChange={setVisibleMonth}
+                  onSelectDate={selectDateKey}
+                  onOpenEvent={openEdit}
+                  onAddAt={openCreateAt}
+                />
+              ) : (
+                <Skeleton className="h-[32rem] w-full" />
+              )}
+            </CardContent>
+          </Card>
 
-        <div className="space-y-4">
+          {/* Mobile — compact picker; the agenda list below carries detail. */}
+          <Card className="lg:hidden">
+            <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle as="h2" className="flex items-center gap-2 text-base">
+                <CalendarIcon className="h-4 w-4 text-brand" /> Pilih Tanggal
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToToday}
+                disabled={!todayKey || selectedKey === todayKey}
+                className="text-xs"
+              >
+                Hari ini
+              </Button>
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+              <UltimateCalendar
+                mode="single"
+                selected={selected}
+                onSelect={(d) => d && selectDate(d)}
+                month={visibleMonth}
+                onMonthChange={setVisibleMonth}
+                locale={localeID}
+                timeZone={timeZone}
+                captionLayout="dropdown"
+                accent="primary"
+                size="lg"
+                highlightToday
+                // `size="lg"` sets `--cell-size` on UltimateCalendar's
+                // wrapper, but the DayPicker root re-declares it, so the
+                // inner value always won and cells stayed 32 px. Setting it
+                // through `className` lands on the same element, where
+                // tailwind-merge picks the last one — 40 px touch targets.
+                className="[--cell-size:2.5rem]"
+                wrapperClassName="mx-auto w-fit max-w-full"
+                markedDates={markedDates}
+                modifiers={{
+                  hasEvent: (date) => eventsByDate.has(localDateKey(date)),
+                }}
+                modifiersClassNames={{
+                  hasEvent: "font-bold text-brand",
+                }}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="min-w-0 space-y-4">
           <Card>
-            <CardHeader className="pb-2 flex-row justify-between items-center space-y-0">
-              <CardTitle className="text-base">
+            <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle as="h2" className="text-base">
                 {selected ? formatWeekdayLong(selected) : "Pilih tanggal"}
               </CardTitle>
               <Button
@@ -304,7 +315,7 @@ export function CalendarView() {
                 onClick={openCreate}
                 className="text-xs"
               >
-                <Plus className="w-3 h-3 mr-1" /> Tambah
+                <Plus className="mr-1 h-3 w-3" /> Tambah
               </Button>
             </CardHeader>
             <CardContent>
@@ -314,11 +325,9 @@ export function CalendarView() {
                   <Skeleton className="h-14 w-full" />
                 </div>
               ) : dayItems.length === 0 ? (
-                <EmptyState
-                  illustration={NoEvents}
-                  title="Tidak ada agenda di tanggal ini."
-                  className="px-0"
-                />
+                <p className="py-2 text-sm text-muted-foreground">
+                  Tidak ada agenda di tanggal ini.
+                </p>
               ) : (
                 <ul className="space-y-2">
                   {dayItems.map((it) => (
@@ -336,13 +345,15 @@ export function CalendarView() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Akan Datang</CardTitle>
+              <CardTitle as="h2" className="text-base">
+                Akan Datang
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <Skeleton className="h-14 w-full" />
               ) : upcoming.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">
+                <p className="py-2 text-sm text-muted-foreground">
                   Belum ada agenda mendatang.
                 </p>
               ) : (
@@ -369,7 +380,7 @@ export function CalendarView() {
           setFormOpen(o);
           if (!o) setEditing(null);
         }}
-        defaultDate={selectedKey || offsetDate(0)}
+        defaultDate={selectedKey || todayKey}
         initial={editing}
         onSubmit={handleSubmit}
       />
@@ -404,373 +415,5 @@ export function CalendarView() {
         </ResponsiveAlertDialogContent>
       </ResponsiveAlertDialog>
     </PageContainer>
-  );
-}
-
-interface FilterChipsProps {
-  filter: FilterType;
-  setFilter: (f: FilterType) => void;
-  counts: Map<FilterType, number>;
-}
-
-function FilterChips({ filter, setFilter, counts }: FilterChipsProps) {
-  const chips: ReadonlyArray<{ key: FilterType; label: string }> = [
-    { key: "all", label: "Semua" },
-    ...TYPE_OPTIONS.map((o) => ({ key: o.value as FilterType, label: o.label })),
-  ];
-  return (
-    <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {chips.map((c) => {
-        const active = c.key === filter;
-        const n = counts.get(c.key) ?? 0;
-        return (
-          <button
-            key={c.key}
-            type="button"
-            onClick={() => setFilter(c.key)}
-            className={cn(
-              "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              active
-                ? "border-brand bg-brand text-brand-foreground"
-                : "border-border bg-card hover:bg-muted",
-            )}
-          >
-            {c.label}
-            {n > 0 ? (
-              <span
-                className={cn(
-                  "rounded-full px-1.5 text-[10px] tabular-nums",
-                  active ? "bg-brand-foreground/25" : "bg-muted-foreground/15",
-                )}
-              >
-                {n}
-              </span>
-            ) : null}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-interface AgendaRowProps {
-  item: AgendaItem;
-  compact?: boolean;
-  onEdit: (item: AgendaItem) => void;
-  onDelete: (item: AgendaItem) => void;
-}
-
-function AgendaRow({ item, compact, onEdit, onDelete }: AgendaRowProps) {
-  const style = getAgendaStyle(item.type);
-  return (
-    <li className="group flex items-start gap-3 p-3 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors">
-      <button
-        type="button"
-        onClick={() => onEdit(item)}
-        className="flex flex-col items-center justify-center min-w-[44px] text-center hover:opacity-80"
-        aria-label={`Edit ${item.title}`}
-      >
-        <span className="text-[10px] font-medium text-muted-foreground uppercase">
-          {formatMonthShort(item.date)}
-        </span>
-        <span className="text-lg font-bold text-foreground leading-none">
-          {new Date(item.date).getDate()}
-        </span>
-      </button>
-      <button
-        type="button"
-        onClick={() => onEdit(item)}
-        className="flex-1 min-w-0 text-left"
-      >
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* min-w-0: as a flex item its automatic minimum is the full
-              nowrap title width, so `truncate` never clipped — one long
-              unbroken title pushed the type badges out of the card. */}
-          <p className="min-w-0 font-medium text-sm text-foreground truncate">
-            {item.title}
-          </p>
-          <Badge
-            variant="secondary"
-            className={cn("text-[10px] px-1.5 py-0", style.cls)}
-          >
-            {style.label}
-          </Badge>
-          {item.reminderMinutes ? (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-              {formatReminder(item.reminderMinutes)}
-            </Badge>
-          ) : null}
-        </div>
-        {compact ? (
-          <p className="text-xs text-muted-foreground truncate">
-            {item.time} · {item.location}
-          </p>
-        ) : (
-          <>
-            <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground min-w-0">
-              <span className="flex items-center gap-1 shrink-0">
-                <Clock className="w-3 h-3" /> {item.time}
-              </span>
-              <span className="flex items-center gap-1 min-w-0">
-                <MapPin className="w-3 h-3 shrink-0" />
-                <span className="truncate">{item.location}</span>
-              </span>
-            </div>
-            {item.notes ? (
-              <p className="mt-1 flex items-start gap-1 text-xs text-muted-foreground line-clamp-2">
-                <StickyNote className="w-3 h-3 mt-0.5 shrink-0" />
-                <span>{item.notes}</span>
-              </p>
-            ) : null}
-          </>
-        )}
-      </button>
-      <div className="flex flex-col gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onEdit(item)}
-          className="h-9 w-9 text-muted-foreground hover:text-foreground"
-          aria-label={`Edit agenda ${item.title}`}
-        >
-          <Pencil className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(item)}
-          className="h-9 w-9 text-muted-foreground hover:text-destructive"
-          aria-label={`Hapus agenda ${item.title}`}
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
-    </li>
-  );
-}
-
-function formatReminder(min: number): string {
-  if (min >= 1440) return `${Math.round(min / 1440)}h sblm`;
-  if (min >= 60) return `${Math.round(min / 60)}j sblm`;
-  return `${min}m sblm`;
-}
-
-interface AgendaFormInput {
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  type: AgendaType;
-  notes?: string;
-  reminderMinutes?: number;
-}
-
-interface AgendaFormDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  defaultDate: string;
-  initial: AgendaItem | null;
-  onSubmit: (input: AgendaFormInput) => Promise<void>;
-}
-
-const REMINDER_OPTIONS: ReadonlyArray<{
-  value: string;
-  label: string;
-  minutes?: number;
-}> = [
-  { value: "none", label: "Tanpa pengingat" },
-  { value: "15", label: "15 menit sebelum", minutes: 15 },
-  { value: "60", label: "1 jam sebelum", minutes: 60 },
-  { value: "1440", label: "1 hari sebelum", minutes: 1440 },
-];
-
-function reminderToOption(m?: number): string {
-  if (!m) return "none";
-  if (m === 15 || m === 60 || m === 1440) return String(m);
-  return "none";
-}
-
-function AgendaFormDialog({
-  open,
-  onOpenChange,
-  defaultDate,
-  initial,
-  onSubmit,
-}: AgendaFormDialogProps) {
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState(defaultDate);
-  const [time, setTime] = useState("09:00");
-  const [location, setLocation] = useState("");
-  const [type, setType] = useState<AgendaType>("interview");
-  const [notes, setNotes] = useState("");
-  const [reminder, setReminder] = useState<string>("none");
-  const [submitting, setSubmitting] = useState(false);
-
-  const isEdit = Boolean(initial);
-
-  // Reseed form whenever the dialog opens — for create we use defaults,
-  // for edit we hydrate from `initial`.
-  useEffect(() => {
-    if (!open) return;
-    if (initial) {
-      setTitle(initial.title);
-      setDate(initial.date);
-      setTime(initial.time);
-      setLocation(initial.location === "—" ? "" : initial.location);
-      setType(initial.type);
-      setNotes(initial.notes ?? "");
-      setReminder(reminderToOption(initial.reminderMinutes));
-    } else {
-      setTitle("");
-      setDate(defaultDate);
-      setTime("09:00");
-      setLocation("");
-      setType("interview");
-      setNotes("");
-      setReminder("none");
-    }
-  }, [open, initial, defaultDate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !date) return;
-    setSubmitting(true);
-    try {
-      const reminderMinutes = REMINDER_OPTIONS.find(
-        (o) => o.value === reminder,
-      )?.minutes;
-      await onSubmit({
-        title: title.trim(),
-        date,
-        time,
-        location: location.trim() || "—",
-        type,
-        // Send the cleared values explicitly. `undefined` means "field
-        // omitted, leave unchanged" to the update mutation, so picking
-        // "Tanpa pengingat" or emptying the notes saved successfully and
-        // changed nothing — the old reminder kept firing.
-        notes: notes.trim(),
-        reminderMinutes: reminderMinutes ?? 0,
-      });
-      onOpenChange(false);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent className="sm:max-w-md">
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>
-            {isEdit ? "Edit Agenda" : "Tambah Agenda"}
-          </ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
-            {isEdit
-              ? "Perbarui detail wawancara, tenggat, atau follow-up."
-              : "Catat wawancara, tenggat lamaran, atau follow-up."}
-          </ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="agenda-title">Judul</Label>
-            <Input
-              id="agenda-title"
-              placeholder="cth. Wawancara HR Tokopedia"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              autoFocus
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="agenda-date">Tanggal</Label>
-              <DatePicker
-                id="agenda-date"
-                value={date}
-                onChange={setDate}
-                placeholder="Pilih tanggal"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="agenda-time">Waktu</Label>
-              <Input
-                id="agenda-time"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="agenda-type">Jenis</Label>
-            <ResponsiveSelect
-              value={type}
-              onValueChange={(v) => setType(v as AgendaType)}
-            >
-              <ResponsiveSelectTrigger id="agenda-type" />
-              <ResponsiveSelectContent drawerTitle="Jenis agenda">
-                {TYPE_OPTIONS.map((opt) => (
-                  <ResponsiveSelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </ResponsiveSelectItem>
-                ))}
-              </ResponsiveSelectContent>
-            </ResponsiveSelect>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="agenda-location">Lokasi / Platform</Label>
-            <Input
-              id="agenda-location"
-              placeholder="cth. Online · Google Meet, atau Onsite · SCBD"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="agenda-notes">Catatan</Label>
-            <Textarea
-              id="agenda-notes"
-              placeholder="Detail tambahan, link join, kontak HR..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="agenda-reminder">Pengingat</Label>
-            <ResponsiveSelect value={reminder} onValueChange={setReminder}>
-              <ResponsiveSelectTrigger id="agenda-reminder" />
-              <ResponsiveSelectContent drawerTitle="Pengingat">
-                {REMINDER_OPTIONS.map((opt) => (
-                  <ResponsiveSelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </ResponsiveSelectItem>
-                ))}
-              </ResponsiveSelectContent>
-            </ResponsiveSelect>
-          </div>
-          <ResponsiveDialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Batal
-            </Button>
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="bg-brand hover:bg-brand"
-            >
-              {isEdit ? "Simpan Perubahan" : "Tambah Agenda"}
-            </Button>
-          </ResponsiveDialogFooter>
-        </form>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
   );
 }

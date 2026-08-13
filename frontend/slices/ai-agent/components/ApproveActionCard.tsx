@@ -80,7 +80,7 @@ export function ApproveActionCard({ action, status, onResolved }: ApproveActionC
   return (
     <div className="border border-border rounded-xl p-3 bg-background/60 backdrop-blur-sm space-y-2">
       <div className="flex items-start gap-2">
-        <div className="w-8 h-8 rounded-lg bg-brand-muted dark:bg-brand/20 text-brand dark:text-brand flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-brand-muted dark:bg-brand/20 text-brand-muted-foreground dark:text-brand-muted-foreground flex items-center justify-center flex-shrink-0">
           <Sparkles className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">

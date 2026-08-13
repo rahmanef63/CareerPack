@@ -385,7 +385,7 @@ export function AIAgentConsole({
               {isDemo && (
                 <Badge
                   variant="secondary"
-                  className="text-[10px] hidden lg:inline-flex"
+                  className="text-xs hidden lg:inline-flex"
                 >
                   Mode Demo
                 </Badge>
@@ -411,7 +411,7 @@ export function AIAgentConsole({
                 ))}
                 {showQuickPrompts && (
                   <div className="pl-9">
-                    <p className="text-[11px] text-muted-foreground mb-2">
+                    <p className="text-xs text-muted-foreground mb-2">
                       Mulai cepat
                     </p>
                     <div className="flex flex-wrap gap-2">

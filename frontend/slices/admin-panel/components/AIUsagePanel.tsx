@@ -101,7 +101,7 @@ export function AIUsagePanel() {
               );
             })}
           </div>
-          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+          <div className="mt-2 flex justify-between text-xs text-muted-foreground">
             <span>{stats.daily[0]?.date}</span>
             <span>{stats.daily[stats.daily.length - 1]?.date}</span>
           </div>
@@ -188,7 +188,7 @@ function StatTile({
         <div className={`text-2xl font-semibold ${tone === "warn" ? "text-destructive" : ""}`}>
           {value.toLocaleString()}
         </div>
-        <div className="text-[10px] text-muted-foreground">{hint}</div>
+        <div className="text-xs text-muted-foreground">{hint}</div>
       </CardContent>
     </Card>
   );

@@ -114,7 +114,7 @@ export function PersonalInfoSection({
               onChange={(e) => updateProfile('summary', e.target.value)}
               className="min-h-[100px]"
             />
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Target ideal: 200–400 karakter. Singkat tapi padat — rekruter scan 6 detik pertama.
             </p>
           </div>

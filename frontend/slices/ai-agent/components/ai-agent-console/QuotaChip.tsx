@@ -28,7 +28,7 @@ export function QuotaChip() {
     <Badge
       variant={tone === "danger" ? "destructive" : "secondary"}
       className={
-        "text-[10px] gap-1 " +
+        "text-xs gap-1 " +
         (tone === "warn"
           ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
           : "")

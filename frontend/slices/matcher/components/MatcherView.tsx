@@ -19,12 +19,15 @@ import { PageContainer } from "@/shared/components/layout/PageContainer";
 
 import type { JobListing } from "../types";
 import { useMatcher } from "../hooks/useMatcher";
+import { useJobFilters } from "../hooks/useJobFilters";
 import { AddJobDialog } from "./AddJobDialog";
 import { ATSHistoryList } from "./ATSHistoryList";
 import { ATSScannerForm } from "./ATSScannerForm";
-import { JobBrowser } from "./JobBrowser";
 import { JobCard } from "./JobCard";
 import { JobDetailDialog } from "./JobDetailDialog";
+import { JobFilterPanel } from "./JobFilterPanel";
+import { JobResults } from "./JobResults";
+import { MatchSummaryCard } from "./MatchSummaryCard";
 import { SalaryInsightsCard } from "./SalaryInsightsCard";
 
 type TopTab = "listings" | "ats" | "history";
@@ -39,6 +42,7 @@ export function MatcherView() {
     matches,
     isLoadingMy,
     isLoadingExplore,
+    isLoadingMatches,
     seedDemo,
   } = useMatcher();
   const [seeding, setSeeding] = useState(false);
@@ -48,6 +52,13 @@ export function MatcherView() {
   /** When user clicks "Cek ATS" on a JobCard, we jump to the ATS tab
    *  with the listing preselected. */
   const [atsPreselect, setAtsPreselect] = useState<JobListing | null>(null);
+
+  // One filter state drives whichever sub-tab is active, so the rail can
+  // hold a single set of controls instead of one per tab — and a filter
+  // the user set survives switching between "Saya" and "Semua".
+  const sourceJobs = listingsTab === "saya" ? myJobs : exploreJobs;
+  const sourceLoading = listingsTab === "saya" ? isLoadingMy : isLoadingExplore;
+  const filters = useJobFilters(sourceJobs);
 
   const handleSeed = async () => {
     setSeeding(true);
@@ -71,8 +82,34 @@ export function MatcherView() {
     setDetail(null);
   };
 
+  // Radix unmounts the inactive TabsContent, so the same element in both
+  // slots only ever renders once — it just keeps each tab panel wired to
+  // its trigger for assistive tech.
+  const results = (
+    <JobResults
+      jobs={filters.filtered}
+      sourceCount={sourceJobs.length}
+      loading={sourceLoading}
+      view={filters.view}
+      onViewChange={filters.setView}
+      onSelect={setDetail}
+      filtersActive={filters.filtersActive}
+      onResetFilters={filters.resetAll}
+      zeroDataHint={
+        listingsTab === "saya"
+          ? "Belum ada lowongan yang kamu tambahkan. Klik “Tambah Lowongan” untuk paste deskripsi dari LinkedIn / JobStreet / sumber lain."
+          : "Belum ada lowongan. Klik “Muat Contoh” untuk memuat katalog contoh."
+      }
+      emptyHint={
+        listingsTab === "saya"
+          ? "Tidak ada lowongan kamu yang cocok dengan filter saat ini."
+          : "Tidak ada lowongan yang cocok dengan filter saat ini."
+      }
+    />
+  );
+
   return (
-    <PageContainer size="lg" className="space-y-6">
+    <PageContainer size="xl" className="space-y-6">
       <ResponsivePageHeader
         title="Pencocok Lowongan"
         description="AI mencocokkan profil + scan ATS untuk CV Anda."
@@ -117,6 +154,9 @@ export function MatcherView() {
 
         {/* ===== Lowongan ===== */}
         <TabsContent value="listings" className="mt-4 space-y-6">
+          {/* Full-bleed above the split: the "top picks" row wants the
+              whole page width, and on a phone it has to stay the first
+              thing on screen. */}
           {matches.length > 0 && (
             <ResponsiveCarousel
               title={
@@ -140,53 +180,70 @@ export function MatcherView() {
             </ResponsiveCarousel>
           )}
 
-          <SalaryInsightsCard />
+          {/*
+            Two columns from `lg` up: list left, rail right.
+            The rail is FIRST in the DOM and gets pushed to column 2 by
+            explicit grid placement — so on a phone (single column) the
+            filters land directly above the results they control instead
+            of a screen below them, which is what stacking DOM order
+            would have given.
+            `minmax(0,1fr)` on the list column is load-bearing: a plain
+            `1fr` track floors at min-content, so one long job title can
+            push the grid past the viewport.
+          */}
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_20rem]">
+            {/* Sticky under the 3.5rem SiteHeader. The rail is taller
+                than a laptop viewport once the salary card fills in, so
+                it scrolls inside itself rather than pinning a section
+                the user can never reach. */}
+            <aside
+              aria-label="Filter dan insight"
+              className="min-w-0 space-y-4 lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2"
+            >
+              <JobFilterPanel filters={filters} />
+              <MatchSummaryCard matches={matches} loading={isLoadingMatches} />
+              <SalaryInsightsCard />
+            </aside>
 
-          <Tabs
-            value={listingsTab}
-            onValueChange={(v) => setListingsTab(v as ListingsTab)}
-          >
-            <TabsList variant="equal" cols={2}>
-              <TabsTrigger value="saya">
-                <Trophy className="h-3.5 w-3.5" />
-                Lowongan Saya
-                {myJobs.length > 0 && (
-                  <span className="ml-1 rounded-full bg-muted px-1.5 text-[10px] tabular-nums">
-                    {myJobs.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="explore">
-                <Compass className="h-3.5 w-3.5" />
-                Semua Lowongan
-                {exploreJobs.length > 0 && (
-                  <span className="ml-1 rounded-full bg-muted px-1.5 text-[10px] tabular-nums">
-                    {exploreJobs.length}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
+            <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+              <Tabs
+                value={listingsTab}
+                onValueChange={(v) => setListingsTab(v as ListingsTab)}
+              >
+                {/* Grid items default to `min-width: auto`, so these two
+                    nowrap labels used to overflow the list and turn it
+                    into a scroll row on a phone. `min-w-0` + `truncate`
+                    lets them clip in place instead. */}
+                <TabsList variant="equal" cols={2}>
+                  <TabsTrigger value="saya" className="min-w-0">
+                    <Trophy className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">Lowongan Saya</span>
+                    {myJobs.length > 0 && (
+                      <span className="shrink-0 rounded-full bg-muted px-1.5 text-xs tabular-nums">
+                        {myJobs.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="explore" className="min-w-0">
+                    <Compass className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">Semua Lowongan</span>
+                    {exploreJobs.length > 0 && (
+                      <span className="shrink-0 rounded-full bg-muted px-1.5 text-xs tabular-nums">
+                        {exploreJobs.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="saya" className="mt-4">
-              <JobBrowser
-                jobs={myJobs}
-                loading={isLoadingMy}
-                onSelect={setDetail}
-                zeroDataHint="Belum ada lowongan yang kamu tambahkan. Klik “Tambah Lowongan” untuk paste deskripsi dari LinkedIn / JobStreet / sumber lain."
-                emptyHint="Tidak ada lowongan kamu yang cocok dengan filter saat ini."
-              />
-            </TabsContent>
-
-            <TabsContent value="explore" className="mt-4">
-              <JobBrowser
-                jobs={exploreJobs}
-                loading={isLoadingExplore}
-                onSelect={setDetail}
-                zeroDataHint="Belum ada lowongan. Klik “Muat Contoh” untuk memuat katalog contoh."
-                emptyHint="Tidak ada lowongan yang cocok dengan filter saat ini."
-              />
-            </TabsContent>
-          </Tabs>
+                <TabsContent value="saya" className="mt-4">
+                  {results}
+                </TabsContent>
+                <TabsContent value="explore" className="mt-4">
+                  {results}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
         </TabsContent>
 
         {/* ===== Cek ATS ===== */}

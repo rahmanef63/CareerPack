@@ -50,7 +50,7 @@ export function StatusBanner({ status, url }: StatusBannerProps) {
             </p>
             <p className="text-xs opacity-80">
               Slug sudah disimpan tapi belum diaktifkan. URL{" "}
-              <code className="font-mono text-[10px]">
+              <code className="font-mono text-xs">
                 careerpack.org{url}
               </code>{" "}
               masih 404. Klik &ldquo;Simpan & Publikasikan&rdquo; untuk

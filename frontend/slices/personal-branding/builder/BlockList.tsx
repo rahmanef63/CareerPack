@@ -212,7 +212,7 @@ function SortableBlockItem({
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
               {TYPE_LABELS[block.type]}
               {block.hidden && (
-                <span className="ml-2 text-[10px] text-warning-text">
+                <span className="ml-2 text-xs text-warning-text">
                   disembunyikan
                 </span>
               )}
@@ -241,7 +241,7 @@ function SortableBlockItem({
             size="icon"
             onClick={onDelete}
             aria-label="Hapus"
-            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="h-8 w-8 text-destructive-text hover:bg-destructive/10 hover:text-destructive-text"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

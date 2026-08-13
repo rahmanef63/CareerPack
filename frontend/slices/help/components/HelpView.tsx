@@ -319,7 +319,7 @@ function QuickLink({ icon: Icon, title, href, description }: QuickLinkProps) {
       href={href}
       className="group flex items-start gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-brand hover:bg-muted/30"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-brand group-hover:bg-brand group-hover:text-brand-foreground transition-colors">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-brand-muted-foreground group-hover:bg-brand group-hover:text-brand-foreground transition-colors">
         <Icon className="h-5 w-5" />
       </div>
       <div className="space-y-0.5">

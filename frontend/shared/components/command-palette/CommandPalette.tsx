@@ -110,7 +110,7 @@ export function CommandPalette() {
                   <Icon className="mr-2 h-4 w-4" />
                   <span>{item.label}</span>
                   {pathname === item.href && (
-                    <span className="ml-auto text-[10px] text-muted-foreground">
+                    <span className="ml-auto text-xs text-muted-foreground">
                       Sekarang
                     </span>
                   )}
@@ -128,7 +128,7 @@ export function CommandPalette() {
                   <Icon className="mr-2 h-4 w-4" />
                   <span>{item.label}</span>
                   {pathname === item.href && (
-                    <span className="ml-auto text-[10px] text-muted-foreground">
+                    <span className="ml-auto text-xs text-muted-foreground">
                       Sekarang
                     </span>
                   )}

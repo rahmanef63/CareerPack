@@ -125,7 +125,7 @@ export function MoreDrawer({ open, onOpenChange }: MoreDrawerProps) {
           <div className="px-4 py-5 max-w-md mx-auto w-full space-y-5">
             {!query && <InstallBanner onAfter={() => onOpenChange(false)} />}
             <section>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {query ? `Hasil (${filteredMore.length})` : "Fitur"}
               </p>
               {filteredMore.length === 0 ? (
@@ -182,13 +182,13 @@ function AccountFooter({ onClose }: { onClose: () => void }) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{name}</p>
         {email && (
-          <p className="truncate text-[11px] text-muted-foreground">{email}</p>
+          <p className="truncate text-xs text-muted-foreground">{email}</p>
         )}
       </div>
       <Button
         variant="outline"
         size="sm"
-        className="gap-2 shrink-0 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="gap-2 shrink-0 border-destructive/40 text-destructive-text hover:bg-destructive/10 hover:text-destructive-text"
         onClick={() => {
           logout();
           onClose();
@@ -237,7 +237,7 @@ function InstallBanner({ onAfter }: { onAfter: () => void }) {
           <p className="text-sm font-semibold text-foreground">
             Pasang Aplikasi CareerPack
           </p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Akses lebih cepat, mode offline, notifikasi push.
           </p>
         </div>
@@ -276,7 +276,7 @@ function TileButton({ tile, onClick }: TileButtonProps) {
         {tile.badge && (
           <Badge
             variant="secondary"
-            className="absolute -top-1 -right-1 h-auto px-1.5 py-0.5 text-[9px] font-bold bg-background text-foreground shadow"
+            className="absolute -top-1 -right-1 h-auto px-1.5 py-0.5 text-xs font-bold bg-background text-foreground shadow"
           >
             {tile.badge}
           </Badge>
@@ -286,7 +286,7 @@ function TileButton({ tile, onClick }: TileButtonProps) {
           regardless of whether the label is 1 word (e.g. 'Jaringan')
           or 2 words (e.g. 'Simulasi Wawancara'). line-clamp-2 prevents
           unusually long labels from pushing the row taller. */}
-      <span className="text-[11px] font-medium text-center leading-tight text-foreground/80 group-active:text-brand min-h-[2rem] line-clamp-2 flex items-start justify-center">
+      <span className="text-xs font-medium text-center leading-tight text-foreground/80 group-active:text-brand min-h-[2rem] line-clamp-2 flex items-start justify-center">
         {tile.label}
       </span>
     </button>

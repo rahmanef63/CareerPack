@@ -100,8 +100,11 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
   const noCV = state.isDemo || (cvs !== undefined && cvs.length === 0);
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+    // Form left, result right from `lg` up — the result is long enough
+    // that on a wide screen the form scrolled off before the user could
+    // re-run it. Below `lg` it collapses back to form-then-result.
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+      <div className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-5">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-brand" />
           <h2 className="text-base font-semibold">Cek ATS dengan AI</h2>
@@ -148,7 +151,7 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
           </TabsList>
 
           <TabsContent value="paste" className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input
                 type="text"
                 placeholder="Judul lowongan (opsional)"
@@ -222,19 +225,34 @@ export function ATSScannerForm({ initialListing = null }: ATSScannerFormProps) {
       </div>
 
       {/* Result */}
-      {scan && (
-        <ATSResultCard
-          score={scan.score}
-          grade={scan.grade}
-          breakdown={scan.breakdown}
-          matchedKeywords={scan.matchedKeywords}
-          missingKeywords={scan.missingKeywords}
-          formatIssues={scan.formatIssues}
-          recommendations={scan.recommendations}
-          jobTitle={scan.jobTitle}
-          jobCompany={scan.jobCompany ?? undefined}
-        />
-      )}
+      <div className="min-w-0">
+        {scan ? (
+          <ATSResultCard
+            score={scan.score}
+            grade={scan.grade}
+            breakdown={scan.breakdown}
+            matchedKeywords={scan.matchedKeywords}
+            missingKeywords={scan.missingKeywords}
+            formatIssues={scan.formatIssues}
+            recommendations={scan.recommendations}
+            jobTitle={scan.jobTitle}
+            jobCompany={scan.jobCompany ?? undefined}
+          />
+        ) : (
+          // Desktop only: on a phone the second column sits under the
+          // form, where an empty placeholder is just noise.
+          <div className="hidden min-h-64 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card p-8 text-center lg:flex">
+            <ScanText className="h-8 w-8 text-muted-foreground/60" />
+            <p className="text-sm font-medium text-foreground">
+              Hasil scan muncul di sini
+            </p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Pilih CV dan sumber deskripsi lowongan di sebelah kiri, lalu
+              jalankan scan untuk melihat skor beserta detil per dimensi.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

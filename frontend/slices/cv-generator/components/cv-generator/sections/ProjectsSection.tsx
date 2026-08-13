@@ -38,7 +38,7 @@ export function ProjectsSection({
                 variant="ghost"
                 size="sm"
                 onClick={() => removeProject(proj.id)}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive-text hover:text-destructive-text hover:bg-destructive/10"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>

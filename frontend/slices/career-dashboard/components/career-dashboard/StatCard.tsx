@@ -7,11 +7,11 @@ import { cn } from "@/shared/lib/utils";
 type Tone = "sky" | "violet" | "emerald" | "amber";
 
 const TONE_CLS: Record<Tone, string> = {
-  sky: "text-info bg-info/20 dark:bg-info/20 dark:text-brand/80",
+  sky: "text-info-text bg-info/20 dark:bg-info/20 dark:text-brand/80",
   violet: "text-brand bg-accent dark:bg-accent dark:text-brand/80",
   emerald:
-    "text-success bg-success/20 dark:bg-success/20 dark:text-success/80",
-  amber: "text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/80",
+    "text-success-text bg-success/20 dark:bg-success/20 dark:text-success-text/80",
+  amber: "text-warning-text bg-warning/20 dark:bg-warning/20 dark:text-warning-text/80",
 };
 
 export function StatCard({

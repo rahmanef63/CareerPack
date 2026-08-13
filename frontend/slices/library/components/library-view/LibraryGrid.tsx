@@ -82,7 +82,7 @@ function LibraryCard({
           </a>
         )}
         {f.usedIn.length > 0 && (
-          <Badge className="absolute left-1 top-1 h-5 px-1.5 text-[10px]">
+          <Badge className="absolute left-1 top-1 h-5 px-1.5 text-xs leading-none">
             {f.usedIn.length}× pakai
           </Badge>
         )}
@@ -111,7 +111,7 @@ function LibraryCard({
       </div>
       <div className="space-y-1 p-2">
         <p className="truncate text-xs font-medium">{f.fileName}</p>
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {bytesToHuman(f.fileSize)}
         </p>
         {(f.tags?.length ?? 0) > 0 && (
@@ -120,14 +120,14 @@ function LibraryCard({
               <Badge
                 key={t}
                 variant="outline"
-                className="h-4 gap-0.5 px-1 text-[9px]"
+                className="h-5 gap-0.5 px-1.5 text-xs leading-none"
               >
-                <Tag className="h-2 w-2" />
+                <Tag className="h-3 w-3" />
                 {t}
               </Badge>
             ))}
             {f.tags!.length > 3 && (
-              <Badge variant="outline" className="h-4 px-1 text-[9px]">
+              <Badge variant="outline" className="h-5 px-1.5 text-xs leading-none">
                 +{f.tags!.length - 3}
               </Badge>
             )}

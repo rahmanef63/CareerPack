@@ -53,7 +53,7 @@ export function ProfileCompletenessCard({ onStartWizard }: ProfileCompletenessCa
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-base font-semibold">Lengkapi profil kamu</h3>
-              <Badge className={cn("border-0 text-[10px]", tone.bg, tone.text)}>
+              <Badge className={cn("border-0 text-xs", tone.bg, tone.text)}>
                 {score}% terisi
               </Badge>
             </div>
@@ -78,7 +78,7 @@ export function ProfileCompletenessCard({ onStartWizard }: ProfileCompletenessCa
                     <p className="text-muted-foreground">{m.hint}</p>
                   </div>
                   {m.href && (
-                    <Button asChild size="sm" variant="ghost" className="h-6 shrink-0 px-2 text-[11px]">
+                    <Button asChild size="sm" variant="ghost" className="h-6 shrink-0 px-2 text-xs">
                       <Link href={m.href}>
                         <ArrowRight className="h-3 w-3" />
                       </Link>

@@ -30,7 +30,7 @@ export function CharCounter({ value, recommendedMax, className }: Props) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-[10px] tabular-nums",
+        "inline-flex items-center gap-1 text-xs tabular-nums",
         tone,
         className,
       )}

@@ -24,10 +24,10 @@ function gradeBadgeClass(grade: string): string {
     case "C":
       return "bg-warning/15 text-warning-text";
     case "D":
-      return "bg-destructive/10 text-destructive";
+      return "bg-destructive/10 text-destructive-text";
     case "F":
     default:
-      return "bg-destructive/20 text-destructive";
+      return "bg-destructive/20 text-destructive-text";
   }
 }
 
@@ -47,7 +47,7 @@ export function ATSHistoryList() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
@@ -60,7 +60,7 @@ export function ATSHistoryList() {
 
   if (scans.length === 0) {
     return (
-      // ponytail: icon only — NoResults art is already spent one tab over in JobBrowser.
+      // ponytail: icon only — NoResults art is already spent one tab over in JobResults.
       <EmptyState
         icon={History}
         title="Belum ada scan"
@@ -72,13 +72,15 @@ export function ATSHistoryList() {
 
   return (
     <>
-      <div className="space-y-2">
+      {/* `grid-cols-1` is explicit so the implicit track can't size to a
+          long job title's max-content and take the page sideways. */}
+      <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
         {scans.map((s) => (
           <button
             key={s._id}
             type="button"
             onClick={() => setOpenId(s._id)}
-            className="group flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition hover:border-brand/40 hover:bg-accent/40"
+            className="group flex w-full min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition hover:border-brand/40 hover:bg-accent/40"
           >
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${gradeBadgeClass(s.grade)}`}

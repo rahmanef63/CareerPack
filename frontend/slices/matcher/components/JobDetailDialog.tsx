@@ -83,7 +83,7 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
                 {job.category && CATEGORY_LABELS[job.category] && (
                   <Badge
                     className={cn(
-                      "gap-1 border-0 text-[10px]",
+                      "gap-1 border-0",
                       CATEGORY_COLORS[job.category] ??
                         "bg-muted text-muted-foreground",
                     )}
@@ -93,23 +93,23 @@ export function JobDetailDialog({ job, onOpenChange, onScanATS }: JobDetailDialo
                   </Badge>
                 )}
                 {job.seniority && (
-                  <Badge variant="outline" className="text-[10px] uppercase">
+                  <Badge variant="outline" className="uppercase">
                     {job.seniority}
                   </Badge>
                 )}
                 {job.employmentType && (
-                  <Badge variant="outline" className="text-[10px] uppercase">
+                  <Badge variant="outline" className="uppercase">
                     {job.employmentType}
                   </Badge>
                 )}
-                <Badge variant="outline" className="gap-1 text-[10px]">
+                <Badge variant="outline" className="gap-1">
                   <Briefcase className="h-3 w-3" />
                   {WORK_MODE_LABELS[
                     job.workMode as keyof typeof WORK_MODE_LABELS
                   ] ?? job.workMode}
                 </Badge>
                 {job.source && SOURCE_LABELS[job.source] && (
-                  <Badge variant="secondary" className="text-[10px]">
+                  <Badge variant="secondary">
                     {SOURCE_LABELS[job.source]}
                   </Badge>
                 )}

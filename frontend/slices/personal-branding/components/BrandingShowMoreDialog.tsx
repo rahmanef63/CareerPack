@@ -148,7 +148,7 @@ function ProjectsGrid({ items }: { items: BrandingPayload["projects"] }) {
               {p.techStack.map((t) => (
                 <span
                   key={t}
-                  className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground/80"
+                  className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground/80"
                 >
                   {t}
                 </span>
@@ -197,7 +197,7 @@ function ExperienceList({ items }: { items: BrandingPayload["experience"] }) {
                 <p className="text-xs text-muted-foreground">{e.company}</p>
               </div>
               {period ? (
-                <span className="shrink-0 text-[10px] text-muted-foreground">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {period}
                 </span>
               ) : null}
@@ -242,7 +242,7 @@ function EducationList({ items }: { items: BrandingPayload["education"] }) {
                 </p>
               </div>
               {period ? (
-                <span className="shrink-0 text-[10px] text-muted-foreground">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {period}
                 </span>
               ) : null}
@@ -266,7 +266,7 @@ function CertList({ items }: { items: BrandingPayload["certifications"] }) {
           <h3 className="text-sm font-semibold text-foreground">{c.name}</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">{c.issuer}</p>
           {c.date ? (
-            <p className="mt-1 text-[10px] text-muted-foreground">{c.date}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{c.date}</p>
           ) : null}
         </article>
       ))}

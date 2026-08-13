@@ -40,7 +40,7 @@ export function AvailabilityCard({ bind }: AvailabilityCardProps) {
       />
       <p
         id="pb-availability-note-help"
-        className={`text-[10px] ${noteOver ? "text-destructive" : "text-muted-foreground"}`}
+        className={`text-xs ${noteOver ? "text-destructive" : "text-muted-foreground"}`}
       >
         {noteLen}/{FIELD_LIMITS_PB.availabilityNoteMax} — role, lokasi,
         atau kapan available. Singkat & spesifik.

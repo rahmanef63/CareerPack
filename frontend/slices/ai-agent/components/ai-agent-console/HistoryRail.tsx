@@ -67,7 +67,7 @@ export function HistoryRail({
                   <p className="text-sm font-medium truncate">
                     {s.title || "Percakapan"}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {/* Prefer the live transcript length once hydrated; fall
                         back to the denormalized count for un-hydrated shells. */}
                     {s.messages.length > 0

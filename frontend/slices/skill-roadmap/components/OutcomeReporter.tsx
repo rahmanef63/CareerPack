@@ -107,7 +107,7 @@ export function OutcomeReporter({
 
   return (
     <div className="rounded-md border border-border bg-card p-3 text-xs">
-      <div className="mb-2 flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
+      <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs font-medium">
         <ChartLine className="h-3.5 w-3.5 text-brand" />
         Cohort untuk{" "}
         <span className="font-semibold">{targetNodeLabel}</span>
@@ -115,7 +115,7 @@ export function OutcomeReporter({
           <>
             <Badge
               variant="outline"
-              className="ml-auto gap-1 text-[10px]"
+              className="ml-auto gap-1"
               title={`Differential Privacy: ε = ${cohort.epsilonTotal.toFixed(1)}`}
             >
               <Lock className="h-3 w-3" />
@@ -124,7 +124,7 @@ export function OutcomeReporter({
             <Badge
               variant="outline"
               className={cn(
-                "gap-1 text-[10px]",
+                "gap-1 text-xs",
                 CONFIDENCE_TONE[cohort.sampleBand],
               )}
             >
@@ -136,14 +136,14 @@ export function OutcomeReporter({
 
       {cohort ? (
         !cohort.released ? (
-          <p className="rounded bg-muted/40 p-2 text-[11px] text-muted-foreground">
+          <p className="rounded bg-muted/40 p-2 text-xs text-muted-foreground">
             Cohort masih di bawah ambang k-anonimitas (min{" "}
             <strong>{cohort.minN}</strong> lapor). Statistik di-suppress
             untuk lindungi privasi. Lapor hasil di bawah untuk membangun
             cohort.
           </p>
         ) : cohort.counts ? (
-          <div className="grid grid-cols-3 gap-2 text-[11px]">
+          <div className="grid grid-cols-3 gap-2 text-xs">
             <Stat label="Lamar" value={cohort.counts.apply} />
             <Stat
               label="Callback"
@@ -157,7 +157,7 @@ export function OutcomeReporter({
           </div>
         ) : null
       ) : (
-        <p className="text-[11px] text-muted-foreground">Memuat cohort…</p>
+        <p className="text-xs text-muted-foreground">Memuat cohort…</p>
       )}
 
       <ResponsiveDialog open={open} onOpenChange={setOpen}>
@@ -166,7 +166,7 @@ export function OutcomeReporter({
             type="button"
             variant="outline"
             size="sm"
-            className="mt-2 h-7 w-full gap-1.5 text-[11px]"
+            className="mt-2 h-7 w-full gap-1.5 text-xs"
           >
             <Plus className="h-3 w-3" />
             Lapor hasil aplikasi
@@ -246,8 +246,8 @@ interface StatProps {
 function Stat({ label, value }: StatProps) {
   return (
     <div className="rounded bg-muted/40 px-2 py-1 text-center">
-      <div className="text-[9px] uppercase text-muted-foreground">{label}</div>
-      <div className="text-[12px] font-semibold tabular-nums">{value}</div>
+      <div className="text-xs uppercase text-muted-foreground">{label}</div>
+      <div className="text-xs font-semibold tabular-nums">{value}</div>
     </div>
   );
 }

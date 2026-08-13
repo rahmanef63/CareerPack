@@ -42,7 +42,17 @@
     --accent-foreground: 0.38 0.14 265.52;
 
     --destructive: 0.64 0.21 25.33;
-    --destructive-foreground: 1.00 0 0;
+    /* text drawn ON a --destructive fill. White (1.00) only hit 3.72:1 on
+       #f14444 — fails WCAG 4.5:1 for normal text, and it failed identically in
+       BOTH palettes because --destructive is the same value in each. Darkened
+       to L 0.20 → 4.87:1, mirroring --info-foreground / --success-foreground /
+       --warning-foreground, which were all darkened for exactly this reason.
+       Every consumer draws it on a bg-destructive fill (badge, button,
+       responsive-alert-dialog, swipe-to-delete, the header count bubble,
+       ultimate-calendar's accent), so nothing else moves. --destructive itself
+       is left alone: it doubles as --status-rejected-fg *text* on a dark card,
+       where darkening the fill would have made that unreadable. */
+    --destructive-foreground: 0.20 0 0;
     /* Prose sibling, completing the set alongside --warning-text /
        --success-text / --info-text. --destructive is a FILL tone and measures
        3.72:1 as text on a card — under AA — and it colours exactly the strings
@@ -173,7 +183,26 @@
     --popover: 0.27 0 0;
     --popover-foreground: 0.92 0 0;
 
-    --primary: 0.62 0.19 259.81;
+    /* L 0.62 = #3981f6 measured 3.73:1 under white --primary-foreground — the
+       dark-mode twin of the light-palette failure fixed above, and the single
+       biggest source of axe color-contrast nodes on the dashboard (every
+       default-variant Badge, plus Button default, tooltip, checked checkbox,
+       calendar selected day, sonner action, active sidebar item). L 0.56 =
+       #266ee1 = 4.79:1, the same value the light palette already uses, so the
+       brand blue is now one colour in both themes.
+       Fixing the FILL rather than the foreground was forced: --primary-foreground
+       is not exclusively ink-on-primary (MoreDrawer paints it over per-tile
+       gradients), so darkening it would have blackened those icons.
+       Cost, stated plainly: --primary is also read as *text* by exactly one
+       consumer, Button's `link` variant (one call site,
+       slices/personal-branding/sections/IdentityCard.tsx). On a dark card that
+       goes 4.04:1 → 3.15:1. It was already under AA at 0.62 and no L satisfies
+       both uses — white-on-fill and text-on-dark-card cross at ~L 0.60 with
+       both sides ≈4.0:1. The link variant wants a brightened `--primary-text`
+       sibling (cf. --destructive-text / --success-text), which needs a
+       tailwind.config.ts entry + a button.tsx edit; not done here.
+       --ring stays 0.62: a focus ring is non-text, judged at 3:1. */
+    --primary: 0.56 0.19 259.81;
     --primary-foreground: 1.00 0 0;
     --secondary: 0.27 0 0;
     --secondary-foreground: 0.92 0 0;
@@ -184,7 +213,11 @@
     --accent-foreground: 0.88 0.06 254.13;
 
     --destructive: 0.64 0.21 25.33;
-    --destructive-foreground: 1.00 0 0;
+    /* Same 3.72:1 → 4.87:1 fix as :root, and it has to be repeated here rather
+       than inherited because --destructive is identical in both palettes, so
+       white ink failed identically in both. Dark ink on a bright red is the
+       house convention already set by --warning-foreground / --info-foreground. */
+    --destructive-foreground: 0.20 0 0;
     /* Brightened rather than darkened, mirroring --warning-text's dark value:
        on a dark card the prose tone has to go UP. 4.05:1 → 6.4:1. */
     --destructive-text: 0.75 0.15 25.33;
@@ -226,9 +259,15 @@
     --sidebar-border: 0.37 0 0;
     --sidebar-ring: 0.62 0.19 259.81;
 
-    --brand: 0.62 0.19 259.81;
+    /* Same 3.73:1 white-on-#3981f6 failure that `--primary` was darkened for,
+       in a token that was missed: `--brand` is a separate alias holding the
+       identical blue, and `bg-brand` + `text-brand-foreground` is what the
+       dashboard's primary CTAs actually use. L 0.56 -> 4.79:1, matching the
+       light palette and `--primary` above. `--brand-from` follows so the
+       gradient still starts on the same colour as the solid fill. */
+    --brand: 0.56 0.19 259.81;
     --brand-foreground: 1.00 0 0;
-    --brand-from: 0.62 0.19 259.81;
+    --brand-from: 0.56 0.19 259.81;
     --brand-to: 0.49 0.22 264.38;
     --brand-muted: 0.38 0.14 265.52;
     --brand-muted-foreground: 0.88 0.06 254.13;

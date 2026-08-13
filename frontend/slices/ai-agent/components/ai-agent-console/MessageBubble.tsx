@@ -82,7 +82,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
       parts.push(
         <code
           key={`c-${i++}`}
-          className="px-1 py-0.5 rounded bg-foreground/10 text-[12px] font-mono"
+          className="px-1 py-0.5 rounded bg-foreground/10 text-xs font-mono"
         >
           {tok.slice(1, -1)}
         </code>,

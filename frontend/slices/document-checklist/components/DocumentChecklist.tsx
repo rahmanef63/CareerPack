@@ -29,7 +29,9 @@ export function DocumentChecklist() {
   const internationalProgress = getProgress("international");
 
   return (
-    <PageContainer size="lg">
+    // xl (not lg): CategorySection runs a rail + list two-column from `lg`
+    // up, and a 6xl frame left the list too narrow to be worth splitting.
+    <PageContainer size="xl">
       <ResponsivePageHeader
         title="Ceklis Dokumen"
         description="Kelola semua dokumen yang diperlukan untuk melamar pekerjaan"
@@ -88,9 +90,9 @@ export function DocumentChecklist() {
         </TabsContent>
 
         <TabsContent value="international" className="space-y-6">
-          <CountryTemplatePicker />
           <CategorySection
             category="international"
+            picker={<CountryTemplatePicker />}
             filterCategory={filterCategory}
             setFilterCategory={setFilterCategory}
             progress={internationalProgress}

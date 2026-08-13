@@ -105,7 +105,7 @@ export function MediaEditor({ media, onChange }: Props) {
                   </div>
                 )}
                 {idx === 0 && (
-                  <span className="absolute bottom-0 right-0 rounded-tl bg-brand px-1 text-[9px] font-bold text-brand-foreground">
+                  <span className="absolute bottom-0 right-0 rounded-tl bg-brand px-1 text-xs font-bold text-brand-foreground">
                     COVER
                   </span>
                 )}

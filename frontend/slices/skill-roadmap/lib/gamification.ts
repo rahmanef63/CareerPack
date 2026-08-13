@@ -159,18 +159,26 @@ export interface RoadmapTheme {
   accentText: string;
 }
 
+/**
+ * `accentText` is the ONLY field here that renders as words (the
+ * "Level 3 · Hacker" line + the stat-pip icons). The `-500` step it used
+ * measured 1.9:1 (amber) to 3.4:1 (blue) on a light card — every domain
+ * failed WCAG AA. `-700` clears 4.5:1 on the light palette for all eleven
+ * hues and `-400` clears it on the dark one; the gradients and glows are
+ * decorative fills and keep their `-500` identity.
+ */
 const THEME_BY_DOMAIN: Record<string, RoadmapTheme> = {
-  tech:        { name: "Cyber",     primary: "from-blue-500 to-cyan-500",       glow: "shadow-[0_0_20px_-2px_rgb(59_130_246/0.5)]",  accentText: "text-blue-500"   },
-  business:    { name: "Empire",    primary: "from-amber-500 to-yellow-500",    glow: "shadow-[0_0_20px_-2px_rgb(245_158_11/0.5)]",  accentText: "text-amber-500"  },
-  creative:    { name: "Atelier",   primary: "from-purple-500 to-pink-500",     glow: "shadow-[0_0_20px_-2px_rgb(168_85_247/0.5)]",  accentText: "text-purple-500" },
-  education:   { name: "Academy",   primary: "from-indigo-500 to-blue-500",     glow: "shadow-[0_0_20px_-2px_rgb(99_102_241/0.5)]",  accentText: "text-indigo-500" },
-  health:      { name: "Sanctuary", primary: "from-rose-500 to-red-500",        glow: "shadow-[0_0_20px_-2px_rgb(244_63_94/0.5)]",   accentText: "text-rose-500"   },
-  finance:     { name: "Vault",     primary: "from-emerald-500 to-teal-500",    glow: "shadow-[0_0_20px_-2px_rgb(16_185_129/0.5)]",  accentText: "text-emerald-500"},
-  hr:          { name: "Council",   primary: "from-violet-500 to-purple-500",   glow: "shadow-[0_0_20px_-2px_rgb(139_92_246/0.5)]",  accentText: "text-violet-500" },
-  operations:  { name: "Workshop",  primary: "from-orange-500 to-amber-500",    glow: "shadow-[0_0_20px_-2px_rgb(249_115_22/0.5)]",  accentText: "text-orange-500" },
-  government:  { name: "Hall",      primary: "from-slate-500 to-gray-500",      glow: "shadow-[0_0_20px_-2px_rgb(100_116_139/0.5)]", accentText: "text-slate-500"  },
-  social:      { name: "Outreach",  primary: "from-pink-500 to-rose-500",       glow: "shadow-[0_0_20px_-2px_rgb(236_72_153/0.5)]",  accentText: "text-pink-500"   },
-  hospitality: { name: "Lounge",    primary: "from-fuchsia-500 to-pink-500",    glow: "shadow-[0_0_20px_-2px_rgb(217_70_239/0.5)]",  accentText: "text-fuchsia-500"},
+  tech:        { name: "Cyber",     primary: "from-blue-500 to-cyan-500",       glow: "shadow-[0_0_20px_-2px_rgb(59_130_246/0.5)]",  accentText: "text-blue-700 dark:text-blue-400"      },
+  business:    { name: "Empire",    primary: "from-amber-500 to-yellow-500",    glow: "shadow-[0_0_20px_-2px_rgb(245_158_11/0.5)]",  accentText: "text-amber-700 dark:text-amber-400"    },
+  creative:    { name: "Atelier",   primary: "from-purple-500 to-pink-500",     glow: "shadow-[0_0_20px_-2px_rgb(168_85_247/0.5)]",  accentText: "text-purple-700 dark:text-purple-400"  },
+  education:   { name: "Academy",   primary: "from-indigo-500 to-blue-500",     glow: "shadow-[0_0_20px_-2px_rgb(99_102_241/0.5)]",  accentText: "text-indigo-700 dark:text-indigo-400"  },
+  health:      { name: "Sanctuary", primary: "from-rose-500 to-red-500",        glow: "shadow-[0_0_20px_-2px_rgb(244_63_94/0.5)]",   accentText: "text-rose-700 dark:text-rose-400"      },
+  finance:     { name: "Vault",     primary: "from-emerald-500 to-teal-500",    glow: "shadow-[0_0_20px_-2px_rgb(16_185_129/0.5)]",  accentText: "text-emerald-700 dark:text-emerald-400"},
+  hr:          { name: "Council",   primary: "from-violet-500 to-purple-500",   glow: "shadow-[0_0_20px_-2px_rgb(139_92_246/0.5)]",  accentText: "text-violet-700 dark:text-violet-400"  },
+  operations:  { name: "Workshop",  primary: "from-orange-500 to-amber-500",    glow: "shadow-[0_0_20px_-2px_rgb(249_115_22/0.5)]",  accentText: "text-orange-700 dark:text-orange-400"  },
+  government:  { name: "Hall",      primary: "from-slate-500 to-gray-500",      glow: "shadow-[0_0_20px_-2px_rgb(100_116_139/0.5)]", accentText: "text-slate-700 dark:text-slate-300"    },
+  social:      { name: "Outreach",  primary: "from-pink-500 to-rose-500",       glow: "shadow-[0_0_20px_-2px_rgb(236_72_153/0.5)]",  accentText: "text-pink-700 dark:text-pink-400"      },
+  hospitality: { name: "Lounge",    primary: "from-fuchsia-500 to-pink-500",    glow: "shadow-[0_0_20px_-2px_rgb(217_70_239/0.5)]",  accentText: "text-fuchsia-700 dark:text-fuchsia-400"},
 };
 
 export function themeForDomain(domain: string | undefined | null): RoadmapTheme {

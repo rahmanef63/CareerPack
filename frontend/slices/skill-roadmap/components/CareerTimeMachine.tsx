@@ -34,13 +34,14 @@ import { ActionEfficacyCard } from "./ActionEfficacyCard";
 
 // Semantic tokens, not raw emerald/amber/rose: those ignore the active
 // preset and each needed a hand-written `dark:` twin to stay legible.
-// high/med take the `-text` prose tones: the band label is words on its own
-// tint, where the fill tones measure 2.28:1 (success) and 1.8:1 (warning) —
-// both below AA. `--destructive` has no `-text` sibling yet, so low keeps it.
+// All three take the `-text` prose tones: the band label is words on its own
+// tint, where the fill tones measure 2.28:1 (success), 1.8:1 (warning) and
+// 3.72:1 (destructive) — all below AA. `--destructive-text` exists now, so
+// `low` no longer has to ride the fill tone.
 const PROB_TONE = {
   high: "bg-success/10 text-success-text border-success/40",
   med: "bg-warning/10 text-warning-text border-warning/40",
-  low: "bg-destructive/10 text-destructive border-destructive/40",
+  low: "bg-destructive/10 text-destructive-text border-destructive/40",
 } as const;
 
 function probTone(p: number): keyof typeof PROB_TONE {
@@ -118,10 +119,10 @@ export function CareerTimeMachine() {
 
       <Card className="border-border">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle as="h2" className="flex items-center gap-2 text-base">
             <Compass className="h-4 w-4 text-brand" />
             Career Time Machine
-            <Badge variant="outline" className="ml-1 text-[10px]">
+            <Badge variant="outline" className="ml-1">
               graph engine
             </Badge>
           </CardTitle>
@@ -304,24 +305,24 @@ function ReachSummary({
           <span className="font-medium">{start}</span>
           <ArrowRight className="h-3.5 w-3.5 text-brand" />
           <span className="font-medium">{end}</span>
-          <Badge variant="outline" className="ml-auto text-[10px]">
+          <Badge variant="outline" className="ml-auto">
             {pathCount} jalur
           </Badge>
         </div>
         {userSkillCount === 0 ? (
-          <p className="rounded-md border border-dashed border-border bg-muted/40 p-2 text-[11px] text-muted-foreground">
+          <p className="rounded-md border border-dashed border-border bg-muted/40 p-2 text-xs text-muted-foreground">
             Truth Ledger kosong — skill-gap tidak bisa dihitung. Seed
             Ledger dari CV (lewat Resume Tailor) untuk insight personal.
           </p>
         ) : targetSkillGap.length === 0 ? (
-          <div className="flex items-center gap-1.5 text-[11px] text-success-text">
+          <div className="flex items-center gap-1.5 text-xs text-success-text">
             <Target className="h-3.5 w-3.5" />
             Tidak ada skill-gap — kamu sudah punya semua skill yang
             dibutuhkan untuk target ini.
           </div>
         ) : (
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-[11px] font-medium">
+            <div className="flex items-center gap-1.5 text-xs font-medium">
               <Target className="h-3.5 w-3.5 text-warning-text" />
               Skill-gap ke target ({targetSkillGap.length} skill):
             </div>
@@ -330,7 +331,7 @@ function ReachSummary({
                 <Badge
                   key={s}
                   variant="outline"
-                  className="border-warning/40 bg-warning/5 text-[10px] text-warning-text"
+                  className="border-warning/40 bg-warning/5 text-xs text-warning-text"
                 >
                   {s}
                 </Badge>
@@ -357,7 +358,7 @@ function PathRow({ path, rank }: PathRowProps) {
       <CardContent className="space-y-2 pt-3">
         <div className="flex items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-1.5">
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline">
               #{rank}
             </Badge>
             <span className="flex items-center gap-1 font-medium">
@@ -373,7 +374,7 @@ function PathRow({ path, rank }: PathRowProps) {
             {calibratedCount > 0 && (
               <Badge
                 variant="outline"
-                className="gap-1 border-info/40 bg-info/10 text-[10px] text-info-text"
+                className="gap-1 border-info/40 bg-info/10 text-xs text-info-text"
                 title={`Probabilitas ${calibratedCount} dari ${path.hops} edge dikalibrasi dari laporan outcome komunitas (Phase 4.5 Bayesian calibrator)`}
               >
                 <Activity className="h-2.5 w-2.5" />
@@ -381,7 +382,7 @@ function PathRow({ path, rank }: PathRowProps) {
               </Badge>
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             score {path.score.toFixed(3)}
           </span>
         </div>
@@ -393,7 +394,7 @@ function PathRow({ path, rank }: PathRowProps) {
               <span key={n._id} className="flex items-center gap-1">
                 <Badge
                   variant="outline"
-                  className="bg-card text-[10px]"
+                  className="bg-card"
                   title={median ? `Median ${formatIDR(median)}/bln` : undefined}
                 >
                   {n.label}
@@ -409,14 +410,14 @@ function PathRow({ path, rank }: PathRowProps) {
         {path.acquiredSkills.length > 0 && (
           <div className="flex flex-wrap items-center gap-1">
             <Sparkles className="h-3 w-3 text-brand" />
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               Skill diperoleh:
             </span>
             {path.acquiredSkills.map((s) => (
               <Badge
                 key={s}
                 variant="outline"
-                className="border-brand/30 bg-brand/5 text-[10px] text-brand"
+                className="border-brand/30 bg-brand/5 text-xs text-brand"
               >
                 {s}
               </Badge>

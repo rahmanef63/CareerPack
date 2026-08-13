@@ -73,7 +73,7 @@ export function PromptStep({ scope, setScope, prompt, onNext }: Props) {
             variant="secondary"
           />
         </div>
-        <pre className="max-h-72 overflow-auto rounded-md bg-background p-3 text-[11px] leading-relaxed text-foreground/90">
+        <pre className="max-h-72 overflow-auto rounded-md bg-background p-3 text-xs leading-relaxed text-foreground/90">
           {prompt}
         </pre>
       </div>

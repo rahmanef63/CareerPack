@@ -77,7 +77,7 @@ export function ScheduleCard() {
                     </p>
                     <Badge
                       variant="secondary"
-                      className={cn("mt-0.5 text-[10px]", typeStyle.cls)}
+                      className={cn("mt-0.5 text-xs", typeStyle.cls)}
                     >
                       {typeStyle.label}
                     </Badge>

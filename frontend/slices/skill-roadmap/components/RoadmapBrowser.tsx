@@ -349,9 +349,11 @@ export function RoadmapBrowser({
                     : "border-border bg-card hover:border-brand hover:bg-muted/50",
                 )}
               >
-                {/* Popularity ribbon — top-right corner */}
+                {/* Popularity ribbon — top-right corner. `text-brand` on a
+                    10% brand wash lands just under AA; the muted pair is
+                    tuned for each other in both palettes. */}
                 {cat.popularity > 0 && (
-                  <span className="absolute top-1.5 right-1.5 text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded-full bg-brand/10 text-brand">
+                  <span className="absolute top-1.5 right-1.5 text-xs font-bold leading-none tabular-nums px-1.5 py-1 rounded-full bg-brand-muted text-brand-muted-foreground">
                     {cat.popularity}×
                   </span>
                 )}
@@ -364,17 +366,17 @@ export function RoadmapBrowser({
                 </div>
                 <span className={cn(
                   "text-xs font-medium text-center leading-tight",
-                  isSelected ? "text-brand" : "text-foreground",
+                  isSelected ? "text-brand-muted-foreground" : "text-foreground",
                 )}>
                   {cat.name}
                 </span>
                 {cat.nodeCount > 0 && (
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {cat.nodeCount} topik · {cat.totalHours}j
                   </span>
                 )}
                 {!cat.isSystem && cat.authorName && (
-                  <Badge variant="outline" className="text-[9px] h-4 px-1 leading-none truncate max-w-full">
+                  <Badge variant="outline" className="h-5 px-1.5 leading-none truncate max-w-full">
                     by {cat.authorName}
                   </Badge>
                 )}

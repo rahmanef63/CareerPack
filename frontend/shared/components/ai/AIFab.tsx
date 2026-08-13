@@ -42,7 +42,7 @@ export function AIFab({ onClick, active }: AIFabProps) {
       </button>
       <span
         className={cn(
-          "absolute -bottom-3 text-[10px] font-bold tracking-wide pointer-events-none",
+          "absolute -bottom-3 text-xs font-bold tracking-wide pointer-events-none",
           active ? "text-brand" : "text-muted-foreground"
         )}
       >

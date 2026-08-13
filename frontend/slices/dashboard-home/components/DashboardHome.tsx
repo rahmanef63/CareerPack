@@ -385,7 +385,7 @@ function AgendaSection() {
                 className="flex items-center gap-3 p-3 rounded-lg bg-muted/40"
               >
                 <div className="w-10 h-10 rounded-lg bg-background border flex flex-col items-center justify-center">
-                  <span className="text-[9px] uppercase text-muted-foreground font-medium">
+                  <span className="text-xs uppercase text-muted-foreground font-medium">
                     {formatMonthShort(it.date)}
                   </span>
                   <span className="text-sm font-bold leading-none">
@@ -398,7 +398,7 @@ function AgendaSection() {
                     <Clock className="w-3 h-3" /> {it.time} · {it.location}
                   </p>
                 </div>
-                <Badge variant="secondary" className="capitalize text-[10px]">
+                <Badge variant="secondary" className="capitalize text-xs">
                   {typeLabel(it.type)}
                 </Badge>
               </li>

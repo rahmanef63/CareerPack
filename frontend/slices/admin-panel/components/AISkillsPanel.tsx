@@ -131,7 +131,7 @@ export function AISkillsPanel() {
             </CardTitle>
             <CardDescription>
               Template system-prompt yang dipicu oleh slash command. Misal{" "}
-              <code className="text-[11px]">/cv</code> → mode CV writer. Edit
+              <code className="text-xs">/cv</code> → mode CV writer. Edit
               prompt untuk mengubah perilaku AI tanpa redeploy.
             </CardDescription>
           </div>
@@ -174,12 +174,12 @@ export function AISkillsPanel() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium">{s.label}</span>
                       {s.slashCommand && (
-                        <Badge variant="secondary" className="font-mono text-[10px]">
+                        <Badge variant="secondary" className="font-mono text-xs">
                           {s.slashCommand}
                         </Badge>
                       )}
                       {s.isSeed && (
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-xs">
                           default
                         </Badge>
                       )}

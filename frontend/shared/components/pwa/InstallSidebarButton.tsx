@@ -25,7 +25,7 @@ export function InstallSidebarButton() {
         <SidebarMenuButton
           onClick={() => install()}
           tooltip="Pasang Aplikasi"
-          className="border border-dashed border-brand/40 bg-brand-muted/30 text-brand hover:bg-brand-muted/50"
+          className="border border-dashed border-brand/40 bg-brand-muted/30 text-brand-muted-foreground hover:bg-brand-muted/50"
         >
           <Download className="h-4 w-4" />
           <span className="font-medium">Pasang Aplikasi</span>

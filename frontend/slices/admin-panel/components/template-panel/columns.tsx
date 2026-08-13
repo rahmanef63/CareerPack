@@ -31,7 +31,7 @@ export function buildTemplateColumns<T extends LoadedTemplate>(
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-medium text-sm truncate">{t.title}</span>
               {t.isSystem && (
-                <Badge variant="secondary" className="text-[9px] h-4 px-1 leading-none">sistem</Badge>
+                <Badge variant="secondary" className="text-xs h-5 px-1.5 leading-none">sistem</Badge>
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
@@ -45,7 +45,7 @@ export function buildTemplateColumns<T extends LoadedTemplate>(
       id: "domain",
       header: "Domain",
       accessor: (t) => t.domain,
-      cell: (t) => <Badge variant="outline" className="text-[10px] uppercase">{t.domain}</Badge>,
+      cell: (t) => <Badge variant="outline" className="text-xs uppercase">{t.domain}</Badge>,
       hideOnMobile: true,
       width: "w-[140px]",
     },

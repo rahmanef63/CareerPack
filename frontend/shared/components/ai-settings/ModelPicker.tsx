@@ -100,7 +100,7 @@ export function ModelPicker({ spec, value, onChange, inputId }: ModelPickerProps
                 title={c.hint}
                 aria-pressed={selected}
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] transition-colors",
+                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors",
                   selected
                     ? "border-brand bg-brand/10 text-brand"
                     : "border-border bg-muted/30 hover:bg-accent",
@@ -129,7 +129,7 @@ export function ModelPicker({ spec, value, onChange, inputId }: ModelPickerProps
         ))}
       </datalist>
 
-      <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           {live && loading ? (
             <>
@@ -165,7 +165,7 @@ export function ModelPicker({ spec, value, onChange, inputId }: ModelPickerProps
       </div>
 
       {matched && (
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           <strong>{matched.name}</strong> · prompt ${matched.promptUsd.toFixed(2)}/M ·
           completion ${matched.completionUsd.toFixed(2)}/M · konteks{" "}
           {matched.context.toLocaleString("id-ID")} token

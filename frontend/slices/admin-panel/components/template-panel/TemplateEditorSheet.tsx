@@ -83,7 +83,7 @@ export function TemplateEditorSheet({
                 <TabsTrigger value="info">Info</TabsTrigger>
                 <TabsTrigger value="nodes">
                   Node{draft.nodes.length > 0 && (
-                    <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1">
+                    <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5 leading-none">
                       {draft.nodes.length}
                     </Badge>
                   )}

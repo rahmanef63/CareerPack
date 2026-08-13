@@ -123,12 +123,12 @@ export function PortfolioCard({
         {item.techStack && item.techStack.length > 0 && (
           <div className="mt-auto flex flex-wrap gap-1">
             {item.techStack.slice(0, 3).map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-[10px]">
+              <Badge key={tech} variant="secondary" className="text-xs">
                 {tech}
               </Badge>
             ))}
             {item.techStack.length > 3 && (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="text-xs">
                 +{item.techStack.length - 3}
               </Badge>
             )}

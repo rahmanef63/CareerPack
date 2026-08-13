@@ -222,8 +222,8 @@ function StatTile({ label, value, expected }: StatTileProps) {
           variant="outline"
           className={
             isComplete
-              ? "mt-1 border-emerald-300/50 text-[10px] text-emerald-700 dark:text-emerald-400"
-              : "mt-1 border-amber-300/50 text-[10px] text-amber-700 dark:text-amber-400"
+              ? "mt-1 border-emerald-300/50 text-xs text-emerald-700 dark:text-emerald-400"
+              : "mt-1 border-amber-300/50 text-xs text-amber-700 dark:text-amber-400"
           }
         >
           {isComplete ? "Lengkap" : "Belum lengkap"}
@@ -285,10 +285,10 @@ function SeedCard({
           )}
         </Button>
         {note && (
-          <p className="text-[11px] text-muted-foreground">{note}</p>
+          <p className="text-xs text-muted-foreground">{note}</p>
         )}
         {result && (
-          <div className="rounded-md border border-emerald-300/50 bg-emerald-500/5 p-2 text-[11px] text-emerald-700 dark:text-emerald-400">
+          <div className="rounded-md border border-emerald-300/50 bg-emerald-500/5 p-2 text-xs text-emerald-700 dark:text-emerald-400">
             ✓ {result}
           </div>
         )}

@@ -117,8 +117,8 @@ export function CVPreviewDialog({
             </div>
           </div>
           <DialogDescription className="text-xs">
-            Tekan <kbd className="px-1 py-0.5 rounded bg-muted text-[11px]">Ctrl</kbd>+
-            <kbd className="px-1 py-0.5 rounded bg-muted text-[11px]">P</kbd> untuk print-to-PDF native browser.
+            Tekan <kbd className="px-1 py-0.5 rounded bg-muted text-xs">Ctrl</kbd>+
+            <kbd className="px-1 py-0.5 rounded bg-muted text-xs">P</kbd> untuk print-to-PDF native browser.
           </DialogDescription>
         </DialogHeader>
         {/* Layout (top→bottom): preview + overlay arrows + swipe, then
@@ -209,7 +209,7 @@ export function CVPreviewDialog({
                   <div className="w-full">
                     <TemplateThumb id={tmpl.id as CVTemplateId} />
                   </div>
-                  <p className="mt-1 text-[11px] font-medium truncate">{tmpl.name}</p>
+                  <p className="mt-1 text-xs font-medium truncate">{tmpl.name}</p>
                 </button>
               );
             })}

@@ -45,7 +45,7 @@ export function AuditLogPanel() {
       header: "Sebelum",
       accessor: (r) => r.previousRole,
       cell: (r) => (
-        <Badge variant="secondary" className="bg-muted text-[10px]">
+        <Badge variant="secondary" className="bg-muted text-xs">
           {ROLE_LABEL[r.previousRole]}
         </Badge>
       ),
@@ -57,7 +57,7 @@ export function AuditLogPanel() {
       header: "Sesudah",
       accessor: (r) => r.newRole,
       cell: (r) => (
-        <Badge variant="secondary" className="bg-brand/20 text-brand text-[10px]">
+        <Badge variant="secondary" className="bg-brand/20 text-brand text-xs">
           {ROLE_LABEL[r.newRole]}
         </Badge>
       ),

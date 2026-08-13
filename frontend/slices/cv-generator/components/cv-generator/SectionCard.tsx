@@ -61,7 +61,7 @@ export function SectionCard({ title, icon: Icon, children, isOpen, onToggle, onA
                 variant="ghost"
                 size="sm"
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
-                className="text-brand hover:text-brand hover:bg-brand-muted"
+                className="text-brand-muted-foreground hover:text-brand-muted-foreground hover:bg-brand-muted"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 {addLabel}

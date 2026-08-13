@@ -148,7 +148,7 @@ export function UserModelOverrideSection() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm">{label}</p>
                       <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                        <Badge variant="secondary" className="font-mono text-[10px]">
+                        <Badge variant="secondary" className="font-mono text-xs">
                           {o.model}
                         </Badge>
                         <CopyButton

@@ -52,12 +52,12 @@ const TYPE_META: Record<
   NotificationType | "default",
   { icon: typeof Bell; tint: string }
 > = {
-  deadline: { icon: Calendar, tint: "bg-warning/20 text-warning" },
+  deadline: { icon: Calendar, tint: "bg-warning/20 text-warning-text" },
   interview: { icon: MessageSquare, tint: "bg-accent text-brand" },
-  application: { icon: FileText, tint: "bg-info/20 text-info" },
+  application: { icon: FileText, tint: "bg-info/20 text-info-text" },
   system: { icon: Bell, tint: "bg-muted text-muted-foreground" },
-  tip: { icon: Lightbulb, tint: "bg-success/20 text-success" },
-  reminder: { icon: Calendar, tint: "bg-warning/20 text-warning" },
+  tip: { icon: Lightbulb, tint: "bg-success/20 text-success-text" },
+  reminder: { icon: Calendar, tint: "bg-warning/20 text-warning-text" },
   default: { icon: Bell, tint: "bg-muted text-muted-foreground" },
 };
 
@@ -143,7 +143,7 @@ function NotificationRow({ n, onRead, onDismiss }: NotificationRowProps) {
       </div>
       {!n.read && (
         <span
-          className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-foreground"
+          className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-brand px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-foreground"
         >
           <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-foreground" />
           Baru

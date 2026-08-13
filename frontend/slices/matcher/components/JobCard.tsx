@@ -26,7 +26,10 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
   return (
     <article
       className={cn(
-        "group relative flex h-full flex-col gap-3 rounded-xl border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md",
+        // `min-w-0` so a long title can never widen the card past its
+        // grid track — an `auto`-sized track would grow to max-content
+        // and take the whole page sideways with it.
+        "group relative flex h-full min-w-0 flex-col gap-3 rounded-xl border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md",
         isTopMatch
           ? "border-brand/40 shadow-[0_0_0_1px_oklch(var(--brand)/0.15)] hover:shadow-cta"
           : "border-border",
@@ -34,12 +37,12 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
       )}
     >
       {isTopMatch && (
-        <span className="absolute -top-2 left-4 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-brand-from to-brand-to px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-foreground shadow-cta">
+        <span className="absolute -top-2 left-4 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-brand-from to-brand-to px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-foreground shadow-cta">
           <Sparkles className="h-3 w-3" />
           Paling Cocok
         </span>
       )}
-      <header className="flex items-start gap-3">
+      <header className="flex min-w-0 items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-muted text-xl">
           {job.companyLogo ?? "🏢"}
         </div>
@@ -52,53 +55,57 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
           </p>
         </div>
         {score !== undefined && score > 0 && !isTopMatch && (
-          <Badge className="gap-1 bg-brand-muted text-brand">
+          <Badge className="shrink-0 gap-1 whitespace-nowrap bg-brand-muted text-brand-muted-foreground">
             <Sparkles className="h-3 w-3" />
             {score}% cocok
           </Badge>
         )}
         {isTopMatch && (
-          <Badge className="gap-1 bg-brand text-brand-foreground">
+          <Badge className="shrink-0 gap-1 bg-brand text-brand-foreground">
             {score}%
           </Badge>
         )}
       </header>
 
       {(categoryLabel || job.seniority) && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex min-w-0 flex-wrap gap-1.5">
           {categoryLabel && (
-            <Badge className={cn("gap-1 border-0 text-[10px]", categoryColor)}>
-              <Tag className="h-3 w-3" />
+            <Badge className={cn("max-w-full gap-1 truncate border-0", categoryColor)}>
+              <Tag className="h-3 w-3 shrink-0" />
               {categoryLabel}
             </Badge>
           )}
           {job.seniority && (
-            <Badge variant="outline" className="text-[10px] uppercase">
+            <Badge variant="outline" className="max-w-full truncate uppercase">
               {job.seniority}
             </Badge>
           )}
           {job.employmentType && job.employmentType !== "full-time" && (
-            <Badge variant="outline" className="text-[10px] uppercase">
+            <Badge variant="outline" className="max-w-full truncate uppercase">
               {job.employmentType}
             </Badge>
           )}
         </div>
       )}
 
-      <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          {job.location}
+      <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="inline-flex min-w-0 max-w-full items-center gap-1">
+          <MapPin className="h-3 w-3 shrink-0" />
+          <span className="truncate">{job.location}</span>
         </span>
-        <span className="inline-flex items-center gap-1">
-          <Briefcase className="h-3 w-3" />
-          {WORK_MODE_LABELS[
-            job.workMode as keyof typeof WORK_MODE_LABELS
-          ] ?? job.workMode}
+        <span className="inline-flex min-w-0 max-w-full items-center gap-1">
+          <Briefcase className="h-3 w-3 shrink-0" />
+          <span className="truncate">
+            {WORK_MODE_LABELS[
+              job.workMode as keyof typeof WORK_MODE_LABELS
+            ] ?? job.workMode}
+          </span>
         </span>
-        <span className="inline-flex items-center gap-1">
-          <Wallet className="h-3 w-3" />
-          {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
+        <span className="inline-flex min-w-0 max-w-full items-center gap-1">
+          <Wallet className="h-3 w-3 shrink-0" />
+          <span className="truncate">
+            {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
+          </span>
         </span>
       </div>
 
@@ -107,21 +114,21 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
       </p>
 
       {job.requiredSkills.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex min-w-0 flex-wrap gap-1">
           {job.requiredSkills.slice(0, 4).map((s) => (
-            <Badge key={s} variant="secondary" className="text-[10px]">
+            <Badge key={s} variant="secondary" className="max-w-full truncate">
               {s}
             </Badge>
           ))}
           {job.requiredSkills.length > 4 && (
-            <Badge variant="secondary" className="text-[10px]">
+            <Badge variant="secondary" className="shrink-0">
               +{job.requiredSkills.length - 4}
             </Badge>
           )}
         </div>
       )}
 
-      <footer className="mt-auto flex items-center justify-between gap-2 pt-1">
+      <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
         <span className="text-xs text-muted-foreground">{timeAgo(job.postedAt)}</span>
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={onView}>

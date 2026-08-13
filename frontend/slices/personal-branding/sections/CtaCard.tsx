@@ -114,7 +114,7 @@ export function CtaCard({ bind }: CtaCardProps) {
             maxLength={FIELD_LIMITS_PB.ctaLabelMax}
           />
           <p
-            className={`text-[10px] ${labelOver ? "text-destructive" : "text-muted-foreground"}`}
+            className={`text-xs ${labelOver ? "text-destructive" : "text-muted-foreground"}`}
           >
             {labelLen}/{FIELD_LIMITS_PB.ctaLabelMax} karakter
           </p>
@@ -135,11 +135,11 @@ export function CtaCard({ bind }: CtaCardProps) {
           type={type.value === "email" ? "email" : "url"}
           inputMode={type.value === "email" ? "email" : "url"}
         />
-        <p className="text-[10px] text-muted-foreground">{selected.hint}</p>
+        <p className="text-xs text-muted-foreground">{selected.hint}</p>
       </div>
       {label.value && url.value && (
         <div className="overflow-hidden rounded-md border border-border bg-muted/30 p-3">
-          <p className="mb-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+          <p className="mb-1.5 text-xs uppercase tracking-wide text-muted-foreground">
             Pratinjau
           </p>
           <button

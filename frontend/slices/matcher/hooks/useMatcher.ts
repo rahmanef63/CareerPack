@@ -8,7 +8,8 @@ import { api } from "../../../../convex/_generated/api";
  * only; "Explore" needs the full catalog. Splitting at the hook layer
  * keeps cache keys stable and lets each tab show its own loading
  * skeleton independently. Filtering (search, category, skills, sort)
- * happens client-side inside `JobBrowser`.
+ * happens client-side in `useJobFilters`, whose controls render in the
+ * desktop rail and whose results render in `JobResults`.
  */
 export function useMatcher() {
   const myJobs = useQuery(api.matcher.queries.listJobs, {

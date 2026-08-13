@@ -85,14 +85,14 @@ export function BatchHistoryPanel() {
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="text-[10px] uppercase">
+                  <Badge variant="outline" className="text-xs uppercase">
                     {b.scope}
                   </Badge>
                   <span className="text-xs text-muted-foreground">{dateStr}</span>
                   {b.undone && (
                     <Badge
                       variant="outline"
-                      className="border-destructive/40 text-[10px] text-destructive"
+                      className="border-destructive/40 text-xs text-destructive"
                     >
                       Sudah dibatalkan
                     </Badge>
@@ -100,14 +100,14 @@ export function BatchHistoryPanel() {
                 </div>
                 <p className="mt-1 text-sm font-medium">{label}</p>
                 {b.warnings.length > 0 && (
-                  <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
                     {b.warnings[0]}
                   </p>
                 )}
               </div>
               <div className="shrink-0">
                 {b.undone ? (
-                  <span className="text-[11px] text-muted-foreground">—</span>
+                  <span className="text-xs text-muted-foreground">—</span>
                 ) : (
                   <Button
                     type="button"

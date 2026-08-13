@@ -47,7 +47,7 @@ export function LinksEditor({ links, onChange }: Props) {
               key={`${l.url}-${idx}`}
               className="flex items-center gap-2 rounded-md border border-border p-2"
             >
-              <Badge variant="secondary" className="text-[10px] uppercase">
+              <Badge variant="secondary" className="text-xs uppercase">
                 {LINK_KIND_LABELS[l.kind as PortfolioLinkKind] ?? l.kind}
               </Badge>
               <div className="min-w-0 flex-1">

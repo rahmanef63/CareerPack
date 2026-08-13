@@ -28,7 +28,7 @@ export function ModeWarning() {
             </p>
           </div>
         </div>
-        <ul className="grid gap-1.5 text-[11px] sm:grid-cols-2">
+        <ul className="grid gap-1.5 text-xs sm:grid-cols-2">
           <li className="flex items-start gap-1.5 text-success-text">
             <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0" />
             <span>Drag-drop block + edit inline</span>

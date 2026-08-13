@@ -117,7 +117,7 @@ function NavButton({ item, active, onClick }: NavButtonProps) {
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative flex flex-col items-center justify-center gap-1 h-full rounded-xl mx-1 px-1",
-        "text-[11px] font-medium transition-colors tap-press",
+        "text-xs font-medium transition-colors tap-press",
         active ? "text-brand" : "text-muted-foreground"
       )}
       {...press}

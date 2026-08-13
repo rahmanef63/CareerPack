@@ -89,7 +89,7 @@ function ModeButton({
       onClick={onClick}
       title={hint}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition-colors",
+        "inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors",
         active
           ? "bg-brand text-brand-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground",

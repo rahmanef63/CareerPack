@@ -55,7 +55,7 @@ export function MobileUserMenu() {
         >
           <Avatar className="h-8 w-8">
             <AvatarImage src={user?.avatar} alt={name} />
-            <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground text-[11px] font-bold">
+            <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground text-xs font-bold">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -66,14 +66,14 @@ export function MobileUserMenu() {
           <div className="flex items-center gap-2 px-2 py-2">
             <Avatar className="h-9 w-9">
               <AvatarImage src={user?.avatar} alt={name} />
-              <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground text-[11px] font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-brand-from to-brand-to text-brand-foreground text-xs font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{name}</p>
               {email && (
-                <p className="truncate text-[11px] text-muted-foreground">
+                <p className="truncate text-xs text-muted-foreground">
                   {email}
                 </p>
               )}

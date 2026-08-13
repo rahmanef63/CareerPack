@@ -83,7 +83,7 @@ export function ShareCard({ slugTrimmed, displayName, enabled }: ShareCardProps)
           <Share2 className="h-4 w-4 text-brand" />
           Bagikan halaman publik
           {!enabled && (
-            <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-medium text-warning-text">
+            <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning-text">
               Draft
             </span>
           )}
@@ -168,7 +168,7 @@ export function ShareCard({ slugTrimmed, displayName, enabled }: ShareCardProps)
                 </a>
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Tip: simpan QR di slide presentasi, di belakang kartu nama,
               atau di bio Instagram untuk traffic offline → online.
             </p>

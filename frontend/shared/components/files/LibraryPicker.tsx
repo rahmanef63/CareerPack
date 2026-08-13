@@ -131,13 +131,13 @@ export function LibraryPicker({ open, onOpenChange, accept = "any", onPick }: Pr
                           </div>
                         )}
                         {f.usedIn.length > 0 && (
-                          <Badge className="absolute left-1 top-1 h-4 px-1 text-[9px]">
+                          <Badge className="absolute left-1 top-1 h-5 px-1.5 text-xs leading-none">
                             {f.usedIn.length}× pakai
                           </Badge>
                         )}
                       </div>
                       <div className="p-1.5">
-                        <p className="truncate text-[10px] font-medium">{f.fileName}</p>
+                        <p className="truncate text-xs font-medium">{f.fileName}</p>
                       </div>
                     </button>
                   </li>

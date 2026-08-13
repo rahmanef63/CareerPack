@@ -54,7 +54,7 @@ export function ThemePicker({ value, onChange }: Props) {
               {t.preview}
             </div>
             {t.premium && (
-              <span className="absolute right-2 top-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-50 shadow-sm">
+              <span className="absolute right-2 top-2 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-amber-50 shadow-sm">
                 Premium
               </span>
             )}
@@ -126,7 +126,7 @@ function EditorialCreamMini() {
       }}
     >
       <div className="flex items-center justify-between">
-        <span className="font-display text-[10px] font-semibold leading-none text-stone-900">
+        <span className="font-display text-xs font-semibold leading-none text-stone-900">
           YN<span className="text-amber-700">.</span>
         </span>
         <span className="h-1 w-3 rounded bg-stone-400/40" />
@@ -164,7 +164,7 @@ function PremiumDarkMini() {
       }}
     >
       <div className="flex items-center justify-between">
-        <span className="font-display text-[10px] font-semibold leading-none text-amber-100">
+        <span className="font-display text-xs font-semibold leading-none text-amber-100">
           YN<span className="text-amber-300">.</span>
         </span>
         <span className="h-1 w-3 rounded bg-amber-100/40" />

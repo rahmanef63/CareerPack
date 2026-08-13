@@ -35,13 +35,13 @@ const DEFAULT_IDS: ReadonlyArray<NavId> = ["cv", "checklist", "interview", "road
  */
 const HUE_BY_ID: Partial<Record<NavId, string>> = {
   cv: "text-brand bg-brand-muted",
-  checklist: "text-success bg-success/15",
-  interview: "text-warning bg-warning/15",
-  roadmap: "text-info bg-info/15",
+  checklist: "text-success-text bg-success/15",
+  interview: "text-warning-text bg-warning/15",
+  roadmap: "text-info-text bg-info/15",
   calendar: "text-brand bg-brand-muted",
-  applications: "text-info bg-info/15",
-  portfolio: "text-warning bg-warning/15",
-  networking: "text-success bg-success/15",
+  applications: "text-info-text bg-info/15",
+  portfolio: "text-warning-text bg-warning/15",
+  networking: "text-success-text bg-success/15",
   matcher: "text-brand bg-brand-muted",
 };
 

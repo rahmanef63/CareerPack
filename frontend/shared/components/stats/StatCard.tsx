@@ -30,10 +30,10 @@ import { cn } from "@/shared/lib/utils";
 export type StatCardTone = "sky" | "violet" | "success" | "warning" | "brand" | "neutral";
 
 const TONE_CLS: Record<StatCardTone, string> = {
-  sky: "text-info bg-info/15 dark:bg-info/15 dark:text-info/80",
+  sky: "text-info-text bg-info/15 dark:bg-info/15 dark:text-info-text/80",
   violet: "text-brand bg-brand-muted dark:bg-brand-muted dark:text-brand/80",
-  success: "text-success bg-success/15 dark:bg-success/15 dark:text-success/80",
-  warning: "text-warning bg-warning/20 dark:bg-warning/20 dark:text-warning/80",
+  success: "text-success-text bg-success/15 dark:bg-success/15 dark:text-success-text/80",
+  warning: "text-warning-text bg-warning/20 dark:bg-warning/20 dark:text-warning-text/80",
   brand: "text-brand bg-brand-muted dark:bg-brand-muted dark:text-brand/80",
   neutral: "text-muted-foreground bg-muted",
 };

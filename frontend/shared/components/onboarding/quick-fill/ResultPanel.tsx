@@ -113,7 +113,7 @@ export function ResultPanel({ result, onDone, onRunAgain }: Props) {
             <Badge
               variant="outline"
               className={cn(
-                "text-[10px]",
+                "text-xs",
                 r.count === 0 && "border-destructive/40 text-destructive",
               )}
             >
@@ -122,13 +122,13 @@ export function ResultPanel({ result, onDone, onRunAgain }: Props) {
             {r.skipped > 0 && (
               <Badge
                 variant="outline"
-                className="border-amber-500/40 text-[10px] text-amber-600"
+                className="border-amber-500/40 text-xs text-amber-600"
               >
                 {r.skipped} dilewati
               </Badge>
             )}
             {r.count === 0 && (
-              <span className="text-[11px] font-medium text-destructive">
+              <span className="text-xs font-medium text-destructive">
                 tidak masuk
               </span>
             )}
