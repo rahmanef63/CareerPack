@@ -60,7 +60,7 @@ export function NavSecondary({
                         overflow-hidden edge unless these two classes are here. */}
                     <span className="truncate">{item.title}</span>
                     {item.badge && (
-                      <span className="ml-auto shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary">
+                      <span className="ml-auto shrink-0 rounded-md bg-brand-muted px-1.5 py-0.5 text-xs font-semibold text-brand-muted-foreground">
                         {item.badge}
                       </span>
                     )}

@@ -178,7 +178,7 @@ function SidebarMetric({
   );
 }
 
-function AutosaveBadge({
+export function AutosaveBadge({
   status,
   lastSavedAt,
   dirty,
@@ -189,7 +189,7 @@ function AutosaveBadge({
 }) {
   if (status === "saving") {
     return (
-      <Badge variant="outline" className="gap-1 text-[10px] font-normal">
+      <Badge variant="outline" className="gap-1 text-xs font-normal">
         <Loader2 className="h-3 w-3 animate-spin" />
         Menyimpan…
       </Badge>
@@ -197,7 +197,7 @@ function AutosaveBadge({
   }
   if (status === "error") {
     return (
-      <Badge variant="destructive" className="gap-1 text-[10px] font-normal">
+      <Badge variant="destructive" className="gap-1 text-xs font-normal">
         <AlertCircle className="h-3 w-3" />
         Gagal autosave
       </Badge>
@@ -207,7 +207,7 @@ function AutosaveBadge({
     return (
       <Badge
         variant="outline"
-        className="gap-1 text-[10px] font-normal text-warning-text border-warning/60"
+        className="gap-1 text-xs font-normal text-warning-text border-warning/60"
       >
         <CloudUpload className="h-3 w-3" />
         Belum disimpan
@@ -216,7 +216,7 @@ function AutosaveBadge({
   }
   if (status === "saved" || lastSavedAt) {
     return (
-      <Badge variant="outline" className="gap-1 text-[10px] font-normal text-success-text border-success/60">
+      <Badge variant="outline" className="gap-1 text-xs font-normal text-success-text border-success/60">
         <Check className="h-3 w-3" />
         {lastSavedAt ? `Tersimpan ${timeAgo(lastSavedAt)}` : "Tersimpan"}
       </Badge>

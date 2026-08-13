@@ -2,9 +2,16 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQuery } from 'convex/react';
-import { ChevronsDownUp, ChevronsUpDown, Download, Eye, Save } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, Download, Eye, FileUp, MoreHorizontal, Save, Sparkles } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { CVImportButton, QuickFillButton } from '@/shared/components/onboarding';
+import { CVImportDialog, QuickFillDialog } from '@/shared/components/onboarding';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/components/ui/dropdown-menu';
 import { api } from '../../../../convex/_generated/api';
 import type { CVData, CVTemplateId, Experience, Skill } from '../types';
 import { PageContainer } from '@/shared/components/layout/PageContainer';
@@ -26,7 +33,7 @@ import { EducationSection } from './cv-generator/sections/EducationSection';
 import { SkillsSection } from './cv-generator/sections/SkillsSection';
 import { CertificationsSection } from './cv-generator/sections/CertificationsSection';
 import { ProjectsSection } from './cv-generator/sections/ProjectsSection';
-import { PreviewSidebar } from './cv-generator/PreviewSidebar';
+import { PreviewSidebar, AutosaveBadge } from './cv-generator/PreviewSidebar';
 import { CVPreviewDialog } from './cv-generator/CVPreviewDialog';
 
 export function CVGenerator() {
@@ -37,6 +44,11 @@ export function CVGenerator() {
   const [isExporting, setIsExporting] = useState(false);
   const [format, setFormat] = useState<CVFormat>('national');
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Owned here rather than inside CVImportButton/QuickFillButton, because the
+  // triggers are now menu items — those components render their own trigger
+  // button, which is exactly what this header no longer has room for.
+  const [importOpen, setImportOpen] = useState(false);
+  const [quickFillOpen, setQuickFillOpen] = useState(false);
   // Set when an export is requested while the preview is still closed — the
   // export runs from an effect once the dialog node actually mounts (below),
   // instead of racing a fixed setTimeout that silently no-ops on slow devices.
@@ -342,44 +354,113 @@ export function CVGenerator() {
 
   return (
     <PageContainer size="lg">
-      {/* Header — single dense row on desktop. Title left, controls
-          right: collapse-all toggle, format pills, QuickFill, then the
-          3 primary actions (Lihat / Simpan / Unduh) inline so the
-          sidebar can drop its redundant action stack. Mobile wraps. */}
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pembuat CV</h1>
-          <p className="text-sm text-muted-foreground mt-0.5 truncate">
-            {format === 'national'
-              ? 'Format Indonesia · dengan foto, data lengkap'
-              : 'Format Internasional · ATS-friendly, no photo, 1 halaman'}
-          </p>
+      {/*
+        Header, in two rows with distinct jobs — it used to be one flex-wrap
+        row holding eight controls of near-identical weight, which wrapped
+        raggedly at 1440px (Simpan and Unduh orphaned onto a second line) and
+        collapsed to four unlabelled icon buttons at 390px.
+
+        Row 1 is identity + the actions you take ON the document: look at it,
+        download it. Row 2 is settings that describe the document itself.
+        Import and QuickFill moved into an overflow menu: they are things you
+        do once at the start, not every session, and they were the two widest
+        buttons in the row.
+
+        `Simpan` is gone as a top-level control. Autosave has been running for
+        this form the whole time — the badge that reports it just lived in the
+        sidebar, which mobile does not show, so the button looked like the only
+        thing keeping your work. The badge now sits next to the title where the
+        status belongs, and an explicit "Simpan sekarang" stays in the menu for
+        anyone who wants the reassurance.
+      */}
+      <div className="mb-5 space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Pembuat CV</h1>
+              <AutosaveBadge
+                status={autosave.status}
+                lastSavedAt={autosave.lastSavedAt}
+                dirty={autosave.dirty}
+              />
+            </div>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {format === 'national'
+                ? 'Format Indonesia · dengan foto, data lengkap'
+                : 'Format Internasional · ATS-friendly, tanpa foto, 1 halaman'}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.currentTarget.blur();
+                setPreviewOpen(true);
+              }}
+              className="h-9 gap-1.5"
+            >
+              <Eye className="h-4 w-4" aria-hidden="true" />
+              Lihat
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleExportClick}
+              disabled={isExporting}
+              className="h-9 gap-1.5 bg-brand text-brand-foreground hover:bg-brand/90"
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              {isExporting ? 'Mengekspor…' : 'Unduh PDF'}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                  aria-label="Tindakan lainnya"
+                >
+                  <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onSelect={() => setImportOpen(true)}>
+                  <FileUp className="h-4 w-4" aria-hidden="true" />
+                  Impor dari CV
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setQuickFillOpen(true)}>
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Isi Cepat dengan AI
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleToggleAll}>
+                  {expandAll ? (
+                    <ChevronsDownUp className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <ChevronsUpDown className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  {expandAll ? 'Tutup semua bagian' : 'Buka semua bagian'}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleSave} disabled={isSaving}>
+                  <Save className="h-4 w-4" aria-hidden="true" />
+                  {isSaving ? 'Menyimpan…' : 'Simpan sekarang'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleToggleAll}
-            className="h-8 gap-1.5 px-2"
-            aria-pressed={expandAll}
-          >
-            {expandAll ? (
-              <ChevronsDownUp className="w-4 h-4" />
-            ) : (
-              <ChevronsUpDown className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline">
-              {expandAll ? 'Tutup' : 'Buka'} semua
-            </span>
-          </Button>
-          <CVImportButton variant="outline" size="sm" cvId={activeCVId} />
-          <QuickFillButton variant="outline" size="sm" />
-          {/* h-8 to match the size="sm" buttons flanking it — the pill's own
-              p-1 + py-1.5 measures 40px, so it stood 8px taller than every
-              other control in this row. */}
+
+        {/* Document setting, not an action — labelled so the two pills read as
+            "which format is this CV" rather than as two more buttons. */}
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+          <span className="text-sm text-muted-foreground">Format CV</span>
           <MagneticTabs<CVFormat>
-            className="h-8"
+            className="h-9"
             value={format}
             onChange={handlers.setFormatWithDefaults}
             tabs={[
@@ -387,50 +468,15 @@ export function CVGenerator() {
               { id: 'international', label: 'Internasional' },
             ]}
           />
-          <span className="mx-0.5 hidden h-6 w-px bg-border sm:inline-block" aria-hidden />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.currentTarget.blur();
-              setPreviewOpen(true);
-            }}
-            className="h-8 gap-1.5 px-2"
-            aria-label="Buka tampilan CV"
-          >
-            <Eye className="w-4 h-4" />
-            <span className="hidden sm:inline">Lihat CV</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="h-8 gap-1.5 px-2"
-            aria-label="Simpan CV"
-          >
-            <Save className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {isSaving ? 'Menyimpan…' : 'Simpan'}
-            </span>
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleExportClick}
-            disabled={isExporting}
-            className="h-8 gap-1.5 bg-brand px-2 text-brand-foreground hover:bg-brand"
-            aria-label="Unduh PDF"
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {isExporting ? 'Mengekspor…' : 'Unduh'}
-            </span>
-          </Button>
         </div>
       </div>
+
+      <CVImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        cvId={activeCVId ? String(activeCVId) : null}
+      />
+      <QuickFillDialog open={quickFillOpen} onOpenChange={setQuickFillOpen} />
 
       {/* min-w-0 on children: canonical fix for grid-track overflow —
           lets cards shrink below their intrinsic content width. */}
