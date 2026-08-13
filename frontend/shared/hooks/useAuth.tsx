@@ -91,7 +91,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await seedForCurrentUser({});
         return;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "";
+        // Read `data` as well as `message`. `authError` throws a ConvexError
+        // whose text lives in `data.message`; `err.message` is only the
+        // envelope, which in production reads "[CONVEX M(seed:…)] [Request
+        // ID: …] Server Error" with the Indonesian string nowhere in it. So
+        // this regex never matched, the retry threw on attempt 1, and the
+        // whole 1.2s budget above was dead code — every guest login logged a
+        // Server Error and skipped seeding, silently, because the caller
+        // swallows it.
+        const data = (err as { data?: { message?: string } } | null)?.data;
+        const msg = `${data?.message ?? ""} ${err instanceof Error ? err.message : ""}`;
         if (!/Tidak terautentikasi/i.test(msg) || i === ATTEMPTS - 1) throw err;
         await new Promise((r) => setTimeout(r, DELAY_MS));
       }

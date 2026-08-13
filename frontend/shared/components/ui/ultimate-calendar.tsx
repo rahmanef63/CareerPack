@@ -39,7 +39,14 @@ export interface MarkedDate {
   label?: string;
 }
 
-const wrapperVariants = cva("relative inline-block", {
+// `block w-fit mx-auto`, not `inline-block`. An inline-block box shrinks to
+// its content AND follows inline flow, so it sat flush left inside whatever
+// contained it — on /dashboard/calendar at 390px the picker measured 27px of
+// gap on the left against 68px on the right, visibly off-centre. Auto margins
+// do nothing on an inline-block, which is why nothing upstream could fix it;
+// `block` + `w-fit` keeps the shrink-to-content sizing and lets `mx-auto`
+// actually centre it.
+const wrapperVariants = cva("relative block w-fit mx-auto", {
   variants: {
     variant: {
       default: "bg-background",
