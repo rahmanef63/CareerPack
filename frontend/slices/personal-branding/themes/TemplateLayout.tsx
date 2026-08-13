@@ -25,29 +25,11 @@ interface Props {
   displayName: string;
   branding?: BrandingPayload;
   enableFloatingNav?: boolean;
-  /**
-   * A server-rendered, semantic version of the same profile, shown until the
-   * template HTML arrives — and left in place permanently if it never does.
-   *
-   * This is what makes the public profile page indexable. The template renders
-   * in a `srcDoc` iframe sandboxed WITHOUT `allow-same-origin` (see the message
-   * handler above), which is a deliberate trust boundary and must stay one: the
-   * template is 80 KB of third-party-shaped HTML+CSS+JS that has no business in
-   * this origin. But an opaque-origin iframe is not indexable content, and it
-   * is fetched client-side on top of that — so careerpack.org/<slug> was
-   * shipping a document with zero `<h1>` and 64 characters of text, while
-   * `sitemap.ts` listed it and `page.tsx` attached Person JSON-LD to it.
-   *
-   * Passing the real profile in here is not cloaking: it is the same
-   * information the template shows, it is what a visitor actually sees until
-   * the template loads, and it is what everyone sees if the fetch fails.
-   */
-  fallback?: React.ReactNode;
 }
 
 export function TemplateLayout({
   templateKey, templateUrl, displayName, branding,
-  enableFloatingNav = false, fallback,
+  enableFloatingNav = false,
 }: Props) {
   const url = templateUrl;
   const [html, setHtml] = useState<string | null>(
@@ -178,13 +160,8 @@ export function TemplateLayout({
 
   return (
     <div className="relative w-full" style={{ minHeight: "calc(100vh - 64px)" }}>
-      {/* The skeleton is still right for editor previews, which pass no
-          fallback. The public page passes one, so a visitor sees the actual
-          profile immediately instead of a shimmer — and keeps seeing it if the
-          template never loads, rather than an error card where their page
-          should be. */}
-      {!html && (fallback ?? (!error && <TemplateSkeleton />))}
-      {error && !fallback && (
+      {!html && !error && <TemplateSkeleton />}
+      {error && (
         <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
           <div className="max-w-md space-y-2 rounded-xl border border-destructive/40 bg-destructive/5 p-6 text-sm">
             <p className="font-semibold text-destructive">Template gagal dimuat</p>

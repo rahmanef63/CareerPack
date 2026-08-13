@@ -25,7 +25,6 @@ export function PersonalBrandingPage({
   brand = true,
   showBranding = true,
   enableFloatingNav = false,
-  fallback,
 }: {
   profile: ProfileShape;
   brand?: boolean;
@@ -38,10 +37,6 @@ export function PersonalBrandingPage({
    *  `.floating-nav`. Editor previews leave this off — the public
    *  page route turns it on. */
   enableFloatingNav?: boolean;
-  /** Server-rendered semantic profile, shown until the template iframe is
-   *  ready. The public route supplies it so the page has real indexable
-   *  content; editor previews leave it off. See TemplateLayout. */
-  fallback?: React.ReactNode;
 }) {
   const accentVar = profile.accent
     ? ({ "--branding-accent": profile.accent } as React.CSSProperties)
@@ -61,7 +56,6 @@ export function PersonalBrandingPage({
         displayName={profile.displayName}
         branding={showBranding ? profile.branding : undefined}
         enableFloatingNav={enableFloatingNav}
-        fallback={fallback}
       />
       {brand && <BrandFooter slug={profile.slug} displayName={profile.displayName} />}
     </div>
