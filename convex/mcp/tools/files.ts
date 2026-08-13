@@ -1,6 +1,11 @@
 import { internal } from "../../_generated/api";
 import type { Id } from "../../_generated/dataModel";
 import type { ToolDef } from "../types";
+import {
+  mintFileToken,
+  FILE_URL_TTL_SECONDS,
+} from "../../_shared/signedFileUrl";
+import { requireEnv } from "../../_shared/env";
 
 /**
  * MCP tools for the `files` domain — the Content Library, where uploaded
@@ -11,12 +16,19 @@ import type { ToolDef } from "../types";
  * `internal.mcp.data.files.*` function re-checks ownership — on this table
  * that is `tenantId === userId.toString()`, see convex/files/schema.ts.
  *
- * No tool ever returns a storageId or a download URL. Either one is enough
- * to fetch the blob from anywhere, and everything a tool returns is copied
- * into a third party's transcript; files are addressed by their row id
- * instead, which is useless without the ownership check. Uploading is absent
- * for a duller reason: it needs a binary PUT to a one-shot URL, which a
- * JSON-RPC tool call cannot do.
+ * No tool returns a raw storageId — it is enough to fetch the blob from
+ * anywhere, forever, and everything a tool returns is copied into a third
+ * party's transcript. Files are addressed by their row id instead, which is
+ * useless without the ownership check.
+ *
+ * `files_read_url` is the one deliberate exception, added on the owner's
+ * instruction so an AI host can actually see an image. It does NOT hand out a
+ * storage URL: it mints a link that carries its own one-hour expiry, HMAC-bound
+ * to the file id and the owner (convex/_shared/signedFileUrl.ts), redeemed
+ * through a route that re-checks ownership at fetch time. A leaked transcript
+ * therefore goes stale on its own, and the link cannot be edited to point at a
+ * different file. Uploading is a two-step dance for the duller reason that a
+ * JSON-RPC call cannot carry bytes.
  */
 
 function requireArg(args: Record<string, unknown>, key: string): string {
@@ -125,5 +137,100 @@ export const filesTools: ToolDef[] = [
         userId,
         fileId: requireArg(args, "file_id") as Id<"files">,
       }),
+  },
+
+  {
+    name: "files_upload_url",
+    description:
+      "Step 1 of 2 for putting a NEW file in the Content Library. Returns a one-shot upload_url; PUT the raw bytes to it with the file's Content-Type, read the storage_id out of the JSON response, then call files_register with that storage_id to make it a library entry. Nothing is saved until you call files_register — an upload_url you never use leaves no trace. Images MUST be image/webp and at most 10 MB; documents MUST be application/pdf and at most 50 MB. Those are the same limits the app enforces, so converting a PNG or JPEG to WebP first is on you.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: {
+      title: "Get upload URL",
+      readOnlyHint: false,
+      destructiveHint: false,
+      // A second call mints a second URL — harmless, but not the same answer.
+      idempotentHint: false,
+      openWorldHint: false,
+    },
+    handler: async (ctx, userId) =>
+      await ctx.runMutation(internal.mcp.data.files.uploadUrl, { userId }),
+  },
+
+  {
+    name: "files_register",
+    description:
+      "Step 2 of 2: turn bytes you already PUT to a files_upload_url into a Content Library entry the user can see and reuse. storage_id is the value the upload response returned. file_name is what the user will see in their library — give it a real name, not 'upload.webp'. file_type must match what you uploaded (image/webp or application/pdf) and file_size is the byte count. Refuses if the blob was never uploaded, so call it after the PUT succeeds, not before.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        storage_id: { type: "string", description: "From the upload response." },
+        file_name: { type: "string", description: "Display name. Max 200 characters." },
+        file_type: {
+          type: "string",
+          description: "MIME type: image/webp or application/pdf.",
+        },
+        file_size: { type: "number", description: "Size in bytes." },
+      },
+      required: ["storage_id", "file_name", "file_type", "file_size"],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: "Register uploaded file",
+      readOnlyHint: false,
+      destructiveHint: false,
+      // Re-registering the same storage_id returns the existing row.
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    handler: async (ctx, userId, args) =>
+      await ctx.runMutation(internal.mcp.data.files.registerFile, {
+        userId,
+        storageId: requireArg(args, "storage_id"),
+        fileName: requireArg(args, "file_name"),
+        fileType: requireArg(args, "file_type"),
+        fileSize: Number(args.file_size),
+      }),
+  },
+
+  {
+    name: "files_read_url",
+    description:
+      "Get a temporary link to the actual contents of one library file, so you can look at an image or hand the user a preview. The link EXPIRES ONE HOUR after it is issued and only works for this user's own files — treat it as short-lived, do not store it, and mint a fresh one rather than reusing an old one. Ask for it only when you genuinely need to see the file; the name, type and note from files_list answer most questions on their own.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        file_id: { type: "string", description: "Id from files_list." },
+      },
+      required: ["file_id"],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: "Get temporary file link",
+      readOnlyHint: true,
+      destructiveHint: false,
+      // A fresh token each call, so the answer differs every time.
+      idempotentHint: false,
+      openWorldHint: false,
+    },
+    handler: async (ctx, userId, args) => {
+      const meta = await ctx.runQuery(internal.mcp.data.files.readToken, {
+        userId,
+        fileId: requireArg(args, "file_id") as Id<"files">,
+      });
+      const { token, expiresAt } = await mintFileToken({
+        fileId: meta.fileId,
+        userId: meta.userId,
+      });
+      // siteUrl, not the .convex.cloud origin: the redeem route lives on the
+      // HTTP router, which is served from the .convex.site host.
+      const base = requireEnv("CONVEX_SITE_URL").replace(/\/+$/, "");
+      return {
+        url: `${base}/files/read?t=${encodeURIComponent(token)}`,
+        file_name: meta.file_name,
+        file_type: meta.file_type,
+        expires_at: new Date(expiresAt).toISOString(),
+        expires_in_seconds: FILE_URL_TTL_SECONDS,
+      };
+    },
   },
 ];

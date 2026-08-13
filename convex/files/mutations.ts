@@ -1,13 +1,8 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { assertAllowedFile } from "./allowlist";
 import { requireUser } from "../_shared/auth";
 import type { Id } from "../_generated/dataModel";
-
-const ALLOWED_IMAGE_TYPES = new Set(["image/webp"]);
-const ALLOWED_DOC_TYPES = new Set(["application/pdf"]);
-
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const MAX_DOC_BYTES = 50 * 1024 * 1024;
 
 const MAX_FILENAME_LEN = 200;
 const MAX_MIME_LEN = 100;
@@ -19,22 +14,6 @@ function trimLen(field: string, value: string, max: number): string {
     throw new Error(`${field} 1-${max} karakter`);
   }
   return trimmed;
-}
-
-function assertAllowedFile(fileType: string, fileSize: number) {
-  if (ALLOWED_IMAGE_TYPES.has(fileType)) {
-    if (fileSize > MAX_IMAGE_BYTES) {
-      throw new Error("Gambar terlalu besar (maks 10 MB)");
-    }
-    return;
-  }
-  if (ALLOWED_DOC_TYPES.has(fileType)) {
-    if (fileSize > MAX_DOC_BYTES) {
-      throw new Error("Dokumen terlalu besar (maks 50 MB)");
-    }
-    return;
-  }
-  throw new Error("Tipe file tidak didukung");
 }
 
 export const generateUploadUrl = mutation({

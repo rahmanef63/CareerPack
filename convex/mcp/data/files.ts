@@ -5,25 +5,8 @@ import type { Id } from "../../_generated/dataModel";
 import { enforceRateLimit } from "../../_shared/rateLimit";
 import { assertShortText } from "../../_shared/validate";
 import { MCP_WRITE_LIMIT, MCP_WRITE_DAILY_LIMIT } from "./limits";
-
-/**
- * Data layer for convex/mcp/tools/files.ts. Internal only, `userId` is an
- * argument and is re-checked — see convex/mcp/data/cv.ts.
- *
- * Two things are deliberately absent from every payload here:
- *   - `storageId`. It is the only thing needed to mint a download URL for a
- *     blob, so it must not land in a third party's transcript. Tools address
- *     files by their `files` row id instead, which is useless outside an
- *     ownership check.
- *   - the signed URL itself, for the same reason and more so.
- * Uploads are absent too: they need a binary PUT to a one-shot URL, which is
- * not something a JSON-RPC tool call can do.
- *
- * Ownership on this table is `tenantId === userId.toString()`, NOT a `userId`
- * field — see the long note on `tenantId` in convex/files/schema.ts. The
- * comparison is against the string form; comparing the Id directly silently
- * never matches.
- */
+// Shared with the app's own upload path so the two cannot drift.
+import { assertAllowedFile } from "../../files/allowlist";
 
 /**
  * Everything that pins a storageId and would break if the blob vanished:
@@ -192,5 +175,114 @@ export const deleteFile = internalMutation({
       // deletion that did happen.
     }
     return { deleted: true, file_name: file.fileName };
+  },
+});
+
+/**
+ * One-shot PUT target for an upload. Convex expires these on its own and each
+ * accepts a single request, so there is nothing to bound here beyond the write
+ * limits — the storageId it returns is useless without `registerFile` below,
+ * which is where ownership is actually written.
+ */
+export const uploadUrl = internalMutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, args.userId, MCP_WRITE_LIMIT);
+    await enforceRateLimit(ctx, args.userId, MCP_WRITE_DAILY_LIMIT);
+    return {
+      upload_url: await ctx.storage.generateUploadUrl(),
+      expires_in_seconds: 60 * 60,
+    };
+  },
+});
+
+/**
+ * Record an uploaded blob as a library file. Mirrors `api.files.mutations.saveFile`
+ * — same type/size allowlist, same tenant dedup — rather than calling it,
+ * because that one reads the caller from the session and MCP has none.
+ */
+export const registerFile = internalMutation({
+  args: {
+    userId: v.id("users"),
+    storageId: v.string(),
+    fileName: v.string(),
+    fileType: v.string(),
+    fileSize: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await enforceRateLimit(ctx, args.userId, MCP_WRITE_LIMIT);
+    await enforceRateLimit(ctx, args.userId, MCP_WRITE_DAILY_LIMIT);
+
+    const fileName = assertShortText(args.fileName, 200, "Nama file");
+    const fileType = assertShortText(args.fileType, 100, "Tipe file");
+    if (!Number.isFinite(args.fileSize) || args.fileSize <= 0) {
+      throw new Error("Ukuran file tidak valid");
+    }
+    assertAllowedFile(fileType, args.fileSize);
+
+    // The blob must actually exist. Without this a caller could mint rows for
+    // storage ids it guessed, and the listing would show files that 404.
+    const meta = await ctx.db.system.get(args.storageId as Id<"_storage">);
+    if (!meta) throw new Error("Storage ID tidak ditemukan — unggah dulu ke upload_url.");
+
+    const tenantId = args.userId.toString();
+    const existing = await ctx.db
+      .query("files")
+      .withIndex("by_storage", (q) => q.eq("storageId", args.storageId))
+      .first();
+    // Never hand back another tenant's row for a storageId they also hold.
+    if (existing && existing.tenantId === tenantId) {
+      return { file_id: existing._id, file_name: existing.fileName, created: false };
+    }
+    if (existing) throw new Error("Storage ID tidak ditemukan — unggah dulu ke upload_url.");
+
+    const fileId = await ctx.db.insert("files", {
+      storageId: args.storageId,
+      fileName,
+      fileType,
+      fileSize: args.fileSize,
+      uploadedBy: args.userId,
+      tenantId,
+      createdAt: Date.now(),
+    });
+    return { file_id: fileId, file_name: fileName, created: true };
+  },
+});
+
+/**
+ * Ownership check + a token. The URL is assembled by the tool, which knows the
+ * deployment origin; this stays a pure query so it can be called from either.
+ */
+export const readToken = internalQuery({
+  args: { userId: v.id("users"), fileId: v.id("files") },
+  handler: async (ctx, args) => {
+    const file = await ctx.db.get(args.fileId);
+    if (!file || file.tenantId !== args.userId.toString()) {
+      throw new Error("File tidak ditemukan");
+    }
+    return {
+      fileId: args.fileId as string,
+      userId: args.userId.toString(),
+      file_name: file.fileName,
+      file_type: file.fileType,
+    };
+  },
+});
+
+/** Redeem path for the HTTP route. Re-checks ownership: a token is minted for
+ *  an hour, and the row can change hands or be deleted inside that hour. */
+export const resolveSignedFile = internalQuery({
+  args: { fileId: v.string(), userId: v.string() },
+  handler: async (ctx, args) => {
+    let file;
+    try {
+      file = await ctx.db.get(args.fileId as Id<"files">);
+    } catch {
+      return null;
+    }
+    if (!file || file.tenantId !== args.userId) return null;
+    const url = await ctx.storage.getUrl(file.storageId);
+    if (!url) return null;
+    return { url, fileName: file.fileName, fileType: file.fileType };
   },
 });

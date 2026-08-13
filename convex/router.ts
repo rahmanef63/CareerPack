@@ -5,6 +5,7 @@ import { handleRequestReset } from "./passwordReset";
 import { handleCheckEmail, handleSignInAttempt } from "./authCheckEmail";
 import { handleHealth } from "./health";
 import { handleMcp } from "./mcp/http";
+import { handleSignedFileRead } from "./mcp/fileRead";
 import {
   authorizationServerMetadata,
   protectedResourceMetadata,
@@ -77,6 +78,21 @@ http.route({
 // the SITE-origin routes (`*.convex.site`), and both the endpoint and its
 // discovery documents have to answer on the same host the MCP URL names —
 // a client's first probe never reaches careerpack.org.
+/**
+ * Redeem a signed file link minted by the `files_read_url` MCP tool.
+ *
+ * Deliberately NOT authenticated: the token IS the credential, which is the
+ * point — an AI host renders the image by fetching this URL directly, with no
+ * session and no CareerPack cookie. What bounds it is the token itself: one
+ * hour, HMAC-bound to the file id and owner, and ownership re-checked here
+ * because a token outlives the row it points at.
+ *
+ * Redirects rather than proxying the bytes: the storage URL is short-lived on
+ * Convex's side too, and streaming megabytes through a Convex action to save
+ * one hop would be worse for both.
+ */
+http.route({ path: "/files/read", method: "GET", handler: handleSignedFileRead });
+
 http.route({ path: "/mcp", method: "POST", handler: handleMcp });
 http.route({ path: "/mcp", method: "GET", handler: handleMcp });
 http.route({ path: "/mcp", method: "OPTIONS", handler: handleMcp });
