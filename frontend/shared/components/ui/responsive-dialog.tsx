@@ -100,6 +100,40 @@ export function ResponsiveDialog({
   const mode: Mode = forceMode ?? (isMobile ? "drawer" : "dialog");
   const Root = mode === "dialog" ? Dialog : Drawer;
 
+  /**
+   * Return focus where it came from when the panel closes.
+   *
+   * Radix and vaul both restore focus to the TRIGGER they rendered — but every
+   * caller here drives `open` from state instead of using
+   * ResponsiveDialogTrigger, so there is no trigger to restore to and focus is
+   * left sitting inside the panel. vaul then keeps the closed drawer mounted
+   * through its exit animation with `aria-hidden`, and Chrome refuses:
+   *
+   *   Blocked aria-hidden on an element because its descendant retained focus.
+   *   Element with focus: <button … #agenda-date>
+   *   Ancestor with aria-hidden: <div … data-vaul-drawer data-state="closed">
+   *
+   * Beyond the console noise it strands keyboard users: focus is on a node the
+   * accessibility tree has been told to ignore. Blurring instead would drop
+   * them at the top of the document, so remember and restore.
+   */
+  const restoreFocusTo = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    if (open) {
+      restoreFocusTo.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      return;
+    }
+    const el = restoreFocusTo.current;
+    restoreFocusTo.current = null;
+    // Only reclaim focus if it is still inside the panel that just closed —
+    // otherwise we would yank it away from wherever the user moved it.
+    const active = document.activeElement;
+    const stranded =
+      active instanceof HTMLElement && active.closest("[data-vaul-drawer],[role='dialog']");
+    if (el && stranded && document.body.contains(el)) el.focus();
+  }, [open]);
+
   return (
     <ResponsiveDialogContext.Provider value={mode}>
       <Root open={open} onOpenChange={onOpenChange}>

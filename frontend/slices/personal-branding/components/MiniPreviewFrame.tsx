@@ -30,7 +30,15 @@ export function MiniPreviewFrame({ state, slugTrimmed }: MiniPreviewFrameProps) 
           Live
         </span>
       </div>
-      <div className="max-h-[calc(100vh-14rem)] overflow-auto bg-muted/10">
+      {/* Scrollable, so it needs a tab stop and a name — without them the
+          preview below the fold is unreachable by keyboard
+          (axe `scrollable-region-focusable`). */}
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Pratinjau halaman personal branding"
+        className="max-h-[calc(100vh-14rem)] overflow-auto bg-muted/10"
+      >
         <PersonalBrandingPage
           profile={previewProfile}
           brand={false}

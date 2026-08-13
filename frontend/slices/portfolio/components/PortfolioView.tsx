@@ -220,7 +220,7 @@ export function PortfolioView() {
           )}
         </div>
         <ResponsiveSelect value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-          <ResponsiveSelectTrigger className="h-9 w-[140px]" />
+          <ResponsiveSelectTrigger className="h-9 w-[140px]" aria-label="Urutkan portofolio" />
           <ResponsiveSelectContent>
             {SORT_OPTIONS.map((s) => (
               <ResponsiveSelectItem key={s.value} value={s.value}>

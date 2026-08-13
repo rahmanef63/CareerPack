@@ -78,9 +78,13 @@ export function ProfileCompletenessCard({ onStartWizard }: ProfileCompletenessCa
                     <p className="text-muted-foreground">{m.hint}</p>
                   </div>
                   {m.href && (
-                    <Button asChild size="sm" variant="ghost" className="h-6 shrink-0 px-2 text-xs">
-                      <Link href={m.href}>
-                        <ArrowRight className="h-3 w-3" />
+                    <Button asChild size="sm" variant="ghost" className="h-7 shrink-0 px-2 text-xs">
+                      {/* aria-label, not a bare arrow: three of these render per
+                          card and axe reported all of them as unnamed links.
+                          h-7 not h-6 — `--font-scale` 0.92 scales the rem base,
+                          so h-6 renders 22px and misses the 24px target. */}
+                      <Link href={m.href} aria-label={`Lengkapi ${m.label} di Pengaturan`}>
+                        <ArrowRight className="h-3 w-3" aria-hidden="true" />
                       </Link>
                     </Button>
                   )}

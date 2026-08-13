@@ -164,7 +164,12 @@ export function BrandingValidationCard({
             {score}/100
           </span>
         </div>
-        <Progress value={pct} className="mt-3 h-2" />
+        <Progress
+          value={pct}
+          aria-label="Kelengkapan personal branding"
+          aria-valuetext={`${pct}% lengkap`}
+          className="mt-3 h-2"
+        />
 
         {next ? (
           <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-brand/30 bg-brand-muted/40 px-3 py-2.5">

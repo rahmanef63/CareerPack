@@ -55,7 +55,7 @@ export function LibraryToolbar({
           )}
         </div>
         <ResponsiveSelect value={kind} onValueChange={(v) => onKindChange(v as KindFilter)}>
-          <ResponsiveSelectTrigger className="h-9 w-[140px]" />
+          <ResponsiveSelectTrigger className="h-9 w-[140px]" aria-label="Filter jenis berkas" />
           <ResponsiveSelectContent>
             {KIND_OPTIONS.map((o) => (
               <ResponsiveSelectItem key={o.value} value={o.value}>

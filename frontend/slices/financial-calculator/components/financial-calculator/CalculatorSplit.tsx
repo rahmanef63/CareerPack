@@ -45,6 +45,11 @@ export function CalculatorSplit({
       <div className="min-w-0 space-y-6">{children}</div>
       <aside
         aria-label={railLabel}
+        // A region that scrolls but takes no focus cannot be scrolled by
+        // keyboard at all (axe `scrollable-region-focusable`). tabIndex 0 gives
+        // it a tab stop so arrow keys reach the content below the fold; the
+        // aria-label above is what makes that stop announce itself.
+        tabIndex={0}
         className={cn(
           "min-w-0 space-y-6",
           "lg:sticky lg:top-[4.5rem] lg:self-start lg:pb-1",
