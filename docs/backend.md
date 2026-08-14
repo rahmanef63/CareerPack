@@ -142,6 +142,8 @@ Env yang dibaca:
 - `JWT_PRIVATE_KEY` — signing key untuk session token (convex-auth)
 - `CONVEX_SITE_URL` — public URL backend (untuk OAuth redirect)
 - `AI_CRED_SECRET` — master secret enkripsi `aiSettings.apiKey` / `globalAISettings.apiKey` (`_shared/aiCrypto.ts`). Opsional: tanpa ini key tersimpan plaintext dan `ai/oauth.ts` menolak connect. Set + rotasi: [deployment.md](./deployment.md) §10
+- `FILE_URL_SECRET` — menandatangani tautan baca file berumur 1 jam yang dikembalikan tool MCP `files_read_url` (`_shared/signedFileUrl.ts`). Tanpa ini tool itu gagal; tidak ada jalur tanpa tanda tangan. Sengaja terpisah dari `AI_CRED_SECRET`
+- `CONVEX_SITE_URL` — origin backend, dipakai menyusun tautan tersebut
 - `APP_URL` — origin publik frontend; dipakai gerbang Origin CSRF (`_shared/origin.ts`) dan callback OAuth provider AI (`ai/oauth.ts`)
 
 Set via Convex dashboard (cloud) atau `backend/convex-self-hosted/.env` (self-hosted).

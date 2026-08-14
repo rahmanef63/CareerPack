@@ -58,6 +58,7 @@ Tier column refers to porting effort — see `_porting-guide.md` §8:
 | `settings` (multi-section) | `/dashboard/settings` | **L** | [settings.md](./settings.md) |
 | `ai-settings` | `/dashboard/ai-settings` | **M** | [ai-settings.md](./ai-settings.md) |
 | `admin` (role-gated `/admin` route) | `/admin` | **S** | [admin.md](./admin.md) |
+| `mcp` (server MCP + OAuth 2.1) | `/mcp` (Convex site) | **XL** | [mcp.md](./mcp.md) |
 
 ## How to use for porting
 
