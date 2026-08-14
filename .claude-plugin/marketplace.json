@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "careerpack",
+  "description": "Plugin CareerPack — akses data karier Anda dari Claude lewat MCP.",
+  "owner": {
+    "name": "Rahman",
+    "url": "https://careerpack.org"
+  },
+  "plugins": [
+    {
+      "name": "careerpack",
+      "source": "./plugin",
+      "category": "productivity",
+      "tags": ["career", "cv", "job-search", "portfolio", "indonesia"]
+    }
+  ]
+}

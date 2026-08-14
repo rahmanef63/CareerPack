@@ -168,15 +168,54 @@ Alurnya: OAuth 2.1 + PKCE → `tools/list` → `files_upload_url` → PUT byte �
 `files_register` → `files_read_url` → ambil byte → coba sunting token → hapus.
 Terakhir dijalankan 2026-08-14, 17 asersi lolos.
 
-## Yang belum ada: lapisan distribusi
+## Distribusi
 
-Server-nya lengkap; paket yang membuatnya bisa **dipasang** belum. Panduannya di
-`github.com/rahmanef63/connectors`:
+### Plugin Claude — sudah ada
 
-- `plugin.json` + `marketplace.json` untuk Claude Code / claude.ai / Desktop
-- Pendaftaran developer mode + submission direktori ChatGPT
-- Form setup siap salin-tempel, satu tab per host — endpoint dan token di balik
-  tombol salin
+```
+.claude-plugin/marketplace.json     katalog, di root repo
+plugin/
+  .claude-plugin/plugin.json        satu-satunya file di sini
+  .mcp.json                         registrasi server, di ROOT plugin
+  skills/careerpack/SKILL.md        instruksi untuk model
+```
 
-Tanpa itu server ini ada tapi belum bisa dihubungkan siapa pun tanpa dituntun
+Pasang:
+
+```bash
+/plugin marketplace add rahmanef63/CareerPack
+/plugin install careerpack@careerpack
+```
+
+Empat hal yang mudah salah dan sudah dikunci:
+
+- **`type` wajib** di entri server. Tanpa itu entri ber-`url` dibaca sebagai
+  stdio, dilewati, dan dilaporkan `has a "url" but no "type"`.
+- **Host `.convex.site`, bukan `.convex.cloud`.** Router HTTP dipasang di origin
+  site; `.convex.cloud` adalah origin fungsi.
+- **`plugin.json` satu-satunya isi `.claude-plugin/`.** Menaruh `skills/` di
+  dalamnya membuat plugin termuat tanpa isi.
+- **`version` hanya di `plugin.json`.** Kalau diset juga di entri marketplace,
+  `plugin.json` menang diam-diam.
+
+Kita memakai **OAuth**, bukan header bearer, jadi `.mcp.json` membawa objek
+`oauth` dan bukan `headers` — inilah yang membuat server ini juga bisa masuk
+form konektor ChatGPT dan claude.ai, yang tidak punya kolom API key.
+`oauth.scopes` sengaja tidak diset: sejak v2.1.196 nilai kosong berarti Claude
+Code meminta apa yang diiklankan metadata, dan menyetelnya manual dulu sering
+memicu `invalid_scope`.
+
+Terverifikasi: `claude plugin validate --strict` lolos, `--plugin-dir` memuat 1
+skill, dan server terdaftar sebagai `plugin:careerpack:careerpack` berstatus
+*needs auth* — benar untuk OAuth di sesi non-interaktif.
+
+### ChatGPT — belum
+
+Pendaftaran developer mode dan submission direktori. Panduannya di
+`cn-gpt-plugin/` pada `github.com/rahmanef63/connectors`.
+
+### Form setup — belum
+
+Satu tab per host, endpoint dan token di balik tombol salin. Spesifikasinya di
+`shared/setup-form.md`. Tanpa ini, menghubungkan server masih perlu dituntun
 manual.

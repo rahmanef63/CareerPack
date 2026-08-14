@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "careerpack",
+  "displayName": "CareerPack",
+  "version": "1.0.0",
+  "description": "Baca dan tulis data karier Anda di CareerPack — CV, lamaran, ceklis dokumen, roadmap skill, portofolio, kalender, dan Pustaka Konten — langsung dari Claude.",
+  "homepage": "https://careerpack.org",
+  "repository": "https://github.com/rahmanef63/CareerPack",
+  "license": "MIT",
+  "author": {
+    "name": "Rahman",
+    "url": "https://careerpack.org"
+  },
+  "keywords": [
+    "career",
+    "cv",
+    "resume",
+    "job-search",
+    "portfolio",
+    "indonesia",
+    "convex",
+    "mcp"
+  ]
+}
