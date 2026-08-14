@@ -150,12 +150,21 @@ Knob: `MCP_EVAL_PROVIDER` (kunci dari `_shared/aiProviders.ts`, default
 `MCP_EVAL_TOOL`, `MCP_EVAL_LIMIT`, `MCP_EVAL_CONCURRENCY`,
 `MCP_EVAL_MIN_ACCURACY`.
 
-**BIAYA — baca ini dulu.** Tiap permintaan membawa **seluruh 69 skema tool**,
-sekitar 19rb token input sebelum promptnya sendiri. Satu putaran penuh 243
-prompt ≈ **4,6 juta token input**. Provider yang meng-cache prefix identik
-membuatnya jauh lebih murah, tapi jangan tahu tagihannya dari kaget: mulai
-dengan `MCP_EVAL_LIMIT=20`, atau `MCP_EVAL_TOOL` kalau cuma mau mengutak-atik
-deskripsi satu tool. Runner mencetak pemakaian tokennya sendiri.
+**Biaya.** Tiap permintaan membawa **seluruh 69 skema tool** — sekitar 25rb
+token input sebelum promptnya sendiri, karena katalognya besar dan tidak bisa
+dipotong (justru katalog utuh itu yang sedang diuji).
+
+| Jalannya | Permintaan | Token input | Perkiraan (gpt-4o-mini, tanpa cache) |
+|---|---|---|---|
+| `MCP_EVAL_LIMIT=20` | 20 | ~0,5 jt | ~$0,07 |
+| `MCP_EVAL_LIMIT=40` | 40 | ~1,0 jt | ~$0,15 |
+| penuh | 243 | ~6,0 jt | ~$0,90 |
+
+Jadi jutaan token, tapi bukan uang yang bikin kaget — dan provider yang
+meng-cache prefix identik menekannya lagi. Tetap mulai dari `MCP_EVAL_LIMIT=20`,
+atau `MCP_EVAL_TOOL` kalau cuma mau mengutak-atik deskripsi satu tool. Runner
+mencetak pemakaian tokennya sendiri, jadi angka nyata menggantikan tebakan ini
+setelah putaran pertama.
 
 Laporannya mengelompokkan salah pilih **berdasarkan pasangan kebingungannya**,
 bukan per prompt — sepuluh prompt yang sama-sama melenceng dari `cv_get` ke
