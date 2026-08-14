@@ -11,6 +11,11 @@
  * Plain data module rather than part of a test file: importing a *.test.ts
  * from another test file re-registers its describe blocks and runs them twice.
  *
+ * Living under convex/ means Convex codegen lists this in _generated/api.d.ts
+ * and bundles it. It exports no Convex function, so it is inert weight — ~30KB
+ * of fixture in the backend bundle, which is the price of keeping it next to
+ * the catalog it describes. Move it out if that ever stops being a fair trade.
+ *
  * GENERATED. Regenerate the rows from a fresh survey; do not hand-edit them
  * one at a time. */
 
