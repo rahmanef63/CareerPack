@@ -89,11 +89,59 @@ Empat operasi, dan dua di antaranya sengaja dibatasi.
 | `files_register` | langkah 2 unggah — catat jadi entri library |
 | `files_read_url` | tautan baca, kedaluwarsa **1 jam** |
 | `portfolio_set_media` | pasang berkas library ke portfolio item + set thumbnail |
+| `portfolio_attach_media` | **lampirkan gambar langsung** — tanpa langkah unggah |
 
 **`storageId` tidak pernah muncul di payload mana pun.** Satu string itu cukup
 untuk mengambil blob dari mana saja, selamanya, dan semua yang dikembalikan tool
 tersalin ke transkrip pihak ketiga. Berkas dialamatkan lewat id barisnya, yang
 tidak berguna tanpa pemeriksaan kepemilikan.
+
+### `portfolio_attach_media` — jalur satu panggilan
+
+Unggah dua langkah di bawah ini **tidak pernah bisa dipakai model**: langkah
+tengahnya adalah HTTP `PUT` byte ke signed URL, dan LLM tidak bisa melakukan
+itu. Jalur itu hanya pernah bisa ditempuh manusia dengan terminal.
+
+`portfolio_attach_media` memakai kontrak file resmi OpenAI
+(`_meta["openai/fileParams"]`): ChatGPT mengirim `download_url` sementara plus
+`file_id`, server yang mengunduh. Satu panggilan, tanpa storage id, tanpa
+koreografi.
+
+Implementasinya tipis di sini — protokolnya milik paket bersama
+`@rahmanef/mcp-files` (`connectors/packages/mcp-files`, di-vendor ke
+`convex/mcp/_vendor/mcpFiles.ts` dengan header checksum). Paket itu memegang
+skema file, unduhan ber-guard SSRF, cek ukuran dan isi. Repo ini hanya memegang
+adapter: di mana byte disimpan, apa arti "attach", dan teks Indonesia.
+
+**WebP saja.** Paket bersama mengizinkan lima format; `files/allowlist.ts`
+mengizinkan `image/webp` saja — dan adapter MENURUNKAN policy-nya dari
+allowlist itu, bukan menuliskannya ulang, supaya keduanya tidak bisa berbeda.
+
+Bedanya dengan `portfolio_set_media`: yang ini **menambah** dan tidak pernah
+menghapus, jadi `destructiveHint: false`. `portfolio_set_media` mengganti
+seluruh daftar dan tetap `destructiveHint: true`. Keduanya dipertahankan.
+
+## Scope — ditegakkan per panggilan
+
+Sampai 2026-08-14 `mcp.read` / `mcp.write` diumumkan di dokumen discovery dan
+disimpan di tiap baris token, lalu **tidak pernah dibaca**. Dispatcher hanya
+memeriksa ada-tidaknya `userId`, jadi token yang hanya diberi `mcp.read` tetap
+bisa memanggil `portfolio_delete`.
+
+Sekarang setiap panggilan tool diperiksa. Scope-nya **diturunkan** dari
+`annotations.readOnlyHint` di `tools/index.ts`, bukan ditulis per tool, supaya
+tidak mungkin berbeda dari anotasi yang sudah menyatakan fakta yang sama.
+
+Gagal scope menjawab **403** dengan tantangan RFC 6750, bukan 200 yang isinya
+berkata "tidak boleh":
+
+```
+WWW-Authenticate: Bearer realm="careerpack", error="insufficient_scope",
+  scope="mcp.write", resource_metadata="…/.well-known/oauth-protected-resource"
+```
+
+Batch tetap 200 — satu status tidak bisa mewakili array campuran; tiap entri
+membawa error JSON-RPC `-32003` sendiri.
 
 ### Kenapa unggah dua langkah
 
