@@ -7,12 +7,13 @@ server.
 
 **Kode:** `convex/mcp/`
 **Endpoint:** `https://proficient-dove-151.convex.site/mcp`
-**Protokol:** `2024-11-05` (dipin di `convex/mcp/types.ts`)
+**Protokol:** dinegosiasikan — `2024-11-05`, `2025-03-26`, `2025-06-18`
+(`MCP_PROTOCOL_VERSIONS` di `convex/mcp/types.ts`)
 
-Versi protokol sengaja dipin di `2024-11-05` meski ada revisi lebih baru
-(2025-06-18 menghapus batching, 2025-11-25 menambah tipe `Icon`). Angka itu
-masih diterima semua klien yang beredar, dan menaikkannya bukan perubahan
-kosmetik — revisi berikutnya mengubah bentuk error dan content.
+Server menjawab `initialize` dengan versi yang **diminta klien** kalau ada di
+daftar itu, kalau tidak menawarkan yang terbaru yang diimplementasikan.
+Rinciannya, termasuk kenapa berhenti di `2025-06-18`, ada di bagian
+[Versi protokol](#versi-protokol--dinegosiasikan-bukan-dipatok) di bawah.
 
 ## Peta modul
 
@@ -128,9 +129,60 @@ tidak ada tool yang tak punya prompt langsung, prompt negatif tidak
 mengharapkan tool apa pun. Itu cukup untuk menangkap rename atau tool yang jadi
 tidak terjangkau.
 
-Yang **tidak** dicek: apakah model betulan memilih tool itu. Itu butuh LLM dan
-token sungguhan per jalannya, jadi sengaja tidak masuk CI. Fixture ini adalah
-input untuk runner semacam itu, bukan penggantinya.
+Yang **tidak** dicek di situ: apakah model betulan memilih tool itu. Untuk itu
+ada runner terpisah.
+
+### Runner eval — model sungguhan
+
+`convex/mcp/goldenPrompts.eval.test.ts`. Mati kecuali diminta:
+
+```bash
+MCP_EVAL=1 MCP_EVAL_API_KEY=sk-... \
+  pnpm exec vitest run convex/mcp/goldenPrompts.eval.test.ts \
+  --reporter=verbose | tee mcp-eval-report.txt
+```
+
+`--reporter=verbose` **wajib** — reporter default menelan console output kalau
+test-nya lulus, padahal laporan itu justru satu-satunya hasil yang dicari.
+
+Knob: `MCP_EVAL_PROVIDER` (kunci dari `_shared/aiProviders.ts`, default
+`openai`), `MCP_EVAL_BASE_URL`, `MCP_EVAL_MODEL`, `MCP_EVAL_KIND`,
+`MCP_EVAL_TOOL`, `MCP_EVAL_LIMIT`, `MCP_EVAL_CONCURRENCY`,
+`MCP_EVAL_MIN_ACCURACY`.
+
+**BIAYA — baca ini dulu.** Tiap permintaan membawa **seluruh 69 skema tool**,
+sekitar 19rb token input sebelum promptnya sendiri. Satu putaran penuh 243
+prompt ≈ **4,6 juta token input**. Provider yang meng-cache prefix identik
+membuatnya jauh lebih murah, tapi jangan tahu tagihannya dari kaget: mulai
+dengan `MCP_EVAL_LIMIT=20`, atau `MCP_EVAL_TOOL` kalau cuma mau mengutak-atik
+deskripsi satu tool. Runner mencetak pemakaian tokennya sendiri.
+
+Laporannya mengelompokkan salah pilih **berdasarkan pasangan kebingungannya**,
+bukan per prompt — sepuluh prompt yang sama-sama melenceng dari `cv_get` ke
+`cv_list` itu satu bug penulisan deskripsi, bukan sepuluh:
+
+```
+kind        n    hit   accuracy
+direct      16     2   12.5%
+TOTAL       24     3   12.5%   (456,000 prompt tokens)
+
+misses, grouped by confusion:
+  cv_get -> cv_list  (3)
+    - Ini cv_id-nya j57d2k9xq1. Tampilkan isi lengkapnya…
+```
+
+Kegagalan setup (kunci salah, kuota habis, 500) **tidak** dihitung sebagai
+jawaban salah — run-nya langsung gagal dengan pesan HTTP-nya. Kalau tidak,
+kunci yang lupa diset akan terbaca sebagai "akurasi 0%" dan orang malah
+mengubah deskripsi tool untuk memperbaiki environment variable.
+
+`MCP_EVAL_MIN_ACCURACY` itu **penjaga regresi, bukan nilai rapor**. Ambil
+baseline dari satu putaran penuh, lalu set sedikit di bawahnya.
+
+Mesinnya sendiri (`convex/mcp/evalRunner.ts`) diuji tanpa jaringan lewat
+`fetchImpl` yang disuntik — retry 429, kegagalan keras, no-call, salah pilih,
+urutan worker pool. Logika yang cuma jalan kalau ada API key adalah logika yang
+tidak pernah diperiksa siapa pun.
 
 ## Snapshot kontrak
 
@@ -272,6 +324,7 @@ yang bagian lain produk anggap tidak ada.
 |---|---|
 | `FILE_URL_SECRET` | menandatangani tautan baca file |
 | `CONVEX_SITE_URL` | origin yang dipakai menyusun tautan itu |
+| `OPENAI_APPS_CHALLENGE` | token verifikasi domain OpenAI; rute 404 selagi kosong |
 
 `FILE_URL_SECRET` sengaja terpisah dari `AI_CRED_SECRET` dan kunci auth — kunci
 tanda tangan sebaiknya mengotorisasi satu hal, supaya rotasinya merusak satu
@@ -329,10 +382,77 @@ Terverifikasi: `claude plugin validate --strict` lolos, `--plugin-dir` memuat 1
 skill, dan server terdaftar sebagai `plugin:careerpack:careerpack` berstatus
 *needs auth* — benar untuk OAuth di sesi non-interaktif.
 
-### ChatGPT — belum
+### ChatGPT — server siap, pendaftaran menunggu akun
 
-Pendaftaran developer mode dan submission direktori. Panduannya di
-`cn-gpt-plugin/` pada `github.com/rahmanef63/connectors`.
+Tidak ada paket kedua untuk dibangun. ChatGPT memakai server yang sama di URL
+yang sama; yang berbeda cuma cara ia berkenalan. Tiga hal yang kurang sudah
+ditutup 2026-08-14.
+
+**Registrasi klien dinamis (RFC 7591).** Ini yang paling menentukan.
+`POST /oauth/register` di origin site, diiklankan sebagai
+`registration_endpoint` di metadata AS. Alasannya satu asimetri: Claude Code,
+Cursor, dan `mcp-remote` mengizinkan pengguna menempel header atau client id
+apa pun ke file config. Form ChatGPT dan claude.ai **tidak punya kolom itu** —
+dokumentasi OpenAI menyatakan ChatGPT "cannot present custom API keys". Klien
+yang tidak bisa mendaftarkan dirinya sendiri tidak bisa terhubung sama sekali.
+
+Endpoint-nya tanpa autentikasi, sesuai RFC 7591 §1.2. Yang membatasinya:
+
+| Batas | Kenapa |
+|---|---|
+| Setiap `redirect_uri` lewat allowlist host yang sama dengan consent | Pendaftaran tidak boleh menciptakan tujuan baru |
+| 20 pendaftaran per IP per jam, tabel bucket terpisah | Endpoint ini menulis baris; spam registrasi tidak boleh mengunci login |
+| Tidak pernah menerbitkan client secret | Public client, PKCE yang membuktikan pertukaran — tidak ada kredensial di sini untuk bocor |
+| Klien terdaftar dikunci ke daftar redirect-nya sendiri | Kalau tidak, mendaftar tidak membeli apa-apa dibanding tidak mendaftar |
+
+Mendaftar tidak memberi akses apa pun. Klien terdaftar tetap harus mengirim
+manusia ke halaman consent, dan tetap mendapat token milik satu orang itu saja.
+
+**`securitySchemes` per tool.** `tools/list` kini menyertakan
+`[{ "type": "oauth2", "scopes": ["mcp.read" | "mcp.write"] }]`, diturunkan dari
+scope yang sudah diresolusi — jadi tidak bisa berbeda dari gerbang yang
+dispatcher jalankan. ChatGPT membekukan array ini saat *Scan Tools* dan
+memakainya untuk memutuskan kapan menawarkan UI penautan OAuth.
+
+**Tantangan verifikasi domain.** `GET /.well-known/openai-apps-challenge`
+menyajikan **hanya** nilai `OPENAI_APPS_CHALLENGE` — bukan JSON, bukan daftar,
+tanpa newline. 404 selama env belum diset, bukan string kosong, karena string
+kosong terbaca sebagai "terverifikasi tapi salah". Harus di host MCP atau
+induknya; induk `*.convex.site` milik Convex, jadi satu-satunya tempat yang sah
+adalah router ini.
+
+Halaman consent ikut berubah: nama aplikasi diambil dari pendaftaran (client id
+`cp_…` tidak terbaca manusia) dan **dilabeli sebagai laporan sendiri**, karena
+tidak ada yang memverifikasinya. Baris izin sekarang mengikuti scope yang
+diminta — klien yang minta `mcp.read` saja tidak lagi dijanjikan hak tulis.
+
+Terverifikasi di deployment dev: `registration_endpoint` terbit di metadata,
+callback `chatgpt.com` dapat `201` beserta `cp_…`, host di luar allowlist dapat
+`400 invalid_redirect_uri`, dan tantangan domain `404` selagi env kosong.
+
+**Yang tersisa bukan kode.** Developer mode ada di **Settings → Security and
+login** (atau sisi admin: Workspace Settings → Permissions & Roles → Connected
+Data), lalu `chatgpt.com/plugins` → tombol plus → tempel
+`https://proficient-dove-151.convex.site/mcp` (path `/mcp` wajib) → Scan Tools.
+Web saja, tidak ada di mobile.
+
+Dan satu kenyataan tentang paket akun yang menentukan apakah ini berguna:
+
+| Yang dipakai | Paket yang dibutuhkan |
+|---|---|
+| Tool baca/fetch | Pro ke atas (Plus disebut OpenAI tapi tidak di help centre — ambil bacaan yang lebih ketat) |
+| Tool tulis — "full MCP" | **Business, Enterprise, Edu saja**, masih beta |
+
+CareerPack mayoritas tool tulis. Di akun Plus/Pro, sebagian besar permukaan ini
+tidak akan bisa dipanggil dari ChatGPT sama sekali. Itu batas OpenAI, bukan
+sesuatu yang bisa diperbaiki di sini.
+
+**Submission direktori** menambah gerbang yang tidak bisa dilewati kode:
+identitas terverifikasi di Platform, `Apps Management = Write`, tepat lima test
+case positif dan tiga negatif, kredensial demo yang jalan **tanpa** MFA/SMS,
+rekaman demo, serta URL kebijakan privasi dan ketentuan layanan. Origin server
+terkunci selamanya setelah publish — path boleh berubah, `scheme`/`host`/`port`
+tidak pernah.
 
 ### Form setup — belum
 
