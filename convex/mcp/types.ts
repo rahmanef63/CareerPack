@@ -6,9 +6,44 @@ import type { Id } from "../_generated/dataModel";
  * imported by the dispatcher, every tool module, and the unit test.
  */
 
-// The version ChatGPT, Claude and Cursor all still negotiate. Bumping it is
-// not a cosmetic change: later revisions move error and content shapes.
-export const MCP_PROTOCOL_VERSION = "2024-11-05";
+/**
+ * Protocol revisions this server actually implements, oldest first.
+ *
+ * Until 2026-08-14 a single constant `"2024-11-05"` was echoed back
+ * unconditionally, whatever the client asked for. That is a legal counter-offer
+ * under the handshake rules, but it meant the server described itself as older
+ * than it behaves and could never use anything added later.
+ *
+ * `2025-06-18` is the ceiling on purpose:
+ *   - it is the revision that introduced `structuredContent`, which `toolOk`
+ *     now emits, so advertising less would be describing a different server;
+ *   - it removed JSON-RPC batching. We still ACCEPT batches (convex/mcp/http.ts)
+ *     because being lenient about input costs nothing and older clients send them;
+ *   - it requires clients to send `MCP-Protocol-Version` on later requests. We
+ *     do not enforce that — rejecting a request over a missing header would
+ *     break working clients to prove a point.
+ *
+ * NOT implemented: `2025-11-25` and `2026-07-28`. The latter is the CURRENT
+ * published revision and is a stateless rewrite — no `initialize` handshake, no
+ * `Mcp-Session-Id`, per-request `_meta` protocol version, a mandatory
+ * `server/discover` RPC and required `Mcp-Method`/`Mcp-Name` headers. That is a
+ * transport rewrite, not a version bump, and no host we serve negotiates it yet.
+ */
+export const MCP_PROTOCOL_VERSIONS = ["2024-11-05", "2025-03-26", "2025-06-18"] as const;
+
+/** What we offer when the client asks for something we do not implement. */
+export const MCP_PROTOCOL_VERSION = "2025-06-18";
+
+/**
+ * Handshake rule for every revision up to 2025-11-25: answer with the client's
+ * version when we support it, otherwise with our latest and let the client
+ * decide whether it can live with that.
+ */
+export const negotiateProtocolVersion = (requested: unknown): string =>
+  typeof requested === "string" &&
+  (MCP_PROTOCOL_VERSIONS as readonly string[]).includes(requested)
+    ? requested
+    : MCP_PROTOCOL_VERSION;
 
 export const SERVER_INFO = { name: "careerpack", version: "1.0.0" } as const;
 

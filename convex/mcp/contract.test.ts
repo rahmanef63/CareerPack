@@ -4,9 +4,27 @@
  * throws — the model just starts picking the wrong tool, or a host starts
  * auto-approving a write, or ChatGPT quietly stops offering a file. */
 import { describe, expect, it } from "vitest";
-import { RESOLVED_TOOLS } from "./tools";
+import { RESOLVED_TOOLS, toolDescriptors } from "./tools";
 import { SCOPE, satisfiesScope, type McpScope } from "./types";
 import { assertFileParamsConformant } from "./_vendor/mcpFiles";
+
+describe("tools/list snapshot", () => {
+  /* The published catalog, byte for byte. Renaming a tool, reworded
+   * description, flipped annotation or changed required[] all reach a third
+   * party's model with no other signal — nothing here throws, the model just
+   * starts behaving differently. The snapshot makes each of those a diff
+   * somebody has to approve.
+   *
+   * When this fails: read the diff. If the change was intended, `vitest -u`.
+   * If you did not mean to touch the model-facing contract, you have a bug. */
+  it("matches the committed contract", () => {
+    expect(toolDescriptors()).toMatchSnapshot();
+  });
+
+  it("publishes every registered tool and nothing else", () => {
+    expect(toolDescriptors().map((t) => t.name)).toEqual(RESOLVED_TOOLS.map((t) => t.name));
+  });
+});
 
 describe("scope resolution", () => {
   it("gives every tool exactly one known scope", () => {
@@ -87,7 +105,17 @@ describe("OpenAI file params", () => {
     expect(t!.annotations.openWorldHint).toBe(true);
   });
 
-  it("no descriptor carries a $-prefixed key, which Convex refuses to encode", () => {
+  /* Convex refuses to encode any object key starting with `$`, so a `$defs` or
+   * `$ref` in a descriptor throws for the WHOLE response — the first call every
+   * client makes. That outage is real, but it needs the RPC to be a Convex
+   * `action`, whose return value crosses the value encoder. This server is an
+   * `httpAction` that JSON.stringifies into a Response body, so descriptors
+   * never reach the encoder and cannot take it down here.
+   *
+   * Kept anyway: the schemas come from a shared package that is also vendored
+   * into action-based servers, where it IS an outage, and inlining costs
+   * nothing. Do not cite this test as protecting THIS deployment. */
+  it("no descriptor carries a $-prefixed key, so the schema stays portable", () => {
     const walk = (n: unknown, path: string): void => {
       if (!n || typeof n !== "object") return;
       if (Array.isArray(n)) return n.forEach((x, i) => walk(x, `${path}[${i}]`));

@@ -70,6 +70,78 @@ mengawasi.
 Yang harian bukan duplikat: 25/menit menahan burst, tapi skrip yang menahan
 diri di 20/menit lolos selamanya.
 
+## Versi protokol — dinegosiasikan, bukan dipatok
+
+Sampai 2026-08-14 server selalu menjawab `"2024-11-05"`, apa pun yang diminta
+klien. Itu sah menurut aturan handshake, tapi artinya server mendeskripsikan
+dirinya lebih tua daripada perilakunya, dan tidak pernah bisa memakai apa pun
+yang ditambahkan revisi setelahnya.
+
+Sekarang `MCP_PROTOCOL_VERSIONS` (`convex/mcp/types.ts`) berisi revisi yang
+benar-benar diimplementasikan — `2024-11-05`, `2025-03-26`, `2025-06-18` — dan
+`initialize` **mengembalikan versi yang diminta klien** kalau ada di daftar itu,
+kalau tidak menawarkan yang terbaru.
+
+Batas atas `2025-06-18` disengaja:
+
+- revisi itu yang memperkenalkan `structuredContent`, yang sekarang dikirim;
+- revisi itu **menghapus** batching JSON-RPC. Server tetap **menerima** batch
+  (`convex/mcp/http.ts`) karena longgar di sisi input tidak merugikan;
+- revisi itu mewajibkan klien mengirim header `MCP-Protocol-Version`. Server
+  tidak menegakkannya — menolak permintaan karena header hilang hanya akan
+  merusak klien yang sudah jalan.
+
+**Yang belum:** `2025-11-25` dan `2026-07-28`. Yang terakhir adalah revisi
+**terkini** dan merupakan penulisan ulang stateless — handshake `initialize`
+dihapus, `Mcp-Session-Id` hilang, versi protokol pindah ke `_meta` per
+permintaan, ada RPC `server/discover` wajib, plus header `Mcp-Method`/`Mcp-Name`.
+Itu penulisan ulang transport, bukan naik versi, dan belum ada host yang kita
+layani menegosiasikannya.
+
+## `structuredContent` — data yang sama, dua encoding
+
+`toolOk` mengirim `structuredContent` untuk setiap payload yang berupa objek
+biasa, memakai **referensi objek yang sama** dengan blok teks — jadi keduanya
+tidak mungkin berbeda isi. Blok teks tidak diubah sedikit pun; itu yang dibaca
+semua klien sekarang.
+
+Tujuh tool baca mengembalikan `null` kalau datanya tidak ada, dan untuk empat di
+antaranya (`profile_get`, `roadmap_get`, `documents_list`, `financial_plan_get`)
+`null` adalah kondisi hari pertama setiap akun baru. Panggilan itu tidak
+membawa `structuredContent` sama sekali — sah, karena `null` bukan objek JSON.
+
+**`outputSchema` sengaja tidak dideklarasikan untuk satu tool pun.** Bukan karena
+malas: SDK TypeScript resmi **melempar error** kalau sebuah tool mendeklarasikan
+`outputSchema` tapi hasil suksesnya tidak membawa `structuredContent`. Kalau
+dideklarasikan, cabang `null` di atas — cabang yang paling sering kena — berubah
+dari "model bilang datanya belum ada" jadi `McpError` di sisi klien. Ditambah
+tidak ada konsumen yang membacanya, dan 42 tool sisanya punya bentuk keluaran
+unik masing-masing.
+
+## Golden prompt
+
+`convex/mcp/goldenPrompts.test.ts` — 243 prompt (146 langsung, 69 tidak
+langsung, 28 negatif) menutup **seluruh 69 tool**.
+
+Yang dicek: strukturnya saja — setiap prompt menyebut tool yang benar-benar ada,
+tidak ada tool yang tak punya prompt langsung, prompt negatif tidak
+mengharapkan tool apa pun. Itu cukup untuk menangkap rename atau tool yang jadi
+tidak terjangkau.
+
+Yang **tidak** dicek: apakah model betulan memilih tool itu. Itu butuh LLM dan
+token sungguhan per jalannya, jadi sengaja tidak masuk CI. Fixture ini adalah
+input untuk runner semacam itu, bukan penggantinya.
+
+## Snapshot kontrak
+
+`convex/mcp/__snapshots__/contract.test.ts.snap` memaku payload `tools/list`
+persis apa adanya. Snapshot dibangun dari `toolDescriptors()` — fungsi yang sama
+yang dipakai dispatcher — supaya test tidak bisa lulus sambil format kawatnya
+bergeser diam-diam.
+
+Kalau gagal: baca diff-nya. Kalau perubahannya disengaja, `vitest -u`. Nilainya
+ada di membaca diff itu; tim yang refleks regenerate tidak dapat apa-apa.
+
 ## Domain tool
 
 `applications`, `goals`, `roadmap`, `calendar`, `documents`, `budget`,

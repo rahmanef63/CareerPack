@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { dispatchJsonRpc } from "./jsonrpc";
-import { MCP_PROTOCOL_VERSION, SCOPE, type McpAuth } from "./types";
+import {
+  MCP_PROTOCOL_VERSION,
+  MCP_PROTOCOL_VERSIONS,
+  SCOPE,
+  type McpAuth,
+} from "./types";
 import { TOOLS } from "./tools";
 import type { ActionCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
@@ -29,7 +34,7 @@ function parseToolPayload(result: unknown) {
 }
 
 describe("dispatchJsonRpc", () => {
-  it("answers initialize with the negotiated version and tool capability", async () => {
+  it("answers initialize with our latest version and tool capability", async () => {
     const res = await dispatchJsonRpc(NO_CTX, OAUTH, {
       jsonrpc: "2.0",
       id: 1,
@@ -39,11 +44,51 @@ describe("dispatchJsonRpc", () => {
       jsonrpc: "2.0",
       id: 1,
       result: {
-        protocolVersion: MCP_PROTOCOL_VERSION,
+        // A literal, not MCP_PROTOCOL_VERSION. Asserting the constant against
+        // itself is a tautology that passes through any version change — which
+        // is exactly the change most likely to break a host.
+        protocolVersion: "2025-06-18",
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: "careerpack", version: "1.0.0" },
       },
     });
+  });
+
+  it("defaults to the newest revision it implements", () => {
+    // Adding a revision to the list and forgetting to move the default is the
+    // easy mistake: everything still passes, and the server quietly keeps
+    // counter-offering an older version than it speaks.
+    expect(MCP_PROTOCOL_VERSION).toBe(
+      MCP_PROTOCOL_VERSIONS[MCP_PROTOCOL_VERSIONS.length - 1],
+    );
+  });
+
+  it("echoes back any protocol revision it actually implements", async () => {
+    // The handshake rule for every revision up to 2025-11-25: if we support
+    // what was asked for, we MUST answer with that same version.
+    for (const asked of ["2024-11-05", "2025-03-26", "2025-06-18"]) {
+      const res = await dispatchJsonRpc(NO_CTX, OAUTH, {
+        id: 1,
+        method: "initialize",
+        params: { protocolVersion: asked },
+      });
+      expect((res?.result as { protocolVersion: string }).protocolVersion, asked).toBe(asked);
+    }
+  });
+
+  it("counter-offers its latest when asked for a revision it does not implement", async () => {
+    // 2026-07-28 is the current published revision and a stateless rewrite we
+    // do not speak; garbage should land the same way, not crash.
+    for (const asked of ["2026-07-28", "1999-01-01", 42, null]) {
+      const res = await dispatchJsonRpc(NO_CTX, OAUTH, {
+        id: 1,
+        method: "initialize",
+        params: { protocolVersion: asked } as Record<string, unknown>,
+      });
+      expect((res?.result as { protocolVersion: string }).protocolVersion, String(asked)).toBe(
+        "2025-06-18",
+      );
+    }
   });
 
   it("returns null for notifications so the route can answer 202", async () => {
@@ -154,6 +199,43 @@ describe("dispatchJsonRpc", () => {
     expect(res?.error).toBeUndefined();
     expect(r.isError).toBe(true);
     expect(r.content[0].text).toContain("cv_id");
+  });
+
+  it("mirrors the tool payload into structuredContent without touching the text", async () => {
+    const res = await dispatchJsonRpc(echoCtx, OAUTH, {
+      id: 9,
+      method: "tools/call",
+      params: { name: "cv_get", arguments: { cv_id: "cv_abc" } },
+    });
+    const r = res?.result as {
+      content: { text: string }[];
+      structuredContent?: unknown;
+      isError: boolean;
+    };
+    // Same data, two encodings. Old clients read the text, newer ones read the
+    // object, and neither may disagree with the other.
+    expect(r.structuredContent).toEqual({ userId: USER, cvId: "cv_abc" });
+    expect(JSON.parse(r.content[0].text)).toEqual(r.structuredContent);
+  });
+
+  it("omits structuredContent when a read tool legitimately returns null", async () => {
+    // Protocol 2025-06-18 defines structuredContent as a JSON object, so `null`
+    // has no representation. Seven read tools answer null for a missing record,
+    // and for four of them that is the day-one state of a new account — so this
+    // branch is common, not exotic. Omission is only legal because no tool here
+    // declares an outputSchema.
+    const nullCtx = {
+      runQuery: async () => null,
+      runMutation: async () => null,
+    } as unknown as ActionCtx;
+    const res = await dispatchJsonRpc(nullCtx, OAUTH, {
+      id: 10,
+      method: "tools/call",
+      params: { name: "cv_get", arguments: { cv_id: "cv_missing" } },
+    });
+    const r = res?.result as { content: { text: string }[]; structuredContent?: unknown };
+    expect("structuredContent" in r).toBe(false);
+    expect(r.content[0].text).toBe("null");
   });
 
   it("keeps a genuinely unknown method as a protocol error", async () => {

@@ -1,0 +1,2392 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tools/list snapshot > matches the committed contract 1`] = `
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List CVs",
+    },
+    "description": "List every CV the signed-in user owns, with its id, title, template and whether it is the default. USE THIS FIRST whenever the user talks about 'my CV' without naming one — every other cv_* tool needs a cv_id and this is where ids come from. Returns all CVs; there is no pagination because a user keeps only a handful.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "cv_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get CV",
+    },
+    "description": "Read one CV in full: personal info, experience, education, skills, certifications, languages and projects. Use it before answering questions about the user's background or rewriting any part of a CV, so the answer is grounded in what is actually stored. Needs a cv_id from cv_list. Returns null if no CV with that id belongs to the user.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cv_id": {
+          "description": "Id from cv_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "cv_id",
+      ],
+      "type": "object",
+    },
+    "name": "cv_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Set CV summary",
+    },
+    "description": "Replace the professional summary (the paragraph at the top) of one CV. This OVERWRITES the existing summary, so read it with cv_get first and show the user the new text before calling. Write in the language the CV itself uses — these CVs are usually Indonesian. Max 2000 characters. Do not use this to edit experience, skills or education.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cv_id": {
+          "description": "Id from cv_list.",
+          "type": "string",
+        },
+        "summary": {
+          "description": "New summary paragraph, max 2000 characters.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "cv_id",
+        "summary",
+      ],
+      "type": "object",
+    },
+    "name": "cv_set_summary",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Create CV",
+    },
+    "description": "Create a new, empty CV. It is prefilled from the user's profile (name, email, phone, location, bio) and nothing else — call cv_add_experience, cv_add_skills and cv_set_summary afterwards to fill it in. template must be 'classic' (photo sidebar, serif, suits Indonesian corporates and BUMN), 'modern' (bold sans header, suits startups and product roles) or 'minimal' (one column, no colour, the safest choice for ATS screening and overseas applications); ask which they want rather than defaulting silently. Give the title a purpose — 'CV Frontend Engineer 2026' beats 'CV'. Use this only when the user wants a SEPARATE CV; to change an existing one, edit it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "template": {
+          "description": "Layout. See the tool description for which fits when.",
+          "enum": [
+            "classic",
+            "modern",
+            "minimal",
+          ],
+          "type": "string",
+        },
+        "title": {
+          "description": "How the user will recognise this CV in their list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "title",
+        "template",
+      ],
+      "type": "object",
+    },
+    "name": "cv_create",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Add CV experience",
+    },
+    "description": "Append one job to a CV's work history. Dates are 'YYYY-MM' ('2024-01'), not full dates. For the user's current job, set current true and leave end_date out. achievements are the bullet points under the role — concrete and measurable ('cut checkout load time 40%'), one per array entry, kept separate from description, which is the one-line summary of the role. This APPENDS; it cannot edit or remove an existing entry, so read cv_get first and tell the user if the role is already there. Omit cv_id to target their default CV.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "achievements": {
+          "description": "Bullet points, one accomplishment each.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "company": {
+          "description": "Employer name.",
+          "type": "string",
+        },
+        "current": {
+          "description": "True when the user still works here. Inferred from a missing end_date.",
+          "type": "boolean",
+        },
+        "cv_id": {
+          "description": "Id from cv_list. Omit to use the user's default CV.",
+          "type": "string",
+        },
+        "description": {
+          "description": "One or two lines on what the role involved.",
+          "type": "string",
+        },
+        "end_date": {
+          "description": "YYYY-MM. Omit when this is the current job.",
+          "type": "string",
+        },
+        "position": {
+          "description": "Job title held.",
+          "type": "string",
+        },
+        "start_date": {
+          "description": "YYYY-MM, e.g. '2024-01'.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "company",
+        "position",
+        "start_date",
+      ],
+      "type": "object",
+    },
+    "name": "cv_add_experience",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Add CV skills",
+    },
+    "description": "Append skills to a CV. Pass short names the way a recruiter scans them — 'React', 'TypeScript', 'Figma' — not sentences. Skills already on the CV are skipped case-insensitively, so it is safe to send a list that overlaps what is there. category groups them on the rendered CV: 'technical', 'soft', 'tools' or 'general' (the default). proficiency is 1-5 and applies to every skill in the call, so split the call when levels differ. Omit cv_id to target the user's default CV.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "description": "Grouping on the CV. Defaults to 'general'.",
+          "enum": [
+            "technical",
+            "soft",
+            "tools",
+            "general",
+          ],
+          "type": "string",
+        },
+        "cv_id": {
+          "description": "Id from cv_list. Omit to use the user's default CV.",
+          "type": "string",
+        },
+        "proficiency": {
+          "description": "1-5, applied to every skill in this call. Defaults to 3.",
+          "type": "number",
+        },
+        "skills": {
+          "description": "Short skill names, e.g. ['React', 'TypeScript'].",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      },
+      "required": [
+        "skills",
+      ],
+      "type": "object",
+    },
+    "name": "cv_add_skills",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete CV",
+    },
+    "description": "Permanently delete one CV and its ATS scan history. There is no undo and no draft left behind, so confirm with the user first and never delete one just because they asked for a new one. Job applications that referenced it survive but lose the link. Needs a cv_id from cv_list — this one does NOT fall back to the default CV.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cv_id": {
+          "description": "Id from cv_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "cv_id",
+      ],
+      "type": "object",
+    },
+    "name": "cv_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List job applications",
+    },
+    "description": "List the user's job applications, newest first: company, position, location, status, source, salary, notes, when they applied, and any interview dates already logged. USE THIS FIRST for anything about applications — every other applications_* tool needs an application_id and this is the only place ids come from. Also the tool for counting questions ('how many jobs have I applied to', 'what is still in interview'). Optional status filter narrows server-side; omit it to see everything. Capped at 200 rows.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "description": "Return only applications in this stage. Omit for all stages.",
+          "enum": [
+            "applied",
+            "screening",
+            "interview",
+            "offer",
+            "rejected",
+            "withdrawn",
+            "accepted",
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "applications_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Create job application",
+    },
+    "description": "Record a new job application. company, position, location and source are all required — source is where the job was found ('LinkedIn', 'JobStreet', 'referral', 'company website'); ask the user rather than guessing it. status defaults to 'applied'; set it only when the user says they are already further along ('I have an interview next week' -> 'interview'). The applied date is set to now, so do not use this to backfill an application from months ago without telling the user the date will be today. cv_id links the CV that was sent — get it from cv_list.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "description": "Hiring company name.",
+          "type": "string",
+        },
+        "cv_id": {
+          "description": "Id from cv_list — the CV sent with this application.",
+          "type": "string",
+        },
+        "location": {
+          "description": "Job location, e.g. 'Jakarta' or 'Remote'.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Anything worth remembering.",
+          "type": "string",
+        },
+        "position": {
+          "description": "Role applied for.",
+          "type": "string",
+        },
+        "salary": {
+          "description": "Free-text salary or range as the user says it, e.g. '10-15 juta'.",
+          "type": "string",
+        },
+        "source": {
+          "description": "Where the job was found, e.g. 'LinkedIn', 'referral'.",
+          "type": "string",
+        },
+        "status": {
+          "description": "Defaults to 'applied'.",
+          "enum": [
+            "applied",
+            "screening",
+            "interview",
+            "offer",
+            "rejected",
+            "withdrawn",
+            "accepted",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "company",
+        "position",
+        "location",
+        "source",
+      ],
+      "type": "object",
+    },
+    "name": "applications_create",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update application status",
+    },
+    "description": "Move one application to a new stage — the tool for 'I got rejected by X', 'they invited me to interview', 'I accepted the offer'. Needs an application_id from applications_list. Passing notes REPLACES the existing notes; omit it to keep them. Use applications_add_interview instead when the user is telling you WHEN an interview is, not that the stage changed.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "description": "Id from applications_list.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Replaces the current notes when supplied.",
+          "type": "string",
+        },
+        "status": {
+          "description": "New stage.",
+          "enum": [
+            "applied",
+            "screening",
+            "interview",
+            "offer",
+            "rejected",
+            "withdrawn",
+            "accepted",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "application_id",
+        "status",
+      ],
+      "type": "object",
+    },
+    "name": "applications_update_status",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Add interview date",
+    },
+    "description": "Append a scheduled interview to one application. \`type\` is the round as the user describes it ('HR screening', 'technical', 'user interview', 'final'). \`date\` is an ISO 8601 instant — include the time and an offset, e.g. '2026-08-14T10:00:00+07:00'; the app's users are on WIB (UTC+7), so a bare '2026-08-14T10:00:00' is read as UTC and lands 7 hours early. This only records the round on the application — it does NOT put anything in the calendar, so call calendar_create_event too when the user wants a reminder.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "description": "Id from applications_list.",
+          "type": "string",
+        },
+        "date": {
+          "description": "ISO 8601 instant with offset, e.g. '2026-08-14T10:00:00+07:00'.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Anything to prepare.",
+          "type": "string",
+        },
+        "type": {
+          "description": "Interview round, e.g. 'HR screening', 'technical'.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "application_id",
+        "type",
+        "date",
+      ],
+      "type": "object",
+    },
+    "name": "applications_add_interview",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete job application",
+    },
+    "description": "Permanently delete one job application and its logged interview rounds. There is no undo, so confirm with the user first and never infer this from a status change — a rejected application is still worth keeping, use applications_update_status with 'rejected'. Calendar events booked against it survive but lose the link back.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "description": "Id from applications_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "application_id",
+      ],
+      "type": "object",
+    },
+    "name": "applications_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List document checklist",
+    },
+    "description": "Read the user's document checklist: every item with its document_id, name, category, whether it is required, whether they already have it, notes and expiry date, plus an overall progress percentage. USE THIS FIRST for anything about paperwork — documents_set_status needs a document_id and this is where they come from. Returns null when the user has no checklist yet; in that case offer documents_start_from_country.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "documents_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Set document status",
+    },
+    "description": "Mark one checklist item as obtained or not — the tool for 'my passport is done', 'I still need the transcript'. Needs a document_id from documents_list; that id is a short template key like 'passport', NOT a database id. Set completed true when the user has the document in hand. notes and expiry_date REPLACE what is stored, so omit them to leave them alone. expiry_date is YYYY-MM-DD and matters for documents that lapse (passport, police record, medical check).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "completed": {
+          "description": "True when the user already has this document.",
+          "type": "boolean",
+        },
+        "document_id": {
+          "description": "document_id from documents_list.",
+          "type": "string",
+        },
+        "expiry_date": {
+          "description": "YYYY-MM-DD. Replaces the stored expiry when supplied.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Replaces the stored note when supplied.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "document_id",
+        "completed",
+      ],
+      "type": "object",
+    },
+    "name": "documents_set_status",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List country checklists",
+    },
+    "description": "List the ready-made country document checklists the app ships with — each entry's two-letter country code, label, and how many documents it contains. Call this before documents_start_from_country so you pass a code that actually exists; the set is curated and small, so do not assume a country is present just because the user named it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "documents_list_countries",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Start checklist from country",
+    },
+    "description": "Replace the user's checklist with the ready-made list for one country — use it for 'set up my documents for Japan' or when documents_list returned null. country is the ISO-3166-1 alpha-2 code from documents_list_countries ('ID', 'JP', 'DE'). Items the user had already ticked off keep their completed flag, notes and expiry when the same document_id exists in the new list; anything not in the new list is dropped, so confirm with the user before switching an established checklist to a different country.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "country": {
+          "description": "Two-letter code from documents_list_countries.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "country",
+      ],
+      "type": "object",
+    },
+    "name": "documents_start_from_country",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get roadmap",
+    },
+    "description": "Read the user's active learning roadmap: its career path, overall progress percentage, and every skill with its skill_id, level, status, estimated hours, prerequisites and learning resources. USE THIS FIRST for anything about learning progress — roadmap_set_skill_status and roadmap_toggle_resource both need a skill_id and this is the only place they come from. Returns null when the user has no roadmap yet; offer roadmap_list_templates then. A user has exactly one active roadmap, so there is no id to pass.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "roadmap_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List roadmap templates",
+    },
+    "description": "Browse the public roadmap catalog: slug, title, domain, description, tags, skill count and total estimated hours for each. Use it to answer 'what roadmaps are there' and ALWAYS before roadmap_start_from_template, because that tool takes a slug and an invented one is rejected. This lists what the app ships — it is not a web search, so if nothing matches say so rather than inventing a slug.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "roadmap_list_templates",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Start roadmap from template",
+    },
+    "description": "Start a roadmap from a catalog template — 'begin the React roadmap', 'set my plan to data-engineer'. slug must match roadmap_list_templates exactly (lowercase, hyphenated). This REPLACES any active roadmap and its progress is lost, so when roadmap_get shows an existing roadmap, tell the user what they are about to lose and get a yes first. The template stays bookmarked either way.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "description": "Exact slug from roadmap_list_templates, e.g. 'frontend-react'.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "slug",
+      ],
+      "type": "object",
+    },
+    "name": "roadmap_start_from_template",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Set skill status",
+    },
+    "description": "Move one skill on the active roadmap between not-started, in-progress and completed — the tool for 'I finished React', 'I started learning TypeScript'. Needs a skill_id from roadmap_get; that id is a slug-like template key, NOT a database id, and the status strings are hyphenated ('in-progress', never 'in_progress'). Setting 'completed' stamps the completion time and recomputes the roadmap's overall progress. Use roadmap_toggle_resource instead when the user finished one course or article rather than the whole skill.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "skill_id": {
+          "description": "skill_id from roadmap_get.",
+          "type": "string",
+        },
+        "status": {
+          "description": "New status for this skill.",
+          "enum": [
+            "not-started",
+            "in-progress",
+            "completed",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "skill_id",
+        "status",
+      ],
+      "type": "object",
+    },
+    "name": "roadmap_set_skill_status",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Toggle learning resource",
+    },
+    "description": "Tick one learning resource (a course, book, article or video) inside a skill as done or not done — 'I finished the Dicoding course', 'I read that article'. resource_title must match the resource's title from roadmap_get character for character; there is no fuzzy match and a near-miss is rejected. Note that titles are not unique within a skill, so two identically-titled resources flip together. This does not change the skill's own status — use roadmap_set_skill_status for that.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "completed": {
+          "description": "True when the user has finished this resource.",
+          "type": "boolean",
+        },
+        "resource_title": {
+          "description": "Exact resource title as returned by roadmap_get.",
+          "type": "string",
+        },
+        "skill_id": {
+          "description": "skill_id from roadmap_get.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "skill_id",
+        "resource_title",
+        "completed",
+      ],
+      "type": "object",
+    },
+    "name": "roadmap_toggle_resource",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Reset roadmap",
+    },
+    "description": "Delete the active roadmap and all progress on it. There is no undo and no partial version — confirm with the user first. If they actually want a DIFFERENT roadmap, call roadmap_start_from_template instead; it replaces the old one in a single step. Bookmarked templates survive, so they can start over later.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "roadmap_reset",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List calendar events",
+    },
+    "description": "List the user's calendar entries with their event_id, title, date, time, location, type, notes and reminder. USE THIS FIRST for anything about the schedule — 'what do I have tomorrow', 'when is the Tokopedia interview' — and before calendar_update_event or calendar_delete_event, which both need an event_id. Narrow with from/to (both YYYY-MM-DD, inclusive) instead of listing everything and filtering yourself; omitting both returns the earliest 200 events, which for an established user is mostly the past. date is YYYY-MM-DD and time is HH:MM on a 24-hour clock, both written as the user's own wall clock (Indonesian users, WIB) — do NOT convert to UTC.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "description": "Inclusive start date, YYYY-MM-DD.",
+          "type": "string",
+        },
+        "to": {
+          "description": "Inclusive end date, YYYY-MM-DD.",
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "calendar_list_events",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Create calendar event",
+    },
+    "description": "Put an entry on the user's calendar — use it for anything they mention with a future date or time: an interview, an application deadline, a study session. date is YYYY-MM-DD and time is HH:MM on a 24-hour clock, both written as the user's own wall clock (Indonesian users, WIB) — do NOT convert to UTC. Resolve relative dates ('besok', 'Senin depan') against today before calling. Use type 'interview' for interviews, 'deadline' for cut-off dates, 'reminder' for study or follow-up nudges, 'other' otherwise. When the user gives no hour, default time to '09:00' and say so. reminder_minutes schedules a notification that many minutes before the start (15, 60, 1440 for a day ahead); leave it out when they did not ask to be reminded. application_id links the entry to a tracked job — take it from applications_list.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "description": "Id from applications_list to link this to a job.",
+          "type": "string",
+        },
+        "date": {
+          "description": "YYYY-MM-DD, local wall clock.",
+          "type": "string",
+        },
+        "location": {
+          "description": "Address or meeting URL. Optional.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Anything to prepare.",
+          "type": "string",
+        },
+        "reminder_minutes": {
+          "description": "Notify this many minutes before the start. Omit for no reminder.",
+          "type": "number",
+        },
+        "time": {
+          "description": "HH:MM, 24-hour, local wall clock.",
+          "type": "string",
+        },
+        "title": {
+          "description": "What the entry is.",
+          "type": "string",
+        },
+        "type": {
+          "description": "Entry kind.",
+          "enum": [
+            "interview",
+            "deadline",
+            "reminder",
+            "other",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "title",
+        "date",
+        "time",
+        "type",
+      ],
+      "type": "object",
+    },
+    "name": "calendar_create_event",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update calendar event",
+    },
+    "description": "Change fields on an existing calendar entry — rescheduling, a new location, an added note. Needs an event_id from calendar_list_events. Send ONLY the fields that change; anything omitted is left alone, and every field sent REPLACES the old value rather than appending to it. Moving the date, the time or the reminder re-arms the reminder, so a notification already sent will fire again for the new slot. date is YYYY-MM-DD and time is HH:MM on a 24-hour clock, both written as the user's own wall clock (Indonesian users, WIB) — do NOT convert to UTC.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "description": "New date, YYYY-MM-DD.",
+          "type": "string",
+        },
+        "event_id": {
+          "description": "Id from calendar_list_events.",
+          "type": "string",
+        },
+        "location": {
+          "description": "New location or URL.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Replaces the existing notes.",
+          "type": "string",
+        },
+        "reminder_minutes": {
+          "description": "New lead time in minutes before the start.",
+          "type": "number",
+        },
+        "time": {
+          "description": "New time, HH:MM 24-hour.",
+          "type": "string",
+        },
+        "title": {
+          "description": "New title.",
+          "type": "string",
+        },
+        "type": {
+          "description": "New entry kind.",
+          "enum": [
+            "interview",
+            "deadline",
+            "reminder",
+            "other",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "event_id",
+      ],
+      "type": "object",
+    },
+    "name": "calendar_update_event",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete calendar event",
+    },
+    "description": "Permanently remove one calendar entry. There is no undo, so confirm with the user first. When they are moving something rather than cancelling it, use calendar_update_event — deleting and recreating loses the link to any job application the entry was attached to.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "description": "Id from calendar_list_events.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "event_id",
+      ],
+      "type": "object",
+    },
+    "name": "calendar_delete_event",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List contacts",
+    },
+    "description": "List the user's professional contacts with contact_id, name, role, company, position, email, phone, LinkedIn, notes, whether they are starred, and when the user last spoke to them. USE THIS FIRST for anything about people — every other contacts_* tool needs a contact_id and this is the only place they come from. Also the tool to answer 'who do I know at X' or 'who have I not followed up with'. Capped at 300, most recently added first.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "contacts_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Create contact",
+    },
+    "description": "Add someone to the user's network. name and role are required; role must be one of recruiter, mentor, peer, other — pick 'other' rather than inventing a value. Everything else is optional, so save a contact with just a name rather than interrogating the user for fields they did not offer. Check contacts_list first when the person may already be there: this always inserts a new row and will happily create a duplicate.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "description": "Where they work.",
+          "type": "string",
+        },
+        "email": {
+          "description": "Email address.",
+          "type": "string",
+        },
+        "favorite": {
+          "description": "Star this contact. Defaults to false.",
+          "type": "boolean",
+        },
+        "linkedin_url": {
+          "description": "LinkedIn profile URL.",
+          "type": "string",
+        },
+        "name": {
+          "description": "Full name.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "How they met, what was discussed, follow-ups.",
+          "type": "string",
+        },
+        "phone": {
+          "description": "Phone number.",
+          "type": "string",
+        },
+        "position": {
+          "description": "Their job title.",
+          "type": "string",
+        },
+        "role": {
+          "description": "How this person relates to the user's job search.",
+          "enum": [
+            "recruiter",
+            "mentor",
+            "peer",
+            "other",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "name",
+        "role",
+      ],
+      "type": "object",
+    },
+    "name": "contacts_create",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update contact",
+    },
+    "description": "Edit an existing contact — a job change, a new email, a starred flag. Needs a contact_id from contacts_list. Send ONLY the fields that change; every field sent REPLACES the stored value, so passing notes wipes the previous note instead of appending to it. Read the current notes with contacts_list and send the merged text when the user wants to add to them. Use contacts_log_interaction, not this, when all that happened is that they talked.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "description": "New company.",
+          "type": "string",
+        },
+        "contact_id": {
+          "description": "Id from contacts_list.",
+          "type": "string",
+        },
+        "email": {
+          "description": "New email.",
+          "type": "string",
+        },
+        "favorite": {
+          "description": "Star or unstar.",
+          "type": "boolean",
+        },
+        "linkedin_url": {
+          "description": "New LinkedIn URL.",
+          "type": "string",
+        },
+        "name": {
+          "description": "New name.",
+          "type": "string",
+        },
+        "notes": {
+          "description": "Replaces the stored notes.",
+          "type": "string",
+        },
+        "phone": {
+          "description": "New phone number.",
+          "type": "string",
+        },
+        "position": {
+          "description": "New job title.",
+          "type": "string",
+        },
+        "role": {
+          "description": "New relationship type.",
+          "enum": [
+            "recruiter",
+            "mentor",
+            "peer",
+            "other",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "contact_id",
+      ],
+      "type": "object",
+    },
+    "name": "contacts_update",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Log contact interaction",
+    },
+    "description": "Stamp a contact as spoken-to just now — the tool for 'I messaged Budi today', 'just had a call with my mentor'. This only moves the last-contacted timestamp that drives the 'who have I gone quiet on' view; it writes no note. When the user also says WHAT was discussed, call contacts_update with the merged notes as well.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "contact_id": {
+          "description": "Id from contacts_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "contact_id",
+      ],
+      "type": "object",
+    },
+    "name": "contacts_log_interaction",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete contact",
+    },
+    "description": "Permanently remove one contact and everything recorded about them. There is no undo, so confirm with the user first — and prefer contacts_update when they only want to correct or unstar the entry.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "contact_id": {
+          "description": "Id from contacts_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "contact_id",
+      ],
+      "type": "object",
+    },
+    "name": "contacts_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List portfolio",
+    },
+    "description": "List the user's portfolio entries: item_id, title, description, category, date, whether it is featured, links, tech stack, role, client, outcomes and skills. USE THIS FIRST for anything about the user's work or proof of experience — portfolio_update and portfolio_delete both need an item_id and this is the only place they come from. Uploaded images and files are reported only as a count; the assistant cannot read or attach them. Capped at 200, most recently added first.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "portfolio_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Create portfolio item",
+    },
+    "description": "Add one portfolio entry — a project, certification, talk, publication, award. title, description, category and date are required. category MUST be one of the listed values, spelled exactly ('openSource' is camelCase); use 'other' rather than inventing one. date is free text but write it as YYYY-MM or YYYY so entries sort sensibly. link is the single main URL (repo, live site, certificate); it does not carry images — attach those with portfolio_set_media after creating the entry. featured pins the entry to the top of the grid and to the user's public page — leave it off unless they ask.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "description": "Kind of work. Exact spelling required.",
+          "enum": [
+            "project",
+            "certification",
+            "publication",
+            "design",
+            "writing",
+            "speaking",
+            "award",
+            "openSource",
+            "volunteer",
+            "music",
+            "photography",
+            "teaching",
+            "research",
+            "video",
+            "other",
+          ],
+          "type": "string",
+        },
+        "client": {
+          "description": "Client or organisation.",
+          "type": "string",
+        },
+        "date": {
+          "description": "When it happened. Prefer YYYY-MM or YYYY.",
+          "type": "string",
+        },
+        "description": {
+          "description": "What it was and what the user did.",
+          "type": "string",
+        },
+        "featured": {
+          "description": "Pin to the top. Defaults to false.",
+          "type": "boolean",
+        },
+        "link": {
+          "description": "Main URL. Optional.",
+          "type": "string",
+        },
+        "role": {
+          "description": "The user's role on it, e.g. 'Lead developer'.",
+          "type": "string",
+        },
+        "tech_stack": {
+          "description": "Tools or technologies used.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "title": {
+          "description": "Name of the work.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "title",
+        "description",
+        "category",
+        "date",
+      ],
+      "type": "object",
+    },
+    "name": "portfolio_create",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update portfolio item",
+    },
+    "description": "Edit one portfolio entry, including pinning or unpinning it with featured. Needs an item_id from portfolio_list. Send ONLY the fields that change; every field sent REPLACES the stored value, and tech_stack replaces the whole array rather than appending — read the current list with portfolio_list and send the merged one. Uploaded media and typed links are untouched by this tool and can only be changed in the web app.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "description": "New category, exact spelling.",
+          "enum": [
+            "project",
+            "certification",
+            "publication",
+            "design",
+            "writing",
+            "speaking",
+            "award",
+            "openSource",
+            "volunteer",
+            "music",
+            "photography",
+            "teaching",
+            "research",
+            "video",
+            "other",
+          ],
+          "type": "string",
+        },
+        "client": {
+          "description": "New client.",
+          "type": "string",
+        },
+        "date": {
+          "description": "New date.",
+          "type": "string",
+        },
+        "description": {
+          "description": "New description.",
+          "type": "string",
+        },
+        "featured": {
+          "description": "Pin or unpin.",
+          "type": "boolean",
+        },
+        "item_id": {
+          "description": "Id from portfolio_list.",
+          "type": "string",
+        },
+        "link": {
+          "description": "New main URL.",
+          "type": "string",
+        },
+        "role": {
+          "description": "New role.",
+          "type": "string",
+        },
+        "tech_stack": {
+          "description": "Replaces the whole tech stack list.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "title": {
+          "description": "New title.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "item_id",
+      ],
+      "type": "object",
+    },
+    "name": "portfolio_update",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete portfolio item",
+    },
+    "description": "Permanently delete one portfolio entry, including any media attached to it in the web app. There is no undo, so confirm with the user first — and use portfolio_update with featured false when all they want is to take it off their public page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "description": "Id from portfolio_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "item_id",
+      ],
+      "type": "object",
+    },
+    "name": "portfolio_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Attach media to portfolio entry",
+    },
+    "description": "Attach images (or PDFs) from the user's Content Library to a portfolio entry, and set its thumbnail. This is the step that puts a picture on a project card: upload with files_upload_url + files_register first, then pass those file_ids here. The FIRST image becomes the thumbnail shown on the card and on the user's public page. It REPLACES whatever media the entry already had rather than adding to it, so pass the complete list you want — including any existing file_ids from files_list if you are adding to a set. Pass an empty list to strip the media and the thumbnail off entirely.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "caption": {
+          "description": "Optional caption applied to the attached media. Max 200 characters.",
+          "type": "string",
+        },
+        "file_ids": {
+          "description": "Ids from files_list, in display order. First image becomes the thumbnail. Empty list removes all media.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "item_id": {
+          "description": "Id from portfolio_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "item_id",
+        "file_ids",
+      ],
+      "type": "object",
+    },
+    "name": "portfolio_set_media",
+  },
+  {
+    "_meta": {
+      "openai/fileParams": [
+        "file",
+      ],
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false,
+      "title": "Attach an image to a portfolio entry",
+    },
+    "description": "Attach an image you have generated or the user has provided to one of their portfolio entries, and optionally make it that entry's thumbnail. Use this whenever the user wants a picture on a project — it takes the image directly, so there is no upload step to arrange. Pass usage='thumbnail' to put it on the card, 'gallery' to add it to the entry's images, or 'attachment' for a supporting file. It ADDS to whatever media the entry already has and never removes any, so it is safe to call more than once; use portfolio_set_media instead when the user wants to reorder or remove existing media. The image MUST be image/webp and at most 10MB — this app stores every image as WebP, so convert before attaching; a PNG or JPEG is refused.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "caption": {
+          "description": "Optional caption. Max 200 characters.",
+          "type": "string",
+        },
+        "file": {
+          "additionalProperties": false,
+          "properties": {
+            "download_url": {
+              "description": "Temporary URL the server fetches the bytes from.",
+              "type": "string",
+            },
+            "file_id": {
+              "description": "Host-side identifier for the file.",
+              "type": "string",
+            },
+            "file_name": {
+              "description": "Declared file name. Advisory only.",
+              "type": "string",
+            },
+            "mime_type": {
+              "description": "Declared content type. Advisory only.",
+              "type": "string",
+            },
+          },
+          "required": [
+            "download_url",
+            "file_id",
+          ],
+          "type": "object",
+        },
+        "item_id": {
+          "description": "Id from portfolio_list.",
+          "type": "string",
+        },
+        "usage": {
+          "description": "Where the image goes. Defaults to gallery.",
+          "enum": [
+            "thumbnail",
+            "gallery",
+            "attachment",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "item_id",
+        "file",
+      ],
+      "type": "object",
+    },
+    "name": "portfolio_attach_media",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List interview sessions",
+    },
+    "description": "List the user's mock interview sessions, newest first: role, type, difficulty, how many questions were answered, the overall score, and when the session started and finished. USE THIS FIRST for any question about interview practice ('how am I doing', 'what did I score last time') and to get an interview_id for the other mock_interview_* tools. Returns a summary only — call mock_interview_get for the questions and answers of one session.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "description": "How many sessions to return. Default 20, max 100.",
+          "type": "number",
+        },
+      },
+      "type": "object",
+    },
+    "name": "mock_interview_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get interview session",
+    },
+    "description": "Read one practice session in full: every question with the answer the user gave, the feedback it got and its score, plus the closing feedback. Use it before commenting on how someone answered, so the critique is about what they actually said. Each question carries a \`number\` — that is what mock_interview_answer takes. Returns null if no session with that id belongs to the user.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "interview_id": {
+          "description": "Id from mock_interview_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "interview_id",
+      ],
+      "type": "object",
+    },
+    "name": "mock_interview_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Start interview session",
+    },
+    "description": "Open a practice session with the questions YOU wrote, then ask them one at a time in the conversation. Call this before asking the first question, not after the interview — the session is saved as you go, so a chat that ends early still leaves the user their answers. Write the questions in the language the user is speaking (usually Indonesian) and tailor them to the role. Returns interview_id and question_count; questions are then addressed by position, 1..question_count. Do not use this to record a session that already happened elsewhere.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "difficulty": {
+          "description": "Question difficulty.",
+          "enum": [
+            "easy",
+            "medium",
+            "hard",
+          ],
+          "type": "string",
+        },
+        "questions": {
+          "description": "1-50 questions, asked in this order.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "category": {
+                "description": "Short label for what this one probes, e.g. 'System Design'. Max 50 characters.",
+                "type": "string",
+              },
+              "question": {
+                "description": "The question text. Max 1000 characters.",
+                "type": "string",
+              },
+            },
+            "required": [
+              "question",
+              "category",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+        "role": {
+          "description": "The position being practised for, e.g. 'Backend Engineer'. Max 100 characters.",
+          "type": "string",
+        },
+        "type": {
+          "description": "Which kind of questions this session is made of.",
+          "enum": [
+            "behavioral",
+            "technical",
+            "situational",
+            "company-specific",
+            "general",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "role",
+        "type",
+        "difficulty",
+        "questions",
+      ],
+      "type": "object",
+    },
+    "name": "mock_interview_start",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Record interview answer",
+    },
+    "description": "Save the user's answer to one question of an open session, together with your critique of it. Call this right after they answer, before you ask the next question — that way the feedback is on record even if the conversation stops. question_number is the 1-based position from mock_interview_start or mock_interview_get. score is 0-100 for THIS answer (the app shows it per question); omit it if you are not scoring. Calling it again for the same number overwrites that answer.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "description": "What the user said, in their own words. Max 5000 characters.",
+          "type": "string",
+        },
+        "feedback": {
+          "description": "Your critique of this answer — what worked, what to fix. Same language as the answer. Max 5000 characters.",
+          "type": "string",
+        },
+        "interview_id": {
+          "description": "Id from mock_interview_start or mock_interview_list.",
+          "type": "string",
+        },
+        "question_number": {
+          "description": "1-based position of the question being answered.",
+          "type": "number",
+        },
+        "score": {
+          "description": "0-100 for this answer. Omit if not scoring.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "interview_id",
+        "question_number",
+        "answer",
+      ],
+      "type": "object",
+    },
+    "name": "mock_interview_answer",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Finish interview session",
+    },
+    "description": "Close a session with an overall 0-100 score and a summary of how the user did. Call it once, after the last answer is saved — this is what makes the session count as completed in the dashboard's average-score and practice-time stats. The elapsed time is measured from when the session was opened, so do not try to supply it. Write the summary in the language the interview was held in.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "feedback": {
+          "description": "Closing summary: strengths, weak spots, what to practise next. Max 5000 characters.",
+          "type": "string",
+        },
+        "interview_id": {
+          "description": "Id from mock_interview_start or mock_interview_list.",
+          "type": "string",
+        },
+        "overall_score": {
+          "description": "0-100 for the session as a whole.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "interview_id",
+        "overall_score",
+        "feedback",
+      ],
+      "type": "object",
+    },
+    "name": "mock_interview_finish",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete interview session",
+    },
+    "description": "Permanently delete one practice session and every answer in it. There is no undo and no export first. Only call it when the user asked for that specific session to be removed; to hide a bad result from an average, tell them the score instead.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "interview_id": {
+          "description": "Id from mock_interview_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "interview_id",
+      ],
+      "type": "object",
+    },
+    "name": "mock_interview_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List budget lines",
+    },
+    "description": "List the user's monthly budget lines — every expense and savings envelope with its amount — plus the totals for each kind. USE THIS FIRST for any money question ('how much do I spend a month', 'can I afford X') and to get the budget_id the other budget_* tools need. Amounts are monthly and in Indonesian rupiah.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "budget_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Add budget line",
+    },
+    "description": "Add one monthly budget line, e.g. the user says 'tambah cicilan motor 800rb'. Read budget_list first and update the existing line instead if one already covers this — duplicates quietly double the totals the user plans against. value is a whole number of rupiah per MONTH (800rb → 800000, 1,2jt → 1200000); convert any 'per year' or 'per week' figure yourself. kind splits the two totals: money going out is 'expense', money set aside is 'savings'.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "description": "Chart colour as #rrggbb hex. Defaults to a neutral slate grey.",
+          "type": "string",
+        },
+        "icon": {
+          "description": "Icon shown next to the line. Pick the closest fit; defaults to Wallet.",
+          "enum": [
+            "Home",
+            "Utensils",
+            "Car",
+            "Zap",
+            "Film",
+            "MoreHorizontal",
+            "PiggyBank",
+            "ShoppingCart",
+            "Heart",
+            "Book",
+            "Briefcase",
+            "Wallet",
+            "CreditCard",
+            "Gift",
+            "Plane",
+            "Stethoscope",
+          ],
+          "type": "string",
+        },
+        "kind": {
+          "description": "'expense' for spending, 'savings' for money put aside.",
+          "enum": [
+            "expense",
+            "savings",
+          ],
+          "type": "string",
+        },
+        "label": {
+          "description": "What this line is, in the user's own words. Max 40 characters.",
+          "type": "string",
+        },
+        "value": {
+          "description": "Rupiah per month, whole number, max 1000000000.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "label",
+        "value",
+        "kind",
+      ],
+      "type": "object",
+    },
+    "name": "budget_add",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update budget line",
+    },
+    "description": "Change one existing budget line — the tool for 'naikkan cicilan jadi 1jt' or 'ganti label X jadi Y'. Send only the fields that change; anything omitted is left alone. value replaces the old amount, it is not added to it. Needs a budget_id from budget_list.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_id": {
+          "description": "Id from budget_list.",
+          "type": "string",
+        },
+        "color": {
+          "description": "New colour as #rrggbb hex.",
+          "type": "string",
+        },
+        "icon": {
+          "description": "New icon.",
+          "enum": [
+            "Home",
+            "Utensils",
+            "Car",
+            "Zap",
+            "Film",
+            "MoreHorizontal",
+            "PiggyBank",
+            "ShoppingCart",
+            "Heart",
+            "Book",
+            "Briefcase",
+            "Wallet",
+            "CreditCard",
+            "Gift",
+            "Plane",
+            "Stethoscope",
+          ],
+          "type": "string",
+        },
+        "kind": {
+          "description": "Move the line between the expense and savings totals.",
+          "enum": [
+            "expense",
+            "savings",
+          ],
+          "type": "string",
+        },
+        "label": {
+          "description": "New label. Max 40 characters.",
+          "type": "string",
+        },
+        "value": {
+          "description": "New rupiah-per-month amount, replacing the old one.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "budget_id",
+      ],
+      "type": "object",
+    },
+    "name": "budget_update",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete budget line",
+    },
+    "description": "Permanently remove one budget line. There is no undo. When a cost has merely gone down, use budget_update instead — deleting it loses the record that the user was ever tracking it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_id": {
+          "description": "Id from budget_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "budget_id",
+      ],
+      "type": "object",
+    },
+    "name": "budget_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get financial plan",
+    },
+    "description": "Read the user's relocation / salary plan: target salary and location, monthly expense breakdown, one-off relocation costs, the timeline in months, and the readiness score the app computed from all of it (0-100, where 100 means the money can be saved inside the timeline). Use it for 'am I financially ready to move' or 'what is my target salary'. Returns null when the user has not filled the calculator in — say so rather than guessing, and point them at the Kalkulator Keuangan page. There is no tool to write this; only the app's own calculator can.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "financial_plan_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List career goals",
+    },
+    "description": "List the user's career goals with their target date, status, percent progress and every milestone. USE THIS FIRST for anything about goals or progress ('what am I working towards', 'am I on track') and to get the goal_id and milestone numbers the other goals_* tools need. Returns all goals; a person keeps a handful, so there is no pagination.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "goals_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Create career goal",
+    },
+    "description": "Create a career goal with a target date and the milestones that make it up. Break the goal into concrete, checkable steps — milestones are how progress is measured, and a goal with none stays at 0% forever. Write title, description and milestones in the language the user is speaking (usually Indonesian). Progress and status are derived from the milestones, so do not try to set them.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "description": "Free-text grouping the user's own dashboard shows, e.g. 'Karir', 'Skill', 'Finansial'. Max 50 characters.",
+          "type": "string",
+        },
+        "description": {
+          "description": "What reaching it means, and why. Max 2000 characters.",
+          "type": "string",
+        },
+        "milestones": {
+          "description": "Ordered checkable steps, up to 20. Each is one short line; they are referred to later by 1-based position.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "target_date": {
+          "description": "Deadline as an ISO date, e.g. 2026-12-31.",
+          "type": "string",
+        },
+        "title": {
+          "description": "Short name for the goal. Max 120 characters.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "title",
+        "description",
+        "category",
+        "target_date",
+        "milestones",
+      ],
+      "type": "object",
+    },
+    "name": "goals_create",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Set milestone state",
+    },
+    "description": "Tick or untick one milestone. This is how a goal advances: the percentage and the active/completed status are recomputed from the milestones, so use it whenever the user says they finished (or has to redo) a step. milestone_number is the 1-based position shown by goals_list. Returns the goal's new progress.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "completed": {
+          "description": "true to tick it, false to untick.",
+          "type": "boolean",
+        },
+        "goal_id": {
+          "description": "Id from goals_list.",
+          "type": "string",
+        },
+        "milestone_number": {
+          "description": "1-based position of the milestone within the goal.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "goal_id",
+        "milestone_number",
+        "completed",
+      ],
+      "type": "object",
+    },
+    "name": "goals_set_milestone",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete career goal",
+    },
+    "description": "Permanently delete one goal and all of its milestones. There is no undo. A goal the user has given up on is usually better left in place — the record of what was attempted is the point — so only call this when they ask for that specific goal to be removed.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "goal_id": {
+          "description": "Id from goals_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "goal_id",
+      ],
+      "type": "object",
+    },
+    "name": "goals_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get profile",
+    },
+    "description": "Read the user's career profile: full name, location, the role they are targeting, experience level, bio, skills, interests, preferred industries, their LinkedIn and portfolio links, whether their public CareerPack page is live (and its URL), and whether they get the weekly job digest. USE THIS FIRST before giving any career advice, writing anything in their voice, or judging whether a job suits them — it is the cheapest way to stop guessing. Returns null if they have not completed onboarding.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "profile_get",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update profile",
+    },
+    "description": "Update the career profile. Send only the fields that change; anything omitted is left alone. Every field REPLACES the stored value rather than merging — to add one skill, read profile_get and send the whole list back with the new entry, or the others are lost. target_role and skills are what the job matcher scores against, so keeping them current is what makes its recommendations useful. Write bio in the user's own language (usually Indonesian). Fails if the user has not completed onboarding yet — send them to the app for that.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "bio": {
+          "description": "One or two sentences about them. Max 600 characters. Send an empty string to clear it.",
+          "type": "string",
+        },
+        "experience_level": {
+          "description": "One of junior, mid-level, senior, lead — the matcher compares this against a listing's seniority.",
+          "type": "string",
+        },
+        "full_name": {
+          "description": "Max 120 characters.",
+          "type": "string",
+        },
+        "interests": {
+          "description": "COMPLETE replacement list, up to 50 entries of 60 characters.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "location": {
+          "description": "City and country, e.g. 'Jakarta, Indonesia'. Max 120 characters.",
+          "type": "string",
+        },
+        "skills": {
+          "description": "COMPLETE replacement list, up to 50 entries of 60 characters. Short technical terms ('React', 'SQL'), not sentences.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "target_role": {
+          "description": "The position they are looking for, e.g. 'Backend Engineer'. Max 120 characters.",
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "profile_update",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List job listings",
+    },
+    "description": "Browse job listings: title, company, location, work mode, seniority, salary range, required skills and a 300-character description preview. The feed is shared by every CareerPack user (imported from RemoteOK and WeWorkRemotely, plus listings people paste in) — set mine=true to see only the ones THIS user saved. Use it to answer 'what is out there' and to get the job_id matcher_scan_ats needs. The preview is truncated; the ATS scan reads the full text server-side, so there is no need to fetch more.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "description": "How many listings to return. Default 15, max 50.",
+          "type": "number",
+        },
+        "mine": {
+          "description": "true returns only listings this user added. Default false (the shared feed).",
+          "type": "boolean",
+        },
+        "work_mode": {
+          "description": "Filter by work mode. Omit for all.",
+          "enum": [
+            "remote",
+            "hybrid",
+            "onsite",
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "matcher_list_jobs",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Save job listing",
+    },
+    "description": "Save a job the user found elsewhere, so it can be scanned against their CV and kept alongside the rest. YOU do the parsing: read the posting the user pasted and fill these fields in — there is no AI parser behind this tool and none is needed. Keep \`description\` as the substantive requirements text, at least 40 characters, because that is what the ATS scan scores against; a one-line summary produces a meaningless score. The listing is marked as the user's own and appears under mine=true.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "apply_url": {
+          "description": "Link to apply. Must start with http:// or https://.",
+          "type": "string",
+        },
+        "category": {
+          "description": "Functional area, for the badge on the job card.",
+          "enum": [
+            "engineering",
+            "design",
+            "support",
+            "product",
+            "marketing",
+            "data",
+          ],
+          "type": "string",
+        },
+        "company": {
+          "description": "Company name. Max 200 characters.",
+          "type": "string",
+        },
+        "currency": {
+          "description": "Currency of the salary range, e.g. IDR or USD.",
+          "type": "string",
+        },
+        "description": {
+          "description": "The requirements and responsibilities, 40-8000 characters. This is what the ATS scan reads — keep the real wording.",
+          "type": "string",
+        },
+        "employment_type": {
+          "description": "Contract shape.",
+          "enum": [
+            "full-time",
+            "part-time",
+            "contract",
+            "internship",
+          ],
+          "type": "string",
+        },
+        "location": {
+          "description": "City/country, or 'Remote'. Max 120 characters.",
+          "type": "string",
+        },
+        "required_skills": {
+          "description": "5-15 short technical terms as written in the posting ('React', 'Node.js', 'SQL'), up to 30.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "salary_max": {
+          "description": "Upper bound, raw number.",
+          "type": "number",
+        },
+        "salary_min": {
+          "description": "Lower bound, raw number.",
+          "type": "number",
+        },
+        "seniority": {
+          "description": "Level, inferred from the title and required experience.",
+          "enum": [
+            "junior",
+            "mid-level",
+            "senior",
+            "lead",
+          ],
+          "type": "string",
+        },
+        "title": {
+          "description": "Position title. Max 200 characters.",
+          "type": "string",
+        },
+        "work_mode": {
+          "description": "Work mode.",
+          "enum": [
+            "remote",
+            "hybrid",
+            "onsite",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "title",
+        "company",
+        "location",
+        "work_mode",
+        "employment_type",
+        "seniority",
+        "description",
+        "required_skills",
+      ],
+      "type": "object",
+    },
+    "name": "matcher_add_job",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false,
+      "title": "Run ATS scan",
+    },
+    "description": "Score one of the user's CVs against one job description the way an applicant tracking system would, and save the result. Give it a cv_id (from cv_list) plus EITHER a job_id from matcher_list_jobs OR the description text in jd_text — not both; job_id is preferred because the stored listing is the full posting. Returns the score and grade; call matcher_get_scan afterwards for the keyword-by-keyword breakdown. THIS ONE COSTS: it runs a server-side AI call against a shared budget, so use it when the user asks how well they match a specific job, not to survey a list of them. If it comes back saying the limit is reached, tell the user what it said — the wait is real and retrying immediately just fails again.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cv_id": {
+          "description": "Id from cv_list.",
+          "type": "string",
+        },
+        "jd_text": {
+          "description": "Raw job description, at least 40 characters. Use only when the job is not in the feed.",
+          "type": "string",
+        },
+        "job_company": {
+          "description": "Company to file the scan under. Used only with jd_text.",
+          "type": "string",
+        },
+        "job_id": {
+          "description": "Id from matcher_list_jobs. Preferred over jd_text.",
+          "type": "string",
+        },
+        "job_title": {
+          "description": "Title to file the scan under. Used only with jd_text; ignored when job_id is given.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "cv_id",
+      ],
+      "type": "object",
+    },
+    "name": "matcher_scan_ats",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List ATS scans",
+    },
+    "description": "List past ATS scans, newest first: which CV was scanned against which job, the score and grade, and when. Use it for 'what did I score' or to track whether CV edits are helping, and to get the scan_id for matcher_get_scan. Reading history is free — prefer it over re-running matcher_scan_ats on a job that was already scanned.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "description": "How many scans to return. Default 10, max 50.",
+          "type": "number",
+        },
+      },
+      "type": "object",
+    },
+    "name": "matcher_list_scans",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get ATS scan",
+    },
+    "description": "Read one ATS scan in full: the five sub-scores (keyword coverage, hard skills, experience fit, section completeness, parseability), which keywords were matched and which are missing, formatting problems, and the recommendations. This is what turns a bare number into advice — use it whenever the user asks why a score is what it is or how to raise it. Costs nothing; the AI work was done when the scan ran. Returns null if no scan with that id belongs to the user.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "scan_id": {
+          "description": "Id from matcher_list_scans.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "scan_id",
+      ],
+      "type": "object",
+    },
+    "name": "matcher_get_scan",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List library files",
+    },
+    "description": "List every file the user has uploaded to their Content Library: name, MIME type, size in bytes, their tags and note, and when it was added — newest first. Use it to answer 'what have I uploaded' or to find the file_id the other files_* tools need. The CONTENTS are not readable through MCP and neither is a download link, so answer from the name, type and note only; if the user wants what is inside a PDF, ask them to paste it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "files_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Update file metadata",
+    },
+    "description": "Rename a library file or change its tags and note — the tool for tidying up ('tag this one as portfolio', 'rename it to CV 2026'). Send only what changes. tags REPLACE the existing list rather than being added to it, so read files_list first and send the full set; they are lowercased and de-duplicated, up to 20 of 30 characters. Send an empty string as note to clear it. This only touches labels; the file itself is untouched.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "description": "Id from files_list.",
+          "type": "string",
+        },
+        "file_name": {
+          "description": "New display name. Max 200 characters.",
+          "type": "string",
+        },
+        "note": {
+          "description": "Free-text note about the file. Max 500 characters; empty string clears it.",
+          "type": "string",
+        },
+        "tags": {
+          "description": "COMPLETE replacement list of tags.",
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      },
+      "required": [
+        "file_id",
+      ],
+      "type": "object",
+    },
+    "name": "files_set_metadata",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete file",
+    },
+    "description": "Permanently delete one file — both the library entry and the stored bytes. This cannot be undone and the file cannot be re-created from anything CareerPack still holds; only call it when the user names that file and asks for it gone. It refuses, naming what it found, if the file is still used as a CV or profile photo, in a portfolio item, or as proof attached to a CV claim, because deleting it there would leave something broken the user cannot fix from here. Detaching it in the app first is the way through.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "description": "Id from files_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "file_id",
+      ],
+      "type": "object",
+    },
+    "name": "files_delete",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Get upload URL",
+    },
+    "description": "Step 1 of 2 for putting a NEW file in the Content Library. Returns a one-shot upload_url; PUT the raw bytes to it with the file's Content-Type, read the storage_id out of the JSON response, then call files_register with that storage_id to make it a library entry. Nothing is saved until you call files_register — an upload_url you never use leaves no trace. Images MUST be image/webp and at most 10 MB; documents MUST be application/pdf and at most 50 MB. Those are the same limits the app enforces, so converting a PNG or JPEG to WebP first is on you.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "files_upload_url",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Register uploaded file",
+    },
+    "description": "Step 2 of 2: turn bytes you already PUT to a files_upload_url into a Content Library entry the user can see and reuse. storage_id is the value the upload response returned. file_name is what the user will see in their library — give it a real name, not 'upload.webp'. file_type must match what you uploaded (image/webp or application/pdf) and file_size is the byte count. Refuses if the blob was never uploaded, so call it after the PUT succeeds, not before.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_name": {
+          "description": "Display name. Max 200 characters.",
+          "type": "string",
+        },
+        "file_size": {
+          "description": "Size in bytes.",
+          "type": "number",
+        },
+        "file_type": {
+          "description": "MIME type: image/webp or application/pdf.",
+          "type": "string",
+        },
+        "storage_id": {
+          "description": "From the upload response.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "storage_id",
+        "file_name",
+        "file_type",
+        "file_size",
+      ],
+      "type": "object",
+    },
+    "name": "files_register",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get temporary file link",
+    },
+    "description": "Get a temporary link to the actual contents of one library file, so you can look at an image or hand the user a preview. The link EXPIRES ONE HOUR after it is issued and only works for this user's own files — treat it as short-lived, do not store it, and mint a fresh one rather than reusing an old one. Ask for it only when you genuinely need to see the file; the name, type and note from files_list answer most questions on their own.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "description": "Id from files_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "file_id",
+      ],
+      "type": "object",
+    },
+    "name": "files_read_url",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List notifications",
+    },
+    "description": "List the user's notifications, newest first: type, title, message, whether it has been read, and when it arrived. Use it for 'what did I miss' or 'anything new', and to get the notification_id the other notifications_* tools need. Set unread_only to answer 'what have I not seen yet' — that filter is applied in the index, so it really does return the newest UNREAD ones rather than the unread few among the newest.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "description": "How many to return. Default 20, max 50.",
+          "type": "number",
+        },
+        "unread_only": {
+          "description": "true returns only unread notifications. Default false.",
+          "type": "boolean",
+        },
+      },
+      "type": "object",
+    },
+    "name": "notifications_list",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Mark notification read",
+    },
+    "description": "Mark one notification as read. Use it after telling the user what a specific notification said, so the app's badge matches what they actually know about. Marking read only changes the badge — the notification stays in the inbox and can still be listed.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "notification_id": {
+          "description": "Id from notifications_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "notification_id",
+      ],
+      "type": "object",
+    },
+    "name": "notifications_mark_read",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Mark all notifications read",
+    },
+    "description": "Mark every unread notification as read and return how many were changed. This is the tool for 'clear the badge' / 'tandai semua sudah dibaca'. Nothing is deleted. Read them out with notifications_list before calling if the user has not seen them yet, or they lose track of what was there.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "notifications_mark_all_read",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete notification",
+    },
+    "description": "Permanently delete one notification. There is no undo. To clear the unread badge use notifications_mark_read instead — that keeps the message where the user can find it again.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "notification_id": {
+          "description": "Id from notifications_list.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "notification_id",
+      ],
+      "type": "object",
+    },
+    "name": "notifications_delete",
+  },
+]
+`;

@@ -1,14 +1,14 @@
 import type { ActionCtx } from "../_generated/server";
 import {
-  MCP_PROTOCOL_VERSION,
   RPC_ERROR,
   SERVER_INFO,
   type JsonRpcRequest,
   type JsonRpcResponse,
   type McpAuth,
+  negotiateProtocolVersion,
   satisfiesScope,
 } from "./types";
-import { TOOLS, TOOL_BY_NAME } from "./tools";
+import { TOOL_BY_NAME, toolDescriptors } from "./tools";
 
 /**
  * JSON-RPC dispatch for the MCP endpoint.
@@ -43,9 +43,26 @@ function toolError(id: string | number | null, message: string): JsonRpcResponse
   });
 }
 
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * The text block is what every current client reads and it is deliberately
+ * unchanged. `structuredContent` (added in protocol 2025-06-18) carries the
+ * SAME object reference, so the two cannot drift apart.
+ *
+ * Emitted only for a plain object, because that revision defines
+ * structuredContent as a JSON object. Seven read tools return a bare `null`
+ * when the record does not exist — for four of them (`profile_get`,
+ * `roadmap_get`, `documents_list`, `financial_plan_get`) null is the day-one
+ * state of every new user. Those calls simply carry no structuredContent,
+ * which is legal precisely because no tool here declares an `outputSchema`.
+ * See `convex/mcp/contract.test.ts` for why declaring one would be a downgrade.
+ */
 function toolOk(id: string | number | null, payload: unknown): JsonRpcResponse {
   return ok(id, {
     content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+    ...(isPlainObject(payload) ? { structuredContent: payload } : {}),
     isError: false,
   });
 }
@@ -74,7 +91,9 @@ export async function dispatchJsonRpc(
   switch (method) {
     case "initialize":
       return ok(id, {
-        protocolVersion: MCP_PROTOCOL_VERSION,
+        protocolVersion: negotiateProtocolVersion(
+          (req.params as { protocolVersion?: unknown } | undefined)?.protocolVersion,
+        ),
         capabilities: { tools: { listChanged: false } },
         serverInfo: SERVER_INFO,
       });
@@ -83,15 +102,7 @@ export async function dispatchJsonRpc(
       return ok(id, {});
 
     case "tools/list":
-      return ok(id, {
-        tools: TOOLS.map((t) => ({
-          name: t.name,
-          description: t.description,
-          inputSchema: t.inputSchema,
-          annotations: t.annotations,
-          ...(t.meta ? { _meta: t.meta } : {}),
-        })),
-      });
+      return ok(id, { tools: toolDescriptors() });
 
     case "tools/call": {
       const params = (req.params ?? {}) as {

@@ -120,6 +120,21 @@ export const TOOL_BY_NAME: ReadonlyMap<string, ResolvedTool> = new Map(
   RESOLVED_TOOLS.map((t) => [t.name, t]),
 );
 
+/**
+ * The exact `tools/list` payload — the whole model-facing contract, in one
+ * place so the dispatcher and the snapshot test cannot describe different
+ * things. A test that rebuilt this mapping itself would keep passing while
+ * the wire format drifted underneath it.
+ */
+export const toolDescriptors = (): Array<Record<string, unknown>> =>
+  RESOLVED_TOOLS.map((t) => ({
+    name: t.name,
+    description: t.description,
+    inputSchema: t.inputSchema,
+    annotations: t.annotations,
+    ...(t.meta ? { _meta: t.meta } : {}),
+  }));
+
 // Two domains picking the same name (`documents_list`) would silently
 // shadow one another in the Map, and the losing tool would be listed to the
 // model but dispatch to the winner. Fail at module load instead.
