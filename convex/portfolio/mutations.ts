@@ -434,3 +434,68 @@ export const mcpDelete = internalMutation({
     return { deleted: true, title: item.title };
   },
 });
+
+/**
+ * Attach Content Library files to a portfolio item as its gallery.
+ *
+ * Takes `files` ROW ids, not storage ids — same reason every other MCP surface
+ * does: a storageId fetches the blob from anywhere forever, and a tool's return
+ * value lands in a third party's transcript. The storageId is resolved here,
+ * server-side, and never crosses the wire.
+ *
+ * REPLACES the gallery rather than appending. A model that cannot see the
+ * current state would otherwise duplicate images on every retry, and "set it to
+ * these three" is the instruction a person actually gives.
+ */
+export const mcpSetMedia = internalMutation({
+  args: {
+    userId: v.id("users"),
+    itemId: v.id("portfolioItems"),
+    fileIds: v.array(v.id("files")),
+    caption: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await mcpQuota(ctx, args.userId);
+    await mcpOwned(ctx, args.itemId, args.userId);
+
+    if (args.fileIds.length > MAX_MEDIA) {
+      throw new Error(`Maksimal ${MAX_MEDIA} media per item`);
+    }
+
+    const media: Array<{ storageId: string; kind: string; caption?: string }> = [];
+    for (const fileId of args.fileIds) {
+      const file = await ctx.db.get(fileId);
+      // Same "not found" for someone else's file as for a missing one — an
+      // error that distinguishes them is an existence oracle.
+      if (!file || file.tenantId !== args.userId.toString()) {
+        throw new Error("File tidak ditemukan di Pustaka Konten");
+      }
+      const kind = file.fileType.startsWith("image/")
+        ? "image"
+        : file.fileType === "application/pdf"
+          ? "pdf"
+          : "file";
+      media.push({
+        storageId: file.storageId,
+        kind,
+        ...(args.caption?.trim() ? { caption: trimMax("Caption", args.caption, 200) } : {}),
+      });
+    }
+
+    // Mirrors buildPayload: the first image also lands in the legacy
+    // coverStorageId so card renderers that never learned about media[] keep
+    // showing a thumbnail.
+    const cover = media.find((m) => m.kind === "image");
+
+    await ctx.db.patch(args.itemId, {
+      media: media.length > 0 ? media : undefined,
+      coverStorageId: cover?.storageId,
+    });
+
+    return {
+      item_id: args.itemId,
+      media_count: media.length,
+      thumbnail_set: Boolean(cover),
+    };
+  },
+});

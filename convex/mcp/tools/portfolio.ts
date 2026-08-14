@@ -95,7 +95,7 @@ export const portfolioTools: ToolDef[] = [
   {
     name: "portfolio_create",
     description:
-      "Add one portfolio entry — a project, certification, talk, publication, award. title, description, category and date are required. category MUST be one of the listed values, spelled exactly ('openSource' is camelCase); use 'other' rather than inventing one. date is free text but write it as YYYY-MM or YYYY so entries sort sensibly. link is the single main URL (repo, live site, certificate); it cannot upload files or images. featured pins the entry to the top of the grid and to the user's public page — leave it off unless they ask.",
+      "Add one portfolio entry — a project, certification, talk, publication, award. title, description, category and date are required. category MUST be one of the listed values, spelled exactly ('openSource' is camelCase); use 'other' rather than inventing one. date is free text but write it as YYYY-MM or YYYY so entries sort sensibly. link is the single main URL (repo, live site, certificate); it does not carry images — attach those with portfolio_set_media after creating the entry. featured pins the entry to the top of the grid and to the user's public page — leave it off unless they ask.",
     inputSchema: {
       type: "object",
       properties: {
@@ -229,6 +229,46 @@ export const portfolioTools: ToolDef[] = [
       await ctx.runMutation(internal.portfolio.mutations.mcpDelete, {
         userId,
         itemId: requireArg(args, "item_id") as Id<"portfolioItems">,
+      }),
+  },
+
+  {
+    name: "portfolio_set_media",
+    description:
+      "Attach images (or PDFs) from the user's Content Library to a portfolio entry, and set its thumbnail. This is the step that puts a picture on a project card: upload with files_upload_url + files_register first, then pass those file_ids here. The FIRST image becomes the thumbnail shown on the card and on the user's public page. It REPLACES whatever media the entry already had rather than adding to it, so pass the complete list you want — including any existing file_ids from files_list if you are adding to a set. Pass an empty list to strip the media and the thumbnail off entirely.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        item_id: { type: "string", description: "Id from portfolio_list." },
+        file_ids: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Ids from files_list, in display order. First image becomes the thumbnail. Empty list removes all media.",
+        },
+        caption: {
+          type: "string",
+          description: "Optional caption applied to the attached media. Max 200 characters.",
+        },
+      },
+      required: ["item_id", "file_ids"],
+      additionalProperties: false,
+    },
+    annotations: {
+      title: "Attach media to portfolio entry",
+      readOnlyHint: false,
+      // Replaces rather than appends, so the same call twice is the same state.
+      idempotentHint: true,
+      // Passing a shorter list drops media the user may have wanted kept.
+      destructiveHint: true,
+      openWorldHint: false,
+    },
+    handler: async (ctx, userId, args) =>
+      await ctx.runMutation(internal.portfolio.mutations.mcpSetMedia, {
+        userId,
+        itemId: requireArg(args, "item_id") as Id<"portfolioItems">,
+        fileIds: (Array.isArray(args.file_ids) ? args.file_ids : []) as Id<"files">[],
+        caption: optionalArg(args, "caption"),
       }),
   },
 ];

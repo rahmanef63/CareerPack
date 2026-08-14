@@ -88,6 +88,7 @@ Empat operasi, dan dua di antaranya sengaja dibatasi.
 | `files_upload_url` | langkah 1 unggah — target PUT sekali pakai |
 | `files_register` | langkah 2 unggah — catat jadi entri library |
 | `files_read_url` | tautan baca, kedaluwarsa **1 jam** |
+| `portfolio_set_media` | pasang berkas library ke portfolio item + set thumbnail |
 
 **`storageId` tidak pernah muncul di payload mana pun.** Satu string itu cukup
 untuk mengambil blob dari mana saja, selamanya, dan semua yang dikembalikan tool
@@ -120,6 +121,20 @@ sama dengan `Cache-Control: no-store`, jadi probing tidak mengajari apa pun.
 
 Implementasi: `convex/_shared/signedFileUrl.ts` (+ 8 test yang menguji dua
 properti tumpuannya: kedaluwarsa, dan tidak bisa dialihkan sasaran).
+
+### Memasang gambar ke portfolio
+
+Mengunggah saja tidak cukup — tanpa ini host AI bisa menaruh gambar di Pustaka
+Konten lalu mentok, yang persis dilaporkan pengguna. `portfolio_set_media`
+menutup rantainya: `files_upload_url` → `files_register` → `portfolio_set_media`.
+
+Menerima **`file_id`**, bukan `storageId` — konsisten dengan seluruh permukaan
+MCP lain. Gambar pertama menjadi thumbnail dan juga ditulis ke
+`coverStorageId` legacy, supaya renderer kartu lama tetap menampilkan gambar.
+
+**Mengganti, bukan menambah.** Model yang tidak bisa melihat state saat ini akan
+menggandakan gambar pada tiap retry, dan "set jadi tiga ini" adalah instruksi
+yang benar-benar diberikan orang. Daftar kosong melepas media dan thumbnail-nya.
 
 ### Allowlist
 
