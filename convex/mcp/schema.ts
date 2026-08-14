@@ -29,6 +29,33 @@ export const mcpTables = {
     createdAt: v.number(),
   }).index("by_code", ["code"]),
 
+  // RFC 7591 dynamically registered clients. ChatGPT's connection modal and
+  // claude.ai's connector form expose no field for a client id, so a client
+  // that cannot register itself cannot connect at all — this table is what
+  // makes those two hosts work without anyone typing a credential.
+  //
+  // `clientName` is whatever the registering software claimed. It is shown on
+  // the consent screen and labelled as self-reported there, because nothing
+  // here verifies it.
+  oauthClients: defineTable({
+    clientId: v.string(),
+    clientName: v.string(),
+    // Registration narrows the redirect allowlist for this client; the
+    // host-level allowlist still applies on top, so a registered client can
+    // only ever be a subset of what an unregistered one could ask for.
+    redirectUris: v.array(v.string()),
+    createdAt: v.number(),
+  }).index("by_clientId", ["clientId"]),
+
+  // Per-IP bucket for the registration endpoint, which is unauthenticated by
+  // definition — anyone who can reach it can insert a row. Kept separate from
+  // `loginCheckIpEvents` so registration spam cannot lock anyone out of
+  // logging in. Pruned daily by `pruneAppendOnlyTables`.
+  oauthRegisterIpEvents: defineTable({
+    ipHash: v.string(),
+    timestamp: v.number(),
+  }).index("by_ipHash_time", ["ipHash", "timestamp"]),
+
   oauthAccessTokens: defineTable({
     token: v.string(),
     userId: v.id("users"),

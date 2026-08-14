@@ -64,6 +64,8 @@ export const _cascadeDeleteDemoUser = internalMutation({
  *                             so anything older is dead weight.
  * - `loginCheckIpEvents`    — 1 day. Same shape + window as the
  *                             password-reset bucket.
+ * - `oauthRegisterIpEvents` — 1 day. Same again, for the unauthenticated
+ *                             RFC 7591 registration endpoint.
  * - `aiIdempotency`         — 30 minutes. Cache lifetime exists only
  *                             to dedupe retries; older rows are dead.
  * - `passwordResetTokens`   — `used` rows or expired rows are
@@ -83,6 +85,7 @@ export const pruneAppendOnlyTables = internalMutation({
       rateLimitEvents: 0,
       passwordResetIpEvents: 0,
       loginCheckIpEvents: 0,
+      oauthRegisterIpEvents: 0,
       aiIdempotency: 0,
       passwordResetTokens: 0,
       pageviewRateLimits: 0,
@@ -134,6 +137,17 @@ export const pruneAppendOnlyTables = internalMutation({
       const batch = stale.slice(0, PRUNE_BATCH_MAX);
       for (const r of batch) await ctx.db.delete(r._id);
       stats.loginCheckIpEvents = batch.length;
+    }
+
+    // oauthRegisterIpEvents > 1 day — same pattern again.
+    {
+      const cutoff = now - DAY;
+      const stale = (
+        await ctx.db.query("oauthRegisterIpEvents").take(PRUNE_BATCH_MAX * 2)
+      ).filter((e) => e.timestamp < cutoff);
+      const batch = stale.slice(0, PRUNE_BATCH_MAX);
+      for (const r of batch) await ctx.db.delete(r._id);
+      stats.oauthRegisterIpEvents = batch.length;
     }
 
     // aiIdempotency > 30 minutes — uses by_createdAt for cheap range.

@@ -39,7 +39,7 @@ const REDIRECT_HOSTS = [
   "cursor.com",
 ];
 
-function assertAllowedRedirect(uri: string): void {
+export function assertAllowedRedirect(uri: string): void {
   let url: URL;
   try {
     url = new URL(uri);
@@ -103,6 +103,19 @@ export const createAuthCode = mutation({
       throw new Error("client_id tidak valid");
     }
     assertAllowedRedirect(args.redirectUri);
+
+    // A client that registered itself declared its redirect URIs up front, so
+    // hold it to that list — the host allowlist above is a floor for clients
+    // that never registered, not a ceiling for the ones that did. Without this
+    // check, registering buys the client nothing and an attacker could reuse a
+    // known client_id with any chatgpt.com callback.
+    const registered = await ctx.db
+      .query("oauthClients")
+      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
+      .first();
+    if (registered && !registered.redirectUris.includes(args.redirectUri)) {
+      throw new Error("redirect_uri tidak terdaftar untuk client ini");
+    }
 
     const code = randomToken(32);
     const now = Date.now();

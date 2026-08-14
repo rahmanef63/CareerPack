@@ -17,6 +17,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -41,6 +49,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_get",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -70,6 +86,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_set_summary",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -104,6 +128,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_create",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -161,6 +193,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_add_experience",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -206,6 +246,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_add_skills",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -230,6 +278,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "cv_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -260,6 +316,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "applications_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -324,6 +388,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "applications_create",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -366,6 +438,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "applications_update_status",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -404,6 +484,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "applications_add_interview",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -428,6 +516,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "applications_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -444,6 +540,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "documents_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -481,6 +585,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "documents_set_status",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -497,6 +609,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "documents_list_countries",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -521,6 +641,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "documents_start_from_country",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -537,6 +665,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "roadmap_get",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -553,6 +689,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "roadmap_list_templates",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -577,6 +721,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "roadmap_start_from_template",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -611,6 +763,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "roadmap_set_skill_status",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -645,6 +805,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "roadmap_toggle_resource",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -661,6 +829,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "roadmap_reset",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -686,6 +862,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "calendar_list_events",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -747,6 +931,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "calendar_create_event",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -805,6 +997,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "calendar_update_event",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -829,6 +1029,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "calendar_delete_event",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -845,6 +1053,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "contacts_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -908,6 +1124,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "contacts_create",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -974,6 +1198,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "contacts_update",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -998,6 +1230,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "contacts_log_interaction",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1022,6 +1262,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "contacts_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1038,6 +1286,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "portfolio_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1117,6 +1373,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "portfolio_create",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1197,6 +1461,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "portfolio_update",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1221,6 +1493,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "portfolio_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1257,6 +1537,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "portfolio_set_media",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "_meta": {
@@ -1326,6 +1614,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "portfolio_attach_media",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1347,6 +1643,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "mock_interview_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1371,6 +1675,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "mock_interview_get",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1440,6 +1752,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "mock_interview_start",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1482,6 +1802,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "mock_interview_answer",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1516,6 +1844,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "mock_interview_finish",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1540,6 +1876,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "mock_interview_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1556,6 +1900,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "budget_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1620,6 +1972,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "budget_add",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1686,6 +2046,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "budget_update",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1710,6 +2078,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "budget_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1726,6 +2102,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "financial_plan_get",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1742,6 +2126,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "goals_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1789,6 +2181,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "goals_create",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1823,6 +2223,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "goals_set_milestone",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1847,6 +2255,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "goals_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1863,6 +2279,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "profile_get",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1914,6 +2338,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "profile_update",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -1948,6 +2380,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "matcher_list_jobs",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2055,6 +2495,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "matcher_add_job",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2095,6 +2543,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "matcher_scan_ats",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2116,6 +2572,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "matcher_list_scans",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2140,6 +2604,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "matcher_get_scan",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2156,6 +2628,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "files_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2195,6 +2675,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "files_set_metadata",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2219,6 +2707,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "files_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2235,6 +2731,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "files_upload_url",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2274,6 +2778,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "files_register",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2298,6 +2810,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "files_read_url",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2323,6 +2843,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "notifications_list",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2347,6 +2875,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "notifications_mark_read",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2363,6 +2899,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "notifications_mark_all_read",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
   {
     "annotations": {
@@ -2387,6 +2931,14 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "type": "object",
     },
     "name": "notifications_delete",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
   },
 ]
 `;

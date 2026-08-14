@@ -72,6 +72,30 @@ export const protectedResourceMetadata = httpAction(async (_ctx, request) => {
   });
 });
 
+/**
+ * OpenAI domain verification for a Plugins Directory submission.
+ *
+ * The challenge has to be served from the MCP host or a parent of it, and the
+ * MCP host here is `*.convex.site` — whose parent belongs to Convex, not to
+ * us. So it can only live on this router, next to `/mcp` itself.
+ *
+ * Returns the token and nothing else: not JSON, not a list, not a trailing
+ * newline. OpenAI's checker rejects anything but the bare value, and 404s
+ * while unset rather than serving an empty string, which would read as a
+ * verified-but-wrong token.
+ */
+export const openaiAppsChallenge = httpAction(async () => {
+  const token = (process.env.OPENAI_APPS_CHALLENGE ?? "").trim();
+  if (!token) return new Response("Not found", { status: 404 });
+  return new Response(token, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "public, max-age=300",
+    },
+  });
+});
+
 /** RFC 8414 — authorization server metadata. */
 export const authorizationServerMetadata = httpAction(async (_ctx, request) => {
   if (request.method === "OPTIONS") return preflight();
@@ -79,6 +103,11 @@ export const authorizationServerMetadata = httpAction(async (_ctx, request) => {
     issuer: siteOrigin(),
     authorization_endpoint: `${appOrigin()}/oauth/authorize`,
     token_endpoint: `${appOrigin()}/api/oauth/token`,
+    // RFC 7591. Served from SITE rather than the app, because a host that
+    // cannot register has no way to obtain a client id at all: neither
+    // ChatGPT's connection modal nor claude.ai's connector form offers a
+    // field to type one into.
+    registration_endpoint: `${siteOrigin()}/oauth/register`,
     response_types_supported: ["code"],
     grant_types_supported: ["authorization_code"],
     // S256 only, advertised as such: a client that reads this will not even

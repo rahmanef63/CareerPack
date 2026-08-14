@@ -132,6 +132,12 @@ export const toolDescriptors = (): Array<Record<string, unknown>> =>
     description: t.description,
     inputSchema: t.inputSchema,
     annotations: t.annotations,
+    // Which scope this tool actually needs, stated per tool rather than only
+    // in the discovery documents. ChatGPT freezes this array at tool-scan
+    // time and uses it to decide when to offer the OAuth linking UI; every
+    // other host ignores it. Derived from the resolved scope, so it cannot
+    // disagree with the check the dispatcher performs.
+    securitySchemes: [{ type: "oauth2", scopes: [t.scope] }],
     ...(t.meta ? { _meta: t.meta } : {}),
   }));
 

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { Button } from "@/shared/components/ui/button";
@@ -73,6 +73,22 @@ export function AuthorizeConsent(params: AuthorizeParams) {
       return "";
     }
   }, [params.redirectUri]);
+
+  // A client that registered itself through RFC 7591 has a `cp_…` id nobody
+  // can read. Show the name it gave — and say who supplied it, because
+  // nothing on this server verifies that name.
+  // Skipped while signed out: the query is behind requireUser, and letting it
+  // run anyway would throw through the "Masuk dulu" branch below.
+  const client = useQuery(
+    api.mcp.register.getClientInfo,
+    state.user ? { clientId: params.clientId } : "skip",
+  );
+
+  // What Izinkan actually grants. The screen used to promise read AND write
+  // unconditionally; since scopes became enforceable per call, a client that
+  // asks only for mcp.read gets only that, and saying otherwise would be the
+  // consent screen lying in the direction that costs the user most.
+  const canWrite = !params.scope || params.scope.split(/\s+/).includes("mcp.write");
 
   if (paramError) {
     return (
@@ -177,7 +193,7 @@ export function AuthorizeConsent(params: AuthorizeParams) {
   return (
     <Shell>
       <CardHeader>
-        <CardTitle>Hubungkan {params.clientId}</CardTitle>
+        <CardTitle>Hubungkan {client?.clientName ?? params.clientId}</CardTitle>
         <CardDescription>
           Aplikasi ini meminta akses ke data CareerPack milik {state.user.email}.
         </CardDescription>
@@ -185,12 +201,25 @@ export function AuthorizeConsent(params: AuthorizeParams) {
       <CardContent className="space-y-4">
         <ul className="space-y-2 text-sm">
           <li>Membaca CV, lamaran, jadwal, dan catatan karier Anda.</li>
-          <li>Membuat dan mengubah data tersebut atas nama Anda.</li>
+          {canWrite ? (
+            <li>Membuat, mengubah, dan menghapus data tersebut atas nama Anda.</li>
+          ) : (
+            <li className="text-muted-foreground">
+              Tidak bisa mengubah atau menghapus apa pun — akses baca saja.
+            </li>
+          )}
         </ul>
         <p className="text-xs text-muted-foreground">
           Kode akan dikirim ke <span className="font-mono">{redirectHost}</span>.
           Jangan lanjutkan kalau Anda tidak mengenali alamat itu.
         </p>
+        {client ? (
+          <p className="text-xs text-muted-foreground">
+            Nama aplikasi di atas dilaporkan sendiri oleh aplikasinya saat
+            mendaftar, bukan diverifikasi CareerPack. Alamat tujuan di atas yang
+            bisa Anda percaya.
+          </p>
+        ) : null}
         {error ? (
           <p className="text-sm text-destructive-text" role="alert">
             {error}

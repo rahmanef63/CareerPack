@@ -144,6 +144,7 @@ import type * as mcp_fileRead from "../mcp/fileRead.js";
 import type * as mcp_http from "../mcp/http.js";
 import type * as mcp_jsonrpc from "../mcp/jsonrpc.js";
 import type * as mcp_oauth from "../mcp/oauth.js";
+import type * as mcp_register from "../mcp/register.js";
 import type * as mcp_tools_applications from "../mcp/tools/applications.js";
 import type * as mcp_tools_calendar from "../mcp/tools/calendar.js";
 import type * as mcp_tools_contacts from "../mcp/tools/contacts.js";
@@ -344,6 +345,7 @@ declare const fullApi: ApiFromModules<{
   "mcp/http": typeof mcp_http;
   "mcp/jsonrpc": typeof mcp_jsonrpc;
   "mcp/oauth": typeof mcp_oauth;
+  "mcp/register": typeof mcp_register;
   "mcp/tools/applications": typeof mcp_tools_applications;
   "mcp/tools/calendar": typeof mcp_tools_calendar;
   "mcp/tools/contacts": typeof mcp_tools_contacts;

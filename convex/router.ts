@@ -6,8 +6,10 @@ import { handleCheckEmail, handleSignInAttempt } from "./authCheckEmail";
 import { handleHealth } from "./health";
 import { handleMcp } from "./mcp/http";
 import { handleSignedFileRead } from "./mcp/fileRead";
+import { handleRegister } from "./mcp/register";
 import {
   authorizationServerMetadata,
+  openaiAppsChallenge,
   protectedResourceMetadata,
 } from "./mcp/wellKnown";
 
@@ -96,6 +98,20 @@ http.route({ path: "/files/read", method: "GET", handler: handleSignedFileRead }
 http.route({ path: "/mcp", method: "POST", handler: handleMcp });
 http.route({ path: "/mcp", method: "GET", handler: handleMcp });
 http.route({ path: "/mcp", method: "OPTIONS", handler: handleMcp });
+
+// RFC 7591. Mounted on SITE beside /mcp because that is the origin a client
+// reaches the discovery document from, and a registration endpoint on the app
+// host would be a cross-origin hop the client has no reason to trust.
+http.route({ path: "/oauth/register", method: "POST", handler: handleRegister });
+http.route({ path: "/oauth/register", method: "OPTIONS", handler: handleRegister });
+
+// Domain verification for the OpenAI Plugins Directory. Inert (404) until
+// OPENAI_APPS_CHALLENGE is set on the deployment.
+http.route({
+  path: "/.well-known/openai-apps-challenge",
+  method: "GET",
+  handler: openaiAppsChallenge,
+});
 
 for (const method of ["GET", "OPTIONS"] as const) {
   http.route({
