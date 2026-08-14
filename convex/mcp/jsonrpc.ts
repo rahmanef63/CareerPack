@@ -6,6 +6,7 @@ import {
   type JsonRpcRequest,
   type JsonRpcResponse,
   type McpAuth,
+  satisfiesScope,
 } from "./types";
 import { TOOLS, TOOL_BY_NAME } from "./tools";
 
@@ -88,6 +89,7 @@ export async function dispatchJsonRpc(
           description: t.description,
           inputSchema: t.inputSchema,
           annotations: t.annotations,
+          ...(t.meta ? { _meta: t.meta } : {}),
         })),
       });
 
@@ -110,6 +112,22 @@ export async function dispatchJsonRpc(
           id,
           "Token MCP_API_KEY tidak terikat ke pengguna. Sambungkan lewat OAuth untuk memakai tool.",
         );
+      }
+
+      // Authorization is checked HERE, per call — not once when the connection
+      // was authenticated. Until 2026-08-14 the scopes on the token row were
+      // published in discovery and never read, so a token granted only
+      // `mcp.read` could still call `portfolio_delete`.
+      if (!satisfiesScope(auth.scopes, tool.scope)) {
+        return {
+          jsonrpc: "2.0" as const,
+          id,
+          error: {
+            code: RPC_ERROR.INSUFFICIENT_SCOPE,
+            message: `Token ini tidak memiliki izin ${tool.scope} yang dibutuhkan oleh ${tool.name}.`,
+            data: { required_scope: tool.scope, granted_scopes: auth.scopes },
+          },
+        };
       }
 
       const raw =

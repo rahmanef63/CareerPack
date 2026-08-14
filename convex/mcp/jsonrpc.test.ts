@@ -1,13 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { dispatchJsonRpc } from "./jsonrpc";
-import { MCP_PROTOCOL_VERSION, type McpAuth } from "./types";
+import { MCP_PROTOCOL_VERSION, SCOPE, type McpAuth } from "./types";
 import { TOOLS } from "./tools";
 import type { ActionCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 
 const USER = "user_from_token" as Id<"users">;
-const OAUTH: McpAuth = { userId: USER, kind: "oauth" };
-const ENV_KEY: McpAuth = { userId: null, kind: "env" };
+// Full authority: these cases assert protocol shape, not the scope gate.
+const OAUTH: McpAuth = { userId: USER, kind: "oauth", scopes: [SCOPE.READ, SCOPE.WRITE] };
+const ENV_KEY: McpAuth = { userId: null, kind: "env", scopes: [] };
 
 /**
  * Echoes back whatever the tool forwarded, so a test can assert on the args

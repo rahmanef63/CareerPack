@@ -101,6 +101,26 @@ export const handleMcp = httpAction(async (ctx, request) => {
   // one on `notifications/initialized` logs a protocol violation.
   if (!response) return new Response(null, { status: 202, headers: CORS });
 
+  // An authorization failure gets the real challenge, not a 200 whose body
+  // happens to say "no". RFC 6750 §3.1: insufficient_scope is a 403 carrying
+  // the scope the request would have needed, which is what lets a client
+  // re-authorize for more instead of silently retrying forever.
+  // Batches stay 200 — one 403 cannot describe a mixed array, and the
+  // per-entry JSON-RPC errors already carry the same detail.
+  if (response.error?.code === RPC_ERROR.INSUFFICIENT_SCOPE) {
+    const required = (response.error.data as { required_scope?: string } | undefined)?.required_scope;
+    return new Response(JSON.stringify(response), {
+      status: 403,
+      headers: {
+        ...JSON_HEADERS,
+        "WWW-Authenticate":
+          `Bearer realm="careerpack", error="insufficient_scope"` +
+          (required ? `, scope="${required}"` : "") +
+          `, resource_metadata="${siteOrigin()}/.well-known/oauth-protected-resource"`,
+      },
+    });
+  }
+
   return new Response(JSON.stringify(response), {
     status: 200,
     headers: JSON_HEADERS,

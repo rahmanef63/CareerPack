@@ -1,7 +1,7 @@
 import type { ActionCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { timingSafeEqual } from "../_shared/pkce";
-import type { McpAuth } from "./types";
+import { parseScopes, type McpAuth } from "./types";
 
 /**
  * Bearer resolution for the MCP endpoint. Called once per request from the
@@ -33,11 +33,15 @@ export async function resolveBearer(
   if (envKey && envKey.length >= 32 && timingSafeEqual(token, envKey)) {
     // No user: this key proves someone has deploy access, not that they are
     // a particular account. tools/list works, tools/call refuses.
-    return { userId: null, kind: "env" };
+    return { userId: null, kind: "env", scopes: [] };
   }
 
-  const userId = await ctx.runQuery(internal.mcp.oauth.lookupAccessToken, {
+  const row = await ctx.runQuery(internal.mcp.oauth.lookupAccessToken, {
     token,
   });
-  return userId ? { userId, kind: "oauth" } : null;
+  // Scopes come from the token row, never from the request. A client asking
+  // for more than it was granted at consent time gets what it was granted.
+  return row
+    ? { userId: row.userId, kind: "oauth", scopes: parseScopes(row.scope) }
+    : null;
 }

@@ -1,4 +1,4 @@
-import type { ToolDef } from "../types";
+import { scopeForTool, type ResolvedTool, type ToolDef } from "../types";
 
 import { cvTools } from "./cv";
 import { applicationsTools } from "./applications";
@@ -7,6 +7,7 @@ import { roadmapTools } from "./roadmap";
 import { calendarTools } from "./calendar";
 import { contactsTools } from "./contacts";
 import { portfolioTools } from "./portfolio";
+import { portfolioMediaTools } from "./portfolioMedia";
 import { mockInterviewTools } from "./mockInterview";
 import { financialTools } from "./financial";
 import { goalsTools } from "./goals";
@@ -94,6 +95,7 @@ export const TOOLS: ToolDef[] = [
   ...calendarTools,
   ...contactsTools,
   ...portfolioTools,
+  ...portfolioMediaTools,
   ...mockInterviewTools,
   ...financialTools,
   ...goalsTools,
@@ -103,14 +105,25 @@ export const TOOLS: ToolDef[] = [
   ...notificationsTools,
 ];
 
-export const TOOL_BY_NAME: ReadonlyMap<string, ToolDef> = new Map(
-  TOOLS.map((t) => [t.name, t]),
+/**
+ * Every tool with its required scope resolved. Derived from
+ * `annotations.readOnlyHint` rather than written per tool, so the scope and
+ * the annotation can never disagree — they assert the same fact, and asserting
+ * it twice is how they drift.
+ */
+export const RESOLVED_TOOLS: readonly ResolvedTool[] = TOOLS.map((t) => ({
+  ...t,
+  scope: scopeForTool(t),
+}));
+
+export const TOOL_BY_NAME: ReadonlyMap<string, ResolvedTool> = new Map(
+  RESOLVED_TOOLS.map((t) => [t.name, t]),
 );
 
 // Two domains picking the same name (`documents_list`) would silently
 // shadow one another in the Map, and the losing tool would be listed to the
 // model but dispatch to the winner. Fail at module load instead.
-if (TOOL_BY_NAME.size !== TOOLS.length) {
+if (TOOL_BY_NAME.size !== RESOLVED_TOOLS.length) {
   const seen = new Set<string>();
   const dupes = TOOLS.map((t) => t.name).filter((n) => !seen.add(n));
   throw new Error(`Duplicate MCP tool name(s): ${dupes.join(", ")}`);

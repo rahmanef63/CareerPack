@@ -211,7 +211,10 @@ export const exchangeCode = mutation({
  */
 export const lookupAccessToken = internalQuery({
   args: { token: v.string() },
-  returns: v.union(v.id("users"), v.null()),
+  // Returns the scope alongside the user: the row has always carried it, but
+  // until 2026-08-14 the dispatcher never asked, so every token behaved as
+  // though it held both scopes.
+  returns: v.union(v.object({ userId: v.id("users"), scope: v.string() }), v.null()),
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query("oauthAccessTokens")
@@ -220,7 +223,7 @@ export const lookupAccessToken = internalQuery({
     if (!row) return null;
     if (row.revokedAt !== undefined) return null;
     if (row.expiresAt < Date.now()) return null;
-    return row.userId;
+    return { userId: row.userId, scope: row.scope };
   },
 });
 

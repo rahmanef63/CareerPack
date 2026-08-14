@@ -6,9 +6,11 @@ import type { ToolDef } from "../types";
  * MCP tools for the `portfolio` domain — projects, certifications,
  * publications and other proof-of-work.
  *
- * Text fields only. Uploading media or attaching a typed link needs a file
- * picker and an owned storage id, which an MCP client has no way to produce,
- * so those stay in the web UI — see convex/portfolio/mutations.ts.
+ * Text fields, plus `portfolio_set_media` for reordering or clearing media the
+ * user already has in their library. ATTACHING a new image no longer needs the
+ * web UI: `portfolio_attach_media` (tools/portfolioMedia.ts) takes the file
+ * directly through the OpenAI file-param contract. Typed links still need a
+ * picker — see convex/portfolio/mutations.ts.
  *
  * Read the contract in convex/mcp/tools/index.ts first. The short version:
  * `userId` arrives from the access token, never from `args`, and the

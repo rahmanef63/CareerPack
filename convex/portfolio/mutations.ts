@@ -499,3 +499,74 @@ export const mcpSetMedia = internalMutation({
     };
   },
 });
+
+/**
+ * Append one file to an item's media and optionally make it the thumbnail.
+ *
+ * Deliberately additive, unlike `mcpSetMedia` which replaces the whole list.
+ * That difference is the whole reason this exists: appending is reversible, so
+ * the tool built on it is NOT `destructiveHint`, and a model that misreads the
+ * user cannot wipe a gallery by passing a short list. The displaced cover is
+ * reported back so a caller can undo the thumbnail change.
+ */
+export const mcpAttachMedia = internalMutation({
+  args: {
+    userId: v.id("users"),
+    itemId: v.id("portfolioItems"),
+    fileId: v.id("files"),
+    usage: v.union(v.literal("thumbnail"), v.literal("gallery"), v.literal("attachment")),
+    caption: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await mcpQuota(ctx, args.userId);
+    const item = await mcpOwned(ctx, args.itemId, args.userId);
+
+    const file = await ctx.db.get(args.fileId);
+    // Same "not found" for someone else's file as for a missing one — an error
+    // that distinguishes them is an existence oracle.
+    if (!file || file.tenantId !== args.userId.toString()) {
+      throw new Error("File tidak ditemukan di Pustaka Konten");
+    }
+
+    const existing = item.media ?? [];
+    if (existing.some((m) => m.storageId === file.storageId)) {
+      throw new Error("File itu sudah terpasang di item ini");
+    }
+    if (existing.length + 1 > MAX_MEDIA) {
+      throw new Error(`Maksimal ${MAX_MEDIA} media per item`);
+    }
+
+    const kind = file.fileType.startsWith("image/")
+      ? "image"
+      : file.fileType === "application/pdf"
+        ? "pdf"
+        : "file";
+    const entry = {
+      storageId: file.storageId,
+      kind,
+      ...(args.caption?.trim() ? { caption: trimMax("Caption", args.caption, 200) } : {}),
+    };
+
+    // Thumbnail means "first image", which is the same rule buildPayload and
+    // mcpSetMedia already use — so it goes to the front rather than into a
+    // second, competing field.
+    const media = args.usage === "thumbnail" ? [entry, ...existing] : [...existing, entry];
+    const previousCover = item.coverStorageId ?? null;
+    const cover = media.find((m) => m.kind === "image");
+
+    await ctx.db.patch(args.itemId, {
+      media,
+      coverStorageId: cover?.storageId,
+    });
+
+    return {
+      item_id: args.itemId,
+      storage_id: file.storageId,
+      media_count: media.length,
+      is_thumbnail: cover?.storageId === file.storageId,
+      // null when there was no cover before; unchanged value when this call
+      // did not displace one. Either way the caller can put it back.
+      previous_cover_storage_id: previousCover,
+    };
+  },
+});

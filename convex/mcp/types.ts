@@ -14,6 +14,27 @@ export const SERVER_INFO = { name: "careerpack", version: "1.0.0" } as const;
 
 export const MCP_SCOPES = "mcp.read mcp.write";
 
+/**
+ * The two scopes a token can carry. Advertised in the discovery documents and
+ * — since 2026-08-14 — actually ENFORCED per tool call. Before that they were
+ * published and ignored, so a token minted for reading could call
+ * `portfolio_delete`.
+ */
+export const SCOPE = { READ: "mcp.read", WRITE: "mcp.write" } as const;
+export type McpScope = (typeof SCOPE)[keyof typeof SCOPE];
+
+/** Split a stored `scope` column into the set the dispatcher compares against. */
+export const parseScopes = (raw: string | undefined | null): McpScope[] =>
+  (raw ?? "").split(/\s+/).filter((s): s is McpScope => s === SCOPE.READ || s === SCOPE.WRITE);
+
+/**
+ * A write implies the ability to read, which is how every OAuth deployment
+ * behaves in practice — a client granted `mcp.write` that then cannot list is
+ * simply broken. Read does NOT imply write.
+ */
+export const satisfiesScope = (held: readonly McpScope[], needed: McpScope): boolean =>
+  held.includes(needed) || (needed === SCOPE.READ && held.includes(SCOPE.WRITE));
+
 export interface JsonRpcRequest {
   jsonrpc?: string;
   /** Absent or null = notification: the client wants no reply at all. */
@@ -35,6 +56,9 @@ export const RPC_ERROR = {
   METHOD_NOT_FOUND: -32601,
   INVALID_PARAMS: -32602,
   INTERNAL: -32603,
+  /** Implementation-defined range. The HTTP layer turns this one into a 403
+   *  with an RFC 6750 challenge; every other code stays a 200 JSON-RPC error. */
+  INSUFFICIENT_SCOPE: -32003,
 } as const;
 
 /**
@@ -61,10 +85,24 @@ export interface ToolInputSchema {
 export interface ToolDef {
   /** snake_case, domain-prefixed. */
   name: string;
+  /**
+   * OVERRIDE ONLY. Leave it unset: `tools/index.ts` derives the scope from
+   * `annotations.readOnlyHint`, so it can never disagree with the annotation
+   * that already states the same fact. Set it only for a tool whose annotation
+   * and required authority genuinely differ.
+   */
+  scope?: McpScope;
   /** Model-facing prompt context, English. See tools/index.ts header. */
   description: string;
   inputSchema: ToolInputSchema;
   annotations: ToolAnnotations;
+  /**
+   * Host-specific hints merged into the descriptor's `_meta`. Currently only
+   * `openai/fileParams`, which is what makes ChatGPT offer a file for a field
+   * instead of asking the model to type a URL. Inert to every other host, so
+   * one tool still serves them all.
+   */
+  meta?: Record<string, unknown>;
   /**
    * `userId` is supplied by the dispatcher from the access-token row and is
    * the only source of identity a handler may use — `args` never carries it.
@@ -85,4 +123,16 @@ export interface McpAuth {
    */
   userId: Id<"users"> | null;
   kind: "env" | "oauth";
+  /** Granted scopes from the token row. The env key carries none: it cannot
+   *  reach a tool at all, so giving it authority would only be misleading. */
+  scopes: McpScope[];
 }
+
+/** A tool after the registry has resolved its scope. This is what the
+ *  dispatcher sees, and the only shape where `scope` is guaranteed. */
+export type ResolvedTool = ToolDef & { scope: McpScope };
+
+/** readOnlyHint is already the declaration of whether a tool changes state, so
+ *  the scope follows from it rather than being asserted twice. */
+export const scopeForTool = (t: ToolDef): McpScope =>
+  t.scope ?? (t.annotations.readOnlyHint === true ? SCOPE.READ : SCOPE.WRITE);
