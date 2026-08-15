@@ -55,11 +55,11 @@ export const profileTables = {
      * user-supplied iframe markup.
      * ------------------------------------------------------------------ */
     /**
-     * Otomatis mode rebuilds the public page from the user's existing
-     * CV / Profile / Portofolio data via convex/profile/autoBlocks.ts
-     * — no manual block authoring required, designed for users
-     * without dev skills. Custom mode renders the user-authored
-     * `publicBlocks` array. Default = "auto" for new profiles.
+     * LEGACY — read-only since the block builder was removed (2026-08-15).
+     * The page is always built from live CV / Profile / Portofolio data now;
+     * "custom" no longer changes anything at render time. Kept in the
+     * validator so existing rows still pass schema validation. Nothing
+     * writes it.
      */
     publicMode: v.optional(
       v.union(v.literal("auto"), v.literal("custom")),
@@ -116,6 +116,7 @@ export const profileTables = {
         v.literal("template-v1"),
         v.literal("template-v2"),
         v.literal("template-v3"),
+        v.literal("starter"),
       ),
     ),
     publicHeaderBg: v.optional(
@@ -173,6 +174,26 @@ export const profileTables = {
     publicHtmlExport: v.optional(v.boolean()),
     publicEmbedExport: v.optional(v.boolean()),
     publicPromptExport: v.optional(v.boolean()),
+    /**
+     * Custom page HTML — a complete standalone document that REPLACES the
+     * built-in template when set. Authored by the user or, more usually, by
+     * an AI host over MCP (`branding_set_html`), which is why the whole
+     * block builder could go: one HTML string covers every layout a block
+     * tree could express and a lot it could not.
+     *
+     * It is NOT static: the renderer splices the same `__cp_data` payload +
+     * hydrator into it as into a built-in template, so `data-cp` markers in
+     * this HTML keep filling from the live CV / portfolio / profile data.
+     * See frontend/slices/personal-branding/themes/templateHydrator.ts for
+     * the marker contract.
+     *
+     * Not sanitised, by design: it is rendered inside the same sandboxed
+     * srcdoc iframe as the built-in templates (no `allow-same-origin`), so
+     * its scripts run in an opaque origin and cannot reach the app's origin,
+     * cookies, or Convex session. Size is capped at PUBLIC_HTML_MAX.
+     */
+    publicHtml: v.optional(v.string()),
+    /** LEGACY — see `publicMode`. Read-only leftovers of the block builder. */
     publicBlocks: v.optional(
       v.array(
         v.object({

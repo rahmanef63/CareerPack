@@ -22,18 +22,21 @@ const TEMPLATE_HTML_CACHE = new Map<string, string>();
 interface Props {
   templateKey: string;
   templateUrl: string;
+  /** The user's own document. When set, nothing is fetched — this IS the
+   *  template, and it gets the same payload + hydrator injection. */
+  templateHtml?: string;
   displayName: string;
   branding?: BrandingPayload;
   enableFloatingNav?: boolean;
 }
 
 export function TemplateLayout({
-  templateKey, templateUrl, displayName, branding,
+  templateKey, templateUrl, templateHtml, displayName, branding,
   enableFloatingNav = false,
 }: Props) {
   const url = templateUrl;
   const [html, setHtml] = useState<string | null>(
-    () => TEMPLATE_HTML_CACHE.get(templateKey) ?? null,
+    () => templateHtml ?? TEMPLATE_HTML_CACHE.get(templateKey) ?? null,
   );
   const [error, setError] = useState<string | null>(null);
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
@@ -54,6 +57,13 @@ export function TemplateLayout({
 
   useEffect(() => {
     let cancelled = false;
+    // Custom HTML arrives as a prop — never cached (it changes as the user
+    // edits) and never fetched.
+    if (templateHtml !== undefined) {
+      setHtml(templateHtml);
+      setError(null);
+      return;
+    }
     const cached = TEMPLATE_HTML_CACHE.get(templateKey);
     if (cached) {
       setHtml(cached);
@@ -79,7 +89,7 @@ export function TemplateLayout({
     return () => {
       cancelled = true;
     };
-  }, [templateKey, url]);
+  }, [templateKey, url, templateHtml]);
 
   // Listen for postMessages from the iframe.
   useEffect(() => {
@@ -180,7 +190,17 @@ export function TemplateLayout({
           srcDoc={hydratedHtml}
           title={`Template ${templateKey} untuk ${displayName}`}
           loading="eager"
-          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
+          // Built-in templates get the historical flag set. A user-authored
+          // document gets less: no `allow-forms` (a credential form served
+          // from careerpack.org/<slug> is the one abuse the sandbox does not
+          // already prevent) and no escape hatch for popups. Neither flag is
+          // used by anything the hydrator does. `allow-same-origin` is absent
+          // in both cases — that is what keeps the frame off our origin.
+          sandbox={
+            templateHtml !== undefined
+              ? "allow-scripts allow-popups"
+              : "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
+          }
           className="block w-full border-0 bg-background"
           style={{
             height: iframeHeight ? `${iframeHeight}px` : "calc(100vh - 64px)",

@@ -10,12 +10,22 @@ function setText(el, val) {
   if (val === undefined || val === null) val = '';
   el.textContent = String(val);
 }
+// An empty src/href does not just clear the attribute — it hides the node.
+// Without this a user with no LinkedIn kept a visible "LinkedIn" button that
+// went nowhere, wearing the template's mock label, on every published page.
+// The reverse (a value arriving later) unhides, so re-fills are idempotent.
 function setAttr(el, name, val) {
   if (val === undefined || val === null || val === '') {
     el.removeAttribute(name);
+    el.style.display = 'none';
+    el.setAttribute('data-cp-hidden', '1');
     return;
   }
   el.setAttribute(name, String(val));
+  if (el.getAttribute('data-cp-hidden') === '1') {
+    el.style.display = '';
+    el.removeAttribute('data-cp-hidden');
+  }
 }
 function fill(scope, key, val) {
   var nodes = scope.querySelectorAll('[data-cp="' + key + '"]');

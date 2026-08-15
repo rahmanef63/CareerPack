@@ -46,7 +46,7 @@ Tier column refers to porting effort — see `_porting-guide.md` §8:
 | `mock-interview` | `/dashboard/interview` | **L** | [mock-interview.md](./mock-interview.md) |
 | `financial-calculator` | `/dashboard/calculator` | **L** | [financial-calculator.md](./financial-calculator.md) |
 | `portfolio` | `/dashboard/portfolio` | **L** | [portfolio.md](./portfolio.md) |
-| `personal-branding` (public profile builder) | `/dashboard/personal-branding`, `/[slug]` | **XL** | [personal-branding.md](./personal-branding.md) |
+| `personal-branding` (public page — one editor, built-in template or own HTML) | `/dashboard/personal-branding`, `/[slug]` | **XL** | [personal-branding.md](./personal-branding.md) |
 | **Secondary tools** | | | |
 | `matcher` (job matching) | `/dashboard/matcher` | **M** | [matcher.md](./matcher.md) |
 | `networking` (contacts) | `/dashboard/networking` | **M** | [networking.md](./networking.md) |

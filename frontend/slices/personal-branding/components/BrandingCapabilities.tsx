@@ -20,21 +20,25 @@ interface SetAvailablePayload {
   availabilityNote?: string;
 }
 
+/** The ids the picker can actually display. The legacy trio
+ *  (linktree/bento/magazine) is still accepted by the Convex validator for
+ *  read-compat, but setting one now would leave the user on a theme that
+ *  renders as template-v2 and cannot be re-selected in the UI. */
 const VALID_THEMES = new Set([
-  "linktree",
-  "bento",
-  "magazine",
+  "starter",
   "template-v1",
   "template-v2",
   "template-v3",
 ]);
 
-const SLUG_RE = /^[a-z][a-z0-9-]{2,39}$/;
+/** Mirrors convex/profile/slug.ts: 3-30 chars, not 3-40. */
+const SLUG_RE = /^[a-z][a-z0-9-]{1,28}[a-z0-9]$/;
 
 /**
  * Personal-branding capability binder — wires status toggles + slug +
- * theme + availability skills. Query (`get-status`) is handled
- * server-side by skillHandlers. Block-level edits stay in slice UI.
+ * theme + availability skills. Query (`get-status`) is handled server-side by
+ * skillHandlers. Page HTML is not here: an AI host edits that over MCP
+ * (branding_set_html), and the dashboard edits it in CustomHtmlCard.
  */
 export function BrandingCapabilities() {
   const updatePublic = useMutation(api.profile.mutations.updateMyPublicProfile);
@@ -61,7 +65,7 @@ export function BrandingCapabilities() {
         const slug = String(a.payload.slug ?? "").trim().toLowerCase();
         if (!SLUG_RE.test(slug)) {
           notify.validation(
-            "Slug harus 3-40 karakter, huruf kecil/angka/dash, mulai huruf",
+            "Slug harus 3-30 karakter, huruf kecil/angka/dash, mulai huruf",
           );
           return;
         }
@@ -79,23 +83,21 @@ export function BrandingCapabilities() {
         const theme = String(a.payload.theme ?? "").trim().toLowerCase();
         if (!VALID_THEMES.has(theme)) {
           notify.validation(
-            "Theme tidak valid (linktree|bento|magazine|template-v1..v3)",
+            "Template tidak valid (starter|template-v1|template-v2|template-v3)",
           );
           return;
         }
         try {
           await updatePublic({
             theme: theme as
-              | "linktree"
-              | "bento"
-              | "magazine"
+              | "starter"
               | "template-v1"
               | "template-v2"
               | "template-v3",
           });
-          notify.success(`Theme diganti: ${theme}`);
+          notify.success(`Template diganti: ${theme}`);
         } catch (err) {
-          notify.fromError(err, "Gagal ganti theme");
+          notify.fromError(err, "Gagal ganti template");
         }
       }),
     );

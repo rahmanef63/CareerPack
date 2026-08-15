@@ -6,6 +6,7 @@ import { documentsTools } from "./documents";
 import { roadmapTools } from "./roadmap";
 import { calendarTools } from "./calendar";
 import { contactsTools } from "./contacts";
+import { brandingTools } from "./branding";
 import { portfolioTools } from "./portfolio";
 import { portfolioMediaTools } from "./portfolioMedia";
 import { mockInterviewTools } from "./mockInterview";
@@ -96,6 +97,7 @@ export const TOOLS: ToolDef[] = [
   ...contactsTools,
   ...portfolioTools,
   ...portfolioMediaTools,
+  ...brandingTools,
   ...mockInterviewTools,
   ...financialTools,
   ...goalsTools,

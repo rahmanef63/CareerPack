@@ -37,13 +37,12 @@
  * Implementation lives in templateHydrator/*.ts — each fragment exports
  * a string that ends up concatenated into a single IIFE. All fragments
  * share scope (notably `var d`, `var has`, `function fill`, …) so order
- * matters: preamble → style → manualBlocks → fillHelpers → identityFills
- * → pageExtras → truncate.
+ * matters: preamble → style → fillHelpers → identityFills → pageExtras
+ * → truncate.
  */
 
 import { HYDRATOR_PREAMBLE } from "./templateHydrator/preamble";
 import { HYDRATOR_STYLE } from "./templateHydrator/style";
-import { HYDRATOR_MANUAL_BLOCKS } from "./templateHydrator/manualBlocks";
 import { HYDRATOR_FILL_HELPERS } from "./templateHydrator/fillHelpers";
 import { HYDRATOR_IDENTITY_FILLS } from "./templateHydrator/identityFills";
 import { HYDRATOR_PAGE_EXTRAS } from "./templateHydrator/pageExtras";
@@ -55,7 +54,6 @@ export const TEMPLATE_HYDRATOR_JS =
   "(function(){" +
   HYDRATOR_PREAMBLE +
   HYDRATOR_STYLE +
-  HYDRATOR_MANUAL_BLOCKS +
   HYDRATOR_FILL_HELPERS +
   HYDRATOR_IDENTITY_FILLS +
   HYDRATOR_PAGE_EXTRAS +

@@ -554,9 +554,9 @@ export interface DemoPBSeed {
   allowIndex: boolean;
   avatarShow: boolean;
   portfolioShow: boolean;
-  mode: "auto" | "custom";
-  theme: "template-v1" | "template-v2" | "template-v3";
-  headerBg: { kind: "gradient" | "solid" | "image" | "none"; value: string } | null;
+  theme: "template-v1" | "template-v2" | "template-v3" | "starter";
+  /** Custom page HTML — empty string means "use the template". */
+  html: string;
   autoToggles: {
     showExperience: boolean;
     showEducation: boolean;
@@ -583,9 +583,8 @@ export const DEMO_PB: DemoPBSeed = {
   allowIndex: true,
   avatarShow: true,
   portfolioShow: true,
-  mode: "auto",
   theme: "template-v2",
-  headerBg: { kind: "gradient", value: "from-cyan-400 to-violet-600" },
+  html: "",
   autoToggles: {
     showExperience: true,
     showEducation: true,

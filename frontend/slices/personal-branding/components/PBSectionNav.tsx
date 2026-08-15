@@ -6,7 +6,6 @@ import {
   Globe,
   Layers,
   Mail,
-  MousePointerClick,
   Palette,
   ShieldCheck,
   User,
@@ -15,11 +14,10 @@ import { cn } from "@/shared/lib/utils";
 
 const SECTIONS = [
   { id: "identity", label: "Identitas", icon: Globe },
-  { id: "theme", label: "Tema", icon: Palette },
+  { id: "theme", label: "Tampilan", icon: Palette },
   { id: "hero", label: "Hero", icon: User },
-  { id: "availability", label: "Status", icon: Briefcase },
-  { id: "cta", label: "CTA", icon: MousePointerClick },
   { id: "layout", label: "Section", icon: Layers },
+  { id: "status", label: "Status & CTA", icon: Briefcase },
   { id: "contact", label: "Kontak", icon: Mail },
   { id: "indexing", label: "SEO", icon: ShieldCheck },
 ] as const;

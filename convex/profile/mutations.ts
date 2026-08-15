@@ -6,11 +6,8 @@ import { enforceRateLimit } from "../_shared/rateLimit";
 import { MCP_WRITE_LIMIT, MCP_WRITE_DAILY_LIMIT } from "../mcp/data/limits";
 import { cascadeDeleteUser } from "../admin/lib/cascadeDelete";
 import { ensureNotLastAdmin } from "../admin/lib/userOps";
-import {
-  sanitizeBlocks,
-  sanitizeHeaderBg,
-  sanitizeAccent,
-} from "./blocks";
+import { sanitizeHeaderBg, sanitizeAccent } from "./blocks";
+import { normalizePublicHtml } from "./publicHtml";
 import { assertSlug } from "./slug";
 
 const HEADLINE_MAX = 120;
@@ -284,7 +281,20 @@ export const updateMyPublicProfile = mutation({
     allowIndex: v.optional(v.boolean()),
     avatarShow: v.optional(v.boolean()),
     portfolioShow: v.optional(v.boolean()),
-    /* ----- Personal Branding builder ------------------------------ */
+    /* ----- Personal Branding --------------------------------------- */
+    /**
+     * Custom page HTML. `""` (or null) clears it and falls back to the
+     * built-in template. See `PUBLIC_HTML_MAX`.
+     */
+    html: v.optional(v.union(v.string(), v.null())),
+    /**
+     * LEGACY, accepted-and-ignored. The block builder is gone, but a browser
+     * tab that loaded the old bundle before a deploy keeps autosaving these
+     * three every 1.5s. Dropping them from the validator would answer that
+     * tab with ArgumentValidationError on every keystroke — the same failure
+     * mode the autosave comments already record from a previous deploy.
+     * Delete these three after a release or two.
+     */
     mode: v.optional(v.union(v.literal("auto"), v.literal("custom"))),
     autoToggles: v.optional(
       v.object({
@@ -317,6 +327,7 @@ export const updateMyPublicProfile = mutation({
         v.literal("template-v1"),
         v.literal("template-v2"),
         v.literal("template-v3"),
+        v.literal("starter"),
       ),
     ),
     headerBg: v.optional(
@@ -426,7 +437,9 @@ export const updateMyPublicProfile = mutation({
     if (args.avatarShow !== undefined) patch.publicAvatarShow = args.avatarShow;
     if (args.portfolioShow !== undefined) patch.publicPortfolioShow = args.portfolioShow;
 
-    if (args.mode !== undefined) patch.publicMode = args.mode;
+    if (args.html !== undefined) {
+      patch.publicHtml = normalizePublicHtml(args.html);
+    }
     if (args.autoToggles !== undefined) patch.publicAutoToggles = args.autoToggles;
     if (args.theme !== undefined) patch.publicTheme = args.theme;
     if (args.headerBg !== undefined) {
@@ -443,25 +456,11 @@ export const updateMyPublicProfile = mutation({
         patch.publicAccent = cleaned;
       }
     }
-    if (args.style !== undefined) {
-      // Whitelist + sanitize — primary color must be hex, the rest are
-      // already constrained by the validator literals.
-      const HEX_RE = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/;
-      const cleaned: Record<string, string> = {};
-      if (args.style.primary && HEX_RE.test(args.style.primary)) {
-        cleaned.primary = args.style.primary.toLowerCase();
-      }
-      if (args.style.font) cleaned.font = args.style.font;
-      if (args.style.radius) cleaned.radius = args.style.radius;
-      if (args.style.density) cleaned.density = args.style.density;
-      patch.publicStyle = Object.keys(cleaned).length > 0 ? cleaned : undefined;
-    }
     if (args.htmlExport !== undefined) patch.publicHtmlExport = args.htmlExport;
     if (args.embedExport !== undefined) patch.publicEmbedExport = args.embedExport;
     if (args.promptExport !== undefined) patch.publicPromptExport = args.promptExport;
-    if (args.blocks !== undefined) {
-      patch.publicBlocks = sanitizeBlocks(args.blocks);
-    }
+    // args.mode / args.blocks / args.style: see the validator note — accepted
+    // from stale clients, written nowhere.
 
     if (args.availableForHire !== undefined) {
       patch.publicAvailableForHire = args.availableForHire;

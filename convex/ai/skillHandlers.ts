@@ -272,8 +272,10 @@ export const SKILL_HANDLERS: Record<string, SkillHandler> = {
       enabled: Boolean(p.publicEnabled),
       slug: p.publicSlug ?? null,
       headline: p.publicHeadline ?? null,
-      theme: p.publicTheme ?? "linktree",
-      mode: p.publicMode ?? "auto",
+      theme: p.publicTheme ?? "template-v2",
+      // Which document the page actually renders: the user's own HTML wins
+      // over the template whenever it is set.
+      source: p.publicHtml ? "custom_html" : "template",
       availableForHire: Boolean(p.publicAvailableForHire),
       availabilityNote: p.publicAvailabilityNote ?? null,
       ctaLabel: p.publicCtaLabel ?? null,

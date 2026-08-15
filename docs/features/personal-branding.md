@@ -1,184 +1,420 @@
 # Personal Branding (Public Profile Builder)
 
-> **Portability tier:** XL — slice + portfolio backend integration + theme system + iframe-template hydrator + public profile route.
+> **Portability tier:** XL — slice + public route + `convex/profile/` +
+> iframe template renderer/hydrator + 4 static template documents + MCP tool
+> surface.
 >
-> **Recent changes (2026-05-20):**
-> - Grade display: bare letter `A/B/C/D/E` → descriptive labels via
->   `GRADE_LABEL` map in `brandingScore.ts` (Premium / Profesional /
->   Cukup / Butuh Pengembangan / Mulai Bangun). Score 0–100 stays as
->   primary number; label sits underneath as small uppercase subtext.
->   Letter grades alone read like school-report (D = "fail") and
->   psychologically discouraged users on a coaching surface.
-> - `BrandingScore` type now exports `BrandingGrade` + `GRADE_LABEL`.
+> **Recent changes (2026-08-15):**
+> - Manual block builder **dihapus**. `builder/`, `ManualBlocksCard`,
+>   `ManualDesignCard`, `StyleCard`, `ModeWarning`, `ManualTab`/`AutoTab`,
+>   `templateHydrator/manualBlocks.ts`, `v-manual.html`,
+>   `convex/profile/blocks/{types,sanitize}.ts`, dan `buildAutoBlocks`
+>   semuanya hilang. Lihat **History** di bawah.
+> - Satu editor saja: `personal-branding-view/EditorPanel.tsx`, tujuh section
+>   accordion. Tidak ada lagi switch mode auto/custom.
+> - Baru: `userProfiles.publicHtml` — dokumen HTML lengkap milik user yang
+>   **menggantikan** template bawaan, plus `sections/CustomHtmlCard.tsx`.
+> - Baru: template bawaan `starter` (`starter.html`) + lima MCP tool
+>   (`convex/mcp/tools/branding.ts`).
+> - Baru: `convex/profile/loadBranding.ts` — perakitan payload yang dipakai
+>   bareng oleh `getBySlug` (halaman publik) dan MCP `branding_data`.
 
 ## Tujuan
 
-Builder halaman profil publik (`/[slug]`) untuk personal branding —
-mode otomatis (auto-build dari CV + Profil + Portofolio) atau manual
-(drag-style block builder), pilih theme, atur SEO/indexing, ekspor ke
-HTML standalone atau snippet iframe embed. Slug unik global, validasi
-real-time.
+Halaman profil publik di `/[slug]` — pengganti Linktree / Bento yang isinya
+ditarik otomatis dari data CareerPack (Profil + CV + Portofolio). User memilih
+salah satu **template bawaan**, atau memasang **HTML sendiri** (biasanya ditulis
+ChatGPT/Claude lewat MCP connector). Dua-duanya dirender lewat jalur yang sama,
+diisi payload yang sama, jadi halaman tidak pernah jadi snapshot mati: ubah CV,
+halaman publik ikut berubah.
 
 ## Route & Entry
 
-- URL builder: `/dashboard/personal-branding`
-- URL public profile: `/[slug]` — page `frontend/app/[slug]/page.tsx` (catch-all marketing route, di-resolve via `api.profile.queries.getBySlug`)
+- Editor: `/dashboard/personal-branding` — registry slug `personal-branding`
+  (`placement: "more"`, icon `Globe`, badge `AI`) di
+  `frontend/shared/lib/dashboardRegistry.ts`.
+- Halaman publik: `/[slug]` → `frontend/app/[slug]/page.tsx`
+  (`revalidate = 60`, `dynamic = "force-static"`, `dynamicParams = true`).
+  File tetangga: `ProfileSummary.tsx`, `opengraph-image.tsx`, `error.tsx`.
+  **Jangan tambah `loading.tsx`** di segment ini — komentar panjang di
+  `page.tsx` menjelaskan kenapa (soft-404: shell ke-flush duluan → status 200
+  untuk semua slug ngawur).
 - Slice: `frontend/slices/personal-branding/`
-- Komponen utama: `PersonalBrandingView.tsx` (~250 baris orchestrator)
+- Komponen utama: `PersonalBrandingView.tsx` (orchestrator tipis) →
+  `personal-branding-view/EditorPanel.tsx` (editornya).
+- Template statis: `frontend/public/personal-branding/templates/`
+  (`starter.html` ~18 KB, `v1.html` 81 KB, `v2.html` 81 KB, `v3.html` 67 KB).
 
 ## Struktur Slice
 
 ```
 personal-branding/
-├─ index.ts                                       export { PersonalBrandingView }
+├─ index.ts                        PersonalBrandingView + BrandingCapabilities + manifest
+├─ manifest.ts                     Katalog skill AI in-app (status/slug/theme/availability)
 ├─ blocks/
-│  └─ types.ts                                    Block, HeaderBg, PersonalBrandingTheme, TEMPLATE_THEMES
-├─ builder/                                       Manual block builder
-│  ├─ AddBlockMenu.tsx                            Type picker popover
-│  ├─ BlockFields.tsx                             Field router per block type
-│  ├─ BlockList.tsx                               Re-orderable block tree
-│  ├─ BlockPresetsCard.tsx                        Quick-insert preset bundles
-│  ├─ ThemePicker.tsx                             Theme card grid
-│  ├─ blockDefaults.ts                            Default block payload per type
-│  ├─ blockPresets.ts                             Curated block bundles
-│  └─ block-fields/
-│     ├─ types.ts
-│     ├─ simpleFields.tsx                         text/heading/paragraph/divider
-│     ├─ linkFields.tsx                           link, button, social
-│     ├─ mediaFields.tsx                          image/video (storageId picker)
-│     ├─ typeFields.tsx                           type-specific switches
-│     ├─ containerField.tsx                       container layout
-│     ├─ ContainerChildren.tsx                    nested block tree editor
-│     └─ StyleChrome.tsx                          per-block style overrides
+│  └─ types.ts                     TEMPLATE_THEMES, TEMPLATE_URLS, THEME_LABELS
+│                                  (nama folder legacy — isinya cuma registry template)
 ├─ components/
-│  ├─ PersonalBrandingView.tsx                    Top tab bar (Otomatis/Manual/Impor/HTML/Embed) + sub-tabs
-│  ├─ MiniPreviewFrame.tsx                        Sandboxed iframe preview
-│  ├─ PreviewDialog.tsx                           Full-screen preview
-│  ├─ MobileActionBar.tsx                         Sticky save/preview FAB row
-│  ├─ PBSectionNav.tsx                            Sub-section accordion nav
-│  ├─ BrandingShowMoreDialog.tsx                  Mobile overflow menu
-│  └─ personal-branding-view/
-│     ├─ AutoTab.tsx                              Auto mode wrapper (split-pane)
-│     └─ ManualTab.tsx                            Manual mode wrapper (split-pane)
-├─ form/                                          State machine
-│  ├─ defaults.ts                                 DEFAULT_FORM_STATE
-│  ├─ slugValidation.ts                           validateSlug()
-│  ├─ types.ts                                    FormState, Mode, Bind, SetField
-│  ├─ usePBForm.ts                                Big hook — hydrate, dirty-tracking, save, undo, demo overlay
-│  └─ usePreviewBranding.ts                       Lazy preview data builder
-├─ sections/                                      Auto-mode card sections (one card per concern)
-│  ├─ PBSection.tsx                               Reusable accordion-card wrapper
-│  ├─ IdentityCard.tsx                            slug + headline + bio
-│  ├─ AvailabilityCard.tsx                        availability/status badge
-│  ├─ BrandingValidationCard.tsx                  Score + jump links to fix gaps
-│  ├─ ContactCard.tsx                             email / linkedin / portfolio
-│  ├─ CtaCard.tsx                                 CTA button config
-│  ├─ ExportCard.tsx                              Self-hosted HTML / iframe export
-│  ├─ HeroTogglesCard.tsx                         Show/hide hero elements
-│  ├─ IdentityCard.tsx
-│  ├─ ImportCard.tsx                              Quick Fill (resume / LinkedIn paste)
-│  ├─ IndexingCard.tsx                            allowIndex (robots) toggle
-│  ├─ ManualBlocksCard.tsx                        Container for manual block list
-│  ├─ ManualDesignCard.tsx                        Theme + style for manual mode
-│  ├─ ModeWarning.tsx                             Switch-mode confirmation
-│  ├─ SaveActions.tsx                             Save / Discard / Reset
-│  ├─ SectionLayoutCard.tsx                       Layout density / order tweaks
-│  ├─ ShareCard.tsx                               Public URL + copy + open
-│  ├─ StatusBanner.tsx                            Published / Unpublished pill
-│  ├─ StyleCard.tsx                               Font / radius / density
-│  ├─ ThemeCard.tsx                               Theme picker
-│  ├─ brandingScore.ts                            Heuristic 0–100 score
-│  └─ brandingScore.test.ts                       Unit test
-└─ themes/                                        Render layer
-   ├─ index.tsx                                   Theme registry + dispatcher
-   ├─ BlockRenderer.tsx                           Block → DOM
-   ├─ BrandFooter.tsx                             "Powered by" footer
-   ├─ FloatingMobileNav.tsx                       Sticky CTA on public page
-   ├─ TemplateLayout.tsx                          Wrapper layout
-   ├─ TemplateSkeleton.tsx                        SSR skeleton
-   ├─ inject.ts                                   Inline CSS variables for theme
-   ├─ types.ts
-   ├─ templateHydrator.ts                         Top-level hydrate orchestration
+│  ├─ PersonalBrandingView.tsx     2 tab: "Edit halaman" | "Bagikan & pasang"
+│  ├─ personal-branding-view/
+│  │  └─ EditorPanel.tsx           SATU editor — 7 section accordion + preview split
+│  ├─ MiniPreviewFrame.tsx         Preview live di kolom kanan (desktop)
+│  ├─ PreviewDialog.tsx            Preview modal — viewport (desktop/tablet/mobile)
+│  │                               + mode "Data Saya" vs "Template" (mock bawaan)
+│  ├─ MobileActionBar.tsx          Bar Preview/Publikasikan sticky (mobile)
+│  ├─ PBSectionNav.tsx             Nav 7 section (mobile)
+│  ├─ BrandingShowMoreDialog.tsx   Modal "Lihat semua" untuk list yang dipotong di iframe
+│  └─ BrandingCapabilities.tsx     Binder aiActionBus (di-mount di Providers)
+├─ form/
+│  ├─ types.ts                     FormState, Bind, SetField, SubmitOptions
+│  ├─ defaults.ts                  DEFAULT_FORM_STATE, DEFAULT_SECTION_ORDER,
+│  │                               FIELD_LIMITS, DEFAULT_RESERVED_SLUGS
+│  ├─ slugValidation.ts            validateSlug() — mirror convex/profile/slug.ts
+│  ├─ usePBForm.ts                 State machine: hydrate, bind, autosave 1.5s, submit
+│  ├─ usePreviewBranding.ts        Bangun BrandingPayload versi klien (mirror backend)
+│  └─ usePreviewProfile.ts         Rakit prop `profile` untuk PersonalBrandingPage
+├─ sections/
+│  ├─ PBSection.tsx                Wrapper accordion-card
+│  ├─ SectionShell.tsx             Wrapper card biasa (mode noCard)
+│  ├─ IdentityCard.tsx             Saklar publish + slug + headline
+│  ├─ ThemeCard.tsx                Picker 4 template (tanpa mini-preview gambar)
+│  ├─ CustomHtmlCard.tsx           Textarea publicHtml + Simpan / Hapus
+│  ├─ HeroTogglesCard.tsx          Opt-in per kolom hero (avatar/bio/skills/…)
+│  ├─ SectionLayoutCard.tsx        Urutan + show/hide section halaman publik
+│  ├─ AvailabilityCard.tsx         Badge "tersedia untuk direkrut" (+ note ≤80)
+│  ├─ CtaCard.tsx                  CTA tunggal (link/email/calendly/download)
+│  ├─ ContactCard.tsx              Email / LinkedIn / Portfolio URL
+│  ├─ IndexingCard.tsx             allowIndex (default mati)
+│  ├─ ShareCard.tsx                URL publik + copy + share text
+│  ├─ ExportCard.tsx               Kartu HTML / snippet embed / prompt AI
+│  ├─ StatusBanner.tsx             Baca SERVER state (active/draft/empty)
+│  ├─ SaveActions.tsx              Simpan draft / publikasikan + indikator autosave
+│  ├─ BrandingValidationCard.tsx   Skor + jump-link (`pb-jump` CustomEvent)
+│  ├─ brandingScore.ts             Skor 0–100 + grade A–E + GRADE_LABEL
+│  └─ brandingScore.test.ts
+└─ themes/                          Render layer
+   ├─ index.tsx                    PersonalBrandingPage — pilih html kustom vs template
+   ├─ TemplateLayout.tsx           Fetch/cache template, srcDoc iframe, postMessage bus
+   ├─ TemplateSkeleton.tsx         Skeleton sebelum HTML siap
+   ├─ BrandFooter.tsx              Footer "dibuat dengan CareerPack"
+   ├─ FloatingMobileNav.tsx        Nav bawah di luar iframe (+ sanitasi SVG allowlist)
+   ├─ inject.ts                    injectBrandingIntoHtml — splice __cp_data + hydrator
+   ├─ types.ts                     BrandingPayload, ProfileShape, VALID_SHOW_MORE_LISTS
+   ├─ starterTemplate.test.ts      Guard drift: starter.html vs kontrak hydrator
+   ├─ templateHydrator.ts          Rakit IIFE hydrator (urutan fragment penting)
    └─ templateHydrator/
-      ├─ fillHelpers.ts                           Generic helpers
-      ├─ identityFills.ts                         Slug, name, headline injection
-      ├─ iframeHelpers.ts                         Sandboxed iframe handling
-      ├─ manualBlocks.ts                          Manual block render path
-      ├─ pageExtras.ts                            Footer / nav extras
-      ├─ preamble.ts                              Pre-render scripts
-      ├─ style.ts                                 Per-page style injection
-      └─ truncate.ts                              Long-text safe truncation
+      ├─ preamble.ts               `var d` dari <script id="__cp_data">, bail kalau kosong
+      ├─ style.ts                  style → --cp-primary/--cp-font/--cp-radius/--cp-density
+      ├─ fillHelpers.ts            fill() / setAttr() / hideSection() / renderList()
+      ├─ identityFills.ts          Isi semua slot + hide section per `has`
+      ├─ pageExtras.ts             Badge availability, CTA, reorder, fluff, empty
+      ├─ truncate.ts               Potong list panjang + tombol "Lihat semua"
+      └─ iframeHelpers.ts          Anchor nav, auto-resize, ekstraksi floating nav
 ```
+
+## Dua sumber konten, satu jalur render
+
+`themes/index.tsx → PersonalBrandingPage` cuma punya satu percabangan:
+
+| Sumber | Kapan dipakai | Dari mana |
+|---|---|---|
+| **Template bawaan** | `publicHtml` kosong | `fetch("/personal-branding/templates/<file>.html")` di klien, di-cache di `TEMPLATE_HTML_CACHE` (Map, per-session, key = theme id) |
+| **`publicHtml`** | string non-kosong | Dikirim sebagai prop dari `getBySlug` — tidak pernah di-fetch, tidak pernah di-cache (berubah tiap user edit). `templateKey` = `custom-<length>` supaya ganti dokumen = remount iframe |
+
+Setelah itu jalurnya identik. `injectBrandingIntoHtml(html, branding)`:
+
+1. `<script id="__cp_data" type="application/json">…</script>` di-splice **sebelum `</head>`** — harus duluan, karena inline script milik template (mis. `v2`) membacanya saat eksekusi. JSON-nya di-escape (`<` jadi `\u003c`, plus U+2028/U+2029) supaya tidak ada tabrakan `</script>`.
+2. `TEMPLATE_IFRAME_HELPERS_JS` + `TEMPLATE_HYDRATOR_JS` di-splice **sebelum `</body>`** (fallback `</html>`, lalu append).
+3. Hasilnya jadi `srcDoc` iframe.
+
+Kalau `branding` tidak dikirim (`showBranding={false}` — tab "Template" di
+`PreviewDialog`), cuma helpers yang masuk: template tampil dengan mock content +
+section `data-cp-fluff`-nya, tanpa data user.
+
+Payload-nya dirakit **sekali** di `convex/profile/loadBranding.ts`
+(avatar → portfolio visible → CV terbaru → `buildBrandingPayload`) dan dipakai
+dua pemanggil: `api.profile.queries.getBySlug` (halaman publik) dan
+`internal.mcp.data.branding.getBrandingData` (tool `branding_data`). Sengaja satu
+implementasi: kalau keduanya beda, model akan menulis marker untuk data yang
+tidak pernah dikirim halaman, dan bug-nya cuma kelihatan sebagai section kosong
+di layar orang lain.
+
+## Kontrak marker `data-cp`
+
+Ini **antarmuka authoring** untuk manusia maupun AI host. SSOT-nya
+`themes/templateHydrator/` (implementasi) dan `MARKER_CONTRACT` di
+`convex/mcp/tools/branding.ts` (yang dikirim ke model). Kalau nambah marker,
+update dua-duanya. `starter.html` mengimplementasikan seluruh tabel di bawah —
+itu contoh terpendek yang benar.
+
+Kontraknya cuma cocok-cocokan string di runtime, di dalam iframe, tanpa error
+kalau meleset — jadi `themes/starterTemplate.test.ts` membacanya balik dari
+source hydrator dan memastikan `starter.html` merender **setiap** key yang
+diisi, punya tepat satu `data-cp-template` per list, tidak memakai nama section
+di luar `has`, tidak meminta apa pun lewat jaringan, dan tidak membawa `<form>`
+atau handler inline.
+
+| Atribut | Arti |
+|---|---|
+| `data-cp="KEY"` | Isi `textContent` node dengan nilai `KEY`. |
+| `data-cp-mode="src\|href\|html"` | Isi atribut itu, bukan teks. `html` → `innerHTML`. |
+| `data-cp-list="NAME"` | Container berisi **satu** anak `data-cp-template`; anak itu di-clone per item, diisi, template asli dihapus. Sibling mock lain di container ikut dibuang. |
+| `data-cp-section="NAME"` | Wrapper section — `display:none` saat `has.NAME` false. |
+| `data-cp-empty="NAME"` | Kebalikannya: hanya tampil saat section itu kosong. |
+| `data-cp-fluff` | Selalu di-hide begitu ada data nyata (testimoni palsu, metrik karangan, lorem). Tetap tampil di preview mode "Template". |
+| `data-cp-list-max="N"` | Override ambang truncate per container. |
+| `data-cp-skip-cta` | Di ancestor hero → hydrator tidak menyuntik tombol CTA. |
+
+**Key teks:** `name`, `headline`, `target-role`, `location`, `bio`, `summary`,
+`contact-email`.
+
+**Key atribut:** `avatar` (`mode=src`), `contact-email-href` (`mode=href`,
+prefix `mailto:` otomatis), `contact-linkedin`, `contact-portfolio` (dipakai
+sebagai href sekaligus teks).
+
+| List (`data-cp-list`) | Key item | Truncate default |
+|---|---|---|
+| `skills` | `skill-name` | 6 |
+| `experience` | `exp-company`, `exp-position`, `exp-period`, `exp-description`, nested list `exp-achievements` → `achievement` | 2 |
+| `education` | `edu-institution`, `edu-degree`, `edu-field`, `edu-period`, `edu-gpa` | 4 |
+| `projects` | `proj-title`, `proj-description`, `proj-category`, `proj-cover` (emoji), `proj-link` (`mode=href`), nested list `proj-tech` → `tech-name` | 3 |
+| `certifications` | `cert-name`, `cert-issuer`, `cert-date` | 3 |
+| `languages` | `lang-name`, `lang-proficiency` | 6 |
+
+`exp-period` / `edu-period` dirakit hydrator dari `startDate`/`endDate`
+(`"2024 — Sekarang"` untuk `current`). Sub-list (`proj-tech`,
+`exp-achievements`) **tidak pernah** dipotong.
+
+**Nama section** (`data-cp-section` / `data-cp-empty` / `sectionOrder`):
+`about`, `skills`, `experience`, `education`, `certifications`, `languages`,
+`projects`, `contact` — persis `ALLOWED_SECTIONS` di `convex/profile/mutations.ts`.
+
+**Yang disuntik hydrator tanpa marker:**
+
+- Badge *availability* — disisipkan sebelum `h1` / `[data-cp-hero]` pertama.
+- Tombol CTA — masuk ke `.hero-cta` / `.hero-actions` kalau ada, kalau tidak
+  setelah `.hero-action`, kalau tidak setelah heading hero. Mengadopsi class
+  `.btn-primary` / `.btn` milik template supaya warnanya nyambung.
+- `style` (dari row lama, **hanya kalau ada `publicHtml`**) → `--cp-primary`,
+  `--cp-font`, `--cp-radius`, `--cp-density` di `:root` + layer override.
+- `sectionOrder` → urutan ulang sibling `[data-cp-section]` dalam parent yang sama.
+- `.reveal` / `.js-reveal` / `.stagger` dipaksa `is-visible` — IntersectionObserver
+  sering tidak pernah fire di srcdoc iframe dan hero-nya nyangkut `opacity:0`.
+- Avatar kosong → seluruh `.hero-visual` (atau `[data-cp-avatar-wrap]`) di-hide
+  dan `.hero-grid` dikolapskan jadi satu kolom.
+- **Nilai `src`/`href` kosong menyembunyikan elemennya**, bukan cuma menghapus
+  atribut. Sebelum ini, user tanpa LinkedIn tetap punya tombol "LinkedIn" yang
+  mati dan masih memakai label mock template. Re-fill idempoten: nilai yang
+  datang belakangan meng-unhide lagi.
+
+**postMessage protocol** (iframe ⇄ parent, `TemplateLayout` yang jaga):
+
+| Arah | Pesan | Efek |
+|---|---|---|
+| iframe → parent | `cp-resize {h}` | Tinggi iframe di-clamp 400–20000 px |
+| iframe → parent | `cp-show-more {list}` | Buka `BrandingShowMoreDialog` (list divalidasi lewat `VALID_SHOW_MORE_LISTS`) |
+| iframe → parent | `cp-floating-nav {items}` | Maks 6 item → `FloatingMobileNav` (SVG-nya disaring allowlist) |
+| iframe → parent | `cp-anchor-y {y}` | Parent men-scroll viewport-nya sendiri |
+| parent → iframe | `cp-goto {id}` | Cari elemen, balikin posisinya |
+
+Parent **hanya** menerima pesan yang `event.source === iframe.contentWindow`
+**dan** `event.origin === "null"` — origin opaque itu satu-satunya diskriminator
+yang bisa dipercaya dari srcdoc tanpa `allow-same-origin`.
 
 ## Data Flow
 
-Backend: `convex/profile/` (sebagian besar lewat `userProfiles` row
-yang sama dengan settings).
+Backend: `convex/profile/` — semua field menumpang row `userProfiles` yang sama
+dengan Pengaturan (prefix `public*`).
 
 | Operasi | Convex |
 |---|---|
 | Load editor state | `api.profile.queries.getMyPublicProfile` |
-| Save / publish | `api.profile.mutations.updateMyPublicProfile` |
-| Slug live-check | `api.profile.queries.isSlugAvailable` |
-| Public lookup | `api.profile.queries.getBySlug` (by route `/[slug]/page.tsx`) |
-| Indexable list | `api.profile.queries.listIndexableSlugs` (sitemap) |
-| Quick Fill paste | `api.ai.actions.parseImportText` → `api.onboarding.mutations.quickFill` |
-| Avatar upload | `api.files.mutations.{generateUploadUrl, saveFile}` + `api.profile.mutations.updateAvatar` |
-| Auto-build inputs | `api.cv.queries.getUserCVs`, `api.portfolio.queries.listPortfolio` (read-only — auto mode only) |
+| Simpan / publish (manual + autosave 1.5s) | `api.profile.mutations.updateMyPublicProfile` |
+| Lookup publik | `api.profile.queries.getBySlug` (unauth; `null` untuk semua jenis kegagalan) |
+| Sitemap | `api.profile.queries.listIndexableSlugs` (index `by_public_index`, cap 5000) |
+| Data preview editor | `api.profile.queries.getCurrentUser` + `api.cv.queries.getUserCVs` + `api.portfolio.queries.listPortfolio` |
+| MCP baca | `internal.mcp.data.branding.getBranding` / `getBrandingData` |
+| MCP tulis | `internal.mcp.data.branding.setHtml` / `clearHtml` |
+| Import CV (isi profil + CV sekaligus) | di luar slice ini — komponen `CVImportButton` dari `@/shared/components/onboarding`, lihat `cv-generator.md` |
 
-Auto-mode hydrates blocks from CV + portfolio + profile lewat helper
-`convex/profile/autoBlocks.ts → DEFAULT_AUTO_TOGGLES` + per-toggle
-fillers di `convex/profile/blocks.ts`.
+Field di `userProfiles` (lihat `convex/profile/schema.ts`): `publicEnabled`,
+`publicSlug`, `publicHeadline`, `publicHtml`, `publicTheme`, `publicAccent`,
+`publicAllowIndex`, `publicAvatarShow`, `publicBioShow`, `publicSkillsShow`,
+`publicTargetRoleShow`, `publicLocationShow`, `publicPortfolioShow`,
+`publicContactEmail`, `publicLinkedinUrl`, `publicPortfolioUrl`,
+`publicAutoToggles`, `publicAvailableForHire`, `publicAvailabilityNote`,
+`publicCta{Label,Url,Type}`, `publicSectionOrder`,
+`public{Html,Embed,Prompt}Export`. Index: `by_public_slug` (unik global),
+`by_public_index` (sitemap).
 
-`brandingPayload.ts` server-side memvalidasi block tree sebelum
-persist (skema diff strict, max-length, allowed types).
+Legacy read-only, tidak ada yang menulis: `publicMode`, `publicBlocks`,
+`publicHeaderBg`, `publicStyle`.
+
+**Gating data, bukan cuma tampilan.** `buildBrandingPayload` menjatuhkan DATA
+section yang dimatikan user (`about`/`skills`/`experience`/… jadi `""`/`[]`),
+bukan sekadar menyetel `has.X = false`. `getBySlug` tidak terautentikasi —
+menyembunyikan sesuatu di sisi klien bukan privasi. `location` default
+**tersembunyi** sampai user opt-in.
+
+## MCP tool surface
+
+`convex/mcp/tools/branding.ts` (definisi) + `convex/mcp/data/branding.ts`
+(query/mutation). Scope diturunkan dari `annotations.readOnlyHint`
+(`convex/mcp/types.ts`): read-only → `mcp.read`, sisanya → `mcp.write`.
+
+| Tool | Scope | Isi |
+|---|---|---|
+| `branding_get` | `mcp.read` | Status halaman: `published`, `slug`, `url`, `headline`, `indexable`, `template`, `source` (`template`\|`custom_html`), `html_chars`, `html_max_chars`. `include_html: true` untuk ikut mengembalikan HTML-nya |
+| `branding_data` | `mcp.read` | `{ contract, data }` — payload `__cp_data` yang identik dengan halaman live, **plus** `MARKER_CONTRACT` |
+| `branding_templates` | `mcp.read` | Tanpa argumen = daftar 4 template; dengan `template_id` = HTML-nya, di-fetch HTTP dari `APP_URL` (default `https://careerpack.org`) |
+| `branding_set_html` | `mcp.write` | Ganti seluruh dokumen (`normalizePublicHtml`) |
+| `branding_delete_html` | `mcp.write` | Kosongkan `publicHtml` → balik ke template |
+
+Write lewat MCP kena `MCP_WRITE_LIMIT` (25/menit) + `MCP_WRITE_DAILY_LIMIT`
+(400/hari) dari `convex/mcp/data/limits.ts` — token MCP hidup setahun dan jalan
+tanpa manusia di depannya.
+
+**Tidak ada publish tool, disengaja.** `publicEnabled`, `publicSlug`, dan
+`publicAllowIndex` hanya bisa ditulis dari dashboard. AI boleh menyusun halaman;
+keputusan menaruh nama sendiri di internet tetap di manusia. Kalau halamannya
+belum aktif, tool-nya menyuruh model bilang ke user untuk menyalakan sendiri.
+
+Agent in-app (`manifest.ts` + `BrandingCapabilities.tsx`) surface-nya berbeda dan
+lebih sempit: `branding.get-status`, `toggle-public`, `set-slug`, `set-theme`,
+`set-available`. Agent in-app **tidak** menulis HTML.
 
 ## State Lokal — `usePBForm`
 
-Hook `usePBForm.ts` (~440 lines) is the single source of truth:
+- **`state: FormState`** — 25 field (lihat `form/types.ts`). Nambah field =
+  4 sentuhan: `FormState` → `defaults.ts` → `seedFromServer` → section pemakainya.
+- **`bind(key)`** → `{ value, onChange }`, tipenya di-narrow per field.
+- **Hydrate sekali** saat data server datang; perubahan server berikutnya tidak
+  menimpa editan lokal (biar tidak terasa reset hantu). Guard-nya di-reset saat
+  mode auth berubah (demo ↔ login), termasuk baseline autosave.
+- **Autosave** debounce 1500 ms, `submit({ silent: true })`. Dilewati kalau demo
+  atau `canEnable` false. Snapshot JSON (`enabled` dikecualikan) mencegah
+  re-render tanpa perubahan memicu save.
+- **Demo mode** (`useDemoPBOverlay`) menyimpan ke overlay localStorage, bukan Convex.
+- **Slug** divalidasi lokal (`validateSlug`) sebelum submit; tabrakan slug baru
+  ketahuan di server (`"Slug sudah dipakai, pilih yang lain"`).
+- **`html` tidak di-bind langsung.** `CustomHtmlCard` menyimpan buffer lokal dan
+  baru commit saat tombol Simpan ditekan — field ini ikut loop autosave 1,5 detik,
+  dan mengirim dokumen ~250 KB per ketikan jelas bukan ide bagus.
 
-- **`state: FormState`** — slug, headline, bioShow, mode, blocks[], theme, style, ctaType, header background, autoToggles, contactEmail, linkedinUrl, portfolioUrl, allowIndex, avatarShow, portfolioShow, …
-- **`Bind` helpers** — typed `bind("slug").value` / `bind.boolean("allowIndex")` to wire inputs.
-- **Hydration** — pulls `getMyPublicProfile`; merges with `DEFAULT_FORM_STATE`. Demo overlay (`useDemoPBOverlay`) for unauth preview.
-- **Dirty tracking** — `isDirty`, `pristineRef`. `submit({ publish? })` validates → calls `updateMyPublicProfile`.
-- **Slug validation** — `validateSlug(slug)` regex + `isSlugAvailable` debounced query → `SlugValidation` object (`status: idle|checking|ok|taken|invalid`).
-- **Mode switch guard** — switching auto ↔ custom prompts via `<ModeWarning>` if blocks[] != defaults.
-
-`usePreviewBranding.ts` derives a render-ready snapshot for
-`MiniPreviewFrame` from the form state + auto-blocks + portfolio
-items. Lazy: only re-runs when watched fields change.
+`usePreviewBranding` membangun `BrandingPayload` versi klien yang **meniru**
+`convex/profile/brandingPayload.ts` baris per baris (gating toggle, urutan
+portfolio featured-lalu-terbaru, CV terbaru menang). Kalau salah satu berubah,
+ubah dua-duanya — kalau tidak, preview dan halaman live jadi beda.
 
 ## Dependensi
 
-- `@/shared/hooks/useAuth`, `useDemoOverlay` (`useDemoPBOverlay`, `useDemoProfileOverlay`).
-- `@/shared/components/files/FileUpload`, `useFileUpload`.
-- `@/shared/components/onboarding/QuickFillButton`.
-- `@/shared/components/brand/Logo` → `BrandMark`.
+- `@/shared/hooks/{useAuth, useDemoOverlay}` — `useDemoPBOverlay`,
+  `useDemoProfileOverlay`, `useDemoCVOverlay`, `useDemoPortfolioOverlay`.
 - `@/shared/components/layout/{PageContainer, PreviewSplitLayout}`.
-- `@/shared/components/ui/{button,badge,card,input,label,textarea,switch,popover,progress,select,skeleton,tabs}`, `responsive-{dialog,select,page-header}`.
-- `@/shared/lib/{notify, utils}`.
-- `convex/react` — `useQuery`, `useMutation`.
-- `convex/profile/{autoBlocks, brandingPayload, blocks}` — shared types/helpers imported from frontend (relative path `../../../../convex/profile/...`).
-- `lucide-react`.
+- `@/shared/components/onboarding` → `CVImportButton` (menggantikan `ImportCard`
+  lama: `parseImportText` cuma mengisi `profile`, CV-nya tidak tersentuh).
+- `@/shared/components/brand/Logo` (`BrandFooter`).
+- `@/shared/components/ui/*` — badge, button, card, copy-button, input, label,
+  progress, responsive-dialog, responsive-page-header, select, skeleton, switch,
+  tabs, textarea.
+- `@/shared/lib/{aiActionBus, notify, utils}`, `@/shared/types/sliceManifest`.
+- `convex/react` (`useQuery`, `useMutation`), `convex/browser`
+  (`ConvexHttpClient` di route publik).
+- Tipe/konstanta backend yang di-import frontend lewat path relatif:
+  `convex/profile/autoBlocks` (`AutoToggles`, `DEFAULT_AUTO_TOGGLES`).
+- `lucide-react`. Tidak ada dependensi npm khusus.
 
-## Catatan Desain
+## Catatan Desain — model keamanan
 
-- **Two-mode dichotomy.** "Otomatis" (computed from canonical sources) vs "Manual" (full block control). User can switch; switching from manual back to auto offers to discard custom block tree.
-- **Iframe template caveat.** `themes/templateHydrator.ts` injects state via sandboxed iframe — caution when refactoring; broken hydrator means white-screen public pages. The `iframeHelpers.ts` keeps allowed origins + sandbox attrs strict.
-- **Slug = global namespace.** Single index `userProfiles.by_public_slug` enforces uniqueness across all users. Reserved slugs (`/login`, `/admin`, `/dashboard`, …) blocked in `validateSlug`.
-- **`brandingScore`** drives `BrandingValidationCard`: heuristic over identity completeness, contact channels, theme + media. Score < 50 surface jump-link CTA ("Isi headline") that emits `pb-jump` event → `PersonalBrandingView` opens matching accordion section.
-- **Public render = pure server.** `app/[slug]/page.tsx` is fully SSR; uses `getBySlug` + `inject.ts` for theme variables. No client JS for SEO.
-- **Allow-index respected.** When `allowIndex=false`, page emits `noindex` meta + Convex `listIndexableSlugs` skips it for sitemap. R3 (privacy default).
-- **Block tree depth-capped.** `containerField` + `ContainerChildren` allow nesting but `brandingPayload.ts` rejects > 3 levels.
-- **`ExportCard` dual export.** "HTML" produces standalone file (inline CSS, no JS). "Embed" produces `<iframe src="…/[slug]?embed=1">` that hides nav + footer.
+- **Iframe sandbox.** `TemplateLayout` merender `srcDoc` dengan
+  `sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"`
+  — **tanpa `allow-same-origin`**. Isinya hidup di origin opaque: tidak bisa
+  menyentuh DOM aplikasi, cookie, atau sesi Convex.
+- **`publicHtml` sengaja tidak disanitasi.** Alasannya ada di
+  `convex/profile/publicHtml.ts`: menyaring tag justru merusak template bawaan
+  (yang butuh inline script-nya sendiri) sambil tidak membeli apa pun yang belum
+  diberikan sandbox. Kalau suatu hari halaman dirender **di luar** iframe itu,
+  `normalizePublicHtml` adalah tempat sanitiser dipasang — semua caller otomatis
+  ikut.
+- **Cap ukuran.** `PUBLIC_HTML_MAX = 250_000` karakter. Satu aturan dipakai dua
+  jalur tulis (`updateMyPublicProfile` dan MCP `setHtml`) supaya limit tidak bisa
+  berlaku di satu sisi saja. `CustomHtmlCard` mencerminkan angka yang sama di klien.
+  Template terbesar 81 KB, jadi capnya longgar.
+- **Enumerasi.** `getBySlug` mengembalikan `null` untuk semua jenis kegagalan
+  (slug ngawur, tidak ada, atau ada tapi dimatikan) → `notFound()`. Halaman
+  nonaktif 404, tidak bisa dibedakan dari yang tidak pernah ada. ISR
+  `revalidate = 60` menyerap scraping sebelum sampai Convex (harganya: tiap slug
+  yang di-probe meninggalkan ~44 KB cache).
+- **Indexing default mati.** Tanpa `publicAllowIndex`, metadata mengirim
+  `noindex, nofollow, nocache, noarchive, nosnippet` dan JSON-LD `Person` tidak
+  di-emit sama sekali. `canonical` tetap dikirim (sengaja) — valid juga di halaman
+  noindex.
+- **Slug.** 3–30 karakter, `^[a-z][a-z0-9-]+[a-z0-9]$`, tanpa `--`, plus daftar
+  reserved. SSOT-nya `convex/profile/slug.ts`; `form/defaults.ts` menyalinnya
+  untuk validasi klien — jaga tetap sinkron, terutama saat menambah route root baru.
+- **CSP.** Header aplikasi berlaku untuk semua path kecuali
+  `/personal-branding/templates/*`. `about:srcdoc` mewarisi CSP parent dan
+  meta-CSP hanya bisa memperketat — itulah kenapa Google Fonts dan
+  `images.unsplash.com` diizinkan global di `next.config.ts`.
+- **`FloatingMobileNav`** merender `iconHtml` yang datang dari iframe lewat
+  `dangerouslySetInnerHTML` **di origin aplikasi**, jadi SVG-nya disaring
+  allowlist tag/atribut di komponen itu. Jangan longgarkan.
+
+## Known gaps
+
+Ditulis biar tidak dicari-cari lagi:
+
+- **`v2.html` tidak ikut protokol `data-cp-list`.** Nol marker list; dia membaca
+  `__cp_data` dengan inline script-nya sendiri dan mengisi mount id
+  (`skillsMount`, `experienceMount`, `casesMount`, `deckMount`). Karena itu
+  `truncate.ts` punya **pass 2** khusus yang memotong mount-mount tersebut.
+  Template ini juga default (`publicTheme` kosong → `template-v2`).
+- **`v1.html` tidak punya section `education`** (section yang ada: `about`,
+  `skills`, `experience`, `projects`, `contact`) — pendidikan user tidak akan
+  muncul di template itu.
+- **`v3.html` tidak punya section `about`** (yang ada: `skills`, `experience`,
+  `education`, `projects`, `contact`).
+- **Isi iframe tidak bisa di-index.** Origin opaque tidak punya URL; crawler
+  tidak membaca apa pun di dalamnya, dan HTML template-nya di-fetch di klien.
+  `ProfileSummary` (dirender server, di bawah iframe) adalah **satu-satunya**
+  konten yang bisa dirayapi di route ini dan pemilik satu-satunya `<h1>`.
+  Dia juga alasan halaman tetap berguna kalau fetch template gagal.
+- **`?embed=1` tidak melakukan apa-apa.** `ExportCard.buildEmbedSnippet`
+  menempelkannya, tapi `app/[slug]/page.tsx` tidak membaca `searchParams` sama
+  sekali (dan `force-static` memang tidak bisa). Lebih jauh: header aplikasi
+  memasang `frame-ancestors 'none'` + `X-Frame-Options: DENY` untuk route ini,
+  jadi snippet iframe itu **tidak akan tampil** di Notion/Wix/WordPress. Yang
+  boleh di-frame cuma `/personal-branding/templates/*` (`'self'`).
+- **`api.profile.queries.isSlugAvailable` tidak punya pemanggil.** Editor hanya
+  validasi format lokal; keunikan baru ketahuan saat save. Query-nya masih ada
+  (butuh auth) — hapus atau pasang lagi, jangan biarkan menggantung.
+- **Sisa builder di validator.** `updateMyPublicProfile` masih menerima
+  `mode` / `blocks` / `style` lalu membuangnya, supaya tab lama yang belum
+  reload tidak kena `ArgumentValidationError` tiap 1,5 detik. Hapus setelah
+  satu-dua rilis.
+- **Theme id legacy** `linktree` / `bento` / `magazine` masih diterima validator
+  (read-compat) tapi tidak ada di picker; renderer memetakannya ke `template-v2`.
+- **`publicStyle` tanpa penulis.** Tidak ada UI yang menulisnya lagi (StyleCard
+  ikut terhapus). `loadBranding` cuma mengirimnya kalau row punya `publicHtml`,
+  jadi halaman template tidak berubah tampilan gara-gara sisa setting mode
+  manual — override `!important` dari hydrator (radius, density, font) sempat
+  bocor ke dua halaman produksi sebelum gate ini dipasang. HTML kustom masih
+  bisa membacanya dari `__cp_data`.
 
 ## Extending
 
-- Custom domains (CNAME → Convex HTTP route).
-- Analytics widget (page views per public slug — table `publicProfileViews`).
-- AI-driven theme suggestion based on detected role.
-- More themes (currently 4: minimal / modern / bold / serif).
-- Animation presets (fade / slide on scroll).
+- **Nambah template bawaan** = 1 file di `frontend/public/personal-branding/templates/`
+  + `TEMPLATE_THEMES`/`TEMPLATE_URLS`/`THEME_LABELS` (`blocks/types.ts`)
+  + union `publicTheme` di `convex/profile/schema.ts` **dan** validator
+  `updateMyPublicProfile` + `TEMPLATES`/`TEMPLATE_PATH` di
+  `convex/mcp/tools/branding.ts` + daftar tema di `manifest.ts` dan
+  `VALID_THEMES` di `BrandingCapabilities.tsx`.
+- **Nambah marker** = implementasi di `templateHydrator/` + entri di
+  `MARKER_CONTRACT` + dukung di `starter.html` (itu yang dicontek AI host).
+- Domain kustom (CNAME → route HTTP Convex).
+- Analytics per slug publik (tabel `pageviews` sudah ada).
+- Versioning `publicHtml` — sekarang `branding_set_html` menimpa tanpa undo,
+  dan itu sebabnya tool-nya bertanda `destructiveHint: true`.
 
 ---
 
@@ -187,31 +423,36 @@ items. Lazy: only re-runs when watched fields change.
 **Tier:** XL
 
 **Prereq:**
-- `auth.md` ported (auth + userProfiles).
-- `file-upload.md` ported (avatar + media uploads).
-- `portfolio.md` ported (auto-mode reads portfolio items).
-- `cv-generator.md` ported (auto-mode reads CV).
-- AI agent (`ai-agent.md`) recommended for Quick Fill resume parse, optional otherwise.
+- `auth.md` (auth + `userProfiles`).
+- `file-upload.md` (avatar + cover portfolio).
+- `portfolio.md` + `cv-generator.md` (sumber data payload).
+- `mcp.md` opsional — tanpa itu, HTML kustom tetap bisa ditempel manual di
+  `CustomHtmlCard`.
 
 **Files untuk dicopy:**
 
 ```
-# Slice (large)
+# Slice
 frontend/slices/personal-branding/
 
 # Public route
-frontend/app/[slug]/page.tsx
-frontend/app/[slug]/error.tsx       # if exists
+frontend/app/[slug]/{page.tsx,ProfileSummary.tsx,opengraph-image.tsx,error.tsx}
+
+# Template documents (WAJIB — tanpa ini halaman publik blank)
+frontend/public/personal-branding/templates/{starter,v1,v2,v3}.html
 
 # Shared
 frontend/shared/hooks/useDemoOverlay.ts
-frontend/shared/components/onboarding/QuickFillButton.tsx
-frontend/shared/components/layout/PreviewSplitLayout.tsx
+frontend/shared/components/layout/{PreviewSplitLayout,PageContainer}.tsx
+frontend/shared/components/onboarding/            # CVImportButton
 frontend/shared/components/brand/Logo.tsx
 
 # Backend
-convex/profile/                                            # adds public-slug fields + autoBlocks + brandingPayload
-convex/onboarding/                                         # Quick Fill batch hydrator
+convex/profile/                                   # schema + queries + mutations +
+                                                  # loadBranding + brandingPayload +
+                                                  # publicHtml + slug + autoBlocks + blocks/
+convex/mcp/tools/branding.ts                      # opsional (butuh MCP server)
+convex/mcp/data/branding.ts
 ```
 
 **cp commands:**
@@ -222,116 +463,118 @@ DST=~/projects/<target>
 
 mkdir -p "$DST/frontend/slices" \
          "$DST/frontend/app/[slug]" \
+         "$DST/frontend/public/personal-branding/templates" \
          "$DST/frontend/shared/hooks" \
-         "$DST/frontend/shared/components/onboarding" \
          "$DST/frontend/shared/components/layout" \
-         "$DST/convex/profile" "$DST/convex/onboarding"
+         "$DST/convex/profile"
 
 cp -r "$SRC/frontend/slices/personal-branding" "$DST/frontend/slices/"
-cp "$SRC/frontend/app/[slug]/page.tsx"             "$DST/frontend/app/[slug]/"
-cp "$SRC/frontend/app/[slug]/error.tsx"            "$DST/frontend/app/[slug]/" 2>/dev/null || true
-cp "$SRC/frontend/shared/hooks/useDemoOverlay.ts"               "$DST/frontend/shared/hooks/"
-cp "$SRC/frontend/shared/components/onboarding/QuickFillButton.tsx" "$DST/frontend/shared/components/onboarding/"
-cp "$SRC/frontend/shared/components/layout/PreviewSplitLayout.tsx"  "$DST/frontend/shared/components/layout/"
-
-cp -r "$SRC/convex/profile/."    "$DST/convex/profile/"
-cp -r "$SRC/convex/onboarding/." "$DST/convex/onboarding/"
+cp -r "$SRC/frontend/app/[slug]/."             "$DST/frontend/app/[slug]/"
+cp -r "$SRC/frontend/public/personal-branding/templates/." \
+      "$DST/frontend/public/personal-branding/templates/"
+cp    "$SRC/frontend/shared/hooks/useDemoOverlay.ts" "$DST/frontend/shared/hooks/"
+cp    "$SRC/frontend/shared/components/layout/PreviewSplitLayout.tsx" \
+      "$DST/frontend/shared/components/layout/"
+cp -r "$SRC/convex/profile/." "$DST/convex/profile/"
 ```
 
-**Schema additions** — `userProfiles` extends with public-profile
-fields (copy verbatim from `convex/profile/schema.ts`):
+**Schema additions** — salin blok field `public*` + `avatarStorageId` dari
+`convex/profile/schema.ts` apa adanya, plus index `by_public_slug` dan
+`by_public_index`. Kalau MCP tidak ikut diport, `publicHtml` tetap wajib —
+`CustomHtmlCard` menulis field yang sama.
 
-```ts
-// inside userProfiles
-publicEnabled: v.optional(v.boolean()),
-publicSlug: v.optional(v.string()),
-publicHeadline: v.optional(v.string()),
-publicMode: v.optional(v.string()),               // "auto" | "custom"
-publicBlocks: v.optional(v.any()),                // serialized block tree
-publicTheme: v.optional(v.string()),
-publicStyle: v.optional(v.object({ font: v.string(), radius: v.string(), density: v.string() })),
-publicHeaderBg: v.optional(v.any()),
-publicAutoToggles: v.optional(v.any()),
-publicContactEmail: v.optional(v.string()),
-publicLinkedinUrl: v.optional(v.string()),
-publicPortfolioUrl: v.optional(v.string()),
-publicCtaType: v.optional(v.string()),
-publicCtaLabel: v.optional(v.string()),
-publicCtaUrl: v.optional(v.string()),
-allowIndex: v.optional(v.boolean()),
-avatarShow: v.optional(v.boolean()),
-bioShow: v.optional(v.boolean()),
-skillsShow: v.optional(v.boolean()),
-targetRoleShow: v.optional(v.boolean()),
-portfolioShow: v.optional(v.boolean()),
-```
+**Convex api.d.ts** — modul `profile` (`queries`, `mutations`), plus
+`mcp/tools/branding` + `mcp/data/branding` kalau MCP ikut.
 
-Add unique index: `.index("by_public_slug", ["publicSlug"])`.
-
-**Convex api.d.ts** — `profile`, `onboarding`, plus auto-block helpers
-re-exported via `convex/profile/blocks.ts`.
-
-**npm deps:** none. (Themes are inline-styled; iframe sandbox is browser-native.)
+**npm deps:** tidak ada. Renderer memakai iframe + postMessage bawaan browser.
 
 **Env vars:**
-- `NEXT_PUBLIC_APP_URL` — used by `ShareCard` to build the public URL.
+- `NEXT_PUBLIC_CONVEX_URL` — dipakai `ConvexHttpClient` di route publik.
+- `APP_URL` (env Convex) — origin yang di-fetch `branding_templates`; default
+  `https://careerpack.org`.
+- Origin publik di `ShareCard`/`ExportCard` masih hardcode `https://careerpack.org`
+  (`DEFAULT_ORIGIN`) — ganti saat porting.
 
-**Nav registration:**
+**Nav registration** — satu entri di `frontend/shared/lib/dashboardRegistry.ts`
+(lihat CLAUDE.md § Routing). Route publik `app/[slug]/page.tsx` harus di **luar**
+route group `(marketing)` dan `(dashboard)` supaya match di root.
 
-`dashboardRoutes.tsx`:
-```ts
-const PERSONAL_BRANDING: View = dynamic(
-  () => import("@/slices/personal-branding").then((m) => m.PersonalBrandingView),
-  { loading: loadingFallback },
-);
-DASHBOARD_VIEWS["personal-branding"] = PERSONAL_BRANDING;
-```
+**Header/CSP** — port juga blok `TEMPLATE_HEADERS` + mapping `headers()` di
+`next.config.ts`. Tanpa itu template iframe kena `frame-ancestors 'none'` dan
+halaman publik jadi kotak kosong.
 
-`navConfig.ts`:
-```ts
-{ id: "personal-branding", label: "Branding", icon: Sparkles, href: "/dashboard/personal-branding", hue: "from-fuchsia-400 to-pink-600" }
-```
+**Manifest + binder wiring** — daftarkan `personalBrandingManifest` di
+`shared/lib/sliceRegistry.ts` dan mount `<BrandingCapabilities />` di `Providers`.
 
-Also wire the public route at `app/[slug]/page.tsx` — keep it OUTSIDE
-the `(marketing)` and `(dashboard)` route groups so it matches at the
-root.
-
-**i18n:** Indonesian throughout — section titles ("Identitas",
-"Konten", "Tampilan", "Bagikan"), validator messages
-("Slug minimal 3 karakter"), button labels, tooltips.
+**i18n:** Indonesia sepenuhnya — judul section ("Identitas & URL", "Tampilan",
+"Tampilkan di hero", "Privasi & SEO"), error server ("Slug harus 3-30 karakter",
+"HTML terlalu besar (…)"), sampai label tombol di hydrator ("Lihat semua (12)",
+"Tersedia untuk direkrut").
 
 **Common breakage after port:**
 
-- **Public page white-screen** — `templateHydrator.ts` sandbox iframe
-  depends on `inject.ts` running before block render. Check `preamble.ts`
-  emits style vars BEFORE `BlockRenderer` mounts.
-- **Slug "always taken"** — `isSlugAvailable` query doesn't exclude
-  the current user's slug. Verify `userId` parameter compares with caller.
-- **Save button always disabled** — dirty tracking bug; ensure
-  `pristineRef` populates AFTER first hydration, not on initial render.
-- **`autoBlocks` reads CV that has no template** — fallback empty list.
-  Check `convex/profile/autoBlocks.ts → DEFAULT_AUTO_TOGGLES` defaults
-  match target's CV schema.
-- **Quick Fill not parsing** — server `parseImportText` action requires
-  `convex/ai/actions.ts` ported + AI provider configured. Without AI,
-  hide ImportCard.
-- **Reserved slug clash** — keep `RESERVED_SLUGS` in `slugValidation.ts`
-  in sync with target's other root routes (`/help`, `/admin`, `/api`).
-- **Iframe `embed=1` mode missing styles** — `app/[slug]/page.tsx` must
-  read `searchParams.embed` and conditionally hide `BrandFooter` /
-  `FloatingMobileNav`.
+- **Halaman publik blank / "Template gagal dimuat"** — file di
+  `public/personal-branding/templates/` belum ikut, atau CSP path-nya belum
+  diport. Pesan errornya menampilkan URL yang gagal.
+- **Iframe cuma setinggi hero** — `iframeHelpers.ts` tidak jalan (helper ini
+  di-inject bahkan tanpa data); cek `injectBrandingIntoHtml` menemukan `</body>`.
+- **Semua section kosong padahal data ada** — `has` di payload semuanya false:
+  toggle `publicBioShow`/`publicSkillsShow`/`publicAutoToggles` memang default
+  opt-in. Cek juga urutan fragment hydrator (`preamble` harus pertama; `d` dipakai
+  fragment lain).
+- **Soft 404** — jangan tambahkan `loading.tsx` di `app/[slug]/`.
+- **Autosave loop error** — `canEnable` butuh slug valid; validator klien dan
+  `convex/profile/slug.ts` harus punya daftar reserved yang sama.
+- **HTML kustom tersimpan tapi tidak kelihatan** — `getBySlug` harus
+  mengembalikan `html`, dan `PersonalBrandingPage` harus meneruskannya ke
+  `TemplateLayout.templateHtml`; kalau putus, user diam-diam kembali ke template.
 
 **Testing the port:**
 
-1. Open `/dashboard/personal-branding` → Auto tab default; status
-   banner says "Belum dipublikasikan".
-2. Set slug, headline → live `IsSlugAvailable` indicator turns green.
-3. Toggle `publicEnabled` → Save → reload → state persists.
-4. Visit `/<slug>` in incognito → public page renders; theme matches.
-5. Toggle `allowIndex=false` → reload public page → `<meta name="robots" content="noindex">` present.
-6. Switch to Manual → add 3 blocks → reorder → save → public page reflects manual blocks.
-7. Click Quick Fill, paste resume text → AI parses → form fields populated → batch row added in `database/batches`.
-8. Export HTML → file downloads, opens standalone (no broken refs).
-9. Switch back to Auto → ModeWarning prompts; confirm → manual blocks discarded.
+1. `/dashboard/personal-branding` → banner "Belum dipublikasikan", tab
+   "Edit halaman" aktif.
+2. Isi slug + headline → nyalakan saklar publish → Simpan → reload → persist.
+3. Buka `/<slug>` di incognito → template terender, `ProfileSummary` ada di bawah.
+4. Matikan `allowIndex` → cek `<meta name="robots" content="noindex, nofollow">`.
+5. Matikan halaman publik → `/<slug>` harus **404** (bukan 200 dengan pesan).
+6. Ganti template di ThemeCard → preview kanan ikut berubah, iframe remount.
+7. Tempel dokumen HTML di CustomHtmlCard (pakai `starter.html` sebagai basis) →
+   Simpan → badge "HTML kustom" muncul, ThemeCard menampilkan peringatan
+   ter-override, halaman publik memakai dokumen itu.
+8. Hapus HTML kustom → balik ke template pilihan.
+9. Kalau MCP ikut: `branding_data` → tulis HTML bermarker via `branding_set_html`
+   → ubah satu entri CV → reload halaman publik, isinya ikut berubah tanpa
+   menyentuh HTML lagi. Itu inti fiturnya; kalau tidak berubah, marker-nya salah
+   atau payload tidak ter-inject.
 
 Run `_porting-guide.md` §9 checklist.
+
+---
+
+## History
+
+Sampai **2026-08-15** slice ini punya dua editor: "Otomatis" (halaman dirakit
+dari data user) dan "Atur sendiri" — block builder dengan sembilan tipe blok,
+container bersarang, preset gallery, editor style sendiri, dan renderer kedua.
+Backend-nya ikut: `publicBlocks` + `publicMode` di schema, sanitiser per tipe
+blok, dan `buildAutoBlocks` yang merakit `Block[]` di setiap pembacaan halaman
+publik — output yang **tidak pernah dirender siapa pun**, karena template iframe
+hidrasi dari `buildBrandingPayload`.
+
+Semuanya dihapus dalam satu langkah, diganti satu field: `publicHtml`. Satu
+dokumen HTML mencakup semua layout yang bisa diungkap block tree dan banyak yang
+tidak, dan AI host menulis HTML lebih baik daripada yang bisa diekspresikan UI
+itu. Yang tidak punya AI host tetap punya empat template.
+
+Angka yang membuat keputusannya gampang: dari **prod export 2026-08-15, nol user
+memakai mode custom**. Tidak ada halaman produksi yang berubah tampilannya saat
+builder-nya dicabut, dan `app/[slug]/page.tsx` sekaligus kehilangan fallback
+`ProfileView` legacy 340 baris yang hanya bisa tercapai oleh profil custom-mode
+tanpa blok — kondisi yang sekarang mustahil.
+
+Sisa jejaknya sengaja dibiarkan dan sudah didaftar di **Known gaps**:
+`publicMode`/`publicBlocks`/`publicHeaderBg`/`publicStyle` di schema (read-only,
+supaya row lama tetap lolos validasi), argumen `mode`/`blocks`/`style` yang
+diterima-lalu-dibuang oleh `updateMyPublicProfile` (biar tab lama tidak error
+tiap 1,5 detik), dan nama folder `blocks/` di dua sisi (path import dipertahankan).
+Jangan cari builder-nya di git — memang sudah tidak ada.

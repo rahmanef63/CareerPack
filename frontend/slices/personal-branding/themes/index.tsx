@@ -7,18 +7,22 @@ import {
   type PersonalBrandingTheme,
   type TemplateTheme,
 } from "../blocks/types";
-import type { Mode } from "../form/types";
-import { MANUAL_TEMPLATE_URL, type ProfileShape } from "./types";
+import type { ProfileShape } from "./types";
 import { TemplateLayout } from "./TemplateLayout";
 import { BrandFooter } from "./BrandFooter";
 
 export type { BrandingPayload } from "./types";
 
 /**
- * Public-page renderer dispatcher. Only template-v1/v2/v3 are
- * supported. Legacy themes (linktree/bento/magazine) from existing
- * profiles fall back to template-v2 at render time — schema validator
- * still accepts them for backward read-compatibility.
+ * Public-page renderer.
+ *
+ * Two sources for the document, one render path: the user's own
+ * `profile.html` when they have custom HTML, otherwise the built-in template
+ * file for their theme. Either way TemplateLayout splices the same
+ * `__cp_data` payload + hydrator in, so the markup stays bound to live data.
+ *
+ * Legacy themes (linktree/bento/magazine) from existing profiles fall back to
+ * template-v2 — the schema validator still accepts them for read-compat.
  */
 export function PersonalBrandingPage({
   profile,
@@ -42,17 +46,19 @@ export function PersonalBrandingPage({
     ? ({ "--branding-accent": profile.accent } as React.CSSProperties)
     : undefined;
   const theme = normalizeTheme(profile.theme);
-  const mode: Mode = profile.mode ?? "auto";
-  // Manual mode forces the canvas template — the v1/v2/v3 templates
-  // are CV-driven hero pages and don't host user-arranged blocks.
-  const templateKey = mode === "custom" ? "template-manual" : theme;
-  const templateUrl =
-    mode === "custom" ? MANUAL_TEMPLATE_URL : TEMPLATE_URLS[theme];
+  // `showBranding: false` is Preview's "Tampilkan Template" tab — it asks for
+  // the template with its own mock content, so a custom document must not
+  // hijack it (unhydrated, it would render the AI's placeholder copy).
+  const customHtml =
+    showBranding && profile.html?.trim() ? profile.html : undefined;
   return (
     <div className="bg-background text-foreground" style={accentVar}>
       <TemplateLayout
-        templateKey={templateKey}
-        templateUrl={templateUrl}
+        // Custom HTML is keyed by length so swapping documents remounts the
+        // iframe, the way switching templates does.
+        templateKey={customHtml ? `custom-${customHtml.length}` : theme}
+        templateUrl={TEMPLATE_URLS[theme]}
+        templateHtml={customHtml}
         displayName={profile.displayName}
         branding={showBranding ? profile.branding : undefined}
         enableFloatingNav={enableFloatingNav}

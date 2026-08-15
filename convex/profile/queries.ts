@@ -1,14 +1,7 @@
 import { query, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser, requireUser } from "../_shared/auth";
-import {
-  buildAutoBlocks,
-  DEFAULT_AUTO_TOGGLES,
-  type AutoToggles,
-  type AutoCVInput,
-  type AutoPortfolioItem,
-} from "./autoBlocks";
-import { buildBrandingPayload } from "./brandingPayload";
+import { loadBranding } from "./loadBranding";
 import { assertSlug } from "./slug";
 
 /** Ceiling on slugs emitted into /sitemap.xml per request. */
@@ -394,191 +387,7 @@ export const getBySlug = query({
     if (!profile) return null;
     if (!profile.publicEnabled) return null;
 
-    const avatarUrl =
-      profile.publicAvatarShow && profile.avatarStorageId
-        ? await ctx.storage.getUrl(profile.avatarStorageId)
-        : null;
-
-    // Read + resolve the portfolio ONCE. The auto-block branch below
-    // used to repeat this exact query and re-run every
-    // `ctx.storage.getUrl`, doubling the cost of every anonymous hit on
-    // the uncached public page.
-    const portfolio: Array<{
-      id: string;
-      title: string;
-      description: string;
-      category: string;
-      link: string;
-      date: string;
-      techStack: string[];
-      featured: boolean;
-      coverEmoji: string | null;
-      coverGradient: string | null;
-      coverUrl: string | null;
-    }> = await (async () => {
-      const items = await ctx.db
-        .query("portfolioItems")
-        .withIndex("by_user", (q) => q.eq("userId", profile.userId))
-        .collect();
-      // Per-item brandingShow overrides the global publicPortfolioShow:
-      //   undefined → follow global toggle
-      //   true      → always show (curate even when global off)
-      //   false     → never show
-      const visible = items.filter((item) => {
-        if (item.brandingShow === true) return true;
-        if (item.brandingShow === false) return false;
-        return profile.publicPortfolioShow ?? false;
-      });
-      const mapped = await Promise.all(
-        visible.map(async (item) => ({
-          id: item._id as string,
-          title: item.title,
-          description: item.description,
-          category: item.category,
-          link: item.link ?? "",
-          date: item.date,
-          techStack: item.techStack ?? [],
-          featured: item.featured,
-          coverEmoji: item.coverEmoji ?? null,
-          coverGradient: item.coverGradient ?? null,
-          coverUrl: item.coverStorageId
-            ? await ctx.storage.getUrl(item.coverStorageId)
-            : null,
-        })),
-      );
-      mapped.sort((a, b) => {
-        if (a.featured !== b.featured) return a.featured ? -1 : 1;
-        return b.date.localeCompare(a.date);
-      });
-      return mapped;
-    })();
-
-    // Pull the user's primary CV once (newest first) — reused by both
-    // the auto-block builder and the branding payload below. Newest
-    // first because without `.order("desc")` Convex returns the oldest
-    // doc, which on a fresh account is the seeded demo CV and overrides
-    // anything imported via Quick Fill. Cheap — single doc.
-    const cvDoc = await ctx.db
-      .query("cvs")
-      .withIndex("by_user", (q) => q.eq("userId", profile.userId))
-      .order("desc")
-      .first();
-
-    // Resolve final block list. Auto mode rebuilds from the user's
-    // CV / Portofolio data on every read so the page stays in sync
-    // when those source feeds change. Custom mode returns the
-    // user-authored blocks (filtering out hidden ones).
-    const mode = profile.publicMode ?? "auto";
-    let blocks: ReadonlyArray<{ id: string; type: string; payload: unknown }> = [];
-    if (mode === "custom") {
-      blocks = (profile.publicBlocks ?? []).filter((b) => !b.hidden);
-    } else {
-      // ---- Auto: pull CV + portfolio + apply toggles ----
-      // Same visibility rule, same cover URLs — reuse the resolved list.
-      const portfolioWithUrl: AutoPortfolioItem[] = portfolio.map((p) => ({
-        id: p.id,
-        title: p.title,
-        description: p.description,
-        category: p.category,
-        link: p.link || undefined,
-        date: p.date,
-        featured: p.featured,
-        coverEmoji: p.coverEmoji ?? undefined,
-        coverUrl: p.coverUrl,
-      }));
-      const stored = profile.publicAutoToggles ?? {};
-      const toggles: AutoToggles = {
-        showExperience: stored.showExperience ?? DEFAULT_AUTO_TOGGLES.showExperience,
-        showEducation: stored.showEducation ?? DEFAULT_AUTO_TOGGLES.showEducation,
-        showCertifications:
-          stored.showCertifications ?? DEFAULT_AUTO_TOGGLES.showCertifications,
-        showProjects: stored.showProjects ?? DEFAULT_AUTO_TOGGLES.showProjects,
-        showSocial: stored.showSocial ?? DEFAULT_AUTO_TOGGLES.showSocial,
-        showLanguages: stored.showLanguages ?? DEFAULT_AUTO_TOGGLES.showLanguages,
-      };
-      blocks = buildAutoBlocks({
-        profile: {
-          bio: profile.bio ?? undefined,
-          skills: profile.skills ?? undefined,
-          publicBioShow: profile.publicBioShow ?? false,
-          publicSkillsShow: profile.publicSkillsShow ?? false,
-          publicLinkedinUrl: profile.publicLinkedinUrl ?? undefined,
-          publicPortfolioUrl: profile.publicPortfolioUrl ?? undefined,
-          publicContactEmail: profile.publicContactEmail ?? undefined,
-        },
-        cv: (cvDoc as AutoCVInput | null) ?? null,
-        portfolio: portfolioWithUrl,
-        toggles,
-        publicPortfolioShow: Boolean(profile.publicPortfolioShow),
-      });
-    }
-
-    const ctaType = profile.publicCtaType ?? "link";
-    const branding = buildBrandingPayload({
-      profile: {
-        fullName: profile.fullName,
-        publicHeadline: profile.publicHeadline ?? "",
-        targetRole: profile.publicTargetRoleShow ? profile.targetRole : "",
-        // Location/bio/skills toggles flow through the toggle override
-        // below; we still pass the raw data so the payload-builder decides.
-        // Location defaults HIDDEN (least-disclosure) — see showLocation.
-        location: profile.location ?? "",
-        bio: profile.bio ?? "",
-        skills: profile.skills ?? [],
-        avatarUrl,
-        contactEmail: profile.publicContactEmail ?? "",
-        linkedinUrl: profile.publicLinkedinUrl ?? "",
-        portfolioUrl: profile.publicPortfolioUrl ?? "",
-      },
-      cv: cvDoc,
-      portfolio,
-      toggles: {
-        showExperience:
-          profile.publicAutoToggles?.showExperience ??
-          DEFAULT_AUTO_TOGGLES.showExperience,
-        showEducation:
-          profile.publicAutoToggles?.showEducation ??
-          DEFAULT_AUTO_TOGGLES.showEducation,
-        showCertifications:
-          profile.publicAutoToggles?.showCertifications ??
-          DEFAULT_AUTO_TOGGLES.showCertifications,
-        showProjects:
-          profile.publicAutoToggles?.showProjects ??
-          DEFAULT_AUTO_TOGGLES.showProjects,
-        showLanguages:
-          profile.publicAutoToggles?.showLanguages ??
-          DEFAULT_AUTO_TOGGLES.showLanguages,
-        showBio: Boolean(profile.publicBioShow),
-        showSkills: Boolean(profile.publicSkillsShow),
-        // Default hidden until the user opts in (privacy-positive).
-        showLocation: Boolean(profile.publicLocationShow),
-      },
-      availability: profile.publicAvailableForHire
-        ? {
-            open: true,
-            note: profile.publicAvailabilityNote ?? "",
-          }
-        : undefined,
-      cta:
-        profile.publicCtaLabel && profile.publicCtaUrl
-          ? {
-              label: profile.publicCtaLabel,
-              url: profile.publicCtaUrl,
-              type: ctaType,
-            }
-          : undefined,
-      sectionOrder: profile.publicSectionOrder ?? undefined,
-      // Style customization (color/font/radius/density) is a manual-
-      // only feature — auto users commit to the chosen template's
-      // baked-in design language so the result stays cohesive.
-      // publicStyle may still exist in the DB from a prior manual
-      // session; we just don't surface it when mode === "auto".
-      style: mode === "custom" ? (profile.publicStyle ?? undefined) : undefined,
-      // Manual-mode blocks fed to the canvas template. Auto-mode pages
-      // ignore this field entirely — the v1/v2/v3 hydrators don't read
-      // it, and we'd be wasting payload bytes on every public visit.
-      blocks: mode === "custom" ? Array.from(blocks) : undefined,
-    });
+    const { avatarUrl, portfolio, branding } = await loadBranding(ctx, profile);
 
     return {
       slug: profile.publicSlug ?? slug,
@@ -593,13 +402,17 @@ export const getBySlug = query({
       allowIndex: Boolean(profile.publicAllowIndex),
       avatarUrl,
       portfolio,
-      // Personal Branding builder additions — default theme=template-v2
-      // (Editorial Cream) when unset so new and legacy profiles render.
-      mode,
+      // Default theme=template-v2 (Editorial Cream) when unset so new and
+      // legacy profiles render.
       theme: profile.publicTheme ?? "template-v2",
-      headerBg: profile.publicHeaderBg ?? null,
       accent: profile.publicAccent ?? null,
-      blocks,
+      /**
+       * Custom page HTML. When present the renderer uses it INSTEAD of
+       * fetching the built-in template file; the `__cp_data` payload and
+       * hydrator are spliced in either way, so `branding` above still
+       * drives the content.
+       */
+      html: profile.publicHtml ?? null,
       // Dynamic data feed for the iframe templates — all sections
       // user has populated, with empty ones omitted so the hydrator
       // script can hide them.
@@ -632,15 +445,13 @@ export const getMyPublicProfile = query({
       allowIndex: Boolean(profile.publicAllowIndex),
       avatarShow: Boolean(profile.publicAvatarShow),
       portfolioShow: Boolean(profile.publicPortfolioShow),
-      mode: profile.publicMode ?? "auto",
       autoToggles: profile.publicAutoToggles ?? null,
       theme: profile.publicTheme ?? "template-v2",
-      headerBg: profile.publicHeaderBg ?? null,
       accent: profile.publicAccent ?? null,
       htmlExport: Boolean(profile.publicHtmlExport),
       embedExport: Boolean(profile.publicEmbedExport),
       promptExport: Boolean(profile.publicPromptExport),
-      blocks: profile.publicBlocks ?? [],
+      html: profile.publicHtml ?? "",
       availableForHire: Boolean(profile.publicAvailableForHire),
       availabilityNote: profile.publicAvailabilityNote ?? "",
       ctaLabel: profile.publicCtaLabel ?? "",

@@ -14,7 +14,7 @@ yang menulis tabel ini harus lewat `requireUser` / `requireOwnedDoc`
 
 | Table | Purpose | Index |
 |---|---|---|
-| `userProfiles` | Profil + avatar (`avatarStorageId`) + 10 opt-in `public*` fields (incl. `publicAvatarShow`) | `by_user`, `by_public_slug` |
+| `userProfiles` | Profil + avatar (`avatarStorageId`) + 30 `public*` fields halaman branding: opt-in per section (`publicAvatarShow`, `publicAutoToggles`, …), `publicTheme` (`starter` \| `template-v1..v3`), dan **`publicHtml`** — dokumen HTML utuh yang **menggantikan** template bawaan kalau di-set (aturan: `profile/publicHtml.ts`). `publicMode` / `publicBlocks` / `publicStyle` = **legacy read-only** sejak block builder dihapus (2026-08-15) — tidak ada UI yang menulisnya lagi, tetap di validator supaya baris lama lolos (`publicMode` & `publicBlocks` tidak lagi dibaca renderer sama sekali; `publicStyle` masih dipancarkan sebagai CSS var `--cp-*`) | `by_user`, `by_public_slug` |
 | `jobApplications` | Tracking lamaran kerja | `by_user`, `by_user_status`, `by_user_applied` |
 | `cvs` | CV terstruktur; `personalInfo.avatarStorageId` untuk foto formal | `by_user` |
 | `skillRoadmaps` | Roadmap per careerPath + per-skill status + resources | `by_user` |
@@ -59,7 +59,7 @@ and any of `queries.ts` / `mutations.ts` / `actions.ts`. API path =
 | `mockInterview/` | `queries.ts`, `mutations.ts`, `schema.ts` (was `interviews`) | `api.mockInterview.queries.getUserInterviews` / `getInterviewAnalytics`; `api.mockInterview.mutations.createMockInterview` / `updateInterviewAnswer` / `completeInterview` / `deleteInterview` |
 | `financial/` | `queries.ts`, `mutations.ts`, `schema.ts` (merges `financial` + `budgetVariables`) | `api.financial.queries.getUserFinancialPlan` / `listBudgetVariables`; `api.financial.mutations.createOrUpdateFinancialPlan` / `deleteFinancialPlan` / `seedBudgetDefaults` / `createBudgetVariable` / `updateBudgetVariable` / `removeBudgetVariable` |
 | `goals/` | `queries.ts`, `mutations.ts`, `schema.ts` | `api.goals.queries.getUserGoals`; `api.goals.mutations.createGoal` / `updateGoalProgress` / `deleteGoal` |
-| `profile/` | `queries.ts`, `mutations.ts`, `schema.ts` (merges `users` + `publicProfile`) | `api.profile.queries.getCurrentUser` (inlines `avatarUrl`) / `getUserStats` / `getBySlug` / `getMyPublicProfile` / `listIndexableSlugs` / `isSlugAvailable`; `api.profile.mutations.createOrUpdateProfile` / `updateAvatar` / `updateMyPublicProfile` |
+| `profile/` | `queries.ts`, `mutations.ts`, `schema.ts` (merges `users` + `publicProfile`) + helper non-API: `loadBranding.ts`, `publicHtml.ts`, `brandingPayload.ts`, `autoBlocks.ts`, `slug.ts`, `blocks.ts` (+ `blocks/helpers.ts`, `blocks/header.ts`) | `api.profile.queries.getCurrentUser` (inlines `avatarUrl`) / `getUserStats` / `getBySlug` / `getMyPublicProfile` / `listIndexableSlugs` / `isSlugAvailable`; `api.profile.mutations.createOrUpdateProfile` / `updateAvatar` / `updateMyPublicProfile` |
 | `ai/` | `queries.ts`, `mutations.ts`, `actions.ts`, `catalog.ts`, `oauth.ts`, `schema.ts` (merges `ai` + `aiSettings` + `chat`) | `api.ai.queries.listAIProviders` / `getMyAISettings` / `listChatSessions` / `getChatSession`; `api.ai.mutations.setMyAISettings` / `toggleAIEnabled` / `clearMyAISettings` / `upsertChatSession` / `deleteChatSession` / `deleteAllChatSessions`; `api.ai.actions.testConnection` / `generateCareerAdvice` / `generateInterviewQuestions` / `evaluateInterviewAnswer`; `api.ai.oauth.startOAuthConnect` (mutation → authorize URL) / `finishOAuthConnect` (action → tukar code, simpan key terenkripsi) |
 | `admin/` | `queries.ts`, `mutations.ts`, `cleanup.ts`, `schema.ts` (merges `admin` + `analytics`) | `api.admin.queries.getGlobalStats` / `listAllUsers` / `viewErrorLogs` / `listRoleAuditLogs` / `listFeedback` / `amISuperAdmin` / `getOverview` / `getProfileAggregates` / `getFeatureAdoption` / `getSignupTrend` / `listUsersWithProfiles`; `api.admin.mutations.updateUserRole` / `deleteUser` / `bulkDeleteUsers`; `internal.admin.cleanup.cleanupInactiveDemoUsers` (cron target) |
 | `feedback/` | `mutations.ts`, `schema.ts` | `api.feedback.mutations.submitFeedback` |
@@ -80,6 +80,36 @@ Root-level files (not in a domain folder):
 | `schema.ts` | Orchestrator — imports per-domain `<domain>Tables` fragments and spreads into one `defineSchema`. |
 | `_shared/` | Cross-domain helpers (no public API): `auth.ts`, `env.ts`, `rateLimit.ts`, `sanitize.ts`, `aiProviders.ts`. |
 | `_seeds/` | Data fixtures: `aiDefaults.ts`, `careerGraph/`, `documents/`, `roadmapTemplates/`. |
+
+## 2b. Halaman branding publik (`convex/profile/`)
+
+Helper di luar `queries` / `mutations`, semuanya melayani `/[slug]`:
+
+| File | Isi |
+|---|---|
+| `loadBranding.ts` | Perakitan payload halaman publik — avatar + portofolio yang terlihat + CV terbaru → `buildBrandingPayload`. **Satu implementasi, dua pemanggil**: `getBySlug` (halaman publik) dan `internal.mcp.data.branding.getBrandingData` (tool MCP). Kalau keduanya berbeda, host AI akan menulis marker untuk data yang tidak pernah dipancarkan halaman hidup |
+| `publicHtml.ts` | `PUBLIC_HTML_MAX` (250.000 karakter) + `normalizePublicHtml()`. Satu aturan untuk kedua jalur tulis (`updateMyPublicProfile` dan `branding_set_html`). **Sengaja tanpa sanitiser**: dokumennya dirender di `srcdoc` iframe yang sama dengan template bawaan — `allow-scripts` tanpa `allow-same-origin` — jadi script-nya jalan di opaque origin dan tidak bisa menyentuh origin / cookie / sesi Convex aplikasi |
+| `brandingPayload.ts` | Bentuk `__cp_data` yang dihidrasi template dan `publicHtml` |
+| `autoBlocks.ts` | **Tinggal `AutoToggles` + `DEFAULT_AUTO_TOGGLES`.** `buildAutoBlocks` (generator `Block[]` 250 baris) dihapus bersama block builder 2026-08-15 — keluarannya tidak pernah dirender siapa pun; nama filenya dipertahankan supaya import path tidak churn |
+| `blocks.ts` | Tinggal sanitiser header background + accent (`blocks/header.ts`) dan URL helper (`blocks/helpers.ts`). `blocks/types.ts` dan `blocks/sanitize.ts` **dihapus** bersama block builder |
+| `slug.ts` | Validasi slug: 3-30 karakter, lowercase, reserved-list |
+
+## 2c. MCP server (`convex/mcp/`)
+
+Endpoint JSON-RPC + OAuth 2.1 untuk host AI eksternal. Kontrak yang berlaku di
+seluruh folder: `tools/<domain>.ts` mendeklarasikan yang dilihat model,
+`data/<domain>.ts` memegang `internalQuery` / `internalMutation` yang menyentuh
+DB, dan **`userId` selalu datang dari access token, tidak pernah dari `args`**.
+Scope diturunkan dari `annotations.readOnlyHint` (`mcp.read` vs `mcp.write`).
+
+74 tool per 2026-08-15; yang terbaru:
+
+| File | Isi |
+|---|---|
+| `tools/branding.ts` | `branding_get`, `branding_data`, `branding_templates` (read) + `branding_set_html`, `branding_delete_html` (write). Memegang `MARKER_CONTRACT` — cerminan `frontend/.../themes/templateHydrator.ts`, dikembalikan sebagai data oleh `branding_data` karena `description` dibatasi 1024 karakter |
+| `data/branding.ts` | Baca `userProfiles` + `loadBranding`, tulis `publicHtml` lewat `normalizePublicHtml` di belakang kuota `mcp:write`. **Tidak ada jalur publish**: `publicEnabled` / `publicSlug` / `publicAllowIndex` cuma bisa ditulis dari dashboard |
+
+Detail lengkap (protokol, OAuth, scope, rate limit, eval): [features/mcp.md](./features/mcp.md).
 
 ## 3. Auth Guards (`convex/_shared/auth.ts`)
 

@@ -26,11 +26,9 @@ export const DEFAULT_FORM_STATE: FormState = {
 
   allowIndex: false,
 
-  mode: "auto",
   theme: "template-v2",
-  headerBg: null,
   autoToggles: DEFAULT_AUTO_TOGGLES,
-  blocks: [],
+  html: "",
 
   htmlExport: false,
   embedExport: false,
@@ -42,7 +40,6 @@ export const DEFAULT_FORM_STATE: FormState = {
   ctaUrl: "",
   ctaType: "link",
   sectionOrder: [],
-  style: {},
 };
 
 /** Canonical section order — used by SectionLayoutCard as the

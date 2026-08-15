@@ -12,33 +12,10 @@
  * binds to its own inputs.
  */
 
-import type {
-  Block,
-  HeaderBg,
-  PersonalBrandingTheme,
-} from "../blocks/types";
+import type { PersonalBrandingTheme } from "../blocks/types";
 import type { AutoToggles } from "../../../../convex/profile/autoBlocks";
 
-export type Mode = "auto" | "custom";
-
 export type CtaType = "link" | "email" | "calendly" | "download";
-
-export type StyleFont = "sans" | "serif" | "mono";
-export type StyleRadius = "none" | "sm" | "md" | "lg" | "full";
-export type StyleDensity = "compact" | "normal" | "spacious";
-
-/**
- * Manual-mode "Style" customization. All fields optional — undefined
- * means inherit from the chosen template's defaults. The hydrator
- * turns each field into a CSS custom property + universal-selector
- * override so even legacy templates pick up primary color + radius.
- */
-export interface PublicStyle {
-  primary?: string;
-  font?: StyleFont;
-  radius?: StyleRadius;
-  density?: StyleDensity;
-}
 
 export interface FormState {
   // ---- identity ----------------------------------------------------
@@ -62,12 +39,19 @@ export interface FormState {
   // ---- discovery --------------------------------------------------
   allowIndex: boolean;
 
-  // ---- builder ----------------------------------------------------
-  mode: Mode;
+  // ---- page ---------------------------------------------------------
+  /** Which built-in template renders when `html` is empty. */
   theme: PersonalBrandingTheme;
-  headerBg: HeaderBg | null;
   autoToggles: AutoToggles;
-  blocks: Block[];
+  /**
+   * The user's own page document. Empty string = use the template.
+   *
+   * Deliberately NOT edited live: CustomHtmlCard keeps a local buffer and
+   * only writes here on save, because this field rides the same 1.5s
+   * autosave loop as every other one and a quarter-megabyte document per
+   * keystroke is not a thing to send.
+   */
+  html: string;
 
   // ---- share & export (opt-in per-format) -------------------------
   htmlExport: boolean;
@@ -82,9 +66,6 @@ export interface FormState {
   ctaType: CtaType;
   /** Empty = use template default order. */
   sectionOrder: string[];
-
-  // ---- manual-mode style customization ----------------------------
-  style: PublicStyle;
 }
 
 export type FieldKey = keyof FormState;

@@ -1,14 +1,5 @@
-import type {
-  Block, HeaderBg, PersonalBrandingTheme,
-} from "../blocks/types";
-import type { Mode } from "../form/types";
+import type { PersonalBrandingTheme } from "../blocks/types";
 import type { ShowMoreList } from "../components/BrandingShowMoreDialog";
-
-/** Static URL for the manual-mode canvas template. Lives outside
- *  TEMPLATE_URLS because users never pick it directly — the renderer
- *  switches to it whenever `profile.mode === "custom"`. */
-export const MANUAL_TEMPLATE_URL =
-  "/personal-branding/templates/v-manual.html";
 
 export const VALID_SHOW_MORE_LISTS: ReadonlySet<ShowMoreList> = new Set([
   "projects",
@@ -77,13 +68,6 @@ export interface BrandingPayload {
     radius?: "none" | "sm" | "md" | "lg" | "full";
     density?: "compact" | "normal" | "spacious";
   };
-  /** Manual-mode block list — only present when profile.mode === "custom". */
-  blocks?: Array<{
-    id: string;
-    type: string;
-    hidden?: boolean;
-    payload: unknown;
-  }>;
   sectionOrder?: string[];
   has: {
     about: boolean;
@@ -100,16 +84,11 @@ export interface BrandingPayload {
 export interface ProfileShape {
   slug: string;
   displayName: string;
-  headline: string;
-  targetRole?: string;
-  avatarUrl: string | null;
-  blocks: Block[];
   theme: PersonalBrandingTheme;
-  headerBg: HeaderBg | null;
   accent: string | null;
-  /** Render mode. When `"custom"` the renderer overrides `theme` and
-   *  fetches the manual canvas template. Default `"auto"`. */
-  mode?: Mode;
+  /** The user's own page document. When set it replaces the built-in
+   *  template file; the data payload is injected into it either way. */
+  html?: string | null;
   /** Optional — when present, fed into the iframe so templates render
    *  with real data and hide empty sections. */
   branding?: BrandingPayload;

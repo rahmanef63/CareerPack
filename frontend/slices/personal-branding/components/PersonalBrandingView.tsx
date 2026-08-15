@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
-import {
-  Eye, Globe2, Sparkles, Wrench, Zap,
-} from "lucide-react";
-import { Badge } from "@/shared/components/ui/badge";
+import { Eye, Globe2, Sparkles, Wrench } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
@@ -18,7 +15,6 @@ import { api } from "../../../../convex/_generated/api";
 
 import { usePBForm } from "../form/usePBForm";
 import { usePreviewBranding } from "../form/usePreviewBranding";
-import type { Mode } from "../form/types";
 import { MobileActionBar } from "./MobileActionBar";
 import { ShareCard } from "../sections/ShareCard";
 import { StatusBanner } from "../sections/StatusBanner";
@@ -27,44 +23,27 @@ import {
 } from "../sections/ExportCard";
 import { CVImportButton } from "@/shared/components/onboarding";
 import { PreviewDialog } from "./PreviewDialog";
-import { AutoTab } from "./personal-branding-view/AutoTab";
-import { ManualTab } from "./personal-branding-view/ManualTab";
+import { EditorPanel } from "./personal-branding-view/EditorPanel";
 
-/** Which editor is active. Doubles as the persisted `mode` field. */
-type EditorView = "auto" | "custom";
 /** Top level. Was five siblings — Otomatis, Manual, Impor, HTML, Embed — where
  *  only the first two are authoring and the rest are export concerns. A
  *  first-timer had to rank five unequal choices before touching anything. */
 type TopView = "edit" | "share";
 
 /**
- * Personal Branding builder — thin orchestrator.
+ * Personal Branding — thin orchestrator.
  *
- * Top-level tabs (5):
- *   - **Otomatis** — page is auto-built from CV + Profil + Portofolio.
- *   - **Manual** — drag-style block builder.
- *   - **Impor** — paste resume / LinkedIn → AI fills CV + profile.
- *   - **HTML** — copy a self-contained profile card to embed.
- *   - **Embed** — copy an iframe snippet.
+ * Two tabs: **Edit halaman** (one editor, seven sections) and **Bagikan &
+ * pasang** (export snippets). The editor used to be two: an automatic one and
+ * a block builder, chosen from a second row of tabs. The page is always built
+ * from the user's own data now; "build it differently" means custom HTML,
+ * which is a field inside the Tampilan section.
  */
 export function PersonalBrandingView() {
   const form = usePBForm();
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewData = usePreviewBranding(form.state);
   const [topView, setTopView] = useState<TopView>("edit");
-  const [view, setView] = useState<EditorView>(
-    () => (form.state.mode === "custom" ? "custom" : "auto"),
-  );
-  // The lazy initializer above runs before the server state hydrates
-  // (mode is still the "auto" default), so a saved custom-mode user
-  // would land on the Otomatis tab with their block builder hidden.
-  // Sync once, when serverState first arrives.
-  const modeSyncedRef = useRef(false);
-  useEffect(() => {
-    if (modeSyncedRef.current || !form.serverState) return;
-    modeSyncedRef.current = true;
-    setView(form.serverState.mode === "custom" ? "custom" : "auto");
-  }, [form.serverState]);
   const [activeSection, setActiveSection] = useState<string | null>("identity");
   function toggleSection(id: string) {
     setActiveSection((prev) => (prev === id ? null : id));
@@ -128,13 +107,6 @@ export function PersonalBrandingView() {
   const livePublicUrl = form.serverState?.slug
     ? `/${form.serverState.slug}`
     : "";
-
-  function handleViewChange(next: string) {
-    const v = next as EditorView;
-    setView(v);
-    const modeBind = form.bind("mode");
-    if (modeBind.value !== (v as Mode)) modeBind.onChange(v as Mode);
-  }
 
   return (
     <PageContainer size="lg" className="space-y-6">
@@ -209,59 +181,14 @@ export function PersonalBrandingView() {
             <CVImportButton variant="outline" size="sm" />
           </div>
 
-          {/* Mode is a question about how you want to build, so it reads as one
-              rather than as two separate destinations. The labels say what each
-              does; "Otomatis" and "Manual" only mean something once you already
-              know the feature. */}
-          <Tabs value={view} onValueChange={handleViewChange}>
-            <TabsList variant="pills">
-              <TabsTrigger value="auto" className="gap-1.5">
-                <Zap className="h-4 w-4" />
-                <span>Susun otomatis dari CV</span>
-                <Badge
-                  variant="secondary"
-                  className="ml-1 hidden bg-success/15 text-xs text-success-text sm:inline-flex"
-                >
-                  Termudah
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="custom" className="gap-1.5">
-                <Wrench className="h-4 w-4" />
-                <span>Atur sendiri</span>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Blocks are only rendered in "Atur sendiri" — the public query
-                drops them outright in auto mode. Someone who built a page,
-                switched modes, and saw it vanish got no explanation at all. */}
-            {view === "auto" && form.state.blocks.length > 0 && (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-text">
-                <span>
-                  Kamu punya <strong>{form.state.blocks.length} blok</strong> yang
-                  disusun sendiri. Blok itu tidak ditampilkan selama mode
-                  &ldquo;Susun otomatis&rdquo; aktif.
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleViewChange("custom")}
-                  className="shrink-0 rounded-md border border-warning/50 bg-background/70 px-2 py-1 font-medium hover:bg-background"
-                >
-                  Pakai blok saya
-                </button>
-              </div>
-            )}
-
-            <AutoTab
-              form={form}
-              previewData={previewData}
-              activeSection={activeSection}
-              setActiveSection={setActiveSection}
-              toggleSection={toggleSection}
-              profileSnapshot={profileSnapshot}
-            />
-
-            <ManualTab form={form} />
-          </Tabs>
+          <EditorPanel
+            form={form}
+            previewData={previewData}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            toggleSection={toggleSection}
+            profileSnapshot={profileSnapshot}
+          />
         </TabsContent>
 
         <TabsContent value="share" className="mt-4 space-y-4">

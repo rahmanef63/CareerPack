@@ -1629,6 +1629,144 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "idempotentHint": true,
       "openWorldHint": false,
       "readOnlyHint": true,
+      "title": "Get branding page",
+    },
+    "description": "Read the state of the user's public personal-brand page (careerpack.org/<slug>): whether it is published, its URL, headline, whether search engines may index it, which built-in template it falls back to, and whether the user has custom HTML (with its size). Call this FIRST before writing or replacing page HTML — it tells you whether you would be overwriting work. Set include_html: true to also get the current HTML back, which can be a few hundred KB, so only do that when you intend to edit it rather than rewrite it. Returns null if the user has not completed onboarding. Publishing is not possible from here: if the page is unpublished, tell the user to flip the switch on the Personal Branding page in the app.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "include_html": {
+          "description": "Include the full current HTML. Default false.",
+          "type": "boolean",
+        },
+      },
+      "type": "object",
+    },
+    "name": "branding_get",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Get branding data",
+    },
+    "description": "Get the live data the public page renders from — identity, bio, skills, experience, education, certifications, languages, projects — TOGETHER with the marker contract that binds it to HTML. Call this before writing any page HTML with branding_set_html. The page is not a snapshot: markup written with data-cp markers keeps filling from the user's CV and portfolio as those change, so read the returned \`contract\` and use markers instead of pasting the values in as text. It also shows which sections are empty or switched off, so you do not design around data that will never appear.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "branding_data",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "List branding templates",
+    },
+    "description": "List the built-in page templates, or fetch one's full HTML to use as a starting point. Call with no argument to see what exists; call with template_id to get the markup. Use 'starter' unless the user asks for one of the others by name — it is ~19 KB and demonstrates every marker, while template-v1/v2/v3 are 67-81 KB design-heavy pages that will fill a large part of your context. This is also the fastest way to see a working example of the marker contract before calling branding_set_html.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "template_id": {
+          "description": "One of: starter, template-v1, template-v2, template-v3. Omit to list.",
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "name": "branding_templates",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.read",
+        ],
+        "type": "oauth2",
+      },
+    ],
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Set branding page HTML",
+    },
+    "description": "Replace the HTML of the user's public page with a complete document you wrote. This REPLACES the whole page — there is no partial edit, so read branding_get with include_html when you mean to change one part. Call branding_data first and write data-cp markers, not literal values, or the page freezes at today's CV. Max 250,000 characters, inline the CSS, one document from <!doctype html> to </html>. It cannot publish a page: an unpublished one stays private until the user turns it on in the app. But if the page is ALREADY published this replaces what visitors see within about a minute, and there is no version history — so on a live page (the result tells you, and branding_get says so up front) confirm with the user before overwriting.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "html": {
+          "description": "The complete HTML document. Max 250,000 characters.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "html",
+      ],
+      "type": "object",
+    },
+    "name": "branding_set_html",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "Delete branding page HTML",
+    },
+    "description": "Delete the user's custom page HTML so the public page falls back to the built-in template they picked. Use when they want to start over or say the custom page is broken. There is no undo and no version history — the HTML is gone. Ask before calling it if you are the one who wrote that HTML in this conversation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object",
+    },
+    "name": "branding_delete_html",
+    "securitySchemes": [
+      {
+        "scopes": [
+          "mcp.write",
+        ],
+        "type": "oauth2",
+      },
+    ],
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
       "title": "List interview sessions",
     },
     "description": "List the user's mock interview sessions, newest first: role, type, difficulty, how many questions were answered, the overall score, and when the session started and finished. USE THIS FIRST for any question about interview practice ('how am I doing', 'what did I score last time') and to get an interview_id for the other mock_interview_* tools. Returns a summary only — call mock_interview_get for the questions and answers of one session.",

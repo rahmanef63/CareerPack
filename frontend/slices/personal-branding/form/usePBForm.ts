@@ -11,8 +11,6 @@ import {
 } from "../../../../convex/profile/autoBlocks";
 import {
   TEMPLATE_THEMES,
-  type Block,
-  type HeaderBg,
   type PersonalBrandingTheme,
 } from "../blocks/types";
 
@@ -27,13 +25,8 @@ import type {
   CtaType,
   FieldKey,
   FormState,
-  Mode,
-  PublicStyle,
   SetField,
   SlugValidation,
-  StyleDensity,
-  StyleFont,
-  StyleRadius,
   SubmitOptions,
 } from "./types";
 
@@ -57,11 +50,9 @@ interface ServerData {
   allowIndex: boolean;
   avatarShow: boolean;
   portfolioShow: boolean;
-  mode?: string | null;
   autoToggles?: Partial<AutoToggles> | null;
   theme?: string | null;
-  headerBg?: HeaderBg | null;
-  blocks?: Block[];
+  html?: string;
   htmlExport?: boolean;
   embedExport?: boolean;
   promptExport?: boolean;
@@ -71,52 +62,6 @@ interface ServerData {
   ctaUrl?: string;
   ctaType?: string | null;
   sectionOrder?: string[] | null;
-  style?: {
-    primary?: string;
-    font?: string;
-    radius?: string;
-    density?: string;
-  } | null;
-}
-
-const STYLE_FONTS: ReadonlyArray<StyleFont> = ["sans", "serif", "mono"];
-const STYLE_RADII: ReadonlyArray<StyleRadius> = [
-  "none",
-  "sm",
-  "md",
-  "lg",
-  "full",
-];
-const STYLE_DENSITIES: ReadonlyArray<StyleDensity> = [
-  "compact",
-  "normal",
-  "spacious",
-];
-
-function sanitizeServerStyle(
-  raw: ServerData["style"],
-): PublicStyle {
-  if (!raw) return {};
-  const out: PublicStyle = {};
-  if (
-    typeof raw.primary === "string" &&
-    /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(raw.primary)
-  ) {
-    out.primary = raw.primary.toLowerCase();
-  }
-  if (raw.font && (STYLE_FONTS as readonly string[]).includes(raw.font)) {
-    out.font = raw.font as StyleFont;
-  }
-  if (raw.radius && (STYLE_RADII as readonly string[]).includes(raw.radius)) {
-    out.radius = raw.radius as StyleRadius;
-  }
-  if (
-    raw.density &&
-    (STYLE_DENSITIES as readonly string[]).includes(raw.density)
-  ) {
-    out.density = raw.density as StyleDensity;
-  }
-  return out;
 }
 
 function seedFromServer(data: ServerData): FormState {
@@ -138,9 +83,7 @@ function seedFromServer(data: ServerData): FormState {
 
     allowIndex: Boolean(data.allowIndex),
 
-    mode: ((data.mode as Mode) ?? "auto") as Mode,
     theme: (isKnownTheme(data.theme) ? (data.theme as PersonalBrandingTheme) : "template-v2"),
-    headerBg: data.headerBg ?? null,
     autoToggles: {
       showExperience:
         data.autoToggles?.showExperience ?? DEFAULT_AUTO_TOGGLES.showExperience,
@@ -156,7 +99,7 @@ function seedFromServer(data: ServerData): FormState {
       showLanguages:
         data.autoToggles?.showLanguages ?? DEFAULT_AUTO_TOGGLES.showLanguages,
     },
-    blocks: data.blocks ?? [],
+    html: data.html ?? "",
     htmlExport: Boolean(data.htmlExport),
     embedExport: Boolean(data.embedExport),
     promptExport: Boolean(data.promptExport),
@@ -166,7 +109,6 @@ function seedFromServer(data: ServerData): FormState {
     ctaUrl: data.ctaUrl ?? "",
     ctaType: (isCtaType(data.ctaType) ? data.ctaType : "link") as CtaType,
     sectionOrder: Array.isArray(data.sectionOrder) ? data.sectionOrder : [],
-    style: sanitizeServerStyle(data.style),
   };
 }
 
@@ -265,10 +207,7 @@ export function usePBForm(): PBForm {
     if (seededRef.current) return;
     if (isDemo) {
       seededRef.current = true;
-      const seeded = seedFromServer({
-        ...demoPB.state,
-        blocks: [],
-      } as ServerData);
+      const seeded = seedFromServer(demoPB.state as ServerData);
       // Pin the autosave baseline to the seeded snapshot so the very
       // first useEffect run after hydration sees "no change" and does
       // NOT fire an autosave (otherwise we'd hit the backend with a
@@ -286,15 +225,39 @@ export function usePBForm(): PBForm {
     setState(seeded);
   }, [data, isDemo, isAuthenticated, demoPB.state]);
 
+  // ---- custom page HTML ------------------------------------------------
+  // `html` is the one field this form does NOT own outright: an AI host can
+  // write it over MCP (branding_set_html) while the editor sits open. The
+  // autosave loop fires every 1.5s off a whole-state snapshot, so without
+  // these two rules it would post its stale `html: ""` and delete the page
+  // ChatGPT just wrote.
+  //   - it is only SENT once the user has edited it here (htmlDirtyRef), and
+  //   - until then it FOLLOWS the server, so the preview shows what landed.
+  const htmlDirtyRef = useRef(false);
+  useEffect(() => {
+    const serverHtml = (data as ServerData | null)?.html ?? "";
+    if (htmlDirtyRef.current) {
+      // Our own edit has landed on the server — stop latching, or the next
+      // MCP write would be ignored here AND overwritten by the following
+      // autosave (any unrelated toggle re-sends the whole form).
+      if (serverHtml === state.html) htmlDirtyRef.current = false;
+      return;
+    }
+    setState((s) => (s.html === serverHtml ? s : { ...s, html: serverHtml }));
+  }, [data, state.html]);
+
   const set: SetField = useCallback((key, value) => {
+    if (key === "html") htmlDirtyRef.current = true;
     setState((s) => ({ ...s, [key]: value }));
   }, []);
 
   const bind: Bind = useCallback(
     <K extends FieldKey>(key: K) => ({
       value: state[key],
-      onChange: (v: FormState[K]) =>
-        setState((s) => ({ ...s, [key]: v })),
+      onChange: (v: FormState[K]) => {
+        if (key === "html") htmlDirtyRef.current = true;
+        setState((s) => ({ ...s, [key]: v }));
+      },
     }),
     [state],
   );
@@ -331,10 +294,9 @@ export function usePBForm(): PBForm {
             allowIndex: state.allowIndex,
             avatarShow: state.avatarShow,
             portfolioShow: state.portfolioShow,
-            mode: state.mode,
             autoToggles: state.autoToggles,
             theme: state.theme,
-            headerBg: state.headerBg ?? null,
+            html: state.html,
             htmlExport: state.htmlExport,
             embedExport: state.embedExport,
             promptExport: state.promptExport,
@@ -359,11 +321,11 @@ export function usePBForm(): PBForm {
             allowIndex: state.allowIndex,
             avatarShow: state.avatarShow,
             portfolioShow: state.portfolioShow,
-            mode: state.mode,
             autoToggles: state.autoToggles,
             theme: state.theme,
-            headerBg: state.headerBg ?? undefined,
-            blocks: state.blocks,
+            // undefined = leave the stored HTML alone; "" clears it and falls
+            // back to the template. See htmlDirtyRef above.
+            html: htmlDirtyRef.current ? state.html : undefined,
             htmlExport: state.htmlExport,
             embedExport: state.embedExport,
             promptExport: state.promptExport,
@@ -373,7 +335,6 @@ export function usePBForm(): PBForm {
             ctaUrl: state.ctaUrl,
             ctaType: state.ctaType,
             sectionOrder: state.sectionOrder,
-            style: state.style,
           });
         }
         if (opts.activate) {
@@ -417,7 +378,14 @@ export function usePBForm(): PBForm {
     // Snapshot the form state we'd save — JSON for cheap deep-equal.
     // Excludes `enabled` so toggling enabled via Save & Publish doesn't
     // get mistaken for a re-save trigger.
-    const snapshot = JSON.stringify({ ...state, enabled: undefined });
+    // `html` counts as a change only once the user edited it here — otherwise
+    // the reactive sync from an MCP write (above) would look like local typing
+    // and fire a save that echoes the value straight back.
+    const snapshot = JSON.stringify({
+      ...state,
+      enabled: undefined,
+      html: htmlDirtyRef.current ? state.html : undefined,
+    });
     if (snapshot === lastSubmittedRef.current) return;
     setAutoSavePending(true);
     const t = window.setTimeout(() => {
@@ -442,7 +410,7 @@ export function usePBForm(): PBForm {
     canEnable,
     slugTrimmed,
     serverState: isDemo
-      ? ({ ...demoPB.state, blocks: [] } as ServerData)
+      ? (demoPB.state as ServerData)
       : ((data as ServerData | null) ?? null),
     lastSavedAt,
     autoSavePending,

@@ -2,19 +2,18 @@ import { Globe } from "lucide-react";
 import type { SliceManifest } from "@/shared/types/sliceManifest";
 
 /**
- * Personal-branding slice manifest — exposes the public-page toggle
- * surface + slug + theme picker to the AI agent. Block-level edits
- * (heading/paragraph/link payloads) stay in the slice builder UI —
- * their schema is too wide and order-sensitive for chat-style edits.
+ * Personal-branding slice manifest — exposes the public-page toggle surface +
+ * slug + theme picker to the in-app AI agent.
  *
- * The agent CAN: turn the public page on/off, set slug, switch theme,
- * toggle "available for hire", set CTA. The agent CANNOT: author
- * blocks. Direct user to `/dashboard/personal-branding` for that.
+ * The agent CAN: turn the public page on/off, set slug, switch template,
+ * toggle "available for hire". It canNOT author the page's HTML — that is an
+ * MCP-connector job (convex/mcp/tools/branding.ts), where the model gets the
+ * data payload and the marker contract to write against.
  */
 export const personalBrandingManifest: SliceManifest = {
   id: "personal-branding",
   label: "Personal Branding",
-  description: "Halaman publik personal + builder block",
+  description: "Halaman publik personal — template atau HTML sendiri",
   icon: Globe,
 
   skills: [
@@ -22,7 +21,7 @@ export const personalBrandingManifest: SliceManifest = {
       id: "branding.get-status",
       label: "Lihat status halaman publik",
       description:
-        "Ambil status halaman publik user (enabled, slug, theme, mode auto/custom, availableForHire). Pakai untuk 'apa status branding saya', 'halaman publik saya aktif?'.",
+        "Ambil status halaman publik user (enabled, slug, theme, availableForHire). Pakai untuk 'apa status branding saya', 'halaman publik saya aktif?'.",
       kind: "query",
     },
     {
@@ -40,7 +39,7 @@ export const personalBrandingManifest: SliceManifest = {
       id: "branding.set-slug",
       label: "Ganti slug halaman publik",
       description:
-        "Ganti URL slug user (mis. 'budi-frontend'). Slug WAJIB lowercase + huruf/angka/dash + 3-40 karakter. Server cek uniqueness dan reserved-slug list — kalau bentrok akan error. Lebih aman panggil branding.get-status dulu untuk lihat slug saat ini.",
+        "Ganti URL slug user (mis. 'budi-frontend'). Slug WAJIB lowercase + huruf/angka/dash + 3-30 karakter. Server cek uniqueness dan reserved-slug list — kalau bentrok akan error. Lebih aman panggil branding.get-status dulu untuk lihat slug saat ini.",
       kind: "mutation",
       cta: "Simpan slug",
       args: {
@@ -49,7 +48,7 @@ export const personalBrandingManifest: SliceManifest = {
           label: "Slug baru (lowercase, no spasi)",
           required: true,
           example: "budi-frontend",
-          pattern: "^[a-z][a-z0-9-]{2,39}$",
+          pattern: "^[a-z][a-z0-9-]{1,28}[a-z0-9]$",
         },
       },
     },
@@ -57,15 +56,15 @@ export const personalBrandingManifest: SliceManifest = {
       id: "branding.set-theme",
       label: "Ganti tema halaman publik",
       description:
-        "Set theme layout halaman publik. theme harus salah satu: linktree (stack), bento (grid), magazine (editorial), template-v1, template-v2, template-v3. Pakai untuk 'pakai bento layout', 'ganti ke linktree'.",
+        "Set template halaman publik. theme harus salah satu: starter (bersih, satu kolom), template-v1 (Purple Glass), template-v2 (Editorial Cream), template-v3 (Premium Dark). Pakai untuk 'ganti template', 'pakai yang dark'.",
       kind: "mutation",
       cta: "Simpan tema",
       args: {
         theme: {
           type: "string",
-          label: "Theme (linktree|bento|magazine|template-v1|...)",
+          label: "Template (starter|template-v1|template-v2|template-v3)",
           required: true,
-          example: "bento",
+          example: "starter",
         },
       },
     },

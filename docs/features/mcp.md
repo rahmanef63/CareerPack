@@ -106,7 +106,7 @@ biasa, memakai **referensi objek yang sama** dengan blok teks — jadi keduanya
 tidak mungkin berbeda isi. Blok teks tidak diubah sedikit pun; itu yang dibaca
 semua klien sekarang.
 
-Tujuh tool baca mengembalikan `null` kalau datanya tidak ada, dan untuk empat di
+Sembilan tool baca mengembalikan `null` kalau datanya tidak ada, dan untuk empat di
 antaranya (`profile_get`, `roadmap_get`, `documents_list`, `financial_plan_get`)
 `null` adalah kondisi hari pertama setiap akun baru. Panggilan itu tidak
 membawa `structuredContent` sama sekali — sah, karena `null` bukan objek JSON.
@@ -121,8 +121,8 @@ unik masing-masing.
 
 ## Golden prompt
 
-`convex/mcp/goldenPrompts.test.ts` — 243 prompt (146 langsung, 69 tidak
-langsung, 28 negatif) menutup **seluruh 69 tool**.
+`convex/mcp/goldenPrompts.test.ts` — 258 prompt (157 langsung, 74 tidak
+langsung, 28 negatif) menutup **seluruh 74 tool**.
 
 Yang dicek: strukturnya saja — setiap prompt menyebut tool yang benar-benar ada,
 tidak ada tool yang tak punya prompt langsung, prompt negatif tidak
@@ -150,15 +150,15 @@ Knob: `MCP_EVAL_PROVIDER` (kunci dari `_shared/aiProviders.ts`, default
 `MCP_EVAL_TOOL`, `MCP_EVAL_LIMIT`, `MCP_EVAL_CONCURRENCY`,
 `MCP_EVAL_MIN_ACCURACY`.
 
-**Biaya.** Tiap permintaan membawa **seluruh 69 skema tool** — sekitar 25rb
+**Biaya.** Tiap permintaan membawa **seluruh 74 skema tool** — sekitar 27rb
 token input sebelum promptnya sendiri, karena katalognya besar dan tidak bisa
 dipotong (justru katalog utuh itu yang sedang diuji).
 
 | Jalannya | Permintaan | Token input | Perkiraan (gpt-4o-mini, tanpa cache) |
 |---|---|---|---|
-| `MCP_EVAL_LIMIT=20` | 20 | ~0,5 jt | ~$0,07 |
-| `MCP_EVAL_LIMIT=40` | 40 | ~1,0 jt | ~$0,15 |
-| penuh | 243 | ~6,0 jt | ~$0,90 |
+| `MCP_EVAL_LIMIT=20` | 20 | ~0,5 jt | ~$0,08 |
+| `MCP_EVAL_LIMIT=40` | 40 | ~1,1 jt | ~$0,16 |
+| penuh | 258 | ~7,0 jt | ~$1,05 |
 
 Jadi jutaan token, tapi bukan uang yang bikin kaget — dan provider yang
 meng-cache prefix identik menekannya lagi. Tetap mulai dari `MCP_EVAL_LIMIT=20`,
@@ -207,7 +207,82 @@ ada di membaca diff itu; tim yang refleks regenerate tidak dapat apa-apa.
 
 `applications`, `goals`, `roadmap`, `calendar`, `documents`, `budget`,
 `financial`, `notifications`, `profile`, `cv`, `contacts`, `mockInterview`,
-`matcher`, `files`, `portfolio`.
+`matcher`, `files`, `portfolio`, `branding`.
+
+## Halaman branding publik
+
+Lima tool untuk halaman publik di `careerpack.org/<slug>`
+(`tools/branding.ts` + `data/branding.ts`): tiga baca, dua tulis — dan satu
+operasi yang sengaja tidak ada.
+
+| Tool | Fungsi | Scope |
+|---|---|---|
+| `branding_get` | status halaman: published, slug, URL, headline, indexable, template bawaan yang dipakai, ada-tidaknya HTML custom + ukurannya. `include_html: true` baru mengembalikan dokumennya | `mcp.read` |
+| `branding_data` | payload `__cp_data` yang dihidrasi halaman, **plus kontrak marker** yang mengikatnya ke markup | `mcp.read` |
+| `branding_templates` | daftar template bawaan, atau HTML utuh salah satunya sebagai titik awal | `mcp.read` |
+| `branding_set_html` | ganti **seluruh** dokumen halaman (maks `PUBLIC_HTML_MAX` = 250.000 karakter) | `mcp.write` |
+| `branding_delete_html` | hapus HTML custom — halaman jatuh balik ke template bawaan | `mcp.write` |
+
+**Tidak ada tool publish, disengaja.** `publicEnabled`, `publicSlug`, dan
+`publicAllowIndex` hanya bisa ditulis dari dashboard. Host AI boleh menyusun
+halamannya; keputusan bahwa halaman itu tayang di internet atas nama seseorang
+tetap di manusia. `branding_set_html` ke halaman yang belum aktif tetap
+tersimpan, dan tetap privat.
+
+### Kontrak marker — kenapa `branding_data` mengembalikan dua hal
+
+HTML yang ditulis model **bukan snapshot**. Renderer menyuntikkan
+`<script id="__cp_data">` + hydrator yang sama ke `publicHtml` seperti ke
+template bawaan, jadi marker di dalamnya terus terisi dari CV / portofolio /
+profil yang hidup:
+
+| Atribut | Arti |
+|---|---|
+| `data-cp="KEY"` | isi teks elemen. `data-cp-mode="src" \| "href" \| "html"` mengisi atribut, bukan teks. **Nilai kosong menyembunyikan elemennya** — LinkedIn yang tidak diisi tidak meninggalkan tombol mati |
+| `data-cp-list="NAME"` | container dengan **satu** anak ber-`data-cp-template`; anak itu dikloning per item, aslinya dibuang. Ada batas per list, override `data-cp-list-max="N"` |
+| `data-cp-section="NAME"` | wrapper yang disembunyikan total kalau `has.NAME` false (section dimatikan user, atau datanya kosong) |
+| `data-cp-empty="NAME"` | hanya muncul kalau list itu kosong |
+| `data-cp-fluff` | dibuang begitu ada data sungguhan — untuk blok placeholder di preview template |
+
+Model yang menempelkan judul proyek sebagai teks literal menghasilkan halaman
+yang diam-diam basi; model yang menulis marker menghasilkan halaman yang tidak
+pernah basi. Itu satu-satunya alasan kontraknya dikembalikan **sebagai data**
+di samping payload-nya, bukan ditulis di `description` — `description` dibatasi
+1024 karakter, dan model cuma butuh kontrak ini di detik ia menulis HTML.
+
+`MARKER_CONTRACT` (`tools/branding.ts`) mencerminkan
+`frontend/slices/personal-branding/themes/templateHydrator.ts`. Marker baru di
+sana wajib ditambahkan di sini juga — tidak ada test yang memaksakannya.
+
+### Template bawaan
+
+| Id | Ukuran | Catatan |
+|---|---|---|
+| `starter` | ~18 KB | Yang dimaksudkan untuk disalin: memakai **semua** marker yang didukung hydrator |
+| `template-v1` | ~81 KB | Purple Glass. Tanpa section education |
+| `template-v2` | ~81 KB | Editorial Cream — default |
+| `template-v3` | ~67 KB | Premium Dark. Tanpa section about |
+
+`branding_templates` tanpa argumen cuma melist; dengan `template_id` ia
+mengambil HTML-nya lewat HTTP dari origin `APP_URL`, jadi v1/v2/v3 akan
+memakan sebagian besar context model. Itu sebabnya deskripsi tool mengarahkan
+ke `starter` kecuali user menyebut yang lain.
+
+### Kenapa tidak disanitasi
+
+`convex/profile/publicHtml.ts` cuma menormalkan dan membatasi ukuran — tidak
+ada penyaring tag. Dokumennya dirender di `srcdoc` iframe **yang sama** dengan
+template bawaan: `allow-scripts` **tanpa** `allow-same-origin`, jadi ia hidup
+di opaque origin tanpa akses ke DOM aplikasi, cookie, atau sesi Convex.
+Menyaring tag hanya akan merusak template (yang butuh script inline-nya
+sendiri) tanpa membeli apa pun yang belum diberikan sandbox. Aturannya satu
+file supaya jalur dashboard (`updateMyPublicProfile`) dan jalur MCP tidak bisa
+menegakkan batas yang berbeda.
+
+Payload-nya pun satu implementasi: `convex/profile/loadBranding.ts` melayani
+`getBySlug` (halaman publik) **dan** `branding_data`. Kalau keduanya berbeda,
+model akan menulis marker untuk data yang tidak pernah dipancarkan halaman
+hidup, dan salahnya baru kelihatan sebagai section kosong di layar orang lain.
 
 ## File & gambar
 
