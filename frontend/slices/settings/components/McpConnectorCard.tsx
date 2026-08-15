@@ -14,9 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { CodeBlock } from "@/shared/components/ui/copy-button";
 import { notify } from "@/shared/lib/notify";
-import { convexHttpUrl } from "@/shared/lib/env";
+import {
+  VERDICT_HINT,
+  buildGuides,
+  connectorValues,
+  type GuideRow,
+} from "./mcpConnectorGuide";
 
 /**
  * The MCP connector surface: what to paste into ChatGPT/Claude, and the list
@@ -36,6 +42,45 @@ import { convexHttpUrl } from "@/shared/lib/env";
  * NEXT_PUBLIC_CONVEX_URL (the SITE origin — the CLOUD one 404s on /mcp) and
  * the OAuth endpoints from wherever this page is being served.
  */
+/** Warna vonis dipakai sebagai makna, bukan hiasan: biru = tindakan Anda,
+ *  kuning = pilihan yang harus diambil, hijau = sudah beres, abu = jangan
+ *  disentuh. Garis kiri membawa status yang sama tanpa perlu dibaca. */
+const VERDICT_STYLE: Record<string, { stripe: string; badge: string }> = {
+  salin: { stripe: "border-l-brand", badge: "border-brand/40 text-brand" },
+  pilih: { stripe: "border-l-warning", badge: "border-warning/40 text-warning-text" },
+  centang: { stripe: "border-l-warning", badge: "border-warning/40 text-warning-text" },
+  otomatis: { stripe: "border-l-success", badge: "border-success/40 text-success-text" },
+  kosongkan: { stripe: "border-l-border", badge: "border-border text-muted-foreground" },
+};
+
+function GuideRowView({ row, host }: { row: GuideRow; host: string }) {
+  const style = VERDICT_STYLE[row.verdict] ?? VERDICT_STYLE.kosongkan!;
+  return (
+    <div
+      className={`rounded-md border border-l-[3px] border-border ${style.stripe} p-2.5 ${
+        row.verdict === "kosongkan" ? "opacity-75" : ""
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <code className="font-mono text-xs font-semibold">{row.field}</code>
+        <Badge
+          variant="outline"
+          className={`h-4 px-1.5 text-[10px] uppercase tracking-wide ${style.badge}`}
+          title={VERDICT_HINT[row.verdict]}
+        >
+          {row.verdict}
+        </Badge>
+      </div>
+      {row.value && (
+        <div className="mt-1.5">
+          <CodeBlock value={row.value} label={`Salin ${host} ${row.field}`} />
+        </div>
+      )}
+      {row.note && <p className="mt-1.5 text-xs text-muted-foreground">{row.note}</p>}
+    </div>
+  );
+}
+
 export function McpConnectorCard() {
   const tokens = useQuery(api.mcp.oauth.listMyTokens);
   const revoke = useMutation(api.mcp.oauth.revokeMyToken);
@@ -45,16 +90,8 @@ export function McpConnectorCard() {
   // fine — this card is below the fold of a settings tab, not a landing page.
   const appOrigin = typeof window === "undefined" ? "" : window.location.origin;
 
-  const fields = useMemo(
-    () => [
-      { label: "MCP Server URL", value: convexHttpUrl("/mcp") },
-      { label: "Resource", value: convexHttpUrl("/mcp") },
-      { label: "Auth URL", value: `${appOrigin}/oauth/authorize` },
-      { label: "Token URL", value: `${appOrigin}/api/oauth/token` },
-      { label: "Client ID", value: "chatgpt-careerpack" },
-    ],
-    [appOrigin],
-  );
+  const values = useMemo(() => connectorValues(appOrigin), [appOrigin]);
+  const guides = useMemo(() => buildGuides(values), [values]);
 
   const onRevoke = async (id: string) => {
     setBusy(id);
@@ -80,20 +117,82 @@ export function McpConnectorCard() {
         </CardTitle>
         <CardDescription>
           Sambungkan ChatGPT, Claude, atau Cursor supaya bisa membaca dan mengubah
-          data CareerPack Anda lewat percakapan. Isi form connector di aplikasi itu
-          dengan nilai di bawah — Client Secret dikosongkan, dan metode auth-nya
-          &quot;none&quot;.
+          data CareerPack Anda lewat percakapan. Pilih aplikasinya di bawah — tiap
+          kolom sudah ditandai mana yang perlu Anda isi dan mana yang dibiarkan.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          {fields.map((f) => (
-            <div key={f.label} className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">{f.label}</p>
-              <CodeBlock value={f.value} label={`Salin ${f.label}`} />
-            </div>
-          ))}
+      <CardContent className="space-y-5">
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">Alamat server MCP</p>
+          <CodeBlock value={values.server} label="Salin alamat server MCP" />
         </div>
+
+        <Tabs defaultValue={guides[0]!.id}>
+          <TabsList className="flex w-full flex-wrap justify-start gap-1 h-auto">
+            {guides.map((g) => (
+              <TabsTrigger key={g.id} value={g.id} className="text-xs">
+                {g.host}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {guides.map((g) => {
+            const rows = g.groups.flatMap((x) => x.rows);
+            const mine = rows.filter(
+              (r) => r.verdict !== "otomatis" && r.verdict !== "kosongkan",
+            ).length;
+            return (
+              <TabsContent key={g.id} value={g.id} className="space-y-4 pt-3">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="mr-1.5 rounded border border-border px-1 py-px text-[10px] uppercase tracking-wide">
+                      Di mana
+                    </span>
+                    {g.path}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{g.lede}</p>
+                  {/* Ringkasan sebelum detail: inti kartu ini adalah bahwa
+                      sebagian besar kolom di form itu bukan urusan pengguna. */}
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-brand tabular-nums">{mine}</span> dari{" "}
+                    {rows.length} kolom butuh Anda
+                    {rows.length - mine > 0
+                      ? ` — ${rows.length - mine} sisanya terisi sendiri atau dibiarkan kosong`
+                      : ""}
+                    .
+                  </p>
+                </div>
+
+                {g.groups.map((grp) => (
+                  <div key={grp.title} className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {grp.title}
+                    </p>
+                    {grp.note && (
+                      <p className="text-xs text-muted-foreground">{grp.note}</p>
+                    )}
+                    {grp.rows.map((row, i) => (
+                      <GuideRowView key={`${row.field}-${i}`} row={row} host={g.host} />
+                    ))}
+                  </div>
+                ))}
+
+                {g.traps && g.traps.length > 0 && (
+                  <div className="rounded-md border border-border bg-muted/40 p-3">
+                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Sebelum disimpan
+                    </p>
+                    <ul className="list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+                      {g.traps.map((t) => (
+                        <li key={t}>{t}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </TabsContent>
+            );
+          })}
+        </Tabs>
 
         <div className="space-y-2">
           <p className="text-sm font-medium">Koneksi aktif</p>
