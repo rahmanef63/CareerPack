@@ -22,6 +22,7 @@ import {
   VERDICT_HINT,
   buildGuides,
   connectorValues,
+  type ConnectorValues,
   type GuideRow,
 } from "./mcpConnectorGuide";
 
@@ -195,7 +196,7 @@ export function McpConnectorCard() {
           })}
         </Tabs>
 
-        <ApiKeySection />
+        <ApiKeySection values={values} />
 
         <div className="space-y-2">
           <p className="text-sm font-medium">Koneksi aktif</p>
@@ -257,21 +258,23 @@ export function McpConnectorCard() {
 }
 
 /**
- * API key — a client id + client secret pair, for hosts that will not register
- * themselves.
+ * API key — a client id + client secret pair.
  *
- * Most hosts should never need this. ChatGPT's "Dynamic Client Registration"
- * and Claude's blank Advanced settings both mean the host mints its own
- * credentials and the user copies nothing, which is strictly safer: nothing to
- * paste is nothing to leak. This exists for the third option in ChatGPT's
- * Registration method dropdown — "User-Defined OAuth Client" — which demands a
- * pair, and for any client that only speaks `client_secret_post`.
+ * Two uses, and the second is the one people come here for:
+ *
+ *  1. A host that refuses to register itself — ChatGPT's "User-Defined OAuth
+ *     Client". Rare, and DCR is better wherever it works: nothing to copy is
+ *     nothing to leak.
+ *  2. Software the user wrote. `grant_type=client_credentials` trades the pair
+ *     for a bearer with no browser and no consent screen, which is the only
+ *     way a script or cron job can read this account's data — a token from the
+ *     interactive flow is never shown to its owner (see listMyTokens).
  *
  * The secret is shown ONCE, from the value still in memory at creation. Only
  * its sha256 is stored, so a surface that could show it again would be a
  * surface whose database holds it in the clear.
  */
-function ApiKeySection() {
+function ApiKeySection({ values }: { values: ConnectorValues }) {
   const clients = useQuery(api.mcp.oauth.listMyClients);
   const createClient = useMutation(api.mcp.oauth.createMyClient);
   const revokeClient = useMutation(api.mcp.oauth.revokeMyClient);
@@ -322,11 +325,16 @@ function ApiKeySection() {
         <div className="space-y-1">
           <p className="text-sm font-medium">API key (Client ID + Secret)</p>
           <p className="text-xs text-muted-foreground">
-            Hanya perlu kalau aplikasinya <em>tidak</em> bisa mendaftar sendiri — di
-            ChatGPT itu pilihan <span className="font-mono">User-Defined OAuth Client</span>.
-            Kalau <span className="font-mono">Dynamic Client Registration</span> bisa
-            dipilih, pakai itu saja dan biarkan kedua kolom ini kosong: yang tidak
-            pernah disalin tidak bisa bocor.
+            Untuk <strong>aplikasi buatan Anda sendiri</strong> yang mau membaca dan
+            mengubah data CareerPack ini tanpa lewat ChatGPT — skrip, cron, backend
+            apa pun. Pair ini ditukar jadi token lewat{" "}
+            <span className="font-mono">client_credentials</span>, tanpa layar izin
+            dan tanpa browser. Lihat “Cara pakai” di bawah setelah dibuat.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Untuk ChatGPT/Claude biasanya <em>tidak</em> perlu: keduanya mendaftar
+            sendiri. Pakai ini di sana hanya kalau terpaksa memilih{" "}
+            <span className="font-mono">User-Defined OAuth Client</span>.
           </p>
         </div>
       </div>
@@ -363,6 +371,46 @@ function ApiKeySection() {
           {busy ? "Membuat…" : "Buat"}
         </Button>
       </div>
+
+      {/* <details> rather than a collapsible component: it is two commands most
+          people read once, and the browser already ships the widget. */}
+      <details className="rounded-md border border-border bg-muted/30 p-2.5">
+        <summary className="cursor-pointer text-xs font-semibold">
+          Cara pakai dari aplikasi sendiri
+        </summary>
+        <div className="mt-2 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            1 · Tukar pair jadi token. Token berlaku 30 hari; panggilan berikutnya
+            mengembalikan token yang sama sampai mendekati kedaluwarsa, jadi aman
+            dipanggil tiap kali aplikasi hidup.
+          </p>
+          <CodeBlock
+            value={`curl -sX POST ${values.token} \\
+  -d grant_type=client_credentials \\
+  -d client_id=CLIENT_ID \\
+  -d client_secret=CLIENT_SECRET \\
+  -d scope='mcp.read mcp.write'`}
+            label="Salin perintah tukar token"
+          />
+          <p className="text-xs text-muted-foreground">
+            2 · Pakai <span className="font-mono">access_token</span> dari jawaban di
+            atas sebagai Bearer. Daftar tool ada di{" "}
+            <span className="font-mono">tools/list</span>.
+          </p>
+          <CodeBlock
+            value={`curl -sX POST ${values.server} \\
+  -H 'Authorization: Bearer ACCESS_TOKEN' \\
+  -H 'Content-Type: application/json' \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"cv_list","arguments":{}}}'`}
+            label="Salin contoh panggilan MCP"
+          />
+          <p className="text-xs text-muted-foreground">
+            Minta <span className="font-mono">scope=mcp.read</span> saja kalau
+            aplikasinya cuma membaca — token itu ditolak 403 saat mencoba menulis.
+            Mencabut API key di bawah mematikan token yang sudah terbit juga.
+          </p>
+        </div>
+      </details>
 
       {clients && clients.length > 0 && (
         <ul className="divide-y divide-border rounded-md border border-border">

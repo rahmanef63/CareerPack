@@ -8,7 +8,7 @@ import {
   VERIFIER_MIN,
 } from "../_shared/pkce";
 import { sha256Hex } from "../_shared/clientIp";
-import { MCP_SCOPES } from "./types";
+import { MCP_SCOPES, SCOPE, parseScopes } from "./types";
 
 /**
  * OAuth 2.1 + PKCE for the MCP server.
@@ -252,6 +252,139 @@ export const exchangeCode = mutation({
 });
 
 /**
+ * `grant_type=client_credentials` — RFC 6749 §4.4.
+ *
+ * The authorization code flow assumes a human at a browser who clicks Izinkan.
+ * Software the user wrote themselves has no such human: a cron job, a script,
+ * another app of theirs that wants to read its own CareerPack data. Until this
+ * existed, the only token they could get came out of a consent redirect and
+ * was never shown to them again (`listMyTokens` returns a preview by design),
+ * so there was no headless path at all.
+ *
+ * The token this mints acts AS THE OWNER of the client — same power as a
+ * consent-granted one. That is why it is refused for anything RFC 7591
+ * registration created: those rows have no `ownerUserId` and no secret, so
+ * "whose data?" would have no answer, and a public client id (which travels in
+ * plain sight, in authorize URLs) would be enough to mint access.
+ *
+ * A live token is REUSED rather than re-minted. Otherwise a client that asks
+ * per request inserts a row per request, and the token table becomes a growth
+ * vector with the owner's own credential as the trigger.
+ */
+const CC_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+/** Re-mint this far ahead of expiry, so a returned token is never about to
+ *  die in the caller's hand. */
+const CC_REUSE_MARGIN_MS = 24 * 60 * 60 * 1000;
+
+export const clientCredentialsGrant = mutation({
+  args: {
+    clientId: v.string(),
+    clientSecret: v.string(),
+    /** Space-separated. Omitted = both scopes. Anything unknown is dropped. */
+    scope: v.optional(v.string()),
+  },
+  returns: v.union(
+    v.object({
+      ok: v.literal(true),
+      accessToken: v.string(),
+      expiresIn: v.number(),
+      scope: v.string(),
+    }),
+    v.object({
+      ok: v.literal(false),
+      error: v.string(),
+      errorDescription: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    // One error for every failure mode. "Unknown client" vs "wrong secret"
+    // vs "revoked" would each be a probe answered honestly.
+    const deny = (errorDescription: string) => ({
+      ok: false as const,
+      error: "invalid_client",
+      errorDescription,
+    });
+
+    const client = await ctx.db
+      .query("oauthClients")
+      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
+      .first();
+    const ownerUserId = client?.ownerUserId;
+    if (!client || !client.clientSecretHash || !ownerUserId) {
+      return deny("Client tidak dikenal atau tidak punya secret");
+    }
+    if (client.revokedAt !== undefined) {
+      return deny("Client tidak dikenal atau tidak punya secret");
+    }
+    const presented = await sha256Hex(args.clientSecret);
+    if (presented !== client.clientSecretHash) {
+      return deny("Client tidak dikenal atau tidak punya secret");
+    }
+
+    // Narrowed, never widened: an unknown scope string is dropped instead of
+    // failing, but asking for nothing recognisable is an error rather than a
+    // silent grant of everything.
+    const requested = parseScopes(args.scope ?? MCP_SCOPES);
+    if (requested.length === 0) {
+      return {
+        ok: false as const,
+        error: "invalid_scope",
+        errorDescription: `Scope harus salah satu dari: ${MCP_SCOPES}`,
+      };
+    }
+    // Fixed order so the reuse lookup below matches on a canonical string.
+    const scope = [SCOPE.READ, SCOPE.WRITE]
+      .filter((s) => requested.includes(s))
+      .join(" ");
+
+    const now = Date.now();
+    const live = await ctx.db
+      .query("oauthAccessTokens")
+      .withIndex("by_user", (q) => q.eq("userId", ownerUserId))
+      .collect();
+    const existing = live.find(
+      (r) =>
+        r.clientId === args.clientId &&
+        r.scope === scope &&
+        r.revokedAt === undefined &&
+        r.expiresAt > now + CC_REUSE_MARGIN_MS,
+    );
+    // Revoking the token from the settings screen therefore hands out a fresh
+    // one on the next call — cutting this client off for good means revoking
+    // the CLIENT, which is the row that holds the secret.
+    if (existing) {
+      return {
+        ok: true as const,
+        accessToken: existing.token,
+        expiresIn: Math.floor((existing.expiresAt - now) / 1000),
+        scope,
+      };
+    }
+
+    const token = randomToken(32);
+    await ctx.db.insert("oauthAccessTokens", {
+      token,
+      userId: ownerUserId,
+      clientId: args.clientId,
+      scope,
+      // 30 days rather than the year an interactive grant gets: this one is
+      // minted unattended, so a leaked token has to age out on its own. The
+      // caller holds the secret and can always ask for another.
+      expiresAt: now + CC_TOKEN_TTL_MS,
+      createdAt: now,
+      label: client.label ?? client.clientName,
+    });
+
+    return {
+      ok: true as const,
+      accessToken: token,
+      expiresIn: Math.floor(CC_TOKEN_TTL_MS / 1000),
+      scope,
+    };
+  },
+});
+
+/**
  * Bearer → user. Re-checks revocation and expiry on EVERY request, not just
  * at issue time, so revoking a token cuts access on the next call rather
  * than whenever some cache decides to expire.
@@ -452,8 +585,25 @@ export const revokeMyClient = mutation({
     if (!row || row.ownerUserId !== userId) {
       throw new Error("Client tidak ditemukan");
     }
+    const now = Date.now();
     if (row.revokedAt === undefined) {
-      await ctx.db.patch(args.clientRowId, { revokedAt: Date.now() });
+      await ctx.db.patch(args.clientRowId, { revokedAt: now });
+    }
+
+    // And every token it ever produced. Revoking the client alone stopped it
+    // minting NEW tokens while leaving the live ones working — with
+    // client_credentials that gap is 30 days of access after the user believes
+    // they cut it off, and with an interactive grant it was a year. Done here
+    // rather than by checking the client on every MCP request: this runs once,
+    // that would run on all of them.
+    const tokens = await ctx.db
+      .query("oauthAccessTokens")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    for (const t of tokens) {
+      if (t.clientId === row.clientId && t.revokedAt === undefined) {
+        await ctx.db.patch(t._id, { revokedAt: now });
+      }
     }
     return null;
   },

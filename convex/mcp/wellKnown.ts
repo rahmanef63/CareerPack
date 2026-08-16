@@ -109,7 +109,11 @@ export const authorizationServerMetadata = httpAction(async (_ctx, request) => {
     // field to type one into.
     registration_endpoint: `${siteOrigin()}/oauth/register`,
     response_types_supported: ["code"],
-    grant_types_supported: ["authorization_code"],
+    // `client_credentials` is for software the user wrote themselves: no
+    // browser, no consent screen, the id + secret pair minted in Settings
+    // traded straight for a bearer. Only user-minted confidential clients can
+    // use it — see clientCredentialsGrant.
+    grant_types_supported: ["authorization_code", "client_credentials"],
     // S256 only, advertised as such: a client that reads this will not even
     // try `plain`, which the token endpoint would refuse anyway.
     code_challenge_methods_supported: ["S256"],
@@ -120,7 +124,14 @@ export const authorizationServerMetadata = httpAction(async (_ctx, request) => {
     // `client_secret_post` for the confidential ones a user creates by hand
     // when a host insists on an id + secret pair. Advertising only `none`
     // told a client the secret it was about to send would be ignored.
-    token_endpoint_auth_methods_supported: ["none", "client_secret_post"],
+    // `client_secret_basic` is last because it is only accepted, not preferred:
+    // the client_credentials path reads it so a library that sends Basic
+    // without asking does not fail as an unexplained invalid_client.
+    token_endpoint_auth_methods_supported: [
+      "none",
+      "client_secret_post",
+      "client_secret_basic",
+    ],
     scopes_supported: SCOPE_LIST,
   });
 });

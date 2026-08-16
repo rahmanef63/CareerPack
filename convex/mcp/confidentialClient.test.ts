@@ -228,3 +228,155 @@ describe("revokeMyClient", () => {
     expect(theirs).toEqual([]);
   });
 });
+
+/* client_credentials — the headless grant.
+ *
+ * This one hands out a token with no human anywhere in the loop, so the checks
+ * that matter are the ones that decide WHOSE data it opens and how long the
+ * hole stays open after the user closes it.
+ */
+describe("clientCredentialsGrant", () => {
+  it("trades a valid pair for a token scoped to the client's owner", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret, userId } = await mintClient(t);
+
+    const res = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.scope).toBe("mcp.read mcp.write");
+
+    const row = await t.run(async (ctx) =>
+      ctx.db
+        .query("oauthAccessTokens")
+        .withIndex("by_token", (q) => q.eq("token", res.accessToken))
+        .first(),
+    );
+    expect(row?.userId).toBe(userId);
+  });
+
+  it("refuses a wrong secret, a revoked client, and an unknown id alike", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret, asUser } = await mintClient(t);
+
+    const wrong = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret: `${clientSecret}x`,
+    });
+    expect(wrong.ok).toBe(false);
+
+    const unknown = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId: "cp_nope",
+      clientSecret,
+    });
+    expect(unknown.ok).toBe(false);
+
+    // All three answer identically — a distinct message would tell a prober
+    // which half of the pair they got right.
+    if (!wrong.ok && !unknown.ok) {
+      expect(wrong.errorDescription).toBe(unknown.errorDescription);
+    }
+
+    const listed = await asUser.query(api.mcp.oauth.listMyClients, {});
+    await asUser.mutation(api.mcp.oauth.revokeMyClient, { clientRowId: listed[0]!.id });
+    const revoked = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+    });
+    expect(revoked.ok).toBe(false);
+  });
+
+  it("refuses a public DCR client, which has no owner to act as", async () => {
+    const t = convexTest(schema, modules);
+    await t.run(async (ctx) =>
+      ctx.db.insert("oauthClients", {
+        clientId: "public-dcr-client",
+        clientName: "ChatGPT",
+        redirectUris: [REDIRECT],
+        createdAt: Date.now(),
+      }),
+    );
+    // The id of a public client travels in every authorize URL. If this
+    // succeeded, reading one out of a browser history would be enough.
+    const res = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId: "public-dcr-client",
+      clientSecret: "anything",
+    });
+    expect(res.ok).toBe(false);
+  });
+
+  it("narrows the scope to what was asked for, and rejects nonsense", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret } = await mintClient(t);
+
+    const readOnly = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+      scope: "mcp.read",
+    });
+    expect(readOnly.ok && readOnly.scope).toBe("mcp.read");
+
+    // Unknown scopes are dropped, not honoured — asking for admin does not
+    // silently hand back both real ones.
+    const junk = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+      scope: "admin",
+    });
+    expect(junk.ok).toBe(false);
+  });
+
+  it("reuses a live token instead of inserting a row per call", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret } = await mintClient(t);
+
+    const first = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+    });
+    const second = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+    });
+    expect(first.ok && second.ok && first.accessToken === second.accessToken).toBe(true);
+
+    // A different scope is a different token, not a widened one.
+    const readOnly = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+      scope: "mcp.read",
+    });
+    expect(first.ok && readOnly.ok && first.accessToken === readOnly.accessToken).toBe(false);
+
+    const count = await t.run(async (ctx) =>
+      (await ctx.db.query("oauthAccessTokens").collect()).length,
+    );
+    expect(count).toBe(2);
+  });
+
+  it("kills already-issued tokens when the client is revoked", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret, asUser } = await mintClient(t);
+    const granted = await t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+    });
+    expect(granted.ok).toBe(true);
+    if (!granted.ok) return;
+
+    const listed = await asUser.query(api.mcp.oauth.listMyClients, {});
+    await asUser.mutation(api.mcp.oauth.revokeMyClient, { clientRowId: listed[0]!.id });
+
+    // Revoking the client used to leave its tokens alive — 30 days of access
+    // after the user believed they had cut it off.
+    const row = await t.run(async (ctx) =>
+      ctx.db
+        .query("oauthAccessTokens")
+        .withIndex("by_token", (q) => q.eq("token", granted.accessToken))
+        .first(),
+    );
+    expect(row?.revokedAt).toBeTypeOf("number");
+  });
+});

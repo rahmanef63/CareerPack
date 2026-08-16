@@ -121,16 +121,20 @@ unik masing-masing.
 
 ## API key — Client ID + Secret
 
-Sebagian besar host **tidak** membutuhkan ini. ChatGPT dengan *Dynamic Client
-Registration* dan Claude dengan Advanced settings kosong sama-sama mendaftarkan
-klien sendiri, dan itu lebih aman: yang tidak pernah disalin tidak bisa bocor.
+Dua pemakaian, dan yang kedua justru yang paling sering dicari.
 
-Yang butuh cuma satu kasus: opsi ketiga di dropdown *Registration method* milik
-ChatGPT — **User-Defined OAuth Client** — yang memaksa sepasang id + secret,
-plus klien mana pun yang hanya bisa `client_secret_post`. Sampai 2026-08-16
-server ini tidak bisa menyediakan keduanya: RFC 7591 hanya mencetak klien
-**publik**, tanpa secret, dan `register.ts` bahkan mencatat bahwa secret yang
-dikirim klien "tidak pernah kami periksa".
+**1 · Host yang tidak bisa mendaftar sendiri.** Sebagian besar host **tidak**
+membutuhkan ini. ChatGPT dengan *Dynamic Client Registration* dan Claude dengan
+Advanced settings kosong sama-sama mendaftarkan klien sendiri, dan itu lebih
+aman: yang tidak pernah disalin tidak bisa bocor. Yang butuh cuma opsi ketiga di
+dropdown *Registration method* milik ChatGPT — **User-Defined OAuth Client** —
+yang memaksa sepasang id + secret, plus klien mana pun yang hanya bisa
+`client_secret_post`. Sampai 2026-08-16 server ini tidak bisa menyediakan
+keduanya: RFC 7591 hanya mencetak klien **publik**, tanpa secret, dan
+`register.ts` bahkan mencatat bahwa secret yang dikirim klien "tidak pernah kami
+periksa".
+
+**2 · Aplikasi buatan pengguna sendiri** — lihat `client_credentials` di bawah.
 
 Sekarang ada tiga fungsi di `convex/mcp/oauth.ts` — `createMyClient`,
 `listMyClients`, `revokeMyClient` — dan bagiannya di kartu Koneksi MCP.
@@ -152,8 +156,49 @@ Discovery ikut berubah: `token_endpoint_auth_methods_supported` sekarang
 `["none", "client_secret_post"]`. Mengumumkan `none` saja berarti memberi tahu
 klien bahwa secret yang akan dikirimnya diabaikan.
 
-Sepuluh tes di `convex/mcp/confidentialClient.test.ts`, termasuk yang paling
+Enam belas tes di `convex/mcp/confidentialClient.test.ts`, termasuk yang paling
 penting: **penukaran ditolak kalau secret-nya hilang.**
+
+## `client_credentials` — aplikasi tanpa manusia
+
+Alur authorization code mengandaikan ada manusia di depan browser yang menekan
+*Izinkan*. Skrip, cron, atau backend buatan pengguna sendiri tidak punya itu —
+dan token dari alur interaktif **tidak pernah ditampilkan lagi ke pemiliknya**
+(`listMyTokens` sengaja hanya mengembalikan preview). Jadi sampai 2026-08-16
+tidak ada jalur headless sama sekali: pair Client ID + Secret tetap harus
+melewati layar izin.
+
+`clientCredentialsGrant` menukar pair itu langsung jadi bearer:
+
+```bash
+curl -sX POST https://careerpack.org/api/oauth/token \
+  -d grant_type=client_credentials \
+  -d client_id=cp_… -d client_secret=… \
+  -d scope='mcp.read mcp.write'
+# → {"access_token":"…","token_type":"Bearer","expires_in":2592000,"scope":"…"}
+```
+
+Lalu token itu dipakai sebagai `Authorization: Bearer …` ke endpoint `/mcp`
+yang sama seperti host mana pun.
+
+| Perilaku | Alasan |
+|---|---|
+| **Hanya** klien buatan pengguna (`ownerUserId` + `clientSecretHash`) | token ini bertindak **sebagai** pemiliknya. Baris DCR tidak punya pemilik, jadi "data siapa?" tidak ada jawabannya — dan `client_id` publik ikut lewat di URL authorize, sehingga membacanya dari riwayat browser akan cukup untuk mencetak akses |
+| TTL 30 hari, bukan setahun | dicetak tanpa pengawasan; token bocor harus mati sendiri. Pemanggil memegang secret dan bisa minta lagi kapan saja |
+| Token hidup **dipakai ulang**, tidak dicetak baru tiap panggilan | kalau tidak, klien yang minta token per request menyisipkan satu baris per request — tabel token jadi vektor pertumbuhan yang dipicu kredensial pemiliknya sendiri. Dicetak ulang saat sisa umur < 1 hari |
+| Scope dipersempit, tidak pernah dilebarkan | `scope=mcp.read` menghasilkan token yang ditolak 403 saat menulis. Scope tak dikenal dibuang; minta yang tak dikenal **saja** = `invalid_scope`, bukan diam-diam dapat semuanya |
+| Gagal apa pun menjawab sama | "klien tak dikenal" vs "secret salah" vs "sudah dicabut" masing-masing adalah pertanyaan probe yang dijawab jujur |
+| Endpoint menerima `client_secret_post` **dan** HTTP Basic | banyak library OAuth mengirim Basic tanpa ditanya, dan ketidakcocokan itu gagal sebagai `invalid_client` yang tidak bisa dibedakan dari secret salah |
+| `invalid_client` → HTTP **401** | RFC 6749 §5.2; klien yang retry pada 400 akan menggedor secret salah selamanya |
+
+**Mencabut klien sekarang mencabut token-tokennya juga.** Sebelumnya
+`revokeMyClient` hanya menandai baris klien: klien berhenti mencetak token baru,
+tapi yang sudah terbit tetap hidup — 30 hari akses (atau setahun, untuk grant
+interaktif) setelah pengguna mengira sudah memutusnya. Dikerjakan sekali saat
+cabut, bukan dengan memeriksa klien di **setiap** permintaan MCP.
+
+Discovery ikut berubah: `grant_types_supported` sekarang
+`["authorization_code", "client_credentials"]`.
 
 ## Golden prompt
 
