@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Plug, Trash2 } from "lucide-react";
+import { KeyRound, Plug, Trash2 } from "lucide-react";
 
 import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import {
   Card,
   CardContent,
@@ -194,6 +195,8 @@ export function McpConnectorCard() {
           })}
         </Tabs>
 
+        <ApiKeySection />
+
         <div className="space-y-2">
           <p className="text-sm font-medium">Koneksi aktif</p>
           {tokens === undefined ? (
@@ -250,5 +253,146 @@ export function McpConnectorCard() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * API key — a client id + client secret pair, for hosts that will not register
+ * themselves.
+ *
+ * Most hosts should never need this. ChatGPT's "Dynamic Client Registration"
+ * and Claude's blank Advanced settings both mean the host mints its own
+ * credentials and the user copies nothing, which is strictly safer: nothing to
+ * paste is nothing to leak. This exists for the third option in ChatGPT's
+ * Registration method dropdown — "User-Defined OAuth Client" — which demands a
+ * pair, and for any client that only speaks `client_secret_post`.
+ *
+ * The secret is shown ONCE, from the value still in memory at creation. Only
+ * its sha256 is stored, so a surface that could show it again would be a
+ * surface whose database holds it in the clear.
+ */
+function ApiKeySection() {
+  const clients = useQuery(api.mcp.oauth.listMyClients);
+  const createClient = useMutation(api.mcp.oauth.createMyClient);
+  const revokeClient = useMutation(api.mcp.oauth.revokeMyClient);
+
+  const [label, setLabel] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [revoking, setRevoking] = useState<string | null>(null);
+  const [minted, setMinted] = useState<{ clientId: string; clientSecret: string } | null>(
+    null,
+  );
+
+  const onCreate = async () => {
+    if (!label.trim()) {
+      notify.error("Beri label dulu supaya nanti bisa dibedakan");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await createClient({ label: label.trim() });
+      setMinted({ clientId: res.clientId, clientSecret: res.clientSecret });
+      setLabel("");
+    } catch (err) {
+      notify.fromError(err, "Gagal membuat API key");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRevoke = async (id: string) => {
+    setRevoking(id);
+    try {
+      await revokeClient({ clientRowId: id as never });
+      notify.success("API key dicabut");
+    } catch (err) {
+      notify.fromError(err, "Gagal mencabut API key");
+    } finally {
+      setRevoking(null);
+    }
+  };
+
+  const fmt = (ms: number) =>
+    new Date(ms).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+
+  return (
+    <div className="space-y-3 rounded-md border border-border p-3">
+      <div className="flex items-start gap-2">
+        <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden />
+        <div className="space-y-1">
+          <p className="text-sm font-medium">API key (Client ID + Secret)</p>
+          <p className="text-xs text-muted-foreground">
+            Hanya perlu kalau aplikasinya <em>tidak</em> bisa mendaftar sendiri — di
+            ChatGPT itu pilihan <span className="font-mono">User-Defined OAuth Client</span>.
+            Kalau <span className="font-mono">Dynamic Client Registration</span> bisa
+            dipilih, pakai itu saja dan biarkan kedua kolom ini kosong: yang tidak
+            pernah disalin tidak bisa bocor.
+          </p>
+        </div>
+      </div>
+
+      {minted && (
+        <div className="space-y-2 rounded-md border border-warning/40 bg-warning/5 p-3">
+          <p className="text-xs font-semibold text-warning-text">
+            Secret ini hanya ditampilkan sekali. Salin sekarang — setelah kotak ini
+            ditutup, nilainya tidak bisa dilihat lagi dan harus dibuat ulang.
+          </p>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Client ID</p>
+            <CodeBlock value={minted.clientId} label="Salin Client ID" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Client Secret</p>
+            <CodeBlock value={minted.clientSecret} label="Salin Client Secret" />
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setMinted(null)}>
+            Sudah saya salin
+          </Button>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <Input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Label, misal: ChatGPT kantor"
+          maxLength={60}
+          className="h-8 text-sm"
+        />
+        <Button size="sm" onClick={() => void onCreate()} disabled={busy}>
+          {busy ? "Membuat…" : "Buat"}
+        </Button>
+      </div>
+
+      {clients && clients.length > 0 && (
+        <ul className="divide-y divide-border rounded-md border border-border">
+          {clients.map((c) => (
+            <li key={c.id} className="flex items-center gap-3 p-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{c.label}</p>
+                <p className="truncate font-mono text-xs text-muted-foreground">
+                  {c.clientId}
+                </p>
+                <p className="text-xs text-muted-foreground">Dibuat {fmt(c.createdAt)}</p>
+              </div>
+              {c.revokedAt !== null ? (
+                <Badge variant="outline" className="shrink-0">Dicabut</Badge>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 text-destructive"
+                  disabled={revoking === c.id}
+                  onClick={() => void onRevoke(c.id)}
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+                  {revoking === c.id ? "Mencabut…" : "Cabut"}
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

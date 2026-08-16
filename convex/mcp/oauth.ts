@@ -7,6 +7,7 @@ import {
   VERIFIER_MAX,
   VERIFIER_MIN,
 } from "../_shared/pkce";
+import { sha256Hex } from "../_shared/clientIp";
 import { MCP_SCOPES } from "./types";
 
 /**
@@ -113,7 +114,16 @@ export const createAuthCode = mutation({
       .query("oauthClients")
       .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
       .first();
-    if (registered && !registered.redirectUris.includes(args.redirectUri)) {
+    // An EMPTY list means "no extra narrowing", not "deny everything". A
+    // user-minted client cannot know the host's callback URL when it is
+    // created — you get that only once the host shows it to you — so it
+    // registers with no list and leans on the host allowlist above. DCR
+    // clients always declare theirs, so they are still held to it.
+    if (
+      registered &&
+      registered.redirectUris.length > 0 &&
+      !registered.redirectUris.includes(args.redirectUri)
+    ) {
       throw new Error("redirect_uri tidak terdaftar untuk client ini");
     }
 
@@ -148,6 +158,9 @@ export const exchangeCode = mutation({
     codeVerifier: v.string(),
     redirectUri: v.string(),
     clientId: v.string(),
+    // Present only for confidential clients (`client_secret_post`). Public
+    // clients — everything RFC 7591 registration mints — omit it.
+    clientSecret: v.optional(v.string()),
   },
   returns: v.union(
     v.object({
@@ -181,6 +194,27 @@ export const exchangeCode = mutation({
     if (row.clientId !== args.clientId) return invalid("client_id tidak cocok");
     if (row.redirectUri !== args.redirectUri) {
       return invalid("redirect_uri tidak cocok");
+    }
+
+    // A confidential client must prove it is itself. Looked up by id rather
+    // than trusting the request: whether a secret is REQUIRED is a property of
+    // the registered client, never of what the caller chose to send. Skipping
+    // this when `args.clientSecret` is absent would make the secret optional
+    // in practice, and a client id is not a secret — it travels in the
+    // authorize URL.
+    const client = await ctx.db
+      .query("oauthClients")
+      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
+      .first();
+    if (client?.revokedAt !== undefined && client?.revokedAt !== null) {
+      return invalid("Client sudah dicabut");
+    }
+    if (client?.clientSecretHash) {
+      if (!args.clientSecret) return invalid("client_secret wajib untuk client ini");
+      // Same opaque failure as every other branch — distinguishing "wrong
+      // secret" from "unknown code" only helps someone probing.
+      const presented = await sha256Hex(args.clientSecret);
+      if (presented !== client.clientSecretHash) return invalid("client_secret salah");
     }
 
     const pkceFailure = await verifyPkce({
@@ -312,6 +346,114 @@ export const revokeMyToken = mutation({
     }
     if (row.revokedAt === undefined) {
       await ctx.db.patch(tokenId, { revokedAt: Date.now() });
+    }
+    return null;
+  },
+});
+
+/* ─────────────── confidential clients (user-minted API keys) ───────────────
+ *
+ * ChatGPT's connector form offers three registration methods, and two of them
+ * ("Dynamic Client Registration", "Client Identifier Metadata Document") grey
+ * out unless the server advertises them. The third — "User-Defined OAuth
+ * Client" — wants a client id and a client secret, and until now this server
+ * could produce neither: RFC 7591 registration mints PUBLIC clients, with no
+ * secret to hand over.
+ *
+ * These three functions are that missing path. A user mints a client from the
+ * settings screen, pastes the pair into whichever host insists on it, and
+ * revokes it from the same place. DCR keeps working untouched and stays the
+ * better route where a host supports it — nothing to copy, nothing to leak.
+ */
+
+/** Long enough that guessing is hopeless; the id is public, the secret is not. */
+const CLIENT_ID_BYTES = 12;
+const CLIENT_SECRET_BYTES = 32;
+const CLIENT_LABEL_MAX = 60;
+
+export const createMyClient = mutation({
+  args: { label: v.string() },
+  returns: v.object({
+    clientId: v.string(),
+    // Returned exactly once. Only the digest is stored, so this value cannot
+    // be produced again — the UI has to show it now or lose it.
+    clientSecret: v.string(),
+    label: v.string(),
+    createdAt: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const label = args.label.trim();
+    if (!label) throw new Error("Label wajib diisi");
+    if (label.length > CLIENT_LABEL_MAX) {
+      throw new Error(`Label maksimal ${CLIENT_LABEL_MAX} karakter`);
+    }
+
+    const clientId = `cp_${randomToken(CLIENT_ID_BYTES)}`;
+    const clientSecret = randomToken(CLIENT_SECRET_BYTES);
+    const now = Date.now();
+
+    await ctx.db.insert("oauthClients", {
+      clientId,
+      clientName: label,
+      // Empty on purpose: the host's callback is unknown at mint time, so this
+      // client is held to the host-level allowlist instead. See exchangeCode.
+      redirectUris: [],
+      createdAt: now,
+      clientSecretHash: await sha256Hex(clientSecret),
+      ownerUserId: userId,
+      label,
+    });
+
+    return { clientId, clientSecret, label, createdAt: now };
+  },
+});
+
+export const listMyClients = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      id: v.id("oauthClients"),
+      clientId: v.string(),
+      label: v.string(),
+      createdAt: v.number(),
+      revokedAt: v.union(v.number(), v.null()),
+    }),
+  ),
+  handler: async (ctx) => {
+    const userId = await requireUser(ctx);
+    const rows = await ctx.db
+      .query("oauthClients")
+      .withIndex("by_owner", (q) => q.eq("ownerUserId", userId))
+      .collect();
+    // No secret field of any kind here, not even a preview. The digest is all
+    // the row holds, and a surface that could show the secret again is a
+    // surface whose database is storing it in the clear.
+    return rows
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map((r) => ({
+        id: r._id,
+        clientId: r.clientId,
+        label: r.label ?? r.clientName,
+        createdAt: r.createdAt,
+        revokedAt: r.revokedAt ?? null,
+      }));
+  },
+});
+
+export const revokeMyClient = mutation({
+  args: { clientRowId: v.id("oauthClients") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await requireUser(ctx);
+    const row = await ctx.db.get(args.clientRowId);
+    // Same "not found" for someone else's row as for a missing one — a
+    // distinct "forbidden" would confirm the id exists.
+    if (!row || row.ownerUserId !== userId) {
+      throw new Error("Client tidak ditemukan");
+    }
+    if (row.revokedAt === undefined) {
+      await ctx.db.patch(args.clientRowId, { revokedAt: Date.now() });
     }
     return null;
   },

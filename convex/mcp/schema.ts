@@ -45,7 +45,31 @@ export const mcpTables = {
     // only ever be a subset of what an unregistered one could ask for.
     redirectUris: v.array(v.string()),
     createdAt: v.number(),
-  }).index("by_clientId", ["clientId"]),
+
+    // --- confidential clients (minted by a user, not by DCR) ---------------
+    //
+    // Absent on every row RFC 7591 registration creates: those are PUBLIC
+    // clients, which is why the token endpoint advertises `none` alongside
+    // `client_secret_post`. Present means the client MUST prove itself at
+    // exchange, and `exchangeCode` refuses the swap without it — otherwise
+    // minting a secret would weaken the client rather than strengthen it,
+    // since anyone knowing the id could still redeem a code.
+    //
+    // sha256 of the secret. The raw value is shown once, at creation, and is
+    // not recoverable — same rule as an access token.
+    clientSecretHash: v.optional(v.string()),
+    // Who minted it. Only set for user-created clients; a DCR row belongs to
+    // nobody, which is what keeps it out of everyone's connections list.
+    ownerUserId: v.optional(v.id("users")),
+    // Shown in the UI so two rows are tellable apart. Required at creation.
+    label: v.optional(v.string()),
+    // Soft revoke, matching oauthAccessTokens: the row stays so "when did I
+    // turn this off?" is answerable, and every exchange re-checks it.
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_clientId", ["clientId"])
+    // For the connections screen: a user's own clients, newest first.
+    .index("by_owner", ["ownerUserId"]),
 
   // Per-IP bucket for the registration endpoint, which is unauthenticated by
   // definition — anyone who can reach it can insert a row. Kept separate from

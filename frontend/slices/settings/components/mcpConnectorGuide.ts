@@ -125,7 +125,7 @@ export function buildGuides(v: ConnectorValues): HostGuide[] {
               verdict: "pilih",
               value: "Dynamic Client Registration (DCR)",
               note:
-                "Server ini mendaftarkan klien secara dinamis, jadi tidak perlu Client ID sama sekali. Kalau opsinya tertulis “(Unavailable)”, berarti Registration URL gagal ditemukan — tempel nilainya di bagian 4, tutup dialognya, lalu buka lagi.",
+                "Server ini mendaftarkan klien secara dinamis, jadi tidak perlu Client ID sama sekali. Kalau opsinya tertulis “(Unavailable)”, berarti Registration URL gagal ditemukan — tempel nilainya di bagian 4, tutup dialognya, lalu buka lagi. Kalau tetap harus pakai “User-Defined OAuth Client”, buat pasangan Client ID + Secret di bagian API key pada kartu ini.",
             },
           ],
         },

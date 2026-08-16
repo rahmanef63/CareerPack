@@ -116,7 +116,11 @@ export const authorizationServerMetadata = httpAction(async (_ctx, request) => {
     // Public client, no secret. ChatGPT's "User-Defined OAuth Client" form
     // wants the Client Secret field left empty — this is the machine-readable
     // half of that instruction.
-    token_endpoint_auth_methods_supported: ["none"],
+    // `none` for the public clients RFC 7591 registration mints, and
+    // `client_secret_post` for the confidential ones a user creates by hand
+    // when a host insists on an id + secret pair. Advertising only `none`
+    // told a client the secret it was about to send would be ignored.
+    token_endpoint_auth_methods_supported: ["none", "client_secret_post"],
     scopes_supported: SCOPE_LIST,
   });
 });

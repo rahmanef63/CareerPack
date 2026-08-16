@@ -119,6 +119,42 @@ dari "model bilang datanya belum ada" jadi `McpError` di sisi klien. Ditambah
 tidak ada konsumen yang membacanya, dan 42 tool sisanya punya bentuk keluaran
 unik masing-masing.
 
+## API key — Client ID + Secret
+
+Sebagian besar host **tidak** membutuhkan ini. ChatGPT dengan *Dynamic Client
+Registration* dan Claude dengan Advanced settings kosong sama-sama mendaftarkan
+klien sendiri, dan itu lebih aman: yang tidak pernah disalin tidak bisa bocor.
+
+Yang butuh cuma satu kasus: opsi ketiga di dropdown *Registration method* milik
+ChatGPT — **User-Defined OAuth Client** — yang memaksa sepasang id + secret,
+plus klien mana pun yang hanya bisa `client_secret_post`. Sampai 2026-08-16
+server ini tidak bisa menyediakan keduanya: RFC 7591 hanya mencetak klien
+**publik**, tanpa secret, dan `register.ts` bahkan mencatat bahwa secret yang
+dikirim klien "tidak pernah kami periksa".
+
+Sekarang ada tiga fungsi di `convex/mcp/oauth.ts` — `createMyClient`,
+`listMyClients`, `revokeMyClient` — dan bagiannya di kartu Koneksi MCP.
+
+**Yang membuat secret ini berarti:** `exchangeCode` menolak penukaran kalau
+klien punya `clientSecretHash` tapi permintaannya tidak membawa secret. Sifat
+"wajib" itu dibaca dari **baris klien yang terdaftar**, bukan dari apa yang
+dikirim pemanggil — kalau tidak, secret jadi opsional dalam praktik, dan
+`client_id` bukan rahasia: dia ikut lewat di URL authorize.
+
+| Perilaku | Alasan |
+|---|---|
+| Secret hanya ditampilkan **sekali**, saat dibuat | yang disimpan cuma sha256-nya; layar yang bisa menampilkannya lagi berarti database menyimpannya polos |
+| Klien DCR tetap jalan **tanpa** secret | mereka publik menurut desain; mewajibkan secret akan merusak jalur yang justru dianjurkan |
+| `redirectUris` kosong untuk klien buatan pengguna | URL callback host belum diketahui saat dibuat, jadi klien ini tunduk pada allowlist host. **Kosong berarti "tidak dipersempit", bukan "tolak semua"** — itu perbedaan satu baris `length > 0` yang kalau salah membuat setiap penukaran gagal |
+| Cabut = `revokedAt`, bukan hapus | supaya "kapan saya matikan?" tetap bisa dijawab; `exchangeCode` memeriksanya tiap kali |
+
+Discovery ikut berubah: `token_endpoint_auth_methods_supported` sekarang
+`["none", "client_secret_post"]`. Mengumumkan `none` saja berarti memberi tahu
+klien bahwa secret yang akan dikirimnya diabaikan.
+
+Sepuluh tes di `convex/mcp/confidentialClient.test.ts`, termasuk yang paling
+penting: **penukaran ditolak kalau secret-nya hilang.**
+
 ## Golden prompt
 
 `convex/mcp/goldenPrompts.test.ts` — 258 prompt (157 langsung, 74 tidak

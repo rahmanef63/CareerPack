@@ -91,12 +91,19 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  // `client_secret_post` — the only confidential-client method this server
+  // advertises. Forwarded when present and simply absent for a public client;
+  // whether it is REQUIRED is decided in exchangeCode from the registered
+  // client, never from what the caller chose to send.
+  const clientSecret = params.client_secret?.trim() || undefined;
+
   const client = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
   const result = await client.mutation(api.mcp.oauth.exchangeCode, {
     code,
     codeVerifier,
     redirectUri,
     clientId,
+    ...(clientSecret ? { clientSecret } : {}),
   });
 
   if (!result.ok) {

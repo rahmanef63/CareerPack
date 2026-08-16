@@ -202,7 +202,7 @@ Never hard-code the color elsewhere (**R2**).
 
 ## G6. Open a public profile for a user
 
-Convex-side contract (`convex/publicProfile.ts`):
+Convex-side contract (`convex/profile/queries.ts` + `convex/profile/mutations.ts`):
 - `getMyPublicProfile` returns the current user's settings
 - `updateMyPublicProfile` patches fields; mutations validate slug + URLs +
   control chars
@@ -503,7 +503,7 @@ Convex self-hosted ships with a built-in blob store — no S3, R2, or
 MinIO dependency. Files live on the Convex container's filesystem; the
 `files` table in `convex/schema.ts` stores only metadata.
 
-### Backend — `convex/files.ts`
+### Backend — `convex/files/`
 
 Five functions. All mutations guarded with `requireUser`; `getFileUrl`
 verifies tenant match and returns `null` for every failure
@@ -530,7 +530,7 @@ point, no drift possible.
 on mobile Canvas), 50 MB for PDFs. Enforced in:
 - `shared/lib/imageConvert.ts` — `MAX_CONVERT_BYTES`
 - `shared/hooks/useFileUpload.ts` — `validateFile`
-- `convex/files.ts` — `assertAllowedFile`
+- `convex/files/allowlist.ts` — `assertAllowedFile`
 
 Expanding any of these requires matching changes everywhere.
 
@@ -616,7 +616,7 @@ uploads by guessing storage ids.
 
 ### Avatar integration (reference wiring)
 
-`convex/users.ts` — `updateAvatar({ storageId })` verifies the file
+`convex/profile/mutations.ts` — `updateAvatar({ storageId })` verifies the file
 belongs to the caller (via `files.tenantId`), then patches
 `userProfiles.avatarStorageId`. `getCurrentUser` resolves the URL
 inline (`ctx.storage.getUrl`) and returns it as `avatarUrl` so the
