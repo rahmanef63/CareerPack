@@ -224,3 +224,39 @@ describe("resolveAI — nothing configured anywhere", () => {
     await expect(resolveAI(ctx, "fallback-model")).resolves.toBeNull();
   });
 });
+
+/* Callers with no browser session — the MCP server.
+ *
+ * `getAuthUserId` does not return null when the request carries something that
+ * is not a JWT: it THROWS. The MCP server authenticates with an opaque bearer,
+ * so every AI-backed tool died on that line before reading a single credential.
+ */
+describe("resolveAI — path 5: no session (MCP)", () => {
+  it("uses the caller-supplied userId and never reads the request identity", async () => {
+    getAuthUserId.mockRejectedValue(new Error("Could not parse JWT payload."));
+    const { ctx } = makeCtx({
+      user: { provider: "openai", model: "gpt-4o", apiKey: "sk-user", baseUrl: null },
+    });
+
+    const res = await resolveAI(ctx, "fallback-model", uid("u1"));
+
+    expect(res?.apiKey).toBe("sk-user");
+    expect(res?.source).toBe("user");
+    // Not merely unused — never called. Reading identity at all is the bug.
+    expect(getAuthUserId).not.toHaveBeenCalled();
+  });
+
+  it("degrades to the global key instead of throwing when identity is unreadable", async () => {
+    getAuthUserId.mockRejectedValue(new Error("Could not parse JWT payload."));
+    const { ctx } = makeCtx({
+      global: { provider: "groq", model: "llama-3.3-70b-versatile", apiKey: "sk-global", baseUrl: null },
+    });
+
+    // No override passed: a future MCP-reachable caller that forgets one gets
+    // a working global key, not an exception from the auth layer.
+    const res = await resolveAI(ctx, "fallback-model");
+
+    expect(res?.apiKey).toBe("sk-global");
+    expect(res?.source).toBe("global");
+  });
+});

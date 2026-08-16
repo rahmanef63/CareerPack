@@ -115,7 +115,7 @@ export const filesTools: ToolDef[] = [
   {
     name: "files_delete",
     description:
-      "Permanently delete one file — both the library entry and the stored bytes. This cannot be undone and the file cannot be re-created from anything CareerPack still holds; only call it when the user names that file and asks for it gone. It refuses, naming what it found, if the file is still used as a CV or profile photo, in a portfolio item, or as proof attached to a CV claim, because deleting it there would leave something broken the user cannot fix from here. Detaching it in the app first is the way through.",
+      "Permanently delete one file — both the library entry and the stored bytes. file_id comes from files_list. This cannot be undone and the file cannot be re-created from anything CareerPack still holds; only call it when the user names that file and asks for it gone. It refuses, naming what it found, if the file is still used as a CV or profile photo, in a portfolio item, or as proof attached to a CV claim, because deleting it there would leave something broken the user cannot fix from here. Detaching it in the app first is the way through.",
     inputSchema: {
       type: "object",
       properties: {

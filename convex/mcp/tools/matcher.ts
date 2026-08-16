@@ -318,7 +318,7 @@ export const matcherTools: ToolDef[] = [
   {
     name: "matcher_get_scan",
     description:
-      "Read one ATS scan in full: the five sub-scores (keyword coverage, hard skills, experience fit, section completeness, parseability), which keywords were matched and which are missing, formatting problems, and the recommendations. This is what turns a bare number into advice — use it whenever the user asks why a score is what it is or how to raise it. Costs nothing; the AI work was done when the scan ran. Returns null if no scan with that id belongs to the user.",
+      "Read one ATS scan in full — scan_id comes from matcher_list_scans, or from what matcher_scan_ats just returned: the five sub-scores (keyword coverage, hard skills, experience fit, section completeness, parseability), which keywords were matched and which are missing, formatting problems, and the recommendations. This is what turns a bare number into advice — use it whenever the user asks why a score is what it is or how to raise it. Costs nothing; the AI work was done when the scan ran. Returns null if no scan with that id belongs to the user.",
     inputSchema: {
       type: "object",
       properties: {

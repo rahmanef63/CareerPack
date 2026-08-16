@@ -271,7 +271,10 @@ async function scanCVImpl(
         source: "ai",
       };
     } else {
-      const cfg = await resolveAI(ctx, "gpt-4.1-nano");
+      // userId explicitly: this function is reached from the MCP server as
+      // well as the browser, and there it has no session to read an identity
+      // from. The user's own AI settings still apply either way.
+      const cfg = await resolveAI(ctx, "gpt-4.1-nano", userId);
       const aiResult = cfg
         ? await aiExtractKeywords(ctx, cfg, jdText, userId)
         : null;

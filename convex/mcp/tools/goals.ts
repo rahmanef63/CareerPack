@@ -159,7 +159,7 @@ export const goalsTools: ToolDef[] = [
   {
     name: "goals_delete",
     description:
-      "Permanently delete one goal and all of its milestones. There is no undo. A goal the user has given up on is usually better left in place — the record of what was attempted is the point — so only call this when they ask for that specific goal to be removed.",
+      "Permanently delete one goal and all of its milestones. goal_id comes from goals_list. There is no undo. A goal the user has given up on is usually better left in place — the record of what was attempted is the point — so only call this when they ask for that specific goal to be removed.",
     inputSchema: {
       type: "object",
       properties: {

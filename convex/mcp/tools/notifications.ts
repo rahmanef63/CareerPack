@@ -69,7 +69,7 @@ export const notificationsTools: ToolDef[] = [
   {
     name: "notifications_mark_read",
     description:
-      "Mark one notification as read. Use it after telling the user what a specific notification said, so the app's badge matches what they actually know about. Marking read only changes the badge — the notification stays in the inbox and can still be listed.",
+      "Mark one notification as read. notification_id comes from notifications_list. Use it after telling the user what a specific notification said, so the app's badge matches what they actually know about. Marking read only changes the badge — the notification stays in the inbox and can still be listed.",
     inputSchema: {
       type: "object",
       properties: {

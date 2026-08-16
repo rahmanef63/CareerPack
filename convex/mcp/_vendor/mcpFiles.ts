@@ -259,6 +259,12 @@ export type JsonSchema = Record<string, unknown>;
 
 const FILE_OBJECT: JsonSchema = {
   type: "object",
+  // The object itself is described, not only its members. A model reading the
+  // schema sees this line first, and without it the only clue that the HOST
+  // supplies this value — rather than the model inventing a URL or passing a
+  // CareerPack file_id — is buried in two sub-property descriptions.
+  description:
+    "A file the HOST is holding for the user (an upload in the conversation, or an image you generated). The host fills this in; do not construct it yourself and do not pass an id from files_list here.",
   properties: {
     download_url: { type: "string", description: "Temporary URL the server fetches the bytes from." },
     file_id: { type: "string", description: "Host-side identifier for the file." },

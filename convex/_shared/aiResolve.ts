@@ -1,4 +1,5 @@
 import type { ActionCtx } from "../_generated/server";
+import type { Id } from "../_generated/dataModel";
 import { internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { optionalEnv } from "./env";
@@ -31,12 +32,21 @@ export interface ResolvedAI {
  * than inside the internal queries: an action is the one place where doing
  * crypto on the way out is unambiguously fine, and the queries stay usable
  * by anything that only needs to know whether a key exists.
+ *
+ * `userIdOverride` is for callers with no browser session — today that means
+ * the MCP server, where the request carries an opaque bearer instead of a JWT.
+ * Without it `getAuthUserId` does not return null, it THROWS ("Could not parse
+ * JWT payload"), and `matcher_scan_ats` failed on every single call over MCP
+ * before the credentials were even looked at. The catch below is the second
+ * half of that fix: any future caller reached without a session degrades to
+ * the global/env key instead of exploding.
  */
 export async function resolveAI(
   ctx: ActionCtx,
   fallbackModel: string,
+  userIdOverride?: Id<"users">,
 ): Promise<ResolvedAI | null> {
-  const userId = await getAuthUserId(ctx);
+  const userId = userIdOverride ?? (await getAuthUserId(ctx).catch(() => null));
   if (userId) {
     const cfg = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
     if (cfg) {

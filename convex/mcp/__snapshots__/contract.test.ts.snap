@@ -1569,6 +1569,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
         },
         "file": {
           "additionalProperties": false,
+          "description": "A file the HOST is holding for the user (an upload in the conversation, or an image you generated). The host fills this in; do not construct it yourself and do not pass an id from files_list here.",
           "properties": {
             "download_url": {
               "description": "Temporary URL the server fetches the bytes from.",
@@ -1957,7 +1958,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "readOnlyHint": false,
       "title": "Finish interview session",
     },
-    "description": "Close a session with an overall 0-100 score and a summary of how the user did. Call it once, after the last answer is saved — this is what makes the session count as completed in the dashboard's average-score and practice-time stats. The elapsed time is measured from when the session was opened, so do not try to supply it. Write the summary in the language the interview was held in.",
+    "description": "Close a session with an overall 0-100 score and a summary of how the user did. interview_id is the one mock_interview_start returned. Call it once, after the last answer is saved — this is what makes the session count as completed in the dashboard's average-score and practice-time stats. The elapsed time is measured from when the session was opened, so do not try to supply it. Write the summary in the language the interview was held in.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
@@ -1999,7 +2000,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "readOnlyHint": false,
       "title": "Delete interview session",
     },
-    "description": "Permanently delete one practice session and every answer in it. There is no undo and no export first. Only call it when the user asked for that specific session to be removed; to hide a bad result from an average, tell them the score instead.",
+    "description": "Permanently delete one practice session and every answer in it. interview_id comes from mock_interview_list. There is no undo and no export first. Only call it when the user asked for that specific session to be removed; to hide a bad result from an average, tell them the score instead.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
@@ -2378,7 +2379,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "readOnlyHint": false,
       "title": "Delete career goal",
     },
-    "description": "Permanently delete one goal and all of its milestones. There is no undo. A goal the user has given up on is usually better left in place — the record of what was attempted is the point — so only call this when they ask for that specific goal to be removed.",
+    "description": "Permanently delete one goal and all of its milestones. goal_id comes from goals_list. There is no undo. A goal the user has given up on is usually better left in place — the record of what was attempted is the point — so only call this when they ask for that specific goal to be removed.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
@@ -2727,7 +2728,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "readOnlyHint": true,
       "title": "Get ATS scan",
     },
-    "description": "Read one ATS scan in full: the five sub-scores (keyword coverage, hard skills, experience fit, section completeness, parseability), which keywords were matched and which are missing, formatting problems, and the recommendations. This is what turns a bare number into advice — use it whenever the user asks why a score is what it is or how to raise it. Costs nothing; the AI work was done when the scan ran. Returns null if no scan with that id belongs to the user.",
+    "description": "Read one ATS scan in full — scan_id comes from matcher_list_scans, or from what matcher_scan_ats just returned: the five sub-scores (keyword coverage, hard skills, experience fit, section completeness, parseability), which keywords were matched and which are missing, formatting problems, and the recommendations. This is what turns a bare number into advice — use it whenever the user asks why a score is what it is or how to raise it. Costs nothing; the AI work was done when the scan ran. Returns null if no scan with that id belongs to the user.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
@@ -2830,7 +2831,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "readOnlyHint": false,
       "title": "Delete file",
     },
-    "description": "Permanently delete one file — both the library entry and the stored bytes. This cannot be undone and the file cannot be re-created from anything CareerPack still holds; only call it when the user names that file and asks for it gone. It refuses, naming what it found, if the file is still used as a CV or profile photo, in a portfolio item, or as proof attached to a CV claim, because deleting it there would leave something broken the user cannot fix from here. Detaching it in the app first is the way through.",
+    "description": "Permanently delete one file — both the library entry and the stored bytes. file_id comes from files_list. This cannot be undone and the file cannot be re-created from anything CareerPack still holds; only call it when the user names that file and asks for it gone. It refuses, naming what it found, if the file is still used as a CV or profile photo, in a portfolio item, or as proof attached to a CV claim, because deleting it there would leave something broken the user cannot fix from here. Detaching it in the app first is the way through.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
@@ -2998,7 +2999,7 @@ exports[`tools/list snapshot > matches the committed contract 1`] = `
       "readOnlyHint": false,
       "title": "Mark notification read",
     },
-    "description": "Mark one notification as read. Use it after telling the user what a specific notification said, so the app's badge matches what they actually know about. Marking read only changes the badge — the notification stays in the inbox and can still be listed.",
+    "description": "Mark one notification as read. notification_id comes from notifications_list. Use it after telling the user what a specific notification said, so the app's badge matches what they actually know about. Marking read only changes the badge — the notification stays in the inbox and can still be listed.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {

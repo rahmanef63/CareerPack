@@ -127,3 +127,65 @@ describe("OpenAI file params", () => {
     for (const t of RESOLVED_TOOLS) walk(t.inputSchema, t.name);
   });
 });
+
+/* Per-tool prompt context.
+ *
+ * The server-level `instructions` say what CareerPack is; these say what one
+ * tool is for. A model meets a tool as a name plus this text and nothing else,
+ * so an undescribed argument or an id with no stated source is a guess waiting
+ * to happen — and both are invisible in review, because a tool with a thin
+ * description works perfectly in every test that calls it with correct args.
+ */
+describe("every tool carries its own prompt context", () => {
+  // RESOLVED_TOOLS, not toolDescriptors(): same catalog, but typed, so these
+  // read annotations without casting through `unknown`.
+  const tools = RESOLVED_TOOLS;
+
+  it("describes what it is for, at more than a label's worth of length", () => {
+    const thin = tools
+      .map((t) => [t.name, t.description.trim().length] as const)
+      .filter(([, len]) => len < 120);
+    expect(thin).toEqual([]);
+  });
+
+  it("describes every argument, including object-typed ones", () => {
+    const undocumented: string[] = [];
+    for (const t of tools) {
+      const props = (t.inputSchema.properties ?? {}) as Record<string, { description?: string }>;
+      for (const [key, spec] of Object.entries(props)) {
+        if (!spec?.description?.trim()) undocumented.push(`${t.name}.${key}`);
+      }
+    }
+    expect(undocumented).toEqual([]);
+  });
+
+  it("says where a required id comes from, by naming the tool that returns it", () => {
+    const names = new Set(tools.map((t) => t.name));
+    const orphans: string[] = [];
+    for (const t of tools) {
+      const required = ((t.inputSchema.required ?? []) as string[]).filter((k) => k.endsWith("_id"));
+      if (required.length === 0) continue;
+      // Ids are opaque Convex row ids. A model that cannot see which tool
+      // hands one out will invent one, and the call fails as "not found" —
+      // which reads like the user's data is missing rather than like a bad id.
+      const cites = [...names].some((other) => other !== t.name && t.description.includes(other));
+      if (!cites) orphans.push(t.name);
+    }
+    expect(orphans).toEqual([]);
+  });
+
+  it("warns about the consequence on anything destructive", () => {
+    const unwarned = tools
+      .filter((t) => t.annotations.destructiveHint)
+      .filter((t) => !/perman|undo|irreversib|cannot be|replace|confirm|no version/i.test(t.description))
+      .map((t) => t.name);
+    expect(unwarned).toEqual([]);
+  });
+
+  it("gives every tool a human title and an explicit readOnlyHint", () => {
+    expect(tools.filter((t) => !t.annotations.title?.trim()).map((t) => t.name)).toEqual([]);
+    expect(
+      tools.filter((t) => typeof t.annotations.readOnlyHint !== "boolean").map((t) => t.name),
+    ).toEqual([]);
+  });
+});

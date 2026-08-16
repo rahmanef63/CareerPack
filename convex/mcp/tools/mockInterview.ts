@@ -253,7 +253,7 @@ export const mockInterviewTools: ToolDef[] = [
   {
     name: "mock_interview_finish",
     description:
-      "Close a session with an overall 0-100 score and a summary of how the user did. Call it once, after the last answer is saved — this is what makes the session count as completed in the dashboard's average-score and practice-time stats. The elapsed time is measured from when the session was opened, so do not try to supply it. Write the summary in the language the interview was held in.",
+      "Close a session with an overall 0-100 score and a summary of how the user did. interview_id is the one mock_interview_start returned. Call it once, after the last answer is saved — this is what makes the session count as completed in the dashboard's average-score and practice-time stats. The elapsed time is measured from when the session was opened, so do not try to supply it. Write the summary in the language the interview was held in.",
     inputSchema: {
       type: "object",
       properties: {
@@ -293,7 +293,7 @@ export const mockInterviewTools: ToolDef[] = [
   {
     name: "mock_interview_delete",
     description:
-      "Permanently delete one practice session and every answer in it. There is no undo and no export first. Only call it when the user asked for that specific session to be removed; to hide a bad result from an average, tell them the score instead.",
+      "Permanently delete one practice session and every answer in it. interview_id comes from mock_interview_list. There is no undo and no export first. Only call it when the user asked for that specific session to be removed; to hide a bad result from an average, tell them the score instead.",
     inputSchema: {
       type: "object",
       properties: {
