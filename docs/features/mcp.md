@@ -209,6 +209,25 @@ ada di membaca diff itu; tim yang refleks regenerate tidak dapat apa-apa.
 `financial`, `notifications`, `profile`, `cv`, `contacts`, `mockInterview`,
 `matcher`, `files`, `portfolio`, `branding`.
 
+## Base prompt — `instructions` di `initialize`
+
+`convex/mcp/instructions.ts` → `SERVER_INSTRUCTIONS`, dikembalikan di hasil
+`initialize`. Host (ChatGPT, Claude, Cursor) menaruhnya di depan model sebelum
+tool call pertama. Ini satu-satunya kanal yang bisa menjelaskan **server**-nya,
+bukan satu tool: model kalau tidak ada ini cuma ketemu 74 nama tool datar dan
+menebak — tidak tahu ada job matcher, tidak tahu semua tool terikat ke satu
+orang, tidak tahu user-nya berbahasa Indonesia.
+
+Isinya sengaja orientasi saja, satu baris per domain: apa gunanya + alur yang
+tidak bisa ditebak dari nama tool (mis. upload file dua langkah, mock interview
+start → answer → finish, halaman branding pakai marker bukan nilai literal).
+Argumen, enum, dan default tetap milik deskripsi per tool — menyalinnya ke sini
+cuma bikin dua salinan yang bakal geser.
+
+`jsonrpc.test.ts` memaku dua hal: `instructions` ada, dan **setiap domain tool
+disebut di dalamnya**. Menambah domain baru tanpa menyebutnya di brief =
+domain yang tidak akan pernah kepikiran dipakai model, dan test-nya merah.
+
 ## Halaman branding publik
 
 Lima tool untuk halaman publik di `careerpack.org/<slug>`

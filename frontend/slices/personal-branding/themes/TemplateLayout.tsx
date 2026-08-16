@@ -7,6 +7,7 @@ import {
   type ShowMoreList,
 } from "../components/BrandingShowMoreDialog";
 import { injectBrandingIntoHtml } from "./inject";
+import { SANDBOX_CUSTOM, SANDBOX_TEMPLATE } from "./sandbox";
 import {
   type BrandingPayload, type FloatingNavItem,
   VALID_SHOW_MORE_LISTS,
@@ -16,7 +17,7 @@ import { FloatingMobileNav } from "./FloatingMobileNav";
 
 /** In-memory cache shared across re-mounts so switching templates
  *  doesn't re-fetch ones already seen this session. Keyed by stable
- *  template id (v1/v2/v3/manual). */
+ *  template id (v1/v2/v3/starter). */
 const TEMPLATE_HTML_CACHE = new Map<string, string>();
 
 interface Props {
@@ -129,7 +130,20 @@ export function TemplateLayout({
         return;
       }
       if (data.type === "cp-floating-nav" && Array.isArray(data.items)) {
-        setFloatingNavItems(data.items.slice(0, 6));
+        // `iconHtml` is the only thing crossing this boundary that ends up in
+        // the MAIN origin's DOM (FloatingMobileNav renders it with
+        // dangerouslySetInnerHTML behind an SVG allowlist). That was written
+        // when the frame could only ever contain one of our own template
+        // files. A custom document is written by whoever owns the page — or
+        // by an AI host acting for them — so it does not get to hand us
+        // markup at all: labels are plain text React escapes, and the nav
+        // falls back to a blank icon slot.
+        const untrusted = templateHtml !== undefined;
+        setFloatingNavItems(
+          data.items
+            .slice(0, 6)
+            .map((item) => (untrusted ? { ...item, iconHtml: "" } : item)),
+        );
         return;
       }
       if (data.type === "cp-anchor-y" && typeof data.y === "number") {
@@ -144,7 +158,7 @@ export function TemplateLayout({
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [templateHtml]);
 
   // Reset height + floating-nav ONLY on an actual template swap — not on
   // every branding keystroke (that nulled the height and collapsed the
@@ -190,16 +204,8 @@ export function TemplateLayout({
           srcDoc={hydratedHtml}
           title={`Template ${templateKey} untuk ${displayName}`}
           loading="eager"
-          // Built-in templates get the historical flag set. A user-authored
-          // document gets less: no `allow-forms` (a credential form served
-          // from careerpack.org/<slug> is the one abuse the sandbox does not
-          // already prevent) and no escape hatch for popups. Neither flag is
-          // used by anything the hydrator does. `allow-same-origin` is absent
-          // in both cases — that is what keeps the frame off our origin.
           sandbox={
-            templateHtml !== undefined
-              ? "allow-scripts allow-popups"
-              : "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
+            templateHtml !== undefined ? SANDBOX_CUSTOM : SANDBOX_TEMPLATE
           }
           className="block w-full border-0 bg-background"
           style={{

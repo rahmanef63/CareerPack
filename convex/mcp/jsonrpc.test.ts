@@ -6,7 +6,7 @@ import {
   SCOPE,
   type McpAuth,
 } from "./types";
-import { TOOLS } from "./tools";
+import { RESOLVED_TOOLS, TOOLS } from "./tools";
 import type { ActionCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 
@@ -40,18 +40,37 @@ describe("dispatchJsonRpc", () => {
       id: 1,
       method: "initialize",
     });
-    expect(res).toEqual({
-      jsonrpc: "2.0",
-      id: 1,
-      result: {
-        // A literal, not MCP_PROTOCOL_VERSION. Asserting the constant against
-        // itself is a tautology that passes through any version change — which
-        // is exactly the change most likely to break a host.
-        protocolVersion: "2025-06-18",
-        capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "careerpack", version: "1.0.0" },
-      },
+    const result = res?.result as Record<string, unknown>;
+    expect({ ...result, instructions: undefined }).toEqual({
+      // A literal, not MCP_PROTOCOL_VERSION. Asserting the constant against
+      // itself is a tautology that passes through any version change — which
+      // is exactly the change most likely to break a host.
+      protocolVersion: "2025-06-18",
+      capabilities: { tools: { listChanged: false } },
+      serverInfo: { name: "careerpack", version: "1.0.0" },
+      instructions: undefined,
     });
+  });
+
+  it("ships server instructions, and they cover every tool domain", async () => {
+    // The host puts `instructions` in front of the model before any tool call.
+    // It is the only place that can say what this server IS — drop it and a
+    // model meets 74 flat tool names with no idea there is a job matcher, or
+    // that every one of them is scoped to a single person. A domain missing
+    // from it is a domain the model will not think to reach for.
+    const res = await dispatchJsonRpc(NO_CTX, OAUTH, { id: 1, method: "initialize" });
+    const text = (res?.result as { instructions?: string }).instructions ?? "";
+    expect(text.length).toBeGreaterThan(500);
+    const domains = new Set(
+      RESOLVED_TOOLS.map((t) => t.name.split("_")[0]).map((d) =>
+        // budget_* and financial_plan_get are one domain; mock_interview_* is
+        // one word split by the prefix rule.
+        d === "budget" ? "financial" : d === "mock" ? "mock_interview" : d,
+      ),
+    );
+    expect(
+      [...domains].filter((d) => !text.toLowerCase().includes(d)),
+    ).toEqual([]);
   });
 
   it("defaults to the newest revision it implements", () => {

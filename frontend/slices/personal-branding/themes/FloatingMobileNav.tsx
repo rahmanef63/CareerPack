@@ -2,13 +2,18 @@ import { useMemo } from "react";
 import type { FloatingNavItem } from "./types";
 
 /**
- * SVG sanitisation allowlist. `iconHtml` arrives via postMessage from
- * the sandboxed template iframe (origin "null") and is rendered here on
- * the MAIN app origin via dangerouslySetInnerHTML — so it MUST be
- * scrubbed even though shipped templates only emit static developer
- * SVGs. We keep a minimal set of inline-SVG elements + presentational
- * attributes and drop everything else (scripts, event handlers, foreign
- * tags, url()/javascript: refs).
+ * SVG sanitisation allowlist. `iconHtml` arrives via postMessage from the
+ * sandboxed template iframe (origin "null") and is rendered here on the MAIN
+ * app origin via dangerouslySetInnerHTML — so it MUST be scrubbed even though
+ * shipped templates only emit static developer SVGs. We keep a minimal set of
+ * inline-SVG elements + presentational attributes and drop everything else
+ * (scripts, event handlers, foreign tags, url()/javascript: refs).
+ *
+ * `class` was in this list and is not any more: nothing needs it (the wrapper
+ * sizes the icon), and it let frame markup pull app utility classes into the
+ * chrome — `fixed inset-0` on an icon is an invisible full-viewport overlay.
+ * TemplateLayout also blanks `iconHtml` outright for user-authored documents,
+ * so in practice this only ever sees our own template files now.
  */
 const ALLOWED_SVG_TAGS = new Set([
   "svg",
@@ -31,7 +36,6 @@ const ALLOWED_SVG_ATTRS = new Set([
   "stroke-linejoin",
   "d",
   "aria-hidden",
-  "class",
   // Geometry primitives used by the allowed shape elements above.
   "cx",
   "cy",

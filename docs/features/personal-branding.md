@@ -326,10 +326,28 @@ ubah dua-duanya — kalau tidak, preview dan halaman live jadi beda.
 
 ## Catatan Desain — model keamanan
 
-- **Iframe sandbox.** `TemplateLayout` merender `srcDoc` dengan
-  `sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"`
-  — **tanpa `allow-same-origin`**. Isinya hidup di origin opaque: tidak bisa
-  menyentuh DOM aplikasi, cookie, atau sesi Convex.
+- **Iframe sandbox** — dua policy, di `themes/sandbox.ts` (dipisah dari
+  komponen supaya bisa di-assert; lihat `sandbox.test.ts`):
+  - template bawaan: `allow-scripts allow-popups allow-popups-to-escape-sandbox
+    allow-forms`
+  - dokumen user (`publicHtml`): sama, **minus `allow-forms`** — form login
+    palsu di `careerpack.org/<slug>` satu-satunya penyalahgunaan yang tidak
+    sudah dimatikan lapisan lain. `allow-popups-to-escape-sandbox` tetap ada,
+    kalau dicabut semua link keluar user membuka tab origin-opaque yang rusak.
+
+  Dua-duanya **tanpa `allow-same-origin`** dan tanpa `allow-top-navigation`.
+  Diverifikasi dengan Chrome asli, dokumen penyerang di sandbox yang sama
+  (2026-08-16):
+
+  | Percobaan | Hasil |
+  |---|---|
+  | tulis DOM parent | `SecurityError` |
+  | baca `top.document` / cookie aplikasi | `SecurityError` |
+  | `document.cookie` sendiri | `SecurityError` |
+  | `localStorage` (sesi Convex) | `SecurityError` |
+  | redirect top frame ke situs lain | diblokir browser |
+  | submit form ke host luar | diblokir browser (`allow-forms` dicabut) |
+  | `fetch` ke host luar | diblokir CSP `connect-src` di produksi |
 - **`publicHtml` sengaja tidak disanitasi.** Alasannya ada di
   `convex/profile/publicHtml.ts`: menyaring tag justru merusak template bawaan
   (yang butuh inline script-nya sendiri) sambil tidak membeli apa pun yang belum
@@ -357,8 +375,19 @@ ubah dua-duanya — kalau tidak, preview dan halaman live jadi beda.
   meta-CSP hanya bisa memperketat — itulah kenapa Google Fonts dan
   `images.unsplash.com` diizinkan global di `next.config.ts`.
 - **`FloatingMobileNav`** merender `iconHtml` yang datang dari iframe lewat
-  `dangerouslySetInnerHTML` **di origin aplikasi**, jadi SVG-nya disaring
-  allowlist tag/atribut di komponen itu. Jangan longgarkan.
+  `dangerouslySetInnerHTML` **di origin aplikasi**. Satu-satunya markup yang
+  menyeberang batas itu. `TemplateLayout` sekarang mengosongkan `iconHtml`
+  untuk dokumen user, jadi yang lewat cuma file template kita sendiri; allowlist
+  tag/atribut di komponen itu tinggal lapis kedua (`class` sudah dicabut dari
+  allowlist — `fixed inset-0` di sebuah ikon = overlay satu layar). Jangan
+  longgarkan keduanya.
+- **Batas yang diketahui.** `connect-src`/`img-src` aplikasi mengizinkan
+  `https://*.convex.cloud` dan `https://*.convex.site` (wildcard untuk deploy
+  origin yang berubah-ubah). Artinya script di halaman kustom bisa beacon ke
+  proyek Convex mana pun — bukan data user lain (tidak ada yang bisa dibaca dari
+  origin opaque), tapi cukup untuk menghitung pengunjung. Menyempitkannya ke
+  origin yang sudah di-resolve adalah perubahan CSP tingkat aplikasi, bukan
+  fitur ini.
 
 ## Known gaps
 

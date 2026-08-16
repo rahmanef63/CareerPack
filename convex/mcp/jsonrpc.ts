@@ -8,6 +8,7 @@ import {
   negotiateProtocolVersion,
   satisfiesScope,
 } from "./types";
+import { SERVER_INSTRUCTIONS } from "./instructions";
 import { TOOL_BY_NAME, toolDescriptors } from "./tools";
 
 /**
@@ -96,6 +97,10 @@ export async function dispatchJsonRpc(
         ),
         capabilities: { tools: { listChanged: false } },
         serverInfo: SERVER_INFO,
+        // The host puts this in front of the model before the first tool
+        // call. It is the only channel that can describe the SERVER rather
+        // than one tool — see convex/mcp/instructions.ts.
+        instructions: SERVER_INSTRUCTIONS,
       });
 
     case "ping":
