@@ -71,6 +71,22 @@ export const _cascadeDeleteDemoUser = internalMutation({
  * - `passwordResetTokens`   — `used` rows or expired rows are
  *                             immediately safe to drop. Active unused
  *                             tokens kept.
+ * - `oauthCodes`            — consumed or expired. Exchange marks a code
+ *                             `consumed: true` rather than deleting it, and
+ *                             nothing deleted it afterwards, so until
+ *                             2026-08-16 EVERY authorization code ever
+ *                             minted was still on disk — one row per
+ *                             successful connection plus one per abandoned
+ *                             consent, each carrying a codeHash, PKCE
+ *                             challenge, redirect, scope and userId. TTL is
+ *                             minutes, so anything expired is dead.
+ * - `oauthAccessTokens`     — expired more than 30 days ago. Deliberately
+ *                             NOT revoked-but-unexpired: a revoked row is
+ *                             kept on purpose so "when did I cut this off?"
+ *                             stays answerable. The grace window is so a
+ *                             user asking why their connector stopped
+ *                             working can still be shown the token that
+ *                             lapsed.
  *
  * All capped at PRUNE_BATCH_MAX deletes per run so the cron tick
  * always finishes within Convex's mutation budget. Pruner re-runs
@@ -90,6 +106,8 @@ export const pruneAppendOnlyTables = internalMutation({
       passwordResetTokens: 0,
       pageviewRateLimits: 0,
       pageviews: 0,
+      oauthCodes: 0,
+      oauthAccessTokens: 0,
     };
 
     // errorLogs > 90 days — uses by_time index for cheap range query.
@@ -198,6 +216,36 @@ export const pruneAppendOnlyTables = internalMutation({
         .take(PRUNE_BATCH_MAX);
       for (const r of stale) await ctx.db.delete(r._id);
       stats.pageviews = stale.length;
+    }
+
+    // oauthCodes — consumed or expired. Only `by_code` exists (the exchange
+    // looks a code up by its hash), so there is no range index to scan; take
+    // a slice and filter, same shape as passwordResetTokens above. A code's
+    // TTL is minutes, so `expiresAt < now` alone would be enough — `consumed`
+    // is included because that is the flag the exchange actually sets, and a
+    // consumed code is dead the instant it is redeemed.
+    {
+      const stale = (
+        await ctx.db.query("oauthCodes").take(PRUNE_BATCH_MAX * 2)
+      ).filter((c) => c.consumed || c.expiresAt < now);
+      const batch = stale.slice(0, PRUNE_BATCH_MAX);
+      for (const r of batch) await ctx.db.delete(r._id);
+      stats.oauthCodes = batch.length;
+    }
+
+    // oauthAccessTokens expired > 30 days. Revoked-but-unexpired rows are
+    // KEPT: `revokedAt` is a soft revoke on purpose (convex/mcp/schema.ts) so
+    // the connections list can still show what was cut off and when. Only the
+    // lapsed ones go, and only after a month, so "my connector stopped
+    // working" is still answerable from the row that lapsed.
+    {
+      const cutoff = now - 30 * DAY;
+      const stale = (
+        await ctx.db.query("oauthAccessTokens").take(PRUNE_BATCH_MAX * 2)
+      ).filter((t) => t.expiresAt < cutoff);
+      const batch = stale.slice(0, PRUNE_BATCH_MAX);
+      for (const r of batch) await ctx.db.delete(r._id);
+      stats.oauthAccessTokens = batch.length;
     }
 
     return stats;

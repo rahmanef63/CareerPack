@@ -1,4 +1,5 @@
-import { internalMutation } from "../_generated/server";
+import { v } from "convex/values";
+import { internalMutation, type MutationCtx } from "../_generated/server";
 import type { Doc } from "../_generated/dataModel";
 
 /**
@@ -43,9 +44,63 @@ function topCounts(values: Iterable<string | null | undefined>, n: number): Coun
     .slice(0, n);
 }
 
+/**
+ * Rows read in one run before we start warning. Sixteen full-table scans share
+ * a single Convex transaction, and a transaction has a ceiling on documents
+ * read — so this job has a size at which it stops working, and every new user
+ * moves it closer.
+ *
+ * The number below is a deliberately early tripwire, not the platform limit:
+ * the point is to hear about it while there is still room, rather than to
+ * predict the exact row on which Convex gives up.
+ *
+ * ponytail: warn, don't cap. `.take(N)` would keep the job alive by reading
+ * part of each table — and `featureAdoption` divides one table's row count by
+ * another's, so a partial read does not produce a smaller number, it produces
+ * a WRONG one, silently, on a dashboard whose entire job is to be trusted. A
+ * loud failure with yesterday's correct figures beats a quiet success with
+ * today's invented ones. The real fix when this trips is incremental counters
+ * maintained on write, which is a bigger change than it deserves today.
+ */
+const READ_WARN_AT = 25_000;
+
 export const recomputeAdminStats = internalMutation({
   args: {},
+  returns: v.object({
+    ok: v.boolean(),
+    action: v.union(
+      v.literal("patched"),
+      v.literal("inserted"),
+      v.literal("failed"),
+    ),
+    computedAt: v.union(v.number(), v.null()),
+  }),
   handler: async (ctx) => {
+    // A cron that throws is invisible: Convex logs it, nobody reads Convex
+    // logs, and the dashboard keeps rendering its last good `adminStats` doc
+    // with no hint that the number is frozen. Catching lets us write the
+    // failure somewhere a human already looks — `errorLogs`, which this very
+    // dashboard surfaces through `topErrorSources`.
+    try {
+      return await compute(ctx);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Deliberately NOT rethrown. A mutation is one transaction, so a rethrow
+      // would roll this insert back and we would be exactly as blind as
+      // before. `adminStats` is left untouched, so the dashboard keeps its
+      // last correct figures rather than gaining partial ones.
+      await ctx.db.insert("errorLogs", {
+        source: "admin.aggregator",
+        message: `recomputeAdminStats failed, admin stats are now STALE: ${message}`.slice(0, 4000),
+        timestamp: Date.now(),
+      });
+      return { ok: false as const, action: "failed" as const, computedAt: null };
+    }
+  },
+});
+
+async function compute(ctx: MutationCtx) {
+  {
     const now = Date.now();
     const cutoff = now - THIRTY_DAYS_MS;
 
@@ -285,15 +340,37 @@ export const recomputeAdminStats = internalMutation({
       signupTrend30d,
     };
 
+    // Every full-table scan above, totalled. This is the number that decides
+    // whether the job survives, so say it out loud before it stops working
+    // rather than after — see READ_WARN_AT.
+    const docsRead =
+      users.length + cvs.length + applications.length + rateEvents.length +
+      errorLogs.length + profiles.length + files.length + checklists.length +
+      roadmaps.length + interviews.length + plans.length + goals.length +
+      budgetVars.length + portfolios.length + contacts.length + chatRows.length;
+
+    if (docsRead >= READ_WARN_AT) {
+      await ctx.db.insert("errorLogs", {
+        source: "admin.aggregator",
+        message:
+          `recomputeAdminStats read ${docsRead} documents in one transaction ` +
+          `(warn threshold ${READ_WARN_AT}). It scans sixteen tables in full, so ` +
+          `it will eventually exceed Convex's per-transaction read limit and the ` +
+          `dashboard will silently freeze. Fix: maintain counters incrementally ` +
+          `on write instead of recounting here.`,
+        timestamp: now,
+      });
+    }
+
     const existing = await ctx.db
       .query("adminStats")
       .withIndex("by_key", (q) => q.eq("key", "global"))
       .first();
     if (existing) {
       await ctx.db.patch(existing._id, payload);
-      return { ok: true as const, action: "patched", computedAt: now };
+      return { ok: true as const, action: "patched" as const, computedAt: now };
     }
     await ctx.db.insert("adminStats", payload);
-    return { ok: true as const, action: "inserted", computedAt: now };
-  },
-});
+    return { ok: true as const, action: "inserted" as const, computedAt: now };
+  }
+}

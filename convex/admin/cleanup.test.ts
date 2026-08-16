@@ -179,3 +179,98 @@ describe("pruneOrphanStorage", () => {
     expect((await counts(t)).profileAvatar).toBe(live);
   });
 });
+
+describe("pruneAppendOnlyTables — OAuth tables", () => {
+  const HOUR = 60 * 60 * 1000;
+  const DAY = 24 * HOUR;
+
+  const code = (over: Partial<{ consumed: boolean; expiresAt: number }>) => ({
+    code: `c-${Math.random().toString(36).slice(2)}`,
+    codeChallenge: "chal",
+    codeChallengeMethod: "S256",
+    redirectUri: "https://example.com/cb",
+    clientId: "client-1",
+    scope: "mcp.read",
+    expiresAt: Date.now() + 5 * 60_000,
+    consumed: false,
+    createdAt: Date.now(),
+    ...over,
+  });
+
+  const token = (over: Partial<{ expiresAt: number; revokedAt: number }>) => ({
+    token: `t-${Math.random().toString(36).slice(2)}`,
+    clientId: "client-1",
+    scope: "mcp.read",
+    expiresAt: Date.now() + 365 * DAY,
+    createdAt: Date.now(),
+    ...over,
+  });
+
+  it("drops consumed and expired codes, keeps a live one", async () => {
+    // Until 2026-08-16 nothing ever deleted an oauthCode: the exchange sets
+    // `consumed: true` and moves on, so one row survived every successful
+    // connection AND every abandoned consent, forever.
+    const t: Tester = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) => ctx.db.insert("users", {}));
+    await t.run(async (ctx) => {
+      await ctx.db.insert("oauthCodes", { ...code({ consumed: true }), userId });
+      await ctx.db.insert("oauthCodes", {
+        ...code({ expiresAt: Date.now() - HOUR }),
+        userId,
+      });
+      await ctx.db.insert("oauthCodes", { ...code({}), userId });
+    });
+
+    const stats = await t.mutation(internal.admin.cleanup.pruneAppendOnlyTables, {});
+    expect(stats.oauthCodes).toBe(2);
+
+    const left = await t.run(async (ctx) => ctx.db.query("oauthCodes").collect());
+    expect(left).toHaveLength(1);
+    expect(left[0]!.consumed).toBe(false);
+    expect(left[0]!.expiresAt).toBeGreaterThan(Date.now());
+  });
+
+  it("drops long-expired tokens but KEEPS a revoked one that has not lapsed", async () => {
+    // `revokedAt` is a soft revoke on purpose — the connections list has to be
+    // able to show what was cut off and when. Pruning on revocation would
+    // delete the audit trail the field exists to provide.
+    const t: Tester = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) => ctx.db.insert("users", {}));
+    await t.run(async (ctx) => {
+      await ctx.db.insert("oauthAccessTokens", {
+        ...token({ expiresAt: Date.now() - 40 * DAY }),
+        userId,
+      });
+      await ctx.db.insert("oauthAccessTokens", {
+        ...token({ revokedAt: Date.now() - HOUR }),
+        userId,
+      });
+      await ctx.db.insert("oauthAccessTokens", { ...token({}), userId });
+    });
+
+    const stats = await t.mutation(internal.admin.cleanup.pruneAppendOnlyTables, {});
+    expect(stats.oauthAccessTokens).toBe(1);
+
+    const left = await t.run(async (ctx) =>
+      ctx.db.query("oauthAccessTokens").collect(),
+    );
+    expect(left).toHaveLength(2);
+    expect(left.some((r) => r.revokedAt !== undefined)).toBe(true);
+  });
+
+  it("keeps a token inside the 30-day grace window after it lapses", async () => {
+    // So "why did my connector stop working?" is still answerable from the
+    // row that lapsed, rather than from nothing.
+    const t: Tester = convexTest(schema, modules);
+    const userId = await t.run(async (ctx) => ctx.db.insert("users", {}));
+    await t.run(async (ctx) => {
+      await ctx.db.insert("oauthAccessTokens", {
+        ...token({ expiresAt: Date.now() - 2 * DAY }),
+        userId,
+      });
+    });
+
+    const stats = await t.mutation(internal.admin.cleanup.pruneAppendOnlyTables, {});
+    expect(stats.oauthAccessTokens).toBe(0);
+  });
+});
