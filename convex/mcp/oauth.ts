@@ -38,6 +38,12 @@ const REDIRECT_HOSTS = [
   "claude.ai",
   "claude.com",
   "cursor.com",
+  // Connectors Gateway — one gateway that fronts this MCP server for its own
+  // users. Listed as the EXACT host, not `rahmanef.com`: the matcher below
+  // also accepts any subdomain of an entry, and that domain carries a dozen
+  // unrelated apps. One of them with an open redirect would be enough to walk
+  // an authorization code out of here.
+  "connectors.rahmanef.com",
 ];
 
 export function assertAllowedRedirect(uri: string): void {

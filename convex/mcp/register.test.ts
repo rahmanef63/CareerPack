@@ -77,6 +77,25 @@ describe("POST /oauth/register", () => {
     expect((await res.json()).error).toBe("invalid_redirect_uri");
   });
 
+  it("accepts the Connectors Gateway callback, but not the domain around it", async () => {
+    const t = convexTest(schema, modules);
+    const gateway = await register(t, {
+      redirect_uris: ["https://connectors.rahmanef.com/oauth/callback"],
+      client_name: "Connectors Gateway",
+    });
+    expect(gateway.status).toBe(201);
+
+    // The allowlist matcher also accepts any SUBDOMAIN of an entry, so the
+    // entry is the exact host. A sibling app on the same domain must not be
+    // able to receive an authorization code minted here.
+    const sibling = await register(t, {
+      redirect_uris: ["https://mso.rahmanef.com/oauth/callback"],
+      client_name: "Something else entirely",
+    });
+    expect(sibling.status).toBe(400);
+    expect((await sibling.json()).error).toBe("invalid_redirect_uri");
+  });
+
   it("refuses a client that wants to authenticate with a secret", async () => {
     const t = convexTest(schema, modules);
     const res = await register(t, {
