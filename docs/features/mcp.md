@@ -175,17 +175,40 @@ curl -sX POST https://careerpack.org/api/oauth/token \
   -d grant_type=client_credentials \
   -d client_id=cp_… -d client_secret=… \
   -d scope='mcp.read mcp.write'
-# → {"access_token":"…","token_type":"Bearer","expires_in":2592000,"scope":"…"}
+# → {"access_token":"…","token_type":"Bearer","scope":"…"}   ← tanpa expires_in
 ```
 
 Lalu token itu dipakai sebagai `Authorization: Bearer …` ke endpoint `/mcp`
 yang sama seperti host mana pun.
 
+**Umur token ditentukan pemanggil, bawaannya tanpa kedaluwarsa.** TTL tetap
+adalah tebakan tentang deployment orang lain: cron di mesin yang tidak pernah
+dibuka butuh kredensial yang tidak diam-diam mati jam 3 pagi, sementara token
+untuk job sekali jalan sebaiknya ikut mati. Tambahkan `-d expires_in=3600`
+(detik) kalau mau berbatas; `0` atau tidak dikirim sama sekali berarti selamanya.
+Yang selalu berlaku adalah **pencabutan**, bukan kedaluwarsa — ada di layar
+Settings dan berlaku pada panggilan berikutnya.
+
+| Masukan | Hasil |
+|---|---|
+| tidak dikirim, atau `0` | tanpa kedaluwarsa. Jawaban **tidak memuat** `expires_in` sama sekali — RFC 6749 §5.1 membuatnya opsional, sedangkan `null` atau `0` dibaca library klien sebagai "sudah kedaluwarsa" lalu di-retry selamanya |
+| 60 … 315.360.000 (10 tahun) | dipakai apa adanya |
+| `30`, `-1`, `1.5`, > 10 tahun | `invalid_request`. Mengubah `expires_in=30` (orang yang maksudnya hari) jadi 30 detik diam-diam lebih buruk daripada menolak |
+
+`expiresAt` pada `oauthAccessTokens` karena itu **opsional**: tidak ada = tidak
+pernah kedaluwarsa. Tiga tempat ikut berubah — `lookupAccessToken` (memeriksa
+`!== undefined` secara eksplisit; `undefined < now` kebetulan `false`, jadi baris
+lama akan benar dengan alasan yang salah), prune harian di `admin/cleanup.ts`
+(baris tanpa kedaluwarsa tidak pernah basi, menghapusnya berarti mematikan job
+yang sedang jalan), dan daftar koneksi di Settings yang kini menulis "tanpa
+kedaluwarsa" alih-alih sebuah tanggal.
+
 | Perilaku | Alasan |
 |---|---|
 | **Hanya** klien buatan pengguna (`ownerUserId` + `clientSecretHash`) | token ini bertindak **sebagai** pemiliknya. Baris DCR tidak punya pemilik, jadi "data siapa?" tidak ada jawabannya — dan `client_id` publik ikut lewat di URL authorize, sehingga membacanya dari riwayat browser akan cukup untuk mencetak akses |
-| TTL 30 hari, bukan setahun | dicetak tanpa pengawasan; token bocor harus mati sendiri. Pemanggil memegang secret dan bisa minta lagi kapan saja |
-| Token hidup **dipakai ulang**, tidak dicetak baru tiap panggilan | kalau tidak, klien yang minta token per request menyisipkan satu baris per request — tabel token jadi vektor pertumbuhan yang dipicu kredensial pemiliknya sendiri. Dicetak ulang saat sisa umur < 1 hari |
+| Umur ditentukan pemanggil, bawaan tanpa kedaluwarsa | lihat tabel `expires_in` di atas |
+| Token hidup **dipakai ulang**, tidak dicetak baru tiap panggilan | kalau tidak, klien yang minta token per request menyisipkan satu baris per request — tabel token jadi vektor pertumbuhan yang dipicu kredensial pemiliknya sendiri |
+| Dipakai ulang hanya kalau **pertanyaannya sama** | baris tanpa kedaluwarsa tidak boleh menjawab permintaan berbatas (memberi lebih dari yang diminta), dan sebaliknya baris berbatas tidak boleh menjawab permintaan selamanya (mati di bawah job yang mempercayainya). Untuk yang berbatas, ambangnya **separuh** umur yang diminta: `>= ttl` tidak akan pernah cocok — baris selalu sesaat lebih tua dari permintaan yang membuatnya — dan itu berarti satu baris baru tiap panggilan |
 | Scope dipersempit, tidak pernah dilebarkan | `scope=mcp.read` menghasilkan token yang ditolak 403 saat menulis. Scope tak dikenal dibuang; minta yang tak dikenal **saja** = `invalid_scope`, bukan diam-diam dapat semuanya |
 | Gagal apa pun menjawab sama | "klien tak dikenal" vs "secret salah" vs "sudah dicabut" masing-masing adalah pertanyaan probe yang dijawab jujur |
 | Endpoint menerima `client_secret_post` **dan** HTTP Basic | banyak library OAuth mengirim Basic tanpa ditanya, dan ketidakcocokan itu gagal sebagai `invalid_client` yang tidak bisa dibedakan dari secret salah |

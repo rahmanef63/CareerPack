@@ -270,11 +270,21 @@ export const exchangeCode = mutation({
  * A live token is REUSED rather than re-minted. Otherwise a client that asks
  * per request inserts a row per request, and the token table becomes a growth
  * vector with the owner's own credential as the trigger.
+ *
+ * LIFETIME IS THE CALLER'S CHOICE, and the default is forever. A fixed TTL
+ * here was guesswork about someone else's deployment: a cron on a machine
+ * nobody logs into needs a credential that does not quietly stop working at
+ * 3am, while a token handed to a short-lived job should die with it. Neither
+ * is more correct, so the request says which — `expiresIn` in seconds, omitted
+ * or 0 for no expiry. Revocation, not expiry, is the control that always
+ * works: it is in the settings screen and it takes effect on the next call.
  */
-const CC_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-/** Re-mint this far ahead of expiry, so a returned token is never about to
- *  die in the caller's hand. */
-const CC_REUSE_MARGIN_MS = 24 * 60 * 60 * 1000;
+/** Floor: below a minute a token is expired before most callers can use it. */
+const CC_TTL_MIN_S = 60;
+/** Ceiling on a FINITE request. Anything longer is asking for forever, which
+ *  is a different answer (omit the field) rather than a bigger number — a
+ *  century-long "expiry" reads as a limit while behaving as none. */
+const CC_TTL_MAX_S = 10 * 365 * 24 * 60 * 60;
 
 export const clientCredentialsGrant = mutation({
   args: {
@@ -282,12 +292,16 @@ export const clientCredentialsGrant = mutation({
     clientSecret: v.string(),
     /** Space-separated. Omitted = both scopes. Anything unknown is dropped. */
     scope: v.optional(v.string()),
+    /** Seconds. Omitted or 0 = never expires. */
+    expiresIn: v.optional(v.number()),
   },
   returns: v.union(
     v.object({
       ok: v.literal(true),
       accessToken: v.string(),
-      expiresIn: v.number(),
+      // Absent = no expiry, matching RFC 6749 §5.1 where `expires_in` is
+      // optional and its absence means the lifetime is not stated.
+      expiresIn: v.optional(v.number()),
       scope: v.string(),
     }),
     v.object({
@@ -337,17 +351,46 @@ export const clientCredentialsGrant = mutation({
       .filter((s) => requested.includes(s))
       .join(" ");
 
+    // 0 and omitted both mean forever. A fractional or out-of-range number is
+    // refused rather than rounded: silently turning `expires_in=30` (someone
+    // meaning days) into 30 seconds is worse than saying no.
+    const rawTtl = args.expiresIn ?? 0;
+    if (!Number.isInteger(rawTtl) || rawTtl < 0) {
+      return {
+        ok: false as const,
+        error: "invalid_request",
+        errorDescription: "expires_in harus bilangan bulat detik, atau 0 untuk tanpa kedaluwarsa",
+      };
+    }
+    if (rawTtl > 0 && (rawTtl < CC_TTL_MIN_S || rawTtl > CC_TTL_MAX_S)) {
+      return {
+        ok: false as const,
+        error: "invalid_request",
+        errorDescription: `expires_in harus antara ${CC_TTL_MIN_S} dan ${CC_TTL_MAX_S} detik, atau 0 untuk tanpa kedaluwarsa`,
+      };
+    }
+    const ttlMs = rawTtl > 0 ? rawTtl * 1000 : null;
+
     const now = Date.now();
     const live = await ctx.db
       .query("oauthAccessTokens")
       .withIndex("by_user", (q) => q.eq("userId", ownerUserId))
       .collect();
+    // Reuse only where the existing token answers the SAME question. A
+    // never-expiring row cannot satisfy a request for a bounded one — that
+    // would hand back more than was asked for — and a bounded row cannot
+    // satisfy a request for forever. Within the bounded case, half the
+    // requested lifetime remaining is the cutoff: `>= ttl` would never match
+    // (the row is always a moment older than the request that made it) and a
+    // fresh row per call is the growth vector reuse exists to prevent.
     const existing = live.find(
       (r) =>
         r.clientId === args.clientId &&
         r.scope === scope &&
         r.revokedAt === undefined &&
-        r.expiresAt > now + CC_REUSE_MARGIN_MS,
+        (ttlMs === null
+          ? r.expiresAt === undefined
+          : r.expiresAt !== undefined && r.expiresAt - now >= ttlMs / 2),
     );
     // Revoking the token from the settings screen therefore hands out a fresh
     // one on the next call — cutting this client off for good means revoking
@@ -356,7 +399,9 @@ export const clientCredentialsGrant = mutation({
       return {
         ok: true as const,
         accessToken: existing.token,
-        expiresIn: Math.floor((existing.expiresAt - now) / 1000),
+        ...(existing.expiresAt === undefined
+          ? {}
+          : { expiresIn: Math.floor((existing.expiresAt - now) / 1000) }),
         scope,
       };
     }
@@ -367,10 +412,8 @@ export const clientCredentialsGrant = mutation({
       userId: ownerUserId,
       clientId: args.clientId,
       scope,
-      // 30 days rather than the year an interactive grant gets: this one is
-      // minted unattended, so a leaked token has to age out on its own. The
-      // caller holds the secret and can always ask for another.
-      expiresAt: now + CC_TOKEN_TTL_MS,
+      // Absent = never expires, which is the default. Only revocation ends it.
+      ...(ttlMs === null ? {} : { expiresAt: now + ttlMs }),
       createdAt: now,
       label: client.label ?? client.clientName,
     });
@@ -378,7 +421,7 @@ export const clientCredentialsGrant = mutation({
     return {
       ok: true as const,
       accessToken: token,
-      expiresIn: Math.floor(CC_TOKEN_TTL_MS / 1000),
+      ...(ttlMs === null ? {} : { expiresIn: Math.floor(ttlMs / 1000) }),
       scope,
     };
   },
@@ -402,7 +445,10 @@ export const lookupAccessToken = internalQuery({
       .first();
     if (!row) return null;
     if (row.revokedAt !== undefined) return null;
-    if (row.expiresAt < Date.now()) return null;
+    // Absent expiry = never expires. Written as an explicit undefined check
+    // rather than a comparison: `undefined < Date.now()` is false, so the old
+    // line would have happened to work and would have read as an oversight.
+    if (row.expiresAt !== undefined && row.expiresAt < Date.now()) return null;
     return { userId: row.userId, scope: row.scope };
   },
 });
@@ -430,7 +476,8 @@ export const listMyTokens = query({
       scope: v.string(),
       label: v.union(v.string(), v.null()),
       createdAt: v.number(),
-      expiresAt: v.number(),
+      /** null = never expires; only revocation ends it. */
+      expiresAt: v.union(v.number(), v.null()),
       revokedAt: v.union(v.number(), v.null()),
     }),
   ),
@@ -450,7 +497,7 @@ export const listMyTokens = query({
         scope: r.scope,
         label: r.label ?? null,
         createdAt: r.createdAt,
-        expiresAt: r.expiresAt,
+        expiresAt: r.expiresAt ?? null,
         revokedAt: r.revokedAt ?? null,
       }));
   },

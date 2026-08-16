@@ -242,7 +242,10 @@ export const pruneAppendOnlyTables = internalMutation({
       const cutoff = now - 30 * DAY;
       const stale = (
         await ctx.db.query("oauthAccessTokens").take(PRUNE_BATCH_MAX * 2)
-      ).filter((t) => t.expiresAt < cutoff);
+        // A row with no `expiresAt` never expires (client_credentials default),
+        // so it is never stale — deleting one would silently cut off a running
+        // job, which is the opposite of pruning lapsed rows.
+      ).filter((t) => t.expiresAt !== undefined && t.expiresAt < cutoff);
       const batch = stale.slice(0, PRUNE_BATCH_MAX);
       for (const r of batch) await ctx.db.delete(r._id);
       stats.oauthAccessTokens = batch.length;

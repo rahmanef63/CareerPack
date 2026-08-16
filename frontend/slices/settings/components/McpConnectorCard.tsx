@@ -211,8 +211,10 @@ export function McpConnectorCard() {
               {tokens.map((t) => {
                 // Expiry is checked server-side on every request, so a row past
                 // its date is already dead — the badge just stops the user
-                // hunting for a revoke button they do not need.
-                const expired = t.expiresAt < Date.now();
+                // hunting for a revoke button they do not need. A null date is
+                // a token that never expires (the client_credentials default),
+                // which is emphatically not the same as an expired one.
+                const expired = t.expiresAt !== null && t.expiresAt < Date.now();
                 const dead = t.revokedAt !== null || expired;
                 return (
                   <li key={t.id} className="flex items-center gap-3 p-3">
@@ -224,7 +226,10 @@ export function McpConnectorCard() {
                         {t.preview}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Dibuat {fmt(t.createdAt)} · berlaku sampai {fmt(t.expiresAt)}
+                        Dibuat {fmt(t.createdAt)} ·{" "}
+                        {t.expiresAt === null
+                          ? "tanpa kedaluwarsa — berhenti hanya kalau dicabut"
+                          : `berlaku sampai ${fmt(t.expiresAt)}`}
                       </p>
                     </div>
                     {t.revokedAt !== null ? (
@@ -380,9 +385,10 @@ function ApiKeySection({ values }: { values: ConnectorValues }) {
         </summary>
         <div className="mt-2 space-y-2">
           <p className="text-xs text-muted-foreground">
-            1 · Tukar pair jadi token. Token berlaku 30 hari; panggilan berikutnya
-            mengembalikan token yang sama sampai mendekati kedaluwarsa, jadi aman
-            dipanggil tiap kali aplikasi hidup.
+            1 · Tukar pair jadi token. Bawaannya <strong>tanpa kedaluwarsa</strong> —
+            cocok untuk cron atau backend yang tidak ada yang menungguinya. Panggilan
+            berikutnya mengembalikan token yang sama, jadi aman dipanggil tiap kali
+            aplikasi hidup.
           </p>
           <CodeBlock
             value={`curl -sX POST ${values.token} \\
@@ -392,6 +398,12 @@ function ApiKeySection({ values }: { values: ConnectorValues }) {
   -d scope='mcp.read mcp.write'`}
             label="Salin perintah tukar token"
           />
+          <p className="text-xs text-muted-foreground">
+            Mau yang berumur pendek? Tambah{" "}
+            <span className="font-mono">-d expires_in=3600</span> (detik, minimal 60,
+            maksimal 10 tahun). Token lama dipakai ulang selama sisa umurnya masih di
+            atas separuh yang diminta.
+          </p>
           <p className="text-xs text-muted-foreground">
             2 · Pakai <span className="font-mono">access_token</span> dari jawaban di
             atas sebagai Bearer. Daftar tool ada di{" "}

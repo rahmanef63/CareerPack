@@ -116,11 +116,23 @@ async function clientCredentials(
     );
   }
 
+  // Lifetime is the caller's call and the default is none. Parsed here only
+  // far enough to be a number — the range check belongs with the grant, which
+  // is also what a non-HTTP caller would go through.
+  const rawExpiresIn = params.expires_in?.trim();
+  if (rawExpiresIn !== undefined && rawExpiresIn !== "" && !/^\d+$/.test(rawExpiresIn)) {
+    return oauthError(
+      "invalid_request",
+      "expires_in harus bilangan bulat detik, atau 0 untuk tanpa kedaluwarsa.",
+    );
+  }
+
   const client = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL);
   const result = await client.mutation(api.mcp.oauth.clientCredentialsGrant, {
     clientId,
     clientSecret,
     ...(params.scope?.trim() ? { scope: params.scope.trim() } : {}),
+    ...(rawExpiresIn ? { expiresIn: Number(rawExpiresIn) } : {}),
   });
 
   if (!result.ok) {
@@ -135,7 +147,10 @@ async function clientCredentials(
     JSON.stringify({
       access_token: result.accessToken,
       token_type: "Bearer",
-      expires_in: result.expiresIn,
+      // Omitted entirely when the token does not expire. RFC 6749 §5.1 makes
+      // the field optional; sending `null` or 0 instead would be read by a
+      // client library as "expired now" or "unknown", and both retry forever.
+      ...(result.expiresIn === undefined ? {} : { expires_in: result.expiresIn }),
       scope: result.scope,
     }),
     { status: 200, headers: JSON_HEADERS },

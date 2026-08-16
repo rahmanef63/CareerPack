@@ -86,7 +86,12 @@ export const mcpTables = {
     clientId: v.string(),
     scope: v.string(),
     resource: v.optional(v.string()),
-    expiresAt: v.number(),
+    // ABSENT MEANS NEVER EXPIRES. Every row an interactive grant creates sets
+    // it; a client_credentials caller chooses, and choosing nothing means no
+    // expiry — a credential for an unattended job should not stop working at
+    // 3am because a number picked here ran out. Revocation is the control that
+    // always applies, and it is checked on every request either way.
+    expiresAt: v.optional(v.number()),
     createdAt: v.number(),
     // Set to revoke without deleting, so a revoked token stays auditable.
     // Checked on every single MCP request, not only at issue time.

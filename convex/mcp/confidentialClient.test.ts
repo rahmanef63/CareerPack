@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { convexTest } from "convex-test";
 import schema from "../schema";
-import { api } from "../_generated/api";
+import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 
 declare global {
@@ -378,5 +378,110 @@ describe("clientCredentialsGrant", () => {
         .first(),
     );
     expect(row?.revokedAt).toBeTypeOf("number");
+  });
+});
+
+/* Token lifetime — the caller's choice, and the default is forever.
+ *
+ * A hardcoded TTL was a guess about someone else's deployment. These assert
+ * the two halves that make the choice real: no expiry unless asked, and an
+ * asked-for expiry that is actually honoured rather than rounded or ignored.
+ */
+describe("clientCredentialsGrant lifetime", () => {
+  // Typed through a factory, not `ReturnType<typeof convexTest>`: the bare
+  // form drops the schema generic, so `ctx.db` inside a helper sees only the
+  // system indexes and `withIndex("by_token")` stops compiling.
+  const mkT = () => convexTest(schema, modules);
+  type T = ReturnType<typeof mkT>;
+
+  const grant = (
+    t: T,
+    clientId: string,
+    clientSecret: string,
+    expiresIn?: number,
+  ) =>
+    t.mutation(api.mcp.oauth.clientCredentialsGrant, {
+      clientId,
+      clientSecret,
+      ...(expiresIn === undefined ? {} : { expiresIn }),
+    });
+
+  const tokenRow = (t: T, token: string) =>
+    t.run(async (ctx) =>
+      ctx.db
+        .query("oauthAccessTokens")
+        .withIndex("by_token", (q) => q.eq("token", token))
+        .first(),
+    );
+
+  it("never expires by default, and says so by omitting expires_in", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret } = await mintClient(t);
+
+    const res = await grant(t, clientId, clientSecret);
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.expiresIn).toBeUndefined();
+    expect((await tokenRow(t, res.accessToken))?.expiresAt).toBeUndefined();
+  });
+
+  it("still authenticates a token with no expiry", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret, userId } = await mintClient(t);
+    const res = await grant(t, clientId, clientSecret);
+    if (!res.ok) throw new Error("grant failed");
+
+    // The old check was `row.expiresAt < now`, which is false for undefined —
+    // right answer, wrong reason. This pins the behaviour either way.
+    const looked = await t.query(internal.mcp.oauth.lookupAccessToken, {
+      token: res.accessToken,
+    });
+    expect(looked?.userId).toBe(userId);
+  });
+
+  it("honours a requested lifetime to the second", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret } = await mintClient(t);
+
+    const res = await grant(t, clientId, clientSecret, 3600);
+    if (!res.ok) throw new Error("grant failed");
+    expect(res.expiresIn).toBe(3600);
+
+    const row = await tokenRow(t, res.accessToken);
+    const life = (row?.expiresAt ?? 0) - Date.now();
+    expect(life).toBeGreaterThan(3590_000);
+    expect(life).toBeLessThanOrEqual(3600_000);
+  });
+
+  it("refuses a lifetime it would have to reinterpret", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret } = await mintClient(t);
+
+    // Someone typing days. Turning this into 30 seconds silently is worse
+    // than refusing it.
+    expect((await grant(t, clientId, clientSecret, 30)).ok).toBe(false);
+    expect((await grant(t, clientId, clientSecret, -1)).ok).toBe(false);
+    expect((await grant(t, clientId, clientSecret, 1.5)).ok).toBe(false);
+    expect((await grant(t, clientId, clientSecret, 20 * 365 * 24 * 3600)).ok).toBe(false);
+
+    // 0 is the explicit spelling of the default, not an out-of-range value.
+    const forever = await grant(t, clientId, clientSecret, 0);
+    expect(forever.ok && forever.expiresIn).toBeUndefined();
+  });
+
+  it("does not answer one lifetime question with another's token", async () => {
+    const t = convexTest(schema, modules);
+    const { clientId, clientSecret } = await mintClient(t);
+
+    const forever = await grant(t, clientId, clientSecret);
+    const hour = await grant(t, clientId, clientSecret, 3600);
+    if (!forever.ok || !hour.ok) throw new Error("grant failed");
+    // Reusing the never-expiring row for a bounded request would hand back
+    // more than was asked for; reusing the bounded one for a forever request
+    // would hand back less and expire under a job that trusted it.
+    expect(hour.accessToken).not.toBe(forever.accessToken);
+
+    const again = await grant(t, clientId, clientSecret, 3600);
+    expect(again.ok && again.accessToken).toBe(hour.accessToken);
   });
 });
