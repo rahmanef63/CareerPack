@@ -4,72 +4,81 @@
 <style>
   :root{
     --accent:#0ea5e9; --accent-dim:#075985;
-    --bg:#0b1220; --bg2:#0f1729; --card:#131c2f; --line:#1e2a44;
+    --bg:#0b1220; --bg2:#0f1729; --card:#141d31; --line:#1e2a44;
     --text:#e2e8f0; --muted:#94a3b8; --faint:#64748b;
     --live:#22c55e; --partial:#f59e0b; --plan:#64748b; --off:#ef4444;
-    --e-browser:#38bdf8; --e-s2s:#a78bfa; --e-deploy:#34d399; --e-plan:#f59e0b;
+    --e-browser:#38bdf8; --e-s2s:#fb923c; --e-deploy:#a78bfa; --e-plan:#64748b;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);
     font:15px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     -webkit-font-smoothing:antialiased}
-  .wrap{max-width:1520px;margin:0 auto;padding:28px 20px 80px}
-  h1{font-size:1.9rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.02em}
-  h2{font-size:1.15rem;margin:44px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);
+  .wrap{max-width:1280px;margin:0 auto;padding:30px 20px 80px}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;color:#fb923c;text-transform:uppercase;
+    margin:0 0 10px}
+  h1{font-size:2.1rem;line-height:1.15;margin:0 0 10px;letter-spacing:-.025em}
+  h2{font-size:1.15rem;margin:46px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);
     letter-spacing:-.01em}
-  h2 .n{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:8px}
+  h2 .n{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:9px}
   h3{font-size:.98rem;margin:22px 0 6px;color:#cbd5e1}
   p{margin:0 0 10px}
-  a{color:var(--accent)}
   code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.87em;
     background:#0a1120;border:1px solid var(--line);border-radius:4px;padding:.5px 5px;color:#bae6fd}
-  .lede{color:var(--muted);max-width:78ch}
-  .tag{display:inline-block;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;
-    border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted);
-    background:var(--bg2);margin:0 6px 6px 0}
+  .lede{color:var(--muted);max-width:80ch}
+  .tag{display:inline-block;font-size:.74rem;border:1px solid var(--line);border-radius:8px;
+    padding:4px 11px;color:var(--muted);background:var(--bg2);margin:0 6px 6px 0}
+  .tag b{color:#e2e8f0;font-weight:600}
   .tag.warn{border-color:#7c2d12;color:#fdba74;background:#1c1008}
-  .meta{display:flex;flex-wrap:wrap;gap:0;margin:14px 0 0}
+  .meta{display:flex;flex-wrap:wrap;margin:16px 0 0}
 
-  /* ---- diagram ---- */
-  .board{display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:18px;align-items:start;
-    margin-top:14px}
-  @media(max-width:1240px){.board{grid-template-columns:1fr}}
-  .svgbox{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:6px;
-    overflow-x:auto}
-  svg{display:block;width:100%;min-width:900px;height:auto}
-  .nd rect.body{fill:var(--card);stroke:var(--line);stroke-width:1.5;rx:9}
-  .nd:focus{outline:none}
-  .nd:focus rect.body,.nd:hover rect.body{stroke:var(--accent)}
+  /* ---------- diagram ---------- */
+  .dia{background:var(--bg2);border:1px solid var(--line);border-radius:14px;margin-top:14px;
+    overflow:hidden}
+  .bar{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:11px 14px;
+    border-bottom:1px solid var(--line);font-size:.78rem;color:var(--muted)}
+  .bar .grow{flex:1}
+  .bar button{background:var(--card);color:#cbd5e1;border:1px solid var(--line);border-radius:7px;
+    padding:5px 11px;font:inherit;font-size:.78rem;cursor:pointer}
+  .bar button:hover{border-color:var(--accent);color:#e2e8f0}
+  .bar button[aria-pressed="true"]{background:var(--accent-dim);border-color:var(--accent);
+    color:#e0f2fe}
+  .key{display:flex;align-items:center;gap:7px}
+  .sw{width:20px;border-top:2.5px solid;display:inline-block}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .scroll{overflow-x:auto;padding:6px}
+  svg{display:block;width:100%;min-width:1050px;height:auto}
+  .colhead{fill:var(--faint);font-size:10px;letter-spacing:.16em}
+  .colbox{fill:#0d1526;stroke:var(--line);stroke-width:1;stroke-dasharray:3 5;rx:12}
   .nd{cursor:pointer}
+  .nd rect.body{fill:var(--card);stroke:var(--line);stroke-width:1.5;rx:8}
+  .nd:hover rect.body,.nd:focus rect.body{stroke:var(--accent)}
+  .nd:focus{outline:none}
   .nd text.t{fill:#e8eefc;font-size:12.5px;font-weight:650}
-  .nd text.s{fill:var(--muted);font-size:10.5px}
-  .nd text.h{fill:var(--faint);font-size:9px;letter-spacing:.08em}
-  .edge path{fill:none;stroke-width:1.6}
-  .edge text{font-size:10px;fill:#cbd5e1}
-  .edge rect{fill:#0b1220;stroke:var(--line);stroke-width:1;rx:4}
-  .lane{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:3 5;rx:12}
-  .lanelabel{fill:var(--faint);font-size:10.5px;letter-spacing:.14em}
-  svg.sel .nd:not(.hi){opacity:.22}
-  svg.sel .edge:not(.hi){opacity:.1}
+  .nd text.s{fill:var(--muted);font-size:9.8px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .edge path{fill:none;stroke-width:1.5;opacity:.72}
+  .edge .lbl{opacity:0}
+  .edge .lbl rect{fill:#0b1220;stroke:var(--line);stroke-width:1;rx:4}
+  .edge .lbl text{font-size:9.5px;fill:#cbd5e1}
+  .dia.labels .edge .lbl,.edge.hi .lbl{opacity:1}
+  svg.sel .nd:not(.hi){opacity:.2}
+  svg.sel .edge:not(.hi){opacity:.08}
+  .edge.hi path{stroke-width:2.6;opacity:1}
   .nd.act rect.body{stroke:var(--accent);stroke-width:2.5}
-  .edge.hi path{stroke-width:2.6}
 
-  .panel{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px;
-    position:sticky;top:16px}
-  .panel h4{margin:0 0 2px;font-size:1rem}
-  .panel .st{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px}
-  .panel ul{margin:8px 0 0;padding-left:18px}
-  .panel li{margin-bottom:6px;font-size:.86rem;color:#cbd5e1}
-  .panel .src{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);
-    font-size:.74rem;color:var(--faint)}
+  .panel{border-top:1px solid var(--line);padding:16px 18px;background:#0d1526;min-height:96px}
+  .panel h4{margin:0 0 3px;font-size:1.02rem}
+  .panel .st{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;margin:0 0 9px}
+  .panel .grid{display:grid;grid-template-columns:1fr 300px;gap:20px}
+  @media(max-width:820px){.panel .grid{grid-template-columns:1fr}}
+  .panel ul{margin:6px 0 0;padding-left:18px}
+  .panel li{margin-bottom:5px;font-size:.86rem;color:#cbd5e1}
+  .panel .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);
+    margin:0 0 4px}
+  .panel .src{margin-top:11px;font-size:.74rem;color:var(--faint)}
   .hint{color:var(--faint);font-size:.85rem}
 
-  .legend{display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0;font-size:.82rem;color:var(--muted)}
-  .legend div{display:flex;align-items:center;gap:7px}
-  .sw{width:22px;height:0;border-top-width:2.5px;border-top-style:solid;display:inline-block}
-  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
-
-  table{width:100%;border-collapse:collapse;margin:10px 0 0;font-size:.87rem}
+  table{width:100%;border-collapse:collapse;margin:0;font-size:.87rem}
   th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--faint);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
   td.own{color:#7dd3fc;font-weight:600}
@@ -91,7 +100,6 @@
     color:#e2e8f0;font-size:.88rem}
   .sym em{color:var(--faint);font-style:normal;font-size:.78rem;text-transform:uppercase;
     letter-spacing:.06em;display:block}
-
   .todo{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
     background:var(--bg2);margin-bottom:10px}
   .pri{flex:0 0 auto;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;
@@ -105,45 +113,53 @@
 </style>
 
 <div class="wrap">
-  <h1>Peta Sistem <span style="color:var(--accent)">CareerPack</span></h1>
-  <p class="lede">Satu halaman untuk melihat semua permukaan produksi sekaligus: apa yang hidup,
-  siapa memanggil siapa dan lewat mekanisme apa, dan fakta mana yang dipegang siapa.</p>
+  <p class="eyebrow">Peta sistem · turunan dokumen</p>
+  <h1>CareerPack — apa yang jalan, di mana, lewat apa</h1>
+  <p class="lede">Untuk agent yang mulai sesi dan engineer baru: orientasi, “kode baru ditaruh di
+  mana”, dan triase saat produksi rusak. Klik node mana pun di diagram — koneksinya menyala dan
+  panel di bawahnya menjelaskan siapa pemilik faktanya.</p>
 
   <div class="meta">
-    <span class="tag">Untuk: engineer / agent yang baru mulai sesi</span>
-    <span class="tag">Dipakai saat: orientasi · produksi rusak · memutuskan di mana kode ditaruh</span>
-    <span class="tag">Disusun 2026-08-17</span>
+    <span class="tag">App <b>careerpack.org</b></span>
+    <span class="tag">Backend <b>Convex Cloud · proficient-dove-151</b></span>
+    <span class="tag">Repo <b>rahmanef63/CareerPack</b></span>
+    <span class="tag">Slice <b>22</b></span>
+    <span class="tag">Domain convex <b>20</b></span>
+    <span class="tag">Tool MCP <b>74</b></span>
+    <span class="tag">Disusun <b>17 Agu 2026</b></span>
     <span class="tag warn">Turunan — bukan source of truth</span>
   </div>
 
-  <h2><span class="n">01</span>Diagram</h2>
-  <p class="hint">Klik node mana pun → koneksinya disorot dan detailnya muncul di panel kanan.
-  Klik area kosong atau <kbd>Esc</kbd> untuk mereset. Node bisa di-Tab dan dibuka dengan Enter.</p>
+  <h2><span class="n">01</span>Jalur runtime — siapa memanggil siapa</h2>
+  <p class="hint">Semua panah mengalir satu arah, kiri ke kanan. Label panah dimatikan supaya
+  kanvasnya terbaca; nyalakan lewat tombol, atau klik satu node untuk melihat label miliknya saja.</p>
+  <div class="dia" id="d-runtime"></div>
 
-  <div class="legend" id="legend"></div>
+  <h2><span class="n">02</span>Dari commit ke produksi</h2>
+  <p class="hint">Gerbang otomatis ada di mesin lokal, bukan di GitHub. Fungsi Convex mendarat di
+  produksi sebelum commit-nya sampai di GitHub — urutan itu disengaja.</p>
+  <div class="dia" id="d-deploy"></div>
 
-  <div class="board">
-    <div class="svgbox"><svg id="map" viewBox="0 0 1316 992" role="img"
-      aria-label="Diagram sistem CareerPack"></svg></div>
-    <aside class="panel" id="panel"></aside>
-  </div>
+  <h2><span class="n">03</span>Pengawasan &amp; backup</h2>
+  <p class="hint">Dua cron di VPS yang sama dengan produksi.</p>
+  <div class="dia" id="d-ops"></div>
 
-  <h2><span class="n">02</span>Alur bernomor</h2>
+  <h2><span class="n">04</span>Alur bernomor</h2>
   <div id="flows"></div>
 
-  <h2><span class="n">03</span>Siapa pemilik fakta ini</h2>
+  <h2><span class="n">05</span>Siapa pemilik fakta ini</h2>
   <p class="lede">Kolom kiri = tempat fakta itu <em>diputuskan</em>. Kolom kanan cuma menampilkan
   atau menyalin — kalau keduanya beda, yang kiri yang benar.</p>
   <div class="tblwrap"><table id="owners"></table></div>
 
-  <h2><span class="n">04</span>Jebakan yang sudah pernah kena</h2>
+  <h2><span class="n">06</span>Jebakan yang sudah pernah kena</h2>
   <p class="lede">Disusun dari gejalanya, karena gejala itulah yang kamu lihat duluan.</p>
   <div id="traps"></div>
 
-  <h2><span class="n">05</span>Yang belum beres</h2>
+  <h2><span class="n">07</span>Yang belum beres</h2>
   <div id="todos"></div>
 
-  <h2><span class="n">06</span>Tidak diketahui dari sumber</h2>
+  <h2><span class="n">08</span>Tidak diketahui dari sumber</h2>
   <div id="unknowns"></div>
 
   <footer id="footer"></footer>
@@ -151,228 +167,27 @@
 
 <script>
 /* ------------------------------------------------------------------ data --
-   Setiap fakta di bawah punya `src` yang menunjuk dokumen asalnya. Kalau
-   sebuah kolom tidak ada di sumber, isinya "tidak diketahui", bukan tebakan. */
+   Tiap fakta punya `src` yang menunjuk dokumen asalnya. Yang tidak ada di
+   sumber ditulis "tidak diketahui", bukan ditebak.
+
+   Node TIDAK punya koordinat. Kolom + urutan dalam kolom yang menentukan
+   posisi, dan renderer yang menghitung sisanya — versi pertama halaman ini
+   memakai koordinat tangan, dan begitu grid ditetapkan lebih dulu, panah
+   terpaksa berkelok mencari celah. Arah aliran yang menentukan tata letak,
+   bukan sebaliknya. */
 
 const STATUS = {
-  live:    {label:"sudah hidup",      color:"var(--live)"},
-  partial: {label:"hidup sebagian",   color:"var(--partial)"},
-  plan:    {label:"masih rencana",    color:"var(--plan)"},
-  off:     {label:"sengaja dimatikan",color:"var(--off)"},
+  live:    {label:"sudah hidup",       color:"var(--live)"},
+  partial: {label:"hidup sebagian",    color:"var(--partial)"},
+  plan:    {label:"masih rencana",     color:"var(--plan)"},
+  off:     {label:"sengaja dimatikan", color:"var(--off)"},
 };
-
 const KIND = {
-  browser:{label:"request browser",  color:"var(--e-browser)"},
-  s2s:    {label:"server-ke-server", color:"var(--e-s2s)"},
-  deploy: {label:"build & deploy",   color:"var(--e-deploy)"},
-  plan:   {label:"rencana / cadangan",color:"var(--e-plan)", dash:"5 4"},
+  browser:{label:"request browser",   color:"var(--e-browser)"},
+  s2s:    {label:"server → server",   color:"var(--e-s2s)"},
+  deploy: {label:"build & deploy",    color:"var(--e-deploy)"},
+  plan:   {label:"cadangan / mati",   color:"var(--e-plan)", dash:"5 4"},
 };
-
-const LANES = [
-  {x:14, y:64,  w:1256, h:456, label:"RUNTIME"},
-  {x:14, y:556, w:1256, h:412, label:"BUILD, DEPLOY & OPS"},
-];
-
-const N = [
- {id:"browser", x:30, y:96,  s:"live", vps:false, t:"Browser pengguna",
-  sub:["careerpack.org — PWA, UI bahasa Indonesia"],
-  what:"Titik masuk semua pengguna akhir. Shell responsif memilih layout dari useIsMobile(): <lg BottomNav 5-slot + AI FAB, ≥lg Sidebar + SiteHeader.",
-  facts:["PWA: manifest.webmanifest + sw.js, install lewat InstallSidebarButton di sidebar desktop.",
-         "Query ke Convex reaktif lewat WebSocket, bukan REST — tidak ada layer tRPC/REST di tengah."],
-  src:"docs/architecture.md §2,§6,§10 · CLAUDE.md"},
-
- {id:"host", x:30, y:230, s:"live", vps:false, t:"Host MCP",
-  sub:["ChatGPT · Claude.ai · Claude Code","Cursor"],
-  what:"Aplikasi AI pihak ketiga yang menyambung sebagai klien MCP dan bertindak atas nama SATU pengguna.",
-  facts:["ChatGPT dan Claude.ai mendaftarkan klien sendiri lewat Dynamic Client Registration (RFC 7591).",
-         "Claude Code dan Cursor menempel Bearer token langsung lewat file konfigurasi.",
-         "Callback host tunduk pada allowlist redirect di convex/mcp/oauth.ts."],
-  src:"docs/features/mcp.md · frontend/slices/settings/components/mcpConnectorGuide.ts"},
-
- {id:"devbox", x:30, y:356, s:"live", vps:true, t:"Mesin dev / agent",
-  sub:["checkout repo — ADA DI VPS PRODUKSI"],
-  what:"~/projects/CareerPack ada di mesin yang sama dengan produksi (srv614914.hstgr.cloud, 76.13.23.37). \"Lokal\" dan \"server\" adalah satu komputer.",
-  facts:["Jangan pernah usulkan ssh/scp untuk menjangkau VPS dari sini — baca/tulis filenya langsung.",
-         "crontab -l, docker ps, ~/bin/health-watch.sh semuanya langsung tersedia.",
-         "backend/convex-cloud/prod.env = kredensial produksi asli di host bersama; mode 0600, gitignored."],
-  src:"memory: project_repo_runs_on_the_vps · CLAUDE.md"},
-
- {id:"app", x:320, y:96, s:"live", vps:true, t:"careerpack.org",
-  sub:["Next.js 15 App Router · standalone container"],
-  what:"Frontend produksi. Dibangun dari Dockerfile root sebagai output standalone, dijalankan Dokploy di VPS.",
-  facts:["Tiga route group: (marketing) publik, (dashboard) auth-guarded lewat catch-all [[...slug]], /admin role-guarded.",
-         "NEXT_PUBLIC_CONVEX_URL di-BAKE saat build (Dockerfile ENV) — ubah env runtime tidak berefek apa pun.",
-         "Build id bisa dicek: /api/build-id — dipakai membuktikan sebuah deploy benar-benar mendarat."],
-  src:"Dockerfile:30 · docs/architecture.md §1,§2 · memory: project_dokploy_autodeploy_unreliable"},
-
- {id:"oauth", x:320, y:230, s:"live", vps:true, t:"Endpoint OAuth aplikasi",
-  sub:["/oauth/authorize · /api/oauth/token"],
-  what:"Separuh OAuth yang harus ada di domain aplikasi: layar persetujuan adalah halaman Next, dan endpoint token berdampingan dengannya.",
-  facts:["Dua grant: authorization_code + PKCE (host dengan manusia di depan browser) dan client_credentials (aplikasi buatan pengguna, tanpa layar izin).",
-         "Menerima client_secret_post DAN HTTP Basic; banyak library OAuth mengirim Basic tanpa ditanya.",
-         "Base authorization server justru origin Convex site — beda host dengan kedua endpoint ini, dan itu memang benar."],
-  src:"docs/features/mcp.md · frontend/app/api/oauth/token/route.ts"},
-
- {id:"slug", x:320, y:356, s:"live", vps:true, t:"Halaman branding publik",
-  sub:["careerpack.org/&lt;slug&gt; · ISR 60 s"],
-  what:"Satu dokumen HTML milik pengguna, dirender di dalam iframe sandbox. Datanya hidup, bukan snapshot.",
-  facts:["Sandbox tanpa allow-same-origin → origin opaque; dokumen kustom juga tidak dapat allow-forms.",
-         "Marker data-cp menempelkan data CV/portfolio saat render, jadi halaman ikut berubah saat data berubah.",
-         "Tidak boleh ada loading.tsx di route ini — memicu soft-404."],
-  src:"docs/features/personal-branding.md · frontend/slices/personal-branding/themes/sandbox.ts"},
-
- {id:"convex", x:660, y:96, s:"live", vps:false, t:"Convex Cloud — PRODUKSI",
-  sub:["proficient-dove-151",".convex.cloud (WS) · .convex.site (HTTP)"],
-  what:"Satu-satunya penyimpan data produksi: 52+ tabel, file storage, auth, cron. Tidak ada database lain.",
-  facts:["Nama proyeknya di dashboard masih 'careerpack-restore-drill' — menyesatkan, tapi ini PRODUKSI.",
-         "Auth: @convex-dev/auth, Password (PBKDF2-SHA256 100k iter) + Anonymous. Scrypt pernah dicoba dan timeout di balik reverse proxy.",
-         "/api/health mengembalikan ready:{ai,email} — cek tercepat tanpa kredensial.",
-         "Deployment dev untuk pnpm dev adalah effervescent-hedgehog-352, TIDAK memegang data produksi."],
-  src:"CLAUDE.md tabel deployment · docs/db-backup.md 'Cloud gap' · docs/auth.md"},
-
- {id:"mcp", x:660, y:230, s:"live", vps:false, t:"Server MCP",
-  sub:["/mcp di .convex.site · 74 tool, 16 domain"],
-  what:"Permukaan JSON-RPC untuk host AI. Setiap tool terikat pada satu pengguna — pemilik token.",
-  facts:["initialize mengirim instructions: brief tingkat server yang menjelaskan tiap domain sebelum tool pertama dipanggil.",
-         "Scope mcp.read / mcp.write diturunkan dari annotations.readOnlyHint dan ditegakkan per panggilan.",
-         "Rate limit tulis: 25/menit, 400/hari.",
-         "Token client_credentials: umur ditentukan pemanggil, bawaannya tanpa kedaluwarsa; hanya pencabutan yang mengakhirinya."],
-  src:"docs/features/mcp.md · convex/mcp/instructions.ts"},
-
- {id:"dev", x:660, y:356, s:"live", vps:false, t:"Convex Cloud — dev",
-  sub:["effervescent-hedgehog-352"],
-  what:"Deployment yang diikat pnpm dev lewat CONVEX_DEPLOYMENT di .env.local.",
-  facts:["Juga dipakai sebagai target drill dan demo; katalog roadmap + checklist negara di-seed manual di sini.",
-         "Tidak memegang data produksi."],
-  src:"docs/db-backup.md · CLAUDE.md tabel deployment"},
-
- {id:"ai", x:950, y:96, s:"live", vps:false, t:"Proxy AI",
-  sub:["OpenAI-compatible · OpenRouter"],
-  what:"Gateway tunggal untuk semua fitur AI. Kredensialnya diresolusi hanya di _shared/aiResolve.ts.",
-  facts:["Urutan resolusi: aiSettings per-user → globalAISettings → env. Baris DB menang atas env.",
-         "Terverifikasi hidup di produksi 2026-07-30: enabled true, provider openrouter, model openai/gpt-4o-mini.",
-         "apiKey bisa ciphertext AES-256-GCM (prefix encv1:) atau plaintext — baris lama tidak pernah dimigrasi."],
-  src:"memory: project_prod_runtime_config_verified · docs/deployment.md §10"},
-
- {id:"resend", x:950, y:196, s:"live", vps:false, t:"Resend",
-  sub:["email transaksional"],
-  what:"Pengirim email selamat datang dan reset kata sandi.",
-  facts:["Terbukti hidup: passwordReset:deliverResetEmail mengembalikan {ok:true, provider:'resend'} dari support@careerpack.org.",
-         "Akun Resend yang tersambung ke konektor MCP claude.ai adalah AKUN LAIN dan tidak mencerminkan produksi."],
-  src:"memory: project_prod_runtime_config_verified"},
-
- {id:"legacy", x:950, y:300, s:"partial", vps:true, t:"Convex self-hosted (legacy)",
-  sub:["api.careerpack.org (container legacy)"],
-  what:"Stack Docker lama. Masih Up (healthy) dan menjawab 200, tapi tidak melayani apa pun yang user-facing sejak cutover ke Cloud.",
-  facts:["Memegang data pra-cutover dan jadi jalur balik kalau Cloud dilepas.",
-         "Image WAJIB dipin ke digest — image tak-terpin adalah akar insiden 2026-06-11.",
-         "Seluruh data ada di satu Docker volume careerpack-convex-8gdbpk_data."],
-  src:"docs/deployment.md §5c · docs/db-backup.md"},
-
- {id:"dash", x:950, y:404, s:"off", vps:true, t:"dash.careerpack.org",
-  sub:["UI admin Convex self-hosted"],
-  what:"Dashboard admin stack legacy. Sengaja dimatikan 2026-07-30 karena menyajikan UI admin ke internet terbuka untuk deployment yang tidak melayani user.",
-  facts:["Dua lapis: domain dihapus di Dokploy, DAN traefik.enable diubah true→false di compose file, lalu container di-stop.",
-         "Lapis kedua yang menentukan — route yang berjalan datang dari label Docker container, bukan daftar domain Dokploy.",
-         "Hasil: dash → 404, api → 200."],
-  src:"docs/deployment.md §5c · memory: project_repo_runs_on_the_vps"},
-
- {id:"prepush", x:30, y:656, s:"live", vps:true, t:"Pre-push hook",
-  sub:["scripts/pre-push.sh via simple-git-hooks"],
-  what:"Gerbang otomatis yang sesungguhnya. GitHub Actions manual-only sejak 2026-05-14, jadi ini pemeriksaan terakhir sebelum main.",
-  facts:["Menjalankan typecheck + lint + test:coverage + build tiap push. Bypass: SKIP_PUSH_CHECKS=1.",
-         "pnpm build satu-satunya langkah yang menangkap kerusakan build-only; typecheck dan vitest buta terhadapnya.",
-         "Kalau push range menyentuh convex/**, ia deploy SEBELUM push mendarat.",
-         "Resolve target tiga tingkat: prod.env → sesi CLI Convex yang login → self-hosted (yang terakhir MEMBATALKAN push)."],
-  src:"CLAUDE.md §Commands · docs/deployment.md"},
-
- {id:"github", x:320, y:656, s:"live", vps:false, t:"GitHub — main",
-  sub:["rahmanef63/CareerPack · SSH"],
-  what:"Satu-satunya branch rilis. Push ke main = web ter-update.",
-  facts:["Tidak ada webhook repo-side: gh api …/hooks mengembalikan nol, karena Dokploy memakai GitHub App.",
-         "Artinya tidak ada delivery yang bisa diinspeksi atau di-replay saat build tidak jalan."],
-  src:"memory: project_dokploy_autodeploy_unreliable · CLAUDE.md"},
-
- {id:"actions", x:320, y:782, s:"partial", vps:false, t:"GitHub Actions",
-  sub:["ci.yml · convex-deploy.yml","workflow_dispatch saja"],
-  what:"Ada, tapi tidak pernah jalan sendiri. Trigger push/PR aslinya disimpan sebagai *.yml.bak.",
-  facts:["Dimatikan 2026-05-14 untuk menekan biaya.",
-         "convex-deploy.yml menyasar backend SELF-HOSTED — tidak me-rollback dan tidak menyentuh produksi."],
-  src:"CLAUDE.md §CI · docs/deployment.md §3,§8"},
-
- {id:"dokploy", x:660, y:656, s:"partial", vps:true, t:"Dokploy",
-  sub:["applicationId 9UFO92wvF0mQjEydEvhrP"],
-  what:"Membangun image frontend dan menjalankan containernya. Auto-deploy-nya intermiten — itu sebabnya statusnya bukan 'sudah hidup' penuh.",
-  facts:["autoDeploy true, triggerType push, sourceType github semuanya ter-set, tapi build pernah tidak terpicu sama sekali.",
-         "composeStatus adalah status DEPLOY TERAKHIR, bukan runtime — selalu cek docker ps sebelum menyebut stack mati.",
-         "Trigger manual: POST application.deploy dengan x-api-key."],
-  src:"memory: project_dokploy_autodeploy_unreliable · memory: project_repo_runs_on_the_vps"},
-
- {id:"watch", x:950, y:600, s:"live", vps:true, t:"health-watch",
-  sub:["~/bin/health-watch.sh · cron */3"],
-  what:"Watchdog runtime out-of-band. Registry multi-proyek (tech, kongloos, careerpack).",
-  facts:["Yang jalan adalah ~/bin/health-watch.sh — BUKAN salinan di backend/convex-self-hosted/ops/.",
-         "Sejak 2026-07-30 probe-nya menyasar Cloud; sebelumnya semuanya menunjuk stack self-hosted, jadi outage Cloud akan tampak hijau seluruhnya.",
-         "Log ~/health-watch.log, state ~/.local/state/health-watch/."],
-  src:"docs/deployment.md §5b · memory: project_repo_runs_on_the_vps"},
-
- {id:"backup", x:950, y:720, s:"live", vps:true, t:"Backup produksi",
-  sub:["scripts/backup-prod.sh · cron 0 4"],
-  what:"Snapshot harian Convex Cloud produksi, termasuk file storage.",
-  facts:["convex export --prod --include-file-storage, lalu arsipnya DIVALIDASI: gagal + dihapus kalau ada baris JSON tak terparse.",
-         "Import drill LULUS 2026-07-30: 54 tabel, 6519 dokumen, nol selisih.",
-         "Retensi KEEP=14."],
-  src:"docs/db-backup.md 'Cloud gap' · crontab rahman"},
-
- {id:"archive", x:950, y:840, s:"partial", vps:true, t:"Arsip backup",
-  sub:["~/backups/careerpack/"],
-  what:"Arsip ada dan terbukti bisa direstore — tapi duduk di mesin yang sama dengan produksi.",
-  facts:["Layer 2 (on-host), BUKAN disaster recovery. Layer 1 = snapshot VPS Hostinger.",
-         "Tidak terenkripsi dan berisi PII pengguna — enkripsi dulu sebelum pernah dipindah keluar.",
-         "Arsip self-hosted lama memegang data PRA-cutover, bukan produksi."],
-  src:"docs/db-backup.md"},
-];
-
-const E = [
- {a:"browser", b:"app",     k:"browser", l:"HTTPS · ISR revalidate 60", lo:-56},
- {a:"browser", b:"convex",  k:"browser", l:"wss:// query reaktif",
-   via:[[290,196],[612,196]], lo:6, lx:-14},
- {a:"browser", b:"slug",    k:"browser", l:"halaman publik",
-   via:[[288,300]], lo:34, lx:-40},
- {a:"app",     b:"convex",  k:"s2s",     l:"ConvexHttpClient (SSR + route handler)",
-   lo:-48, lx:0},
- {a:"slug",    b:"convex",  k:"s2s",     l:"payload __cp_data saat ISR",
-   via:[[610,397],[610,186]], lo:49, lx:0},
- {a:"host",    b:"oauth",   k:"s2s",     l:"OAuth 2.1 PKCE + DCR (RFC 7591)", lo:-52},
- {a:"host",    b:"mcp",     k:"s2s",     l:"JSON-RPC 2.0 + Bearer",
-   via:[[292,334],[612,334]], lo:0, lx:-40},
- {a:"devbox",  b:"oauth",   k:"s2s",     l:"client_credentials (id+secret)", lo:0, lx:-80},
- {a:"oauth",   b:"convex",  k:"s2s",     l:"PKCE exchange", via:[[610,258]], lo:0, lx:0},
- {a:"mcp",     b:"convex",  k:"s2s",     l:"internal fn, userId dari token", lo:0, lx:14},
- {a:"convex",  b:"ai",      k:"s2s",     l:"requireQuota → sanitize → wrapUserInput", lo:-50},
- {a:"convex",  b:"resend",  k:"s2s",     l:"API HTTPS", lo:0, lx:16},
- {a:"devbox",  b:"dev",     k:"deploy",  l:"pnpm dev · backend:dev-sync", lo:-14, lx:0},
- {a:"app",     b:"legacy",  k:"plan",    l:"jalur balik — tidak aktif",
-   via:[[440,494],[906,494],[906,341]], lo:-12, lx:-40},
- {a:"legacy",  b:"dash",    k:"plan",    l:"traefik.enable=false + stopped", lo:0, lx:0},
- {a:"devbox",  b:"prepush", k:"deploy",  l:"git push memicu hook", lo:-12},
- {a:"prepush", b:"github",  k:"deploy",  l:"push mendarat setelah gate lulus", lo:-54},
- {a:"prepush", b:"convex",  k:"deploy",  l:"convex deploy (3 tingkat target)",
-   via:[[150,525],[632,525],[632,182]], lo:-12, lx:-232},
- {a:"github",  b:"dokploy", k:"deploy",  l:"webhook GitHub App", lo:-54},
- {a:"github",  b:"actions", k:"plan",    l:"workflow_dispatch — manual saja", lo:0, lx:0},
- {a:"dokploy", b:"app",     k:"deploy",  l:"docker run · URL Convex sudah di-bake",
-   via:[[780,596],[308,596],[308,140]], lo:-12, lx:-100},
- {a:"watch",   b:"app",     k:"s2s",     l:"probe HTTP 200 tiap 3 menit",
-   via:[[1070,560],[610,560],[610,138]], lo:-12, lx:170},
- {a:"watch",   b:"convex",  k:"s2s",     l:"/api/health ready{ai,email}",
-   via:[[920,641],[920,206]], lo:94, lx:0},
- {a:"watch",   b:"legacy",  k:"s2s",     l:"probe legacy",
-   via:[[1222,641],[1222,341]], lo:0, lx:30},
- {a:"backup",  b:"convex",  k:"s2s",     l:"convex export --prod (0 4 * * *)",
-   via:[[1268,761],[1268,78],[906,78]], lo:-12, lx:-92},
- {a:"backup",  b:"archive", k:"s2s",     l:"zip + validasi + prune KEEP=14", lo:0, lx:0},
-];
 
 const FLOWS = [
  {t:"Pengunjung membuka halaman branding publik",
@@ -515,158 +330,410 @@ const UNKNOWNS = [
  ["Jumlah pasti tabel produksi — dua angka berbeda di sumber.","db-backup.md menyebut 52 tabel pada arsip 2026-07-30 dan 54 tabel pada drill; architecture.md menyebut 45 tabel + authTables. Tidak saya rukunkan."],
 ];
 
-/* ------------------------------------------------------------- rendering -- */
-const NW = 240, NH = 86, SVGNS = "http://www.w3.org/2000/svg";
-const byId = Object.fromEntries(N.map(n => [n.id, n]));
-const svg = document.getElementById("map");
+
+
+/* --- Diagram 1: jalur runtime ------------------------------------------- */
+const RUNTIME = {
+  cols: ["AKTOR", "APLIKASI · NEXT.JS 15 · DOKPLOY", "CONVEX CLOUD · PROFICIENT-DOVE-151",
+         "PIHAK KETIGA & SISA LAMA"],
+  nodes: [
+   {id:"browser", c:0, s:"live", t:"Browser pengguna", sub:"careerpack.org · PWA",
+    what:"Titik masuk semua pengguna akhir. Shell responsif memilih layout dari useIsMobile().",
+    facts:["&lt;lg BottomNav 5-slot + AI FAB; ≥lg Sidebar + SiteHeader.",
+           "Query ke Convex reaktif lewat WebSocket — tidak ada layer REST/tRPC di tengah.",
+           "PWA: manifest.webmanifest + sw.js, install lewat InstallSidebarButton."],
+    src:"docs/architecture.md §2,§6,§10"},
+   {id:"host", c:0, s:"live", t:"Host MCP", sub:"ChatGPT · Claude · Cursor",
+    what:"Aplikasi AI pihak ketiga yang menyambung sebagai klien MCP, bertindak atas nama SATU pengguna.",
+    facts:["ChatGPT dan Claude.ai mendaftarkan klien sendiri lewat DCR (RFC 7591).",
+           "Claude Code dan Cursor menempel Bearer langsung lewat file konfigurasi.",
+           "Callback tunduk allowlist redirect di convex/mcp/oauth.ts."],
+    src:"docs/features/mcp.md"},
+   {id:"userapp", c:0, s:"live", t:"Aplikasi buatan pengguna", sub:"skrip · cron · backend",
+    what:"Software yang ditulis pengguna sendiri, tanpa manusia di depan browser.",
+    facts:["Masuk lewat grant_type=client_credentials — tidak melewati layar izin.",
+           "Umur token ditentukan pemanggil; bawaannya tanpa kedaluwarsa.",
+           "Dicabut dari Settings; mencabut API key ikut mematikan tokennya."],
+    src:"docs/features/mcp.md §client_credentials"},
+
+   {id:"app", c:1, s:"live", t:"careerpack.org", sub:"App Router · standalone",
+    what:"Frontend produksi. Dibangun dari Dockerfile root sebagai output standalone.",
+    facts:["Tiga route group: (marketing) publik, (dashboard) catch-all [[...slug]], /admin role-guarded.",
+           "Tambah halaman dashboard = SATU entry di shared/lib/dashboardRegistry.ts.",
+           "NEXT_PUBLIC_CONVEX_URL di-bake saat build — ubah env runtime tidak berefek."],
+    src:"docs/architecture.md §1–3 · Dockerfile:30", vps:true},
+   {id:"slug", c:1, s:"live", t:"Halaman branding /<slug>", sub:"ISR 60 s · iframe sandbox",
+    what:"Satu dokumen HTML milik pengguna di dalam iframe sandbox. Datanya hidup, bukan snapshot.",
+    facts:["Sandbox tanpa allow-same-origin → origin opaque; dokumen kustom juga tanpa allow-forms.",
+           "Marker data-cp menempelkan data CV/portfolio saat render.",
+           "Tidak boleh ada loading.tsx di route ini — memicu soft-404."],
+    src:"docs/features/personal-branding.md", vps:true},
+   {id:"oauth", c:1, s:"live", t:"Endpoint OAuth", sub:"/oauth/authorize · /token",
+    what:"Separuh OAuth yang harus ada di domain aplikasi: layar izin adalah halaman Next.",
+    facts:["Dua grant: authorization_code + PKCE, dan client_credentials.",
+           "Menerima client_secret_post DAN HTTP Basic.",
+           "Base authorization server justru origin .convex.site — beda host, dan itu benar."],
+    src:"docs/features/mcp.md", vps:true},
+   {id:"buildid", c:1, s:"live", t:"/api/build-id", sub:"bukti sebuah deploy mendarat",
+    what:"Satu-satunya cara cepat membuktikan frontend yang jalan adalah build terbaru.",
+    facts:["Push hijau BUKAN bukti frontend ter-deploy — auto-deploy Dokploy intermiten.",
+           "Kalau id tidak berubah dalam ~5 menit, trigger build manual.",
+           "pnpm smoke:watch menunggu id berganti lalu menguji rute utama."],
+    src:"memory: project_dokploy_autodeploy_unreliable", vps:true},
+
+   {id:"data", c:2, s:"live", t:"Query · Mutation · Action", sub:"20 domain · convex/<domain>/",
+    what:"Satu-satunya penyimpan data produksi. Tidak ada database lain.",
+    facts:["requireUser di tiap mutation, optionalUser di tiap list query, requireOwnedDoc untuk kepemilikan.",
+           "Error dilempar dalam bahasa Indonesia; 'tidak ditemukan', bukan 'forbidden', agar tidak bocor enumerasi.",
+           "Nama proyeknya di dashboard masih 'careerpack-restore-drill' — menyesatkan, tapi ini PRODUKSI."],
+    src:"CLAUDE.md §Convex backend · docs/db-backup.md"},
+   {id:"mcp", c:2, s:"live", t:"Server MCP", sub:"/mcp · 74 tool · 16 domain",
+    what:"Permukaan JSON-RPC untuk host AI. Tiap tool terikat pada pemilik token.",
+    facts:["initialize mengirim instructions — brief tingkat server sebelum tool pertama dipanggil.",
+           "Scope mcp.read/mcp.write diturunkan dari annotations.readOnlyHint, ditegakkan per panggilan.",
+           "Rate limit tulis 25/menit, 400/hari."],
+    src:"docs/features/mcp.md · convex/mcp/instructions.ts"},
+   {id:"auth", c:2, s:"live", t:"Auth", sub:"@convex-dev/auth · PBKDF2 100k",
+    what:"Password + Anonymous. Hash kustom PBKDF2-SHA256 100k iterasi.",
+    facts:["Scrypt pernah dipakai dan timeout &gt;60 s di balik reverse proxy Dokploy — jangan dikembalikan.",
+           "Login-or-register satu panggilan: cek /api/auth/check-email (30/jam per IP) lalu signIn.",
+           "seedForCurrentUser hanya membuat baris userProfiles; CV/checklist/roadmap lahir malas."],
+    src:"docs/auth.md · CLAUDE.md §Auth specifics"},
+   {id:"storage", c:2, s:"live", t:"File storage + cron", sub:"blob · crons.ts",
+    what:"Blob upload dan penjadwalan internal Convex.",
+    facts:["Unggah dua langkah: minta upload URL, PUT bytes, lalu daftarkan hasilnya.",
+           "Tautan baca ditandatangani dan kedaluwarsa satu jam.",
+           "Storage ID bertipe v.string() di empat tabel — tidak ada yang mencegah pointer yatim."],
+    src:"docs/features/file-upload.md · memory: project_prod_runtime_config_verified"},
+
+   {id:"ai", c:3, s:"live", t:"Proxy AI", sub:"OpenAI-compatible · OpenRouter",
+    what:"Gateway tunggal semua fitur AI. Kredensial diresolusi hanya di _shared/aiResolve.ts.",
+    facts:["Urutan: aiSettings per-user → globalAISettings → env. Baris DB menang atas env.",
+           "Terverifikasi hidup di produksi 2026-07-30 (openrouter, openai/gpt-4o-mini).",
+           "apiKey bisa ciphertext encv1: atau plaintext — baris lama tidak pernah dimigrasi."],
+    src:"memory: project_prod_runtime_config_verified · docs/deployment.md §10"},
+   {id:"resend", c:3, s:"live", t:"Resend", sub:"email transaksional",
+    what:"Pengirim email selamat datang dan reset kata sandi.",
+    facts:["Terbukti: deliverResetEmail → {ok:true, provider:'resend'} dari support@careerpack.org.",
+           "Akun Resend di konektor MCP claude.ai adalah AKUN LAIN — jangan menyimpulkan apa pun darinya."],
+    src:"memory: project_prod_runtime_config_verified"},
+   {id:"legacy", c:3, s:"partial", t:"Convex self-hosted", sub:"api.careerpack.org · legacy",
+    what:"Stack Docker lama. Masih Up (healthy) dan menjawab 200, tapi tidak melayani apa pun yang user-facing.",
+    facts:["Memegang data pra-cutover dan jadi jalur balik kalau Cloud dilepas.",
+           "Image WAJIB dipin ke digest — image tak-terpin adalah akar insiden 2026-06-11.",
+           "Seluruh datanya di satu volume careerpack-convex-8gdbpk_data."],
+    src:"docs/deployment.md §5c", vps:true},
+   {id:"dash", c:3, s:"off", t:"dash.careerpack.org", sub:"UI admin — dikunci",
+    what:"Dashboard admin stack legacy, sengaja dimatikan 2026-07-30.",
+    facts:["Dua lapis: domain dihapus di Dokploy, DAN traefik.enable true→false lalu container di-stop.",
+           "Lapis kedua yang menentukan — route aktif datang dari label Docker container yang berjalan.",
+           "Hasil: dash → 404, api → 200."],
+    src:"docs/deployment.md §5c", vps:true},
+  ],
+  edges: [
+   {a:"browser", b:"app",     k:"browser", l:"HTTPS · ISR revalidate 60"},
+   {a:"browser", b:"slug",    k:"browser", l:"halaman publik, force-static"},
+   {a:"browser", b:"data",    k:"browser", l:"wss:// query reaktif"},
+   {a:"host",    b:"oauth",   k:"s2s",     l:"OAuth 2.1 PKCE + DCR"},
+   {a:"host",    b:"mcp",     k:"s2s",     l:"JSON-RPC 2.0 + Bearer"},
+   {a:"userapp", b:"oauth",   k:"s2s",     l:"client_credentials (id+secret)"},
+   {a:"userapp", b:"mcp",     k:"s2s",     l:"Bearer · scope mcp.read/write"},
+   {a:"app",     b:"data",    k:"s2s",     l:"ConvexHttpClient (SSR)"},
+   {a:"app",     b:"auth",    k:"s2s",     l:"check-email + signIn"},
+   {a:"slug",    b:"data",    k:"s2s",     l:"payload __cp_data saat ISR"},
+   {a:"oauth",   b:"mcp",     k:"s2s",     l:"createAuthCode / exchangeCode"},
+   {a:"mcp",     b:"data",    k:"s2s",     l:"internal fn, userId dari token"},
+   {a:"data",    b:"ai",      k:"s2s",     l:"requireQuota → sanitize → wrapUserInput"},
+   {a:"data",    b:"resend",  k:"s2s",     l:"API HTTPS"},
+   {a:"data",    b:"storage", k:"s2s",     l:"ctx.storage + scheduler"},
+   {a:"app",     b:"legacy",  k:"plan",    l:"jalur balik — tidak aktif"},
+   {a:"legacy",  b:"dash",    k:"plan",    l:"traefik.enable=false + stopped"},
+  ],
+};
+
+/* --- Diagram 2: commit → produksi --------------------------------------- */
+const DEPLOY = {
+  cols: ["PEMICU", "GERBANG LOKAL", "DISTRIBUSI", "EKSEKUSI", "HASIL"],
+  nodes: [
+   {id:"dev", c:0, s:"live", t:"Mesin dev / agent", sub:"ADA DI VPS PRODUKSI",
+    what:"~/projects/CareerPack ada di mesin yang sama dengan produksi (srv614914.hstgr.cloud).",
+    facts:["Jangan pernah usulkan ssh/scp untuk menjangkau VPS dari sini — baca/tulis filenya langsung.",
+           "crontab -l, docker ps, ~/bin/health-watch.sh langsung tersedia.",
+           "backend/convex-cloud/prod.env kredensial produksi asli; 0600, gitignored, jangan di-source."],
+    src:"memory: project_repo_runs_on_the_vps", vps:true},
+   {id:"prepush", c:1, s:"live", t:"Pre-push hook", sub:"scripts/pre-push.sh",
+    what:"Gerbang otomatis yang sesungguhnya. GitHub Actions manual-only sejak 2026-05-14.",
+    facts:["typecheck + lint + test:coverage + build tiap push. Bypass: SKIP_PUSH_CHECKS=1.",
+           "pnpm build satu-satunya langkah yang menangkap kerusakan build-only.",
+           "Pre-commit terpisah: ESLint --fix + tsc convex. Jangan dilewati dengan --no-verify."],
+    src:"CLAUDE.md §Commands", vps:true},
+   {id:"cvxdeploy", c:1, s:"live", t:"Convex deploy", sub:"3 tingkat target",
+    what:"Kalau push range menyentuh convex/**, fungsi dideploy SEBELUM push mendarat.",
+    facts:["Urutan: prod.env → sesi CLI Convex yang login → self-hosted.",
+           "Resolve ke self-hosted MEMBATALKAN push (bypass ALLOW_NONPROD_CONVEX_DEPLOY=1).",
+           "Hook menyebut target mana yang kena — baca barisnya, jangan diasumsikan."],
+    src:"CLAUDE.md §Commands · docs/deployment.md", vps:true},
+   {id:"github", c:2, s:"live", t:"GitHub — main", sub:"rahmanef63/CareerPack",
+    what:"Satu-satunya branch rilis. Push ke main = web ter-update.",
+    facts:["Tidak ada webhook repo-side: gh api …/hooks mengembalikan nol (Dokploy pakai GitHub App).",
+           "Artinya tidak ada delivery yang bisa diperiksa atau di-replay saat build tidak jalan."],
+    src:"memory: project_dokploy_autodeploy_unreliable"},
+   {id:"actions", c:2, s:"partial", t:"GitHub Actions", sub:"workflow_dispatch saja",
+    what:"Ada, tapi tidak pernah jalan sendiri. Trigger push/PR aslinya disimpan sebagai *.yml.bak.",
+    facts:["Dimatikan 2026-05-14 untuk menekan biaya.",
+           "convex-deploy.yml menyasar backend SELF-HOSTED — tidak menyentuh produksi."],
+    src:"CLAUDE.md §CI"},
+   {id:"dokploy", c:3, s:"partial", t:"Dokploy", sub:"app 9UFO92wvF0mQjEydEvhrP",
+    what:"Membangun image frontend dan menjalankan containernya. Auto-deploy-nya intermiten.",
+    facts:["autoDeploy true, triggerType push, sourceType github ter-set — tapi build pernah tidak terpicu.",
+           "composeStatus = status DEPLOY TERAKHIR, bukan runtime. Cek docker ps dulu.",
+           "Trigger manual: POST application.deploy dengan x-api-key."],
+    src:"memory: project_dokploy_autodeploy_unreliable", vps:true},
+   {id:"prodfe", c:4, s:"live", t:"Container frontend", sub:"careerpack.org",
+    what:"Next.js standalone yang melayani produksi.",
+    facts:["URL Convex sudah ter-bake di image — build arg, bukan env runtime.",
+           "Verifikasi mendarat lewat /api/build-id, bukan lewat status push."],
+    src:"Dockerfile · memory: project_dokploy_autodeploy_unreliable", vps:true},
+   {id:"prodbe", c:4, s:"live", t:"Fungsi Convex produksi", sub:"proficient-dove-151",
+    what:"Schema + fungsi yang benar-benar melayani pengguna.",
+    facts:["Sampai 2026-07-30 hanya jalur self-hosted yang ada dan ia tidak memperingatkan apa pun — perubahan convex/** tidak pernah sampai ke produksi sementara hook melaporkan sukses.",
+           "Kalau kamu mengubah convex/**, pastikan target mana yang menerimanya."],
+    src:"CLAUDE.md tabel deployment"},
+  ],
+  edges: [
+   {a:"dev",       b:"prepush",   k:"deploy", l:"git push memicu hook"},
+   {a:"dev",       b:"cvxdeploy", k:"deploy", l:"diff push range vs convex/**"},
+   {a:"prepush",   b:"github",    k:"deploy", l:"push mendarat setelah gate lulus"},
+   {a:"cvxdeploy", b:"prodbe",    k:"deploy", l:"convex deploy --yes"},
+   {a:"github",    b:"dokploy",   k:"deploy", l:"webhook GitHub App (intermiten)"},
+   {a:"github",    b:"actions",   k:"plan",   l:"workflow_dispatch — manual"},
+   {a:"dokploy",   b:"prodfe",    k:"deploy", l:"docker run image standalone"},
+  ],
+};
+
+/* --- Diagram 3: ops ------------------------------------------------------ */
+const OPS = {
+  cols: ["CRON DI VPS", "YANG DIPERIKSA / DITARIK", "HASIL"],
+  nodes: [
+   {id:"watch", c:0, s:"live", t:"health-watch", sub:"~/bin/health-watch.sh · */3",
+    what:"Watchdog runtime out-of-band. Registry multi-proyek (tech, kongloos, careerpack).",
+    facts:["Yang jalan adalah ~/bin/health-watch.sh — BUKAN salinan repo di backend/convex-self-hosted/ops/.",
+           "Sejak 2026-07-30 probe-nya menyasar Cloud; sebelumnya semua menunjuk self-hosted, jadi outage Cloud akan tampak hijau.",
+           "Self-heal: compose up -d kalau container backend HILANG (bukan sekadar mati)."],
+    src:"docs/deployment.md §5b", vps:true},
+   {id:"backupjob", c:0, s:"live", t:"Backup produksi", sub:"scripts/backup-prod.sh · 0 4",
+    what:"Snapshot harian Convex Cloud produksi, termasuk file storage.",
+    facts:["convex export --prod --include-file-storage.",
+           "Arsip DIVALIDASI: gagal dan dihapus kalau ada baris JSON tak terparse.",
+           "Import drill LULUS 2026-07-30: 54 tabel, 6519 dokumen, nol selisih."],
+    src:"docs/db-backup.md · crontab rahman", vps:true},
+   {id:"pfe", c:1, s:"live", t:"careerpack.org", sub:"HTTP 200",
+    what:"Probe frontend — halaman root harus menjawab 200.",
+    facts:["Dulu probe ini menunjuk domain self-hosted, jadi hijau tidak berarti apa-apa untuk Cloud."],
+    src:"docs/deployment.md §5b"},
+   {id:"phealth", c:1, s:"live", t:"/api/health", sub:"ready:{ai,email}",
+    what:"Cek tercepat tanpa kredensial: db, AI, dan email sekaligus.",
+    facts:["Diperiksa saat menyusun halaman ini: ok:true, ready ai+email dua-duanya true."],
+    src:"memory: project_prod_runtime_config_verified"},
+   {id:"pconvex", c:1, s:"live", t:"Convex Cloud produksi", sub:"sumber export + /version",
+    what:"Target probe /version sekaligus sumber data yang di-export tiap malam.",
+    facts:["Export menarik seluruh tabel + blob, bukan hanya schema."],
+    src:"docs/db-backup.md"},
+   {id:"plegacy", c:1, s:"partial", t:"Stack legacy", sub:"careerpack-legacy-*",
+    what:"Pasangan probe self-hosted, diturunkan namanya agar tidak tertukar dengan produksi.",
+    facts:["Probe container hanya aktif saat SELF_HOSTED=1 — terhadap Cloud tidak ada container untuk diperiksa."],
+    src:"docs/deployment.md §5b", vps:true},
+   {id:"arsip", c:2, s:"partial", t:"Arsip backup", sub:"~/backups/careerpack/",
+    what:"Arsip ada dan terbukti bisa direstore — tapi duduk di mesin yang sama dengan produksi.",
+    facts:["Layer 2 (on-host), BUKAN disaster recovery. Layer 1 = snapshot VPS Hostinger.",
+           "Tidak terenkripsi dan berisi PII — enkripsi dulu sebelum dipindah keluar.",
+           "Retensi KEEP=14."],
+    src:"docs/db-backup.md", vps:true},
+   {id:"alert", c:2, s:"live", t:"Log + alert hook", sub:"~/health-watch.log",
+    what:"Tiap kegagalan / heal / backup basi memanggil ALERT_HOOK.",
+    facts:["No-op kalau hook tidak ada; script tidak pernah exit non-zero karena probe gagal.",
+           "State per-check di ~/.local/state/health-watch/."],
+    src:"docs/deployment.md §5b", vps:true},
+  ],
+  edges: [
+   {a:"watch",     b:"pfe",     k:"s2s", l:"HTTP 200 tiap 3 menit"},
+   {a:"watch",     b:"phealth", k:"s2s", l:"body ok:true"},
+   {a:"watch",     b:"pconvex", k:"s2s", l:"/version 200"},
+   {a:"watch",     b:"plegacy", k:"s2s", l:"probe + self-heal"},
+   {a:"watch",     b:"alert",   k:"s2s", l:"ALERT_HOOK kalau gagal"},
+   {a:"backupjob", b:"pconvex", k:"s2s", l:"convex export --prod"},
+   {a:"backupjob", b:"arsip",   k:"s2s", l:"zip + validasi + prune"},
+  ],
+};
+
+/* ------------------------------------------------------------- rendering --
+   Tata letak dihitung dari (kolom, urutan). Panah = kurva bezier dari sisi
+   kanan node ke sisi kiri node berikutnya; karena tiap diagram hanya mengalir
+   satu arah, tidak ada satu pun jalur yang perlu berkelok mencari celah. */
+const SVGNS = "http://www.w3.org/2000/svg";
+const NW = 210, NH = 54, GAPX = 96, GAPY = 20, PADX = 26, HEADY = 34;
 const el = (n, a = {}) => { const e = document.createElementNS(SVGNS, n);
   for (const k in a) e.setAttribute(k, a[k]); return e; };
+/* Judul node memuat karakter seperti `<slug>`: aman sebagai textContent di SVG,
+   tapi harus di-escape saat baris yang sama dipakai di innerHTML panel. */
+const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/* Anchor pada sisi node yang menghadap tujuan, bukan pada titik pusat — garis
-   yang berangkat dari pusat akan menembus kotaknya sendiri. */
-function anchor(n, tx, ty) {
-  const cx = n.x + NW / 2, cy = n.y + NH / 2;
-  const dx = tx - cx, dy = ty - cy;
-  if (Math.abs(dx) / (NW / 2) > Math.abs(dy) / (NH / 2)) {
-    const s = (NW / 2 + 6) / Math.abs(dx);
-    return [cx + dx * s, cy + dy * s];
-  }
-  const s = (NH / 2 + 6) / Math.abs(dy);
-  return [cx + dx * s, cy + dy * s];
-}
+function renderDiagram(mountId, model) {
+  const mount = document.getElementById(mountId);
+  const byId = Object.fromEntries(model.nodes.map(n => [n.id, n]));
+  const colOf = {}, idx = {};
+  model.nodes.forEach(n => {
+    colOf[n.c] = (colOf[n.c] || 0);
+    idx[n.id] = colOf[n.c]++;
+  });
+  const x = c => PADX + c * (NW + GAPX);
+  const y = i => HEADY + 26 + i * (NH + GAPY);
+  const rows = Math.max(...Object.values(colOf));
+  const W = PADX * 2 + model.cols.length * NW + (model.cols.length - 1) * GAPX + 66;
+  const H = y(rows - 1) + NH + 22;
 
-function defs() {
-  const d = el("defs");
+  mount.innerHTML =
+    '<div class="bar">' +
+      Object.values(KIND).map(k => '<span class="key"><span class="sw" style="border-color:' +
+        k.color + (k.dash ? ";border-top-style:dashed" : "") + '"></span>' + k.label + '</span>').join("") +
+      Object.values(STATUS).map(s => '<span class="key"><span class="dot" style="background:' +
+        s.color + '"></span>' + s.label + '</span>').join("") +
+      '<span class="grow"></span>' +
+      '<span style="display:flex;gap:8px;white-space:nowrap">' +
+      '<button type="button" data-act="labels" aria-pressed="false">Label semua panah</button>' +
+      '<button type="button" data-act="reset">Reset</button></span>' +
+    '</div>' +
+    '<div class="scroll"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+      'aria-label="Diagram: ' + model.cols.join(", ") + '"></svg></div>' +
+    '<div class="panel"></div>';
+
+  const svg = mount.querySelector("svg"), panel = mount.querySelector(".panel");
+  const defs = el("defs");
   for (const k in KIND) {
-    const m = el("marker", {id:"ar-" + k, viewBox:"0 0 10 10", refX:"9", refY:"5",
+    const m = el("marker", {id:mountId + "-ar-" + k, viewBox:"0 0 10 10", refX:"9", refY:"5",
       markerWidth:"6", markerHeight:"6", orient:"auto-start-reverse"});
     m.appendChild(el("path", {d:"M0,0 L10,5 L0,10 z", fill:KIND[k].color}));
-    d.appendChild(m);
+    defs.appendChild(m);
   }
-  svg.appendChild(d);
-}
+  svg.appendChild(defs);
 
-function lanes() {
-  for (const L of LANES) {
-    svg.appendChild(el("rect", {class:"lane", x:L.x, y:L.y, width:L.w, height:L.h}));
-    const t = el("text", {class:"lanelabel", x:L.x + 14, y:L.y + 18});
-    t.textContent = L.label; svg.appendChild(t);
-  }
-}
+  model.cols.forEach((label, c) => {
+    const n = model.nodes.filter(nn => nn.c === c).length;
+    svg.appendChild(el("rect", {class:"colbox", x:x(c) - 13, y:HEADY + 6,
+      width:NW + 26, height:y(n - 1) + NH - HEADY - 6 + 12}));
+    const t = el("text", {class:"colhead", x:x(c) - 13, y:HEADY - 6});
+    t.textContent = label; svg.appendChild(t);
+  });
 
-const edgeEls = [];
-function edges() {
-  for (const e of E) {
+  const edgeEls = [];
+  model.edges.forEach((e, ei) => {
     const A = byId[e.a], B = byId[e.b];
-    const first = e.via ? e.via[0] : [B.x + NW / 2, B.y + NH / 2];
-    const last  = e.via ? e.via[e.via.length - 1] : [A.x + NW / 2, A.y + NH / 2];
-    const p1 = anchor(A, first[0], first[1]);
-    const p2 = anchor(B, last[0], last[1]);
-    const pts = [p1, ...(e.via || []), p2];
-    const d = "M" + pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
-
+    const ax = x(A.c) + NW, ay = y(idx[A.id]) + NH / 2;
+    const sameCol = A.c === B.c;
+    const bx = sameCol ? x(B.c) + NW : x(B.c), by = y(idx[B.id]) + NH / 2;
+    /* Satu kolom: keluar kanan, turun, masuk kanan lagi — tidak ada persilangan
+       karena pasangannya selalu bertetangga. */
+    const d = sameCol
+      ? "M" + ax + "," + ay + " C" + (ax + 52) + "," + ay + " " + (bx + 52) + "," + by +
+        " " + bx + "," + by
+      : "M" + ax + "," + ay + " C" + (ax + (bx - ax) * .55) + "," + ay + " " +
+        (bx - (bx - ax) * .55) + "," + by + " " + bx + "," + by;
     const g = el("g", {class:"edge", "data-a":e.a, "data-b":e.b});
-    const kind = KIND[e.k];
-    g.appendChild(el("path", {d, stroke:kind.color, "marker-end":"url(#ar-" + e.k + ")",
-      ...(kind.dash ? {"stroke-dasharray":kind.dash} : {})}));
-
-    /* Label di titik tengah panjang lintasan, digeser tegak lurus lewat `lo`
-       lewat `lo` (tegak) dan `lx` (datar) supaya dua garis yang berdempet tidak
-       menumpuk teksnya. Nilai-nilainya hasil melihat screenshot, bukan hitungan. */
-    const mid = pts.length % 2 ? pts[(pts.length - 1) / 2]
-      : [(pts[pts.length / 2 - 1][0] + pts[pts.length / 2][0]) / 2,
-         (pts[pts.length / 2 - 1][1] + pts[pts.length / 2][1]) / 2];
-    const w = e.l.length * 5.55 + 14;
-    const off = e.lo === undefined ? -11 : e.lo, ox = e.lx || 0;
-    g.appendChild(el("rect", {x:mid[0] + ox - w / 2, y:mid[1] + off - 9, width:w, height:17}));
-    const t = el("text", {x:mid[0] + ox, y:mid[1] + off + 3, "text-anchor":"middle"});
-    t.textContent = e.l; g.appendChild(t);
+    g.appendChild(el("path", {d, stroke:KIND[e.k].color,
+      "marker-end":"url(#" + mountId + "-ar-" + e.k + ")",
+      ...(KIND[e.k].dash ? {"stroke-dasharray":KIND[e.k].dash} : {})}));
+    /* Label duduk di titik tengah kurva yang sebenarnya, bukan di tengah garis
+       lurus antar-node — di kurva yang melengkung tajam keduanya berjauhan. */
+    const lg = el("g", {class:"lbl"});
+    /* Stagger tegak per indeks: waktu SEMUA label dinyalakan sekaligus, dua
+       kurva yang berpotongan di tengah akan menaruh kotaknya di titik yang
+       nyaris sama. Menggeser bergiliran lebih murah daripada uji tabrakan. */
+    /* 0,58 ke arah tujuan, bukan tepat di tengah: label yang lebih lebar dari
+       celah antar-kolom akan menabrak node ASAL kalau ditaruh di titik tengah. */
+    const mx = sameCol ? ax + 42 : ax + (bx - ax) * .58;
+    const my = (ay + by) / 2 + ((ei % 3) - 1) * 12;
+    const w = e.l.length * 5.3 + 12;
+    lg.appendChild(el("rect", {x:mx - w / 2, y:my - 8.5, width:w, height:16}));
+    const t = el("text", {x:mx, y:my + 3.5, "text-anchor":"middle"});
+    t.textContent = e.l; lg.appendChild(t); g.appendChild(lg);
     svg.appendChild(g); edgeEls.push({g, a:e.a, b:e.b});
-  }
-}
+  });
 
-function nodes() {
-  for (const n of N) {
+  for (const n of model.nodes) {
+    const nx = x(n.c), ny = y(idx[n.id]);
     const g = el("g", {class:"nd", "data-id":n.id, tabindex:"0", role:"button",
       "aria-label":n.t + " — " + STATUS[n.s].label});
-    g.appendChild(el("rect", {class:"body", x:n.x, y:n.y, width:NW, height:NH}));
-    g.appendChild(el("rect", {x:n.x, y:n.y, width:4, height:NH, rx:2,
+    g.appendChild(el("rect", {class:"body", x:nx, y:ny, width:NW, height:NH}));
+    const t = el("text", {class:"t", x:nx + 14, y:ny + 22}); t.textContent = n.t;
+    const s = el("text", {class:"s", x:nx + 14, y:ny + 38}); s.textContent = n.sub;
+    g.appendChild(t); g.appendChild(s);
+    g.appendChild(el("circle", {cx:nx + NW - 13, cy:ny + 14, r:4.5,
       fill:STATUS[n.s].color}));
-    const title = el("text", {class:"t", x:n.x + 16, y:n.y + 25});
-    title.textContent = n.t; g.appendChild(title);
-    n.sub.forEach((s, i) => {
-      const st = el("text", {class:"s", x:n.x + 16, y:n.y + 43 + i * 14});
-      st.textContent = s; g.appendChild(st);
-    });
-    const st = el("text", {class:"h", x:n.x + 16, y:n.y + NH - 9});
-    st.textContent = STATUS[n.s].label.toUpperCase() + (n.vps ? "  ·  DI VPS" : "");
-    st.setAttribute("fill", STATUS[n.s].color); st.setAttribute("opacity", ".85");
-    g.appendChild(st);
     svg.appendChild(g);
   }
-}
 
-const panel = document.getElementById("panel");
-function showPanel(n) {
-  if (!n) {
-    panel.innerHTML = '<h4>Belum ada yang dipilih</h4>' +
-      '<p class="hint">Klik sebuah node untuk melihat perannya, fakta yang mengikat, ' +
-      'dan dokumen asalnya. Warna garis menandai jenis hubungan; label di garis ' +
-      'menyebut mekanismenya.</p>';
-    return;
+  function show(n) {
+    if (!n) {
+      panel.innerHTML = '<p class="hint">Klik sebuah node untuk melihat perannya, fakta yang ' +
+        'mengikat, dan dokumen asalnya. Titik di pojok kanan atas node = statusnya.</p>';
+      return;
+    }
+    const links = model.edges.filter(e => e.a === n.id || e.b === n.id).map(e => {
+      const other = e.a === n.id ? byId[e.b].t : byId[e.a].t;
+      return '<li><span style="color:' + KIND[e.k].color + '">' +
+        (e.a === n.id ? "→" : "←") + '</span> ' + esc(other) +
+        ' <span style="color:var(--faint)">· ' + e.l + '</span></li>';
+    }).join("");
+    panel.innerHTML =
+      '<h4>' + esc(n.t) + '</h4>' +
+      '<p class="st" style="color:' + STATUS[n.s].color + '">' + STATUS[n.s].label +
+        (n.vps ? " · berjalan di VPS produksi" : "") + '</p>' +
+      '<div class="grid"><div>' +
+        '<p style="font-size:.9rem;color:#cbd5e1">' + n.what + '</p>' +
+        '<ul>' + n.facts.map(f => '<li>' + f + '</li>').join("") + '</ul>' +
+        '<p class="src">Sumber: ' + n.src + '</p>' +
+      '</div><div><p class="lbl">Hubungan</p><ul>' + links + '</ul></div></div>';
   }
-  const links = E.filter(e => e.a === n.id || e.b === n.id).map(e => {
-    const other = e.a === n.id ? byId[e.b].t : byId[e.a].t;
-    const dir = e.a === n.id ? "→" : "←";
-    return '<li><span style="color:' + KIND[e.k].color + '">' + dir + '</span> ' +
-      other + ' <span style="color:var(--faint)">· ' + e.l + '</span></li>';
-  }).join("");
-  panel.innerHTML =
-    '<h4>' + n.t + '</h4>' +
-    '<p class="st" style="color:' + STATUS[n.s].color + '">' + STATUS[n.s].label +
-      (n.vps ? " · berjalan di VPS produksi" : "") + '</p>' +
-    '<p style="font-size:.88rem;color:#cbd5e1">' + n.what + '</p>' +
-    '<ul>' + n.facts.map(f => '<li>' + f + '</li>').join("") + '</ul>' +
-    '<p class="st" style="margin:14px 0 0;color:var(--faint)">Hubungan</p>' +
-    '<ul>' + links + '</ul>' +
-    '<p class="src">Sumber: ' + n.src + '</p>';
-}
 
-function select(id) {
-  const on = !!id;
-  svg.classList.toggle("sel", on);
-  svg.querySelectorAll(".nd").forEach(g => {
-    const me = g.dataset.id === id;
-    const nb = on && E.some(e => (e.a === id && e.b === g.dataset.id) ||
-                                 (e.b === id && e.a === g.dataset.id));
-    g.classList.toggle("hi", me || nb);
-    g.classList.toggle("act", me);
+  function select(id) {
+    svg.classList.toggle("sel", !!id);
+    svg.querySelectorAll(".nd").forEach(g => {
+      const me = g.dataset.id === id;
+      const nb = id && model.edges.some(e => (e.a === id && e.b === g.dataset.id) ||
+                                             (e.b === id && e.a === g.dataset.id));
+      g.classList.toggle("hi", !!(me || nb));
+      g.classList.toggle("act", me);
+    });
+    edgeEls.forEach(({g, a, b}) => g.classList.toggle("hi", !!id && (a === id || b === id)));
+    show(id ? byId[id] : null);
+  }
+
+  svg.addEventListener("click", ev => {
+    const g = ev.target.closest(".nd"); select(g ? g.dataset.id : null);
   });
-  edgeEls.forEach(({g, a, b}) => g.classList.toggle("hi", on && (a === id || b === id)));
-  showPanel(on ? byId[id] : null);
+  svg.addEventListener("keydown", ev => {
+    if (ev.key === "Enter" || ev.key === " ") {
+      const g = ev.target.closest(".nd");
+      if (g) { ev.preventDefault(); select(g.dataset.id); }
+    }
+  });
+  mount.querySelector('[data-act="labels"]').addEventListener("click", ev => {
+    const on = mount.classList.toggle("labels");
+    ev.currentTarget.setAttribute("aria-pressed", String(on));
+  });
+  mount.querySelector('[data-act="reset"]').addEventListener("click", () => {
+    mount.classList.remove("labels");
+    mount.querySelector('[data-act="labels"]').setAttribute("aria-pressed", "false");
+    select(null);
+  });
+  document.addEventListener("keydown", ev => { if (ev.key === "Escape") select(null); });
+  show(null);
 }
 
-defs(); lanes(); edges(); nodes(); showPanel(null);
+renderDiagram("d-runtime", RUNTIME);
+renderDiagram("d-deploy", DEPLOY);
+renderDiagram("d-ops", OPS);
 
-svg.addEventListener("click", ev => {
-  const g = ev.target.closest(".nd");
-  select(g ? g.dataset.id : null);
-});
-svg.addEventListener("keydown", ev => {
-  if (ev.key === "Enter" || ev.key === " ") {
-    const g = ev.target.closest(".nd");
-    if (g) { ev.preventDefault(); select(g.dataset.id); }
-  }
-});
-document.addEventListener("keydown", ev => { if (ev.key === "Escape") select(null); });
-
-/* legend */
-document.getElementById("legend").innerHTML =
-  Object.values(STATUS).map(s =>
-    '<div><span class="dot" style="background:' + s.color + '"></span>' + s.label + '</div>').join("") +
-  Object.values(KIND).map(k =>
-    '<div><span class="sw" style="border-top-color:' + k.color +
-    (k.dash ? ";border-top-style:dashed" : "") + '"></span>' + k.label + '</div>').join("");
 
 document.getElementById("flows").innerHTML = FLOWS.map((f, i) =>
   '<div class="flowcard"><h3>' + String.fromCharCode(65 + i) + ' · ' + f.t + '</h3>' +
