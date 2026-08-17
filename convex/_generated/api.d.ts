@@ -60,6 +60,7 @@ import type * as _shared_stableHash from "../_shared/stableHash.js";
 import type * as _shared_url from "../_shared/url.js";
 import type * as _shared_validate from "../_shared/validate.js";
 import type * as admin_aggregator from "../admin/aggregator.js";
+import type * as admin_aiCreds from "../admin/aiCreds.js";
 import type * as admin_bootstrap from "../admin/bootstrap.js";
 import type * as admin_cleanup from "../admin/cleanup.js";
 import type * as admin_lib_cascadeDelete from "../admin/lib/cascadeDelete.js";
@@ -266,6 +267,7 @@ declare const fullApi: ApiFromModules<{
   "_shared/url": typeof _shared_url;
   "_shared/validate": typeof _shared_validate;
   "admin/aggregator": typeof admin_aggregator;
+  "admin/aiCreds": typeof admin_aiCreds;
   "admin/bootstrap": typeof admin_bootstrap;
   "admin/cleanup": typeof admin_cleanup;
   "admin/lib/cascadeDelete": typeof admin_lib_cascadeDelete;

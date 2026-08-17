@@ -30,9 +30,15 @@
 >   claims and both get proven on every run.
 > - ⚠️ **Same box as production.** The archives sit on the machine that also runs
 >   the frontend container, so this is Layer 2 (on-host), not disaster recovery.
->   Off-host copies are still the Hostinger VPS snapshot (Layer 1). The archives
->   are unencrypted and contain user PII — encrypt before ever moving them
->   off-box.
+>   Off-host copies are still the Hostinger VPS snapshot (Layer 1).
+> - ✅ **Encryption is now possible** (2026-08-17). Set `BACKUP_PASSPHRASE_FILE`
+>   and `scripts/backup-prod.sh` encrypts the VERIFIED archive with
+>   `gpg --symmetric --cipher-algo AES256`, deletes the plaintext zip, and keeps
+>   pruning both extensions. Same knob and same cipher as the self-hosted
+>   `backup.sh` — one convention, not two. Restore with
+>   `gpg --decrypt -o restored.zip <archive>.zip.gpg`. **Not enabled by default**:
+>   it is a knob, so an archive is only encrypted once someone sets the file.
+>   Until then the archives remain plaintext PII and must not leave the box.
 > - ✅ **Import drill PASSED 2026-07-30.** A throwaway project
 >   (`careerpack-restore-drill`, dev deployment `effervescent-hedgehog-352`) was
 >   created for the purpose, the current `convex/` schema pushed to it, and
@@ -124,7 +130,22 @@ Path-path lain dipertimbangkan & ditunda — lihat *Alternatives Considered* di 
 
 Script siap pakai: [`backend/convex-self-hosted/backup.sh`](../backend/convex-self-hosted/backup.sh). Ini auto-detect volume name, snapshot read-only (zero downtime), dan prune arsip > retention. Idempotent — safe untuk re-run.
 
-Eksekusi via SSH ke Dokploy host:
+> ⚠️ **Repo ini ADA di host itu.** `/home/rahman/projects/CareerPack` berjalan di
+> `srv614914.hstgr.cloud` — mesin yang sama dengan Dokploy, semua container, dan Convex
+> self-hosted. Jadi `scp`/`ssh root@<host>` di bawah ini bukan cuma tidak perlu, tapi
+> menyesatkan: perintahnya gagal verifikasi host-key dan menghabiskan waktu untuk
+> masalah yang tidak ada. Dari checkout ini, **salin filenya langsung** dan jalankan
+> `crontab -e` di tempat. Blok SSH dipertahankan untuk kasus deploy di host LAIN.
+
+**Dari host itu sendiri (kasus repo ini):**
+
+```bash
+install -m 755 backend/convex-self-hosted/backup.sh /opt/careerpack/backup.sh
+/opt/careerpack/backup.sh                 # smoke test sekali
+sudo crontab -e                           # tambahkan baris di bawah
+```
+
+**Kalau host-nya berbeda dari mesin tempat kamu mengetik:**
 
 ```bash
 # 1. Copy script ke host

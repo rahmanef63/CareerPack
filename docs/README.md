@@ -31,7 +31,7 @@ CareerPack/
 │  └─ _shared/        Server helpers (auth guard, rate limit, sanitize, env)
 ├─ backend/convex-self-hosted/   Optional: Docker Compose stack
 ├─ docs/              ← you are here
-└─ .github/workflows/ CI (typecheck/lint/test/build) + Convex auto-deploy
+└─ .github/workflows/ workflow_dispatch SAJA sejak 2026-05-14 — gerbang nyata = pre-push hook
 ```
 
 ## Design Principles

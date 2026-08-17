@@ -33,7 +33,9 @@ Default `.env.local` mengarah ke prod self-hosted (`<your-convex-backend>`). Unt
 | `pnpm backend:deploy` | Deploy ke stack self-hosted legacy — **bukan** produksi |
 | `pnpm backend:admin-key` | Generate admin key dari container self-hosted |
 
-Script `backend:dev*` + `backend:deploy` memakai `--env-file backend/convex-self-hosted/convex.env`; `backend:deploy-prod` memakai `backend/convex-cloud/prod.env`. Dua-duanya secret — jangan commit, jangan `source` (nilai deploy key mengandung `|`).
+`backend:dev` dan `backend:dev-sync` menjalankan `convex dev` **tanpa** `--env-file`, jadi keduanya menyasar deployment yang disebut `CONVEX_DEPLOYMENT` di `.env.local` (Convex Cloud dev). Yang memakai env-file tinggal dua: `backend:deploy` → `backend/convex-self-hosted/convex.env` (legacy), `backend:deploy-prod` → `backend/convex-cloud/prod.env` (produksi). Dua-duanya secret — jangan commit, jangan `source` (nilai deploy key mengandung `|`).
+
+> Kenapa ini penting: selama `backend:dev-sync` masih menunjuk env-file self-hosted, ia menulis ulang `.env.local` dan menghapus baris `CONVEX_DEPLOYMENT` — yang menurunkan pre-push hook dari tier 2 ke tier 3, dan sejak tier 3 membatalkan push, itu tampil sebagai push yang ditolak tanpa sebab yang jelas. Lihat [CLAUDE.md](../CLAUDE.md) bagian Commands.
 
 ## 4. Env Matrix
 
@@ -89,7 +91,7 @@ pnpm exec convex dev             # interaktif: pilih / buat deployment
 pnpm dev
 ```
 
-Catatan: script `backend:dev` saat ini point ke `--env-file backend/convex-self-hosted/convex.env`. Untuk Convex cloud, jalankan langsung `pnpm exec convex dev` tanpa env-file.
+Catatan: `pnpm backend:dev` **sudah** menjalankan `convex dev` tanpa env-file, jadi opsi B tidak butuh perintah khusus — `CONVEX_DEPLOYMENT` di `.env.local` yang menentukan sasarannya.
 
 ## 6. Coding Conventions
 

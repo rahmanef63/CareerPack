@@ -180,7 +180,27 @@ menangkap cron backup yang mati diam-diam.
 push yang sudah ada di host). No-op kalau hook tidak ada/tidak executable;
 script tidak pernah exit non-zero karena probe gagal (cron tetap jalan).
 
-**Pasang via SSH ke host:**
+> ⚠️ **Repo ini ADA di host itu.** `/home/rahman/projects/CareerPack` berjalan di
+> `srv614914.hstgr.cloud` — mesin yang sama dengan Dokploy, semua container, dan Convex
+> self-hosted. Jadi `scp`/`ssh root@<host>` di bawah ini bukan cuma tidak perlu, tapi
+> menyesatkan: perintahnya gagal verifikasi host-key dan menghabiskan waktu untuk
+> masalah yang tidak ada. Dari checkout ini, **salin filenya langsung** dan jalankan
+> `crontab -e` di tempat. Blok SSH dipertahankan untuk kasus deploy di host LAIN.
+
+**Dari host itu sendiri (kasus repo ini):**
+
+```bash
+install -m 755 backend/convex-self-hosted/ops/health-watch.sh /opt/careerpack/health-watch.sh
+install -m 755 backend/convex-self-hosted/ops/install-cron.sh  /opt/careerpack/install-cron.sh
+/opt/careerpack/health-watch.sh          # smoke test sekali
+VOLUME_NAME=careerpack-convex-8gdbpk_data /opt/careerpack/install-cron.sh
+```
+
+> Catatan: watchdog yang BENAR-BENAR jalan di host ini adalah `~/bin/health-watch.sh`
+> (registry multi-proyek, crontab `rahman`), bukan salinan di `/opt/careerpack/`. Lihat
+> peringatan di atas.
+
+**Kalau host-nya berbeda dari mesin tempat kamu mengetik:**
 
 ```bash
 # 1. Copy ops scripts ke host
@@ -317,15 +337,31 @@ jalan — `openssl rand -hex 32` cuma default yang aman.
   Sengaja — key hasil OAuth tidak pernah dilihat user, jadi user tidak bisa
   merotasi sesuatu yang bocor tanpa dia pernah tahu key itu ada.
 
-**Tidak ada migrasi.** Baris yang sudah ada TIDAK ikut dienkripsi waktu env
+**Tidak ada migrasi OTOMATIS.** Baris yang sudah ada TIDAK ikut dienkripsi waktu env
 di-set; ciphertext-nya self-describing (`encv1:`) dan read path (`decryptCred`
 lewat `_shared/aiResolve.ts`) menerima dua-duanya. Enkripsi hanya kena baris
 yang ditulis SETELAH env ada.
 
+**Menutup ekor plaintext-nya** (baris yang ditulis sebelum env ada) —
+`convex/admin/aiCreds.ts`, dry-run secara bawaan seperti `admin/cleanup.ts`:
+
+```bash
+# hitung dulu: berapa baris yang masih polos, tanpa mengubah apa pun
+npx convex run --prod admin/aiCreds:reencryptAICreds '{}'
+# lalu tulis
+npx convex run --prod admin/aiCreds:reencryptAICreds '{"apply":true}'
+```
+
+Idempotent, melewati baris tanpa key, dan menolak menulis kalau `AI_CRED_SECRET`
+belum ada (tetap mengembalikan hitungannya). `updatedAt` sengaja tidak diubah —
+itu mencatat kapan manusia terakhir mengedit setelan, dan enkripsi ulang bukan
+suntingan siapa pun.
+
 ⚠️ **Ganti/hapus nilainya = kehilangan.** Baris `encv1:` yang sudah ada gagal
 didekripsi, dan AI action-nya error *"Kredensial AI tidak bisa didekripsi —
-AI_CRED_SECRET berubah atau salah."* Tidak ada script re-encrypt; pemulihannya
-manual — user simpan ulang key-nya, admin simpan ulang global key.
+AI_CRED_SECRET berubah atau salah."* Setelah menjalankan re-enkripsi di atas,
+plaintext-nya sudah tidak ada lagi untuk dibaca ulang — jadi catat secretnya di
+password manager SEBELUM, bukan sesudah.
 `scripts/backup-prod.sh` menyimpan tabel + file storage, **bukan** env, jadi
 nilai ini harus dicatat terpisah (password manager) — snapshot Convex tidak
 akan mengembalikannya.
