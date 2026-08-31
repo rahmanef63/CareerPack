@@ -51,6 +51,11 @@ interface GuideDocument {
   notes?: string;
 }
 
+interface GuideSource {
+  label: string;
+  url: string;
+}
+
 interface CountryGuide {
   slug: string;
   country: string;
@@ -58,6 +63,8 @@ interface CountryGuide {
   flag?: string;
   description?: string;
   documents: GuideDocument[];
+  sources?: GuideSource[];
+  lastVerified?: string;
 }
 
 /**
@@ -196,6 +203,7 @@ export default async function CountryGuidePage({ params }: PageProps) {
     about: { "@type": "Country", name: guide.countryLabel },
     author: { "@type": "Organization", name: "CareerPack", url: SITE_URL },
     publisher: { "@type": "Organization", name: "CareerPack", url: SITE_URL },
+    ...(guide.lastVerified ? { dateModified: guide.lastVerified } : {}),
   };
 
   const breadcrumbLd = {
@@ -324,6 +332,45 @@ export default async function CountryGuidePage({ params }: PageProps) {
                 pribadi Anda. Selalu verifikasi ke kedutaan atau perwakilan
                 resmi {guide.countryLabel} sebelum mengurus berkas apa pun.
               </p>
+
+              {(guide.lastVerified || (guide.sources && guide.sources.length > 0)) && (
+                <div className="mt-3 border-t border-warning/20 pt-3 text-sm text-foreground/80">
+                  {guide.lastVerified && (
+                    <p>
+                      Data pada halaman ini diverifikasi terakhir pada{" "}
+                      <span className="font-medium text-foreground">
+                        {new Date(guide.lastVerified).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                      .
+                    </p>
+                  )}
+                  {guide.sources && guide.sources.length > 0 && (
+                    <>
+                      <p className="mt-1.5 text-xs uppercase tracking-[0.1em] text-muted-foreground">
+                        Sumber
+                      </p>
+                      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                        {guide.sources.map((s) => (
+                          <li key={s.url}>
+                            <a
+                              href={s.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline underline-offset-4 hover:text-brand"
+                            >
+                              {s.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
