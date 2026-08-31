@@ -1,0 +1,69 @@
+import type { SeedCountryDocs } from "./types";
+
+export const TW_DOCS: SeedCountryDocs = {
+  country: "TW",
+  countryLabel: "Taiwan",
+  flag: "🇹🇼",
+  description: "Dokumen untuk izin kerja white-collar (spesialis/teknis) maupun blue-collar (pabrik, caregiver) via agensi resmi.",
+  documents: [
+    {
+      id: "tw-work-permit",
+      title: "Izin Kerja (Work Permit)",
+      description: "Diajukan pemberi kerja SEBELUM kedatangan — wajib terbit dulu sebelum bekerja secara legal.",
+      category: "visa",
+      required: true,
+      issuingAuthority: "Workforce Development Agency (WDA), Kementerian Tenaga Kerja",
+    },
+    {
+      id: "tw-employment-contract",
+      title: "Kontrak Kerja",
+      description: "Untuk jalur blue-collar (pabrik/caregiver) wajib melalui agensi penyalur berlisensi.",
+      category: "employment",
+      required: true,
+    },
+    {
+      id: "tw-passport",
+      title: "Paspor",
+      description: "Paspor RI yang masih berlaku.",
+      category: "travel",
+      required: true,
+      issuingAuthority: "Imigrasi RI",
+    },
+    {
+      id: "tw-pre-departure-medical",
+      title: "Surat Kesehatan Pra-Keberangkatan",
+      description: "Rontgen dada (TB), serologi sifilis, pemeriksaan feses/parasit, titer campak-rubella — di klinik resmi berizin.",
+      category: "health",
+      required: true,
+    },
+    {
+      id: "tw-arc",
+      title: "ARC (Alien Resident Certificate)",
+      description: "Wajib diajukan dalam 15 hari setelah tiba di Taiwan.",
+      category: "identity",
+      required: true,
+      issuingAuthority: "National Immigration Agency (NIA)",
+    },
+    {
+      id: "tw-recurring-checkup",
+      title: "Pemeriksaan Kesehatan Berkala",
+      description: "Jadwal rutin selama masa kerja sesuai ketentuan WDA/CDC.",
+      category: "health",
+      required: true,
+    },
+    {
+      id: "tw-nhi",
+      title: "Pendaftaran NHI (National Health Insurance)",
+      description: "Asuransi kesehatan nasional Taiwan — aktif setelah masa tunggu tertentu sejak kedatangan.",
+      category: "insurance",
+      required: true,
+    },
+    {
+      id: "tw-degree",
+      title: "Ijazah/Sertifikasi",
+      description: "Jalur white-collar (spesialis/teknis, manajerial): ijazah min S1 atau sertifikasi kompetensi relevan bidang.",
+      category: "education",
+      required: false,
+    },
+  ],
+};
