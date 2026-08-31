@@ -26,6 +26,7 @@ import type { Application, ApplicationStatus } from "../types";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { DataTable } from "@/shared/components/data-table";
 import { STATUS_META } from "../constants/status";
+import { getResponseRateStat } from "@/shared/lib/responseRate";
 import { StatCard } from "./career-dashboard/StatCard";
 import { AddApplicationDialog } from "./career-dashboard/AddApplicationDialog";
 import {
@@ -58,14 +59,8 @@ export function CareerDashboard() {
     const offer = applications.filter(
       (a) => a.status === "offer" || a.status === "accepted",
     ).length;
-    const responseRate =
-      total === 0
-        ? 0
-        : Math.round(
-            (applications.filter((a) => a.status !== "applied").length / total) *
-              100,
-          );
-    return { total, applied, interview, offer, responseRate };
+    const responseRateStat = getResponseRateStat(applications);
+    return { total, applied, interview, offer, responseRateStat };
   }, [applications]);
 
   // Errors come from the hook (withMutationToast). Success notify is
@@ -161,9 +156,9 @@ export function CareerDashboard() {
         <StatCard
           icon={TrendingUp}
           label="Tingkat Respons"
-          value={`${stats.responseRate}%`}
+          value={stats.responseRateStat.display}
           tone="amber"
-          sub={stats.responseRate >= 30 ? "Bagus" : "Tingkatkan kualitas CV"}
+          sub={stats.responseRateStat.sub}
         />
       </section>
 
