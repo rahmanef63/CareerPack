@@ -1,0 +1,75 @@
+import type { SeedCountryDocs } from "./types";
+
+export const GB_DOCS: SeedCountryDocs = {
+  country: "GB",
+  countryLabel: "Inggris (UK)",
+  flag: "🇬🇧",
+  description: "Dokumen untuk Skilled Worker Visa — jalur utama profesional skilled ke Inggris, disponsori pemberi kerja berlisensi.",
+  documents: [
+    {
+      id: "gb-cos",
+      title: "Certificate of Sponsorship (CoS)",
+      description: "Diterbitkan pemberi kerja berlisensi UKVI — syarat mutlak sebelum apply visa.",
+      category: "employment",
+      required: true,
+      issuingAuthority: "UK Visas and Immigration (UKVI)",
+    },
+    {
+      id: "gb-passport",
+      title: "Paspor",
+      description: "Paspor RI yang masih berlaku.",
+      category: "travel",
+      required: true,
+      issuingAuthority: "Imigrasi RI",
+    },
+    {
+      id: "gb-english",
+      title: "Bukti Kemampuan Bahasa Inggris",
+      description: "Skor tes (IELTS/setara) atau ijazah berbahasa Inggris sesuai standar UKVI.",
+      category: "language",
+      required: true,
+    },
+    {
+      id: "gb-qualification",
+      title: "Sertifikat Kualifikasi Relevan Posisi",
+      description: "Ijazah/sertifikasi sesuai kode SOC pekerjaan yang disponsori.",
+      category: "qualification",
+      required: true,
+    },
+    {
+      id: "gb-tb-test",
+      title: "Tes Tuberkulosis (TB)",
+      description: "Wajib di klinik yang disetujui UK untuk pemohon asal Indonesia yang tinggal >6 bulan.",
+      category: "health",
+      required: true,
+    },
+    {
+      id: "gb-ihs",
+      title: "Immigration Health Surcharge (IHS)",
+      description: "Biaya tahunan wajib dibayar saat aplikasi visa untuk akses NHS selama tinggal di UK.",
+      category: "financial",
+      required: true,
+    },
+    {
+      id: "gb-maintenance-funds",
+      title: "Bukti Dana Cukup (Maintenance Funds)",
+      description: "Kecuali disertifikasi pemberi kerja — tunjukkan saldo tabungan minimum sesuai ketentuan UKVI terkini.",
+      category: "financial",
+      required: false,
+    },
+    {
+      id: "gb-criminal-record",
+      title: "Surat Keterangan Catatan Kepolisian (SKCK, Dilegalisir)",
+      description: "Wajib untuk sektor tertentu (kesehatan, pendidikan, pekerjaan sensitif) — legalisir & terjemahan tersumpah.",
+      category: "legal",
+      required: false,
+    },
+    {
+      id: "gb-visa-application",
+      title: "Aplikasi Skilled Worker Visa + Biometrik",
+      description: "Pengajuan online via UKVI, dilanjutkan janji temu biometrik di VFS Global.",
+      category: "visa",
+      required: true,
+    },
+  ],
+};

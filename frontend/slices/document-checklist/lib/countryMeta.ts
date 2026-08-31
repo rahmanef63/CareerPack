@@ -36,11 +36,17 @@ export const COUNTRY_META: Record<string, CountryMeta> = {
   JP: { continent: "asia", workLanguages: ["Jepang", "Inggris"] },
   KR: { continent: "asia", workLanguages: ["Korea", "Inggris"] },
   SG: { continent: "asia", workLanguages: ["Inggris"] },
+  MY: { continent: "asia", workLanguages: ["Melayu", "Inggris"] },
+  TW: { continent: "asia", workLanguages: ["Mandarin", "Inggris"] },
+  HK: { continent: "asia", workLanguages: ["Kanton", "Inggris"] },
   AU: { continent: "oceania", workLanguages: ["Inggris"] },
   DE: { continent: "europe", workLanguages: ["Jerman", "Inggris"] },
   NL: { continent: "europe", workLanguages: ["Belanda", "Inggris"] },
+  GB: { continent: "europe", workLanguages: ["Inggris"] },
   AE: { continent: "middle-east", workLanguages: ["Inggris", "Arab"] },
   SA: { continent: "middle-east", workLanguages: ["Arab", "Inggris"] },
+  QA: { continent: "middle-east", workLanguages: ["Arab", "Inggris"] },
+  US: { continent: "other", workLanguages: ["Inggris"] },
 };
 
 export function getCountryMeta(code: string): CountryMeta {

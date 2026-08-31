@@ -1,0 +1,70 @@
+import type { SeedCountryDocs } from "./types";
+
+export const HK_DOCS: SeedCountryDocs = {
+  country: "HK",
+  countryLabel: "Hong Kong",
+  flag: "🇭🇰",
+  description: "Dokumen untuk visa Foreign Domestic Helper (FDH) atau Employment Visa (jalur profesional).",
+  documents: [
+    {
+      id: "hk-id988",
+      title: "Formulir ID988A + ID988B",
+      description: "ID988A diisi calon pekerja, ID988B diisi pemberi kerja — pengajuan visa FDH.",
+      category: "visa",
+      required: true,
+      issuingAuthority: "Immigration Department Hong Kong",
+    },
+    {
+      id: "hk-passport",
+      title: "Paspor + Pas Foto Terbaru",
+      description: "Paspor RI yang masih berlaku beserta pas foto sesuai spesifikasi.",
+      category: "travel",
+      required: true,
+      issuingAuthority: "Imigrasi RI",
+    },
+    {
+      id: "hk-experience",
+      title: "Bukti Pengalaman Kerja Domestik (2+ tahun)",
+      description: "Referensi kerja/kontrak sebelumnya sebagai syarat kelayakan FDH.",
+      category: "employment",
+      required: false,
+      notes: "Tidak wajib untuk pekerja pertama kali, tapi mempercepat proses & memperkuat lamaran.",
+    },
+    {
+      id: "hk-id407",
+      title: "Kontrak Standar ID407",
+      description: "Kontrak kerja baku wajib untuk FDH — cakup gaji minimum, jam kerja, hari libur, akomodasi.",
+      category: "employment",
+      required: true,
+    },
+    {
+      id: "hk-employer-proof",
+      title: "Bukti Kemampuan Finansial Pemberi Kerja",
+      description: "Employer membuktikan kesanggupan finansial + alamat tempat tinggal di HK.",
+      category: "financial",
+      required: true,
+      notes: "Disiapkan pihak pemberi kerja, bukan pekerja — cek status sebelum berangkat.",
+    },
+    {
+      id: "hk-medical",
+      title: "Pemeriksaan Medis",
+      description: "Sesuai persyaratan pemberi kerja/asuransi, umumnya sebelum keberangkatan.",
+      category: "health",
+      required: true,
+    },
+    {
+      id: "hk-return-ticket",
+      title: "Tiket Pesawat Pulang-Pergi",
+      description: "Dibiayai pemberi kerja sesuai klausa kontrak ID407.",
+      category: "travel",
+      required: true,
+    },
+    {
+      id: "hk-employment-visa",
+      title: "Employment Visa (jalur profesional)",
+      description: "Untuk posisi non-FDH/profesional — proses terpisah dari FDH, syarat kualifikasi & gaji lebih tinggi.",
+      category: "visa",
+      required: false,
+    },
+  ],
+};

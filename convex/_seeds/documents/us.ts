@@ -1,0 +1,70 @@
+import type { SeedCountryDocs } from "./types";
+
+export const US_DOCS: SeedCountryDocs = {
+  country: "US",
+  countryLabel: "Amerika Serikat",
+  flag: "🇺🇸",
+  description: "Dokumen untuk H-1B Specialty Occupation Visa — jalur utama profesional skilled. Diajukan pemberi kerja, terikat kuota lotere tahunan.",
+  documents: [
+    {
+      id: "us-degree",
+      title: "Ijazah S1+ (Bidang Spesialis)",
+      description: "Wajib ijazah min S1 relevan bidang, atau evaluasi kredensial setara (credential evaluation) jika lulusan luar AS.",
+      category: "education",
+      required: true,
+    },
+    {
+      id: "us-lca",
+      title: "Labor Condition Application (LCA)",
+      description: "Diajukan pemberi kerja ke Dept. of Labor — bukti gaji sesuai prevailing wage.",
+      category: "employment",
+      required: true,
+      issuingAuthority: "U.S. Department of Labor",
+    },
+    {
+      id: "us-i129",
+      title: "Petisi I-129 oleh Pemberi Kerja",
+      description: "Petisi H-1B diajukan sponsor ke USCIS, termasuk registrasi lotere tahunan (~Maret, mulai kerja Okt).",
+      category: "visa",
+      required: true,
+      issuingAuthority: "USCIS",
+    },
+    {
+      id: "us-resume",
+      title: "CV / Resume + Surat Pengalaman Kerja",
+      description: "Format Amerika (tanpa foto/data pribadi berlebih), lampirkan surat pengalaman jika diminta petisi.",
+      category: "career",
+      required: true,
+    },
+    {
+      id: "us-passport",
+      title: "Paspor",
+      description: "Paspor RI yang masih berlaku untuk wawancara visa & perjalanan.",
+      category: "travel",
+      required: true,
+      issuingAuthority: "Imigrasi RI",
+    },
+    {
+      id: "us-i797",
+      title: "Notifikasi Persetujuan I-797",
+      description: "Bukti petisi H-1B disetujui USCIS — dibutuhkan untuk proses visa di kedutaan.",
+      category: "visa",
+      required: true,
+    },
+    {
+      id: "us-ds160",
+      title: "Formulir DS-160 + Wawancara Konsuler",
+      description: "Aplikasi visa non-imigran online, diikuti wawancara di Kedutaan/Konsulat AS.",
+      category: "visa",
+      required: true,
+      issuingAuthority: "U.S. Department of State",
+    },
+    {
+      id: "us-offer-letter",
+      title: "Surat Penawaran Kerja (Offer Letter)",
+      description: "Dari pemberi kerja AS — dasar pengajuan LCA dan petisi I-129.",
+      category: "employment",
+      required: true,
+    },
+  ],
+};

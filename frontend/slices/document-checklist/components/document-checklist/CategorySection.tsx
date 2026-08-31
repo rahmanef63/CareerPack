@@ -40,7 +40,20 @@ interface Props {
  * full-width *above* the document list, so a 1600px viewport rendered a
  * single ~1060px column with the list pushed below the fold. They now
  * share a rail beside the list from `lg` up (12-col grid, 5/7 then 4/8
- * at `xl`); below `lg` everything stacks in the same reading order.
+ * at `xl`).
+ *
+ * Below `lg` this used to read top-to-bottom as: progress, picker,
+ * filter, reminder card, illustration, THEN the document list — on the
+ * overseas tab the country picker alone is tall enough that the filter
+ * (and the list it controls) sat a full screen or more down, so picking
+ * a category meant scrolling down to find it, then further down again to
+ * see the filtered result. `order-*` below splits the rail into a
+ * "quick controls" group (progress + filter — order-1) and a
+ * "secondary" group (country picker, reminder card, illustration —
+ * order-3), with the document list itself in between (order-2). Grid
+ * auto-placement honours `order` at every breakpoint, so `lg` and up
+ * still lands quick-controls top-left / secondary bottom-left beside a
+ * list spanning both rail rows — only the mobile stacking order changes.
  */
 export function CategorySection({
   isLoading, category, filterCategory, setFilterCategory,
@@ -49,9 +62,8 @@ export function CategorySection({
 }: Props) {
   return (
     <div className="grid gap-6 lg:grid-cols-12">
-      <aside className="min-w-0 space-y-4 lg:col-span-5 xl:col-span-4">
+      <div className="order-1 min-w-0 space-y-4 lg:col-span-5 xl:col-span-4">
         <ProgressSummary progress={progress} />
-        {picker}
         <CategoryFilter
           filterCategory={filterCategory}
           setFilterCategory={setFilterCategory}
@@ -59,15 +71,9 @@ export function CategorySection({
           items={items}
           category={category}
         />
-        {sidebarExtra}
-        {/* ponytail: spot art only where the rail has room — it stacks
-            full-width on mobile, so hide it below lg. */}
-        <div className="hidden overflow-hidden rounded-2xl border border-border bg-card p-3 lg:block">
-          <SpotDocuments />
-        </div>
-      </aside>
+      </div>
 
-      <div className="min-w-0 space-y-6 lg:col-span-7 xl:col-span-8">
+      <div className="order-2 min-w-0 space-y-6 lg:col-span-7 lg:row-span-2 xl:col-span-8">
         {notice}
 
         <Card className="border-border">
@@ -110,6 +116,14 @@ export function CategorySection({
             )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="order-3 min-w-0 space-y-4 lg:col-span-5 xl:col-span-4">
+        {picker}
+        {sidebarExtra}
+        <div className="hidden overflow-hidden rounded-2xl border border-border bg-card p-3 lg:block">
+          <SpotDocuments />
+        </div>
       </div>
     </div>
   );
