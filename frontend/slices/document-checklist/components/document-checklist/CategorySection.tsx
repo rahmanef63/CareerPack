@@ -30,35 +30,32 @@ interface Props {
   onToggle: (id: string) => void;
   onSelect: (item: ChecklistItem) => void;
   notice?: ReactNode;
-  /** Country/template picker — rail slot, above the category filter. */
-  picker?: ReactNode;
   sidebarExtra?: ReactNode;
 }
 
 /**
- * Layout — progress summary, picker and category filter used to stack
- * full-width *above* the document list, so a 1600px viewport rendered a
- * single ~1060px column with the list pushed below the fold. They now
- * share a rail beside the list from `lg` up (12-col grid, 5/7 then 4/8
- * at `xl`).
+ * Layout — progress summary and category filter used to stack full-width
+ * *above* the document list, so a 1600px viewport rendered a single
+ * ~1060px column with the list pushed below the fold. They now share a
+ * rail beside the list from `lg` up (12-col grid, 5/7 then 4/8 at `xl`).
  *
- * Below `lg` this used to read top-to-bottom as: progress, picker,
- * filter, reminder card, illustration, THEN the document list — on the
- * overseas tab the country picker alone is tall enough that the filter
- * (and the list it controls) sat a full screen or more down, so picking
- * a category meant scrolling down to find it, then further down again to
- * see the filtered result. `order-*` below splits the rail into a
- * "quick controls" group (progress + filter — order-1) and a
- * "secondary" group (country picker, reminder card, illustration —
- * order-3), with the document list itself in between (order-2). Grid
- * auto-placement honours `order` at every breakpoint, so `lg` and up
- * still lands quick-controls top-left / secondary bottom-left beside a
- * list spanning both rail rows — only the mobile stacking order changes.
+ * The country/template picker used to live in this rail too (between
+ * progress and the filter, then later moved below the list) — it now
+ * renders as its own full-width block above this whole section (see
+ * `DocumentChecklist`), directly under the Kerja Lokal/Kerja Luar Negeri
+ * tabs, since picking a destination country is the first thing a user
+ * on the overseas tab needs to do. `order-*` below keeps the remaining
+ * rail split into a "quick controls" group (progress + filter — order-1)
+ * and a "secondary" group (reminder card, illustration — order-3), with
+ * the document list itself in between (order-2). Grid auto-placement
+ * honours `order` at every breakpoint, so `lg` and up still lands
+ * quick-controls top-left / secondary bottom-left beside a list spanning
+ * both rail rows — only the mobile stacking order changes.
  */
 export function CategorySection({
   isLoading, category, filterCategory, setFilterCategory,
   progress, filteredItems, subcategories, items,
-  onToggle, onSelect, notice, picker, sidebarExtra,
+  onToggle, onSelect, notice, sidebarExtra,
 }: Props) {
   return (
     <div className="grid gap-6 lg:grid-cols-12">
@@ -102,7 +99,12 @@ export function CategorySection({
               />
             ) : (
               <ScrollArea className="h-[70vh] max-h-[720px] pr-2">
-                <div className="space-y-3">
+                {/* Mobile: one rounded "grouped list" card, rows separated by
+                    a hairline divider — iOS grouped-table-view style, and
+                    denser than a stack of individually-bordered cards. From
+                    `sm` up it reverts to the app's usual gapped-card list
+                    (ChecklistItemCard supplies its own border there). */}
+                <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border sm:divide-y-0 sm:space-y-3 sm:overflow-visible sm:rounded-none sm:border-0">
                   {filteredItems.map((item) => (
                     <ChecklistItemCard
                       key={item.id}
@@ -119,7 +121,6 @@ export function CategorySection({
       </div>
 
       <div className="order-3 min-w-0 space-y-4 lg:col-span-5 xl:col-span-4">
-        {picker}
         {sidebarExtra}
         <div className="hidden overflow-hidden rounded-2xl border border-border bg-card p-3 lg:block">
           <SpotDocuments />

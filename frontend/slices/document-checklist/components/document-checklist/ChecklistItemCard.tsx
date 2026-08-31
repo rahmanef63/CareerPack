@@ -31,6 +31,11 @@ interface Props {
  * Dropping `role`/`tabIndex` instead would have traded a reported
  * violation for an unoperable div — the overlay is what preserves the
  * click-anywhere behaviour.
+ *
+ * Border/radius are `sm:`-gated on purpose: below `sm` this renders as one
+ * row inside the parent's single grouped-list card (see `CategorySection`),
+ * so an individual border here would double up against the group's own
+ * border. From `sm` up each row is its own gapped card again.
  */
 export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
   const Icon = categoryIcons[item.subcategory] || FileText;
@@ -38,12 +43,12 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
   return (
     <div
       className={cn(
-        "group relative flex items-start gap-4 rounded-xl border-2 p-4 transition-all duration-200",
+        "group relative flex items-start gap-4 p-4 transition-all duration-200 sm:rounded-xl sm:border-2",
         item.completed
-          ? "border-brand/30 bg-brand/10"
+          ? "bg-brand/10 sm:border-brand/30"
           : item.required
-            ? "border-border bg-card hover:border-brand"
-            : "border-border bg-muted/50 hover:border-border",
+            ? "bg-card sm:border-border sm:hover:border-brand"
+            : "bg-muted/50 sm:border-border sm:hover:border-border",
       )}
     >
       <Button
@@ -79,7 +84,7 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
                 type="button"
                 onClick={() => onSelect(item)}
                 className={cn(
-                  "text-left after:absolute after:inset-0 after:rounded-xl after:content-['']",
+                  "text-left after:absolute after:inset-0 after:content-[''] sm:after:rounded-xl",
                   "focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring",
                   "focus-visible:after:ring-offset-2 focus-visible:after:ring-offset-background",
                 )}
