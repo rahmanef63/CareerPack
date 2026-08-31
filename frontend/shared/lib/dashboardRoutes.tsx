@@ -4,5 +4,5 @@
  * derived there). This file is kept so existing `@/shared/lib/dashboardRoutes`
  * import sites (the catch-all `/dashboard/[[...slug]]` page) keep working.
  */
-export { DASHBOARD_VIEWS, resolveDashboardView } from "./dashboardRegistry";
+export { DASHBOARD_VIEWS, resolveDashboardView, labelForPath } from "./dashboardRegistry";
 export type { DashboardSlug } from "./dashboardRegistry";

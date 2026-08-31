@@ -140,7 +140,7 @@ function parseWWRRss(xml: string, category: string): NormalizedJob[] {
     const block = m[1];
     const guid = extractTag(block, "guid") ?? extractTag(block, "link");
     if (!guid) continue;
-    const titleRaw = decodeEntities(extractTag(block, "title") ?? "");
+    const titleRaw = repairMojibake(decodeEntities(extractTag(block, "title") ?? ""));
     const link = extractTag(block, "link") ?? "";
     const descRaw = extractTag(block, "description") ?? "";
     const pubDate = extractTag(block, "pubDate");
@@ -150,12 +150,14 @@ function parseWWRRss(xml: string, category: string): NormalizedJob[] {
     const colonIdx = titleRaw.indexOf(":");
     const company = colonIdx > 0 ? titleRaw.slice(0, colonIdx).trim() : "WWR Listing";
     const title = colonIdx > 0 ? titleRaw.slice(colonIdx + 1).trim() : titleRaw.trim();
-    if (!title || !company) continue;
+    // Below MIN_TITLE_LEN is virtually always a malformed entry (stray
+    // colon, truncated feed item) rather than a real terse title.
+    if (!title || !company || title.length < MIN_TITLE_LEN) continue;
 
     // Decode entities first (RSS escapes HTML inside CDATA-less text),
     // THEN strip the now-real tags. Skipping decode means stripHtml is
     // a no-op on `&lt;img...&gt;` blobs and the garbage leaks to UI.
-    const description = stripHtml(decodeEntities(descRaw)).slice(0, 4000);
+    const description = repairMojibake(stripHtml(decodeEntities(descRaw))).slice(0, 4000);
     const postedAt = pubDate ? Date.parse(pubDate) : Date.now();
     const t = title.toLowerCase();
     const seniority = /\b(senior|lead|principal|staff)\b/.test(t)
@@ -206,10 +208,10 @@ function extractTag(block: string, tag: string): string | undefined {
 function normalizeRemoteOK(raw: Record<string, unknown>): NormalizedJob | null {
   const id = strField(raw, "id") ?? strField(raw, "slug");
   if (!id) return null;
-  const title = decodeEntities(strField(raw, "position") ?? "");
-  const company = decodeEntities(strField(raw, "company") ?? "");
-  if (!title || !company) return null;
-  const description = stripHtml(decodeEntities(strField(raw, "description") ?? "")).slice(0, 4000);
+  const title = repairMojibake(decodeEntities(strField(raw, "position") ?? ""));
+  const company = repairMojibake(decodeEntities(strField(raw, "company") ?? ""));
+  if (!title || !company || title.length < MIN_TITLE_LEN) return null;
+  const description = repairMojibake(stripHtml(decodeEntities(strField(raw, "description") ?? ""))).slice(0, 4000);
   const tags = Array.isArray(raw.tags)
     ? raw.tags.filter((t): t is string => typeof t === "string").slice(0, 20)
     : [];
@@ -664,4 +666,53 @@ function safeCodePoint(n: number): string {
     return "";
   }
 }
+
+/**
+ * Repair the small, well-known set of mojibake byte sequences seen coming
+ * out of the WWR/RemoteOK feeds: UTF-8 punctuation (curly quotes, dashes,
+ * ellipsis, accented Latin letters) that got read back as Windows-1252
+ * upstream, before it ever reaches this fetch. `fetch().text()` already
+ * decodes our OWN response correctly, so this is not a decoding bug on our
+ * side -- it is literal garbage bytes baked into the feed's own payload
+ * (confirmed 2026-08-31 audit; each pair below was derived by encoding the
+ * target character as UTF-8 and re-reading those bytes as Windows-1252, the
+ * decoder that actually produces this class of mojibake). Best-effort,
+ * allowlist-only: only replaces sequences we've actually seen mangled, so it
+ * can't corrupt legitimate text that happens to contain one of these byte
+ * pairs for some other reason. Written with \u escapes, not the literal
+ * glyphs, so the source stays byte-exact under any editor/font re-encode.
+ */
+const MOJIBAKE_MAP: ReadonlyArray<[RegExp, string]> = [
+  [/\u00E2\u20AC\u02DC/g, "\u2018"], // LEFT SINGLE QUOTATION MARK
+  [/\u00E2\u20AC\u2122/g, "\u2019"], // RIGHT SINGLE QUOTATION MARK
+  [/\u00E2\u20AC\u0153/g, "\u201C"], // LEFT DOUBLE QUOTATION MARK
+  [/\u00E2\u20AC\u009D/g, "\u201D"], // RIGHT DOUBLE QUOTATION MARK (trailing byte has no CP1252 glyph -- the literal boxes seen live)
+  [/\u00E2\u20AC\u201C/g, "\u2013"], // EN DASH
+  [/\u00E2\u20AC\u201D/g, "\u2014"], // EM DASH
+  [/\u00E2\u20AC\u00A6/g, "\u2026"], // HORIZONTAL ELLIPSIS
+  [/\u00C3\u00A9/g, "\u00E9"], // e-acute
+  [/\u00C3\u00A8/g, "\u00E8"], // e-grave
+  [/\u00C3\u00A1/g, "\u00E1"], // a-acute
+  [/\u00C3\u00AD/g, "\u00ED"], // i-acute
+  [/\u00C3\u00B3/g, "\u00F3"], // o-acute
+  [/\u00C3\u00B1/g, "\u00F1"], // n-tilde
+  [/\u00C2\u00A0/g, " "], // stray "A-circumflex" + non-breaking-space artifact
+];
+
+function repairMojibake(s: string): string {
+  if (!s) return s;
+  let out = s;
+  for (const [pattern, replacement] of MOJIBAKE_MAP) {
+    out = out.replace(pattern, replacement);
+  }
+  return out;
+}
+
+/**
+ * A title under this many characters after WWR's "Company: Position" split
+ * is virtually always a malformed feed entry (stray punctuation, a colon
+ * that split the wrong place) rather than a real, if terse, job title —
+ * skip it instead of showing a near-empty card.
+ */
+const MIN_TITLE_LEN = 3;
 

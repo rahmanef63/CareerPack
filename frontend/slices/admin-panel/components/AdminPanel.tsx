@@ -146,7 +146,7 @@ export function AdminPanel() {
   if (amIAdmin === undefined || amIAdmin === false) return <LoadingScreen />;
 
   return (
-    <PageContainer size="xl" className="space-y-6">
+    <PageContainer size="xl" className="min-w-0 space-y-6 overflow-x-hidden">
       <ResponsivePageHeader
         title={
           <span className="inline-flex items-center gap-2">
@@ -182,10 +182,15 @@ export function AdminPanel() {
         </Card>
       )}
 
-      {/* Analytics — super-admin only */}
+      {/* Analytics — super-admin only. `min-w-0` on the wrapper and the
+       *  chart cards stops recharts' `ResponsiveContainer` (which measures
+       *  its parent's box, not the viewport) from ever forcing this block
+       *  wider than the page — without it a wide first paint here pushes
+       *  the whole `/dashboard/admin-panel` route into horizontal scroll,
+       *  clipping the sticky header's right-aligned actions along with it. */}
       {amISuperAdmin && (
-        <>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="min-w-0 space-y-6">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={UsersIcon}
           label="Total Pengguna"
@@ -231,7 +236,7 @@ export function AdminPanel() {
         </CardHeader>
         <CardContent>
           {trendData.length > 0 ? (
-            <div className="h-48">
+            <div className="h-48 min-w-0 overflow-x-auto">
               <ResponsiveContainer>
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
@@ -270,7 +275,7 @@ export function AdminPanel() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         <TopList
           icon={Target}
           title="Top Target Role"
@@ -312,7 +317,7 @@ export function AdminPanel() {
         </CardHeader>
         <CardContent>
           {adoption?.adoption ? (
-            <div className="h-72">
+            <div className="h-72 min-w-0 overflow-x-auto">
               <ResponsiveContainer>
                 <BarChart
                   data={adoption.adoption}
@@ -354,7 +359,7 @@ export function AdminPanel() {
         </CardContent>
       </Card>
 
-        </>
+        </div>
       )}{/* end super-admin analytics block */}
 
       {/* Bottom panels — tabbed so the admin page stops being a 6-section

@@ -101,7 +101,7 @@ export function EditorPanel({
           <PBSection
             sectionId="theme"
             title="Tampilan"
-            description="Pilih template siap pakai, atau pasang HTML kustom yang kamu (atau ChatGPT) buat sendiri."
+            description="Pilih template siap pakai, generate HTML kustom dengan AI CareerPack langsung di sini, atau pasang HTML yang kamu (atau ChatGPT) buat sendiri."
             icon={<Palette className="h-4 w-4" />}
             tone="indigo"
             activeId={activeSection}

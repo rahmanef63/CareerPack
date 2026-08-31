@@ -53,6 +53,37 @@ export const saveFile = mutation({
       .first();
     if (existing && existing.tenantId === tenantId) return existing._id;
 
+    // Same-content dedup by (name, size) — the storageId check above only
+    // catches re-uploading the exact same blob. It never fires for CV
+    // export, which re-renders and re-uploads a brand-new storage blob
+    // every time even when the exported document is byte-identical, so the
+    // library silently accumulated several rows named e.g.
+    // "rahman-fakhrul-ai-full-stack-cv-2026....pdf" (2026-08-31 audit).
+    // Name+size isn't a cryptographic guarantee of identical content, but
+    // for a personal content library — export re-runs of the same
+    // document, not adversarial input — it's the same practical signal a
+    // person uses to spot "didn't I already save this?" by eye, and it's
+    // free: no content hashing, no schema change, no upload-flow change.
+    const byNameAndSize = await ctx.db
+      .query("files")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenantId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("fileName"), fileName),
+          q.eq(q.field("fileSize"), args.fileSize),
+        ),
+      )
+      .first();
+    if (byNameAndSize) {
+      // The newly-uploaded blob is now an orphan — nothing references it.
+      try {
+        await ctx.storage.delete(storageId);
+      } catch {
+        // benign — best-effort cleanup, not worth failing the save over
+      }
+      return byNameAndSize._id;
+    }
+
     return await ctx.db.insert("files", {
       storageId,
       fileName,

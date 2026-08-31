@@ -8,7 +8,10 @@ import type { Metadata } from "next";
  * so it pre-renders to a single HTML file the SW can precache.
  */
 export const metadata: Metadata = {
-  title: "Offline · CareerPack",
+  // Bare label — root layout's `title.template: "%s · CareerPack"` already
+  // appends the suffix. Writing it here too produced a doubled
+  // "Offline · CareerPack · CareerPack" tab title.
+  title: "Offline",
   description: "Anda sedang offline.",
   robots: { index: false, follow: false },
 };

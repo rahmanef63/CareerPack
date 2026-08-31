@@ -73,6 +73,46 @@ export const EMOJI_SUGGESTIONS: ReadonlyArray<string> = [
   "✍️", "🎤", "🌱", "🤝", "🎵", "🧑‍🏫", "🏅", "🏷️",
 ];
 
+/**
+ * Fallback cover for items with no `coverGradient`/`coverEmoji` of their own
+ * (legacy rows from before the cover picker existed — the create form
+ * always sets `DEFAULT_FORM`'s cyan/rocket pair going forward). Cards used
+ * to `??` straight to one hardcoded slate gradient + a document emoji, so
+ * every uncovered item looked identical (2026-08-31 audit: two "Unggulan"
+ * cards were visually indistinguishable). Deterministic per item — same
+ * project always renders the same fallback, it just isn't the SAME
+ * fallback as every other uncovered project. Reuses `COVER_GRADIENTS`
+ * (skipping "Arang", the old static slate, so uncovered items look
+ * distinctly less "default" than before) and `CATEGORY_EMOJI_DEFAULT` — the
+ * emoji is category-driven rather than hashed, since "a real icon for what
+ * this actually is" beats one more layer of pseudo-randomness.
+ */
+const FALLBACK_GRADIENTS = COVER_GRADIENTS.filter((g) => g.label !== "Arang");
+
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+export function fallbackCoverFor(
+  id: string,
+  // `string`, not `PortfolioCategory`: the Convex column is `v.string()`
+  // (no server-side enum), so a value that predates a category rename
+  // (or a future one this file doesn't know about yet) must not be a type
+  // error at every call site — it just falls through to the emoji default.
+  category: string,
+): { gradient: string; emoji: string } {
+  const gradient =
+    FALLBACK_GRADIENTS[hashString(id) % FALLBACK_GRADIENTS.length]?.value ??
+    "from-slate-500 to-slate-700";
+  const emoji =
+    CATEGORY_EMOJI_DEFAULT[category as PortfolioCategory] ?? "📄";
+  return { gradient, emoji };
+}
+
 export const DEFAULT_FORM: PortfolioFormValues = {
   title: "",
   description: "",

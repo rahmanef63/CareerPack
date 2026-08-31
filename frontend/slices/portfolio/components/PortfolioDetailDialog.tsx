@@ -29,7 +29,7 @@ import { cn } from "@/shared/lib/utils";
 import { formatMonthYear } from "@/shared/lib/formatDate";
 
 import type { PortfolioItem, PortfolioLinkKind } from "../types";
-import { CATEGORY_LABELS, LINK_KIND_LABELS } from "../constants";
+import { CATEGORY_LABELS, LINK_KIND_LABELS, fallbackCoverFor } from "../constants";
 
 interface Props {
   item: PortfolioItem | null;
@@ -60,6 +60,7 @@ export function PortfolioDetailDialog({
 
   const media = item.media ?? [];
   const hasGallery = media.length > 0;
+  const fallback = fallbackCoverFor(item._id, item.category);
 
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
@@ -163,10 +164,10 @@ export function PortfolioDetailDialog({
               <div
                 className={cn(
                   "flex h-40 items-center justify-center rounded-lg bg-gradient-to-br",
-                  item.coverGradient ?? "from-slate-500 to-slate-700",
+                  item.coverGradient ?? fallback.gradient,
                 )}
               >
-                <span className="text-5xl">{item.coverEmoji ?? "📄"}</span>
+                <span className="text-5xl">{item.coverEmoji ?? fallback.emoji}</span>
               </div>
             )}
 
