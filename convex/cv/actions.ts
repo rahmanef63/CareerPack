@@ -286,6 +286,123 @@ Hard rules:
 }
 
 // ---------------------------------------------------------------------------
+// Field Suggest — the "Saran AI" chips on the summary and per-experience
+// description fields in the CV editor (PersonalInfoSection / ExperienceSection).
+// Both chips used to insert the SAME hardcoded Indonesian paragraph and toast
+// "Saran AI diterapkan" — no AI was ever called. Fixed 2026-08-31: this action
+// actually calls the AI gateway, grounded in whatever context the user has
+// already typed elsewhere on the form (target industry, most recent position,
+// skills). Ephemeral — returns text for the client to insert; does not touch
+// the CV row itself, same as generateCoverLetter above.
+// ---------------------------------------------------------------------------
+
+export const suggestCVText = action({
+  args: {
+    field: v.union(v.literal("summary"), v.literal("experience")),
+    context: v.object({
+      targetIndustry: v.optional(v.string()),
+      experienceLevel: v.optional(v.string()),
+      position: v.optional(v.string()),
+      company: v.optional(v.string()),
+      skills: v.optional(v.array(v.string())),
+    }),
+    idempotencyKey: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw authError("Tidak terautentikasi");
+
+    return withIdempotency(ctx, userId, args.idempotencyKey, () =>
+      suggestCVTextImpl(ctx, args, userId),
+    );
+  },
+});
+
+async function suggestCVTextImpl(
+  ctx: ActionCtx,
+  args: {
+    field: "summary" | "experience";
+    context: {
+      targetIndustry?: string;
+      experienceLevel?: string;
+      position?: string;
+      company?: string;
+      skills?: string[];
+    };
+  },
+  userId: Id<"users">,
+): Promise<{ text: string }> {
+  await ctx.runMutation(internal.ai.mutations._checkAIQuota, { userId });
+
+  const lines: string[] = [];
+  const industry = sanitizeAIInput(args.context.targetIndustry ?? "", 120);
+  const position = sanitizeAIInput(args.context.position ?? "", 120);
+  const company = sanitizeAIInput(args.context.company ?? "", 120);
+  if (industry) lines.push(`Industri target: ${industry}`);
+  if (args.context.experienceLevel) lines.push(`Level pengalaman: ${args.context.experienceLevel}`);
+  if (position) lines.push(`Jabatan: ${position}`);
+  if (company) lines.push(`Perusahaan: ${company}`);
+  if (args.context.skills?.length) {
+    const skills = args.context.skills
+      .slice(0, 15)
+      .map((s) => sanitizeAIInput(s, 60))
+      .filter(Boolean);
+    if (skills.length) lines.push(`Skill: ${skills.join(", ")}`);
+  }
+  const contextText = lines.length > 0
+    ? lines.join("\n")
+    : "Tidak ada informasi tambahan dari pengguna — buat draf generik yang mudah disesuaikan.";
+
+  const cfg = await resolveAI(ctx, "gpt-4.1-mini");
+
+  const systemPrompt = args.field === "summary"
+    ? `You write a professional CV/resume summary in Bahasa Indonesia, grounded ONLY in the context given — never invent employers, numbers, or years of experience not stated.
+Output: 2-3 sentences, 200-400 characters total, plain text, no quotes, no markdown, no preamble.
+If the context is sparse, write a generic but genuinely useful starter paragraph the candidate can edit — do not pad with clichés like "pekerja keras" or "team player yang solid".`
+    : `You write ONE resume bullet point in Bahasa Indonesia describing responsibilities/impact for the given position, grounded ONLY in the context given — never invent employers, metrics, or achievements not implied by the context.
+Output: a single sentence, max 30 words, starting with a strong action verb (Memimpin, Membangun, Mengelola, Meningkatkan, …), plain text, no bullet marker, no quotes, no markdown.
+If little context is given, describe generic core responsibilities for that job title rather than fabricating specifics.`;
+
+  const response = await fetchWithTimeout(`${cfg.baseUrl}/chat/completions`, {
+    timeoutMs: FETCH_TIMEOUTS.aiChat,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cfg.apiKey}`,
+    },
+    body: JSON.stringify({
+      model: cfg.model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: wrapUserInput("cv_suggest_context", contextText) },
+      ],
+      temperature: 0.6,
+      max_tokens: args.field === "summary" ? 260 : 120,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    await recordError(ctx, {
+      source: "cv.suggestCVText",
+      message: `gateway ${response.status} ${detail.slice(0, 300)}`,
+    });
+    await ctx.runMutation(internal.ai.mutations._refundAIQuota, { userId });
+    throw new ConvexError(
+      response.status === 429
+        ? "Layanan AI sedang sibuk. Coba lagi beberapa saat."
+        : "Gagal menghubungi layanan AI. Coba lagi nanti.",
+    );
+  }
+
+  const data = await response.json();
+  const text = (data?.choices?.[0]?.message?.content ?? "").trim();
+  if (!text) throw new ConvexError("AI tidak mengembalikan teks. Coba lagi.");
+
+  return { text };
+}
+
+// ---------------------------------------------------------------------------
 // Resume Tailor — given a JD, rewrite the user's CV achievements bullets
 // to incorporate JD keywords without fabricating facts. Returns per-bullet
 // suggestions the UI can apply selectively. Does NOT mutate the CV — the
@@ -476,9 +593,9 @@ Hard rules:
     return { jobMeta, experiences: results };
 }
 
-// ────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 // Constrained Rewriter — Truth Ledger gated paraphrase
-// ────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 
 interface LedgerRewrite {
   atomId: Id<"truthAtoms">;
@@ -691,7 +808,7 @@ One entry per input atom, SAME id. If you cannot improve an atom, return the ori
   };
 }
 
-// ────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 
 function buildCVSummary(cv: Doc<"cvs">): string {
   const parts: string[] = [];
