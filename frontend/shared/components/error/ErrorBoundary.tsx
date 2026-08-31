@@ -1,6 +1,7 @@
 "use client";
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { unstable_rethrow } from "next/navigation";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -31,6 +32,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   state: ErrorBoundaryState = { error: null };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    // notFound()/redirect() from next/navigation work by throwing a
+    // special digest-tagged error that Next's OWN routing machinery
+    // needs to see in order to render the right segment (a real 404,
+    // a redirect) instead of this component's fallback. Without this,
+    // any unrecognized route inside a boundary like this one renders
+    // a generic crash screen instead of the app's actual 404 page.
+    unstable_rethrow(error);
     return { error };
   }
 

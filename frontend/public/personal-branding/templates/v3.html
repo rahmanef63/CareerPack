@@ -623,6 +623,13 @@
       filter: grayscale(1) contrast(1.08) brightness(0.86);
     }
 
+    /* No real cover photo for this project: drop the image column
+       instead of a hardcoded stock photo (or an empty 38%-wide gap). */
+    .case-card.cp-no-cover {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
     .case-content {
       padding: 26px 22px;
       display: flex;
@@ -1723,7 +1730,7 @@
         <div class="container">
           <div class="snap-row" data-carousel="projects" data-cp-list="projects">
             <article class="case-card project-card reveal" data-cp-template>
-              <img loading="lazy" src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=700&q=80" alt="" />
+              <img loading="lazy" src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=700&q=80" alt="" data-cp="proj-image" data-cp-mode="src" />
               <div class="case-content">
                 <span class="case-num">01</span>
                 <span class="case-kicker" data-cp="proj-category">project</span>

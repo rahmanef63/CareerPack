@@ -114,6 +114,28 @@ renderList('projects', d.projects || [], function(node, item) {
   fill(node, 'proj-category', item.category);
   fill(node, 'proj-cover', item.coverEmoji || '');
   fill(node, 'proj-link', item.link || '');
+  // Cover photo: only ever show the user's OWN coverUrl. Templates
+  // ship this <img> with a hardcoded placeholder photo in their
+  // markup (no data-cp binding) — with no per-item fallback, cloning
+  // it for N projects put the identical stock photo on every single
+  // card. Hide the image and flag the card as cover-less when there's
+  // no real photo so template CSS can show the emoji/category treatment
+  // instead of a fake, repeated photo.
+  var coverImgs = node.querySelectorAll('[data-cp="proj-image"]');
+  for (var pc = 0; pc < coverImgs.length; pc++) {
+    var coverImg = coverImgs[pc];
+    if (item.coverUrl) {
+      coverImg.setAttribute('src', item.coverUrl);
+      coverImg.style.display = '';
+      coverImg.removeAttribute('data-cp-hidden');
+    } else {
+      coverImg.removeAttribute('src');
+      coverImg.style.display = 'none';
+      coverImg.setAttribute('data-cp-hidden', '1');
+      var coverParent = coverImg.closest('.case-card, .project-card') || coverImg.parentElement;
+      if (coverParent && coverParent.classList) coverParent.classList.add('cp-no-cover');
+    }
+  }
   var techList = node.querySelector('[data-cp-list="proj-tech"]');
   if (techList) {
     var tTpl = techList.querySelector('[data-cp-template]');

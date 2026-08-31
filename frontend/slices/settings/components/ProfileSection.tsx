@@ -45,12 +45,33 @@ const EMPTY_PROFILE: ProfileState = {
   interests: [],
 };
 
+// Canonical vocabulary — must match `EXP_LEVELS` in
+// convex/_shared/aiOutput.ts (what the AI/CV importer actually writes
+// to profile.experienceLevel). This list used to be a different,
+// shorter set ("entry"/"mid", no "junior") which meant most imported
+// profiles held a value with no matching option here — the Select
+// couldn't find it, so the trigger showed blank despite the field
+// being filled.
 const EXPERIENCE_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
-  { value: "entry", label: "Entry (0-2 thn)" },
-  { value: "mid", label: "Menengah (2-5 thn)" },
-  { value: "senior", label: "Senior (5+ thn)" },
-  { value: "lead", label: "Lead / Principal" },
+  { value: "entry-level", label: "Entry Level (0-1 thn)" },
+  { value: "junior", label: "Junior (1-3 thn)" },
+  { value: "mid-level", label: "Menengah (3-6 thn)" },
+  { value: "senior", label: "Senior (6-10 thn)" },
+  { value: "lead", label: "Lead / Principal (10+ thn)" },
 ];
+
+// A handful of older profiles were written under the previous, shorter
+// vocabulary ("entry"/"mid"). Map those forward so they still resolve
+// to a valid option instead of going blank again.
+const LEGACY_EXPERIENCE_LEVEL_MAP: Record<string, string> = {
+  entry: "entry-level",
+  mid: "mid-level",
+};
+
+function normalizeExperienceLevel(value: string | null | undefined): string {
+  if (!value) return "";
+  return LEGACY_EXPERIENCE_LEVEL_MAP[value] ?? value;
+}
 
 export function ProfileSection() {
   const { state: authState } = useAuth();
@@ -105,7 +126,7 @@ export function ProfileSection() {
         phone: p.phone ?? "",
         location: p.location ?? "",
         targetRole: p.targetRole ?? "",
-        experienceLevel: p.experienceLevel ?? "",
+        experienceLevel: normalizeExperienceLevel(p.experienceLevel),
         bio: p.bio ?? "",
         skills: p.skills ?? [],
         interests: p.interests ?? [],
