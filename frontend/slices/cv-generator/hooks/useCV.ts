@@ -128,7 +128,7 @@ export function useCV() {
             avatarStorageId: activeCV.personalInfo.avatarStorageId,
             avatarUrl: activeCV.personalInfo.avatarUrl,
             dateOfBirth: activeCV.personalInfo.dateOfBirth,
-            targetIndustry: "", // Not in schema yet
+            targetIndustry: activeCV.personalInfo.targetIndustry || "",
             experienceLevel: "fresh-graduate", // Not in schema yet
         },
         education: (activeCV.education || []).map((e) => ({
@@ -168,6 +168,7 @@ export function useCV() {
                     avatarStorageId: data.profile.avatarStorageId,
                     avatarUrl: data.profile.avatarUrl,
                     dateOfBirth: data.profile.dateOfBirth,
+                    targetIndustry: data.profile.targetIndustry || undefined,
                 },
                 displayPrefs: {
                     showPicture: data.displayPrefs.showPicture,

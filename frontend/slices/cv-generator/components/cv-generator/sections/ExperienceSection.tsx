@@ -26,11 +26,13 @@ interface Props {
   updateExperience: (id: string, field: keyof Experience | string, value: string) => void;
   removeExperience: (id: string) => void;
   aiSuggestExperienceDesc: (id: string) => void;
+  suggestingExperienceId?: string | null;
 }
 
 export function ExperienceSection({
   cvData, isOpen, onToggle, expDrag,
   addExperience, updateExperience, removeExperience, aiSuggestExperienceDesc,
+  suggestingExperienceId,
 }: Props) {
   return (
     <SectionCard
@@ -59,7 +61,7 @@ export function ExperienceSection({
                   <h4 className="font-medium text-foreground truncate">Pengalaman #{idx + 1}</h4>
                 </div>
                 <div className="flex items-center gap-1">
-                  <InlineAISuggestChip label="AI" onClick={() => aiSuggestExperienceDesc(exp.id)} />
+                  <InlineAISuggestChip label="AI" onClick={() => aiSuggestExperienceDesc(exp.id)} loading={suggestingExperienceId === exp.id} />
                   <Button
                     variant="ghost"
                     size="sm"
