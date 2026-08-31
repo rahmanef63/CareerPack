@@ -45,6 +45,7 @@ import { ScheduleCard } from "@/shared/components/layout/ScheduleCard";
 import { WelcomeTipCard } from "@/shared/components/layout/WelcomeTipCard";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import { StatCard } from "@/shared/components/stats/StatCard";
+import { getResponseRateStat } from "@/shared/lib/responseRate";
 import { Reveal } from "@/shared/components/motion/Reveal";
 import { ProfileCompletenessCard } from "./ProfileCompletenessCard";
 import { OnboardingWizard } from "./OnboardingWizard";
@@ -86,26 +87,13 @@ export function DashboardHome() {
       (a) => a.status === "offer" || a.status === "accepted",
     ).length;
     const applied = applications.filter((a) => a.status === "applied").length;
-    const RESPONSE_MIN = 5;
-    const responseRate =
-      applications.length === 0
-        ? 0
-        : Math.round(
-            (applications.filter((a) => a.status !== "applied").length /
-              applications.length) *
-              100
-          );
-    // "Tingkat Respons" butuh baseline data cukup agar tidak menyesatkan.
-    // 1 lamaran + 1 wawancara = 100% teknis benar tapi tidak bermakna.
-    const responseRateReliable = applications.length >= RESPONSE_MIN;
+    const responseRateStat = getResponseRateStat(applications);
     return {
       total: applications.length,
       interview,
       offer,
       applied,
-      responseRate,
-      responseRateReliable,
-      responseMin: RESPONSE_MIN,
+      responseRateStat,
     };
   }, [applications]);
 
@@ -240,22 +228,8 @@ export function DashboardHome() {
         <StatCard
           icon={TrendingUp}
           label="Tingkat Respons"
-          value={
-            loadingApps
-              ? "—"
-              : stats.responseRateReliable
-                ? `${stats.responseRate}%`
-                : "—"
-          }
-          sub={
-            loadingApps
-              ? ""
-              : stats.responseRateReliable
-                ? stats.responseRate >= 50
-                  ? "Di atas rata-rata"
-                  : "Tingkatkan kualitas CV"
-                : `Butuh min. ${stats.responseMin} lamaran untuk statistik akurat`
-          }
+          value={loadingApps ? "—" : stats.responseRateStat.display}
+          sub={loadingApps ? "" : stats.responseRateStat.sub}
           tone="warning"
         />
       </section>
