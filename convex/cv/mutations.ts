@@ -81,6 +81,7 @@ type CVUpdates = {
     linkedin?: string;
     portfolio?: string;
     summary: string;
+    targetIndustry?: string;
     avatarStorageId?: string;
     avatarUrl?: string;
     dateOfBirth?: string;
@@ -162,6 +163,7 @@ export function validateCVUpdates(updates: CVUpdates): CVUpdates {
       summary: assertShortText(p.summary, 600, "Ringkasan"),
       linkedin: capLen("LinkedIn", p.linkedin, 300),
       portfolio: capLen("Portfolio", p.portfolio, 300),
+      targetIndustry: capLen("Industri target", p.targetIndustry, 120),
       dateOfBirth: capLen("Tanggal lahir", p.dateOfBirth, 40),
     };
   }
@@ -252,6 +254,7 @@ export const updateCV = mutation({
         linkedin: v.optional(v.string()),
         portfolio: v.optional(v.string()),
         summary: v.string(),
+        targetIndustry: v.optional(v.string()),
         avatarStorageId: v.optional(v.string()),
         avatarUrl: v.optional(v.string()),
         dateOfBirth: v.optional(v.string()),
@@ -427,7 +430,12 @@ export const appendSkills = mutation({
       .map((name, i) => ({
         id: `skill-${Date.now()}-${i}`,
         name,
-        category: args.category ?? "general",
+        // "general" isn't one of the four categories the editor's dropdown
+        // offers (technical|soft|language|tool — see SkillsSection.tsx and
+        // shared/types SkillCategory), so an AI-added skill with no explicit
+        // category rendered with a blank/mismatched selector. "technical"
+        // matches the manual "Tambah Skill" button's own default.
+        category: args.category ?? "technical",
         proficiency: args.proficiency ?? 3,
       }));
     if (newOnes.length === 0) return { cvId, added: 0 };
@@ -619,7 +627,9 @@ export const mcpAppendSkills = internalMutation({
     const cv = await mcpTargetCV(ctx, args.userId, args.cvId);
 
     const existing = new Set(cv.skills.map((s) => s.name.toLowerCase()));
-    const category = assertShortText(args.category ?? "general", 60, "Kategori");
+    // Same mismatch as appendSkills above — "general" isn't a category the
+    // frontend dropdown knows, so default to the same "technical" fallback.
+    const category = assertShortText(args.category ?? "technical", 60, "Kategori");
     const proficiency = args.proficiency ?? 3;
     if (!Number.isInteger(proficiency) || proficiency < 1 || proficiency > 5) {
       throw new Error("Proficiency harus 1-5");
