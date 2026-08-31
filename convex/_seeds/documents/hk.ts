@@ -67,4 +67,10 @@ export const HK_DOCS: SeedCountryDocs = {
       required: false,
     },
   ],
+  sources: [
+    { label: "Immigration Department Hong Kong — Foreign Domestic Helpers", url: "https://www.immd.gov.hk/eng/services/visas/foreign_domestic_helpers.html" },
+    { label: "Form ID407 — kontrak standar FDH", url: "https://www.immd.gov.hk/eng/forms/forms/id407.html" },
+    { label: "Labour Department — FDH portal", url: "https://www.fdh.labour.gov.hk/en/home.html" },
+  ],
+  lastVerified: "2026-08-31",
 };

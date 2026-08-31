@@ -66,4 +66,10 @@ export const TW_DOCS: SeedCountryDocs = {
       required: false,
     },
   ],
+  sources: [
+    { label: "Workforce Development Agency (WDA) — EZ Work Taiwan", url: "https://ezworktaiwan.wda.gov.tw/en/" },
+    { label: "National Immigration Agency Taiwan — ARC", url: "https://www.immigration.gov.tw/5475/" },
+    { label: "National Health Insurance Administration Taiwan", url: "https://www.nhi.gov.tw/" },
+  ],
+  lastVerified: "2026-08-31",
 };

@@ -72,4 +72,10 @@ export const GB_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "GOV.UK — Skilled Worker visa", url: "https://www.gov.uk/skilled-worker-visa" },
+    { label: "GOV.UK — sponsor a Skilled Worker (CoS)", url: "https://www.gov.uk/guidance/sponsor-a-skilled-worker" },
+    { label: "GOV.UK — Immigration Rules Appendix Skilled Worker", url: "https://www.gov.uk/guidance/immigration-rules" },
+  ],
+  lastVerified: "2026-08-31",
 };

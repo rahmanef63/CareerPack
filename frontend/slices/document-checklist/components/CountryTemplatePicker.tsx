@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { useSearchParams } from "next/navigation";
-import { Globe, Loader2, MapPin, ScrollText, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Globe, Loader2, MapPin, ScrollText, ShieldCheck, X } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -37,6 +37,11 @@ import {
   isDomestic,
 } from "../lib/countryMeta";
 
+interface TemplateSource {
+  label: string;
+  url: string;
+}
+
 interface TemplateSummary {
   _id: string;
   country: string;
@@ -45,6 +50,7 @@ interface TemplateSummary {
   description?: string;
   documentCount: number;
   requiredCount: number;
+  lastVerified?: string;
 }
 
 interface TemplateDoc {
@@ -55,6 +61,7 @@ interface TemplateDoc {
   required: boolean;
   issuingAuthority?: string;
   validityYears?: number;
+  notes?: string;
 }
 
 interface TemplateFull {
@@ -63,6 +70,8 @@ interface TemplateFull {
   flag?: string;
   description?: string;
   documents: TemplateDoc[];
+  sources?: TemplateSource[];
+  lastVerified?: string;
 }
 
 const ALL = "all" as const;
@@ -128,24 +137,36 @@ export function CountryTemplatePicker() {
     }
   }, [filtered, selectedCountry]);
 
-  // Deep-link from Quest "Jalankan" — open preview if ?country=<code>
-  // matches a loaded template (and is overseas).
+  // Deep-link from Quest "Jalankan" (and the in-page "Destinasi Populer"
+  // carousel) — open preview if ?country=<code> matches a loaded template
+  // (and is overseas). Tracks the *last applied* value rather than a
+  // one-shot flag, so clicking a second destination card after the first
+  // still opens its dialog — `closePreview` below clears the param again
+  // on close, so re-clicking the same destination re-triggers this too.
+  const router = useRouter();
+  const pathname = usePathname();
   const sp = useSearchParams();
-  const appliedRef = useRef(false);
+  const lastAppliedCountryRef = useRef<string | null>(null);
   useEffect(() => {
-    if (appliedRef.current) return;
     if (templates === undefined) return;
-    const country = sp?.get("country");
-    if (
-      country &&
-      !isDomestic(country) &&
-      templates.some((t) => t.country === country)
-    ) {
+    const country = sp?.get("country") ?? null;
+    if (country === lastAppliedCountryRef.current) return;
+    lastAppliedCountryRef.current = country;
+    if (country && !isDomestic(country) && templates.some((t) => t.country === country)) {
       setSelectedCountry(country);
       setPreviewCountry(country);
-      appliedRef.current = true;
     }
   }, [sp, templates]);
+
+  const closePreview = () => {
+    setPreviewCountry(null);
+    if (sp?.get("country")) {
+      const params = new URLSearchParams(sp.toString());
+      params.delete("country");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    }
+  };
 
   const resetFilters = () => {
     setContinent(ALL);
@@ -188,11 +209,15 @@ export function CountryTemplatePicker() {
             </p>
           ) : (
             <>
-              {/* Single column inside the lg rail, paired again at xl where
-                  the rail is wide enough — the old 4-across track list was
-                  written for a full-width card and collapses into unusable
-                  slivers now that this sits beside the document list. */}
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              {/* This card is full-width now (it renders above
+                  `CategorySection`, not inside its `lg` rail column — see
+                  `DocumentChecklist`), so the three controls sit evenly
+                  from `sm` up instead of cramming into a narrow column.
+                  Was `lg:grid-cols-1 xl:grid-cols-2` with `Negara` spanning
+                  wider — that math was written for the old narrow-rail
+                  placement and left this card mostly empty space on a
+                  desktop viewport after the picker moved. */}
+              <div className="grid gap-3 sm:grid-cols-3">
                 <FilterSelect
                   label="Benua"
                   placeholder="Semua benua"
@@ -207,13 +232,11 @@ export function CountryTemplatePicker() {
                   onChange={setLanguage}
                   options={languageOptions.map((l) => ({ value: l, label: l }))}
                 />
-                <div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
-                  <CountryDropdown
-                    filtered={filtered}
-                    value={selectedCountry}
-                    onChange={setSelectedCountry}
-                  />
-                </div>
+                <CountryDropdown
+                  filtered={filtered}
+                  value={selectedCountry}
+                  onChange={setSelectedCountry}
+                />
               </div>
 
               {filtered.length === 0 && (
@@ -235,6 +258,17 @@ export function CountryTemplatePicker() {
                     <ScrollText className="h-3.5 w-3.5" />
                     {selectedSummary.documentCount} dokumen ·{" "}
                     {selectedSummary.requiredCount} wajib
+                    {selectedSummary.lastVerified && (
+                      <>
+                        {" "}
+                        · diverifikasi{" "}
+                        {new Date(selectedSummary.lastVerified).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </>
+                    )}
                   </span>
                 )}
                 {filtersActive && (
@@ -269,7 +303,7 @@ export function CountryTemplatePicker() {
 
       <TemplatePreviewDialog
         country={previewCountry}
-        onClose={() => setPreviewCountry(null)}
+        onClose={closePreview}
       />
     </>
   );
@@ -439,10 +473,54 @@ function TemplatePreviewDialog({ country, onClose }: PreviewDialogProps) {
                     <span>· Berlaku {d.validityYears} thn</span>
                   )}
                 </div>
+                {d.notes && (
+                  <p className="mt-1.5 rounded border border-dashed border-warning/40 bg-warning/5 p-1.5 text-xs text-warning-text">
+                    {d.notes}
+                  </p>
+                )}
               </div>
             ))
           )}
         </div>
+
+        {template && (template.lastVerified || (template.sources && template.sources.length > 0)) && (
+          <div className="rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-brand" />
+              Sumber &amp; Terakhir Diverifikasi
+            </div>
+            {template.lastVerified && (
+              <p className="mt-1 text-muted-foreground">
+                Data diverifikasi terakhir pada{" "}
+                <span className="font-medium text-foreground">
+                  {new Date(template.lastVerified).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+                . Persyaratan resmi bisa berubah — selalu cek ulang di sumber
+                di bawah sebelum submit dokumen.
+              </p>
+            )}
+            {template.sources && template.sources.length > 0 && (
+              <ul className="mt-1.5 space-y-1 text-muted-foreground">
+                {template.sources.map((s) => (
+                  <li key={s.url}>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand underline underline-offset-2 hover:text-brand/80"
+                    >
+                      {s.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         <ResponsiveDialogFooter>
           <Button type="button" variant="outline" onClick={onClose}>

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   AlertCircle, Bell, Building2, Globe, Plane,
 } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
 import { ResponsivePageHeader } from "@/shared/components/ui/responsive-page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { ResponsiveCarousel } from "@/shared/components/ui/responsive-carousel";
 import { PageContainer } from "@/shared/components/layout/PageContainer";
 import type { ChecklistItem } from "../types";
 import { useChecklistData } from "../hooks/useChecklistData";
@@ -15,10 +17,26 @@ import { CategorySection } from "./document-checklist/CategorySection";
 import { ItemDetailDialog } from "./document-checklist/ItemDetailDialog";
 import { CountryTemplatePicker } from "./CountryTemplatePicker";
 
+/**
+ * Shortcut destinations for the "Destinasi Populer" carousel — country
+ * codes must match a seeded `documentTemplates.country` value (see
+ * `convex/_seeds/documents/index.ts`). Clicking a card sets `?country=<code>`
+ * on the current URL, which `CountryTemplatePicker`'s own deep-link effect
+ * (originally built for the Quest "Jalankan" flow) picks up and opens the
+ * preview dialog for — no extra state wiring needed here.
+ */
+const POPULAR_DESTINATIONS = [
+  { code: "SG", flag: "🇸🇬", label: "Singapura" },
+  { code: "AU", flag: "🇦🇺", label: "Australia" },
+  { code: "JP", flag: "🇯🇵", label: "Jepang" },
+  { code: "AE", flag: "🇦🇪", label: "UAE" },
+] as const;
+
 export function DocumentChecklist() {
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("local");
+  const pathname = usePathname();
 
   const {
     items, toggleItem, updateItem, isLoading,
@@ -47,7 +65,7 @@ export function DocumentChecklist() {
         }}
         className="space-y-6"
       >
-        <TabsList variant="equal" cols={2}>
+        <TabsList variant="segmented">
           <TabsTrigger value="local" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             Kerja Lokal
@@ -108,10 +126,14 @@ export function DocumentChecklist() {
         </TabsContent>
 
         <TabsContent value="international" className="space-y-6">
+          {/* Full-width, directly below the tab bar — see the layout note
+              atop `CategorySection` for why the country picker moved out of
+              its rail and up here. */}
+          <CountryTemplatePicker />
+
           <CategorySection
             isLoading={isLoading}
             category="international"
-            picker={<CountryTemplatePicker />}
             filterCategory={filterCategory}
             setFilterCategory={setFilterCategory}
             progress={internationalProgress}
@@ -141,20 +163,29 @@ export function DocumentChecklist() {
             sidebarExtra={
               <Card className="border-border bg-gradient-to-br from-info/20 to-info/20">
                 <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-info flex items-center justify-center flex-shrink-0">
                       <Plane className="w-5 h-5 text-brand-foreground" />
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-info-text">Destinasi Populer</h4>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-card text-info-text">Singapura</Badge>
-                        <Badge variant="secondary" className="bg-card text-info-text">Australia</Badge>
-                        <Badge variant="secondary" className="bg-card text-info-text">Jepang</Badge>
-                        <Badge variant="secondary" className="bg-card text-info-text">UAE</Badge>
-                      </div>
-                    </div>
+                    <h4 className="font-semibold text-info-text">Destinasi Populer</h4>
                   </div>
+                  {/* Real shortcuts now, not static badges: each card sets
+                      `?country=<code>` on the URL, which `CountryTemplatePicker`
+                      picks up via its existing deep-link effect and opens
+                      straight into that country's preview dialog. */}
+                  <ResponsiveCarousel cellWidth="w-28" hideControls>
+                    {POPULAR_DESTINATIONS.map((d) => (
+                      <Link
+                        key={d.code}
+                        href={`${pathname}?country=${d.code}`}
+                        scroll={false}
+                        className="flex h-full flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-card p-4 text-center transition-colors hover:border-info/50 hover:bg-info/10"
+                      >
+                        <span className="text-3xl" aria-hidden="true">{d.flag}</span>
+                        <span className="text-sm font-medium text-info-text">{d.label}</span>
+                      </Link>
+                    ))}
+                  </ResponsiveCarousel>
                 </CardContent>
               </Card>
             }

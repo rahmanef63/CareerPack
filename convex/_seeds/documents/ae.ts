@@ -4,7 +4,7 @@ export const AE_DOCS: SeedCountryDocs = {
   country: "AE",
   countryLabel: "Uni Emirat Arab",
   flag: "🇦🇪",
-  description: "Dokumen untuk UAE Employment Visa / Golden Visa / Green Visa.",
+  description: "Dokumen untuk UAE Employment Visa (sponsor MoHRE, model kerja masih sponsor-based) — atau jalur mandiri Green Visa (freelancer/self-employed skilled) & Golden Visa (residensi 5-10 thn untuk kategori skilled/high-earner tertentu) tanpa perlu sponsor pemberi kerja.",
   documents: [
     {
       id: "ae-employment-visa",
@@ -29,7 +29,7 @@ export const AE_DOCS: SeedCountryDocs = {
       description: "ID resident UAE. Diajukan saat residence visa. Wajib untuk semua urusan.",
       category: "identity",
       required: true,
-      issuingAuthority: "ICA",
+      issuingAuthority: "ICP (Federal Authority for Identity, Citizenship, Customs & Port Security — dahulu ICA)",
     },
     {
       id: "ae-passport",
@@ -84,4 +84,10 @@ export const AE_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "ICP — Federal Authority for Identity, Citizenship, Customs & Port Security", url: "https://icp.gov.ae/en/about-icp/overview-en/" },
+    { label: "MoHRE — Ministry of Human Resources & Emiratisation", url: "https://mohre.gov.ae/" },
+    { label: "GDRFA Dubai", url: "https://www.gdrfad.gov.ae/en" },
+  ],
+  lastVerified: "2026-08-31",
 };

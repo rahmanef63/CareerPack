@@ -24,7 +24,7 @@ export const DE_DOCS: SeedCountryDocs = {
     {
       id: "de-blue-card-contract",
       title: "Kontrak Kerja (EU Blue Card)",
-      description: "Min gaji €45.300/thn (2025) atau €41.041 untuk shortage occupations.",
+      description: "Min gaji €50.700/thn (2026, umum) atau €45.934,20/thn untuk shortage occupations & fresh graduate. Angka disesuaikan tiap Januari.",
       category: "employment",
       required: false,
     },
@@ -90,4 +90,9 @@ export const DE_DOCS: SeedCountryDocs = {
       validityYears: 1,
     },
   ],
+  sources: [
+    { label: "Make it in Germany — EU Blue Card", url: "https://www.make-it-in-germany.com/en/visa-residence/types/eu-blue-card" },
+    { label: "EU Immigration Portal — EU Blue Card Jerman", url: "https://home-affairs.ec.europa.eu/policies/migration-and-asylum/eu-immigration-portal/eu-blue-card/eu-blue-card-germany_en" },
+  ],
+  lastVerified: "2026-08-31",
 };

@@ -9,7 +9,7 @@ export const MY_DOCS: SeedCountryDocs = {
     {
       id: "my-employment-pass",
       title: "Employment Pass (Kategori I/II/III)",
-      description: "Untuk posisi profesional/skilled. Kategori I min gaji ~RM20.000/bln, Kategori III ~RM5.000/bln. Tanpa kuota/levy.",
+      description: "Untuk posisi profesional/skilled. Per kebijakan gaji EP terbaru (efektif 1 Jun 2026): Kategori I ≥RM20.000/bln, Kategori II RM10.000–19.999/bln, Kategori III RM5.000–9.999/bln. Tanpa kuota/levy.",
       category: "visa",
       required: true,
       issuingAuthority: "Jabatan Imigresen Malaysia (JIM)",
@@ -81,4 +81,11 @@ export const MY_DOCS: SeedCountryDocs = {
       required: false,
     },
   ],
+  sources: [
+    { label: "Jabatan Imigresen Malaysia — Expatriate Services Division", url: "https://esd.imi.gov.my/portal/" },
+    { label: "Kementerian Sumber Manusia Malaysia (MOHR)", url: "https://www.mohr.gov.my/" },
+    { label: "FWCMS — portal pekerja asing", url: "https://fwcms.mohr.gov.my/" },
+    { label: "FOMEMA — pemeriksaan medis wajib", url: "https://www.fomema.com.my/" },
+  ],
+  lastVerified: "2026-08-31",
 };
