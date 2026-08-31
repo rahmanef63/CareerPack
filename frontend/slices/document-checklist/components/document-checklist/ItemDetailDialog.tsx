@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, FileText, Download } from "lucide-react";
+import { CheckCircle2, FileText } from "lucide-react";
 import {
   ResponsiveDialog as Dialog,
   ResponsiveDialogContent as DialogContent,
@@ -138,10 +138,6 @@ export function ItemDetailDialog({
                       Tandai Selesai
                     </>
                   )}
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  <Download className="w-4 h-4 mr-2" />
-                  Unduh Template
                 </Button>
               </div>
             </div>

@@ -148,8 +148,15 @@ export function useChecklistData() {
     return [...new Set(categoryItems.map((item) => item.subcategory))];
   };
 
+  // The Convex query resolves to `undefined` while in flight, which the
+  // `?? []` above quietly turns into the SAME empty array a genuinely empty
+  // checklist would produce — every fresh page load briefly rendered "Belum
+  // ada dokumen" before the real list arrived. Demo mode has no server
+  // query (the overlay is synchronous), so it's never "loading".
+  const isLoading = isAuthenticated && !isDemo && checklist === undefined;
+
   return {
-    items, toggleItem, updateItem,
+    items, toggleItem, updateItem, isLoading,
     getFilteredItems, getProgress, getSubcategories,
   };
 }

@@ -132,6 +132,11 @@ export function PracticeSession({
                 variant="ghost"
                 size="sm"
                 onClick={() => onToggleFavorite(currentQuestion.id)}
+                aria-label={
+                  favorites.has(currentQuestion.id)
+                    ? "Hapus dari favorit"
+                    : "Tambah ke favorit"
+                }
               >
                 <Star
                   className={cn(

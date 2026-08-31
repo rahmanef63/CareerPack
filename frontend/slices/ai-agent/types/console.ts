@@ -8,11 +8,29 @@ export type ActionStatus = "pending" | "approved" | "rejected";
 
 export type StoredAction = AgentAction & { status?: ActionStatus };
 
+export type AttachmentKind = "image" | "document";
+
+export interface MessageAttachment {
+  kind: AttachmentKind;
+  fileName: string;
+  /** Convex storage id — lets a reloaded session re-resolve a signed URL via
+   *  `files.queries.getFileUrl`. Absent while still uploading. */
+  storageId?: string;
+  /** Local object URL, valid only in the tab that created it — never sent to
+   *  the server, never persisted. Used for an instant preview before the
+   *  upload (or a reload) hands back a real `storageId`. */
+  previewUrl?: string;
+}
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
   text: string;
   actions?: StoredAction[];
+  /** Files the user attached to this turn. Metadata only — the pixel data /
+   *  extracted text that reached the model is never stored (see
+   *  ai/schema.ts's `attachments` comment). */
+  attachments?: MessageAttachment[];
   /** Server-measured agent run timeline. Only assistant messages
    *  carry it. Absent on legacy messages from before this field
    *  existed — UI must treat as optional. */

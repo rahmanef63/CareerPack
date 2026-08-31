@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { api } from "../../../../convex/_generated/api";
 import {
-  type ChatSession, type Message, type StoredAction,
+  type ChatSession, type Message, type MessageAttachment, type StoredAction,
   MIGRATION_DONE_KEY, STORAGE_KEY,
   loadSessions, newSession,
 } from "../types/console";
@@ -75,6 +75,11 @@ export function useSessionSync() {
                 type: a.type,
                 payload: a.payload,
                 status: "pending" as const,
+              })),
+              attachments: m.attachments?.map((a) => ({
+                kind: a.kind,
+                fileName: a.fileName,
+                storageId: a.storageId,
               })),
             })),
           }).catch((e) => {
@@ -151,6 +156,11 @@ export function useSessionSync() {
                   status: a.status,
                 }) as StoredAction,
             ),
+            attachments: m.attachments?.map((a) => ({
+              kind: a.kind as MessageAttachment["kind"],
+              fileName: a.fileName,
+              storageId: a.storageId,
+            })),
           }));
         if (s.messages.length === 0 && serverMsgs.length > 0) {
           return {
@@ -192,6 +202,11 @@ export function useSessionSync() {
               // Was hardcoded "pending", which overwrote the resolution on
               // every debounced write.
               status: a.status ?? ("pending" as const),
+            })),
+            attachments: m.attachments?.map((a) => ({
+              kind: a.kind,
+              fileName: a.fileName,
+              storageId: a.storageId,
             })),
           })),
         }).catch((e) => {

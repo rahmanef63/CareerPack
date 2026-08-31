@@ -58,6 +58,14 @@ export function PortfolioView() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("newest");
 
+  const handleToggleFeatured = async (itemId: PortfolioItemId) => {
+    try {
+      await toggleFeatured(itemId);
+    } catch (err) {
+      notify.fromError(err, "Gagal memperbarui status unggulan");
+    }
+  };
+
   const [detailItem, setDetailItem] = useState<PortfolioItem | null>(null);
   const [editItem, setEditItem] = useState<PortfolioItem | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<PortfolioItem | null>(null);
@@ -192,7 +200,7 @@ export function PortfolioView() {
               item={item}
               variant="carousel"
               onClick={() => setDetailItem(item)}
-              onToggleFeatured={async () => { await toggleFeatured(item._id); }}
+              onToggleFeatured={() => handleToggleFeatured(item._id)}
             />
           ))}
         </ResponsiveCarousel>
@@ -313,7 +321,7 @@ export function PortfolioView() {
                   key={item._id}
                   item={item}
                   onClick={() => setDetailItem(item)}
-                  onToggleFeatured={async () => { await toggleFeatured(item._id); }}
+                  onToggleFeatured={() => handleToggleFeatured(item._id)}
                   selected={selectMode ? selected.has(String(item._id)) : undefined}
                   onToggleSelect={selectMode ? () => toggleSelect(String(item._id)) : undefined}
                 />
@@ -339,9 +347,7 @@ export function PortfolioView() {
           setDetailItem(null);
           setConfirmDelete(item);
         }}
-        onToggleFeatured={async (item) => {
-          await toggleFeatured(item._id);
-        }}
+        onToggleFeatured={(item) => handleToggleFeatured(item._id)}
       />
 
       {/* Edit dialog (controlled) */}

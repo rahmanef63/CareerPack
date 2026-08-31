@@ -63,6 +63,7 @@ export function LinksEditor({ links, onChange }: Props) {
                 variant="ghost"
                 className="h-7 w-7 text-destructive"
                 onClick={() => onChange(links.filter((_, i) => i !== idx))}
+                aria-label={`Hapus link ${l.label}`}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>

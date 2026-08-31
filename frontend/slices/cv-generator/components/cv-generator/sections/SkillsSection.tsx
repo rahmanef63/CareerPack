@@ -88,6 +88,7 @@ export function SkillsSection({
               variant="ghost"
               size="sm"
               onClick={() => removeSkill(skill.id)}
+              aria-label={`Hapus skill ${skill.name || ""}`.trim()}
               className="text-destructive-text hover:text-destructive-text hover:bg-destructive/10"
             >
               <Trash2 className="w-4 h-4" />

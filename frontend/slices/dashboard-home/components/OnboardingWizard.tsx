@@ -130,6 +130,7 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
   const totalSteps = 4;
   const canNext0 = fullName.trim().length >= 2 && location.trim().length >= 2;
   const canNext1 = targetRole.trim().length >= 3;
+  const canNext2 = skills.length >= 3;
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : handleClose())}>
@@ -316,7 +317,12 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
             <Button
               type="button"
               onClick={() => handleSave(true)}
-              disabled={saving || (step === 0 && !canNext0) || (step === 1 && !canNext1)}
+              disabled={
+                saving
+                || (step === 0 && !canNext0)
+                || (step === 1 && !canNext1)
+                || (step === 2 && !canNext2)
+              }
               className="gap-2 bg-brand hover:bg-brand"
             >
               {saving ? (

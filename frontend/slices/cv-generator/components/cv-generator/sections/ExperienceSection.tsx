@@ -64,6 +64,7 @@ export function ExperienceSection({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExperience(exp.id)}
+                    aria-label={`Hapus pengalaman #${idx + 1}`}
                     className="text-destructive-text hover:text-destructive-text hover:bg-destructive/10"
                   >
                     <Trash2 className="w-4 h-4" />
