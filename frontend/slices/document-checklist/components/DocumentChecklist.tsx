@@ -71,7 +71,24 @@ export function DocumentChecklist() {
             onToggle={toggleItem}
             onSelect={setSelectedItem}
             sidebarExtra={
-              <Card className="border-border bg-gradient-to-br from-brand-muted to-brand-muted">
+              <Card
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  // Opens the SKCK item's own detail dialog, where the
+                  // existing due-date field (see ItemDetailDialog) can
+                  // actually be set — this card used to be a dead end.
+                  const skck = items.find((i) => i.id === "doc-4");
+                  if (skck) setSelectedItem(skck);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  const skck = items.find((i) => i.id === "doc-4");
+                  if (skck) setSelectedItem(skck);
+                }}
+                className="border-border bg-gradient-to-br from-brand-muted to-brand-muted cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
@@ -80,7 +97,7 @@ export function DocumentChecklist() {
                     <div>
                       <h4 className="font-semibold text-brand">Pengingat</h4>
                       <p className="text-sm text-brand mt-1">
-                        SKCK perlu diperpanjang setiap 6 bulan. Atur pengingat!
+                        SKCK perlu diperpanjang setiap 6 bulan. Klik untuk atur tanggal jatuh tempo.
                       </p>
                     </div>
                   </div>
