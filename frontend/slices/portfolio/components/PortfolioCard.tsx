@@ -9,7 +9,7 @@ import { Checkbox } from "@/shared/components/ui/checkbox";
 import { cn } from "@/shared/lib/utils";
 import { formatMonthYear } from "@/shared/lib/formatDate";
 import type { PortfolioItem } from "../types";
-import { CATEGORY_LABELS } from "../constants";
+import { CATEGORY_LABELS, fallbackCoverFor } from "../constants";
 
 interface PortfolioCardProps {
   item: PortfolioItem;
@@ -34,6 +34,7 @@ export function PortfolioCard({
   const galleryCount = item.media?.length ?? 0;
   const linkCount = item.links?.length ?? (item.link ? 1 : 0);
   const primaryLink = item.links?.[0]?.url ?? item.link;
+  const fallback = fallbackCoverFor(item._id, item.category);
 
   return (
     <article
@@ -57,7 +58,7 @@ export function PortfolioCard({
         className={cn(
           "relative overflow-hidden text-left",
           !item.coverUrl && "flex items-center justify-center bg-gradient-to-br",
-          !item.coverUrl && (item.coverGradient ?? "from-slate-500 to-slate-700"),
+          !item.coverUrl && (item.coverGradient ?? fallback.gradient),
           compact ? "h-28" : "h-32",
         )}
       >
@@ -72,7 +73,7 @@ export function PortfolioCard({
           />
         ) : (
           <span className="text-4xl" aria-hidden="true">
-            {item.coverEmoji ?? "📄"}
+            {item.coverEmoji ?? fallback.emoji}
           </span>
         )}
         {item.featured && (

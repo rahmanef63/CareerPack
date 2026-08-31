@@ -20,7 +20,10 @@ import { AdminPanel } from "@/slices/admin-panel";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Admin · CareerPack",
+  // Bare label — root layout's `title.template: "%s · CareerPack"` already
+  // appends the suffix. Writing it here too produced a doubled
+  // "Admin · CareerPack · CareerPack" tab title.
+  title: "Admin",
   robots: { index: false, follow: false },
 };
 
