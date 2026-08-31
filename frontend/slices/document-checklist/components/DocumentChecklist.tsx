@@ -21,7 +21,7 @@ export function DocumentChecklist() {
   const [activeTab, setActiveTab] = useState("local");
 
   const {
-    items, toggleItem, updateItem,
+    items, toggleItem, updateItem, isLoading,
     getFilteredItems, getProgress, getSubcategories,
   } = useChecklistData();
 
@@ -60,6 +60,7 @@ export function DocumentChecklist() {
 
         <TabsContent value="local" className="space-y-6">
           <CategorySection
+            isLoading={isLoading}
             category="local"
             filterCategory={filterCategory}
             setFilterCategory={setFilterCategory}
@@ -91,6 +92,7 @@ export function DocumentChecklist() {
 
         <TabsContent value="international" className="space-y-6">
           <CategorySection
+            isLoading={isLoading}
             category="international"
             picker={<CountryTemplatePicker />}
             filterCategory={filterCategory}

@@ -16,6 +16,17 @@ export const aiTables = {
         payload: v.any(),
         status: v.optional(v.string()),
       }))),
+      // Attachment METADATA only — never pixel data or extracted text. The
+      // substantive content (vision image, PDF text layer) is sent to the
+      // model once on the turn it was attached (see ai/actions.ts `chat`
+      // attachmentImages) and never persisted, so a reload can't replay
+      // stale bytes into a future request. This sidecar just lets the
+      // history UI keep showing "you attached resume.pdf" after reload.
+      attachments: v.optional(v.array(v.object({
+        kind: v.string(), // "image" | "document"
+        fileName: v.string(),
+        storageId: v.optional(v.string()),
+      }))),
     })),
     // Denormalized list-view metadata so `listChatSessions` never has to
     // deserialize the (up to 200 × 4000-char) `messages` array just to show a

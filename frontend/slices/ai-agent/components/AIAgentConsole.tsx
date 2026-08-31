@@ -28,6 +28,7 @@ import { Composer } from "./ai-agent-console/Composer";
 import { QuotaChip } from "./ai-agent-console/QuotaChip";
 import { ThinkingProgress } from "./ai-agent-console/ThinkingProgress";
 import { useSessionSync } from "../hooks/useSessionSync";
+import { useChatAttachments } from "../hooks/useChatAttachments";
 import { api } from "../../../../convex/_generated/api";
 
 interface AIAgentConsoleProps {
@@ -60,6 +61,7 @@ export function AIAgentConsole({
     useSessionSync();
   const isDemo = useIsDemo();
   const [input, setInput] = useState("");
+  const attachments = useChatAttachments();
 
   // Write the approve/dismiss decision back into session state so the next
   // debounced upsert persists it — otherwise the card re-arms on reload and a
@@ -168,29 +170,40 @@ export function AIAgentConsole({
   const send = useCallback(
     async (rawText?: string) => {
       const text = (rawText ?? input).trim();
-      if (!text || thinking || !activeSession) return;
+      const { meta, contentSuffix, visionUrls } = attachments.buildForSend();
+      // A message needs SOME payload — either typed text or a ready
+      // attachment. `attachments.busy` blocks sending mid-upload rather than
+      // silently dropping a file the user just picked.
+      if ((!text && meta.length === 0) || attachments.busy || thinking || !activeSession)
+        return;
 
       const userMsg: Message = {
         id: `u-${crypto.randomUUID()}`,
         role: "user",
-        text,
+        text: text || "(lampiran)",
+        attachments: meta.length > 0 ? meta : undefined,
         ts: Date.now(),
       };
 
       // Snapshot history BEFORE optimistic update so we send the right
-      // payload to the backend (including the brand new user turn).
+      // payload to the backend (including the brand new user turn). The
+      // attachment's extracted PDF text rides inline in `content` here —
+      // it's never persisted separately, so a reload can't resend it.
       const history = activeSession.messages.map((m) => ({
         role: m.role,
         content: m.text,
       }));
-      history.push({ role: "user", content: text });
+      history.push({ role: "user", content: (text || "(lampiran)") + contentSuffix });
 
       setSessions((prev) =>
         prev.map((s) =>
           s.id === activeSession.id
             ? {
                 ...s,
-                title: s.messages.length <= 1 ? text.slice(0, 48) : s.title,
+                title:
+                  s.messages.length <= 1
+                    ? text.slice(0, 48) || meta[0]?.fileName || "Percakapan baru"
+                    : s.title,
                 messages: [...s.messages, userMsg],
                 updatedAt: Date.now(),
               }
@@ -198,6 +211,7 @@ export function AIAgentConsole({
         ),
       );
       setInput("");
+      attachments.reset();
       setThinkingId(activeSession.id);
 
       // finally guarantees the thinking state always clears — even if a
@@ -236,6 +250,7 @@ export function AIAgentConsole({
             sessionId: activeSession.id,
             view: currentView,
             availableSkills,
+            attachmentImages: visionUrls.length > 0 ? visionUrls : undefined,
           });
           assistantText = result.text;
           toolActions = (result.toolCalls ?? []).map(
@@ -308,7 +323,7 @@ export function AIAgentConsole({
         setThinkingId(null);
       }
     },
-    [activeSession, input, thinking, setSessions, chatAction, currentView],
+    [activeSession, input, thinking, setSessions, chatAction, currentView, attachments],
   );
 
   const onSubmit = (e: React.FormEvent) => {
@@ -442,6 +457,7 @@ export function AIAgentConsole({
                 showSlashPopover={showSlashPopover}
                 onSubmit={onSubmit}
                 send={send}
+                attachments={attachments}
               />
             </div>
           </div>

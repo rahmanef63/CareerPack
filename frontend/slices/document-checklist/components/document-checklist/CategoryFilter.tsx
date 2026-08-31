@@ -34,6 +34,7 @@ export function CategoryFilter({
             type="button"
             variant="ghost"
             onClick={() => setFilterCategory(null)}
+            aria-pressed={filterCategory === null}
             className={cn(
               "w-full h-auto flex items-center gap-3 p-3 rounded-lg text-left justify-start transition-all duration-200",
               filterCategory === null
@@ -55,6 +56,7 @@ export function CategoryFilter({
                 type="button"
                 variant="ghost"
                 onClick={() => setFilterCategory(subcat)}
+                aria-pressed={filterCategory === subcat}
                 className={cn(
                   "w-full h-auto flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200",
                   filterCategory === subcat

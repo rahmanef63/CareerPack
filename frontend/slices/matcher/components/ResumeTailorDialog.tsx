@@ -79,7 +79,13 @@ export function ResumeTailorDialog({ job, open, onOpenChange }: ResumeTailorDial
   const rewriteAction = useAction(api.cv.actions.rewriteFromLedger);
   const updateCV = useMutation(api.cv.mutations.updateCV);
 
-  const cv = cvs && cvs.length > 0 ? cvs[0] : null;
+  // Insertion order (Convex default) puts the OLDEST cv first, not the
+  // active one — sort by creation time descending, same fix already
+  // applied in ATSScannerForm.tsx for the identical bug.
+  const cv =
+    cvs && cvs.length > 0
+      ? [...cvs].sort((a, b) => b._creationTime - a._creationTime)[0]
+      : null;
   const ledger = useTruthLedger(cv?._id ?? null);
 
   const [generating, setGenerating] = useState(false);

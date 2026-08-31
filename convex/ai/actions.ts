@@ -9,7 +9,14 @@ import { aiUnavailableError } from "../_shared/aiProviders";
 import { parseJsonOrThrow, coerceProfileShape } from "../_shared/aiOutput";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
+import { visionSupport } from "../_shared/aiVision";
 import { SKILL_HANDLERS } from "./skillHandlers";
+
+/** Mirrors the caps in ai/resume.ts's OCR escalation — duplicated rather than
+ *  hoisted so this file's attachment handling stays self-contained. */
+const MAX_ATTACHMENT_IMAGES = 3;
+const MAX_ATTACHMENT_IMAGE_BYTES = 4 * 1024 * 1024;
+const ATTACHMENT_DATA_URL_RE = /^data:image\/(webp|png|jpe?g);base64,[A-Za-z0-9+/=]+$/;
 
 /** Pull the assistant text out of an OpenAI-shaped response, or throw a
  *  clean Indonesian error if the provider returned an unexpected shape
@@ -239,6 +246,14 @@ export const chat = action({
         }),
       ),
     ),
+    /**
+     * Data-URL images (webp/png/jpeg) attached to the NEWEST user turn only.
+     * Never persisted server-side — `chatConversations.messages.attachments`
+     * stores metadata (fileName, storageId), never pixel data — so a reload
+     * can't replay stale images into a future request. Follows the vision
+     * content-part convention from ai/resume.ts.
+     */
+    attachmentImages: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     await requireQuota(ctx);
@@ -507,6 +522,37 @@ Aturan ketat penggunaan USER_CONTEXT:
           : { role: "assistant", content: m.content },
       ),
     ];
+
+    // Fold any attached images into the newest user turn as OpenAI-style
+    // vision content parts. Gated on the resolved model actually reading
+    // images — same rule ai/resume.ts enforces for CV OCR — but degrades
+    // instead of throwing: an unreadable attachment shouldn't sink a chat
+    // turn whose text half is still perfectly answerable.
+    let attachmentNote: string | undefined;
+    const attachmentImages = (args.attachmentImages ?? [])
+      .filter((u) => ATTACHMENT_DATA_URL_RE.test(u))
+      .slice(0, MAX_ATTACHMENT_IMAGES);
+    if (attachmentImages.length > 0) {
+      const totalBytes = attachmentImages.reduce((n, u) => n + u.length, 0);
+      if (visionSupport(cfg.model) === "no") {
+        attachmentNote =
+          "⚠️ Gambar yang dilampirkan tidak diproses — model AI saat ini tidak mendukung membaca gambar. Ganti model di Setelan → AI agar bisa dianalisis.";
+      } else if (totalBytes > MAX_ATTACHMENT_IMAGE_BYTES) {
+        attachmentNote = "⚠️ Gambar yang dilampirkan terlalu besar untuk diproses AI.";
+      } else {
+        const last = conversation[conversation.length - 1];
+        if (last?.role === "user" && typeof last.content === "string") {
+          last.content = [
+            { type: "text", text: last.content },
+            ...attachmentImages.map((url) => ({
+              type: "image_url" as const,
+              image_url: { url },
+            })),
+          ];
+        }
+      }
+    }
+
     let totalLlmMs = 0;
     let queryHops = 0;
     let inferenceError: string | null = null;
@@ -682,6 +728,9 @@ Aturan ketat penggunaan USER_CONTEXT:
       }
       if (reply.trim().length === 0) {
         reply = `Saya menyiapkan ${toolCalls.length} tindakan untuk persetujuan Anda di bawah.`;
+      }
+      if (attachmentNote) {
+        reply = `${attachmentNote}\n\n${reply}`;
       }
 
       const detailParts = [`Model ${cfg.model}`, `${hop} hop`];

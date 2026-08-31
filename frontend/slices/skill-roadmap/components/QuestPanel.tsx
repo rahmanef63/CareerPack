@@ -27,6 +27,16 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Progress } from "@/shared/components/ui/progress";
+import {
+  ResponsiveAlertDialog,
+  ResponsiveAlertDialogAction,
+  ResponsiveAlertDialogCancel,
+  ResponsiveAlertDialogContent,
+  ResponsiveAlertDialogDescription,
+  ResponsiveAlertDialogFooter,
+  ResponsiveAlertDialogHeader,
+  ResponsiveAlertDialogTitle,
+} from "@/shared/components/ui/responsive-alert-dialog";
 import { notify } from "@/shared/lib/notify";
 import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
 import { cn } from "@/shared/lib/utils";
@@ -189,8 +199,15 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
     }
   };
 
-  const handleAbandon = async () => {
+  // Abandoning is irreversible (the quest and its checklist are gone), so it
+  // gets the same confirm-dialog treatment as every other destructive action
+  // in this slice (see SkillRoadmap.tsx's skill-switch confirm) instead of
+  // firing on a single stray tap.
+  const [confirmAbandon, setConfirmAbandon] = useState(false);
+
+  const runAbandon = async () => {
     if (!quest) return;
+    setConfirmAbandon(false);
     try {
       await setStatus({ questId: quest._id, status: "abandoned" });
       notify.info("Quest ditinggalkan");
@@ -267,6 +284,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
   );
 
   return (
+    <>
     <Card className="border-border">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
@@ -362,7 +380,7 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={handleAbandon}
+            onClick={() => setConfirmAbandon(true)}
             className="gap-1.5 text-xs text-muted-foreground"
           >
             <Trash2 className="h-3 w-3" />
@@ -382,5 +400,23 @@ export function QuestPanel({ targetNodeSlug }: { targetNodeSlug?: string }) {
         </div>
       </CardContent>
     </Card>
+    <ResponsiveAlertDialog open={confirmAbandon} onOpenChange={setConfirmAbandon}>
+      <ResponsiveAlertDialogContent>
+        <ResponsiveAlertDialogHeader>
+          <ResponsiveAlertDialogTitle>Tinggalkan quest ini?</ResponsiveAlertDialogTitle>
+          <ResponsiveAlertDialogDescription>
+            Checklist dan progres quest &ldquo;{quest.title}&rdquo; akan hilang
+            dan tidak bisa dikembalikan.
+          </ResponsiveAlertDialogDescription>
+        </ResponsiveAlertDialogHeader>
+        <ResponsiveAlertDialogFooter>
+          <ResponsiveAlertDialogCancel>Batal</ResponsiveAlertDialogCancel>
+          <ResponsiveAlertDialogAction onClick={runAbandon}>
+            Tinggalkan
+          </ResponsiveAlertDialogAction>
+        </ResponsiveAlertDialogFooter>
+      </ResponsiveAlertDialogContent>
+    </ResponsiveAlertDialog>
+    </>
   );
 }

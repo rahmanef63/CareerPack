@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
 import { NoDocuments } from "@/shared/components/illustrations/empty";
 import { SpotDocuments } from "@/shared/components/illustrations/features";
@@ -15,6 +16,10 @@ import { ProgressSummary } from "./ProgressSummary";
 import type { ChecklistProgress } from "../../hooks/useChecklistData";
 
 interface Props {
+  /** Server checklist query still in flight — distinct from a genuinely
+   *  empty `filteredItems`, so the list shows a skeleton instead of
+   *  "Belum ada dokumen" on every fresh page load. */
+  isLoading?: boolean;
   category: "local" | "international";
   filterCategory: string | null;
   setFilterCategory: (s: string | null) => void;
@@ -38,7 +43,7 @@ interface Props {
  * at `xl`); below `lg` everything stacks in the same reading order.
  */
 export function CategorySection({
-  category, filterCategory, setFilterCategory,
+  isLoading, category, filterCategory, setFilterCategory,
   progress, filteredItems, subcategories, items,
   onToggle, onSelect, notice, picker, sidebarExtra,
 }: Props) {
@@ -77,7 +82,13 @@ export function CategorySection({
             </div>
           </CardHeader>
           <CardContent>
-            {filteredItems.length === 0 ? (
+            {isLoading ? (
+              <div className="space-y-3" aria-hidden="true">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : filteredItems.length === 0 ? (
               <EmptyState
                 illustration={NoDocuments}
                 title="Belum ada dokumen di kategori ini"

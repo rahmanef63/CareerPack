@@ -169,6 +169,10 @@ export function CalendarView() {
         }
       } catch (err) {
         notify.fromError(err, editing ? "Gagal memperbarui" : "Gagal menambahkan");
+        // Rethrow so AgendaFormDialog's handleSubmit sees the rejection and
+        // skips closing the dialog — otherwise a failed save looked
+        // identical to a successful one and the typed data was lost.
+        throw err;
       }
     },
     [create, update, editing, selectDateKey],

@@ -98,7 +98,11 @@ export function MatcherView() {
       zeroDataHint={
         listingsTab === "saya"
           ? "Belum ada lowongan yang kamu tambahkan. Klik “Tambah Lowongan” untuk paste deskripsi dari LinkedIn / JobStreet / sumber lain."
-          : "Belum ada lowongan. Klik “Muat Contoh” untuk memuat katalog contoh."
+          : isAdmin
+            ? "Belum ada lowongan. Klik “Muat Contoh” untuk memuat katalog contoh."
+            : // "Muat Contoh" only renders for admins — telling every other
+              // user to click a button they can't see was a dead end.
+              "Belum ada lowongan contoh saat ini. Coba lagi nanti, atau klik “Tambah Lowongan” untuk menambahkan lowongan kamu sendiri."
       }
       emptyHint={
         listingsTab === "saya"

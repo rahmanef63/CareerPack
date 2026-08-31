@@ -71,6 +71,7 @@ export function RoadmapSkillsSheet({
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 shrink-0"
+                    aria-label="Ubah nama career path"
                     onClick={() => {
                       setCareerPathDraft(selectedRoadmap?.careerPath ?? "");
                       setCareerPathEditing(true);

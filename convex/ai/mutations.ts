@@ -531,6 +531,9 @@ const MAX_PREVIEW_LEN = 160;
 const MAX_ACTIONS_PER_MSG = 10;
 const MAX_ACTION_TYPE = 60;
 const MAX_SESSIONS_PER_USER = 50;
+const MAX_ATTACHMENTS_PER_MSG = 3;
+const MAX_ATTACHMENT_FILENAME = 200;
+const MAX_ATTACHMENT_STORAGE_ID = 200;
 
 const ROLE_WHITELIST = new Set(["user", "assistant", "system"]);
 // Action types are slice-manifest skill IDs — too dynamic to whitelist
@@ -544,6 +547,7 @@ const ACTION_STATUS_WHITELIST = new Set([
   "executed",
   "failed",
 ]);
+const ATTACHMENT_KIND_WHITELIST = new Set(["image", "document"]);
 
 function trimLen(field: string, value: string, max: number): string {
   const trimmed = value.trim();
@@ -568,6 +572,11 @@ export const upsertChatSession = mutation({
         type: v.string(),
         payload: v.any(),
         status: v.optional(v.string()),
+      }))),
+      attachments: v.optional(v.array(v.object({
+        kind: v.string(),
+        fileName: v.string(),
+        storageId: v.optional(v.string()),
       }))),
     })),
   },
@@ -609,7 +618,25 @@ export const upsertChatSession = mutation({
         });
       }
 
-      return { id: msgId, role: m.role, content, timestamp: m.timestamp, actions };
+      let attachments: typeof m.attachments = undefined;
+      if (m.attachments && m.attachments.length > 0) {
+        if (m.attachments.length > MAX_ATTACHMENTS_PER_MSG) {
+          throw new Error(`Lampiran ≤${MAX_ATTACHMENTS_PER_MSG} per pesan`);
+        }
+        attachments = m.attachments.map((a) => {
+          if (!ATTACHMENT_KIND_WHITELIST.has(a.kind)) {
+            throw new Error("Jenis lampiran tidak valid");
+          }
+          const fileName = trimLen("Nama file lampiran", a.fileName, MAX_ATTACHMENT_FILENAME);
+          const storageId =
+            a.storageId !== undefined
+              ? trimLen("Storage ID lampiran", a.storageId, MAX_ATTACHMENT_STORAGE_ID)
+              : undefined;
+          return { kind: a.kind, fileName, storageId };
+        });
+      }
+
+      return { id: msgId, role: m.role, content, timestamp: m.timestamp, actions, attachments };
     });
 
     // Denormalize list-view metadata so `listChatSessions` never deserializes

@@ -226,8 +226,11 @@ export function CareerDashboard() {
               description: `${payload.position} @ ${payload.company}`,
             });
             setAddOpen(false);
-          } catch {
-            // Already toasted by hook.
+          } catch (err) {
+            // Already toasted by hook — rethrow so AddApplicationDialog's
+            // handleSubmit sees the rejection and skips `reset()`, which
+            // otherwise wiped the user's typed form data on a failed save.
+            throw err;
           }
         }}
       />
