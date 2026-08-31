@@ -6,9 +6,14 @@ import type { SliceManifest } from "@/shared/types/sliceManifest";
  * slug + theme picker to the in-app AI agent.
  *
  * The agent CAN: turn the public page on/off, set slug, switch template,
- * toggle "available for hire". It canNOT author the page's HTML — that is an
- * MCP-connector job (convex/mcp/tools/branding.ts), where the model gets the
- * data payload and the marker contract to write against.
+ * toggle "available for hire". It canNOT author the page's HTML through the
+ * general chat/tool-calling loop — that stays an MCP-connector job
+ * (convex/mcp/tools/branding.ts) or the dedicated, single-purpose
+ * `api.ai.branding.generateBrandingHtml` action wired into
+ * `CustomHtmlCard`'s "Generate dengan AI" button. Both write against the
+ * same marker contract (convex/profile/brandingMarkers.ts) and only ever
+ * return a draft for the user to review — neither can reach `publicHtml`
+ * through a chat turn.
  */
 export const personalBrandingManifest: SliceManifest = {
   id: "personal-branding",
