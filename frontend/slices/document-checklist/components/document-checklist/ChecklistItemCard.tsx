@@ -40,7 +40,7 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
       className={cn(
         "group relative flex items-start gap-4 rounded-xl border-2 p-4 transition-all duration-200",
         item.completed
-          ? "border-success/30 bg-success/10"
+          ? "border-brand/30 bg-brand/10"
           : item.required
             ? "border-border bg-card hover:border-brand"
             : "border-border bg-muted/50 hover:border-border",
@@ -61,7 +61,7 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
           // overlay, so its own click never falls through to "open detail".
           "relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-all duration-200",
           item.completed
-            ? "bg-success text-brand-foreground hover:bg-success/90"
+            ? "bg-brand text-brand-foreground hover:bg-brand/90"
             : "bg-muted text-muted-foreground hover:bg-brand-muted hover:text-brand",
         )}
       >
@@ -73,7 +73,7 @@ export function ChecklistItemCard({ item, onToggle, onSelect }: Props) {
           <div className="min-w-0">
             <h4 className={cn(
               "font-medium",
-              item.completed ? "text-success-text line-through" : "text-foreground",
+              item.completed ? "text-brand line-through" : "text-foreground",
             )}>
               <button
                 type="button"
