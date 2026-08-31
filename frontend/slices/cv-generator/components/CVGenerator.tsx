@@ -503,6 +503,7 @@ export function CVGenerator() {
                 onPhotoUrl={handlers.handlePhotoUrl}
                 onPhotoClear={handlers.handlePhotoClear}
                 aiSuggestSummary={handlers.aiSuggestSummary}
+                isSuggestingSummary={handlers.isSuggestingSummary}
               />
               <DisplayPrefsSection
                 cvData={cvData}
@@ -519,6 +520,7 @@ export function CVGenerator() {
                 updateExperience={handlers.updateExperience}
                 removeExperience={handlers.removeExperience}
                 aiSuggestExperienceDesc={handlers.aiSuggestExperienceDesc}
+                suggestingExperienceId={handlers.suggestingExperienceId}
               />
               <EducationSection
                 cvData={cvData}

@@ -1,7 +1,10 @@
 "use client";
 
-import { useCallback, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
+import { useAction } from "convex/react";
 import { notify } from "@/shared/lib/notify";
+import { makeIdempotencyKey } from "@/shared/lib/idempotencyKey";
+import { api } from "../../../../convex/_generated/api";
 import type {
   CVData, Certification, Education, Experience, Project, Skill,
 } from "../types";
@@ -14,6 +17,9 @@ export function useCVHandlers(
    *  field they target is already filled before claiming they applied one. */
   cvData: CVData,
 ) {
+  const suggestCVText = useAction(api.cv.actions.suggestCVText);
+  const [isSuggestingSummary, setIsSuggestingSummary] = useState(false);
+  const [suggestingExperienceId, setSuggestingExperienceId] = useState<string | null>(null);
   const handlePhotoUploaded = (result: { storageId: string }) => {
     // Storage source supersedes any prior URL — clear avatarUrl so
     // the renderer's storage-precedence rule doesn't strand the URL.
@@ -63,43 +69,74 @@ export function useCVHandlers(
     }));
   };
 
-  // These chips insert a canned starter line, and the `||` means they do
-  // nothing at all once the field has text — but they still toasted success,
-  // so the user was told a suggestion had been applied while nothing changed.
-  const aiSuggestSummary = () => {
+  // These used to insert the SAME hardcoded paragraph regardless of who
+  // clicked it, and toasted "Saran AI diterapkan" — no AI was ever called.
+  // Fixed 2026-08-31: both now call cv.actions.suggestCVText, grounded in
+  // whatever the user has already typed elsewhere on the form.
+  const aiSuggestSummary = async () => {
     if (cvData.profile.summary.trim()) {
       notify.info('Ringkasan sudah terisi — kosongkan dulu untuk memakai saran');
       return;
     }
-    setCvData(prev => ({
-      ...prev,
-      profile: {
-        ...prev.profile,
-        summary:
-          'Profesional muda dengan etos kerja kuat, fokus pada problem solving dan kolaborasi tim. Berorientasi pada dampak terukur dan pengembangan diri berkelanjutan.',
-      },
-    }));
-    notify.success('Saran AI diterapkan ke ringkasan');
+    if (isSuggestingSummary) return;
+    setIsSuggestingSummary(true);
+    try {
+      const context = {
+        targetIndustry: cvData.profile.targetIndustry || undefined,
+        position: cvData.experience[0]?.position || undefined,
+        skills: cvData.skills.map(s => s.name).filter(Boolean),
+      };
+      const idempotencyKey = makeIdempotencyKey('cv-suggest-summary', [
+        context.targetIndustry, context.position, ...context.skills,
+      ]);
+      const { text } = await suggestCVText({ field: 'summary', context, idempotencyKey });
+      setCvData(prev => ({
+        ...prev,
+        profile: { ...prev.profile, summary: text },
+      }));
+      notify.success('Saran AI diterapkan ke ringkasan');
+    } catch (err) {
+      notify.fromError(err, 'Gagal membuat saran AI');
+    } finally {
+      setIsSuggestingSummary(false);
+    }
   };
 
-  const aiSuggestExperienceDesc = (id: string) => {
-    if (cvData.experience.find(e => e.id === id)?.description.trim()) {
+  const aiSuggestExperienceDesc = async (id: string) => {
+    const exp = cvData.experience.find(e => e.id === id);
+    if (exp?.description.trim()) {
       notify.info('Deskripsi sudah terisi — kosongkan dulu untuk memakai saran');
       return;
     }
-    setCvData(prev => ({
-      ...prev,
-      experience: prev.experience.map(e =>
-        e.id === id
-          ? {
-              ...e,
-              description:
-                'Memimpin inisiatif end-to-end yang menghasilkan peningkatan efisiensi 30%. Berkolaborasi lintas tim untuk mendelivery fitur tepat waktu dengan kualitas tinggi.',
-            }
-          : e,
-      ),
-    }));
-    notify.success('Saran AI diterapkan');
+    if (!exp?.position.trim()) {
+      notify.info('Isi jabatan dulu supaya saran AI relevan');
+      return;
+    }
+    if (suggestingExperienceId) return;
+    setSuggestingExperienceId(id);
+    try {
+      const context = {
+        position: exp.position,
+        company: exp.company || undefined,
+        targetIndustry: cvData.profile.targetIndustry || undefined,
+        skills: cvData.skills.map(s => s.name).filter(Boolean),
+      };
+      const idempotencyKey = makeIdempotencyKey('cv-suggest-experience', [
+        id, context.position, context.company,
+      ]);
+      const { text } = await suggestCVText({ field: 'experience', context, idempotencyKey });
+      setCvData(prev => ({
+        ...prev,
+        experience: prev.experience.map(e =>
+          e.id === id ? { ...e, description: text } : e,
+        ),
+      }));
+      notify.success('Saran AI diterapkan');
+    } catch (err) {
+      notify.fromError(err, 'Gagal membuat saran AI');
+    } finally {
+      setSuggestingExperienceId(null);
+    }
   };
 
   const updateProfile = useCallback((field: string, value: string) => {
@@ -219,6 +256,7 @@ export function useCVHandlers(
   return {
     handlePhotoUploaded, handlePhotoFromLibrary, handlePhotoUrl, handlePhotoClear,
     aiSuggestSummary, aiSuggestExperienceDesc,
+    isSuggestingSummary, suggestingExperienceId,
     updateProfile, updatePref, setFormatWithDefaults,
     addEducation, updateEducation, removeEducation,
     addExperience, updateExperience, removeExperience,

@@ -14,6 +14,12 @@ export const cvTables = {
       linkedin: v.optional(v.string()),
       portfolio: v.optional(v.string()),
       summary: v.string(),
+      // Shown as a headline tagline under the name in the Modern/Classic
+      // templates (see CVTemplateModern.tsx / CVTemplateClassic.tsx) — was
+      // rendered there since those templates shipped but had no schema
+      // column and no form field, so it was permanently empty for every
+      // account. Added 2026-08-31 alongside the PersonalInfoSection field.
+      targetIndustry: v.optional(v.string()),
       avatarStorageId: v.optional(v.string()),
       // Direct URL alternative to `avatarStorageId` — used when the
       // user pastes a hosted image (LinkedIn / GitHub / Gravatar etc.)

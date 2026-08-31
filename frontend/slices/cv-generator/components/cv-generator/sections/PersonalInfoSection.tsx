@@ -25,12 +25,13 @@ interface Props {
   onPhotoUrl: (url: string) => void;
   onPhotoClear: () => void;
   aiSuggestSummary: () => void;
+  isSuggestingSummary?: boolean;
 }
 
 export function PersonalInfoSection({
   cvData, format, photoUrl, avatarStorageId, isOpen, onToggle,
   updateProfile, onPhotoUploaded, onPhotoFromLibrary, onPhotoUrl, onPhotoClear,
-  aiSuggestSummary,
+  aiSuggestSummary, isSuggestingSummary,
 }: Props) {
   return (
     <SectionCard title="Informasi Pribadi" icon={User} isOpen={isOpen} onToggle={onToggle}>
@@ -87,6 +88,15 @@ export function PersonalInfoSection({
               onChange={(e) => updateProfile('portfolio', e.target.value)} />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="profile-target-industry">Industri Target (opsional)</Label>
+            <Input id="profile-target-industry" placeholder="cth. Fintech, E-commerce, Manufaktur"
+              value={cvData.profile.targetIndustry}
+              onChange={(e) => updateProfile('targetIndustry', e.target.value)} />
+            <p className="text-xs text-muted-foreground">
+              Ditampilkan sebagai tagline di bawah nama pada template Modern &amp; Klasik.
+            </p>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="profile-dob">Tanggal Lahir (opsional)</Label>
             <DatePicker
               id="profile-dob"
@@ -104,7 +114,7 @@ export function PersonalInfoSection({
               <Label htmlFor="profile-summary">Ringkasan Profesional</Label>
               <div className="flex items-center gap-2">
                 <CharCounter value={cvData.profile.summary} recommendedMax={400} />
-                <InlineAISuggestChip label="Saran AI" onClick={aiSuggestSummary} />
+                <InlineAISuggestChip label="Saran AI" onClick={aiSuggestSummary} loading={isSuggestingSummary} />
               </div>
             </div>
             <Textarea
