@@ -4,6 +4,16 @@
 > iframe template renderer/hydrator + 4 static template documents + MCP tool
 > surface.
 >
+> **Recent changes (2026-08-31):**
+> - Baru: `convex/ai/branding.ts` (`generateBrandingHtml`) — tombol "Generate
+>   dengan AI" di `CustomHtmlCard`, pakai AI CareerPack sendiri (Setelan → AI)
+>   untuk menulis dokumen HTML dari data profil/CV/portfolio live, tanpa perlu
+>   setup connector ChatGPT. Hasilnya cuma masuk draft lokal — "Simpan HTML"
+>   tetap satu-satunya yang commit ke `publicHtml`. `MARKER_CONTRACT` /
+>   `TEMPLATES` / `TEMPLATE_PATH` pindah ke `convex/profile/brandingMarkers.ts`
+>   (shared antara jalur MCP dan jalur in-app ini) — `convex/mcp/tools/branding.ts`
+>   sekarang cuma import dari situ.
+>
 > **Recent changes (2026-08-15):**
 > - Manual block builder **dihapus**. `builder/`, `ManualBlocksCard`,
 >   `ManualDesignCard`, `StyleCard`, `ModeWarning`, `ManualTab`/`AutoTab`,
@@ -143,7 +153,8 @@ di layar orang lain.
 
 Ini **antarmuka authoring** untuk manusia maupun AI host. SSOT-nya
 `themes/templateHydrator/` (implementasi) dan `MARKER_CONTRACT` di
-`convex/mcp/tools/branding.ts` (yang dikirim ke model). Kalau nambah marker,
+`convex/profile/brandingMarkers.ts` (yang dikirim ke model — dipakai bareng
+oleh `mcp/tools/branding.ts` dan `ai/branding.ts`). Kalau nambah marker,
 update dua-duanya. `starter.html` mengimplementasikan seluruh tabel di bawah —
 itu contoh terpendek yang benar.
 
@@ -281,7 +292,28 @@ belum aktif, tool-nya menyuruh model bilang ke user untuk menyalakan sendiri.
 
 Agent in-app (`manifest.ts` + `BrandingCapabilities.tsx`) surface-nya berbeda dan
 lebih sempit: `branding.get-status`, `toggle-public`, `set-slug`, `set-theme`,
-`set-available`. Agent in-app **tidak** menulis HTML.
+`set-available`. Agent chat in-app **tidak** menulis HTML lewat tool-calling loop.
+
+**Tapi ada jalur kedua, di luar chat, untuk menulis HTML pakai AI CareerPack
+sendiri:** `convex/ai/branding.ts` (`generateBrandingHtml`), dipanggil dari
+tombol "Generate dengan AI" di `CustomHtmlCard.tsx`. Bukan skill chat — action
+Convex tersendiri, satu tujuan, tanpa tool-calling loop, jadi tidak membuka
+jalan bagi percakapan biasa untuk menulis ulang halaman:
+
+1. Ambil payload sama seperti `branding_data` (`internal.mcp.data.branding.getBrandingData`).
+2. Fetch contoh HTML template yang dipilih user (opsional, non-fatal kalau gagal)
+   supaya struktur dasarnya konsisten dengan template CareerPack.
+3. Prompt model dengan `MARKER_CONTRACT` + payload (di-`sanitizeAIInput`, cap
+   20.000 karakter) + instruksi gaya opsional dari user (di-`wrapUserInput`).
+4. Balikkan HTML mentah ke caller — **tidak pernah** menulis ke `publicHtml`.
+   `CustomHtmlCard` naruh hasilnya di draft lokal; "Simpan HTML" tetap satu-
+   satunya jalan commit, sama seperti tempel manual atau hasil MCP.
+
+Lewat pipeline standar `requireQuota → sanitizeAIInput → wrapUserInput → proxy`
+(quota dicek lewat `internal.ai.mutations._checkAIQuota` setelah semua validasi
+lokal/non-AI selesai, dan di-refund kalau langkah AI-nya gagal). Kredensial AI
+diresolve dari `_shared/aiResolve.ts` seperti aksi AI lain (per-user → global →
+env) — kalau belum dikonfigurasi, user diarahkan ke Setelan → AI.
 
 ## State Lokal — `usePBForm`
 
@@ -436,7 +468,7 @@ Ditulis biar tidak dicari-cari lagi:
   + `TEMPLATE_THEMES`/`TEMPLATE_URLS`/`THEME_LABELS` (`blocks/types.ts`)
   + union `publicTheme` di `convex/profile/schema.ts` **dan** validator
   `updateMyPublicProfile` + `TEMPLATES`/`TEMPLATE_PATH` di
-  `convex/mcp/tools/branding.ts` + daftar tema di `manifest.ts` dan
+  `convex/profile/brandingMarkers.ts` + daftar tema di `manifest.ts` dan
   `VALID_THEMES` di `BrandingCapabilities.tsx`.
 - **Nambah marker** = implementasi di `templateHydrator/` + entri di
   `MARKER_CONTRACT` + dukung di `starter.html` (itu yang dicontek AI host).
@@ -479,9 +511,11 @@ frontend/shared/components/brand/Logo.tsx
 # Backend
 convex/profile/                                   # schema + queries + mutations +
                                                   # loadBranding + brandingPayload +
-                                                  # publicHtml + slug + autoBlocks + blocks/
+                                                  # publicHtml + slug + autoBlocks + blocks/ +
+                                                  # brandingMarkers (shared MCP + in-app AI contract)
 convex/mcp/tools/branding.ts                      # opsional (butuh MCP server)
 convex/mcp/data/branding.ts
+convex/ai/branding.ts                             # opsional (tombol "Generate dengan AI")
 ```
 
 **cp commands:**

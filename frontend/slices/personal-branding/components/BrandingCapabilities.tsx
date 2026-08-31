@@ -37,8 +37,11 @@ const SLUG_RE = /^[a-z][a-z0-9-]{1,28}[a-z0-9]$/;
 /**
  * Personal-branding capability binder — wires status toggles + slug +
  * theme + availability skills. Query (`get-status`) is handled server-side by
- * skillHandlers. Page HTML is not here: an AI host edits that over MCP
- * (branding_set_html), and the dashboard edits it in CustomHtmlCard.
+ * skillHandlers. Page HTML is not here: an external AI host edits it over MCP
+ * (branding_set_html), CareerPack's own AI can draft it via the dedicated
+ * `generateBrandingHtml` action, and either way the human edits/saves it in
+ * CustomHtmlCard — none of that goes through the chat action bus this file
+ * subscribes to.
  */
 export function BrandingCapabilities() {
   const updatePublic = useMutation(api.profile.mutations.updateMyPublicProfile);
