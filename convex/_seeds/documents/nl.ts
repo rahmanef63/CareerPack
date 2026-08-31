@@ -16,7 +16,7 @@ export const NL_DOCS: SeedCountryDocs = {
     {
       id: "nl-hsm-contract",
       title: "Kontrak Highly Skilled Migrant",
-      description: "Sponsor harus IND-recognised. Min gaji €5.688/bln (under 30 thn) atau €4.171 fresh graduate.",
+      description: "Sponsor harus IND-recognised. Min gaji (paruh kedua 2026): €5.942/bln (30 thn ke atas), €4.357/bln (di bawah 30 thn), €3.122/bln khusus fresh graduate/researcher dalam 3 thn lulus. Disesuaikan tiap Jan & Jul.",
       category: "employment",
       required: false,
     },
@@ -90,4 +90,8 @@ export const NL_DOCS: SeedCountryDocs = {
       required: false,
     },
   ],
+  sources: [
+    { label: "IND — required amounts / income requirements", url: "https://ind.nl/en/required-amounts-income-requirements" },
+  ],
+  lastVerified: "2026-08-31",
 };
