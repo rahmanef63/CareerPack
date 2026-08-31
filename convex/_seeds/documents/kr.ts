@@ -4,15 +4,15 @@ export const KR_DOCS: SeedCountryDocs = {
   country: "KR",
   countryLabel: "Korea Selatan",
   flag: "🇰🇷",
-  description: "Dokumen untuk Employment Permit System (EPS / E-9), Seasonal Worker (E-8), atau Specialist (E-7).",
+  description: "Dokumen untuk Employment Permit System (EPS / E-9), Seasonal Worker (E-8), atau Specialist (E-7) — pekerja E-9 berpengalaman juga bisa naik jalur E-7-4 (skilled) setelah memenuhi syarat masa kerja & poin.",
   documents: [
     {
       id: "kr-eps-topik",
       title: "EPS-TOPIK (lulus)",
-      description: "Test bahasa Korea wajib EPS. Lulus = masuk pool kandidat. Diadakan BP2MI.",
+      description: "Test bahasa Korea wajib EPS. Lulus = masuk pool kandidat. Diadakan KP2MI (dahulu BP2MI).",
       category: "language",
       required: true,
-      issuingAuthority: "HRDK / BP2MI",
+      issuingAuthority: "HRDK / KP2MI (dahulu BP2MI)",
       validityYears: 2,
     },
     {
@@ -25,11 +25,11 @@ export const KR_DOCS: SeedCountryDocs = {
     },
     {
       id: "kr-eps-contract",
-      title: "Kontrak EPS via BP2MI",
-      description: "Kontrak resmi sponsor Korea via BP2MI. Tanpa ini = ilegal.",
+      title: "Kontrak EPS via KP2MI (dahulu BP2MI)",
+      description: "Kontrak resmi sponsor Korea via KP2MI (dahulu BP2MI). Tanpa ini = ilegal.",
       category: "employment",
       required: true,
-      issuingAuthority: "BP2MI",
+      issuingAuthority: "KP2MI (dahulu BP2MI)",
     },
     {
       id: "kr-passport",
@@ -58,17 +58,17 @@ export const KR_DOCS: SeedCountryDocs = {
     {
       id: "kr-medical",
       title: "Medical Check-up (TB, HIV, Hepatitis)",
-      description: "Cek kesehatan dari rumah sakit rekomendasi BP2MI.",
+      description: "Cek kesehatan dari rumah sakit rekomendasi KP2MI (dahulu BP2MI).",
       category: "health",
       required: true,
     },
     {
       id: "kr-pre-departure-orientation",
       title: "Sertifikat Pra-Pemberangkatan",
-      description: "Pelatihan bahasa + budaya wajib dari BP2MI sebelum berangkat.",
+      description: "Pelatihan bahasa + budaya wajib dari KP2MI (dahulu BP2MI) sebelum berangkat.",
       category: "qualification",
       required: true,
-      issuingAuthority: "BP2MI",
+      issuingAuthority: "KP2MI (dahulu BP2MI)",
     },
     {
       id: "kr-skck-legalized",
@@ -81,9 +81,16 @@ export const KR_DOCS: SeedCountryDocs = {
     {
       id: "kr-resume",
       title: "CV / Resume (English atau Korean)",
-      description: "Untuk E-7 (Specialist) dibutuhkan CV English; E-9 biasanya isi formulir BP2MI.",
+      description: "Untuk E-7 (Specialist) dibutuhkan CV English; E-9 biasanya isi formulir KP2MI (dahulu BP2MI).",
       category: "career",
       required: false,
     },
   ],
+  sources: [
+    { label: "EPS resmi (Korea, multi-bahasa)", url: "https://www.eps.go.kr/" },
+    { label: "Human Resources Development Korea (HRDK)", url: "https://www.hrdkorea.or.kr/" },
+    { label: "KP2MI — Kementerian Pelindungan Pekerja Migran Indonesia (dahulu BP2MI)", url: "https://kp2mi.go.id/" },
+    { label: "Direktorat Jenderal Imigrasi RI", url: "https://www.imigrasi.go.id/" },
+  ],
+  lastVerified: "2026-08-31",
 };

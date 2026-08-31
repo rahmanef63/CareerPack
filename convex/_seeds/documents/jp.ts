@@ -4,23 +4,23 @@ export const JP_DOCS: SeedCountryDocs = {
   country: "JP",
   countryLabel: "Jepang",
   flag: "🇯🇵",
-  description: "Dokumen untuk Specified Skilled Worker (SSW), Technical Intern (TITP), atau Engineer/Specialist visa.",
+  description: "Dokumen untuk Specified Skilled Worker (SSW), Technical Intern (TITP — bertahap digantikan skema baru Ikusei Shuro mulai ±2027), atau Engineer/Specialist visa.",
   documents: [
     {
       id: "jp-ssw-cert",
-      title: "Sertifikat SSW (lulus ujian)",
-      description: "Lulus Japanese Foundation Test (A2) + Skill Specific Test bidang yang relevan.",
+      title: "Sertifikat SSW (lulus ujian keterampilan sektor)",
+      description: "Lulus JFT-Basic atau JLPT N4 (bahasa) + Skill Specific Test bidang yang relevan — ujian keterampilan diselenggarakan per-sektor (konstruksi, caregiving, F&B, dll), bukan oleh JLPT.",
       category: "qualification",
       required: true,
-      issuingAuthority: "JLPT / Industry Skill Council",
+      issuingAuthority: "SSW Portal (Kementerian Kehakiman Jepang) / badan uji per-sektor",
     },
     {
       id: "jp-jlpt-n4",
-      title: "JLPT N4 (atau setara)",
-      description: "Sertifikat kemampuan bahasa Jepang minimum N4 (A2). N3+ disarankan untuk Engineer visa.",
+      title: "JLPT N4 atau JFT-Basic (setara)",
+      description: "Sertifikat kemampuan bahasa Jepang minimum N4/JFT-Basic (A2). N3+ disarankan untuk Engineer visa.",
       category: "language",
       required: true,
-      issuingAuthority: "JEES",
+      issuingAuthority: "JEES (JLPT) / Japan Foundation (JFT-Basic)",
       validityYears: 5,
     },
     {
@@ -93,4 +93,11 @@ export const JP_DOCS: SeedCountryDocs = {
       required: false,
     },
   ],
+  sources: [
+    { label: "Support Portal for SSW (ISA — Kementerian Kehakiman Jepang)", url: "https://www.ssw.go.jp/en/" },
+    { label: "Immigration Services Agency of Japan (COE / visa)", url: "https://www.isa.go.jp/en/index.html" },
+    { label: "JLPT resmi (JEES)", url: "https://www.jlpt.jp/e/" },
+    { label: "JITCO — Technical Intern / Ikusei Shuro", url: "https://www.jitco.or.jp/en/" },
+  ],
+  lastVerified: "2026-08-31",
 };

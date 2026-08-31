@@ -9,7 +9,7 @@ export const SG_DOCS: SeedCountryDocs = {
     {
       id: "sg-employment-pass",
       title: "Employment Pass Application (IPA)",
-      description: "Diajukan sponsor SG ke MOM. Min gaji S$5.000/bln (S$5.500 untuk financial sector).",
+      description: "Diajukan sponsor SG ke MOM. Min gaji S$5.600/bln sektor umum, S$6.200/bln sektor finansial (berlaku sejak Jan 2025) — naik lagi ke S$6.000/S$6.600 untuk aplikasi baru mulai Jan 2027.",
       category: "visa",
       required: true,
       issuingAuthority: "Ministry of Manpower (MOM)",
@@ -81,4 +81,9 @@ export const SG_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "MOM — syarat kelayakan Employment Pass", url: "https://www.mom.gov.sg/passes-and-permits/employment-pass/eligibility" },
+    { label: "MOM — patokan gaji COMPASS C1", url: "https://www.mom.gov.sg/passes-and-permits/employment-pass/eligibility/compass-c1-salary-benchmarks" },
+  ],
+  lastVerified: "2026-08-31",
 };

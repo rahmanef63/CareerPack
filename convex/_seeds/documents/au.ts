@@ -4,7 +4,7 @@ export const AU_DOCS: SeedCountryDocs = {
   country: "AU",
   countryLabel: "Australia",
   flag: "🇦🇺",
-  description: "Dokumen untuk Skilled Worker (subclass 482 / 186 / 189), Graduate Visa (485), Working Holiday (462).",
+  description: "Dokumen untuk Skills in Demand visa (subclass 482 — nama baru sejak 7 Des 2024, gantikan TSS), skilled independent 189/190/491, Graduate Visa (485), Working Holiday (462).",
   documents: [
     {
       id: "au-ielts-7",
@@ -23,14 +23,14 @@ export const AU_DOCS: SeedCountryDocs = {
     {
       id: "au-eoi",
       title: "Expression of Interest (EOI) di SkillSelect",
-      description: "Untuk visa 189 / 190 / 491. Skor min 65 poin.",
+      description: "Untuk visa 189 / 190 / 491. Skor minimum legal 65 poin, tapi skor undangan yang benar-benar kompetitif biasanya 85+.",
       category: "visa",
       required: false,
     },
     {
       id: "au-nomination-482",
-      title: "Sponsor Nomination (visa 482)",
-      description: "Sponsor harus Australian-business + occupation di STSOL/MLTSSL list.",
+      title: "Sponsor Nomination — Skills in Demand visa (482)",
+      description: "Sponsor harus Australian-business + occupation di Core Skills Occupation List (CSOL, gantikan STSOL/MLTSSL). Tiga jalur: Specialist Skills (tanpa daftar occupation, gaji tinggi), Core Skills (CSOL), Essential Skills.",
       category: "employment",
       required: false,
     },
@@ -87,4 +87,9 @@ export const AU_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "Home Affairs — Skills in Demand visa (subclass 482)", url: "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/skills-in-demand-visa-subclass-482" },
+    { label: "Home Affairs — jalur Core Skills", url: "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/skills-in-demand-visa-subclass-482/core-skills-stream" },
+  ],
+  lastVerified: "2026-08-31",
 };
