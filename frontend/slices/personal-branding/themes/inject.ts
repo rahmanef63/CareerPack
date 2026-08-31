@@ -53,9 +53,12 @@ export function injectBrandingIntoHtml(
     result = `${dataScript}${result}`;
   }
 
-  // Helpers + hydrator run last — fills slots, hides empty sections,
-  // wires anchor nav + iframe auto-resize.
-  const tail = `${helpersScript}${hydratorScript}`;
+  // Hydrator + helpers run last — fills slots, hides empty sections,
+  // wires anchor nav + iframe auto-resize. Hydrator FIRST: helpers runs
+  // a synchronous floating-nav extraction on load, and it needs the
+  // DOM already hydrated (sections/fluff hidden) or it ships dead tabs
+  // to the parent for anything hidden by the hydrator.
+  const tail = `${hydratorScript}${helpersScript}`;
   if (result.includes("</body>")) {
     result = result.replace("</body>", `${tail}</body>`);
   } else if (result.includes("</html>")) {

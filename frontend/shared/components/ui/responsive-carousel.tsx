@@ -133,8 +133,10 @@ export function ResponsiveCarousel({
           "flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2",
           "[scrollbar-width:none] [-ms-overflow-style:none]",
           "[&::-webkit-scrollbar]:hidden",
-          // breathing room so first item isn't glued to the edge
-          "scroll-px-4 -mx-4 px-4 lg:mx-0 lg:px-0 lg:scroll-px-0",
+          // breathing room so first/last item isn't glued to the edge —
+          // kept at every breakpoint; only the negative-margin bleed
+          // trick (needed for full-bleed mobile scrolling) is desktop-only
+          "scroll-px-4 -mx-4 px-4 lg:mx-0 lg:scroll-px-0",
         )}
       >
         {items.map((child, i) => (

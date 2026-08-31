@@ -47,7 +47,7 @@ export function JobCard({ job, score, variant = "list", onView }: JobCardProps) 
           {job.companyLogo ?? "🏢"}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="line-clamp-1 font-semibold text-foreground">
+          <h3 className="line-clamp-2 font-semibold text-foreground">
             {job.title}
           </h3>
           <p className="line-clamp-1 text-sm text-muted-foreground">

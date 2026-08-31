@@ -202,4 +202,57 @@ Object.keys(emptyMap).forEach(function(k) {
     nodes[i].style.display = emptyMap[k] ? '' : 'none';
   }
 });
+
+// ---- Nav link -> hidden section sync ---------------------------
+// Both hideSection() (has.* driven) and the fluff-hider above mark
+// their target with data-cp-hidden="1". Nav markup (.desktop-nav,
+// .drawer/.mobile-drawer, .footer-nav, .bottom-nav) is static HTML —
+// it has no idea a section it links to just disappeared. Without
+// this, a user who hasn't filled in e.g. Skills still ships a "Skills"
+// nav item that scrolls to a display:none target and looks broken.
+// This also catches nav items that ALWAYS point at fluff (Process,
+// Insights, ...) since those carry the same data-cp-hidden marker.
+try {
+  var navAnchors = document.querySelectorAll(
+    '.desktop-nav a[href^="#"], .drawer a[href^="#"], .mobile-drawer a[href^="#"], ' +
+    '.footer-nav a[href^="#"], .floating-nav a[href^="#"], nav a[href^="#"]'
+  );
+  for (var na = 0; na < navAnchors.length; na++) {
+    var navA = navAnchors[na];
+    var navId = (navA.getAttribute('href') || '').slice(1);
+    if (!navId) continue;
+    var navTarget = document.getElementById(navId);
+    if (navTarget && navTarget.getAttribute('data-cp-hidden') === '1') {
+      var navWrap = navA.closest('li') || navA;
+      navWrap.style.display = 'none';
+      navA.setAttribute('data-cp-nav-hidden', '1');
+    }
+  }
+} catch (e) {
+  try { console.warn('[CareerPack hydrator] nav sync failed', e); } catch (_) {}
+}
+
+// ---- Hero shrink after fluff removal ---------------------------
+// Some templates size a hero/grid section with a large viewport-based
+// min-height tuned for its FULL column count. Fluff columns inside
+// that grid (e.g. a "Guiding Principles" aside) are always hidden on
+// real-data pages, so the section keeps its full-viewport height with
+// nothing left to fill it — a large dead gap before the next section.
+// Clearing min-height on the immediate grid/flex parent of a just-
+// hidden fluff node lets it shrink to fit the content that's actually
+// left. Scoped to the direct parent only, so it never touches
+// unrelated ancestors (main/body) or templates without this pattern.
+try {
+  var fluffForShrink = document.querySelectorAll('[data-cp-fluff]');
+  for (var fs = 0; fs < fluffForShrink.length; fs++) {
+    var fluffParent = fluffForShrink[fs].parentElement;
+    if (!fluffParent) continue;
+    var parentDisplay = window.getComputedStyle(fluffParent).display;
+    if (parentDisplay === 'grid' || parentDisplay === 'flex') {
+      fluffParent.style.setProperty('min-height', 'auto', 'important');
+    }
+  }
+} catch (e) {
+  try { console.warn('[CareerPack hydrator] hero shrink failed', e); } catch (_) {}
+}
 `;

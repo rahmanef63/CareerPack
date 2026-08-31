@@ -48,6 +48,12 @@ export const TEMPLATE_IFRAME_HELPERS_JS = String.raw`
         var fa = anchors[fi];
         var fhref = fa.getAttribute('href') || '';
         if (fhref.length < 2) continue;
+        // Skip tabs pointing at a section the hydrator already hid
+        // (missing data, or permanently-hidden fluff) — otherwise the
+        // parent-rendered floating nav ships a tab that scrolls to
+        // nothing.
+        var ftarget = document.getElementById(fhref.slice(1));
+        if (ftarget && ftarget.getAttribute('data-cp-hidden') === '1') continue;
         var label = (fa.getAttribute('aria-label') || fa.textContent || '').trim();
         if (!label) continue;
         label = label.replace(/\s+/g, ' ').slice(0, 18);
