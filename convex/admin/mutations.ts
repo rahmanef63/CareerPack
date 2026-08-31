@@ -386,12 +386,16 @@ export const adminSeedDocumentTemplates = mutation({
           description: existing.description,
           flag: existing.flag,
           countryLabel: existing.countryLabel,
+          sources: existing.sources,
+          lastVerified: existing.lastVerified,
         });
         const sigNew = JSON.stringify({
           documents: country.documents,
           description: country.description,
           flag: country.flag,
           countryLabel: country.countryLabel,
+          sources: country.sources,
+          lastVerified: country.lastVerified,
         });
         if (sigOld !== sigNew || args.overwrite) {
           await ctx.db.patch(existing._id, {
@@ -401,6 +405,8 @@ export const adminSeedDocumentTemplates = mutation({
             description: country.description,
             documents: country.documents,
             isSystem: true,
+            sources: country.sources,
+            lastVerified: country.lastVerified,
           });
           updated++;
         } else {
@@ -416,6 +422,8 @@ export const adminSeedDocumentTemplates = mutation({
         description: country.description,
         documents: country.documents,
         isSystem: true,
+        sources: country.sources,
+        lastVerified: country.lastVerified,
       });
       inserted++;
     }

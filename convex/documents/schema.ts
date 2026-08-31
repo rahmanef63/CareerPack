@@ -51,5 +51,11 @@ export const documentsTables = {
     ),
     /** True = seed-managed; false = user/admin custom override. */
     isSystem: v.boolean(),
+    /** Official sources this list was checked against — shown to the user
+     *  so "info ini didapat dari mana" has a real answer. */
+    sources: v.optional(v.array(v.object({ label: v.string(), url: v.string() }))),
+    /** ISO date (YYYY-MM-DD) this row's content was last checked against
+     *  `sources`. Immigration rules drift often; this is the staleness signal. */
+    lastVerified: v.optional(v.string()),
   }).index("by_country", ["country"]),
 };

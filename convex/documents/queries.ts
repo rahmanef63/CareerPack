@@ -34,6 +34,7 @@ export const listTemplates = query({
         description: r.description,
         documentCount: r.documents.length,
         requiredCount: r.documents.filter((d) => d.required).length,
+        lastVerified: r.lastVerified,
       }))
       .sort((a, b) => a.countryLabel.localeCompare(b.countryLabel));
   },
@@ -68,7 +69,7 @@ export const getTemplateByCountry = query({
 // required. Nothing here reads the session.
 // ---------------------------------------------------------------------------
 
-/** Row count cap — mirrors `listTemplates`; there are 9 seeded countries. */
+/** Row count cap — mirrors `listTemplates`; there are 15 seeded countries. */
 const PUBLIC_TEMPLATE_LIMIT = 50;
 
 /**
@@ -91,6 +92,7 @@ export const listPublicCountryGuides = query({
       description: v.string(),
       documentCount: v.number(),
       requiredCount: v.number(),
+      lastVerified: v.string(),
     }),
   ),
   handler: async (ctx) => {
@@ -104,6 +106,7 @@ export const listPublicCountryGuides = query({
         description: r.description ?? "",
         documentCount: r.documents.length,
         requiredCount: r.documents.filter((d) => d.required).length,
+        lastVerified: r.lastVerified ?? "",
       }))
       .sort((a, b) => a.countryLabel.localeCompare(b.countryLabel));
   },
@@ -117,7 +120,7 @@ export const listPublicCountryGuides = query({
  * Resolution is two-tier. The seeded slugs map straight to an ISO code and hit
  * the `by_country` index. Anything else falls back to a bounded scan matching
  * the derived slug, so an admin-authored custom template gets a working public
- * URL without a code change. The scan is 9 rows today and capped at 50.
+ * URL without a code change. The scan is 15 rows today and capped at 50.
  */
 export const getPublicCountryGuide = query({
   args: { slug: v.string() },
