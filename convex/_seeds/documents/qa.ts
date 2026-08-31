@@ -66,4 +66,10 @@ export const QA_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "Ministry of Labour Qatar", url: "https://www.mol.gov.qa/" },
+    { label: "Ministry of Interior Qatar — Metrash2 / QID", url: "https://portal.moi.gov.qa/" },
+    { label: "Wafid — platform medical check resmi pra-keberangkatan", url: "https://wafid.com/" },
+  ],
+  lastVerified: "2026-08-31",
 };

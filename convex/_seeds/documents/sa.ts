@@ -8,11 +8,11 @@ export const SA_DOCS: SeedCountryDocs = {
   documents: [
     {
       id: "sa-work-visa",
-      title: "Saudi Work Visa (issued via Enjazit)",
-      description: "Sponsor (kafil) urus melalui platform Enjazit + MOL Saudi.",
+      title: "Saudi Work Visa (via Qiwa + Muqeem)",
+      description: "Sponsor urus kontrak kerja via platform Qiwa dan residency/exit-re-entry via Muqeem — Enjazit adalah platform lama, sudah banyak digantikan kedua sistem ini. Reformasi ketenagakerjaan (LRI, sejak 2021, masih bertahap) memudahkan pindah sponsor & keluar-masuk tanpa izin pemberi kerja setelah syarat kontrak terpenuhi.",
       category: "visa",
       required: true,
-      issuingAuthority: "MOL Saudi Arabia",
+      issuingAuthority: "Kementerian Sumber Daya Manusia Saudi (HRSD/MOL)",
     },
     {
       id: "sa-iqama",
@@ -56,11 +56,11 @@ export const SA_DOCS: SeedCountryDocs = {
     },
     {
       id: "sa-bp2mi",
-      title: "Dokumen BP2MI (kalau via P3MI)",
-      description: "Untuk PMI domestik dan beberapa sektor lain — verifikasi BP2MI wajib.",
+      title: "Dokumen KP2MI (dahulu BP2MI) (kalau via P3MI)",
+      description: "Untuk PMI domestik dan beberapa sektor lain — verifikasi KP2MI (dahulu BP2MI) wajib.",
       category: "employment",
       required: false,
-      issuingAuthority: "BP2MI",
+      issuingAuthority: "KP2MI (dahulu BP2MI)",
     },
     {
       id: "sa-degree-attest",
@@ -84,4 +84,11 @@ export const SA_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "Muqeem — layanan residensi Saudi", url: "https://muqeem.sa/" },
+    { label: "Qiwa — kontrak & layanan ketenagakerjaan", url: "https://qiwa.sa/" },
+    { label: "Absher — portal layanan pemerintah Saudi", url: "https://www.absher.sa/" },
+    { label: "HRSD — Kementerian Sumber Daya Manusia Saudi", url: "https://www.hrsd.gov.sa/en" },
+  ],
+  lastVerified: "2026-08-31",
 };

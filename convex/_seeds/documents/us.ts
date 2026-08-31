@@ -28,6 +28,7 @@ export const US_DOCS: SeedCountryDocs = {
       category: "visa",
       required: true,
       issuingAuthority: "USCIS",
+      notes: "Proklamasi biaya tambahan USD 100.000 untuk petisi baru (efektif 21 Sep 2025) sedang berstatus sengketa hukum/di-blokir pengadilan per pertengahan 2026 — cek status terkini di uscis.gov sebelum submit, jangan asumsikan berlaku atau tidak berlaku.",
     },
     {
       id: "us-resume",
@@ -67,4 +68,10 @@ export const US_DOCS: SeedCountryDocs = {
       required: true,
     },
   ],
+  sources: [
+    { label: "USCIS — H-1B Specialty Occupations", url: "https://www.uscis.gov/working-in-the-united-states/h-1b-specialty-occupations" },
+    { label: "Dept. of Labor — FLAG (LCA)", url: "https://flag.dol.gov/" },
+    { label: "U.S. Department of State — Travel.gov (DS-160/konsuler)", url: "https://travel.state.gov/" },
+  ],
+  lastVerified: "2026-08-31",
 };
