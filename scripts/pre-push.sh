@@ -14,34 +14,25 @@
 # exports incompatible with the current Next config) — typecheck and vitest are
 # blind to all three, and Dokploy builds straight off a push to main.
 #
-# DEPLOY TARGET. Production's frontend talks to Convex CLOUD
-# (proficient-dove-151 — hardcoded in Dockerfile), NOT to the self-hosted Dokploy
-# backend. So the deploy target is resolved in that order:
+# DEPLOY TARGET. The target MUST follow the backend baked into the production
+# frontend, not whichever credential happens to be present on this machine.
+# During the 2026-09-09 recovery Dockerfile pins NEXT_PUBLIC_CONVEX_URL to the
+# restored self-hosted API at https://api.careerpack.org, because the previous
+# Cloud production project (proficient-dove-151) became inaccessible. In that
+# state the self-hosted env is production and must win even if a stale Cloud
+# deploy-key file still exists. Once Dockerfile moves back to a verified Cloud
+# URL, the existing Cloud tiers become authoritative again.
 #
-#   1. backend/convex-cloud/prod.env       → CONVEX_DEPLOY_KEY, Cloud PROD  ✅
-#   2. logged-in Convex CLI session        → Cloud PROD of the project named
-#                                            by .env.local's CONVEX_DEPLOYMENT ✅
-#   3. backend/convex-self-hosted/convex.env → self-hosted (legacy, NOT prod) ⚠️
+# Recovery order while Dockerfile points at api.careerpack.org:
+#   1. backend/convex-self-hosted/convex.env → ACTIVE production fallback ✅
 #
-# Until 2026-07-30 only (3) existed, so every push with convex/** changes ran a
-# deploy, printed "Convex deploy OK", and left production's functions untouched
-# — the worst possible outcome, because it looked like a working pipeline. If it
-# still falls through to (3) the hook now says so in as many words instead of
-# reporting a success that isn't one.
+# Normal Cloud order after a future verified cutover:
+#   1. backend/convex-cloud/prod.env          → Convex Cloud PROD ✅
+#   2. logged-in Convex CLI session           → Cloud PROD ✅
+#   3. self-hosted env                         → non-production fallback ⚠️
 #
-# (2) exists because (1) needs a dashboard-minted key that a solo dev pushing
-# from their own machine already has a working substitute for: `convex deploy`
-# with no key deploys to the PROD deployment of the project that
-# CONVEX_DEPLOYMENT belongs to. Note the asymmetry — CONVEX_DEPLOYMENT names the
-# *dev* deployment, the deploy still goes to *prod*; that is the CLI's documented
-# behaviour, not a bug here. Wire (1) anyway for CI, or for any machine without
-# an interactive `convex login`.
-#
-# To wire (1): Convex dashboard → proficient-dove-151 → Settings → Deploy keys →
-# "Generate production deploy key", then
-#   mkdir -p backend/convex-cloud
-#   printf 'CONVEX_DEPLOY_KEY=prod:…\n' > backend/convex-cloud/prod.env
-# The path is gitignored. Never commit it.
+# Never "fix" this by deleting old credential files. Target identity comes
+# from the client-facing Dockerfile; credentials merely authorize that target.
 #
 # Skips:
 #   - $SKIP_PUSH_CHECKS=1              (typecheck+lint+test+build gate bypass, emergency)
@@ -81,8 +72,12 @@ else
   # Shares frontend/.next with a running `pnpm dev`. If they race, next build
   # can die on a spurious ENOENT rename inside .next — that is the dev server,
   # not your diff: stop dev (or rm -rf frontend/.next) and push again.
-  echo "[pre-push] Quality gate: pnpm build…" >&2
-  if ! pnpm build < /dev/null; then
+  # MSO's operator shell may export TURBOPACK=1 globally; Next 15 treats that
+  # as an implicit `next build --turbopack`, whose prerender path currently
+  # breaks /404 in this app. Production does not request Turbopack, so make the
+  # quality gate deterministic instead of inheriting an unrelated host flag.
+  echo "[pre-push] Quality gate: pnpm build (TURBOPACK unset)…" >&2
+  if ! env -u TURBOPACK pnpm build < /dev/null; then
     echo "[pre-push] Build FAILED — aborting push. Fix and retry, or 'SKIP_PUSH_CHECKS=1 git push' to bypass." >&2
     exit 1
   fi
@@ -94,7 +89,16 @@ if [[ "${SKIP_CONVEX_DEPLOY:-0}" == "1" ]]; then
   exit 0
 fi
 
-if [[ -f "${PROD_ENV_FILE}" ]]; then
+ACTIVE_SELFHOSTED=0
+if grep -Eq '^ENV[[:space:]]+NEXT_PUBLIC_CONVEX_URL=https://api\.careerpack\.org([[:space:]]|$)' Dockerfile; then
+  ACTIVE_SELFHOSTED=1
+fi
+
+if [[ "${ACTIVE_SELFHOSTED}" -eq 1 && -f "${SELFHOSTED_ENV_FILE}" ]]; then
+  DEPLOY_CMD=(pnpm backend:deploy)
+  DEPLOY_TARGET="self-hosted CareerPack production fallback (api.careerpack.org)"
+  TARGET_IS_PROD=1
+elif [[ -f "${PROD_ENV_FILE}" ]]; then
   DEPLOY_CMD=(pnpm backend:deploy-prod)
   DEPLOY_TARGET="Convex Cloud PROD (deploy key)"
   TARGET_IS_PROD=1
@@ -104,7 +108,7 @@ elif [[ -f "${HOME}/.convex/config.json" ]] && grep -qs '^CONVEX_DEPLOYMENT=' .e
   TARGET_IS_PROD=1
 elif [[ -f "${SELFHOSTED_ENV_FILE}" ]]; then
   DEPLOY_CMD=(pnpm backend:deploy)
-  DEPLOY_TARGET="self-hosted Dokploy backend (NOT production)"
+  DEPLOY_TARGET="self-hosted Dokploy backend (not the frontend's active target)"
   TARGET_IS_PROD=0
 else
   echo "[pre-push] No Convex deploy target configured — deploy skipped." >&2
@@ -168,9 +172,9 @@ fi
 # fell through to the legacy self-hosted backend.
 echo "" >&2
 echo "[pre-push] ✖  Deployed to ${DEPLOY_TARGET} — PUSH ABORTED." >&2
-echo "[pre-push] ✖  Production Convex functions are UNCHANGED. The live app talks to" >&2
-echo "[pre-push] ✖  Convex Cloud (see Dockerfile NEXT_PUBLIC_CONVEX_URL), so pushing now" >&2
-echo "[pre-push] ✖  would ship a frontend built against backend code that is not deployed." >&2
+echo "[pre-push] ✖  Production Convex functions are UNCHANGED. The selected deploy target" >&2
+echo "[pre-push] ✖  does not match Dockerfile NEXT_PUBLIC_CONVEX_URL, so pushing now would" >&2
+echo "[pre-push] ✖  ship a frontend built against backend code that is not deployed." >&2
 echo "" >&2
 echo "[pre-push]    Fix, cheapest first:" >&2
 echo "[pre-push]      1. Check .env.local still has a CONVEX_DEPLOYMENT line." >&2

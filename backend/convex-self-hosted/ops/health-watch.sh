@@ -17,37 +17,36 @@
 # runtime — so an out-of-band probe is the only real detection signal.
 # Full postmortem: docs/progress/2026-06-11-vps-incident-and-hardening.md
 #
-# RETARGETED 2026-07-30. Production's backend is Convex **Cloud**
-# (proficient-dove-151); the self-hosted compose is idle and serves nobody. Until
-# this change the probes still pointed at `api.careerpack.org` /
-# `site.careerpack.org`, so the watchdog was reporting on a backend no user
-# touches — the same class of mistake as the backup cron and the deploy hook,
-# and the third place it turned up. Worse, probe 4 would `compose up -d` on
-# every tick, quietly trying to resurrect the retired stack.
+# RECOVERED 2026-09-09. The Convex Cloud production deployment
+# `proficient-dove-151` became inaccessible after the 2026-09-05 backup.
+# Production is temporarily back on the restored self-hosted fallback at
+# `api.careerpack.org` / `site.careerpack.org`, so container self-heal and
+# backup freshness are again part of the production health contract.
 #
-# `SELF_HOSTED=1` restores the old behaviour wholesale (container probe,
-# self-heal, volume-backup freshness) for anyone actually running that stack.
+# When a replacement Cloud production deployment is cut over, set
+# SELF_HOSTED=0 and override CONVEX_API_URL / CONVEX_SITE_URL explicitly.
 #
 # Env knobs (override at the top or via cron env):
 #   FRONTEND_URL     Frontend root, expect HTTP 200
 #                    (default https://careerpack.org)
 #   CONVEX_API_URL   Convex API origin; /version must return 200
-#                    (default https://proficient-dove-151.convex.cloud)
+#                    (default https://api.careerpack.org)
 #   CONVEX_SITE_URL  Convex site origin; /api/health must return ok:true
-#                    (default https://proficient-dove-151.convex.site)
+#                    (default https://site.careerpack.org)
 #   SELF_HOSTED      1 = also run the container probe, self-heal and volume
-#                    backup-freshness check. 0 (default) = Cloud backend, so
+#                    backup-freshness check. 1 is the current default; 0 = Cloud, so
 #                    there is no container to inspect and no volume tar to age
 #                    out; checking either would alert forever on a healthy
 #                    deployment.
-#   BACKEND_CONTAINER  Docker container name of the Convex backend
-#                    (default careerpack-convex-backend)
+#   BACKEND_CONTAINER  Optional exact Docker container name. Empty (default)
+#                    auto-discovers the backend by Compose project + service.
+#   COMPOSE_SERVICE  Compose backend service name (default backend)
 #   COMPOSE_PROJECT  Compose project to `up -d` on self-heal
 #                    (default careerpack-convex-8gdbpk)
 #   COMPOSE_DIR      Dir holding the compose file used for self-heal
 #                    (default /etc/dokploy/compose/careerpack-convex-8gdbpk/code)
 #   BACKUP_DIR       Where backup.sh writes archives
-#                    (default /var/backups/careerpack)
+#                    (default $HOME/backups/careerpack)
 #   BACKUP_MAX_AGE_H Warn if newest backup is older than N hours
 #                    (default 25)
 #   ALERT_HOOK       Executable invoked as `ALERT_HOOK "<message>"` on any
@@ -61,13 +60,14 @@
 set -euo pipefail
 
 FRONTEND_URL="${FRONTEND_URL:-https://careerpack.org}"
-CONVEX_API_URL="${CONVEX_API_URL:-https://proficient-dove-151.convex.cloud}"
-CONVEX_SITE_URL="${CONVEX_SITE_URL:-https://proficient-dove-151.convex.site}"
-SELF_HOSTED="${SELF_HOSTED:-0}"
-BACKEND_CONTAINER="${BACKEND_CONTAINER:-careerpack-convex-backend}"
+CONVEX_API_URL="${CONVEX_API_URL:-https://api.careerpack.org}"
+CONVEX_SITE_URL="${CONVEX_SITE_URL:-https://site.careerpack.org}"
+SELF_HOSTED="${SELF_HOSTED:-1}"
+BACKEND_CONTAINER="${BACKEND_CONTAINER:-}"
+COMPOSE_SERVICE="${COMPOSE_SERVICE:-backend}"
 COMPOSE_PROJECT="${COMPOSE_PROJECT:-careerpack-convex-8gdbpk}"
 COMPOSE_DIR="${COMPOSE_DIR:-/etc/dokploy/compose/careerpack-convex-8gdbpk/code}"
-BACKUP_DIR="${BACKUP_DIR:-/var/backups/careerpack}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups/careerpack}"
 BACKUP_MAX_AGE_H="${BACKUP_MAX_AGE_H:-25}"
 ALERT_HOOK="${ALERT_HOOK:-$HOME/.config/health-watch.alert}"
 
@@ -112,38 +112,53 @@ fi
 # "gone" branch would fire every tick and try to bring the retired stack back.
 CONTAINER_STATE=""
 if [[ "$SELF_HOSTED" == "1" ]]; then
-CONTAINER_STATE="$(docker inspect -f '{{.State.Health.Status}}' "$BACKEND_CONTAINER" 2>/dev/null || true)"
-if [[ -z "$CONTAINER_STATE" ]]; then
-  # Container missing entirely — the exact 2026-06-11 incident class.
-  note_problem "careerpack-convex-container GONE — running compose up -d (project=$COMPOSE_PROJECT)"
-  if [[ -d "$COMPOSE_DIR" ]]; then
-    # Idempotent: a no-op when the stack is already up; re-creates the
-    # backend against the existing volume + network when it vanished.
-    if (cd "$COMPOSE_DIR" && docker compose -p "$COMPOSE_PROJECT" up -d) >&2; then
-      echo "[health] HEAL compose up -d ok (project=$COMPOSE_PROJECT)"
-      if [[ -n "$ALERT_HOOK" && -x "$ALERT_HOOK" ]]; then
-        "$ALERT_HOOK" "CareerPack: self-heal compose up -d ok (project=$COMPOSE_PROJECT)" || true
+  # Dokploy/Compose owns the concrete container name, so discover it from stable
+  # Compose labels instead of pinning a name that drifts across redeploys.
+  if [[ -z "$BACKEND_CONTAINER" ]]; then
+    BACKEND_CONTAINER="$(docker ps -a \
+      --filter "label=com.docker.compose.project=$COMPOSE_PROJECT" \
+      --filter "label=com.docker.compose.service=$COMPOSE_SERVICE" \
+      --format '{{.Names}}' | head -1 || true)"
+  fi
+  if [[ -n "$BACKEND_CONTAINER" ]]; then
+    CONTAINER_STATE="$(docker inspect -f '{{.State.Health.Status}}' "$BACKEND_CONTAINER" 2>/dev/null || true)"
+  fi
+  if [[ -z "$CONTAINER_STATE" ]]; then
+    # Container missing entirely — the exact 2026-06-11 incident class.
+    note_problem "careerpack-convex-container GONE — running compose up -d $COMPOSE_SERVICE (project=$COMPOSE_PROJECT)"
+    if [[ -d "$COMPOSE_DIR" ]]; then
+      # Start ONLY the backend service. The compose project also contains a
+      # dashboard image whose registry access can fail; pulling that unrelated
+      # service must never block recovery of the API users actually need.
+      if (cd "$COMPOSE_DIR" && docker compose -p "$COMPOSE_PROJECT" up -d "$COMPOSE_SERVICE") >&2; then
+        echo "[health] HEAL compose up -d $COMPOSE_SERVICE ok (project=$COMPOSE_PROJECT)"
+        BACKEND_CONTAINER="$(docker ps -a \
+          --filter "label=com.docker.compose.project=$COMPOSE_PROJECT" \
+          --filter "label=com.docker.compose.service=$COMPOSE_SERVICE" \
+          --format '{{.Names}}' | head -1 || true)"
+        if [[ -n "$BACKEND_CONTAINER" ]]; then
+          CONTAINER_STATE="$(docker inspect -f '{{.State.Health.Status}}' "$BACKEND_CONTAINER" 2>/dev/null || true)"
+        fi
+        if [[ -n "$ALERT_HOOK" && -x "$ALERT_HOOK" ]]; then
+          "$ALERT_HOOK" "CareerPack: self-heal backend service ok (project=$COMPOSE_PROJECT)" || true
+        fi
+      else
+        note_problem "careerpack-convex-container self-heal FAILED (project=$COMPOSE_PROJECT) — manual intervention needed"
       fi
     else
-      note_problem "careerpack-convex-container self-heal FAILED (project=$COMPOSE_PROJECT) — manual intervention needed"
+      note_problem "careerpack-convex-container self-heal skipped: compose dir missing ($COMPOSE_DIR)"
     fi
-  else
-    note_problem "careerpack-convex-container self-heal skipped: compose dir missing ($COMPOSE_DIR)"
+  elif [[ "$CONTAINER_STATE" != "healthy" ]]; then
+    note_problem "careerpack-convex-container unhealthy (state=$CONTAINER_STATE)"
   fi
-elif [[ "$CONTAINER_STATE" != "healthy" ]]; then
-  note_problem "careerpack-convex-container unhealthy (state=$CONTAINER_STATE)"
-fi
 fi
 
 # --- Backup freshness: newest archive must be < BACKUP_MAX_AGE_H old ---
 # Catches a silently-dead backup cron (the worst kind: looks fine until
-# you need to restore). Matches both plain + gpg-encrypted shapes.
-# Self-hosted only: these archives are volume tars. The Cloud deployment is
-# backed up by scripts/backup-prod.sh (snapshot export) wherever that cron
-# lives, which is not necessarily this host — so ageing out a tar directory
-# here would report on a backup that is no longer the one that matters.
+# you need to restore). Accepts verified Convex snapshot ZIPs as well as
+# lower-level volume tarballs, plain or gpg-encrypted.
 if [[ "$SELF_HOSTED" == "1" ]]; then
-NEWEST_BACKUP="$(find "$BACKUP_DIR" -maxdepth 1 \( -name 'convex-*.tar.gz' -o -name 'convex-*.tar.gz.gpg' \) -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 || true)"
+NEWEST_BACKUP="$(find "$BACKUP_DIR" -maxdepth 1 \( -name 'careerpack-prod-*.zip' -o -name 'careerpack-prod-*.zip.gpg' -o -name 'convex-*.tar.gz' -o -name 'convex-*.tar.gz.gpg' \) -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 || true)"
 if [[ -z "$NEWEST_BACKUP" ]]; then
   note_problem "backup freshness: no archive found in $BACKUP_DIR"
 else

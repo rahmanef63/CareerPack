@@ -73,6 +73,23 @@ export const handleHealth = httpAction(async (ctx, request) => {
       ready: {
         ai: await ctx.runQuery(internal.health._aiReady, {}),
         email: emailConfigured(),
+        // Public readiness booleans only — never expose credential values.
+        // The frontend uses these to disable auth paths that cannot possibly
+        // succeed instead of sending visitors into a broken OAuth callback.
+        auth: Boolean(
+          optionalEnv("JWT_PRIVATE_KEY") &&
+            optionalEnv("JWKS") &&
+            optionalEnv("SITE_URL") &&
+            optionalEnv("CONVEX_SITE_URL"),
+        ),
+        google: Boolean(
+          optionalEnv("JWT_PRIVATE_KEY") &&
+            optionalEnv("JWKS") &&
+            optionalEnv("SITE_URL") &&
+            optionalEnv("CONVEX_SITE_URL") &&
+            optionalEnv("AUTH_GOOGLE_ID") &&
+            optionalEnv("AUTH_GOOGLE_SECRET"),
+        ),
       },
     });
     return new Response(body, {
@@ -80,6 +97,8 @@ export const handleHealth = httpAction(async (ctx, request) => {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-store",
+        // Safe because the response contains liveness/readiness booleans only.
+        "Access-Control-Allow-Origin": "*",
       },
     });
   } catch (e) {
@@ -89,6 +108,7 @@ export const handleHealth = httpAction(async (ctx, request) => {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-store",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   }

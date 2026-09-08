@@ -35,24 +35,25 @@ import {
  * dari tombol "Simpan Profil": satu klik nyasar di sini tidak bisa
  * dibatalkan.
  *
- * Sesi demo tetap dapat tombol yang sama, bukan disembunyikan. Akun tamu
- * anonim itu baris `users` + auth beneran di Convex (lihat
- * useAuth.loginAsDemo) — kalau tombolnya disembunyikan, satu-satunya cara
- * user demo "menghapus jejak" adalah menutup tab, dan barisnya menumpuk di
- * daftar user admin selamanya. Yang berbeda cuma data yang terlihat: isi
- * sandbox demo hidup di localStorage `careerpack:demo:*`, bukan di Convex,
- * jadi harus ikut dibersihkan di sini.
+ * Demo baru bersifat browser-local: tidak membuat row user di Convex dan semua
+ * sandbox hidup di localStorage `careerpack:demo:*`. Legacy Anonymous sessions
+ * tetap didukung; hanya mode itu yang perlu deleteMyAccount di server.
  */
 export function DangerZoneCard() {
   const { state, logout } = useAuth();
   const deleteMyAccount = useMutation(api.profile.mutations.deleteMyAccount);
   const [busy, setBusy] = useState(false);
   const isDemo = state.isDemo;
+  const isLocalDemo = state.isLocalDemo;
 
   const handleDelete = async () => {
     setBusy(true);
     try {
-      await deleteMyAccount({});
+      // Browser-local demo has no server account to delete. Legacy Anonymous
+      // demo sessions and real accounts still use the authoritative mutation.
+      if (!isLocalDemo) {
+        await deleteMyAccount({});
+      }
       // Tanpa ini, pengunjung berikutnya di browser yang sama disambut CV
       // demo yang barusan "dihapus".
       for (const key of Object.keys(window.localStorage)) {
@@ -77,11 +78,19 @@ export function DangerZoneCard() {
         </CardTitle>
         <CardDescription>
           {isDemo ? (
-            <>
-              Sesi demo memakai akun tamu tanpa email. Menghapusnya mengakhiri
-              sesi, menghapus akun tamu di server, dan membersihkan data contoh
-              yang tersimpan di browser ini.
-            </>
+            isLocalDemo ? (
+              <>
+                Sesi demo ini hanya tersimpan di browser. Menghapusnya
+                membersihkan seluruh data contoh lokal dan mengakhiri sesi tanpa
+                membuat atau menghapus akun server.
+              </>
+            ) : (
+              <>
+                Sesi demo lama memakai akun tamu tanpa email. Menghapusnya
+                mengakhiri sesi, menghapus akun tamu di server, dan membersihkan
+                data contoh yang tersimpan di browser ini.
+              </>
+            )
           ) : (
             <>
               Menghapus akun menghapus permanen profil, CV, lamaran, roadmap,
@@ -110,10 +119,10 @@ export function DangerZoneCard() {
               </ResponsiveAlertDialogTitle>
               <ResponsiveAlertDialogDescription>
                 {isDemo
-                  ? "Akun tamu dan seluruh data contoh di browser ini akan hilang. Anda akan dikembalikan ke halaman depan."
+                  ? "Seluruh data contoh di browser ini akan hilang. Anda akan dikembalikan ke halaman depan."
                   // Jangan tulis "tidak ada cadangan": scripts/backup-prod.sh
-                  // meng-export seluruh tabel tiap malam dan menyimpan 14
-                  // arsip. Yang benar adalah cadangan itu tidak dipakai untuk
+                  // meng-export seluruh tabel tiap malam dan menyimpan arsip.
+                  // Yang benar adalah cadangan itu tidak dipakai untuk
                   // memulihkan akun yang sengaja dihapus.
                   : "Semua data Anda dihapus dari server saat itu juga. Tidak ada tombol undo dan kami tidak memulihkannya dari cadangan; email ini bisa dipakai mendaftar lagi dari nol."}
               </ResponsiveAlertDialogDescription>

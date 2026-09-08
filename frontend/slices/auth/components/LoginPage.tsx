@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -13,6 +13,7 @@ import { Label } from '@/shared/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { convexHttpUrl } from '@/shared/lib/env';
 
 export function LoginPage() {
     const router = useRouter();
@@ -23,6 +24,31 @@ export function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDemoLoading, setIsDemoLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const [authReadiness, setAuthReadiness] = useState<{ auth: boolean; google: boolean } | null>(null);
+
+    // Ask the backend for booleans only. This avoids presenting an OAuth button
+    // when the active deployment lacks signing/provider configuration, while
+    // automatically re-enabling it as soon as ops restores those env vars.
+    useEffect(() => {
+        const controller = new AbortController();
+        fetch(convexHttpUrl('/api/health'), {
+            cache: 'no-store',
+            signal: controller.signal,
+        })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((body: { ready?: { auth?: boolean; google?: boolean } } | null) => {
+                if (typeof body?.ready?.auth === 'boolean' && typeof body.ready.google === 'boolean') {
+                    setAuthReadiness({ auth: body.ready.auth, google: body.ready.google });
+                }
+            })
+            .catch(() => {
+                // A failed readiness probe must not block the page or local demo.
+            });
+        return () => controller.abort();
+    }, []);
+
+    const authUnavailable = authReadiness?.auth === false;
+    const googleUnavailable = authReadiness?.google === false;
 
     // Login form
     const [loginEmail, setLoginEmail] = useState('');
@@ -153,12 +179,14 @@ export function LoginPage() {
         }
     };
 
-    // Demo path — creates a fresh Anonymous Convex session per click.
-    // NO shared email/password account (the old pattern leaked data
-    // across concurrent demo visitors via realtime sync). Each demo
-    // visitor gets their own isolated user row + seeded starter data.
+    // Google stays runtime-gated by backend readiness. The active fallback may
+    // serve data correctly while its OAuth/JWT env is still being recovered.
     const handleGoogleLogin = async () => {
         setError('');
+        if (googleUnavailable) {
+            showError('Login Google sedang dipulihkan. Mode demo tetap bisa digunakan sekarang.');
+            return;
+        }
         setIsGoogleLoading(true);
         try {
             await signIn("google");
@@ -209,12 +237,20 @@ export function LoginPage() {
                 </Alert>
             )}
 
+            {authUnavailable && (
+                <Alert className="mb-4">
+                    <AlertDescription>
+                        Login akun sedang dipulihkan. Anda tetap bisa menjelajahi seluruh demo tanpa mendaftar.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <Button
                 type="button"
                 variant="outline"
                 className="w-full mb-4"
                 onClick={handleGoogleLogin}
-                disabled={isGoogleLoading || isLoading || isDemoLoading}
+                disabled={isGoogleLoading || isLoading || isDemoLoading || googleUnavailable}
             >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
                     <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.3 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.5z"/>
@@ -222,7 +258,9 @@ export function LoginPage() {
                     <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.2 35 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
                     <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.5l6.3 5.3C40.9 36 44 30.5 44 24c0-1.3-.1-2.6-.4-3.5z"/>
                 </svg>
-                {isGoogleLoading ? 'Mengarahkan ke Google…' : 'Lanjutkan dengan Google'}
+                {googleUnavailable
+                    ? 'Google login sedang dipulihkan'
+                    : isGoogleLoading ? 'Mengarahkan ke Google…' : 'Lanjutkan dengan Google'}
             </Button>
 
             <div className="relative mb-4">
@@ -310,15 +348,14 @@ export function LoginPage() {
                                     <Button
                                         type="submit"
                                         className="w-full bg-brand hover:bg-brand"
-                                        disabled={isLoading}
+                                        disabled={isLoading || authUnavailable}
                                     >
                                         {isLoading ? 'Memuat...' : 'Masuk'}
                                     </Button>
                                 </form>
 
-                                {/* Demo session — anonymous Convex provider.
-                                    Each click = new isolated session (no shared
-                                    account across visitors, no data leak). */}
+                                {/* Demo session — browser-local fallback. No backend account,
+                                    no OAuth dependency, no cross-visitor shared state. */}
                                 <div className="mt-6 pt-6 border-t border-border">
                                     <p className="text-sm text-muted-foreground text-center mb-3">
                                         Mau coba dulu?
@@ -329,23 +366,13 @@ export function LoginPage() {
                                         size="sm"
                                         className="w-full"
                                         onClick={handleDemoLogin}
-                                        disabled={isDemoLoading || isLoading}
+                                        disabled={isDemoLoading}
                                     >
                                         <User className="w-4 h-4 mr-2" />
                                         {isDemoLoading ? 'Memulai sesi demo…' : 'Masuk sebagai Tamu'}
                                     </Button>
-                                    {/* Was "data akan dihapus saat logout", which is not what
-                                        happens: logout deletes nothing. convex/admin/cleanup.ts
-                                        purges anonymous accounts only once they are 7 days old.
-                                        An earlier version of this comment went on to claim that
-                                        signing up keeps the guest's work — it does not, and the
-                                        line below deliberately never says so: useDemoOverlay.ts
-                                        keeps demo feature data in localStorage and never writes
-                                        it to Convex, and no overlay→Convex migration exists.
-                                        See DemoBanner.tsx. The repo is public; a claim the code
-                                        contradicts reads as a retention lie, not stale copy. */}
                                     <p className="text-xs text-muted-foreground text-center mt-2">
-                                        Sesi pribadi · tanpa daftar · terhapus otomatis setelah 7 hari
+                                        Sesi lokal di browser · tanpa daftar · dibersihkan saat logout
                                     </p>
                                 </div>
                             </TabsContent>
@@ -425,7 +452,7 @@ export function LoginPage() {
                                     <Button
                                         type="submit"
                                         className="w-full bg-brand hover:bg-brand"
-                                        disabled={isLoading}
+                                        disabled={isLoading || authUnavailable}
                                     >
                                         {isLoading ? 'Memuat...' : 'Daftar'}
                                     </Button>

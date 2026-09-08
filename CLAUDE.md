@@ -29,19 +29,22 @@ Pre-commit hook (`simple-git-hooks` + `lint-staged`) runs ESLint `--fix` on fron
 
 **Resolving to the self-hosted backend now ABORTS the push** (bypass: `ALLOW_NONPROD_CONVEX_DEPLOY=1`). It used to warn and proceed, which is how `convex/**` changes shipped a frontend built against backend code that was never deployed. This used to fire constantly because `pnpm backend:dev-sync` pointed at the self-hosted env file and rewrote `.env.local`, dropping the `CONVEX_DEPLOYMENT` line and demoting the hook from tier 2 to tier 3. Both `backend:dev` and `backend:dev-sync` now target Convex Cloud, so the line survives — if a push still aborts this way, check `.env.local` names a deployment in the **production project**, not another one.
 
-**Which Convex deployment is production (audited 2026-07-30).** Three deployments are in play and they are easy to confuse:
+**PRODUCTION RECOVERY 2026-09-09 — read this before any Convex/deploy change.** The Cloud production project that owned `proficient-dove-151` became inaccessible between the successful 2026-09-05 04:00 backup and the 2026-09-06 backup run. Its public `.convex.cloud` / `.convex.site` endpoints now return 404. Production data from the verified 2026-09-05 snapshot (58 tables + file storage) was restored into the still-healthy self-hosted fallback and current Convex functions were deployed there. Frontend production is therefore temporarily pinned to `https://api.careerpack.org`. Do **not** point clients back at `proficient-dove-151`, and do not repurpose `api.careerpack.org` / `site.careerpack.org` as Convex Cloud CNAMEs while they are the live rollback path. Google/password auth on the fallback still requires its deployment auth env to be restored through an approved secret-management path; browser-local demo mode deliberately does not depend on it.
+
+**Which Convex deployment is production (re-audited 2026-09-09).**
 
 | Deployment | Used by | CLI target |
 |---|---|---|
-| **Convex Cloud `proficient-dove-151`** | **production** — hardcoded as `NEXT_PUBLIC_CONVEX_URL` in `Dockerfile` | `pnpm backend:deploy-prod` → `backend/convex-cloud/prod.env` (`CONVEX_DEPLOY_KEY`), or plain `npx convex deploy` on a logged-in CLI |
-| Convex Cloud `effervescent-hedgehog-352` | local `pnpm dev` (`.env.local`) | `npx convex dev` |
-| Self-hosted Docker (Dokploy) | nothing user-facing; legacy | `pnpm backend:deploy` → `backend/convex-self-hosted/convex.env` |
+| **Self-hosted Docker (Dokploy), `api.careerpack.org` / `site.careerpack.org`** | **temporary production recovery target**; restored from the 2026-09-05 Cloud snapshot | `pnpm backend:deploy` → `backend/convex-self-hosted/convex.env` |
+| Convex Cloud `proficient-dove-151` | **INACCESSIBLE / never target production** until ownership/access is explicitly recovered and verified | old `backend/convex-cloud/prod.env` target; nightly backup began failing 2026-09-06 |
+| Convex Cloud `savory-oyster-802` | older healthy rollback project; code/auth endpoint is healthy but its data is stale relative to the 2026-09-05 snapshot | use only for controlled recovery/credential migration, never direct traffic cutover without data reconciliation |
+| Convex Cloud `effervescent-hedgehog-352` | local/dev history only | do not use for production |
 
 The pre-push hook resolves a target in three tiers and **says which one it hit**: (1) `backend/convex-cloud/prod.env`, (2) a logged-in Convex CLI session (`~/.convex/config.json`) plus a `CONVEX_DEPLOYMENT` line in `.env.local` — `npx convex deploy` with no key goes to that project's **prod** deployment, note that `CONVEX_DEPLOYMENT` names the *dev* one, (3) the self-hosted backend, which prints a loud warning that production functions are unchanged. Until 2026-07-30 only (3) existed and it warned about nothing, so `convex/**` changes (including security fixes) never reached production while the hook reported success. If you change `convex/**`, verify which target got it.
 
 Both env files are secrets — never commit either. Paths are gitignored.
 
-**Prod data backup.** [`scripts/backup-prod.sh`](./scripts/backup-prod.sh) snapshots Cloud prod (all tables + file storage) to `~/backups/careerpack/`, validates the archive, and prunes to `KEEP`. Runs from the `rahman` crontab on the VPS at `0 4 * * *`. The self-hosted volume backups cover **pre-cutover** data only — see [docs/db-backup.md](./docs/db-backup.md) "Cloud gap" for what is and is not proven.
+**Prod data backup.** [`scripts/backup-prod.sh`](./scripts/backup-prod.sh) snapshots the **explicit active target** selected by `PROD_ENV_FILE` (current default: `backend/convex-self-hosted/convex.env`), includes file storage, validates every JSONL row, and prunes to `KEEP`. It runs from the `rahman` crontab at `0 4 * * *`. Never make backup target selection depend on ambient Convex CLI login/project state again: that is how backups silently stopped after `proficient-dove-151` became inaccessible. A pre-recovery self-hosted volume rollback archive also exists outside the repo; production snapshot archives remain under `~/backups/careerpack/`.
 
 **Where this repo lives.** The working checkout at `/home/rahman/projects/CareerPack` is **on the production VPS** (`srv614914.hstgr.cloud`, Hostinger, `76.13.23.37`) — the same host that runs Dokploy, every app container, and the legacy self-hosted Convex. So "local" and "the server" are the same machine: crontabs, `docker ps`, and `~/bin/health-watch.sh` are all right here, no SSH needed. `backend/convex-cloud/prod.env` is a real production credential sitting on a shared host — mode `0600`, gitignored, and **never shell-source it**: the deploy key contains a `|`, so `. prod.env` truncates the value and pipes the rest to a command. Use `convex --env-file`, or `sed -n 's/^CONVEX_DEPLOY_KEY=//p'`.
 
@@ -51,7 +54,7 @@ Both env files are secrets — never commit either. Paths are gitignored.
 
 - `frontend/` — Next.js 15 App Router. Only pnpm workspace member (`pnpm-workspace.yaml`).
 - `convex/` — Convex schema + functions. Separate `tsconfig.json` typechecked alongside frontend.
-- `backend/convex-self-hosted/` — Docker Compose stack for self-hosted Convex. **No longer serves production** (prod is Convex Cloud — see the deployment table above); kept for local/offline work and as a fallback.
+- `backend/convex-self-hosted/` — Docker Compose stack for self-hosted Convex. **Temporarily serves production recovery as of 2026-09-09**; keep it healthy and backed up until a replacement Cloud production deployment is fully restored, authenticated, custom-domain verified, and cut over.
 - `docs/` — Authoritative long-form docs; read these before architectural work.
 
 ### Routing (Next.js App Router)

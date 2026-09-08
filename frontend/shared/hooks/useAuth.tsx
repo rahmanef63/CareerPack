@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -38,10 +39,42 @@ function extractAuthError(err: unknown): string {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+/** Demo must remain usable even when Convex/auth is unavailable. */
+const LOCAL_DEMO_SESSION_KEY = "careerpack:demo:local-session";
+/** Prevent a dead auth backend from trapping /login behind LoadingScreen forever. */
+const AUTH_STARTUP_GRACE_MS = 4000;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
+  const [localDemo, setLocalDemo] = useState(false);
+  const [authStartupTimedOut, setAuthStartupTimedOut] = useState(false);
+
+  // Restore only the demo-session marker. All actual demo data already lives in
+  // the existing `careerpack:demo:*` localStorage overlays used by each slice.
+  useEffect(() => {
+    try {
+      setLocalDemo(window.sessionStorage.getItem(LOCAL_DEMO_SESSION_KEY) === "1");
+    } catch {
+      // sessionStorage can be unavailable in hardened/private contexts. A demo
+      // started in this tab still works; it simply won't survive a reload.
+    }
+  }, []);
+
+  // Convex auth normally resolves quickly. If the selected deployment is gone,
+  // however, useConvexAuth can remain loading forever and RouteGuard hides the
+  // entire login page. Fail open to the guest UI after a bounded grace period;
+  // real sign-in calls still fail closed on the backend, while local demo stays
+  // available as the promised fallback.
+  useEffect(() => {
+    if (!authLoading) {
+      setAuthStartupTimedOut(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setAuthStartupTimedOut(true), AUTH_STARTUP_GRACE_MS);
+    return () => window.clearTimeout(timer);
+  }, [authLoading]);
 
   const userProfile = useQuery(api.profile.queries.getCurrentUser, isAuthenticated ? {} : "skip");
   const updateProfile = useMutation(api.profile.mutations.createOrUpdateProfile);
@@ -108,17 +141,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const state = useMemo<AuthState>(() => {
-    const isLoading = authLoading || (isAuthenticated && userProfile === undefined);
+    const effectiveAuthenticated = isAuthenticated || localDemo;
+    const isLoading = localDemo
+      ? false
+      : (authLoading && !authStartupTimedOut) ||
+        (isAuthenticated && userProfile === undefined);
 
     let user: AuthUser | null = null;
-    // Anonymous Convex users have no email. That's the stable marker
-    // for demo / guest sessions — simpler than threading a flag
-    // through schema.
-    const isDemo = Boolean(
-      userProfile && !userProfile.email?.trim(),
-    );
+    // Legacy Anonymous Convex sessions are still recognized, but new demo
+    // sessions are local-only so demo remains available during backend outages.
+    const isDemo = localDemo || Boolean(userProfile && !userProfile.email?.trim());
 
-    if (userProfile) {
+    if (localDemo) {
+      const now = new Date().toISOString();
+      user = {
+        id: "demo-local-session",
+        email: "",
+        name: "Tamu",
+        role: "user",
+        lastLogin: now,
+        isActive: true,
+        isDemo: true,
+        createdAt: now,
+        updatedAt: now,
+      };
+    } else if (userProfile) {
       user = {
         id: userProfile._id,
         email: userProfile.email || "",
@@ -135,8 +182,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    return { user, isAuthenticated, isLoading, isDemo };
-  }, [isAuthenticated, authLoading, userProfile]);
+    return {
+      user,
+      isAuthenticated: effectiveAuthenticated,
+      isLoading,
+      isDemo,
+      isLocalDemo: localDemo,
+    };
+  }, [isAuthenticated, authLoading, authStartupTimedOut, localDemo, userProfile]);
 
   const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
     try {
@@ -252,27 +305,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   /**
-   * Demo / guest session — each click creates a brand-new Convex user
-   * via the Anonymous provider. No shared account across visitors
-   * (the old `demo@careerpack.id` pattern leaked data cross-user
-   * because Convex is realtime). Demo accounts get the same minimal
-   * starter seed real users do — no more rich Rizky persona that
-   * polluted the admin user list with dozens of duplicates.
+   * Demo / guest session is deliberately backend-independent. Feature slices
+   * already maintain rich `careerpack:demo:*` localStorage overlays; requiring
+   * a Convex Anonymous account merely made the fallback unavailable exactly
+   * when it was needed and polluted the admin user table with throwaway rows.
    */
   const loginAsDemo = async (): Promise<AuthResult> => {
     try {
-      await signIn("anonymous", {});
-      try {
-        await seedWithAuthWait();
-      } catch (seedError) {
-        console.warn("Seed demo dilewati:", seedError);
-      }
-      return { ok: true };
-    } catch (error) {
-      const msg = extractAuthError(error);
-      console.error("Demo sign-in gagal:", msg);
-      return { ok: false, error: msg };
+      window.sessionStorage.setItem(LOCAL_DEMO_SESSION_KEY, "1");
+    } catch {
+      // In-memory state still makes the current tab fully usable.
     }
+    setLocalDemo(true);
+    return { ok: true };
   };
 
   // `to` exists because callers used to try `<Link href={x} onClick={logout}>`
@@ -282,6 +327,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // redirects again. The demo banner's "Daftar" button lost every high-intent
   // signup that way. Pass the destination in instead of racing it.
   const logout = async (to: string = ROUTES.marketing.landing) => {
+    if (localDemo) {
+      try {
+        window.sessionStorage.removeItem(LOCAL_DEMO_SESSION_KEY);
+        for (const key of Object.keys(window.localStorage)) {
+          if (key.startsWith("careerpack:demo:")) {
+            window.localStorage.removeItem(key);
+          }
+        }
+      } catch {
+        // No persistence to clear.
+      }
+      setLocalDemo(false);
+      router.replace(to);
+      return;
+    }
     // Sign out FIRST, then navigate. Navigating while still authenticated let
     // MarketingLanding's "authenticated → /dashboard" redirect grab the window
     // and bounce landing→dashboard→spinner→login on every logout. RouteGuard's
@@ -292,7 +352,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateUser = async (updates: Partial<AuthUser>) => {
-    if (!state.user) return;
+    if (!state.user || localDemo) return;
     try {
       if (updates.name) {
         await updateProfile({

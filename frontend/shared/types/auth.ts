@@ -14,10 +14,9 @@ export interface AuthUser extends BaseEntity {
   lastLogin: string;
   isActive: boolean;
   /**
-   * True when this session was created via the Anonymous provider
-   * (demo / guest). Anonymous users have no email + no password —
-   * each browser gets a fresh isolated session, so demos can't
-   * share CV / application data with each other.
+   * True for demo / guest mode. New demo sessions are browser-local so the
+   * product remains explorable when Convex/auth is unavailable; legacy
+   * Anonymous-provider sessions are still recognized for compatibility.
    */
   isDemo: boolean;
 }
@@ -28,6 +27,12 @@ export interface AuthState {
   isLoading: boolean;
   /** Convenience — same as `state.user?.isDemo ?? false`. */
   isDemo: boolean;
+  /**
+   * True only for the backend-independent browser demo. This lets destructive
+   * account actions skip server mutations while keeping legacy Anonymous demo
+   * sessions compatible during the migration.
+   */
+  isLocalDemo: boolean;
 }
 
 export interface LoginCredentials {
@@ -51,10 +56,9 @@ export interface AuthContextValue {
   login: (credentials: LoginCredentials) => Promise<AuthResult>;
   register: (credentials: LoginCredentials & { name: string }) => Promise<AuthResult>;
   /**
-   * Start an isolated demo session via the Convex Anonymous provider.
-   * Each call creates a fresh `users` row with no email / password;
-   * the visitor gets their own sandbox that won't collide with other
-   * concurrent demo visitors. Seeds starter data on first success.
+   * Start a browser-local demo session. Feature slices hydrate their existing
+   * `careerpack:demo:*` overlays, so no backend account or working auth service
+   * is required and concurrent demo visitors remain isolated.
    */
   loginAsDemo: () => Promise<AuthResult>;
   /** `to` defaults to the landing page. Pass a destination rather than

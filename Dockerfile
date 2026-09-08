@@ -20,14 +20,15 @@ FROM node:${NODE_VERSION} AS builder
 RUN corepack enable && corepack prepare pnpm@10.24.0 --activate
 WORKDIR /app
 
-# Convex Cloud PROD deployment. HARDCODED as a plain ENV (not an overridable
-# ARG) on purpose: a stray Dokploy build-arg kept pinning the frontend to the
-# old dev deployment (compassionate-vole-664), which uses a different Google
-# OAuth client and broke login with redirect_uri_mismatch. A plain ENV cannot
-# be overridden by --build-arg, so every build now bakes the correct URL.
-# NEXT_PUBLIC_* is inlined at build time — to change which Convex backend the
-# app talks to, edit THIS line and rebuild (a runtime env change does nothing).
-ENV NEXT_PUBLIC_CONVEX_URL=https://proficient-dove-151.convex.cloud
+# Production recovery target (2026-09-09). The previous Convex Cloud prod
+# deployment (proficient-dove-151) became inaccessible after the 2026-09-05
+# backup. The self-hosted fallback at api.careerpack.org is healthy and has been
+# restored from that verified snapshot, so production is intentionally pinned
+# here until a new Cloud production deployment is provisioned and verified.
+# Keep this a plain ENV, not an overridable ARG: NEXT_PUBLIC_* is inlined at
+# build time and a stale Dokploy build arg previously sent clients to the wrong
+# Convex deployment. Changing this target always requires a frontend rebuild.
+ENV NEXT_PUBLIC_CONVEX_URL=https://api.careerpack.org
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
