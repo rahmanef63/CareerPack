@@ -29,6 +29,7 @@ WORKDIR /app
 # build time and a stale Dokploy build arg previously sent clients to the wrong
 # Convex deployment. Changing this target always requires a frontend rebuild.
 ENV NEXT_PUBLIC_CONVEX_URL=https://api.careerpack.org
+ENV NEXT_PUBLIC_CONVEX_SITE_URL=https://site.careerpack.org
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
