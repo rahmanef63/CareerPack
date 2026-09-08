@@ -38,6 +38,7 @@ function convexOrigins(url: string | undefined): {
 }
 
 const CONVEX = convexOrigins(process.env.NEXT_PUBLIC_CONVEX_URL)
+const CONVEX_SITE = convexOrigins(process.env.NEXT_PUBLIC_CONVEX_SITE_URL)
 // Wildcard fallbacks so the same build CSP works for cloud Convex
 // (storage on *.convex.cloud, sometimes *.convex.site) without requiring
 // a separate env. Self-hosted deploys also benefit because CONVEX.http
@@ -87,9 +88,10 @@ const SECURITY_HEADERS = [
       // personal-branding template thumbnails + the Convex deploy origin
       // for stored avatars/portfolio media.
       // gstatic/translate hosts serve the widget's flag + spinner sprites.
-      `img-src 'self' data: blob: https://images.unsplash.com https://www.gstatic.com https://translate.googleapis.com https://translate.google.com ${CONVEX.http} ${CONVEX_WILDCARDS_HTTP}`,
+      `img-src 'self' data: blob: https://images.unsplash.com https://www.gstatic.com https://translate.googleapis.com https://translate.google.com ${CONVEX.http} ${CONVEX_SITE.http} ${CONVEX_WILDCARDS_HTTP}`,
       "font-src 'self' data: https://fonts.gstatic.com",
-      // Enumerate connect-src to the Convex deploy origin + WS upgrade.
+      // Enumerate connect-src to the Convex deploy origin + WS upgrade, plus
+      // the explicit Convex site origin used by HTTP Actions on custom domains.
       // `https:`/`wss:` were too broad — defeated CSP exfil-control if
       // XSS ever landed. GA4 (script-src allows googletagmanager.com to
       // load gtag.js) beacons to google-analytics.com, falling back to
@@ -97,7 +99,7 @@ const SECURITY_HEADERS = [
       // both were missing here, so every hit was silently CSP-blocked.
       // translate.googleapis.com is where the widget POSTs page text for
       // translation — without it the script loads and silently does nothing.
-      `connect-src 'self' ${CONVEX.http} ${CONVEX.ws} ${CONVEX_WILDCARDS_HTTP} ${CONVEX_WILDCARDS_WS} https://www.google-analytics.com https://www.google.com https://translate.googleapis.com`,
+      `connect-src 'self' ${CONVEX.http} ${CONVEX.ws} ${CONVEX_SITE.http} ${CONVEX_WILDCARDS_HTTP} ${CONVEX_WILDCARDS_WS} https://www.google-analytics.com https://www.google.com https://translate.googleapis.com`,
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
