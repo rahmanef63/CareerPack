@@ -82,3 +82,6 @@ frontend/public/cmaps/
 
 # golden-prompt eval report (tee target, per-run)
 mcp-eval-report*.txt
+
+# Local MSO runtime state — never commit
+.mso/
