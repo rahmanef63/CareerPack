@@ -24,7 +24,11 @@ export function siteOrigin(): string {
 
 /** Where the human-facing consent + token endpoints live (Next.js app). */
 function appOrigin(): string {
-  return (process.env.APP_URL ?? "https://careerpack.local").replace(/\/$/, "");
+  // CareerPack production has a fixed public app origin. APP_URL remains
+  // overridable for local/dev stacks, but the fallback must be production-safe:
+  // a missing Dokploy env must never advertise careerpack.local to remote OAuth
+  // clients such as ChatGPT.
+  return (process.env.APP_URL ?? "https://careerpack.org").replace(/\/$/, "");
 }
 
 export function mcpResourceUrl(): string {
