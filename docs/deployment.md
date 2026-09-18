@@ -135,13 +135,13 @@ idempotent, **tanpa secret**):
 | [`backend/convex-self-hosted/ops/health-watch.sh`](../backend/convex-self-hosted/ops/health-watch.sh) | 4 probe + self-heal + cek kesegaran backup, jalan tiap 3 menit |
 | [`backend/convex-self-hosted/ops/install-cron.sh`](../backend/convex-self-hosted/ops/install-cron.sh) | Installer crontab idempotent (backup + health-watch) |
 
-**Probe `health-watch.sh` (retargeted 2026-07-30 — defaults now Convex Cloud):**
+**Probe `health-watch.sh` (production custom-domain defaults):**
 
 1. `careerpack-frontend` — root frontend HTTP 200 (`FRONTEND_URL`)
 2. `careerpack-convex-api` — `/version` HTTP 200 (`CONVEX_API_URL`, default
-   `https://proficient-dove-151.convex.cloud`)
+   `https://api.careerpack.org`)
 3. `careerpack-site-health` — `/api/health` body `ok:true` (`CONVEX_SITE_URL`,
-   default `https://proficient-dove-151.convex.site`)
+   default `https://site.careerpack.org`)
 4. `careerpack-convex-container` — Docker health of `careerpack-convex-backend`.
    **Only when `SELF_HOSTED=1`.** Against Cloud there is no container, so this
    probe would fire "GONE" every tick and `compose up -d` would keep trying to
@@ -158,13 +158,13 @@ logging to `~/health-watch.log` with per-check state in
 only `backup.sh` is there. The repo copy under `backend/convex-self-hosted/ops/`
 is the single-project variant kept for reference.
 
-Both were retargeted on 2026-07-30. Until then every CareerPack backend probe
-pointed at `api./site.careerpack.org` — the self-hosted stack — so a Convex
-**Cloud** outage would have left the registry entirely green. The live registry
-now checks `careerpack.org`, `careerpack.org/api/health`,
-`proficient-dove-151.convex.cloud/version` and
-`proficient-dove-151.convex.site/api/health`, with the self-hosted pair demoted to
-`careerpack-legacy-*`.
+The current production contract uses CareerPack-owned custom domains end to end:
+`careerpack.org` for the Next.js app and OAuth authorize/token pages,
+`api.careerpack.org` for the Convex API origin, and `site.careerpack.org` for
+HTTP actions, MCP, OAuth discovery, and DCR. Monitoring must probe those public
+custom domains rather than a deployment-specific `*.convex.cloud` or
+`*.convex.site` hostname, so a backend migration does not leak into clients or
+runbooks.
 
 **Self-heal:** kalau container backend **hilang** (kelas insiden 2026-06-11 —
 `restart: unless-stopped` tidak menolong saat container DIHAPUS), script

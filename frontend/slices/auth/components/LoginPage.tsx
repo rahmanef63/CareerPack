@@ -226,9 +226,19 @@ export function LoginPage() {
                 // Was a hardcoded "© 2024" — two years stale, and sitting on the
                 // one page every signup passes through. Derived instead so it
                 // cannot rot again; MarketingFooter already does the same.
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                    © {new Date().getFullYear()} CareerPack. Semua hak dilindungi.
-                </p>
+                <div className="mt-6 space-y-2 text-center text-xs text-muted-foreground">
+                    <p>© {new Date().getFullYear()} CareerPack. Semua hak dilindungi.</p>
+                    <p>
+                        Dengan melanjutkan, Anda menyetujui{" "}
+                        <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
+                            Terms of Service
+                        </Link>{" "}
+                        dan telah membaca{" "}
+                        <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+                            Privacy Policy
+                        </Link>.
+                    </p>
+                </div>
             }
         >
             {error && (

@@ -76,7 +76,7 @@ export function connectorValues(appOrigin: string): ConnectorValues {
     server: `${site}/mcp`,
     // RFC 8707: penanda resource adalah endpoint MCP-nya, bukan origin-nya.
     resource: `${site}/mcp`,
-    // RFC 9728 `authorization_servers[0]` — origin Convex site, BUKAN domain app.
+    // RFC 9728 `authorization_servers[0]` — custom SITE origin, bukan domain app.
     asBase: site,
     // Dua endpoint ini memang di domain app, bukan di Convex. Perbedaan itu
     // nyata dan sengaja: halaman consent adalah halaman Next.
@@ -93,9 +93,9 @@ export function buildGuides(v: ConnectorValues): HostGuide[] {
     {
       id: "chatgpt",
       host: "ChatGPT",
-      path: "Settings → Apps → Advanced settings → Developer mode, lalu Plugins → +",
+      path: "Buka plugin CareerPack terdaftar lewat tombol Connect ChatGPT. Form manual di bawah hanya fallback Developer Mode.",
       lede:
-        "Tempel Server URL, sisanya ditemukan sendiri oleh ChatGPT dari dokumen .well-known kita. Panel lanjutan hanya cadangan kalau penemuan itu gagal — kolom yang kosong di sana adalah satu-satunya alasan menyentuhnya.",
+        "Cara utama sekarang adalah plugin CareerPack yang sudah terdaftar di ChatGPT. Gunakan setup Server URL manual hanya untuk debugging atau Developer Mode; endpoint tetap memakai custom domain CareerPack.",
       groups: [
         {
           title: "1 · Kolom yang benar-benar Anda isi",
@@ -156,7 +156,7 @@ export function buildGuides(v: ConnectorValues): HostGuide[] {
               field: "Authorization server base",
               verdict: "otomatis",
               value: v.asBase,
-              note: "Perhatikan: ini origin Convex, sedangkan Auth URL dan Token URL ada di domain aplikasi. Memang beda host, dan itu benar.",
+              note: "Ini custom domain site.careerpack.org. Auth URL dan Token URL berada di careerpack.org; keduanya domain resmi CareerPack.",
             },
             { field: "Resource", verdict: "otomatis", value: v.resource, note: "Endpoint MCP-nya sendiri, bukan origin-nya." },
           ],
@@ -174,7 +174,7 @@ export function buildGuides(v: ConnectorValues): HostGuide[] {
         {
           title: "6 · Selesai",
           rows: [
-            { field: "Icon (optional)", verdict: "kosongkan", note: "PNG saja, minimal 256×256, maksimal 10 KB. Murni kosmetik." },
+            { field: "Icon (optional)", verdict: "otomatis", note: "Plugin terdaftar sudah membawa icon PNG 256×256 di bawah 10 KB; upload manual hanya diperlukan untuk draft Developer Mode terpisah." },
             { field: "I understand and want to continue", verdict: "centang", note: "Tombol Create baru aktif setelah ini dicentang." },
             { field: "Create", verdict: "pilih", note: "Lalu jalankan Scan Tools. Aplikasinya masuk ke Drafts." },
           ],

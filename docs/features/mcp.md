@@ -6,7 +6,7 @@ antar host hanya **cara klien mendaftar**, tidak pernah apa yang dilakukan
 server.
 
 **Kode:** `convex/mcp/`
-**Endpoint:** `https://proficient-dove-151.convex.site/mcp`
+**Endpoint:** `https://site.careerpack.org/mcp`
 **Protokol:** dinegosiasikan — `2024-11-05`, `2025-03-26`, `2025-06-18`
 (`MCP_PROTOCOL_VERSIONS` di `convex/mcp/types.ts`)
 
@@ -571,8 +571,9 @@ Empat hal yang mudah salah dan sudah dikunci:
 
 - **`type` wajib** di entri server. Tanpa itu entri ber-`url` dibaca sebagai
   stdio, dilewati, dan dilaporkan `has a "url" but no "type"`.
-- **Host `.convex.site`, bukan `.convex.cloud`.** Router HTTP dipasang di origin
-  site; `.convex.cloud` adalah origin fungsi.
+- **Gunakan custom domain `site.careerpack.org`.** Router HTTP/MCP production
+  dipasang di origin site itu; jangan bocorkan hostname deployment Convex ke
+  config klien atau dokumentasi pengguna.
 - **`plugin.json` satu-satunya isi `.claude-plugin/`.** Menaruh `skills/` di
   dalamnya membuat plugin termuat tanpa isi.
 - **`version` hanya di `plugin.json`.** Kalau diset juga di entri marketplace,
@@ -589,11 +590,11 @@ Terverifikasi: `claude plugin validate --strict` lolos, `--plugin-dir` memuat 1
 skill, dan server terdaftar sebagai `plugin:careerpack:careerpack` berstatus
 *needs auth* — benar untuk OAuth di sesi non-interaktif.
 
-### ChatGPT — server siap, pendaftaran menunggu akun
+### ChatGPT — registered app + custom-domain MCP
 
-Tidak ada paket kedua untuk dibangun. ChatGPT memakai server yang sama di URL
-yang sama; yang berbeda cuma cara ia berkenalan. Tiga hal yang kurang sudah
-ditutup 2026-08-14.
+Registered app ChatGPT dan konektor manual memakai backend MCP yang sama di
+`https://site.careerpack.org/mcp`. Registered app menjadi jalur utama; DCR/manual
+setup tetap dipertahankan sebagai compatibility/debugging path.
 
 **Registrasi klien dinamis (RFC 7591).** Ini yang paling menentukan.
 `POST /oauth/register` di origin site, diiklankan sebagai
@@ -624,9 +625,9 @@ memakainya untuk memutuskan kapan menawarkan UI penautan OAuth.
 **Tantangan verifikasi domain.** `GET /.well-known/openai-apps-challenge`
 menyajikan **hanya** nilai `OPENAI_APPS_CHALLENGE` — bukan JSON, bukan daftar,
 tanpa newline. 404 selama env belum diset, bukan string kosong, karena string
-kosong terbaca sebagai "terverifikasi tapi salah". Harus di host MCP atau
-induknya; induk `*.convex.site` milik Convex, jadi satu-satunya tempat yang sah
-adalah router ini.
+kosong terbaca sebagai "terverifikasi tapi salah". Production menyajikannya
+dari custom domain MCP `site.careerpack.org`, sehingga verifikasi tidak bergantung
+pada hostname deployment Convex.
 
 Halaman consent ikut berubah: nama aplikasi diambil dari pendaftaran (client id
 `cp_…` tidak terbaca manusia) dan **dilabeli sebagai laporan sendiri**, karena
@@ -637,11 +638,17 @@ Terverifikasi di deployment dev: `registration_endpoint` terbit di metadata,
 callback `chatgpt.com` dapat `201` beserta `cp_…`, host di luar allowlist dapat
 `400 invalid_redirect_uri`, dan tantangan domain `404` selagi env kosong.
 
-**Yang tersisa bukan kode.** Developer mode ada di **Settings → Security and
-login** (atau sisi admin: Workspace Settings → Permissions & Roles → Connected
-Data), lalu `chatgpt.com/plugins` → tombol plus → tempel
-`https://proficient-dove-151.convex.site/mcp` (path `/mcp` wajib) → Scan Tools.
-Web saja, tidak ada di mobile.
+**Cara utama sekarang memakai app CareerPack yang sudah terdaftar.** Buka
+`https://chatgpt.com/plugins/plugin_asdk_app_6a7ed7c4fd54819197496ceb6abf03b1`
+atau tombol **Connect ChatGPT** di Pengaturan CareerPack. App binding OpenAI ada
+di `.app.json`; paket kompatibilitas Codex/OpenAI ada di `.codex-plugin/`.
+Endpoint MCP yang menjadi authority tetap custom domain
+`https://site.careerpack.org/mcp`.
+
+Developer Mode/manual connector tetap dipertahankan sebagai fallback debugging:
+Settings → Apps → Advanced settings → Developer mode → Plugins → + → tempel
+`https://site.careerpack.org/mcp` → Scan Tools. Jangan gunakan hostname deployment
+`*.convex.site` langsung; production contract memakai custom domain CareerPack.
 
 Dan satu kenyataan tentang paket akun yang menentukan apakah ini berguna:
 
@@ -653,6 +660,14 @@ Dan satu kenyataan tentang paket akun yang menentukan apakah ini berguna:
 CareerPack mayoritas tool tulis. Di akun Plus/Pro, sebagian besar permukaan ini
 tidak akan bisa dipanggil dari ChatGPT sama sekali. Itu batas OpenAI, bukan
 sesuatu yang bisa diperbaiki di sini.
+
+
+**Paket app OpenAI/Codex.** Struktur mengikuti pola plugin resmi OpenAI seperti
+Composio: `.app.json` mengikat nama `careerpack` ke registered app
+`asdk_app_6a7ed7c4fd54819197496ceb6abf03b1`; `.codex-plugin/plugin.json`
+menyatakan website, support, Privacy Policy, Terms of Service, skill root, MCP
+config, dan asset brand. Icon `./.codex-plugin/assets/icon.png` adalah PNG
+256×256 dengan ukuran di bawah 10 KB.
 
 **Submission direktori** menambah gerbang yang tidak bisa dilewati kode:
 identitas terverifikasi di Platform, `Apps Management = Write`, tepat lima test

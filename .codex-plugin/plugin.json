@@ -1,0 +1,50 @@
+{
+  "name": "careerpack",
+  "version": "1.0.0",
+  "description": "CareerPack workflows for CVs, job applications, career roadmaps, portfolios, documents, and career planning through the registered CareerPack app.",
+  "author": {
+    "name": "Rahman",
+    "url": "https://careerpack.org"
+  },
+  "homepage": "https://careerpack.org",
+  "repository": "https://github.com/rahmanef63/CareerPack",
+  "license": "MIT",
+  "keywords": [
+    "career",
+    "cv",
+    "resume",
+    "job-search",
+    "portfolio",
+    "indonesia",
+    "mcp"
+  ],
+  "skills": "./plugin/skills/",
+  "apps": "./.app.json",
+  "mcpServers": "./plugin/.mcp.json",
+  "requires_local_executor": false,
+  "interface": {
+    "displayName": "CareerPack",
+    "shortDescription": "Build and manage your career pack",
+    "longDescription": "Use CareerPack to work with CVs, job applications, document checklists, skill roadmaps, portfolios, schedules, and other career data through the registered CareerPack app and its OAuth-protected MCP server.",
+    "developerName": "CareerPack",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://careerpack.org/",
+    "privacyPolicyURL": "https://careerpack.org/privacy",
+    "termsOfServiceURL": "https://careerpack.org/terms",
+    "supportURL": "https://careerpack.org/",
+    "defaultPrompt": [
+      "Review my current CV and tell me the highest-impact improvements for the role I am targeting.",
+      "Show my active job applications and help me plan the next follow-up for each one.",
+      "Use my CareerPack data to prepare a focused career plan for the next 30 days."
+    ],
+    "brandColor": "#1D4ED8",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "screenshots": []
+  }
+}

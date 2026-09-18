@@ -210,8 +210,10 @@ export function AuthorizeConsent(params: AuthorizeParams) {
           )}
         </ul>
         <p className="text-xs text-muted-foreground">
-          Kode akan dikirim ke <span className="font-mono">{redirectHost}</span>.
-          Jangan lanjutkan kalau Anda tidak mengenali alamat itu.
+          Otorisasi diproses di domain resmi <span className="font-mono">careerpack.org</span>.
+          Setelah Anda mengizinkan, kode otorisasi hanya dikirim ke{" "}
+          <span className="font-mono">{redirectHost}</span>. Jangan lanjutkan kalau
+          Anda tidak mengenali alamat tujuan itu.
         </p>
         {client ? (
           <p className="text-xs text-muted-foreground">
@@ -238,6 +240,26 @@ export function AuthorizeConsent(params: AuthorizeParams) {
             {busy ? "Menghubungkan…" : "Izinkan"}
           </Button>
         </div>
+        <p className="text-center text-xs text-muted-foreground">
+          Dengan memilih Izinkan, Anda menyetujui{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
+            Terms of Service
+          </Link>{" "}
+          dan{" "}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
+            Privacy Policy
+          </Link>.
+        </p>
       </CardContent>
     </Shell>
   );

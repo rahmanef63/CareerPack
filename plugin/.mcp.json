@@ -2,10 +2,10 @@
   "mcpServers": {
     "careerpack": {
       "type": "http",
-      "url": "https://proficient-dove-151.convex.site/mcp",
+      "url": "https://site.careerpack.org/mcp",
       "oauth": {
         "clientId": "careerpack-claude-plugin",
-        "authServerMetadataUrl": "https://proficient-dove-151.convex.site/.well-known/oauth-authorization-server"
+        "authServerMetadataUrl": "https://site.careerpack.org/.well-known/oauth-authorization-server"
       }
     }
   }

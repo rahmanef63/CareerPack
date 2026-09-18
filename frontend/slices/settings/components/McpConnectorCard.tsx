@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { KeyRound, Plug, Trash2 } from "lucide-react";
+import { ExternalLink, KeyRound, Plug, Trash2 } from "lucide-react";
 
 import { api } from "../../../../convex/_generated/api";
 import { Badge } from "@/shared/components/ui/badge";
@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { CodeBlock } from "@/shared/components/ui/copy-button";
 import { notify } from "@/shared/lib/notify";
+import { CHATGPT_CAREERPACK_PLUGIN_URL } from "@/shared/lib/externalLinks";
 import {
   VERDICT_HINT,
   buildGuides,
@@ -153,6 +154,18 @@ export function McpConnectorCard() {
                     {g.path}
                   </p>
                   <p className="text-sm text-muted-foreground">{g.lede}</p>
+                  {g.id === "chatgpt" ? (
+                    <Button asChild size="sm" className="mt-2 w-fit">
+                      <a
+                        href={CHATGPT_CAREERPACK_PLUGIN_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Connect ChatGPT
+                        <ExternalLink className="ml-1.5 h-3.5 w-3.5" aria-hidden />
+                      </a>
+                    </Button>
+                  ) : null}
                   {/* Ringkasan sebelum detail: inti kartu ini adalah bahwa
                       sebagian besar kolom di form itu bukan urusan pengguna. */}
                   <p className="text-xs text-muted-foreground">

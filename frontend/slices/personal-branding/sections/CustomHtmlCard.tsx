@@ -22,6 +22,7 @@ import {
   ResponsiveAlertDialogTitle,
 } from "@/shared/components/ui/responsive-alert-dialog";
 import { notify } from "@/shared/lib/notify";
+import { CHATGPT_CAREERPACK_PLUGIN_URL } from "@/shared/lib/externalLinks";
 import { api } from "../../../../convex/_generated/api";
 import { TEMPLATE_THEMES, THEME_LABELS, type PersonalBrandingTheme } from "../blocks/types";
 import type { Bind } from "../form/types";
@@ -204,8 +205,16 @@ export function CustomHtmlCard({ bind }: CustomHtmlCardProps) {
       <div className="flex gap-2 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
         <p>
-          Alternatif: sambungkan CareerPack sebagai connector di ChatGPT, lalu
-          minta <em>&quot;bikinin halaman personal branding aku&quot;</em>.
+          Alternatif:{" "}
+          <a
+            href={CHATGPT_CAREERPACK_PLUGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
+            Connect CareerPack ke ChatGPT
+          </a>{" "}
+          lalu minta <em>&quot;bikinin halaman personal branding aku&quot;</em>.
           ChatGPT baca data kamu lewat{" "}
           <code className="font-mono">branding_data</code> dan menyimpan
           hasilnya lewat <code className="font-mono">branding_set_html</code>{" "}
