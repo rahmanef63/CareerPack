@@ -6,7 +6,7 @@
 // purges any cache whose name doesn't match. Keep the suffix in lockstep
 // with deploys; "-vN" or a date hash both work.
 
-const CACHE = "careerpack-v24-2026-07-28-brand-assets";
+const CACHE = "careerpack-v25-2026-09-18-sw-response";
 const PRECACHE = [
   "/",
   "/offline",
@@ -78,30 +78,37 @@ self.addEventListener("fetch", (event) => {
           // Cache successful navigations so the same URL works offline next time.
           if (response && response.ok && response.type === "basic") {
             const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copy));
+            event.waitUntil(caches.open(CACHE).then((cache) => cache.put(request, copy)));
           }
           return response;
         })
-        .catch(() =>
-          caches.match(request).then((cached) => cached || caches.match("/offline"))
-        ),
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+
+          const offline = await caches.match("/offline");
+          return offline || Response.error();
+        }),
     );
     return;
   }
 
   // Static assets: stale-while-revalidate. Serve from cache instantly,
-  // refresh in the background.
+  // refresh in the background. A cache miss plus a failed network request
+  // must still resolve to a Response: returning undefined from respondWith()
+  // causes "Failed to convert value to 'Response'" in the browser.
   event.respondWith(
     caches.match(request).then((cached) => {
       const networkFetch = fetch(request)
         .then((response) => {
           if (response && response.ok && response.type === "basic") {
             const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copy));
+            event.waitUntil(caches.open(CACHE).then((cache) => cache.put(request, copy)));
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(() => cached || Response.error());
+
       return cached || networkFetch;
     })
   );
