@@ -33,20 +33,25 @@ Tanpa langkah ini, tombolnya gagal seketika (no client creds).
 
 1. **Google Cloud Console** → APIs & Services → Credentials → Create
    OAuth client ID → **Web application**.
-2. **Authorized redirect URI** (paling sering salah): origin HTTP-Actions
-   Convex (`.site` / `CONVEX_SITE_ORIGIN`, port 3211) + `/api/auth/callback/google`.
-   **Bukan** URL frontend, **bukan** origin API (3210):
+2. **Authorized redirect URI** production harus memakai custom domain HTTP-Actions:
    ```
-   https://site.<convex-backend-anda>/api/auth/callback/google
+   https://site.careerpack.org/api/auth/callback/google
    ```
-3. Set 3 env var di **backend Convex produksi** — yaitu dashboard Convex Cloud
-   `proficient-dove-151` (bukan env Dokploy; itu backend self-hosted legacy):
+   Jangan gunakan `careerpack.org`, `api.careerpack.org`, port `3210`, atau hostname
+   deployment `*.convex.site` langsung.
+3. Di Google OAuth consent screen, gunakan URL publik:
+   - Homepage: `https://careerpack.org`
+   - Privacy Policy: `https://careerpack.org/privacy`
+   - Terms of Service: `https://careerpack.org/terms`
+   - Authorized JavaScript origin: `https://careerpack.org`
+4. Set env pada **Convex production runtime yang aktif**:
    - `AUTH_GOOGLE_ID` — Client ID
    - `AUTH_GOOGLE_SECRET` — Client secret
-   - `SITE_URL` — URL frontend (mis. `https://careerpack.org`) — tujuan
-     redirect setelah auth selesai (beda dari `CONVEX_SITE_ORIGIN`).
-4. Pastikan backend di-deploy **setelah** commit `c6bc8a1` (provider Google)
-   — kalau backend lebih lama, provider belum ada → `signIn("google")` gagal.
+   - `SITE_URL=https://careerpack.org`
+   `CONVEX_SITE_URL` adalah built-in pada self-hosted Convex dan mengarah ke
+   `https://site.careerpack.org`; jangan mencoba menimpanya dengan `convex env set`.
+5. Setelah env Google tersedia, deploy/restart backend lalu pastikan
+   `GET https://site.careerpack.org/api/health` memberi `ready.google=true`.
 
 > Catatan account-linking: kalau email yang sama dipakai sign-up password
 > lalu login Google, Auth.js default **tidak** auto-link (anti account-takeover)
@@ -126,7 +131,7 @@ Backend wajib set:
   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out jwt.pem
   # copy content (including BEGIN/END lines) ke env
   ```
-- `CONVEX_SITE_URL` — public URL backend (self-hosted: `https://<your-convex-backend>`, cloud: `https://<id>.convex.site`)
+- `CONVEX_SITE_URL` — built-in Convex site origin; production custom domain saat ini `https://site.careerpack.org`
 
 Untuk Google OAuth (lihat §1b), backend juga butuh:
 - `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` — kredensial OAuth client.
@@ -143,7 +148,7 @@ Lihat [deployment.md](./deployment.md) untuk Docker/Dokploy setup.
 | `Missing environment variable JWT_PRIVATE_KEY` | Backend env kosong | Set di Convex dashboard / `.env` self-hosted, restart |
 | `InvalidAccountId` berulang | DB self-hosted rusak / seed lama | `docker compose down -v` + `up` + push ulang |
 | User baru tidak dapat seed | First `seedForCurrentUser` throw — log `console.warn` | Panggil manual lewat settings atau fix schema drift |
-| "Lanjutkan dengan Google" spin lalu gagal | `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` belum di-set di backend | Set 3 env (§1b) di Dokploy → redeploy/restart backend |
-| Google: `redirect_uri_mismatch` | Redirect URI di Google Console ≠ `<CONVEX_SITE_ORIGIN>/api/auth/callback/google` | Pakai origin `.site` (3211), bukan frontend / bukan `.cloud` (3210) |
+| "Lanjutkan dengan Google" nonaktif / gagal | `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` belum di-set di runtime Convex aktif | Set dua credential itu di runtime Convex, lalu redeploy/restart dan cek `ready.google=true` |
+| Google: `redirect_uri_mismatch` | Redirect URI Google Console bukan custom callback production | Pakai persis `https://site.careerpack.org/api/auth/callback/google` |
 | Google sukses tapi balik ke origin salah / localhost | `SITE_URL` backend belum di-set / salah | Set `SITE_URL` = URL frontend publik, restart backend |
 | Google: `Could not find public function` / provider error | Backend belum di-deploy setelah `c6bc8a1` | `pnpm backend:deploy-prod` (Convex Cloud). `pnpm backend:deploy` menyasar self-hosted legacy — tidak menyentuh produksi |
