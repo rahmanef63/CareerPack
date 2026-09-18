@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { convexHttpUrl } from '@/shared/lib/env';
+import { isAuthReadinessKnown, isGoogleAuthReady, type AuthReadiness } from '../lib/authReadiness';
 
 export function LoginPage() {
     const router = useRouter();
@@ -24,7 +25,7 @@ export function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDemoLoading, setIsDemoLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-    const [authReadiness, setAuthReadiness] = useState<{ auth: boolean; google: boolean } | null>(null);
+    const [authReadiness, setAuthReadiness] = useState<AuthReadiness>(null);
 
     // Ask the backend for booleans only. This avoids presenting an OAuth button
     // when the active deployment lacks signing/provider configuration, while
@@ -48,7 +49,12 @@ export function LoginPage() {
     }, []);
 
     const authUnavailable = authReadiness?.auth === false;
-    const googleUnavailable = authReadiness?.google === false;
+    // Fail closed: Google must be explicitly reported ready by the active
+    // backend before the UI may call signIn("google"). Unknown readiness is
+    // not permission to invoke a provider that may not be configured.
+    const googleReadinessKnown = isAuthReadinessKnown(authReadiness);
+    const googleReady = isGoogleAuthReady(authReadiness);
+    const googleUnavailable = !googleReady;
 
     // Login form
     const [loginEmail, setLoginEmail] = useState('');
@@ -183,8 +189,12 @@ export function LoginPage() {
     // serve data correctly while its OAuth/JWT env is still being recovered.
     const handleGoogleLogin = async () => {
         setError('');
-        if (googleUnavailable) {
-            showError('Login Google sedang dipulihkan. Mode demo tetap bisa digunakan sekarang.');
+        if (!googleReady) {
+            showError(
+                googleReadinessKnown
+                    ? 'Login Google belum dikonfigurasi di server. Gunakan email/password atau mode demo untuk sementara.'
+                    : 'Status Google login belum dapat diverifikasi. Coba lagi setelah koneksi server pulih.',
+            );
             return;
         }
         setIsGoogleLoading(true);
@@ -268,9 +278,11 @@ export function LoginPage() {
                     <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.2 35 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
                     <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.5l6.3 5.3C40.9 36 44 30.5 44 24c0-1.3-.1-2.6-.4-3.5z"/>
                 </svg>
-                {googleUnavailable
-                    ? 'Google login sedang dipulihkan'
-                    : isGoogleLoading ? 'Mengarahkan ke Google…' : 'Lanjutkan dengan Google'}
+                {!googleReadinessKnown
+                    ? 'Memeriksa Google login…'
+                    : googleUnavailable
+                      ? 'Google login belum dikonfigurasi'
+                      : isGoogleLoading ? 'Mengarahkan ke Google…' : 'Lanjutkan dengan Google'}
             </Button>
 
             <div className="relative mb-4">
