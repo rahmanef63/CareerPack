@@ -61,6 +61,10 @@ export function MarketingFooter() {
         <Separator className="my-6" />
         <p className="text-xs text-muted-foreground text-center">
           © {new Date().getFullYear()} CareerPack. Dibuat untuk pencari kerja Indonesia.
+          {" "}Dikembangkan oleh{" "}
+          <a href="https://rahmanef.com/about" className="font-medium text-foreground underline underline-offset-4">
+            Rahman Fakhru
+          </a>.
         </p>
       </div>
     </footer>
