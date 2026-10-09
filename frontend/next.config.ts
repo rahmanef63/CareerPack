@@ -198,24 +198,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, ".."),
-  // geoip-lite loads its .dat data files from disk at runtime; the
-  // standalone output tracer can't see those fs reads, so include them
-  // explicitly for the analytics beacon route or the Dokploy image ships
-  // without them (geo silently empty — all geo fields are optional, so the
-  // beacon still records path/referrer/session). Glob is relative to this
-  // (frontend) project dir; the tracer follows the pnpm symlink into the
-  // hoisted store under outputFileTracingRoot (repo root).
-  outputFileTracingIncludes: {
-    "/api/analytics": ["./node_modules/geoip-lite/data/**"],
-  },
-  // Keep geoip-lite OUT of the webpack bundle. Bundled, its CommonJS module
-  // (which fs.readFileSync's its .dat at eval) gets inlined into the route
-  // chunk with a rewritten __dirname, so `next build`'s "collect page data"
-  // step evaluates it and crashes with ENOENT on
-  // .next/server/app/api/data/geoip-country.dat. External → it's require()d
-  // from node_modules at runtime with the correct __dirname; the lazy import
-  // in the route means it never loads at build time at all.
-  serverExternalPackages: ["geoip-lite"],
   transpilePackages: ["rahman-shared"],
   generateBuildId: async () => BUILD_ID,
   env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },

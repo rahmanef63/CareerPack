@@ -1,5 +1,10 @@
 # Deployment
 
+> **Cloudflare migration (2026-10-09):** the Workers release configuration and
+> current Convex production target are documented in
+> [cloudflare-deployment.md](./cloudflare-deployment.md). The Dokploy instructions
+> below describe the previous stack; they are not the Cloudflare release path.
+
 > ## ⚠️ Apa yang benar-benar jalan di produksi (audit 2026-07-30)
 >
 > Doc ini menjelaskan stack **Dokploy + self-hosted Convex**. Frontend memang

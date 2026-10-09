@@ -8,6 +8,10 @@ frontend/node_modules
 dist
 dist-ssr
 frontend/.next
+frontend/.open-next
+frontend/.wrangler
+.dev.vars
+.dev.vars.*
 frontend/out
 *.local
 
