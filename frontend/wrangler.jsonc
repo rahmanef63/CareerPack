@@ -7,6 +7,10 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
   "preview_urls": false,
+  "routes": [
+    { "pattern": "careerpack.org", "custom_domain": true },
+    { "pattern": "www.careerpack.org", "custom_domain": true }
+  ],
   "placement": { "mode": "smart" },
   "assets": {
     "directory": ".open-next/assets",

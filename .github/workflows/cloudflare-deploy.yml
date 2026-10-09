@@ -20,6 +20,7 @@ jobs:
       NEXT_PUBLIC_CONVEX_SITE_URL: https://savory-oyster-802.convex.site
       NEXT_PUBLIC_SITE_URL: https://careerpack.org
       APP_URL: https://careerpack.org
+      NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:

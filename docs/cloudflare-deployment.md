@@ -13,6 +13,13 @@ Cloudflare R2 bucket contains only the disposable Next.js incremental cache.
 - Cache bucket: `careerpack-next-cache`; SQLite Durable Object queue handles ISR.
 - Next.js image optimization uses the Cloudflare Images binding.
 
+The frontend went live on Cloudflare on 2026-10-10 (Asia/Jakarta), from
+`main` revision `f79bb6d6f22eeab402925b4b7805c6fa7df2c5b1`.
+Both `careerpack.org` and `www.careerpack.org` are Worker custom domains.
+The private R2 cache was populated with 130 entries; public bucket access is
+disabled. The previous frontend DNS origin was `76.13.23.37` (proxied A),
+with `www` a proxied CNAME to `careerpack.org`. Mail records were preserved.
+
 On 2026-10-09, the Convex dashboard showed the custom API and HTTP domains as
 disconnected, unavailable on the current plan. Their DNS returned error 1014.
 The deployment's system URL overrides were restored to the healthy default
@@ -39,6 +46,8 @@ cannot change values already compiled into the browser bundle.
    environment, then run
    `pnpm --filter careerpack-frontend exec opennextjs-cloudflare deploy`.
    This uploads the Worker, assets, and incremental cache together.
+   An authorized Wrangler OAuth session also works for a local release.
+   Set `NEXT_PUBLIC_BUILD_ID` to the released Git revision before building.
 6. Test the Worker on `careerpack-frontend.careerpack-org.workers.dev` before
    routing `careerpack.org` and `www.careerpack.org` to it. Verify login, session
    renewal, password reset, uploads, public branding, WebSocket updates, and
