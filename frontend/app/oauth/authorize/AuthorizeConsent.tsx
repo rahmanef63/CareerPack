@@ -59,7 +59,12 @@ export function AuthorizeConsent(params: AuthorizeParams) {
       return "code_challenge_method harus 'S256'.";
     }
     try {
-      new URL(params.redirectUri);
+      const redirect = new URL(params.redirectUri);
+      const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(redirect.hostname);
+      if (redirect.username || redirect.password || redirect.hash ||
+          (redirect.protocol !== "https:" && !(loopback && redirect.protocol === "http:"))) {
+        return "redirect_uri harus HTTPS (HTTP hanya untuk loopback).";
+      }
     } catch {
       return "redirect_uri bukan URL yang valid.";
     }

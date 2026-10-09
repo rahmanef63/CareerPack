@@ -34,12 +34,12 @@ describe("app/[slug] route status", () => {
     ).toBeUndefined();
   });
 
-  it("still declares the ISR config the 404 caching depends on", () => {
+  it("does not create an unbounded per-slug disk cache", () => {
     // `force-static` + `revalidate` is what lets an unknown slug answer 404
     // from the cache without a Convex round trip. If someone drops it, real
     // profiles stop being CDN-cached and enumeration reaches the backend.
     const page = readFileSync(join(SEGMENT, "page.tsx"), "utf8");
-    expect(page).toContain('export const dynamic = "force-static"');
-    expect(page).toMatch(/export const revalidate = \d+/);
+    expect(page).toContain('export const dynamic = "force-dynamic"');
+    expect(page).not.toContain('export const dynamic = "force-static"');
   });
 });

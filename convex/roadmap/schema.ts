@@ -105,6 +105,7 @@ export const roadmapTables = {
     .index("by_slug", ["slug"])
     .index("by_domain", ["domain"])
     .index("by_order", ["order"])
+    .index("by_public_order", ["isPublic", "order"])
     .index("by_author", ["authorId"]),
 
   /**

@@ -335,7 +335,7 @@ export const amIAdmin = query({
       .query("userProfiles")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
-    return profile?.role === "admin";
+    return profile?.role === "admin" && (await ctx.db.get(userId))?.emailVerificationTime !== undefined;
   },
 });
 

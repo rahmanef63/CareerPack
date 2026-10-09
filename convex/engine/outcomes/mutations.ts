@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
-import { requireUser } from "../../_shared/auth";
+import { enforceRateLimit, enforceGlobalWriteLimit } from "../../_shared/rateLimit";
+import { requireUser, requireOwnedDoc } from "../../_shared/auth";
 import { sanitizeAIInput } from "../../_shared/sanitize";
 
 const outcomeKindValidator = v.union(
@@ -13,11 +14,8 @@ const outcomeKindValidator = v.union(
 );
 
 /**
- * Append a single outcome event. Append-only by design — the same
- * `(user, jobListing, kind)` may legitimately occur multiple times
- * (re-apply after rejection, two interview rounds, etc.), so no
- * dedup is performed. Notes are sanitised to prevent prompt injection
- * if this data ever feeds an AI summariser later.
+ * Record one contribution per user/job/edge/kind; retries return the existing ID.
+ * Notes are sanitised before storage.
  */
 export const record = mutation({
   args: {
@@ -35,6 +33,17 @@ export const record = mutation({
   returns: v.id("outcomeEvents"),
   handler: async (ctx, args) => {
     const userId = await requireUser(ctx);
+    if (args.cvId) await requireOwnedDoc(ctx, args.cvId, "CV");
+    if (args.jobListingId && !(await ctx.db.get(args.jobListingId))) throw new Error("Lowongan tidak ditemukan");
+    for (const slug of [args.targetNodeSlug, args.fromNodeSlug]) {
+      if (slug !== undefined && (slug.length > 80 || !/^[a-z][a-z0-9-]*$/.test(slug) || !(await ctx.db.query("careerNodes").withIndex("by_slug", q => q.eq("slug", slug)).first()))) throw new Error("Node karier tidak valid");
+    }
+    const occurredAt = args.occurredAt ?? Date.now();
+    if (!Number.isFinite(occurredAt) || occurredAt > Date.now() || occurredAt < Date.now() - 365 * 86_400_000) throw new Error("Tanggal laporan tidak valid");
+    const duplicate = await ctx.db.query("outcomeEvents").withIndex("by_user_job_edge_kind", q => q.eq("userId", userId).eq("jobListingId", args.jobListingId).eq("fromNodeSlug", args.fromNodeSlug).eq("targetNodeSlug", args.targetNodeSlug).eq("kind", args.kind)).first();
+    if (duplicate) return duplicate._id;
+    await enforceRateLimit(ctx, userId, { key: "outcome:record", max: 20, windowMs: 86_400_000 });
+    await enforceGlobalWriteLimit(ctx, "outcome:record", 200);
     const notes = args.notes
       ? sanitizeAIInput(args.notes, 500).trim() || undefined
       : undefined;
@@ -46,7 +55,7 @@ export const record = mutation({
       targetNodeSlug: args.targetNodeSlug,
       fromNodeSlug: args.fromNodeSlug,
       notes,
-      occurredAt: args.occurredAt ?? Date.now(),
+      occurredAt,
     });
   },
 });

@@ -17,3 +17,12 @@ README.md
 DEPLOYMENT.md
 implementation_plan.md
 backend/convex-self-hosted/data
+**/*.env
+**/*.env.*
+!**/*.env.example
+*.pem
+**/*.pem
+debug
+.harvest
+.mso
+.claude/settings.local.json

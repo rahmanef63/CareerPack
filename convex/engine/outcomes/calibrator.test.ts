@@ -53,7 +53,7 @@ async function seedApplies(
   await t.run(async (ctx) => {
     for (let i = 0; i < n; i++) {
       await ctx.db.insert("outcomeEvents", {
-        userId,
+        userId: await ctx.db.insert("users", { email: `member${i}@example.test` }),
         kind: "apply",
         fromNodeSlug: from,
         targetNodeSlug: to,

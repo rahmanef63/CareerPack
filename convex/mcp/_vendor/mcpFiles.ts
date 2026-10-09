@@ -191,6 +191,8 @@ export function checkUrl(raw: string, policy: FetchPolicy): { ok: true; url: URL
     bracketless.startsWith("fe80");
   if (isPrivate) return { ok: false, reason: "private-address" };
 
+  const approved = ["https://files.oaiusercontent.com", "https://cdn.openai.com", ...(process.env.MCP_FILE_ALLOWED_ORIGINS ?? "").split(",").map(s => s.trim()).filter(Boolean)];
+  if (!approved.includes(url.origin)) return { ok: false, reason: "private-address" };
   return { ok: true, url };
 }
 

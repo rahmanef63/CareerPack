@@ -248,8 +248,7 @@ export function CustomHtmlCard({ bind }: CustomHtmlCardProps) {
         )}
         <span className="flex items-center gap-1 text-xs text-muted-foreground">
           <Code2 className="h-3.5 w-3.5" />
-          Dirender di iframe terisolasi — script kamu tidak bisa menyentuh akun
-          CareerPack.
+          HTML dan CSS didukung. Skrip kustom dan pengiriman formulir dinonaktifkan.
         </span>
       </div>
     </div>

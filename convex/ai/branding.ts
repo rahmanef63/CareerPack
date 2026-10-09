@@ -151,6 +151,7 @@ export const generateBrandingHtml = action({
         "- WAJIB ada elemen <h1> atau atribut data-cp-hero.",
         "- WAJIB pakai marker data-cp untuk SEMUA data profil (nama, headline, bio, skill, pengalaman, pendidikan, project, kontak, dst). JANGAN menulis nilai data sebagai teks literal — contoh: JANGAN tulis \"Budi Santoso\" langsung, tulis <span data-cp=\"name\"></span>.",
         "- CSS inline di dalam <style> saja. Jangan bergantung pada request eksternal kecuali gambar dari Unsplash atau origin app sendiri.",
+        "- Jangan sertakan JavaScript, event handler inline, iframe, atau form. HTML kustom menonaktifkannya; navigasi anchor dan hydrator data-cp disediakan aplikasi.",
         `- Maksimal ${PUBLIC_HTML_MAX.toLocaleString("id-ID")} karakter total.`,
       ].join("\n"),
     ]

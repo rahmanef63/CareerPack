@@ -137,10 +137,8 @@ export function OutcomeReporter({
       {cohort ? (
         !cohort.released ? (
           <p className="rounded bg-muted/40 p-2 text-xs text-muted-foreground">
-            Cohort masih di bawah ambang k-anonimitas (min{" "}
-            <strong>{cohort.minN}</strong> lapor). Statistik di-suppress
-            untuk lindungi privasi. Lapor hasil di bawah untuk membangun
-            cohort.
+            Statistik komunitas sementara tidak ditampilkan untuk melindungi privasi.
+            Laporan Anda tetap tersimpan.
           </p>
         ) : cohort.counts ? (
           <div className="grid grid-cols-3 gap-2 text-xs">

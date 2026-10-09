@@ -1,3 +1,4 @@
+import { ownedStorageUrl } from "../files/ownership";
 import { query, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser } from "../_shared/auth";
@@ -24,13 +25,13 @@ export const listPortfolio = query({
     return await Promise.all(
       items.map(async (item) => {
         const coverUrl = item.coverStorageId
-          ? await ctx.storage.getUrl(item.coverStorageId)
+          ? await ownedStorageUrl(ctx, item.coverStorageId, userId)
           : null;
         const media = item.media
           ? await Promise.all(
               item.media.map(async (m) => ({
                 ...m,
-                url: await ctx.storage.getUrl(m.storageId),
+                url: await ownedStorageUrl(ctx, m.storageId, userId),
               })),
             )
           : [];

@@ -8,8 +8,6 @@ import { AuthProvider } from "@/shared/hooks/useAuth"
 import { AIConfigProvider } from "@/shared/hooks/useAIConfig"
 import { UIPrefsProvider } from "@/shared/hooks/useUIPrefs"
 import { LocaleProvider } from "@/shared/hooks/useLocale"
-import { TranslateHint } from "@/shared/components/system/TranslateHint"
-import { GoogleTranslate } from "@/shared/components/system/GoogleTranslate"
 import { OfflineBanner } from "@/shared/components/system/OfflineBanner"
 import { ThemeColorSync } from "@/shared/components/pwa/ThemeColorSync"
 import { SWUpdatePrompt } from "@/shared/components/pwa/SWUpdatePrompt"
@@ -72,8 +70,6 @@ export function Providers({ children }: { children: ReactNode }) {
                 <RegisterSW />
                 <SWUpdatePrompt />
                 <UpdateChecker />
-                <GoogleTranslate />
-                <TranslateHint />
                 <OfflineBanner />
                 <Toaster />
               </TooltipProvider>

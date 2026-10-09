@@ -42,7 +42,8 @@ describe("public-page iframe sandbox", () => {
     for (const sandbox of [SANDBOX_TEMPLATE, SANDBOX_CUSTOM]) {
       expect(sandbox).toContain("allow-scripts");
       expect(sandbox).toContain("allow-popups");
-      expect(sandbox).toContain("allow-popups-to-escape-sandbox");
+      if (sandbox === SANDBOX_CUSTOM) expect(sandbox).not.toContain("allow-popups-to-escape-sandbox");
+      else expect(sandbox).toContain("allow-popups-to-escape-sandbox");
     }
   });
 });

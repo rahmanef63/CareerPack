@@ -9,10 +9,8 @@
  *     accepts both formats and this change rewrites no existing row — the
  *     alternative (bulk re-encrypt on deploy) means one failed migration
  *     takes AI down for everyone at once.
- *  2. `AI_CRED_SECRET` may legitimately be unset (local dev, a fresh
- *     deployment). Everything that works without it must keep working; only
- *     the OAuth connect, which would be minting a NEW secret the user never
- *     sees, refuses. See `credEncryptionAvailable`.
+ * New writes require AI_CRED_SECRET; existing plaintext remains readable
+ * until the operator migrates it.
  *
  * The `encv1:` tag is what makes both possible: ciphertext is self-describing,
  * so `decryptCred` distinguishes a stored blob from a raw `sk-…` with no
@@ -91,12 +89,7 @@ export async function decryptCred(stored: string): Promise<string> {
   }
 }
 
-/**
- * Write-path helper: encrypt when we can, store plaintext when we cannot.
- * Without this branch, setting `AI_CRED_SECRET` becomes a hard prerequisite
- * for saving any API key, and the settings form starts throwing on a
- * deployment where it used to work.
- */
+/** New writes fail closed when encryption is not configured. */
 export async function maybeEncryptCred(plain: string): Promise<string> {
-  return credEncryptionAvailable() ? await encryptCred(plain) : plain;
+  return await encryptCred(plain);
 }

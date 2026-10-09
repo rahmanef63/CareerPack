@@ -1,3 +1,4 @@
+import { ownedStorageUrl } from "../files/ownership";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { DEFAULT_AUTO_TOGGLES } from "./autoBlocks";
@@ -42,7 +43,7 @@ export async function loadBranding(
 }> {
   const avatarUrl =
     profile.publicAvatarShow && profile.avatarStorageId
-      ? await ctx.storage.getUrl(profile.avatarStorageId)
+      ? await ownedStorageUrl(ctx, profile.avatarStorageId, profile.userId)
       : null;
 
   const items = await ctx.db
@@ -71,7 +72,7 @@ export async function loadBranding(
       coverEmoji: item.coverEmoji ?? null,
       coverGradient: item.coverGradient ?? null,
       coverUrl: item.coverStorageId
-        ? await ctx.storage.getUrl(item.coverStorageId)
+        ? await ownedStorageUrl(ctx, item.coverStorageId, profile.userId)
         : null,
     })),
   );

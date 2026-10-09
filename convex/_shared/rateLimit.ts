@@ -78,7 +78,7 @@ export async function enforceRateLimit(
     .withIndex("by_user_key_time", (q) =>
       q.eq("userId", userId).eq("key", rule.key).gte("timestamp", windowStart),
     )
-    .collect();
+    .take(rule.max);
 
   if (recent.length >= rule.max) {
     const retrySec = Math.ceil(
@@ -151,4 +151,13 @@ async function enforceGlobalCeiling(
       ? `Pemakaian AI bersama sedang mencapai batas untuk jam ini. Sesi demo dibatasi lebih dulu agar akun terdaftar tetap terlayani. Coba lagi sekitar ${retryMin} menit lagi.`
       : `Pemakaian AI bersama sedang mencapai batas untuk jam ini — bukan batas pribadi Anda. Coba lagi sekitar ${retryMin} menit lagi.`,
   });
+}
+
+/** Caller-independent ceiling for public writes; also bounds account farming. */
+export async function enforceGlobalWriteLimit(ctx: MutationCtx, key: string, max: number, windowMs = 3_600_000): Promise<void> {
+  const now = Date.now();
+  const row = await ctx.db.query("pageviewRateLimits").withIndex("by_key", q => q.eq("key", "security:" + key)).unique();
+  if (row && row.resetAt > now && row.count >= max) throw new ConvexError({ message: "Terlalu banyak permintaan. Coba lagi nanti." });
+  if (row) await ctx.db.patch(row._id, { count: row.resetAt > now ? row.count + 1 : 1, resetAt: row.resetAt > now ? row.resetAt : now + windowMs });
+  else await ctx.db.insert("pageviewRateLimits", { key: "security:" + key, count: 1, resetAt: now + windowMs });
 }

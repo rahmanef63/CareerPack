@@ -206,7 +206,7 @@ Generic langkah (UI per provider beda):
 docker compose -f /path/to/dokploy/compose stop backend
 
 # 2. Wipe + restore volume
-docker run --rm -v <VOLUME_NAME>:/dest -v /var/backups/careerpack:/src alpine sh -c \
+docker run --rm -v <VOLUME_NAME>:/dest -v /var/backups/careerpack:/src "${BACKUP_IMAGE:?Set a reviewed alpine image digest}" sh -c \
   'rm -rf /dest/* && tar xzf /src/convex-YYYYMMDD-HHMM.tar.gz -C /dest'
 
 # 3. Start container

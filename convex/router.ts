@@ -1,3 +1,4 @@
+import { handleUpload } from "./files/uploads";
 import { httpRouter } from "convex/server";
 import { handleResendWebhook } from "./admin/webhooks";
 import { handleUnsubscribeGet, handleUnsubscribePost } from "./admin/unsubscribes";
@@ -14,6 +15,8 @@ import {
 } from "./mcp/wellKnown";
 
 const http = httpRouter();
+http.route({ path: "/files/upload", method: "POST", handler: handleUpload });
+http.route({ path: "/files/upload", method: "OPTIONS", handler: handleUpload });
 
 http.route({
   path: "/webhooks/resend",
@@ -89,9 +92,7 @@ http.route({
  * hour, HMAC-bound to the file id and owner, and ownership re-checked here
  * because a token outlives the row it points at.
  *
- * Redirects rather than proxying the bytes: the storage URL is short-lived on
- * Convex's side too, and streaming megabytes through a Convex action to save
- * one hop would be worse for both.
+ * Proxies storage bytes so redemption never exposes a durable storage URL.
  */
 http.route({ path: "/files/read", method: "GET", handler: handleSignedFileRead });
 

@@ -77,13 +77,14 @@ export async function requireAdmin(
   // deployment, no need to self-promote via updateUserRole first.
   if (superAdminConfigured()) {
     const user = await ctx.db.get(userId);
-    if (user?.email === SUPER_ADMIN_EMAIL) return userId;
+    if (user?.email === SUPER_ADMIN_EMAIL && user.emailVerificationTime !== undefined) return userId;
   }
   const profile = await ctx.db
     .query("userProfiles")
     .withIndex("by_user", (q) => q.eq("userId", userId))
     .first();
-  if (profile?.role !== "admin") throw authError("Bukan admin");
+  const user = await ctx.db.get(userId);
+  if (profile?.role !== "admin" || user?.emailVerificationTime === undefined) throw authError("Bukan admin");
   return userId;
 }
 
@@ -98,7 +99,7 @@ export async function requireSuperAdmin(
   const userId = await requireUser(ctx);
   if (!superAdminConfigured()) throw authError("Tidak berwenang");
   const user = await ctx.db.get(userId);
-  if (!user || user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user || user.email !== SUPER_ADMIN_EMAIL || user.emailVerificationTime === undefined) {
     throw authError("Tidak berwenang");
   }
   return userId;
@@ -112,5 +113,5 @@ export async function isSuperAdminCaller(
   const userId = await getAuthUserId(ctx);
   if (!userId) return false;
   const user = await ctx.db.get(userId);
-  return user?.email === SUPER_ADMIN_EMAIL;
+  return user?.email === SUPER_ADMIN_EMAIL && user.emailVerificationTime !== undefined;
 }

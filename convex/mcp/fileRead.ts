@@ -42,13 +42,14 @@ export const handleSignedFileRead = httpAction(async (ctx, request) => {
   });
   if (!file) return NOT_FOUND();
 
-  return new Response(null, {
-    status: 302,
+  const blob = await ctx.storage.get(file.storageId);
+  if (!blob) return NOT_FOUND();
+  return new Response(blob, {
+    status: 200,
     headers: {
-      Location: file.url,
-      // `private` and no-store: this response carries a redirect to a blob the
-      // owner alone should see, and it is reachable without a session. A shared
-      // cache holding it would serve the next person through the same proxy.
+      "Content-Type": file.fileType,
+      "Content-Disposition": `inline; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
+      // Serve bytes without exposing the durable storage bearer URL.
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
     },

@@ -45,7 +45,8 @@ export async function POST(req: Request) {
     !path ||
     path.startsWith("/dashboard") ||
     path.startsWith("/admin") ||
-    path.startsWith("/api")
+    path.startsWith("/api") ||
+    path.startsWith("/reset-password") || path.startsWith("/oauth") || path.startsWith("/login")
   ) {
     return new Response(null, { status: 204 });
   }

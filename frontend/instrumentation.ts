@@ -16,13 +16,14 @@ export const onRequestError: Instrumentation.onRequestError = (
   request,
   context,
 ) => {
-  const message = err instanceof Error ? err.message : String(err);
-  const stack = err instanceof Error ? err.stack : "";
+  const redact = (value: string) => value.replace(/(\/reset-password\/)[^\s/?#]+/g, "$1[redacted]");
+  const message = redact(err instanceof Error ? err.message : String(err));
+  const stack = err instanceof Error ? redact(err.stack ?? "") : "";
 
   // Structured single-line log — Dokploy / log shipper picks it up;
   // grep-friendly without needing a JSON parser.
   console.error(
-    `[onRequestError] ${request.method} ${request.path} (${context.routerKind}/${context.routeType}): ${message}`,
+    `[onRequestError] ${request.method} ${redact(request.path.split("?")[0])} (${context.routerKind}/${context.routeType}): ${message}`,
   );
   if (stack) console.error(stack);
 

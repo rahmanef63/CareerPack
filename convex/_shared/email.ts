@@ -389,7 +389,8 @@ async function unsubscribeKey(): Promise<CryptoKey> {
   // Property: token reveals nothing about the API key (HMAC is one-way),
   // and rotating the API key invalidates outstanding unsub links —
   // acceptable trade since users can re-click from the next email.
-  const seed = process.env.RESEND_API_KEY ?? "careerpack-fallback-unsub-key";
+  const seed = process.env.RESEND_API_KEY;
+  if (!seed?.trim()) throw new Error("RESEND_API_KEY belum diset");
   const seedBytes = new TextEncoder().encode(`${seed}::unsub-v1`);
   return crypto.subtle.importKey(
     "raw",

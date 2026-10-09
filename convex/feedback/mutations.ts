@@ -1,5 +1,6 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
+import { enforceGlobalWriteLimit, enforceRateLimit } from "../_shared/rateLimit";
 import { optionalUser } from "../_shared/auth";
 
 const SUBJECT_MAX = 120;
@@ -29,6 +30,8 @@ export const submitFeedback = mutation({
       throw new Error(`Pesan maksimal ${MESSAGE_MAX} karakter`);
     }
 
+    await enforceGlobalWriteLimit(ctx, "feedback", 100);
+    if (userId) await enforceRateLimit(ctx, userId, { key: "feedback", max: 5, windowMs: 3_600_000 });
     await ctx.db.insert("feedback", {
       userId: userId ?? undefined,
       subject,

@@ -47,6 +47,12 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
     for (const r of rows) await ctx.db.delete(r._id);
   }
 
+  const uploads = await ctx.db.query("uploadIntents").withIndex("by_user", q => q.eq("userId", userId)).collect();
+  for (const upload of uploads) {
+    if (upload.storageId) await ctx.storage.delete(upload.storageId);
+    await ctx.db.delete(upload._id);
+  }
+
   // Templates the user published stay live (other users' roadmaps point
   // at them) but must stop carrying the deleted person's real name.
   const authored = await ctx.db
@@ -72,10 +78,14 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
     .collect();
   for (const atom of atoms) {
     if (atom.proofStorageId) {
-      try {
-        await ctx.storage.delete(atom.proofStorageId);
-      } catch {
-        /* blob may already be gone */
+      const storageId = atom.proofStorageId;
+      const owners = await ctx.db.query("files").withIndex("by_storage", q => q.eq("storageId", storageId)).take(2);
+      if (owners.length === 1 && owners[0].uploadedBy === userId) {
+        try {
+          await ctx.storage.delete(storageId);
+        } catch {
+          /* blob may already be gone */
+        }
       }
     }
     await ctx.db.delete(atom._id);
@@ -98,10 +108,13 @@ export async function cascadeDeleteUser(ctx: MutationCtx, userId: Id<"users">) {
     .withIndex("by_user", (q) => q.eq("uploadedBy", userId))
     .collect();
   for (const f of userFiles) {
-    try {
-      await ctx.storage.delete(f.storageId);
-    } catch {
-      /* blob may already be gone */
+    const owners = await ctx.db.query("files").withIndex("by_storage", q => q.eq("storageId", f.storageId)).take(2);
+    if (owners.length === 1) {
+      try {
+        await ctx.storage.delete(f.storageId);
+      } catch {
+        /* blob may already be gone */
+      }
     }
     await ctx.db.delete(f._id);
   }

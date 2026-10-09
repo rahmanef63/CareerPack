@@ -65,7 +65,7 @@ export const _topMatchesForUser = internalQuery({
     const userLevel = profile?.experienceLevel?.toLowerCase() ?? "";
     const userLoc = profile?.location?.toLowerCase() ?? "";
 
-    const scored = jobs.map((job) => {
+    const scored = jobs.filter(job => job.source !== "user-paste" || job.addedBy === args.userId).map((job) => {
       let score = 0;
       const title = job.title.toLowerCase();
       if (role && title.includes(role)) score += 40;

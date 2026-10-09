@@ -365,6 +365,13 @@ export const resetPassword = mutation({
     const newSecret = await hashSecret(args.newPassword);
     await ctx.db.patch(account._id, { secret: newSecret });
     await ctx.db.patch(match._id, { usedAt: now });
+    await ctx.db.patch(match.userId, { emailVerificationTime: now });
+    const sessions = await ctx.db.query("authSessions").withIndex("userId", q => q.eq("userId", match.userId)).collect();
+    for (const session of sessions) {
+      const tokens = await ctx.db.query("authRefreshTokens").withIndex("sessionId", q => q.eq("sessionId", session._id)).collect();
+      for (const token of tokens) await ctx.db.delete(token._id);
+      await ctx.db.delete(session._id);
+    }
 
     return { ok: true as const };
   },

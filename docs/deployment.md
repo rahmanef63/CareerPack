@@ -303,7 +303,7 @@ Frontend: Dokploy rollback ke revision sebelumnya (UI).
 otomatis tiap login lewat `useAuth.login()`.
 
 Untuk admin baru: set env `ADMIN_BOOTSTRAP_EMAILS` (comma-separated) di deployment
-produksi; email yang cocok naik jadi `role: "admin"` pada login berikutnya.
+produksi; email yang cocok dan sudah terverifikasi naik jadi `role: "admin"` pada login berikutnya.
 
 ## 10. Kredensial AI terenkripsi (`AI_CRED_SECRET`)
 
@@ -313,29 +313,20 @@ produksi; email yang cocok naik jadi `role: "admin"` pada login berikutnya.
 `NEXT_PUBLIC_*`, jangan pernah ikut ter-inline ke build frontend.
 
 ```bash
-# sudah ada belum? (list mencetak nama DAN nilai — jangan tempel outputnya ke mana pun)
-pnpm exec convex env list --env-file backend/convex-cloud/prod.env
-
-# set di PRODUKSI (Convex Cloud proficient-dove-151)
+# Set di target pemulihan produksi yang aktif; jangan cetak secret.
 pnpm exec convex env set AI_CRED_SECRET "$(openssl rand -hex 32)" \
-  --env-file backend/convex-cloud/prod.env
+  --env-file backend/convex-self-hosted/convex.env
 ```
 
-Self-hosted legacy: sama, `--env-file backend/convex-self-hosted/convex.env`.
+Target produksi harus sesuai `Dockerfile`; tidak ada fallback ke proyek lama.
 Dev lokal: tanpa `--env-file` (kena deployment dev). Bisa juga lewat Convex
 dashboard → Settings → Environment Variables.
 
 Nilai bebas: env-nya di-SHA-256 dulu jadi kunci AES, jadi passphrase apa pun
 jalan — `openssl rand -hex 32` cuma default yang aman.
 
-**Kalau tidak diset** (keadaan yang valid: dev lokal, deployment baru):
-
-- Simpan API key di Setelan → AI dan Admin Panel **tetap jalan**, key ditulis
-  plaintext persis seperti sebelum fitur ini ada. Semua AI action jalan.
-- Yang menolak cuma OAuth connect (`api.ai.oauth.startOAuthConnect`):
-  *"Login provider belum aktif — admin perlu mengatur AI_CRED_SECRET dulu."*
-  Sengaja — key hasil OAuth tidak pernah dilihat user, jadi user tidak bisa
-  merotasi sesuatu yang bocor tanpa dia pernah tahu key itu ada.
+**Kalau tidak diset**, semua penyimpanan kredensial AI dan OAuth connect ditolak.
+AI berbasis konfigurasi server yang sudah ada tetap dapat berjalan.
 
 **Tidak ada migrasi OTOMATIS.** Baris yang sudah ada TIDAK ikut dienkripsi waktu env
 di-set; ciphertext-nya self-describing (`encv1:`) dan read path (`decryptCred`
@@ -347,7 +338,7 @@ yang ditulis SETELAH env ada.
 
 ```bash
 # hitung dulu: berapa baris yang masih polos, tanpa mengubah apa pun
-npx convex run --prod admin/aiCreds:reencryptAICreds '{}'
+pnpm exec convex run --env-file backend/convex-self-hosted/convex.env admin/aiCreds:reencryptAICreds '{}'
 # lalu tulis
 npx convex run --prod admin/aiCreds:reencryptAICreds '{"apply":true}'
 ```

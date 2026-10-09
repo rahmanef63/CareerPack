@@ -48,7 +48,7 @@ function makeCtx(opts: CtxOpts = {}): { ctx: ActionCtx; runQuery: ReturnType<typ
   return { ctx, runQuery };
 }
 
-const ENV_KEYS = ["CONVEX_OPENAI_BASE_URL", "CONVEX_OPENAI_API_KEY"] as const;
+const ENV_KEYS = ["CONVEX_OPENAI_BASE_URL", "CONVEX_OPENAI_API_KEY", "AI_ALLOWED_BASE_URLS"] as const;
 const savedEnv: Record<string, string | undefined> = {};
 
 beforeEach(() => {
@@ -88,6 +88,7 @@ describe("resolveAI — path 1: per-user settings win", () => {
   });
 
   it("honours an explicit baseUrl override on the user's settings", async () => {
+    process.env.AI_ALLOWED_BASE_URLS = "https://gw.example.com/v1";
     getAuthUserId.mockResolvedValue(uid("u1"));
     const { ctx } = makeCtx({
       user: {

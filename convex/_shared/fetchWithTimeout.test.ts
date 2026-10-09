@@ -15,6 +15,23 @@ describe("fetchWithTimeout", () => {
     expect(await r.text()).toBe("ok");
   });
 
+  it("refuses redirects even when the caller requests following them", async () => {
+    const spy = vi.fn(async () => new Response("ok"));
+    global.fetch = spy;
+    await fetchWithTimeout("https://example.com", { timeoutMs: 1000, redirect: "follow" });
+    expect(spy.mock.calls[0]).toEqual(["https://example.com", expect.objectContaining({ redirect: "error" })]);
+  });
+
+  it("rejects an oversized body after successful headers", async () => {
+    global.fetch = vi.fn(async () => new Response("12345"));
+    await expect(fetchWithTimeout("https://example.com", { timeoutMs: 1000, maxResponseBytes: 4 })).rejects.toThrow(/byte limit/);
+  });
+
+  it("keeps the deadline active while reading a stalled body", async () => {
+    global.fetch = vi.fn(async () => new Response(new ReadableStream({ start(c) { c.enqueue(new Uint8Array([1])); } })));
+    await expect(fetchWithTimeout("https://example.com", { timeoutMs: 30 })).rejects.toThrow(/timeout after 30ms/);
+  });
+
   it("forwards method + body + headers untouched", async () => {
     const spy = vi.fn(
       async (_url: string | URL | Request, _init?: RequestInit) => new Response("ok"),

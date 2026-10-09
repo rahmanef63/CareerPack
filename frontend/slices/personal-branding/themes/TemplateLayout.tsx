@@ -6,7 +6,7 @@ import {
   BrandingShowMoreDialog,
   type ShowMoreList,
 } from "../components/BrandingShowMoreDialog";
-import { injectBrandingIntoHtml } from "./inject";
+import { injectBrandingIntoHtml, injectCustomBrandingIntoHtml } from "./inject";
 import { SANDBOX_CUSTOM, SANDBOX_TEMPLATE } from "./sandbox";
 import {
   type BrandingPayload, type FloatingNavItem,
@@ -179,8 +179,9 @@ export function TemplateLayout({
   // copy with the user's real data and hide empty sections.
   const hydratedHtml = useMemo(() => {
     if (!html) return html;
-    return injectBrandingIntoHtml(html, debouncedBranding);
-  }, [html, debouncedBranding]);
+    if (templateHtml === undefined) return injectBrandingIntoHtml(html, debouncedBranding);
+    return injectCustomBrandingIntoHtml(html, debouncedBranding);
+  }, [html, debouncedBranding, templateHtml]);
 
   return (
     <div className="relative w-full" style={{ minHeight: "calc(100vh - 64px)" }}>

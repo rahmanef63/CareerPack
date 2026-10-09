@@ -1,6 +1,7 @@
 /** Admin self-demotion / self-deletion guard + role mutation helper. */
 
 import type { MutationCtx } from "../../_generated/server";
+import { SUPER_ADMIN_EMAIL } from "../../_shared/auth";
 import type { Id } from "../../_generated/dataModel";
 
 export type AdminRole = "admin" | "moderator" | "user";
@@ -16,6 +17,12 @@ export async function ensureNotLastAdmin(
   message: string,
 ) {
   const set = new Set(affected);
+  for (const id of set) {
+    const user = await ctx.db.get(id);
+    if (SUPER_ADMIN_EMAIL && user?.email === SUPER_ADMIN_EMAIL) {
+      throw new Error("Akun super-admin tidak boleh dihapus atau diturunkan perannya");
+    }
+  }
   if (!set.has(callerId)) return;
 
   const adminProfiles = await ctx.db
