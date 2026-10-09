@@ -24,7 +24,9 @@
     "smoke": "bash scripts/smoke-prod.sh",
     "smoke:watch": "bash scripts/smoke-prod.sh --watch",
     "pwa:assets": "node scripts/generate-pwa-assets.mjs",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "build:cloudflare": "pnpm --filter careerpack-frontend build:cloudflare",
+    "preview:cloudflare": "pnpm --filter careerpack-frontend preview:cloudflare"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged",

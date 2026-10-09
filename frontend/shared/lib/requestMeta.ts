@@ -55,3 +55,9 @@ export function publicOrigin(req: Request): string {
     return "";
   }
 }
+
+/** Cloudflare supplies coarse geolocation without a local database or IP lookup. */
+export function edgeCountry(req: Request): string | null {
+  const country = req.headers.get("cf-ipcountry")?.trim().toUpperCase() ?? "";
+  return /^[A-Z]{2}$/.test(country) && country !== "XX" ? country : null;
+}

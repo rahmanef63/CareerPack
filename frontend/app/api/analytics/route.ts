@@ -1,27 +1,8 @@
-// Cookieless visitor beacon ingest. The client posts via
-// navigator.sendBeacon; we resolve geo from the caller IP (geoip-lite —
-// offline, no MaxMind, no external call), hash the IP into a rate-limit
-// bucket key, then DISCARD the raw IP (never sent to Convex, never stored).
-// Fire-and-forget → always 204.
+// Cookieless public-page beacon; raw IPs are hashed and never persisted.
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
-import { clientIp, publicOrigin } from "@/shared/lib/requestMeta";
+import { clientIp, publicOrigin, edgeCountry } from "@/shared/lib/requestMeta";
 import { createHash } from "node:crypto";
-
-// geoip-lite loads its .dat data at module-eval and ships without it → a TOP-LEVEL import
-// crashes `next build`. Lazy + guarded: builds clean; geo degrades to null if data is absent.
-type _Geo = { country?: string; region?: string; city?: string; ll?: [number, number] } | null;
-let _geoip: { lookup: (ip: string) => _Geo } | null | undefined;
-async function lookupGeo(ip: string): Promise<_Geo> {
-  if (_geoip === undefined) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const m: any = await import("geoip-lite");
-      _geoip = m.default ?? m;
-    } catch { _geoip = null; }
-  }
-  try { return _geoip?.lookup(ip) ?? null; } catch { return null; }
-}
 
 export const dynamic = "force-dynamic"; // never statically cache a beacon POST
 
@@ -65,12 +46,12 @@ export async function POST(req: Request) {
   }
 
   const ip = clientIp(req);
-  const geo = ip ? (await lookupGeo(ip)) : null;
+  const country = edgeCountry(req);
   const ipHash = ip ? createHash("sha256").update(ip).digest("hex") : undefined;
 
   if (!CONVEX_URL) return new Response(null, { status: 204 });
   const client = new ConvexHttpClient(CONVEX_URL);
-  void client
+  await client
     .mutation(api.pageviews.mutations.record, {
       path,
       referrerHost,
@@ -84,11 +65,7 @@ export async function POST(req: Request) {
       utmCampaign: str(body?.utmCampaign, 120),
       utmTerm: str(body?.utmTerm, 120),
       utmContent: str(body?.utmContent, 120),
-      country: geo?.country || undefined,
-      region: geo?.region || undefined,
-      city: geo?.city || undefined,
-      lat: geo?.ll?.[0],
-      lon: geo?.ll?.[1],
+      country: country ?? undefined,
       properties: str(body?.properties, 2000),
       ipHash,
     })
