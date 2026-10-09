@@ -2,7 +2,7 @@ import { action, internalAction, internalMutation, mutation, type ActionCtx } fr
 import { internal } from "../_generated/api";
 import { enforceRateLimit, enforceGlobalWriteLimit } from "../_shared/rateLimit";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "../_shared/authSession";
 import { authError, requireUser } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI } from "../_shared/aiResolve";

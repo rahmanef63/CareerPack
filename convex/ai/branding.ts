@@ -1,7 +1,7 @@
 import { action, type ActionCtx } from "../_generated/server";
 import { ConvexError, v } from "convex/values";
 import { internal } from "../_generated/api";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "../_shared/authSession";
 import { authError } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI, type ResolvedAI } from "../_shared/aiResolve";

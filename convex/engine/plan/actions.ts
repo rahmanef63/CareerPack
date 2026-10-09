@@ -1,6 +1,6 @@
 import { v, ConvexError } from "convex/values";
 import { action, type ActionCtx } from "../../_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "../../_shared/authSession";
 import { sanitizeAIInput, wrapUserInput } from "../../_shared/sanitize";
 import { resolveAI as resolveAIShared } from "../../_shared/aiResolve";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../../_shared/fetchWithTimeout";

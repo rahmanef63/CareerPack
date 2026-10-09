@@ -128,16 +128,38 @@ describe("public abuse and privacy boundaries", () => {
     const key = await crypto.subtle.importKey("raw", new TextEncoder().encode("test-reset-secret"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
     const bytes = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawToken)));
     const tokenHash = "hmacv1_" + Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
-    await t.run(async ctx => {
+    const sessionId = await t.run(async ctx => {
       await ctx.db.insert("authAccounts", { userId: owner, provider: "password", providerAccountId: "owner@example.test", secret: "old" });
+      await ctx.db.insert("userProfiles", { userId: owner, fullName: "Owner", location: "", targetRole: "", experienceLevel: "", role: "admin" });
       const sessionId = await ctx.db.insert("authSessions", { userId: owner, expirationTime: Date.now() + 86_400_000 });
       await ctx.db.insert("authRefreshTokens", { sessionId, expirationTime: Date.now() + 86_400_000 });
       await ctx.db.insert("passwordResetTokens", { userId: owner, tokenHash, expiresAt: Date.now() + 60_000 });
+      await ctx.db.insert("oauthAccessTokens", { token: "existing-grant", userId: owner, clientId: "test-client", scope: "mcp.write", createdAt: Date.now() });
+      await ctx.db.insert("oauthCodes", { code: "pending-code", codeChallenge: "challenge", codeChallengeMethod: "S256", redirectUri: "https://chatgpt.com/callback", clientId: "test-client", scope: "mcp.write", userId: owner, expiresAt: Date.now() + 60_000, consumed: false, createdAt: Date.now() });
+      await ctx.db.insert("oauthClients", { clientId: "test-client", clientName: "Test", redirectUris: [], createdAt: Date.now(), ownerUserId: owner, label: "Test", clientSecretHash: "secret-hash" });
+      return sessionId;
     });
+    const oldClient = t.withIdentity({ subject: `${owner}|${sessionId}` });
+    expect(await oldClient.query(api.auth.loggedInUser, {})).not.toBeNull();
+    expect(await oldClient.query(api.admin.queries.amIAdmin, {})).toBe(false);
     await t.mutation(api.passwordReset.resetPassword, { token: rawToken, newPassword: "New-password-123!" });
     expect(await t.run(ctx => ctx.db.query("authSessions").collect())).toEqual([]);
     expect(await t.run(ctx => ctx.db.query("authRefreshTokens").collect())).toEqual([]);
     expect((await t.run(ctx => ctx.db.get(owner)))?.emailVerificationTime).toBeDefined();
+    expect(await oldClient.query(api.auth.loggedInUser, {})).toBeNull();
+    expect(await oldClient.query(api.profile.queries.getCurrentUser, {})).toBeNull();
+    expect(await oldClient.query(api.admin.queries.amIAdmin, {})).toBe(false);
+    await expect(oldClient.mutation(api.files.mutations.generateUploadUrl, {})).rejects.toThrow(/Tidak terautentikasi/);
+    expect(await t.query(internal.authSessions.isRevoked, { sessionId })).toBe(true);
+    await t.run(ctx => ctx.db.insert("authRevocations", { sessionId: "expired-session", expiresAt: Date.now() - 1 }));
+    expect(await t.query(internal.authSessions.isRevoked, { sessionId: "expired-session" })).toBe(false);
+    await t.mutation(internal.authSessions.pruneRevocations, {});
+    expect((await t.run(ctx => ctx.db.query("authRevocations").collect())).map(row => row.sessionId)).toEqual([sessionId]);
+    expect((await t.run(ctx => ctx.db.query("oauthAccessTokens").first()))?.revokedAt).toBeDefined();
+    expect((await t.run(ctx => ctx.db.query("oauthClients").first()))?.revokedAt).toBeDefined();
+    expect(await t.run(ctx => ctx.db.query("oauthCodes").collect())).toEqual([]);
+    const freshId = await t.run(ctx => ctx.db.insert("authSessions", { userId: owner, expirationTime: Date.now() + 86_400_000 }));
+    expect(await t.withIdentity({ subject: `${owner}|${freshId}` }).query(api.admin.queries.amIAdmin, {})).toBe(true);
     await expect(t.mutation(api.passwordReset.resetPassword, { token: rawToken, newPassword: "Again-password-123!" })).rejects.toThrow(/Token tidak valid/);
   });
   it("bounds signup at the authoritative server entry point", async () => {

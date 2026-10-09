@@ -6,7 +6,7 @@ import {
 } from "../_generated/server";
 import { v, ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "../_shared/authSession";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI, type ResolvedAI } from "../_shared/aiResolve";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";

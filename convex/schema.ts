@@ -32,6 +32,8 @@ import { mcpTables } from "./mcp/schema";
 // at the convex root because it's auth-adjacent and avoids an
 // `auth.ts`/`auth/` folder name collision; see docs/progress/2026-04-25-convex-restructure.md.)
 const passwordResetTables = {
+  authRevocations: defineTable({ sessionId: v.string(), expiresAt: v.number() })
+    .index("by_session", ["sessionId"]).index("by_expiry", ["expiresAt"]),
   passwordResetTokens: defineTable({
     userId: v.id("users"),
     tokenHash: v.string(),

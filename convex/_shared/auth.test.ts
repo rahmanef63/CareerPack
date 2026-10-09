@@ -7,7 +7,7 @@ import type { Id } from "../_generated/dataModel";
 // `ctx.db` access we fake below. Mocking it lets us drive the
 // authenticated / anonymous branches deterministically.
 const { getAuthUserId } = vi.hoisted(() => ({ getAuthUserId: vi.fn() }));
-vi.mock("@convex-dev/auth/server", () => ({ getAuthUserId }));
+vi.mock("@convex-dev/auth/server", () => ({ getAuthUserId, getAuthSessionId: async () => "session" }));
 
 type AuthModule = typeof import("./auth");
 
@@ -50,8 +50,8 @@ function makeCtx(opts: FakeCtxOpts = {}): QueryCtx {
   const ctx = {
     db: {
       get: vi.fn(async (id: string) => opts.docs?.[id] ?? null),
-      query: vi.fn(() => ({
-        withIndex: () => ({ first: async () => opts.profile ?? null }),
+      query: vi.fn((table: string) => ({
+        withIndex: () => ({ first: async () => table === "authRevocations" ? null : opts.profile ?? null }),
       })),
     },
   };

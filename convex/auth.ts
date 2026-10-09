@@ -1,4 +1,5 @@
-import { convexAuth, getAuthUserId } from "@convex-dev/auth/server";
+import { convexAuth } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId, AUTH_JWT_DURATION_MS } from "./_shared/authSession";
 import { Password } from "@convex-dev/auth/providers/Password";
 import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import Google from "@auth/core/providers/google";
@@ -47,6 +48,7 @@ const passwordProvider = Password<DataModel>({
 const anonymousProvider = Anonymous<DataModel>();
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
+  jwt: { durationMs: AUTH_JWT_DURATION_MS },
   signIn: { maxFailedAttempsPerHour: 10 },
   providers: [
     { ...passwordProvider, authorize: async (params: Parameters<NonNullable<typeof passwordProvider.authorize>>[0], ctx: Parameters<NonNullable<typeof passwordProvider.authorize>>[1]) => {

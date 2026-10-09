@@ -9,7 +9,7 @@ import { internal } from "../_generated/api";
 // internal AI-settings queries are reached through `ctx.runQuery`, which we
 // fake below. Mocking auth lets us drive the authed / anonymous branches.
 const { getAuthUserId } = vi.hoisted(() => ({ getAuthUserId: vi.fn() }));
-vi.mock("@convex-dev/auth/server", () => ({ getAuthUserId }));
+vi.mock("@convex-dev/auth/server", () => ({ getAuthUserId, getAuthSessionId: async () => "session" }));
 
 const uid = (s: string) => s as unknown as Id<"users">;
 
@@ -18,6 +18,7 @@ const uid = (s: string) => s as unknown as Id<"users">;
 // access path) so we CANNOT compare refs by identity — `getFunctionName`
 // yields the stable "module:fn" name and is the only reliable dispatch key.
 const Q = {
+  revoked: getFunctionName(internal.authSessions.isRevoked),
   user: getFunctionName(internal.ai.queries._getAISettingsForUser),
   global: getFunctionName(internal.ai.queries._getGlobalAISettings),
   override: getFunctionName(internal.ai.queries._getUserModelOverride),
@@ -39,6 +40,7 @@ interface CtxOpts {
 function makeCtx(opts: CtxOpts = {}): { ctx: ActionCtx; runQuery: ReturnType<typeof vi.fn> } {
   const runQuery = vi.fn(async (ref: unknown) => {
     const name = getFunctionName(ref as Parameters<typeof getFunctionName>[0]);
+    if (name === Q.revoked) return false;
     if (name === Q.user) return opts.user ?? null;
     if (name === Q.global) return opts.global ?? null;
     if (name === Q.override) return opts.override ?? null;
@@ -82,9 +84,9 @@ describe("resolveAI — path 1: per-user settings win", () => {
       source: "user",
     });
     // Only the per-user lookup ran; global + override were never consulted.
-    expect(runQuery).toHaveBeenCalledTimes(1);
+    expect(runQuery).toHaveBeenCalledTimes(2);
     const calledNames = runQuery.mock.calls.map((c) => getFunctionName(c[0]));
-    expect(calledNames).toEqual([Q.user]);
+    expect(calledNames).toEqual([Q.revoked, Q.user]);
   });
 
   it("honours an explicit baseUrl override on the user's settings", async () => {
@@ -125,7 +127,7 @@ describe("resolveAI — path 2: admin-global fallback", () => {
     });
     // user → (null) → global → override(null): all three were consulted.
     const calledNames = runQuery.mock.calls.map((c) => getFunctionName(c[0]));
-    expect(calledNames).toEqual([Q.user, Q.global, Q.override]);
+    expect(calledNames).toEqual([Q.revoked, Q.user, Q.global, Q.override]);
   });
 
   it("uses admin-global directly for an anonymous caller and never looks up an override", async () => {

@@ -19,7 +19,7 @@ This change addresses the scan's 37 findings in code or with a documented existi
 - Community cohort statistics are paused. Self-reported outcomes are retained for the user but cannot override shared career probabilities. Resume only with provenance/Sybil controls and a valid privacy ledger.
 - Google Analytics and automatic third-party translation no longer run globally. Translation can use the browser's own feature.
 - Global quotas can temporarily reject legitimate bursts. Public roadmap listing caps at 200 entries and popularity samples at 5,000 roadmaps; add indexed pagination/counters if that scale is reached.
-- Password reset removes sessions/refresh tokens. Already issued stateless access JWTs retain the authentication library's remaining token lifetime; immediate access-token invalidation requires an additional revocation control.
+- Password reset removes sessions/refresh tokens, immediately rejects their still-valid JWTs at all application auth boundaries, and revokes MCP tokens, owned confidential clients and pending authorization codes. Sign in and reconnect MCP clients afterward. Revocation records expire only after the configured one-hour JWT lifetime plus a five-minute margin.
 - No production credential rotation, data migration, deployment, historical Git rewrite, live penetration test or Security Cloud rescan was performed.
 
 ## Finding-to-change map
@@ -52,7 +52,7 @@ This change addresses the scan's 37 findings in code or with a documented existi
 | 24 | Community roadmap color metadata is interpreted as application CSS classes | New and existing publicly read color values pass a fixed class allowlist. |
 | 25 | Legacy chat migration crosses accounts in a shared browser | Unscoped legacy localStorage migration removed; pending writes and visible sessions are cleared on account changes. |
 | 26 | Public profile ISR allows unbounded negative-cache cardinality | Profile route renders dynamically instead of persisting arbitrary negative ISR entries. |
-| 27 | Password reset does not revoke existing sessions | Successful reset verifies email and deletes all auth sessions and refresh tokens in the same transaction. |
+| 27 | Password reset does not revoke existing sessions | Successful reset verifies email, deletes sessions/refresh tokens, adds immediate JWT revocation and revokes MCP credentials in one transaction. |
 | 28 | Role administrators can delete the super-administrator account | Shared admin role/delete guard protects the configured super-admin, including bulk operations. |
 | 29 | Signed file wrapper upgrades to a durable storage bearer URL | Signed MCP read route streams bytes with no-store headers; it never reveals or redirects to a durable storage URL. |
 | 30 | AI credentials are stored in plaintext when AI_CRED_SECRET is absent | New AI credential writes require encryption; existing plaintext has an explicit dry-run/apply migration. |
@@ -66,6 +66,6 @@ This change addresses the scan's 37 findings in code or with a documented existi
 
 ## Validation
 
-Passed: frontend/backend type checks, zero-warning lint, 790 Vitest tests (one existing skipped test), coverage thresholds, production build, local anonymous Convex schema/function push, and backup failure/encryption checks. Coverage reported 35.57% statements, 33.94% branches, 33.22% functions and 36.42% lines, subject to the Windows limitation below.
+Passed: frontend/backend type checks, zero-warning lint, 791 Vitest tests (one existing skipped test), coverage thresholds, production build, local anonymous Convex schema/function push, and backup failure/encryption checks. Coverage reported 35.94% statements, 34.18% branches, 33.51% functions and 36.81% lines, subject to the Windows limitation below.
 
 Windows standalone build validation used a local junction/hardlink fallback because native symlink creation lacks permission; production configuration was unchanged. Vitest's existing Windows coverage transform warns that some unexecuted TSX files are excluded, so its passing coverage percentages do not represent full UI coverage. Browser and production smoke tests remain part of rollout.

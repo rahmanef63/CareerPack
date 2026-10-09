@@ -18,7 +18,7 @@
 import { action, internalMutation, internalQuery, mutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { ConvexError, v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "../_shared/authSession";
 import { authError, requireUser } from "../_shared/auth";
 import { randomToken, sha256Base64Url } from "../_shared/pkce";
 import { AI_PROVIDERS, providerOAuth } from "../_shared/aiProviders";

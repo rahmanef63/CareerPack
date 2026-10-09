@@ -50,7 +50,7 @@ async function s256(input: string): Promise<string> {
 /** Signs a user in and mints a client, returning the once-only secret. */
 async function mintClient(t: ReturnType<typeof convexTest>) {
   const userId = await t.run(async (ctx) => ctx.db.insert("users", {}));
-  const asUser = t.withIdentity({ subject: userId });
+  const asUser = t.withIdentity({ subject: `${userId}|session` });
   const created = await asUser.mutation(api.mcp.oauth.createMyClient, {
     label: "ChatGPT kantor",
   });
@@ -104,7 +104,7 @@ describe("createMyClient", () => {
     const t = convexTest(schema, modules);
     const userId = await t.run(async (ctx) => ctx.db.insert("users", {}));
     await expect(
-      t.withIdentity({ subject: userId }).mutation(api.mcp.oauth.createMyClient, {
+      t.withIdentity({ subject: `${userId}|session` }).mutation(api.mcp.oauth.createMyClient, {
         label: "   ",
       }),
     ).rejects.toThrow(/Label/);
@@ -183,7 +183,7 @@ describe("exchangeCode with a confidential client", () => {
     // path we actually want people on.
     const t = convexTest(schema, modules);
     const userId = await t.run(async (ctx) => ctx.db.insert("users", {}));
-    const asUser = t.withIdentity({ subject: userId });
+    const asUser = t.withIdentity({ subject: `${userId}|session` });
     await t.run(async (ctx) =>
       ctx.db.insert("oauthClients", {
         clientId: "public-dcr-client",
@@ -213,7 +213,7 @@ describe("revokeMyClient", () => {
     const otherId = await t.run(async (ctx) => ctx.db.insert("users", {}));
     await expect(
       t
-        .withIdentity({ subject: otherId })
+        .withIdentity({ subject: `${otherId}|session` })
         .mutation(api.mcp.oauth.revokeMyClient, { clientRowId: listed[0]!.id }),
     ).rejects.toThrow(/tidak ditemukan/);
   });
@@ -223,7 +223,7 @@ describe("revokeMyClient", () => {
     await mintClient(t);
     const otherId = await t.run(async (ctx) => ctx.db.insert("users", {}));
     const theirs = await t
-      .withIdentity({ subject: otherId })
+      .withIdentity({ subject: `${otherId}|session` })
       .query(api.mcp.oauth.listMyClients, {});
     expect(theirs).toEqual([]);
   });
