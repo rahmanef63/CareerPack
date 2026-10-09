@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
 import { Suspense } from "react"
-import Script from "next/script"
 import { AnalyticsBeacon } from "@/shared/components/AnalyticsBeacon"
 import {
   DM_Sans,
@@ -259,13 +258,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AnalyticsBeacon />
         </Suspense>
         <Providers>{children}</Providers>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-P1B124M70R"
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-P1B124M70R');`}
-        </Script>
       </body>
     </html>
   )

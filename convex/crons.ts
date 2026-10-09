@@ -105,4 +105,6 @@ crons.daily(
   internal.ai.catalog.refreshModelCatalog,
 );
 
+crons.cron("prune-auth-revocations", "15 * * * *", internal.authSessions.pruneRevocations);
+
 export default crons;

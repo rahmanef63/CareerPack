@@ -4,6 +4,12 @@ import {
 } from "./templateHydrator";
 import type { BrandingPayload } from "./types";
 
+export function injectCustomBrandingIntoHtml(html: string, branding?: BrandingPayload): string {
+  const nonce = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
+  const csp = `default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline' https://fonts.googleapis.com; img-src https: data:; font-src https://fonts.gstatic.com data:; connect-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'`;
+  return `<!doctype html><meta http-equiv="Content-Security-Policy" content="${csp}">` + injectBrandingIntoHtml(html, branding, nonce);
+}
+
 /**
  * Splice branding payload + hydrator script into the template HTML.
  * Injects right before `</body>` so it runs after the template's own
@@ -18,12 +24,14 @@ import type { BrandingPayload } from "./types";
 export function injectBrandingIntoHtml(
   html: string,
   branding?: BrandingPayload,
+  nonce?: string,
 ): string {
   let result = html;
+  const scriptAttr = nonce ? ` nonce="${nonce}"` : "";
   // Always-injected helpers (anchor nav + auto-resize). Run regardless
   // of whether real branding is present so the mock-content "Tampilkan
   // Template" tab also resizes correctly and has working in-iframe nav.
-  const helpersScript = `\n<script>${TEMPLATE_IFRAME_HELPERS_JS}</script>\n`;
+  const helpersScript = `\n<script${scriptAttr}>${TEMPLATE_IFRAME_HELPERS_JS}</script>\n`;
 
   if (!branding) {
     if (result.includes("</body>")) {
@@ -42,7 +50,7 @@ export function injectBrandingIntoHtml(
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
   const dataScript = `\n<script id="__cp_data" type="application/json">${json}</script>\n`;
-  const hydratorScript = `\n<script>${TEMPLATE_HYDRATOR_JS}</script>\n`;
+  const hydratorScript = `\n<script${scriptAttr}>${TEMPLATE_HYDRATOR_JS}</script>\n`;
 
   // Data must come BEFORE the template's own inline scripts so per-
   // template mounts (e.g. v2's casesMount, skillsMount) can read it

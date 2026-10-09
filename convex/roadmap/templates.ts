@@ -1,6 +1,7 @@
 import { mutation, query, internalQuery } from "../_generated/server";
 import type { QueryCtx } from "../_generated/server";
 import type { Doc } from "../_generated/dataModel";
+import { enforceRateLimit, enforceGlobalWriteLimit } from "../_shared/rateLimit";
 import { v } from "convex/values";
 import { requireUser, optionalUser } from "../_shared/auth";
 import { templateNodeValidator, VALID_DOMAINS } from "./schema";
@@ -13,6 +14,9 @@ const MAX_SLUG_LEN = 80;
 const MAX_FIELD_LEN = 60;
 const MAX_TAGS = 20;
 const MAX_NODES = 200;
+
+const TEMPLATE_COLORS = new Set(["bg-brand", "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-pink-500", "bg-cyan-500", "bg-indigo-500", "bg-emerald-500", "bg-amber-500", "bg-red-500", "bg-sky-500", "bg-teal-500", "bg-violet-500", "bg-rose-500"]);
+export function safeTemplateColor(color: string) { return TEMPLATE_COLORS.has(color) ? color : "bg-brand"; }
 
 const SLUG_RE = /^[a-z][a-z0-9-]*$/;
 
@@ -44,8 +48,8 @@ export const listPublicTemplates = query({
     // user-published templates.
     const all = await ctx.db
       .query("roadmapTemplates")
-      .withIndex("by_order")
-      .collect();
+      .withIndex("by_public_order", q => q.eq("isPublic", true))
+      .take(200);
     return all
       .filter((t) => t.isPublic)
       .map((t) => {
@@ -69,7 +73,7 @@ export const listPublicTemplates = query({
           slug: t.slug,
           domain: t.domain,
           icon: t.icon,
-          color: t.color,
+          color: safeTemplateColor(t.color),
           description: t.description,
           tags: t.tags,
           nodeTags: Array.from(nodeTags),
@@ -97,8 +101,8 @@ export const mcpListTemplates = internalQuery({
   handler: async (ctx) => {
     const all = await ctx.db
       .query("roadmapTemplates")
-      .withIndex("by_order")
-      .collect();
+      .withIndex("by_public_order", q => q.eq("isPublic", true))
+      .take(200);
     return {
       items: all
         .filter((t) => t.isPublic)
@@ -133,7 +137,7 @@ async function canSeeTemplate(
     .query("userProfiles")
     .withIndex("by_user", (q) => q.eq("userId", userId))
     .first();
-  return profile?.role === "admin";
+  return profile?.role === "admin" && (await ctx.db.get(userId))?.emailVerificationTime !== undefined;
 }
 
 export const getTemplateBySlug = query({
@@ -144,7 +148,7 @@ export const getTemplateBySlug = query({
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .first();
     if (!tpl) return null;
-    return (await canSeeTemplate(ctx, tpl)) ? tpl : null;
+    return (await canSeeTemplate(ctx, tpl)) ? { ...tpl, color: safeTemplateColor(tpl.color) } : null;
   },
 });
 
@@ -153,7 +157,7 @@ export const getTemplateById = query({
   handler: async (ctx, { id }) => {
     const tpl = await ctx.db.get(id);
     if (!tpl) return null;
-    return (await canSeeTemplate(ctx, tpl)) ? tpl : null;
+    return (await canSeeTemplate(ctx, tpl)) ? { ...tpl, color: safeTemplateColor(tpl.color) } : null;
   },
 });
 
@@ -173,6 +177,12 @@ export const publishMyRoadmap = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await requireUser(ctx);
+
+    await enforceRateLimit(ctx, userId, { key: "roadmap:publish", max: 5, windowMs: 86_400_000 });
+    await enforceGlobalWriteLimit(ctx, "roadmap:publish", 50);
+    const authored = await ctx.db.query("roadmapTemplates").withIndex("by_author", q => q.eq("authorId", userId)).take(20);
+    if (authored.length >= 20) throw new Error("Maksimal 20 template per akun");
+    if (JSON.stringify(args.nodes).length > 100_000 || args.tags.some(t => t.length > 60)) throw new Error("Template terlalu besar");
 
     // Validate + normalize all inputs before any DB write.
     const slug = normalizeSlug(args.slug);
@@ -216,7 +226,7 @@ export const publishMyRoadmap = mutation({
       title,
       domain: args.domain,
       icon,
-      color,
+      color: safeTemplateColor(color),
       description,
       tags,
       nodes: args.nodes,
@@ -239,7 +249,7 @@ export const listMyTemplates = query({
       .query("roadmapTemplates")
       .withIndex("by_author", (q) => q.eq("authorId", userId))
       .order("asc")
-      .collect();
+      .take(20);
   },
 });
 
@@ -252,7 +262,7 @@ export const listMyTemplates = query({
 export const getTemplateUsageCounts = query({
   args: {},
   handler: async (ctx) => {
-    const all = await ctx.db.query("skillRoadmaps").collect();
+    const all = await ctx.db.query("skillRoadmaps").take(5000);
     const counts: Record<string, number> = {};
     for (const r of all) {
       if (!r.templateId) continue;

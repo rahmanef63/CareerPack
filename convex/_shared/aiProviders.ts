@@ -246,7 +246,10 @@ export type AIProviderId = keyof typeof AI_PROVIDERS;
 
 export function resolveProviderBaseUrl(provider: string, override?: string): string {
   const trimmed = override?.trim();
-  if (trimmed) return trimmed.replace(/\/+$/, "");
+  if (trimmed) {
+    assertTrustedAIBaseUrl(trimmed);
+    return trimmed.replace(/\/+$/, "");
+  }
   const spec = AI_PROVIDERS[provider];
   if (!spec || !spec.baseUrl) {
     throw new Error(`Provider AI tidak dikenal: ${provider}`);
@@ -322,4 +325,12 @@ export function listProvidersPublic() {
     docsUrl: auth.apiKey?.docsUrl,
     auth,
   }));
+}
+
+export function assertTrustedAIBaseUrl(raw: string): void {
+  const url = new URL(raw);
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) throw new Error("Base URL harus HTTPS tanpa kredensial atau parameter");
+  const normalized = url.toString().replace(/\/+$/, "");
+  const allowed = [...Object.values(AI_PROVIDERS).map(p => p.baseUrl), process.env.CONVEX_OPENAI_BASE_URL ?? "", ...(process.env.AI_ALLOWED_BASE_URLS ?? "").split(",")];
+  if (!allowed.some(value => value.trim().replace(/\/+$/, "") === normalized)) throw new Error("Base URL belum diizinkan administrator");
 }

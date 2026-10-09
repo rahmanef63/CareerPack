@@ -48,18 +48,15 @@ export const record = mutation({
       !path ||
       path.startsWith("/dashboard") ||
       path.startsWith("/admin") ||
-      path.startsWith("/api")
+      path.startsWith("/api") ||
+      path.startsWith("/reset-password") || path.startsWith("/oauth") || path.startsWith("/login")
     ) {
       return null;
     }
 
-    // Per-IP fixed-window limiter. OCC-safe read-modify-write on the
-    // pageviewRateLimits counter — no library needed. `ipHash` is
-    // caller-supplied and this mutation is public, so a missing hash
-    // falls into one shared "anon" bucket instead of skipping the
-    // limiter outright (which was an unthrottled insert path).
+    // A server-chosen global bucket cannot be bypassed with arbitrary ipHash values.
     {
-      const key = `pv:${a.ipHash ?? "anon"}`;
+      const key = "pv:global";
       const now = Date.now();
       const row = await ctx.db
         .query("pageviewRateLimits")

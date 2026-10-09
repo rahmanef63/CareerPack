@@ -81,6 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const seedForCurrentUser = useMutation(api.seed.seedForCurrentUser);
   const heartbeat = useMutation(api.profile.mutations.heartbeat);
 
+  useEffect(() => {
+    if (isAuthenticated && userProfile === null) void signOut().catch(() => {});
+  }, [isAuthenticated, userProfile, signOut]);
+
   /**
    * Heartbeat — fires once on mount + every 5 min while authenticated.
    * Server throttles inserts to ≥4 min apart, so the cadence is safe
@@ -141,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const state = useMemo<AuthState>(() => {
-    const effectiveAuthenticated = isAuthenticated || localDemo;
+    const effectiveAuthenticated = localDemo || (isAuthenticated && userProfile !== null);
     const isLoading = localDemo
       ? false
       : (authLoading && !authStartupTimedOut) ||

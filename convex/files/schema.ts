@@ -2,6 +2,11 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export const filesTables = {
+  uploadIntents: defineTable({
+    userId: v.id("users"), tokenHash: v.string(), expiresAt: v.number(),
+    claimedAt: v.optional(v.number()), storageId: v.optional(v.string()),
+    fileType: v.optional(v.string()), fileSize: v.optional(v.number()),
+  }).index("by_token", ["tokenHash"]).index("by_storage", ["storageId"]).index("by_user", ["userId"]),
   files: defineTable({
     storageId: v.string(),
     fileName: v.string(),

@@ -6,7 +6,7 @@ services:
     # silently. Example pinned form:
     #   ghcr.io/get-convex/convex-backend:62ef0ae6b91bc7e44b3a82a1e80b1f0d
     # Find current stable tag at https://github.com/get-convex/convex-backend/releases
-    image: ${CONVEX_SELF_HOSTED_IMAGE:-ghcr.io/get-convex/convex-backend:latest}
+    image: ghcr.io/get-convex/convex-backend@sha256:${CONVEX_BACKEND_DIGEST:?Set a reviewed 64-character backend image digest}
     container_name: careerpack-convex-backend
     restart: unless-stopped
     env_file:

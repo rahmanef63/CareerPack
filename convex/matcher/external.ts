@@ -1,7 +1,8 @@
 import { action, internalAction, internalMutation, mutation, type ActionCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
+import { enforceRateLimit, enforceGlobalWriteLimit } from "../_shared/rateLimit";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "../_shared/authSession";
 import { authError, requireUser } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI } from "../_shared/aiResolve";
@@ -106,6 +107,7 @@ export const fetchJobFeeds = internalAction({
 async function fetchRemoteOK(): Promise<NormalizedJob[]> {
   const res = await fetchWithTimeout(REMOTEOK_URL, {
     timeoutMs: FETCH_TIMEOUTS.jobFeed,
+    maxResponseBytes: 16 * 1024 * 1024,
     headers: {
       "User-Agent": "CareerPack-JobSync/1.0 (+https://careerpack.org)",
       Accept: "application/json",
@@ -121,6 +123,7 @@ async function fetchRemoteOK(): Promise<NormalizedJob[]> {
 async function fetchWWR(url: string, category: string): Promise<NormalizedJob[]> {
   const res = await fetchWithTimeout(url, {
     timeoutMs: FETCH_TIMEOUTS.jobFeed,
+    maxResponseBytes: 16 * 1024 * 1024,
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; CareerPack-JobSync/1.0; +https://careerpack.org)",
       Accept: "application/rss+xml, text/xml",
@@ -547,6 +550,9 @@ export const addUserJob = mutation({
     if (args.title.trim().length < 2 || args.company.trim().length < 1) {
       throw new Error("Judul dan perusahaan wajib diisi.");
     }
+    await enforceRateLimit(ctx, userId, { key: "job:paste", max: 20, windowMs: 3_600_000 });
+    await enforceGlobalWriteLimit(ctx, "job:paste", 200);
+    if (args.description.length > 20_000 || [args.title, args.company, args.location, args.workMode, args.employmentType, args.seniority].some(s => s.length > 200) || args.requiredSkills.length > 30 || args.requiredSkills.some(s => s.length > 100)) throw new Error("Lowongan terlalu panjang");
     const externalId = `user:${userId}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 8)}`;
     const skillsLower = args.requiredSkills.map((s) => s.toLowerCase());
     return await ctx.db.insert("jobListings", {

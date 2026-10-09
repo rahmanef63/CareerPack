@@ -56,6 +56,7 @@ export const outcomesTables = {
     occurredAt: v.number(),
   })
     .index("by_user_time", ["userId", "occurredAt"])
+    .index("by_user_job_edge_kind", ["userId", "jobListingId", "fromNodeSlug", "targetNodeSlug", "kind"])
     .index("by_user_kind", ["userId", "kind"])
     .index("by_target_kind", ["targetNodeSlug", "kind"])
     .index("by_from_to", ["fromNodeSlug", "targetNodeSlug"])

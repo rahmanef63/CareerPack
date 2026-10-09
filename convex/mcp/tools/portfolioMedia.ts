@@ -91,6 +91,12 @@ function storeAdapter(ctx: ActionCtx, userId: Id<"users">): FileStoreAdapter {
       const storageId = await ctx.storage.store(
         new Blob([input.bytes as BlobPart], { type: input.mimeType }),
       );
+      try {
+        await ctx.runMutation(internal.files.uploads.stageTrustedUpload, { userId, storageId, fileType: input.mimeType, fileSize: input.sizeBytes });
+      } catch (error) {
+        await ctx.storage.delete(storageId);
+        throw error;
+      }
       const row = await ctx.runMutation(internal.mcp.data.files.registerFile, {
         userId,
         storageId,

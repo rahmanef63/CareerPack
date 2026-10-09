@@ -6,6 +6,7 @@ import { renderResetEmail, sendEmail } from "./_shared/email";
 import { extractClientIp, sha256Hex } from "./_shared/clientIp";
 import { rejectIfBadOrigin } from "./_shared/origin";
 import { redactEmail } from "./_shared/redact";
+import { AUTH_JWT_DURATION_MS } from "./_shared/authSession";
 
 const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
 const PBKDF2_ITERATIONS = 100_000;
@@ -365,6 +366,20 @@ export const resetPassword = mutation({
     const newSecret = await hashSecret(args.newPassword);
     await ctx.db.patch(account._id, { secret: newSecret });
     await ctx.db.patch(match._id, { usedAt: now });
+    await ctx.db.patch(match.userId, { emailVerificationTime: now });
+    const sessions = await ctx.db.query("authSessions").withIndex("userId", q => q.eq("userId", match.userId)).collect();
+    for (const session of sessions) {
+      await ctx.db.insert("authRevocations", { sessionId: session._id, expiresAt: now + AUTH_JWT_DURATION_MS + 300_000 });
+      const tokens = await ctx.db.query("authRefreshTokens").withIndex("sessionId", q => q.eq("sessionId", session._id)).collect();
+      for (const token of tokens) await ctx.db.delete(token._id);
+      await ctx.db.delete(session._id);
+    }
+    const grants = await ctx.db.query("oauthAccessTokens").withIndex("by_user", q => q.eq("userId", match.userId)).collect();
+    for (const grant of grants) await ctx.db.patch(grant._id, { revokedAt: now });
+    const codes = await ctx.db.query("oauthCodes").withIndex("by_user", q => q.eq("userId", match.userId)).collect();
+    for (const code of codes) await ctx.db.delete(code._id);
+    const clients = await ctx.db.query("oauthClients").withIndex("by_owner", q => q.eq("ownerUserId", match.userId)).collect();
+    for (const client of clients) await ctx.db.patch(client._id, { revokedAt: now });
 
     return { ok: true as const };
   },

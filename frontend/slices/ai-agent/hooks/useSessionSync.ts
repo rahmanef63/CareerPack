@@ -6,8 +6,7 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { api } from "../../../../convex/_generated/api";
 import {
   type ChatSession, type Message, type MessageAttachment, type StoredAction,
-  MIGRATION_DONE_KEY, STORAGE_KEY,
-  loadSessions, newSession,
+  newSession,
 } from "../types/console";
 
 /** Hydration + cross-device sync for chat sessions. */
@@ -16,7 +15,11 @@ export function useSessionSync() {
   const [activeId, setActiveId] = useState<string>("");
 
   const { state: authState } = useAuth();
-  const canWriteChat = authState.isAuthenticated;
+  const accountId = authState.user?.id ?? "";
+  const [sessionOwner, setSessionOwner] = useState(accountId);
+  const accountRef = useRef(accountId);
+  accountRef.current = accountId;
+  const canWriteChat = authState.isAuthenticated && !!accountId;
 
   const serverSessions = useQuery(
     api.ai.queries.listChatSessions,
@@ -31,14 +34,13 @@ export function useSessionSync() {
 
   const upsertSession = useCallback(
     (args: Parameters<typeof upsertSessionRaw>[0]) => {
-      if (!canWriteChat) return Promise.resolve(null);
+      if (!canWriteChat || accountRef.current !== accountId) return Promise.resolve(null);
       return upsertSessionRaw(args);
     },
-    [upsertSessionRaw, canWriteChat],
+    [upsertSessionRaw, canWriteChat, accountId],
   );
 
   const hydratedRef = useRef(false);
-  const migratedRef = useRef(false);
   // Each entry keeps the live timer plus the bound upsert for that
   // session, so a still-pending transcript write can be flushed (not just
   // cancelled) when the console closes — otherwise the last AI turn that
@@ -48,55 +50,18 @@ export function useSessionSync() {
   >(new Map());
 
   useEffect(() => {
+    for (const { timer } of pendingUpserts.current.values()) clearTimeout(timer);
+    pendingUpserts.current.clear();
+    hydratedRef.current = false;
+    setSessions([]);
+    setActiveId("");
+    setSessionOwner(accountId);
+  }, [accountId]);
+
+  useEffect(() => {
     if (serverSessions === undefined) return;
     if (hydratedRef.current) return;
     hydratedRef.current = true;
-
-    const alreadyMigrated =
-      typeof window !== "undefined" &&
-      window.localStorage.getItem(MIGRATION_DONE_KEY) === "1";
-    const legacy = !alreadyMigrated ? loadSessions() : [];
-
-    if (legacy.length > 0 && !migratedRef.current) {
-      migratedRef.current = true;
-      Promise.all(
-        legacy.map((s) =>
-          upsertSession({
-            sessionId: s.id,
-            title: s.title || "Percakapan",
-            createdAt: s.createdAt,
-            updatedAt: s.updatedAt,
-            messages: s.messages.map((m) => ({
-              id: m.id,
-              role: m.role,
-              content: m.text,
-              timestamp: m.ts,
-              actions: m.actions?.map((a) => ({
-                type: a.type,
-                payload: a.payload,
-                status: "pending" as const,
-              })),
-              attachments: m.attachments?.map((a) => ({
-                kind: a.kind,
-                fileName: a.fileName,
-                storageId: a.storageId,
-              })),
-            })),
-          }).catch((e) => {
-            console.error("[chat-sync] migrate upsert failed", e);
-            return null;
-          }),
-        ),
-      ).finally(() => {
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem(MIGRATION_DONE_KEY, "1");
-          window.localStorage.removeItem(STORAGE_KEY);
-        }
-      });
-      setSessions(legacy);
-      setActiveId(legacy[0].id);
-      return;
-    }
 
     if (serverSessions.length === 0) {
       const fresh = newSession();
@@ -135,7 +100,7 @@ export function useSessionSync() {
 
   // Merge server transcript into local state for the active session.
   useEffect(() => {
-    if (!activeServerSession) return;
+    if (!activeServerSession || activeServerSession.userId.toString() !== accountId) return;
     setSessions((prev) =>
       prev.map((s) => {
         if (s.id !== activeServerSession.sessionId) return s;
@@ -174,11 +139,11 @@ export function useSessionSync() {
         return s;
       }),
     );
-  }, [activeServerSession]);
+  }, [activeServerSession, accountId]);
 
   // Debounced upsert on local change.
   useEffect(() => {
-    if (!hydratedRef.current) return;
+    if (!hydratedRef.current || sessionOwner !== accountId || !canWriteChat) return;
     for (const s of sessions) {
       if (s.messages.length === 0) continue;
       const existing = pendingUpserts.current.get(s.id);
@@ -220,7 +185,7 @@ export function useSessionSync() {
       }, 400);
       pendingUpserts.current.set(s.id, { timer: t, run });
     }
-  }, [sessions, upsertSession]);
+  }, [sessions, upsertSession, sessionOwner, accountId, canWriteChat]);
 
   // Mount-only: flush every queued transcript write when the console
   // unmounts (route change / app teardown), so the final AI turn that
@@ -239,6 +204,7 @@ export function useSessionSync() {
 
   const deleteSession = useCallback(
     (id: string) => {
+      if (!canWriteChat || sessionOwner !== accountId) return;
       const pending = pendingUpserts.current.get(id);
       if (pending) {
         clearTimeout(pending.timer);
@@ -256,8 +222,8 @@ export function useSessionSync() {
         return next;
       });
     },
-    [activeId, deleteSessionMutation],
+    [activeId, deleteSessionMutation, canWriteChat, sessionOwner, accountId],
   );
 
-  return { sessions, setSessions, activeId, setActiveId, deleteSession };
+  return { sessions: sessionOwner === accountId ? sessions : [], setSessions, activeId: sessionOwner === accountId ? activeId : "", setActiveId, deleteSession };
 }

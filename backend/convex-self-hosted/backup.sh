@@ -25,6 +25,12 @@
 # Health: exits non-zero on tar/gpg error; prune is best-effort.
 
 set -euo pipefail
+umask 077
+BACKUP_IMAGE="${BACKUP_IMAGE:?Set a reviewed alpine image digest}"
+[[ "$BACKUP_IMAGE" =~ @sha256:[a-f0-9]{64}$ ]] || { echo "[backup] FAIL: BACKUP_IMAGE must use a digest" >&2; exit 2; }
+if [[ -n "${BACKUP_PASSPHRASE_FILE:-}" ]]; then
+  [[ -s "$BACKUP_PASSPHRASE_FILE" && -r "$BACKUP_PASSPHRASE_FILE" ]] && command -v gpg >/dev/null 2>&1 || { echo "[backup] FAIL: encryption requires gpg and a readable nonempty passphrase file" >&2; exit 2; }
+fi
 
 VOLUME_NAME="${VOLUME_NAME:-}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/careerpack}"
@@ -60,32 +66,22 @@ STAMP="$(date -u +%Y%m%d-%H%M)"
 TAR_NAME="convex-$STAMP.tar.gz"
 TAR_PATH="$BACKUP_DIR/$TAR_NAME"
 
-# Read-only mount keeps the running container untouched.
-docker run --rm \
-  -v "$VOLUME_NAME:/source:ro" \
-  -v "$BACKUP_DIR:/dest" \
-  alpine \
-  sh -c "tar czf /dest/$TAR_NAME -C /source ."
-
+# Stream directly to the encrypted output; no plaintext staging archive.
 OUT="$TAR_PATH"
 ENCRYPTED="no"
-
-if [[ -n "$BACKUP_PASSPHRASE_FILE" && -r "$BACKUP_PASSPHRASE_FILE" ]]; then
-  if ! command -v gpg >/dev/null 2>&1; then
-    echo "[backup] WARN: BACKUP_PASSPHRASE_FILE set but gpg not installed. Leaving archive unencrypted." >&2
-  else
-    GPG_OUT="$TAR_PATH.gpg"
-    gpg --batch --yes --symmetric --cipher-algo AES256 \
-      --passphrase-file "$BACKUP_PASSPHRASE_FILE" \
-      --output "$GPG_OUT" "$TAR_PATH"
-    chmod 600 "$GPG_OUT"
-    rm -f "$TAR_PATH"
-    OUT="$GPG_OUT"
-    ENCRYPTED="yes"
-  fi
-elif [[ -n "$BACKUP_PASSPHRASE_FILE" ]]; then
-  echo "[backup] WARN: BACKUP_PASSPHRASE_FILE='$BACKUP_PASSPHRASE_FILE' not readable. Leaving archive unencrypted." >&2
+if [[ -n "$BACKUP_PASSPHRASE_FILE" ]]; then
+  OUT="$TAR_PATH.gpg"
+  ENCRYPTED="yes"
 fi
+PART="$OUT.partial"
+trap 'rm -f -- "$PART"' EXIT
+if [[ "$ENCRYPTED" == "yes" ]]; then
+  docker run --rm -v "$VOLUME_NAME:/source:ro" "$BACKUP_IMAGE" sh -c "tar czf - -C /source ." |
+    gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-file "$BACKUP_PASSPHRASE_FILE" --output "$PART"
+else
+  docker run --rm -v "$VOLUME_NAME:/source:ro" "$BACKUP_IMAGE" sh -c "tar czf - -C /source ." > "$PART"
+fi
+mv -- "$PART" "$OUT"
 
 SIZE="$(du -h "$OUT" | cut -f1)"
 

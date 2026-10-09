@@ -2,7 +2,6 @@ import { internalMutation, type MutationCtx } from "../../_generated/server";
 import {
   bayesianPosterior,
   bucketSuccessRate,
-  bucketTotal,
   CALIB_MAX_EVENTS,
   CALIB_WINDOW_MS,
   DEFAULT_PRIOR_N,
@@ -42,11 +41,19 @@ export const runCalibrator = internalMutation({
       .take(CALIB_MAX_EVENTS);
 
     const buckets = new Map<string, EventCountBucket>();
+    const contributions = new Set<string>();
+    const members = new Map<string, Set<string>>();
     // "|" delimiter (never in kebab slugs) so the split below is exact.
     const key = (f: string, t: string) => `${f}|${t}`;
     for (const e of events) {
       if (!e.fromNodeSlug || !e.targetNodeSlug) continue;
       const k = key(e.fromNodeSlug, e.targetNodeSlug);
+      const contribution = `${e.userId}|${k}|${e.kind}`;
+      if (contributions.has(contribution)) continue;
+      contributions.add(contribution);
+      const users = members.get(k) ?? new Set<string>();
+      users.add(e.userId);
+      members.set(k, users);
       const b = buckets.get(k) ?? emptyBucket();
       switch (e.kind) {
         case "apply":
@@ -75,7 +82,7 @@ export const runCalibrator = internalMutation({
 
     const now = Date.now();
     for (const [k, b] of buckets) {
-      if (bucketTotal(b) < MIN_COHORT_K) continue;
+      if ((members.get(k)?.size ?? 0) < MIN_COHORT_K) continue;
       const sep = k.indexOf("|");
       const fromSlug = k.slice(0, sep);
       const toSlug = k.slice(sep + 1);

@@ -47,7 +47,8 @@ export async function bootstrapUser(ctx: MutationCtx, userId: string) {
 
   const authEmail = (authUser as { email?: string }).email?.toLowerCase()?.trim() ?? "";
   const authName = (authUser as { name?: string }).name ?? "";
-  const shouldBeAdmin = authEmail.length > 0 && adminBootstrapEmails().has(authEmail);
+  const verified = (authUser as { emailVerificationTime?: number }).emailVerificationTime !== undefined;
+  const shouldBeAdmin = verified && authEmail.length > 0 && adminBootstrapEmails().has(authEmail);
 
   const existingProfile = await ctx.db
     .query("userProfiles")
@@ -66,7 +67,7 @@ export async function bootstrapUser(ctx: MutationCtx, userId: string) {
 
     // Anonymous accounts have no email — skip silently rather than scheduling
     // a send to "".
-    if (authEmail.length > 0) {
+    if (verified && authEmail.length > 0) {
       await ctx.scheduler.runAfter(0, internal.seed.deliverWelcomeEmail, {
         to: authEmail,
         fullName: authName,

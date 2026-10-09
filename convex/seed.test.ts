@@ -22,8 +22,8 @@ describe("user bootstrap", () => {
       ctx.db.insert("users", { name: "Budi Santoso", email: "budi@example.com" }),
     );
 
-    await t.withIdentity({ subject: userId }).mutation(api.seed.seedForCurrentUser, {});
-    await t.withIdentity({ subject: userId }).mutation(api.seed.seedForCurrentUser, {});
+    await t.withIdentity({ subject: `${userId}|session` }).mutation(api.seed.seedForCurrentUser, {});
+    await t.withIdentity({ subject: `${userId}|session` }).mutation(api.seed.seedForCurrentUser, {});
 
     const profiles = await t.run(async (ctx) =>
       ctx.db

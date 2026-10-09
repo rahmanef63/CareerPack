@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ConvexError } from "convex/values";
-import type { QueryCtx } from "../_generated/server";
+import type { QueryCtx, MutationCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 
 // auth.ts's only runtime dependency is `getAuthUserId`; the rest is plain
 // `ctx.db` access we fake below. Mocking it lets us drive the
 // authenticated / anonymous branches deterministically.
 const { getAuthUserId } = vi.hoisted(() => ({ getAuthUserId: vi.fn() }));
-vi.mock("@convex-dev/auth/server", () => ({ getAuthUserId }));
+vi.mock("@convex-dev/auth/server", () => ({ getAuthUserId, getAuthSessionId: async () => "session" }));
 
 type AuthModule = typeof import("./auth");
 
@@ -50,8 +50,8 @@ function makeCtx(opts: FakeCtxOpts = {}): QueryCtx {
   const ctx = {
     db: {
       get: vi.fn(async (id: string) => opts.docs?.[id] ?? null),
-      query: vi.fn(() => ({
-        withIndex: () => ({ first: async () => opts.profile ?? null }),
+      query: vi.fn((table: string) => ({
+        withIndex: () => ({ first: async () => table === "authRevocations" ? null : opts.profile ?? null }),
       })),
     },
   };
@@ -134,10 +134,15 @@ describe("requireOwnedDoc", () => {
 });
 
 describe("requireAdmin (no super-admin configured)", () => {
+  it("rejects an unverified legacy admin role", async () => {
+    const { requireAdmin } = await loadAuth();
+    getAuthUserId.mockResolvedValue(uid("u1"));
+    await expectConvexError(requireAdmin(makeCtx({ profile: { role: "admin" }, docs: { u1: { email: "boss@example.test" } } })), "Bukan admin");
+  });
   it("passes when the profile role is admin", async () => {
     const { requireAdmin } = await loadAuth();
     getAuthUserId.mockResolvedValue(uid("u1"));
-    await expect(requireAdmin(makeCtx({ profile: { role: "admin" } }))).resolves.toBe(
+    await expect(requireAdmin(makeCtx({ profile: { role: "admin" }, docs: { u1: { emailVerificationTime: 1 } } }))).resolves.toBe(
       uid("u1"),
     );
   });
@@ -162,11 +167,24 @@ describe("requireAdmin (no super-admin configured)", () => {
 });
 
 describe("requireAdmin (super-admin configured)", () => {
+  it("protects the super-admin from single and bulk role/deletion operations", async () => {
+    await loadAuth("boss@careerpack.org");
+    const { ensureNotLastAdmin } = await import("../admin/lib/userOps");
+    const ctx = makeCtx({ docs: { boss: { email: "boss@careerpack.org" } } }) as unknown as MutationCtx;
+    for (const targets of [[uid("boss")], [uid("other"), uid("boss")]]) {
+      await expect(ensureNotLastAdmin(ctx, uid("actor"), targets, "blocked")).rejects.toThrow(/super-admin/);
+    }
+  });
+  it("rejects a configured super-admin email until verified", async () => {
+    const { requireAdmin } = await loadAuth("boss@careerpack.org");
+    getAuthUserId.mockResolvedValue(uid("u1"));
+    await expectConvexError(requireAdmin(makeCtx({ docs: { u1: { email: "boss@careerpack.org" } }, profile: { role: "admin" } })), "Bukan admin");
+  });
   it("bypasses the role check for the super-admin email even at role=user", async () => {
     const { requireAdmin } = await loadAuth("boss@careerpack.org");
     getAuthUserId.mockResolvedValue(uid("u1"));
     const ctx = makeCtx({
-      docs: { u1: { email: "boss@careerpack.org" } },
+      docs: { u1: { email: "boss@careerpack.org", emailVerificationTime: 1 } },
       profile: { role: "user" },
     });
     await expect(requireAdmin(ctx)).resolves.toBe(uid("u1"));
@@ -193,7 +211,7 @@ describe("requireSuperAdmin", () => {
   it("passes for the configured super-admin email", async () => {
     const { requireSuperAdmin } = await loadAuth("boss@careerpack.org");
     getAuthUserId.mockResolvedValue(uid("u1"));
-    const ctx = makeCtx({ docs: { u1: { email: "boss@careerpack.org" } } });
+    const ctx = makeCtx({ docs: { u1: { email: "boss@careerpack.org", emailVerificationTime: 1 } } });
     await expect(requireSuperAdmin(ctx)).resolves.toBe(uid("u1"));
   });
 
@@ -221,7 +239,7 @@ describe("isSuperAdminCaller", () => {
   it("returns true only for the configured super-admin email", async () => {
     const { isSuperAdminCaller } = await loadAuth("boss@careerpack.org");
     getAuthUserId.mockResolvedValue(uid("u1"));
-    const ctx = makeCtx({ docs: { u1: { email: "boss@careerpack.org" } } });
+    const ctx = makeCtx({ docs: { u1: { email: "boss@careerpack.org", emailVerificationTime: 1 } } });
     await expect(isSuperAdminCaller(ctx)).resolves.toBe(true);
   });
 

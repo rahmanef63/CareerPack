@@ -1,7 +1,7 @@
 import { internalQuery, internalMutation } from "../../_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "../../_generated/dataModel";
-import { enforceRateLimit } from "../../_shared/rateLimit";
+import { enforceRateLimit, enforceGlobalWriteLimit } from "../../_shared/rateLimit";
 import { assertShortText, capStringArray } from "../../_shared/validate";
 import { MCP_WRITE_LIMIT, MCP_WRITE_DAILY_LIMIT } from "./limits";
 
@@ -81,7 +81,8 @@ export const listJobs = internalQuery({
             .withIndex("by_posted")
             .order("desc")
             .take(limit);
-    return { items: rows.map(summariseJob), total: rows.length };
+    const publicRows = rows.filter(job => job.source !== "user-paste");
+    return { items: publicRows.map(summariseJob), total: publicRows.length };
   },
 });
 
@@ -105,6 +106,8 @@ export const addJob = internalMutation({
   handler: async (ctx, args) => {
     await enforceRateLimit(ctx, args.userId, MCP_WRITE_LIMIT);
     await enforceRateLimit(ctx, args.userId, MCP_WRITE_DAILY_LIMIT);
+    await enforceRateLimit(ctx, args.userId, { key: "jobs:add", max: 20, windowMs: 3_600_000 });
+    await enforceGlobalWriteLimit(ctx, "jobs:add", 200);
 
     const title = assertShortText(args.title, 200, "Judul");
     const company = assertShortText(args.company, 200, "Perusahaan");

@@ -1,7 +1,9 @@
-import { convexAuth, getAuthUserId } from "@convex-dev/auth/server";
+import { convexAuth } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId, AUTH_JWT_DURATION_MS } from "./_shared/authSession";
 import { Password } from "@convex-dev/auth/providers/Password";
 import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import Google from "@auth/core/providers/google";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
@@ -9,13 +11,14 @@ import type { DataModel } from "./_generated/dataModel";
 import { bootstrapUser } from "./_shared/bootstrapUser";
 import { hashSecret, verifySecret } from "./_shared/passwordCrypto";
 
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [
-    Password<DataModel>({
+const passwordProvider = Password<DataModel>({
       profile(params) {
+        if (typeof params.email !== "string" || params.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email.trim())) {
+          throw new Error("Email tidak valid");
+        }
         return {
-          email: params.email as string,
-          name: params.name as string,
+          email: typeof params.email === "string" ? params.email.trim().toLowerCase() : "",
+          name: typeof params.name === "string" ? params.name.trim().slice(0, 120) : "",
         };
       },
       validatePasswordRequirements: (password: string) => {
@@ -40,8 +43,22 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         hashSecret,
         verifySecret,
       },
-    }),
-    Anonymous,
+    });
+
+const anonymousProvider = Anonymous<DataModel>();
+
+export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
+  jwt: { durationMs: AUTH_JWT_DURATION_MS },
+  signIn: { maxFailedAttempsPerHour: 10 },
+  providers: [
+    { ...passwordProvider, authorize: async (params: Parameters<NonNullable<typeof passwordProvider.authorize>>[0], ctx: Parameters<NonNullable<typeof passwordProvider.authorize>>[1]) => {
+      if (params.flow === "signUp") await ctx.runMutation(internal.authLimits.checkSignup, {});
+      return await passwordProvider.authorize!(params, ctx);
+    } },
+    { ...anonymousProvider, authorize: async (params: Parameters<NonNullable<typeof anonymousProvider.authorize>>[0], ctx: Parameters<NonNullable<typeof anonymousProvider.authorize>>[1]) => {
+      await ctx.runMutation(internal.authLimits.checkSignup, {});
+      return await anonymousProvider.authorize!(params, ctx);
+    } },
     // Google OAuth registers ONLY when both creds are set — otherwise a
     // "Continue with Google" click 500s on the callback. Deploys that never
     // set these keep Password + Anonymous untouched. env is read at

@@ -138,7 +138,7 @@ describe("createAuthCode against a registered client", () => {
     const userId = await t.run(async (ctx) =>
       ctx.db.insert("users", { email: "ada@example.com" }),
     );
-    const asUser = t.withIdentity({ subject: userId });
+    const asUser = t.withIdentity({ subject: `${userId}|session` });
 
     // Same host, still allow-listed — and still refused, because this client
     // said up front which callbacks it uses. Registration has to narrow what

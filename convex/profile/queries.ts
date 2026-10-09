@@ -1,3 +1,4 @@
+import { ownedStorageUrl } from "../files/ownership";
 import { query, internalQuery } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser, requireUser } from "../_shared/auth";
@@ -26,7 +27,7 @@ export const getCurrentUser = query({
       .first();
 
     const avatarUrl = profile?.avatarStorageId
-      ? await ctx.storage.getUrl(profile.avatarStorageId)
+      ? await ownedStorageUrl(ctx, profile.avatarStorageId, userId)
       : null;
 
     return { ...user, profile, avatarUrl };

@@ -47,7 +47,7 @@ function setup(): Tester {
 const identity = (userId: Id<"users">) => ({ subject: `${userId}|session` });
 
 async function insertUser(t: Tester, email?: string): Promise<Id<"users">> {
-  return t.run((ctx) => ctx.db.insert("users", email ? { email } : {}));
+  return t.run((ctx) => ctx.db.insert("users", email ? { email, emailVerificationTime: 1 } : {}));
 }
 
 describe("super-admin analytics read O(1) from adminStats", () => {

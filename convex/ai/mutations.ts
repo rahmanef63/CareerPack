@@ -1,52 +1,10 @@
 import { mutation, internalMutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireUser, requireAdmin } from "../_shared/auth";
-import { AI_PROVIDERS } from "../_shared/aiProviders";
+import { AI_PROVIDERS, assertTrustedAIBaseUrl } from "../_shared/aiProviders";
 import { maybeEncryptCred } from "../_shared/aiCrypto";
 import { enforceRateLimit, AI_RATE_LIMITS } from "../_shared/rateLimit";
 import { DEFAULT_AI_SKILLS, DEFAULT_AI_TOOLS } from "../_seeds/aiDefaults";
-
-/**
- * SSRF guard for a user-supplied custom AI provider Base URL. `callAI` fetches
- * `${baseUrl}/chat/completions` server-side from the Convex backend on the VPS,
- * so an unvalidated URL lets any authed user (incl. anonymous demo) probe the
- * VPS's own network / cloud metadata endpoint. Require https and reject
- * loopback / link-local / private / internal hosts.
- *
- * ponytail: hostname/IP-literal deny-list only — it will NOT stop DNS
- * rebinding (a public name resolving to a private IP). Upgrade to resolve-then-
- * check-IP if custom providers ever become a real attack surface.
- */
-function assertSafeBaseUrl(raw: string): void {
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    throw new Error("Base URL tidak valid");
-  }
-  if (url.protocol !== "https:") {
-    throw new Error("Base URL harus memakai https");
-  }
-  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  const blocked =
-    host === "localhost" ||
-    host.endsWith(".localhost") ||
-    host.endsWith(".internal") ||
-    host === "metadata.google.internal" ||
-    host === "0.0.0.0" ||
-    host === "::1" ||
-    host.startsWith("fd") ||
-    host.startsWith("fc") ||
-    host.startsWith("fe80") ||
-    /^127\./.test(host) ||
-    /^10\./.test(host) ||
-    /^192\.168\./.test(host) ||
-    /^169\.254\./.test(host) ||
-    /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-  if (blocked) {
-    throw new Error("Base URL menuju host internal tidak diizinkan");
-  }
-}
 
 // ----- AI Settings -----
 
@@ -72,7 +30,7 @@ export const setMyAISettings = mutation({
     if (args.provider === "custom" && !baseUrl) {
       throw new Error("Provider kustom butuh Base URL");
     }
-    if (baseUrl) assertSafeBaseUrl(baseUrl);
+    if (baseUrl) assertTrustedAIBaseUrl(baseUrl);
 
     const existing = await ctx.db
       .query("aiSettings")
@@ -154,7 +112,7 @@ export const setGlobalAISettings = mutation({
     if (args.provider === "custom" && !baseUrl) {
       throw new Error("Provider kustom butuh Base URL");
     }
-    if (baseUrl) assertSafeBaseUrl(baseUrl);
+    if (baseUrl) assertTrustedAIBaseUrl(baseUrl);
 
     const existing = await ctx.db.query("globalAISettings").first();
     // Same both-formats rule as `setMyAISettings`. Critically, leaving the key

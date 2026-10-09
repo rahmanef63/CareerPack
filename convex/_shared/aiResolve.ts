@@ -1,7 +1,7 @@
 import type { ActionCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
 import { internal } from "../_generated/api";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { activeUserId as getAuthUserId } from "./authSession";
 import { optionalEnv } from "./env";
 import { resolveProviderBaseUrl } from "./aiProviders";
 import { decryptCred } from "./aiCrypto";

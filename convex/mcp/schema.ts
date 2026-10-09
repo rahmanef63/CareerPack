@@ -27,7 +27,7 @@ export const mcpTables = {
     expiresAt: v.number(),
     consumed: v.boolean(),
     createdAt: v.number(),
-  }).index("by_code", ["code"]),
+  }).index("by_code", ["code"]).index("by_user", ["userId"]),
 
   // RFC 7591 dynamically registered clients. ChatGPT's connection modal and
   // claude.ai's connector form expose no field for a client id, so a client

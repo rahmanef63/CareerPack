@@ -1,4 +1,5 @@
 import { mutation } from "../_generated/server";
+import { enforceRateLimit, IMPORT_RATE_LIMITS, enforceGlobalWriteLimit } from "../_shared/rateLimit";
 import { v } from "convex/values";
 import { requireUser } from "../_shared/auth";
 import {
@@ -50,6 +51,8 @@ export const quickFill = mutation({
   },
   handler: async (ctx, args): Promise<QuickFillResult & { batchId: Id<"quickFillBatches"> | null }> => {
     const userId = await requireUser(ctx);
+    await enforceRateLimit(ctx, userId, IMPORT_RATE_LIMITS["import:merge"]);
+    await enforceGlobalWriteLimit(ctx, "quickFill", 100);
     const result: QuickFillResult & {
       batchId: Id<"quickFillBatches"> | null;
     } = {

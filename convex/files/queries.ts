@@ -1,3 +1,4 @@
+import { ownedStorageUrl } from "../files/ownership";
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 import { optionalUser } from "../_shared/auth";
@@ -16,7 +17,9 @@ export const getFileUrl = query({
 
     if (record.tenantId !== userId.toString()) return null;
 
-    return await ctx.storage.getUrl(args.storageId);
+    const owners = await ctx.db.query("files").withIndex("by_storage", q => q.eq("storageId", args.storageId)).take(2);
+    if (owners.length !== 1) return null;
+    return await ownedStorageUrl(ctx, args.storageId, userId);
   },
 });
 
@@ -73,7 +76,7 @@ export const listMyFiles = query({
     const enriched = await Promise.all(
       rows.map(async (r) => ({
         ...r,
-        url: await ctx.storage.getUrl(r.storageId),
+        url: await ownedStorageUrl(ctx, r.storageId, userId),
         usedIn: usageBySid.get(r.storageId) ?? [],
       })),
     );

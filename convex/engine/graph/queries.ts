@@ -2,11 +2,8 @@ import { v } from "convex/values";
 import { query } from "../../_generated/server";
 import { optionalUser } from "../../_shared/auth";
 import {
-  applyCalibratedProbabilities,
-  edgeKey,
   findPaths,
   skillGap,
-  type CalibratedStat,
   type GraphEdge,
   type GraphNode,
 } from "./lib";
@@ -14,7 +11,6 @@ import type { Doc, Id } from "../../_generated/dataModel";
 
 const MAX_NODES = 500;
 const MAX_EDGES = 2_000;
-const MAX_OUTCOME_STATS = 5_000;
 
 /**
  * Lists all career nodes — the universe of selectable "current" /
@@ -92,9 +88,6 @@ export const reach = query({
 
     const allNodes = await ctx.db.query("careerNodes").take(MAX_NODES);
     const allEdges = await ctx.db.query("careerEdges").take(MAX_EDGES);
-    const allStats = await ctx.db
-      .query("nodeOutcomeStats")
-      .take(MAX_OUTCOME_STATS);
 
     const nodeData: GraphNode[] = allNodes.map((n) => ({
       _id: n._id,
@@ -114,24 +107,8 @@ export const reach = query({
       }),
     );
 
-    // Calibrated-probability blend: substitute curated edge.probability
-    // with nodeOutcomeStats.posteriorProb where the daily cron has
-    // upserted one. Closes the Phase 4.5 loop — calibrator output
-    // actually drives planning, not just the cohort badge.
-    const slugByNodeId = new Map<string, string>(
-      allNodes.map((n) => [String(n._id), n.slug]),
-    );
-    const statsByEdgeKey = new Map<string, CalibratedStat>(
-      allStats.map((s) => [
-        edgeKey(s.fromNodeSlug, s.toNodeSlug),
-        { posteriorProb: s.posteriorProb, posteriorN: s.posteriorN },
-      ]),
-    );
-    const edgeData = applyCalibratedProbabilities(
-      rawEdgeData,
-      statsByEdgeKey,
-      slugByNodeId,
-    );
+    // shortcut: use curated priors until outcome provenance and Sybil resistance are enforced.
+    const edgeData = rawEdgeData;
 
     const paths = findPaths({
       nodes: nodeData,

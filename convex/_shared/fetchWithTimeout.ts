@@ -15,19 +15,26 @@
 export interface FetchTimeoutOptions extends RequestInit {
   /** Timeout in ms. No default — callers must commit to a deadline. */
   timeoutMs: number;
+  maxResponseBytes?: number;
 }
 
 export async function fetchWithTimeout(
   input: string,
   options: FetchTimeoutOptions,
 ): Promise<Response> {
-  const { timeoutMs, signal: callerSignal, ...rest } = options;
+  const { timeoutMs, maxResponseBytes = 4 * 1024 * 1024, signal: callerSignal, ...rest } = options;
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
     throw new Error(`[fetch] invalid timeoutMs: ${timeoutMs}`);
   }
+  if (!Number.isSafeInteger(maxResponseBytes) || maxResponseBytes <= 0) throw new Error("[fetch] invalid byte limit");
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const aborted = new Promise<never>((_, reject) => {
+    controller.signal.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true });
+  });
+  // A signal already aborted on entry can reject before the race is attached.
+  void aborted.catch(() => {});
 
   // Forward caller-supplied abort to our controller so user-cancelled
   // fetches still cancel the underlying request.
@@ -38,7 +45,26 @@ export async function fetchWithTimeout(
   }
 
   try {
-    return await fetch(input, { ...rest, signal: controller.signal });
+    if (controller.signal.aborted) throw new DOMException("aborted", "AbortError");
+    const response = await Promise.race([fetch(input, { ...rest, redirect: "error", signal: controller.signal }), aborted]);
+    if (!response.body) return response;
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      while (true) {
+        const { value, done } = await Promise.race([reader.read(), aborted]);
+        if (done) break;
+        size += value.byteLength;
+        if (size > maxResponseBytes) {
+          controller.abort();
+          throw new Error("[fetch] response exceeds byte limit");
+        }
+        chunks.push(value);
+      }
+    } finally { void reader.cancel(); }
+    // Buffer under the same deadline, so later text/json reads cannot hang.
+    return new Response(new Blob(chunks as BlobPart[]), { status: response.status, statusText: response.statusText, headers: response.headers });
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       // Distinguish caller cancel vs our timer.

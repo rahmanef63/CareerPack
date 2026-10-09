@@ -8,11 +8,15 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
+    environment: production
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -32,4 +36,8 @@ jobs:
         env:
           CONVEX_SELF_HOSTED_URL: ${{ secrets.CONVEX_SELF_HOSTED_URL }}
           CONVEX_SELF_HOSTED_ADMIN_KEY: ${{ secrets.CONVEX_SELF_HOSTED_ADMIN_KEY }}
-        run: pnpm exec convex deploy --yes
+        run: |
+          test "$CONVEX_SELF_HOSTED_URL" = "https://api.careerpack.org"
+          test -n "$CONVEX_SELF_HOSTED_ADMIN_KEY"
+          grep -q '^ENV NEXT_PUBLIC_CONVEX_URL=https://api.careerpack.org$' Dockerfile
+          pnpm exec convex deploy --yes

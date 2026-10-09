@@ -35,7 +35,7 @@ async function insertUser(
   opts: { email?: string; role?: "admin" | "moderator" | "user" } = {},
 ): Promise<Id<"users">> {
   return t.run(async (ctx) => {
-    const userId = await ctx.db.insert("users", { email: opts.email });
+    const userId = await ctx.db.insert("users", { email: opts.email, ...(opts.role === "admin" ? { emailVerificationTime: 1 } : {}) });
     if (opts.role) {
       await ctx.db.insert("userProfiles", {
         userId,

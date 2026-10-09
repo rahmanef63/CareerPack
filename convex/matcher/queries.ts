@@ -99,7 +99,7 @@ export const listJobs = query({
         .withIndex("by_addedBy_posted", (q) => q.eq("addedBy", userId))
         .order("desc")
         .take(MAX_LIST);
-      return applyClientFilters(rows, args).slice(0, limit);
+      return rows.filter(r => (!args.category || args.category === "all" || r.category === args.category) && (!args.workMode || args.workMode === "all" || r.workMode === args.workMode)).slice(0, limit);
     }
 
     // Source-scoped (explore by feed origin). Uses by_source_posted.
@@ -140,7 +140,7 @@ function applyClientFilters(
   rows: JobListing[],
   args: { category?: string; workMode?: string },
 ): JobListing[] {
-  let out = rows;
+  let out = rows.filter(r => r.source !== "user-paste");
   if (args.category && args.category !== "all") {
     out = out.filter((r) => r.category === args.category);
   }
@@ -168,6 +168,7 @@ export const getMatches = query({
       .take(200);
 
     const scored = jobs
+      .filter(job => job.source !== "user-paste" || job.addedBy === userId)
       .map((job) => ({ job, score: scoreJob(profile, job) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, args.limit ?? 6);
@@ -197,9 +198,9 @@ export const getSalaryInsights = query({
     // Aggregation (currency separation + percentile math) lives in a
     // pure, unit-tested module — see matcher/salaryStats.ts.
     return {
-      categories: summarizeSalaries(rows),
+      categories: summarizeSalaries(rows.filter(job => job.source !== "user-paste")),
       // Total listings actually scanned (the percentile sample ceiling).
-      scannedCount: rows.length,
+      scannedCount: rows.filter(job => job.source !== "user-paste").length,
       // True when we may have truncated older listings: stats are a
       // recent-window sample, not the whole table.
       capped: rows.length >= MAX_SALARY_SCAN,

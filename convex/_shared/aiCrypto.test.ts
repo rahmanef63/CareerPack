@@ -64,9 +64,9 @@ describe("plaintext fallback — the branch production depends on", () => {
 });
 
 describe("AI_CRED_SECRET unset", () => {
-  it("makes maybeEncryptCred store plaintext instead of throwing", async () => {
+  it("rejects new writes instead of storing plaintext", async () => {
     delete process.env.AI_CRED_SECRET;
-    await expect(maybeEncryptCred("sk-new")).resolves.toBe("sk-new");
+    await expect(maybeEncryptCred("sk-new")).rejects.toThrow(/AI_CRED_SECRET/);
   });
 
   it("still encrypts when the secret is present", async () => {
@@ -96,6 +96,6 @@ describe("whitespace-only AI_CRED_SECRET", () => {
   it("counts as unset rather than as a one-character key", async () => {
     process.env.AI_CRED_SECRET = "   ";
     expect(credEncryptionAvailable()).toBe(false);
-    await expect(maybeEncryptCred("sk-new")).resolves.toBe("sk-new");
+    await expect(maybeEncryptCred("sk-new")).rejects.toThrow(/AI_CRED_SECRET/);
   });
 });
