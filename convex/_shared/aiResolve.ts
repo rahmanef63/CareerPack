@@ -50,8 +50,13 @@ export async function resolveAI(
   if (userId) {
     const cfg = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
     if (cfg) {
+      const baseUrl = resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined);
+      // Re-checked on every call, not only at save: a row saved before this
+      // guard existed, or a name whose DNS changed after saving, would
+      // otherwise reach a private address with the user's key attached.
+      await ctx.runAction(internal.ai.dnsGuard.assertPublicResolution, { baseUrl });
       return {
-        baseUrl: resolveProviderBaseUrl(cfg.provider, cfg.baseUrl ?? undefined),
+        baseUrl,
         apiKey: await decryptCred(cfg.apiKey),
         model: cfg.model,
         source: "user",
@@ -67,8 +72,10 @@ export async function resolveAI(
       const override = await ctx.runQuery(internal.ai.queries._getUserModelOverride, { userId });
       if (override) model = override;
     }
+    const globalBaseUrl = resolveProviderBaseUrl(global.provider, global.baseUrl ?? undefined);
+    await ctx.runAction(internal.ai.dnsGuard.assertPublicResolution, { baseUrl: globalBaseUrl });
     return {
-      baseUrl: resolveProviderBaseUrl(global.provider, global.baseUrl ?? undefined),
+      baseUrl: globalBaseUrl,
       apiKey: await decryptCred(global.apiKey),
       model,
       source: "global",
@@ -77,6 +84,10 @@ export async function resolveAI(
   const baseUrl = optionalEnv("CONVEX_OPENAI_BASE_URL");
   const apiKey = optionalEnv("CONVEX_OPENAI_API_KEY");
   if (!baseUrl || !apiKey) return null;
+  // No DNS guard here: this endpoint comes from deployment env, i.e. the
+  // operator already chose it, and a private address is a legitimate choice
+  // for a self-hosted gateway on the same network. The user-typed paths above
+  // get the guard because there the operator never saw the address.
   return {
     baseUrl: baseUrl.replace(/\/+$/, ""),
     apiKey,

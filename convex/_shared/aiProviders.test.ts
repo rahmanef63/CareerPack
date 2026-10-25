@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { AI_PROVIDERS, listProvidersPublic, providerOAuth } from "./aiProviders";
+import { describe, it, expect, vi } from "vitest";
+import { ConvexError } from "convex/values";
+import {
+  AI_PROVIDERS,
+  assertTrustedAIBaseUrl,
+  listProvidersPublic,
+  providerOAuth,
+} from "./aiProviders";
 
 describe("declared auth capability", () => {
   it("gives every provider at least one usable way in", async () => {
@@ -58,6 +64,45 @@ describe("public provider payload", () => {
     const serialized = JSON.stringify(listProvidersPublic());
     for (const leak of ["clientId", "client_id", "apiKey\":\"", "secret", "token"]) {
       expect(serialized).not.toContain(leak);
+    }
+  });
+});
+
+describe("assertTrustedAIBaseUrl — the reason must survive prod redaction", () => {
+  // Prod Convex turns an uncaught Error into a bare "Server Error", which is
+  // how a rejected custom endpoint became indistinguishable from a broken
+  // feature. Every rejection is a ConvexError carrying a readable message.
+  const rejects = (url: string) => {
+    let caught: unknown;
+    try {
+      assertTrustedAIBaseUrl(url);
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught, `${url} was accepted`).toBeDefined();
+    return caught;
+  };
+
+  it("reports a malformed URL instead of throwing a raw TypeError", () => {
+    const err = rejects("not a url");
+    expect(err).toBeInstanceOf(ConvexError);
+    expect((err as ConvexError<{ message: string }>).data.message).toContain("tidak valid");
+  });
+
+  it("names the reason for a private address, including the offending host", () => {
+    const err = rejects("https://10.0.0.5/v1");
+    expect(err).toBeInstanceOf(ConvexError);
+    const message = (err as ConvexError<{ message: string }>).data.message;
+    expect(message).toContain("privat");
+  });
+
+  it("still rejects the other SSRF shapes", () => {
+    for (const url of [
+      "http://approved.example.test/v1", // not HTTPS
+      "https://user:pw@approved.example.test/v1", // embedded credentials
+      "https://approved.example.test/v1?x=1", // query string
+    ]) {
+      expect(rejects(url)).toBeInstanceOf(ConvexError);
     }
   });
 });
