@@ -20,6 +20,7 @@ import { Switch } from "@/shared/components/ui/switch";
 import { CodeBlock } from "@/shared/components/ui/copy-button";
 import { BaseUrlField, ConfirmDestructiveButton, ProviderSelect } from "./fields";
 import { ModelPicker } from "./ModelPicker";
+import { CustomModelField, type VerifiedEndpoint } from "./CustomModelField";
 import { ProviderAuthSection } from "./ProviderAuthSection";
 import { providerAffordances, type ProviderOption, type StoredAISettings } from "./providerAuth";
 
@@ -106,6 +107,8 @@ export function AIProviderForm({ scope, connectFailed }: AIProviderFormProps) {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  /** Models returned by the last successful URL+key probe, for the custom picker. */
+  const [verified, setVerified] = useState<VerifiedEndpoint | null>(null);
 
   const spec = useMemo(
     () => providers?.find((p) => p.id === form.provider),
@@ -149,6 +152,8 @@ export function AIProviderForm({ scope, connectFailed }: AIProviderFormProps) {
       // for; keep it only where the provider ships none of its own.
       baseUrl: nextSpec?.baseUrl ? "" : prev.baseUrl,
     }));
+    // Model lists belong to an endpoint, so they never survive a switch.
+    setVerified(null);
     setDirty(true);
   };
 
@@ -238,36 +243,61 @@ export function AIProviderForm({ scope, connectFailed }: AIProviderFormProps) {
             disabled={loading}
           />
 
+          {affordances.baseUrl === "required" && (
+            // Not an "advanced override" here: without an endpoint this
+            // provider has nothing to call, so it belongs with the credential
+            // — and ABOVE it, because the key is useless until we know where
+            // to send it.
+            <BaseUrlField
+              id={`${idPrefix}-baseUrl`}
+              value={form.baseUrl}
+              onChange={(v) => {
+                update("baseUrl", v);
+                setVerified(null);
+              }}
+              placeholder="https://.../v1"
+              required
+            />
+          )}
+
           <ProviderAuthSection
             spec={spec}
             scope={scope}
             stored={current ?? null}
             storedLabel={providers?.find((p) => p.id === current?.provider)?.label ?? null}
             apiKey={form.apiKey}
-            onApiKeyChange={(v) => update("apiKey", v)}
+            onApiKeyChange={(v) => {
+              update("apiKey", v);
+              setVerified(null);
+            }}
             onDisconnect={onClear}
             connectFailed={connectFailed}
             idPrefix={idPrefix}
           />
 
-          {affordances.baseUrl === "required" && (
-            // Not an "advanced override" here: without an endpoint this
-            // provider has nothing to call, so it belongs with the credential.
-            <BaseUrlField
-              id={`${idPrefix}-baseUrl`}
-              value={form.baseUrl}
-              onChange={(v) => update("baseUrl", v)}
-              placeholder="https://.../v1"
-              required
+          {affordances.baseUrl === "required" ? (
+            // Custom endpoint: verify URL + key FIRST, then pick from what the
+            // endpoint actually serves. Asking for a model slug before the
+            // connection works is the ordering that made "custom tidak
+            // berfungsi" indistinguishable from a typo.
+            <CustomModelField
+              id={`${idPrefix}-model`}
+              baseUrl={form.baseUrl}
+              apiKey={form.apiKey}
+              hasStoredKey={Boolean(current?.hasKey && current?.enabled)}
+              value={form.model}
+              onChange={(v) => update("model", v)}
+              verified={verified}
+              onVerified={setVerified}
+            />
+          ) : (
+            <ModelPicker
+              spec={spec}
+              value={form.model}
+              onChange={(v) => update("model", v)}
+              inputId={`${idPrefix}-model`}
             />
           )}
-
-          <ModelPicker
-            spec={spec}
-            value={form.model}
-            onChange={(v) => update("model", v)}
-            inputId={`${idPrefix}-model`}
-          />
 
           {affordances.baseUrl === "optional" && spec && (
             <details className="rounded-md border border-border/60 px-3 py-2">
