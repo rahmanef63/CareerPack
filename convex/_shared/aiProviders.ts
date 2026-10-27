@@ -328,9 +328,83 @@ export function listProvidersPublic() {
 }
 
 export function assertTrustedAIBaseUrl(raw: string): void {
-  const url = new URL(raw);
-  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) throw new Error("Base URL harus HTTPS tanpa kredensial atau parameter");
-  const normalized = url.toString().replace(/\/+$/, "");
-  const allowed = [...Object.values(AI_PROVIDERS).map(p => p.baseUrl), process.env.CONVEX_OPENAI_BASE_URL ?? "", ...(process.env.AI_ALLOWED_BASE_URLS ?? "").split(",")];
-  if (!allowed.some(value => value.trim().replace(/\/+$/, "") === normalized)) throw new Error("Base URL belum diizinkan administrator");
+  // BYOK means the endpoint is the USER's, so there is no operator list to be
+  // on. What replaces it is not a weaker check but a different one: an
+  // operator list asks "did a human approve this host", which cannot scale to
+  // every user's gateway; a private-address block asks "can this reach
+  // something only our network can reach", which is the actual SSRF question
+  // and holds for any host a user types.
+  //
+  // ConvexError, not Error: prod Convex redacts an uncaught Error to a bare
+  // "Server Error", which is exactly how a rejected custom endpoint became
+  // indistinguishable from a broken feature. `data.message` survives the RPC
+  // boundary, so the user learns WHICH rule they hit.
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new ConvexError({ message: "Base URL tidak valid — harus URL lengkap, mis. https://host/v1" });
+  }
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) {
+    throw new ConvexError({ message: "Base URL harus HTTPS tanpa kredensial atau parameter" });
+  }
+  // Credentials we send with this request are a bearer header, so a host that
+  // resolves to loopback, a private range, or link-local would let a user aim
+  // our egress at the Convex container's own network. Literal-IP hosts are
+  // checked here; a name that RESOLVES to a private address is caught by
+  // `assertPublicResolution` at request time (convex/ai/actions.ts), because
+  // this module runs in the V8 isolate where there is no resolver.
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (isPrivateHost(host)) {
+    throw new ConvexError({
+      message: "Base URL menunjuk ke alamat privat. Pakai host publik untuk endpoint kustom.",
+    });
+  }
+}
+
+/**
+ * True for addresses that are not reachable from the public internet.
+ *
+ * Covers the literal forms only — `localhost`, IPv4 privates/loopback/link-
+ * local, and the IPv6 equivalents including IPv4-mapped (`::ffff:127.0.0.1`)
+ * and unique-local `fc00::/7`. A DNS name that resolves privately is a
+ * separate check, deliberately, because resolution needs Node.
+ */
+export function isPrivateHost(host: string): boolean {
+  if (!host) return true;
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  // `.internal` is the GCP/Convex-style service namespace; resolvable only
+  // inside the platform's own network.
+  if (host === "internal" || host.endsWith(".internal")) return true;
+
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    if (v4.slice(1).some((o) => Number(o) > 255)) return true; // malformed → refuse
+    if (a === 0 || a === 10 || a === 127) return true; // this-network, private, loopback
+    if (a === 169 && b === 254) return true; // link-local (cloud metadata: 169.254.169.254)
+    if (a === 172 && b >= 16 && b <= 31) return true; // private
+    if (a === 192 && b === 168) return true; // private
+    if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+    if (a >= 224) return true; // multicast + reserved
+    return false;
+  }
+
+  if (host.includes(":")) {
+    if (host === "::" || host === "::1") return true;
+    if (/^f[cd][0-9a-f]{2}:/.test(host)) return true; // unique-local fc00::/7
+    if (/^fe[89ab][0-9a-f]:/.test(host)) return true; // link-local fe80::/10
+    // IPv4-mapped. The URL parser rewrites the dotted tail into hex, so
+    // `::ffff:127.0.0.1` arrives as `::ffff:7f00:1` — compare the embedded
+    // IPv4, not the text the user typed.
+    const mapped = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(host);
+    if (mapped) {
+      const hi = parseInt(mapped[1], 16);
+      const lo = parseInt(mapped[2], 16);
+      const v4 = [hi >> 8, hi & 0xff, lo >> 8, lo & 0xff].join(".");
+      return isPrivateHost(v4);
+    }
+    return false;
+  }
+  return false;
 }

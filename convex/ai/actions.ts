@@ -1,11 +1,12 @@
 import { action, type ActionCtx } from "../_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { internal } from "../_generated/api";
 import { activeUserId as getAuthUserId } from "../_shared/authSession";
 import { authError } from "../_shared/auth";
 import { sanitizeAIInput, wrapUserInput } from "../_shared/sanitize";
 import { resolveAI, type ResolvedAI } from "../_shared/aiResolve";
-import { aiUnavailableError } from "../_shared/aiProviders";
+import { aiUnavailableError, assertTrustedAIBaseUrl } from "../_shared/aiProviders";
+import { decryptCred } from "../_shared/aiCrypto";
 import { parseJsonOrThrow, coerceProfileShape } from "../_shared/aiOutput";
 import { recordError } from "../_shared/errorSink";
 import { fetchWithTimeout, FETCH_TIMEOUTS } from "../_shared/fetchWithTimeout";
@@ -813,6 +814,88 @@ export const testConnection = action({
     });
     const reply = data?.choices?.[0]?.message?.content ?? "";
     return { ok: true, reply: String(reply).slice(0, 80) };
+  },
+});
+
+/**
+ * Verify a custom endpoint's URL + key BEFORE the user is asked to pick a
+ * model, and hand back the model list in the same round trip.
+ *
+ * This is the step that was missing. The form used to demand a model slug
+ * first (free text — `custom` ships no catalog and has no live one), so the
+ * only way to learn the URL or key was wrong was to save and then watch a
+ * later generation fail with a generic gateway error. An OpenAI-compatible
+ * `/models` probe answers all three questions at once: reachable, authorized,
+ * and what you can actually pick.
+ *
+ * Deliberately NOT quota-metered (`requireQuota`): this spends no tokens and
+ * is the diagnostic path a user hits exactly when everything else is broken.
+ * It is still authenticated, and the URL passes the same public-address check
+ * as saving (`assertTrustedAIBaseUrl` + the DNS guard), so it cannot be used
+ * as an open SSRF proxy.
+ */
+export const verifyCustomEndpoint = action({
+  args: {
+    baseUrl: v.string(),
+    apiKey: v.string(),
+  },
+  handler: async (
+    ctx,
+    args,
+  ): Promise<{ models: Array<{ id: string; name: string }> }> => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw authError("Tidak terautentikasi");
+
+    const baseUrl = args.baseUrl.trim().replace(/\/+$/, "");
+    assertTrustedAIBaseUrl(baseUrl);
+    // A literal private address is already refused above; this catches a NAME
+    // that RESOLVES privately (DNS rebinding), which needs a real resolver.
+    await ctx.runAction(internal.ai.dnsGuard.assertPublicResolution, { baseUrl });
+    // Blank key = "reuse the stored one", same rule as the save mutation, so
+    // a user who already saved a key can re-probe without retyping it.
+    let apiKey = args.apiKey.trim();
+    if (!apiKey) {
+      const stored = await ctx.runQuery(internal.ai.queries._getAISettingsForUser, { userId });
+      apiKey = stored?.apiKey ? await decryptCred(stored.apiKey) : "";
+    }
+    if (!apiKey) throw new ConvexError({ message: "API key belum diisi" });
+
+    let res: Response;
+    try {
+      res = await fetchWithTimeout(`${baseUrl}/models`, {
+        timeoutMs: FETCH_TIMEOUTS.modelList,
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+    } catch {
+      throw new ConvexError({
+        message: `Tidak bisa menghubungi ${baseUrl}. Periksa URL dan koneksi.`,
+      });
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new ConvexError({ message: "API key ditolak endpoint. Periksa kembali key-nya." });
+    }
+    if (!res.ok) {
+      throw new ConvexError({
+        message: `Endpoint menjawab ${res.status}. Sebagian gateway tidak punya /models — isi model manual di bawah.`,
+      });
+    }
+
+    const body = (await res.json().catch(() => null)) as
+      | { data?: Array<{ id?: unknown; name?: unknown }> }
+      | Array<{ id?: unknown; name?: unknown }>
+      | null;
+    // OpenAI shape is `{data: [...]}`; some gateways answer a bare array.
+    const rows = Array.isArray(body) ? body : (body?.data ?? []);
+    const models = rows
+      .map((m) => ({ id: String(m?.id ?? "").trim(), name: String(m?.name ?? m?.id ?? "").trim() }))
+      .filter((m) => m.id)
+      .sort((a, b) => a.id.localeCompare(b.id));
+    if (!models.length) {
+      throw new ConvexError({
+        message: "Tersambung, tapi endpoint tidak mengembalikan daftar model. Isi model manual di bawah.",
+      });
+    }
+    return { models };
   },
 });
 

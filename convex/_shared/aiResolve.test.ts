@@ -37,7 +37,16 @@ interface CtxOpts {
 // Fake just enough of `ActionCtx`: a `runQuery` that routes each generated
 // function reference to the matching canned result. Anything unexpected
 // throws so a typo in the production query path surfaces loudly.
-function makeCtx(opts: CtxOpts = {}): { ctx: ActionCtx; runQuery: ReturnType<typeof vi.fn> } {
+//
+// `runAction` exists because `resolveAI` now resolves the base URL's DNS
+// before handing the key over (rebinding guard). In production that action
+// refuses private addresses; here it is a no-op, because these tests are about
+// which settings row wins, not about the network.
+function makeCtx(opts: CtxOpts = {}): {
+  ctx: ActionCtx;
+  runQuery: ReturnType<typeof vi.fn>;
+  runAction: ReturnType<typeof vi.fn>;
+} {
   const runQuery = vi.fn(async (ref: unknown) => {
     const name = getFunctionName(ref as Parameters<typeof getFunctionName>[0]);
     if (name === Q.revoked) return false;
@@ -46,11 +55,12 @@ function makeCtx(opts: CtxOpts = {}): { ctx: ActionCtx; runQuery: ReturnType<typ
     if (name === Q.override) return opts.override ?? null;
     throw new Error(`unexpected runQuery: ${name}`);
   });
-  const ctx = { runQuery } as unknown as ActionCtx;
-  return { ctx, runQuery };
+  const runAction = vi.fn(async () => null);
+  const ctx = { runQuery, runAction } as unknown as ActionCtx;
+  return { ctx, runQuery, runAction };
 }
 
-const ENV_KEYS = ["CONVEX_OPENAI_BASE_URL", "CONVEX_OPENAI_API_KEY", "AI_ALLOWED_BASE_URLS"] as const;
+const ENV_KEYS = ["CONVEX_OPENAI_BASE_URL", "CONVEX_OPENAI_API_KEY"] as const;
 const savedEnv: Record<string, string | undefined> = {};
 
 beforeEach(() => {
@@ -90,7 +100,6 @@ describe("resolveAI — path 1: per-user settings win", () => {
   });
 
   it("honours an explicit baseUrl override on the user's settings", async () => {
-    process.env.AI_ALLOWED_BASE_URLS = "https://gw.example.com/v1";
     getAuthUserId.mockResolvedValue(uid("u1"));
     const { ctx } = makeCtx({
       user: {

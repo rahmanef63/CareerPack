@@ -83,6 +83,7 @@ import type * as aiIdempotency from "../aiIdempotency.js";
 import type * as ai_actions from "../ai/actions.js";
 import type * as ai_branding from "../ai/branding.js";
 import type * as ai_catalog from "../ai/catalog.js";
+import type * as ai_dnsGuard from "../ai/dnsGuard.js";
 import type * as ai_mutations from "../ai/mutations.js";
 import type * as ai_oauth from "../ai/oauth.js";
 import type * as ai_queries from "../ai/queries.js";
@@ -302,6 +303,7 @@ declare const fullApi: ApiFromModules<{
   "ai/actions": typeof ai_actions;
   "ai/branding": typeof ai_branding;
   "ai/catalog": typeof ai_catalog;
+  "ai/dnsGuard": typeof ai_dnsGuard;
   "ai/mutations": typeof ai_mutations;
   "ai/oauth": typeof ai_oauth;
   "ai/queries": typeof ai_queries;

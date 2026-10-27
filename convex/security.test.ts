@@ -199,11 +199,50 @@ describe("server-selected destinations and presentation", () => {
     vi.stubEnv("RESEND_API_KEY", "");
     await expect(signUnsubscribeToken("owner@example.test")).rejects.toThrow(/belum diset/);
   });
-  it("rejects arbitrary DNS hosts and altered provider paths", () => {
-    vi.stubEnv("AI_ALLOWED_BASE_URLS", "https://approved.example.test/v1");
-    for (const url of ["https://attacker.example/v1", "https://api.openai.com/other", "https://approved.example.test.evil/v1", "https://api.openai.com/v1?target=internal"]) expect(() => assertTrustedAIBaseUrl(url)).toThrow();
-    expect(() => assertTrustedAIBaseUrl("https://api.openai.com/v1")).not.toThrow();
-    expect(() => assertTrustedAIBaseUrl("https://approved.example.test/v1")).not.toThrow();
+  it("accepts any public host — BYOK needs no operator pre-approval", () => {
+    // The old contract was an exact-match allowlist in AI_ALLOWED_BASE_URLS,
+    // which made every user's own gateway an admin ticket. BYOK means the
+    // endpoint is the user's; the SSRF question is answered by what it can
+    // reach, not by who approved the host.
+    for (const url of [
+      "https://api.openai.com/v1",
+      "https://my-gateway.example.com/v1",
+      "https://gw.internal.example.co/v1",
+      "https://openrouter.ai/api/v1",
+    ]) {
+      expect(() => assertTrustedAIBaseUrl(url)).not.toThrow();
+    }
+  });
+  it("refuses addresses that are not publicly routable", () => {
+    // One case per branch of isPrivateHost: loopback, private v4, link-local
+    // (cloud metadata), CGNAT, IPv6 loopback, unique-local, IPv4-mapped.
+    for (const url of [
+      "https://localhost/v1",
+      "https://api.localhost/v1",
+      "https://127.0.0.1/v1",
+      "https://10.1.2.3/v1",
+      "https://172.16.0.9/v1",
+      "https://192.168.1.1/v1",
+      "https://169.254.169.254/latest/meta-data",
+      "https://100.64.0.1/v1",
+      "https://[::1]/v1",
+      "https://[fd00::1]/v1",
+      "https://[fe80::1]/v1",
+      "https://[::ffff:127.0.0.1]/v1",
+      "https://gw.internal/v1",
+    ]) {
+      expect(() => assertTrustedAIBaseUrl(url), url).toThrow();
+    }
+  });
+  it("still refuses non-HTTPS, credentials, and query strings", () => {
+    for (const url of [
+      "http://my-gateway.example.com/v1", // downgrade
+      "https://user:pw@my-gateway.example.com/v1", // embedded credentials
+      "https://my-gateway.example.com/v1?target=internal", // query smuggling
+      "not a url",
+    ]) {
+      expect(() => assertTrustedAIBaseUrl(url), url).toThrow();
+    }
   });
   it("permits only exact trusted file origins", () => {
     expect(checkUrl("https://files.oaiusercontent.com/file.webp?sig=x", imagePolicy).ok).toBe(true);

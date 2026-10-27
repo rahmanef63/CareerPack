@@ -150,7 +150,6 @@ export default async function OGImage({
           {/* Avatar circle — either user's photo or initials fallback */}
           {profile.avatarUrl ? (
             // ImageResponse renders native elements; next/image cannot run here.
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profile.avatarUrl}
               alt=""
